@@ -13,14 +13,14 @@ import com.easy.kotlins.event.EventObservableView
 import com.easy.kotlins.event.LiveEventProxy
 import com.easy.kotlins.helper.SingleLiveEvent
 import com.easy.kotlins.http.NiceOkFaker
-import com.easy.kotlins.http.NiceOkFakerScope
-import com.easy.kotlins.http.SimpleNiceOkFakerScope
+import com.easy.kotlins.http.OkFakerScope
+import com.easy.kotlins.http.SimpleOkFakerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
  */
 
-open class NiceViewModel : ViewModel(), NiceOkFakerScope by SimpleNiceOkFakerScope() {
+open class ViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
 
     private val liveEventProxy = LiveEventProxy { SingleLiveEvent() }
     var event: Event? by liveEventProxy
@@ -63,7 +63,7 @@ open class NiceViewModel : ViewModel(), NiceOkFakerScope by SimpleNiceOkFakerSco
     }
 }
 
-class NiceStateViewModel(val handle: SavedStateHandle) : NiceViewModel()
+class StateViewModel(val handle: SavedStateHandle) : ViewModel()
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(

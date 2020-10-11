@@ -4,7 +4,7 @@ package com.easy.kotlins.http
 /**
  * Create by LiZhanPing on 2020/8/24
  */
-class SimpleNiceOkFakerScope : NiceOkFakerScope, Iterable<NiceOkFaker> {
+class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
     private var resources: MutableList<NiceOkFaker>? = null
 
     override fun add(tag: Any, faker: NiceOkFaker): NiceOkFaker {

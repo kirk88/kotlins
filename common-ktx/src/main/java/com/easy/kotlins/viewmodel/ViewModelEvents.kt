@@ -11,8 +11,8 @@ object ViewModelEvents {
         when {
             owner !is EventObservableView ||
                     owner !is ViewModelOwner<*> ||
-                    owner.viewModel !is NiceViewModel -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
-            else -> (owner.viewModel as NiceViewModel).observeEvent(owner)
+                    owner.viewModel !is ViewModel -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
+            else -> (owner.viewModel as ViewModel).observeEvent(owner)
         }
     }
 }

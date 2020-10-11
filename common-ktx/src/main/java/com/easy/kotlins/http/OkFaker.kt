@@ -14,7 +14,7 @@ import kotlin.collections.set
  * Create by LiZhanPing on 2020/8/22
  */
 
-class NiceOkFaker(val okFaker: OkFaker) {
+class NiceOkFaker(val request: OkRequest) {
 
     private var onStart: (() -> Unit)? = null
     private var onSuccess: ((Any) -> Unit)? = null
@@ -29,228 +29,232 @@ class NiceOkFaker(val okFaker: OkFaker) {
     private var onDownloadComplete: (() -> Unit)? = null
 
     val isCanceled: Boolean
-        get() = okFaker.isCanceled
+        get() = request.isCanceled
 
     val isExecuted: Boolean
-        get() = okFaker.isExecuted
+        get() = request.isExecuted
 
     val tag: Any?
-        get() = okFaker.tag()
+        get() = request.tag()
 
     inline fun client(crossinline client: () -> OkHttpClient): NiceOkFaker = this.apply {
-        okFaker.client(client())
+        request.client(client())
     }
 
     fun client(client: OkHttpClient): NiceOkFaker = this.apply {
-        okFaker.client(client)
+        request.client(client)
     }
 
     fun downloadExtension(downloadExtension: DownloadExtension): NiceOkFaker = this.apply {
-        okFaker.downloadExtension(downloadExtension)
+        request.downloadExtension(downloadExtension)
     }
 
     inline fun downloadExtension(crossinline downloadExtension: () -> DownloadExtension): NiceOkFaker =
         this.apply {
-            okFaker.downloadExtension(downloadExtension())
+            request.downloadExtension(downloadExtension())
         }
 
     inline fun url(crossinline url: () -> String): NiceOkFaker = this.apply {
-        okFaker.url(url())
+        request.url(url())
     }
 
     fun url(url: String): NiceOkFaker = this.apply {
-        okFaker.url(url)
+        request.url(url)
     }
 
     inline fun tag(crossinline tag: () -> Any): NiceOkFaker = this.apply {
-        okFaker.tag(tag())
+        request.tag(tag())
     }
 
     fun tag(tag: Any) {
-        okFaker.tag(tag)
+        request.tag(tag)
     }
 
     fun cacheControl(cacheControl: () -> CacheControl): NiceOkFaker = this.apply {
-        okFaker.cacheControl(cacheControl())
+        request.cacheControl(cacheControl())
     }
 
     fun cacheControl(cacheControl: CacheControl): NiceOkFaker = this.apply {
-        okFaker.cacheControl(cacheControl)
+        request.cacheControl(cacheControl)
     }
 
     inline fun headers(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.setHeader(it.key, it.value.toString())
+                request.setHeader(it.key, it.value.toString())
             }
         }
 
     fun headers(headers: Map<String, Any?>): NiceOkFaker = this.apply {
         headers.forEach {
-            okFaker.setHeader(it.key, it.value.toString())
+            request.setHeader(it.key, it.value.toString())
         }
     }
 
     fun headers(vararg headers: Pair<String, Any?>): NiceOkFaker = this.apply {
         headers.forEach {
-            okFaker.setHeader(it.first, it.second.toString())
+            request.setHeader(it.first, it.second.toString())
         }
     }
 
     inline fun queryParameters(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.addQueryParameter(it.key, it.value.toString())
+                request.addQueryParameter(it.key, it.value.toString())
             }
         }
 
     fun queryParameters(queryParameters: Map<String, Any?>): NiceOkFaker = this.apply {
         queryParameters.forEach {
-            okFaker.addQueryParameter(it.key, it.value.toString())
+            request.addQueryParameter(it.key, it.value.toString())
         }
     }
 
     fun queryParameters(vararg queryParameters: Pair<String, Any?>): NiceOkFaker = this.apply {
         queryParameters.forEach {
-            okFaker.addQueryParameter(it.first, it.second.toString())
+            request.addQueryParameter(it.first, it.second.toString())
         }
     }
 
     inline fun encodedQueryParameters(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.addEncodedQueryParameter(it.key, it.value.toString())
+                request.addEncodedQueryParameter(it.key, it.value.toString())
             }
         }
 
     fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>): NiceOkFaker =
         this.apply {
             encodedQueryParameters.forEach {
-                okFaker.addEncodedQueryParameter(it.key, it.value.toString())
+                request.addEncodedQueryParameter(it.key, it.value.toString())
             }
         }
 
     fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>): NiceOkFaker =
         this.apply {
             encodedQueryParameters.forEach {
-                okFaker.addEncodedQueryParameter(it.first, it.second.toString())
+                request.addEncodedQueryParameter(it.first, it.second.toString())
             }
         }
 
     inline fun formParameters(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.addFormParameter(it.key, it.value.toString())
+                request.addFormParameter(it.key, it.value.toString())
             }
         }
 
     fun formParameters(formParameters: Map<String, Any?>): NiceOkFaker = this.apply {
         formParameters.forEach {
-            okFaker.addFormParameter(it.key, it.value.toString())
+            request.addFormParameter(it.key, it.value.toString())
         }
     }
 
     fun formParameters(vararg formParameters: Pair<String, Any?>): NiceOkFaker = this.apply {
         formParameters.forEach {
-            okFaker.addFormParameter(it.first, it.second.toString())
+            request.addFormParameter(it.first, it.second.toString())
         }
     }
 
     inline fun encodedFormParameters(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.addEncodedFormParameter(it.key, it.value.toString())
+                request.addEncodedFormParameter(it.key, it.value.toString())
             }
         }
 
     fun encodedFormParameters(encodedFormParameters: Map<String, Any?>): NiceOkFaker = this.apply {
         encodedFormParameters.forEach {
-            okFaker.addEncodedFormParameter(it.key, it.value.toString())
+            request.addEncodedFormParameter(it.key, it.value.toString())
         }
     }
 
     fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>): NiceOkFaker =
         this.apply {
             encodedFormParameters.forEach {
-                okFaker.addEncodedFormParameter(it.first, it.second.toString())
+                request.addEncodedFormParameter(it.first, it.second.toString())
             }
         }
 
     inline fun formDataParts(crossinline action: RequestPairs<Any?>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Any?>().apply(action).forEach {
-                okFaker.addFormDataPart(it.key, it.value.toString())
+                request.addFormDataPart(it.key, it.value.toString())
             }
         }
 
     fun formDataParts(formDataParts: Map<String, Any?>): NiceOkFaker = this.apply {
         formDataParts.forEach {
-            okFaker.addFormDataPart(it.key, it.value.toString())
+            request.addFormDataPart(it.key, it.value.toString())
         }
     }
 
     fun formDataParts(vararg formDataParts: Pair<String, Any?>): NiceOkFaker = this.apply {
         formDataParts.forEach {
-            okFaker.addFormDataPart(it.first, it.second.toString())
+            request.addFormDataPart(it.first, it.second.toString())
         }
     }
 
     inline fun formDataBodyParts(action: RequestPairs<Pair<String, RequestBody>>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Pair<String, RequestBody>>().apply(action).forEach {
-                okFaker.addFormDataPart(it.key, it.value.first, it.value.second)
+                request.addFormDataPart(it.key, it.value.first, it.value.second)
             }
         }
 
     fun formDataBodyParts(formDataBodyParts: Iterable<Map.Entry<String, Pair<String, RequestBody>>>): NiceOkFaker =
         this.apply {
             formDataBodyParts.forEach {
-                okFaker.addFormDataPart(it.key, it.value.first, it.value.second)
+                request.addFormDataPart(it.key, it.value.first, it.value.second)
             }
         }
 
     inline fun formDataFileParts(crossinline action: RequestPairs<Pair<MediaType, File>>.() -> Unit): NiceOkFaker =
         this.apply {
             RequestPairs<Pair<MediaType, File>>().apply(action).forEach {
-                okFaker.addFormDataPart(it.key, it.value.first, it.value.second)
+                request.addFormDataPart(it.key, it.value.first, it.value.second)
             }
         }
 
     fun formDataFileParts(formDataFileParts: Iterable<Map.Entry<String, Pair<MediaType, File>>>): NiceOkFaker =
         this.apply {
             formDataFileParts.forEach {
-                okFaker.addFormDataPart(it.key, it.value.first, it.value.second)
+                request.addFormDataPart(it.key, it.value.first, it.value.second)
             }
         }
 
     inline fun parts(crossinline action: ArrayList<RequestBody>.() -> Unit): NiceOkFaker =
         this.apply {
             arrayListOf<RequestBody>().apply(action).forEach {
-                okFaker.addPart(it)
+                request.addPart(it)
             }
         }
 
     inline fun multiParts(crossinline action: ArrayList<MultipartBody.Part>.() -> Unit): NiceOkFaker =
         this.apply {
             arrayListOf<MultipartBody.Part>().apply(action).forEach {
-                okFaker.addPart(it)
+                request.addPart(it)
             }
         }
 
     inline fun body(crossinline body: () -> RequestBody): NiceOkFaker = this.apply {
-        okFaker.body(body())
+        request.body(body())
     }
 
     inline fun <T> mapResponse(crossinline action: (response: String) -> T): NiceOkFaker =
         this.apply {
-            okFaker.mapResponse(OkFunction<Response, OkSource<T>> {
-                return@OkFunction OkSource.just(action(it.body()!!.string()))
+            request.mapResponse(object : OkFunction<Response, OkSource<T>> {
+                override fun apply(r: Response): OkSource<T> {
+                    return OkSource.just(action(r.body()!!.string()))
+                }
             })
         }
 
     inline fun <T> mapError(crossinline action: (error: Throwable) -> T): NiceOkFaker = this.apply {
-        okFaker.mapError(OkFunction<Throwable, OkSource<T>> {
-            return@OkFunction OkSource.just(action(it))
+        request.mapError(object : OkFunction<Throwable, OkSource<T>> {
+            override fun apply(r: Throwable): OkSource<T> {
+                return OkSource.just(action(r))
+            }
         })
     }
 
@@ -303,47 +307,48 @@ class NiceOkFaker(val okFaker: OkFaker) {
     @Suppress("UNCHECKED_CAST")
     @Throws(Exception::class)
     fun <T> execute(): T? {
-        return okFaker.execute<Any?>() as? T
+        return request.execute<T>()
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> safeExecute(defaultValue: T): T {
-        return okFaker.safeExecute<T?>() ?: defaultValue
+        return request.safeExecute<T>() ?: defaultValue
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> safeExecute(defaultValue: () -> T): T {
-        return okFaker.safeExecute<T?>() ?: defaultValue()
+        return request.safeExecute<T>() ?: defaultValue()
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> safeExecute(): T? {
-        return okFaker.safeExecute<T?>()
+        return request.safeExecute<T>()
     }
 
     fun request(): NiceOkFaker = this.apply {
-        okFaker.enqueue(object : OkStartedCallback<Any> {
+        request.enqueue(object : OkCallback<Any> {
             override fun onStart() {
                 onStart?.invoke()
             }
 
             override fun onSuccess(result: Any) {
                 onSuccess?.invoke(result)
-                onComplete?.invoke()
             }
 
             override fun onError(error: Throwable) {
                 onError?.invoke(error)
+            }
+
+            override fun onComplete() {
                 onComplete?.invoke()
             }
         })
     }
 
     fun download(): NiceOkFaker = this.apply {
-        okFaker.enqueue(object : OkDownloadCallback {
+        request.enqueue(object : OkDownloadCallback {
             override fun onSuccess(result: File) {
                 onDownloadSuccess?.invoke(result)
-                onDownloadComplete?.invoke()
             }
 
             override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
@@ -352,11 +357,14 @@ class NiceOkFaker(val okFaker: OkFaker) {
 
             override fun onError(error: Throwable) {
                 onDownloadError?.invoke(error)
-                onDownloadComplete?.invoke()
             }
 
             override fun onStart() {
                 onDownloadStart?.invoke()
+            }
+
+            override fun onComplete() {
+                onDownloadComplete?.invoke()
             }
 
             override fun onCancel() {
@@ -367,17 +375,17 @@ class NiceOkFaker(val okFaker: OkFaker) {
     }
 
     fun cancel() {
-        okFaker.cancel()
+        request.cancel()
     }
 
     companion object {
 
         fun get(action: NiceOkFaker.() -> Unit): NiceOkFaker {
-            return NiceOkFaker(OkFaker.newGet()).apply(action)
+            return NiceOkFaker(OkRequest(OkRequest.Method.GET)).apply(action)
         }
 
         fun post(action: NiceOkFaker.() -> Unit): NiceOkFaker {
-            return NiceOkFaker(OkFaker.newPost()).apply(action)
+            return NiceOkFaker(OkRequest(OkRequest.Method.POST)).apply(action)
         }
 
     }
