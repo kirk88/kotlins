@@ -388,7 +388,7 @@ class OkRequest constructor(private val method: Method) {
      *
      *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    </T></T> */
+    */
     fun <T> mapResponseEvenError(
         func1: OkFunction<Response, OkSource<T>>,
         func2: OkFunction<Throwable, OkSource<T>>
@@ -434,9 +434,7 @@ class OkRequest constructor(private val method: Method) {
                 urlBuilder!!.build()
             ).get()
         }
-        if (downloadExtension != null) {
-            downloadExtension!!.addHeaderTo(builder)
-        }
+        downloadExtension?.addHeaderTo(builder)
         return checkClient(client).newCall(builder.build())
     }
 
