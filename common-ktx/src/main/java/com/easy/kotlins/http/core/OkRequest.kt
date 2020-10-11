@@ -401,9 +401,8 @@ class OkRequest constructor(private val method: Method) {
     /**
      * response convert to <T> which you need
      *
-     *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    </T></T> */
+    */
     fun <T> mapResponse(func: OkFunction<Response, OkSource<T>>): OkRequest {
         mapResponseFunc = func
         return this
@@ -412,9 +411,8 @@ class OkRequest constructor(private val method: Method) {
     /**
      * response convert to <T> which you need
      *
-     *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    </T></T> */
+    */
     fun <T> mapError(func: OkFunction<Throwable, OkSource<T>>): OkRequest {
         mapErrorFunc = func
         return this
