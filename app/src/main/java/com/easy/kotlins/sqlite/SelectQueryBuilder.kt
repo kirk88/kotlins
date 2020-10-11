@@ -20,7 +20,6 @@ package com.easy.kotlins.sqlite.db
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import com.doctor.base.better.kotlin.sqlite.db.*
 
 abstract class SelectQueryBuilder(private val tableName: String) {
 

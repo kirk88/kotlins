@@ -1,6 +1,7 @@
 package com.easy.kotlins.http.core;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 /**
  * Create by LiZhanPing on 2020/4/29

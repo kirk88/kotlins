@@ -18,7 +18,6 @@
 
 package com.easy.kotlins.sqlite.db
 
-import com.doctor.base.better.kotlin.sqlite.db.RowParser
 import com.easy.kotlins.sqlite.db.JavaSqliteUtils.PRIMITIVES_TO_WRAPPERS
 import java.lang.reflect.Modifier
 

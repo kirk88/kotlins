@@ -22,7 +22,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.doctor.base.better.kotlin.sqlite.db.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
