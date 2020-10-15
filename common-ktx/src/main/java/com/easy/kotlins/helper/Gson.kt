@@ -71,42 +71,38 @@ inline fun <reified T> JsonObject?.getArrayAs(name: String): List<T>? {
     return this?.let { gson.fromJson(it.getAsJsonArray(name), listType(T::class.java)) }
 }
 
-fun JsonObject?.getAsString(name: String): String? = this?.get(name)?.asString
+fun JsonObject.getAsString(name: String, defaultValue: String? = null): String? = this.get(name)?.asString ?: defaultValue
 
-fun JsonObject?.getAsNumber(name: String): Number? = this?.get(name)?.asNumber
+fun JsonObject.getAsNumber(name: String, defaultValue: Number? = null): Number? = this.get(name)?.asNumber ?: defaultValue
 
-fun JsonObject?.getAsDouble(name: String): Double? = this?.get(name)?.asDouble
+fun JsonObject.getAsDouble(name: String, defaultValue: Double = 0.D): Double = this.get(name)?.asDouble ?: defaultValue
 
-fun JsonObject?.getAsFloat(name: String): Float? = this?.get(name)?.asFloat
+fun JsonObject.getAsFloat(name: String, defaultValue: Float = 0.F): Float = this.get(name)?.asFloat ?: defaultValue
 
-fun JsonObject?.getAsLong(name: String): Long? = this?.get(name)?.asLong
+fun JsonObject.getAsLong(name: String, defaultValue: Long = 0.L): Long = this.get(name)?.asLong ?: defaultValue
 
-fun JsonObject?.getAsInt(name: String): Int? = this?.get(name)?.asInt
+fun JsonObject.getAsInt(name: String, defaultValue: Int = 0.I): Int = this.get(name)?.asInt ?: defaultValue
 
-fun JsonObject?.getAsShort(name: String): Short? = this?.get(name)?.asShort
+fun JsonObject.getAsShort(name: String, defaultValue: Short = 0.S): Short = this.get(name)?.asShort ?: defaultValue
 
-fun JsonObject?.getAsByte(name: String): Byte? = this?.get(name)?.asByte
+fun JsonObject.getAsByte(name: String, defaultValue: Byte? = null): Byte? = this.get(name)?.asByte ?: defaultValue
 
-fun JsonObject?.getAsChar(name: String): Char? = this?.get(name)?.asCharacter
+fun JsonObject.getAsChar(name: String, defaultValue: Char? = null): Char? = this.get(name)?.asCharacter ?: defaultValue
 
-fun JsonObject?.getAsBigDecimal(name: String): BigDecimal? = this?.get(name)?.asBigDecimal
+fun JsonObject.getAsBigDecimal(name: String, defaultValue: BigDecimal = BigDecimal.ZERO): BigDecimal = this.get(name)?.asBigDecimal ?: defaultValue
 
-fun JsonObject?.getAsBigInteger(name: String): BigInteger? = this?.get(name)?.asBigInteger
+fun JsonObject.getAsBigInteger(name: String, defaultValue: BigInteger = BigInteger.ZERO): BigInteger = this.get(name)?.asBigInteger ?: defaultValue
 
-fun JsonObject?.getAsBoolean(name: String): Boolean? = this?.get(name)?.asBoolean
+fun JsonObject.getAsBoolean(name: String, defaultValue: Boolean = false): Boolean = this.get(name)?.asBoolean ?: defaultValue
 
-inline fun JsonObject?.forEach(action: (entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) =
-    this?.entrySet()?.forEach(action)
+inline fun JsonObject.forEach(action: (entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) = this.entrySet()?.forEach(action)
 
-inline fun JsonObject?.forEach(action: (key: String, element: JsonElement?) -> Unit) =
-    this?.entrySet()?.forEach {
-        action.invoke(it.key, it.value)
-    }
+inline fun JsonObject.forEach(action: (key: String, element: JsonElement?) -> Unit) = this.entrySet()?.forEach {
+    action.invoke(it.key, it.value)
+}
 
-inline fun JsonObject?.forEachIndexed(action: (index: Int, entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) =
-    this?.entrySet()?.forEachIndexed(action)
+inline fun JsonObject.forEachIndexed(action: (index: Int, entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) = this.entrySet()?.forEachIndexed(action)
 
-inline fun JsonObject?.forEachIndexed(action: (index: Int, key: String, element: JsonElement?) -> Unit) =
-    this?.entrySet()?.forEachIndexed { index, entry ->
-        action.invoke(index, entry.key, entry.value)
-    }
+inline fun JsonObject.forEachIndexed(action: (index: Int, key: String, element: JsonElement?) -> Unit) = this.entrySet()?.forEachIndexed { index, entry ->
+    action.invoke(index, entry.key, entry.value)
+}

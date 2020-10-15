@@ -3,12 +3,14 @@ package com.easy.kotlins.event
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.easy.kotlins.helper.LiveDataPoster
-import com.easy.kotlins.helper.SingleLiveEvent
 import com.easy.kotlins.helper.opt
 import java.io.Serializable
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KProperty
 
 /**
