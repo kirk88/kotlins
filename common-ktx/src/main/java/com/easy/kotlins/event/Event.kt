@@ -73,18 +73,19 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
 
 }
 
-enum class Status(val code: Int) {
+object Status {
 
-    NONE(-1),
+    private const val STATUS_BASE = 10000
 
-    SHOW_PROGRESS(10000),
-    HIDE_PROGRESS(10001),
+    const val NONE = -1
 
-    REFRESH_COMPLETE(10002),
-    LOADMORE_COMPLETE(10003),
-    LOADMORE_COMPLETE_NO_MORE(10004),
-    REFRESH_FAILURE(10005),
-    LOADMORE_FAILURE(10006)
+    const val SHOW_PROGRESS = STATUS_BASE + 1
+    const val DISMISS_PROGRESS = STATUS_BASE + 2
+    const val REFRESH_COMPLETE = STATUS_BASE + 3
+    const val LOADMORE_COMPLETE = STATUS_BASE + 4
+    const val LOADMORE_COMPLETE_NO_MORE = STATUS_BASE + 5
+    const val REFRESH_FAILURE = STATUS_BASE + 6
+    const val LOADMORE_FAILURE = STATUS_BASE + 7
 
 }
 
@@ -109,19 +110,17 @@ fun event(what: Int = 0, message: String? = null) = Event(what, message)
 
 inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) = Event(what, message).apply(init)
 
-fun progressShow(message: String? = null): Event = buildEvent(Status.SHOW_PROGRESS.code) {
-    putString("message", message)
-}
+fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 
-fun progressDismiss(message: String? = null): Event = Event(Status.HIDE_PROGRESS.code, message)
+fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
-fun refreshComplete(): Event = Event(Status.REFRESH_COMPLETE.code)
+fun refreshCompleted(): Event = Event(Status.REFRESH_COMPLETE)
 
-fun loadMoreComplete(hasMore: Boolean = true): Event = Event(hasMore.opt(Status.LOADMORE_COMPLETE.code, Status.LOADMORE_COMPLETE_NO_MORE.code))
+fun loadMoreCompleted(hasMore: Boolean = true): Event = Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
-fun refreshFailure(): Event = Event(Status.REFRESH_FAILURE.code)
+fun refreshFailed(): Event = Event(Status.REFRESH_FAILURE)
 
-fun loadMoreFailure(): Event = Event(Status.LOADMORE_FAILURE.code)
+fun loadMoreFailed(): Event = Event(Status.LOADMORE_FAILURE)
 
 
 interface EventObservableView : LifecycleOwner {

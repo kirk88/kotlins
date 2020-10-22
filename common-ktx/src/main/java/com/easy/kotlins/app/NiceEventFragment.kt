@@ -29,16 +29,15 @@ abstract class NiceEventFragment(layoutID: Int) : NiceFragment(layoutID), EventO
         if (onViewModelEventChanged(event)) return
 
         when (event.what) {
-            Status.SHOW_PROGRESS.code -> loadingView?.showProgress(event.getString("message"))
-            Status.HIDE_PROGRESS.code -> loadingView?.dismissProgress()
-            Status.REFRESH_COMPLETE.code -> refreshView?.finishRefresh()
-            Status.LOADMORE_COMPLETE.code -> refreshView?.finishLoadMore()
-            Status.LOADMORE_COMPLETE_NO_MORE.code -> refreshView?.finishLoadMore(false)
-            Status.REFRESH_FAILURE.code -> refreshView?.refreshFailed()
-            Status.LOADMORE_FAILURE.code -> refreshView?.loadMoreFailed()
+            Status.SHOW_PROGRESS -> loadingView?.showProgress(event.message)
+            Status.DISMISS_PROGRESS -> loadingView?.dismissProgress()
+            Status.REFRESH_COMPLETE -> refreshView?.finishRefresh()
+            Status.LOADMORE_COMPLETE -> refreshView?.finishLoadMore()
+            Status.LOADMORE_COMPLETE_NO_MORE -> refreshView?.finishLoadMore(false)
+            Status.REFRESH_FAILURE -> refreshView?.refreshFailed()
+            Status.LOADMORE_FAILURE -> refreshView?.loadMoreFailed()
+            else -> event.message?.let { toast(it) }
         }
-
-        event.message?.let { toast(it) }
     }
 
     open fun onViewModelEventChanged(event: Event): Boolean {
