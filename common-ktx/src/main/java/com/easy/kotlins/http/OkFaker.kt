@@ -1,9 +1,8 @@
 package com.easy.kotlins.http
 
-import com.easy.kotlins.helper.asJsonObject
+import com.easy.kotlins.helper.toJsonObject
 import com.easy.kotlins.helper.forEach
 import com.easy.kotlins.helper.toJson
-import com.easy.kotlins.helper.toJsonObject
 import com.easy.kotlins.http.core.*
 import com.google.gson.JsonObject
 import okhttp3.*
@@ -441,7 +440,7 @@ inline fun requestPairsOf(
     crossinline action: RequestPairs<Any?>.() -> Unit = {}
 ): RequestPairs<Any?> {
     return RequestPairs<Any?>().apply {
-        val source = if (copyFrom is String) copyFrom.toJsonObject() else copyFrom.asJsonObject()
+        val source = if (copyFrom is String) copyFrom.toJsonObject() else copyFrom.toJsonObject()
         source.forEach { key, element ->
             when {
                 element == null || element.isJsonNull && serializeNulls -> key - element.toString()

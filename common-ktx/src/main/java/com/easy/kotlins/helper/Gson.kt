@@ -10,54 +10,53 @@ import java.math.BigInteger
 
 val gson: Gson = Gson()
 
-inline fun <reified T> parseJsonObject(json: String?): T? {
-    return json?.let { gson.fromJson(it, T::class.java) }
+inline fun <reified T> parseJsonObject(json: String): T {
+    return gson.fromJson(json, T::class.java)
 }
 
-inline fun <reified T> parseJsonArray(json: String?): List<T>? {
-    return json?.let { gson.fromJson(it, listType(T::class.java)) }
+inline fun <reified T> parseJsonArray(json: String): List<T> {
+    return gson.fromJson(json, listType(T::class.java))
 }
 
-fun <T> parseJsonObject(json: String?, type: Type): T? {
-    return json?.let { gson.fromJson(it, type) }
+fun <T> parseJsonObject(json: String, type: Type): T {
+    return gson.fromJson(json, type)
 }
 
-fun <T> parseJsonArray(json: String?, type: Type): List<T>? {
-    return json?.let { gson.fromJson(it, listType(type)) }
+fun <T> parseJsonArray(json: String, type: Type): List<T> {
+    return gson.fromJson(json, listType(type))
 }
 
-inline fun <reified T> JsonElement?.parseAsObject(): T? {
-    return this?.let { gson.fromJson(it, T::class.java) }
+inline fun <reified T> JsonElement.parseAsObject(): T {
+    return asJsonObject.parse()
 }
 
-inline fun <reified T> JsonElement?.parseAsArray(): List<T>? {
-    return this?.let { gson.fromJson(it, listType(T::class.java)) }
+inline fun <reified T> JsonElement.parseAsArray(): List<T> {
+    return asJsonArray.parse()
 }
 
-fun String?.toJsonObject(): JsonObject {
-    return this?.let {
-        parseJsonObject<JsonObject>(it)
-    } ?: JsonObject()
+inline fun <reified T> JsonObject.parse(): T{
+    return gson.fromJson(this, T::class.java)
 }
 
-fun String?.toJsonArray(): JsonArray {
-    return this?.let {
-        parseJsonObject<JsonArray>(it)
-    } ?: JsonArray()
+inline fun <reified T> JsonArray.parse(): List<T>{
+    return gson.fromJson(this, listType(T::class.java))
 }
 
-fun String?.toJsonElement(): JsonElement? {
-    return this?.let {
-        gson.fromJson(it, JsonElement::class.java)
-    }
+fun String.toJsonObject(): JsonObject {
+    return parseJsonObject(this)
 }
 
-fun Any?.asJsonObject(): JsonObject =
-    this?.let { gson.fromJson(it.toJson(), JsonObject::class.java) }
-        ?: JsonObject()
+fun String.toJsonArray(): JsonArray {
+    return  parseJsonObject(this)
+}
 
-fun Any?.asJsonArray(): JsonArray = this?.let { gson.fromJson(it.toJson(), JsonArray::class.java) }
-    ?: JsonArray()
+fun String.toJsonElement(): JsonElement? {
+    return  gson.fromJson(this, JsonElement::class.java)
+}
+
+fun Any.toJsonObject(): JsonObject = gson.fromJson(this.toJson(), JsonObject::class.java)
+
+fun Any.toJsonArray(): JsonArray =  gson.fromJson(this.toJson(), JsonArray::class.java)
 
 fun Any?.toJsonOrNull(): String? = this?.let { gson.toJson(it) }
 
