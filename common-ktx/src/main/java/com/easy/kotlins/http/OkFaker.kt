@@ -244,7 +244,7 @@ class OkFaker(private val okFaker: OkRequest) {
         onSuccess = { action(it as T) }
     }
 
-    fun onSuccess(action: () -> Unit): OkFaker = this.apply {
+    fun onSingleSuccess(action: () -> Unit): OkFaker = this.apply {
         onSuccess = { action() }
     }
 

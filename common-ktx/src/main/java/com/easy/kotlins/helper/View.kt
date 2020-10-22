@@ -15,43 +15,43 @@ import androidx.viewpager.widget.ViewPager
  */
 
 @Deprecated(message = "use isVisible replaced", replaceWith = ReplaceWith("isVisible"))
-fun View?.visible(visible: Boolean = true) {
-    this?.run { visibility = if (visible) View.VISIBLE else View.INVISIBLE }
+fun View.visible(visible: Boolean = true) {
+    visibility = if (visible) View.VISIBLE else View.INVISIBLE
 }
 
 @Deprecated(message = "use isGone replaced", replaceWith = ReplaceWith("isGone"))
-fun View?.gone(gone: Boolean = true) {
-    this?.run { visibility = if (gone) View.GONE else View.VISIBLE }
+fun View.gone(gone: Boolean = true) {
+    visibility = if (gone) View.GONE else View.VISIBLE
 }
 
-var View?.isVisible: Boolean
-    get() = this?.visibility == View.VISIBLE
+var View.isVisible: Boolean
+    get() = visibility == View.VISIBLE
     set(value) {
-        this?.visibility = if (value) View.VISIBLE else View.INVISIBLE
+        visibility = if (value) View.VISIBLE else View.INVISIBLE
     }
 
-var View?.isInvisible
-    get() = this?.visibility == View.INVISIBLE
+var View.isInvisible
+    get() = visibility == View.INVISIBLE
     set(value) {
-        this?.visibility = if (value) View.INVISIBLE else View.VISIBLE
+        visibility = if (value) View.INVISIBLE else View.VISIBLE
     }
 
-var View?.isGone
-    get() = this?.visibility == View.GONE
+var View.isGone
+    get() = visibility == View.GONE
     set(value) {
-        this?.visibility = if (value) View.GONE else View.VISIBLE
+        visibility = if (value) View.GONE else View.VISIBLE
     }
 
-var View?.backgroundColor: Int
-    get() = if (this?.background is ColorDrawable) (background as ColorDrawable).color else 0
+var View.backgroundColor: Int
+    get() = if (background is ColorDrawable) (background as ColorDrawable).color else 0
     set(value) {
-        this?.setBackgroundColor(value)
+        setBackgroundColor(value)
     }
 
-var View?.backgroundResource: Int
+var View.backgroundResource: Int
     @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
     set(value) {
-        this?.setBackgroundResource(value)
+        setBackgroundResource(value)
     }
 
 var View.startPadding: Int
@@ -66,10 +66,10 @@ var View.endPadding: Int
         setPaddingRelative(paddingStart, paddingTop, value, paddingBottom)
     }
 
-var View?.horizontalPadding: Int
+var View.horizontalPadding: Int
     @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
     set(value) {
-        this?.setPaddingRelative(value, paddingTop, value, paddingBottom)
+        setPaddingRelative(value, paddingTop, value, paddingBottom)
     }
 
 var View.topPadding: Int
@@ -84,10 +84,10 @@ var View.bottomPadding: Int
         setPaddingRelative(paddingStart, paddingTop, paddingEnd, value)
     }
 
-var View?.verticalPadding: Int
+var View.verticalPadding: Int
     @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
     set(value) {
-        this?.setPaddingRelative(paddingStart, value, paddingEnd, value)
+        setPaddingRelative(paddingStart, value, paddingEnd, value)
     }
 
 var View.padding: Int
@@ -182,38 +182,38 @@ var View.layoutHeight: Int
         }
     }
 
-operator fun <T : View> View.get(@IdRes id: Int): T = findViewById<T?>(id)
+operator fun <T : View> View.get(@IdRes id: Int): T = findViewById<T>(id)
         ?: error("can not find view by id: $id")
 
-inline fun View?.onClick(crossinline action: (view: View) -> Unit) {
-    this?.setOnClickListener { v -> action(v) }
+inline fun View.onClick(crossinline action: (view: View) -> Unit) {
+    setOnClickListener { v -> action(v) }
 }
 
-inline fun View?.onLongClick(crossinline action: (view: View) -> Boolean) {
-    this?.setOnLongClickListener { v -> action(v) }
+inline fun View.onLongClick(crossinline action: (view: View) -> Boolean) {
+    setOnLongClickListener { v -> action(v) }
 }
 
-inline fun Iterable<View>?.onClick(crossinline action: (view: View) -> Unit) {
+inline fun Iterable<View>.onClick(crossinline action: (view: View) -> Unit) {
     val clickListener: View.OnClickListener = View.OnClickListener { v -> action(v) }
-    this?.forEach {
+    forEach {
         it.setOnClickListener(clickListener)
     }
 }
 
-inline fun Iterable<View>?.onLongClick(crossinline action: (view: View) -> Boolean) {
+inline fun Iterable<View>.onLongClick(crossinline action: (view: View) -> Boolean) {
     val longClickListener: View.OnLongClickListener = View.OnLongClickListener { v -> action(v) }
-    this?.forEach {
+    forEach {
         it.setOnLongClickListener(longClickListener)
     }
 }
 
 @Suppress("ClickableViewAccessibility")
-inline fun View?.onTouch(crossinline action: (view: View, event: MotionEvent) -> Boolean) {
-    this?.setOnTouchListener { v, event -> action(v, event) }
+inline fun View.onTouch(crossinline action: (view: View, event: MotionEvent) -> Boolean) {
+    setOnTouchListener { v, event -> action(v, event) }
 }
 
-inline fun TextView?.onTextChanged(crossinline action: (text: CharSequence?) -> Unit) {
-    this?.addTextChangedListener(object : TextWatcher {
+inline fun TextView.onTextChanged(crossinline action: (text: CharSequence?) -> Unit) {
+    addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
 
@@ -227,8 +227,8 @@ inline fun TextView?.onTextChanged(crossinline action: (text: CharSequence?) -> 
     })
 }
 
-inline fun TextView?.afterTextChanged(crossinline action: (text: Editable?) -> Unit) {
-    this?.addTextChangedListener(object : TextWatcher {
+inline fun TextView.afterTextChanged(crossinline action: (text: Editable?) -> Unit) {
+    addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
 
@@ -242,43 +242,43 @@ inline fun TextView?.afterTextChanged(crossinline action: (text: Editable?) -> U
     })
 }
 
-inline fun TextView?.onEditorActionEvent(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Unit) {
-    this?.setOnEditorActionListener { v, actionId, event ->
+inline fun TextView.onEditorActionEvent(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Unit) {
+    setOnEditorActionListener { v, actionId, event ->
         action(v, actionId, event)
         true
     }
 }
 
-inline fun CompoundButton?.onCheckedChanged(crossinline action: (buttonView: CompoundButton, isChecked: Boolean) -> Unit) {
-    this?.setOnCheckedChangeListener { buttonView, isChecked -> action(buttonView, isChecked) }
+inline fun CompoundButton.onCheckedChanged(crossinline action: (buttonView: CompoundButton, isChecked: Boolean) -> Unit) {
+    setOnCheckedChangeListener { buttonView, isChecked -> action(buttonView, isChecked) }
 }
 
-inline fun RadioGroup?.onCheckedChanged(crossinline action: (group: RadioGroup, checkedId: Int) -> Unit) {
-    this?.setOnCheckedChangeListener { group, checkedId -> action(group, checkedId) }
+inline fun RadioGroup.onCheckedChanged(crossinline action: (group: RadioGroup, checkedId: Int) -> Unit) {
+    setOnCheckedChangeListener { group, checkedId -> action(group, checkedId) }
 }
 
 
-inline fun MenuItem?.onMenuItemClick(crossinline action: (item: MenuItem) -> Unit) {
-    this?.setOnMenuItemClickListener { item ->
+inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Unit) {
+    setOnMenuItemClickListener { item ->
         action(item)
         true
     }
 }
 
-inline fun ViewGroup?.forEachChild(action: (view: View) -> Unit) = this?.run {
+inline fun ViewGroup.forEachChild(action: (view: View) -> Unit) = run {
     for (index in 0 until childCount) {
         action(getChildAt(index))
     }
 }
 
-inline fun ViewGroup?.forEachChildIndexed(action: (index: Int, view: View) -> Unit) = this?.run {
+inline fun ViewGroup.forEachChildIndexed(action: (index: Int, view: View) -> Unit) = run {
     for (index in 0 until childCount) {
         action(index, getChildAt(index))
     }
 }
 
-inline fun ViewPager?.onPageSelected(crossinline action: (position: Int) -> Unit) {
-    this?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit) {
+    addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
         override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
         }
 
