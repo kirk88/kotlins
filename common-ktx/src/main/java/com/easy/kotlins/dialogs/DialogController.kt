@@ -42,7 +42,7 @@ fun DialogController<*>.contentView(view: () -> View) {
     contentView = view()
 }
 
-fun DialogController<*>.contentView(@LayoutRes layoutResId: Int, action: (View.() -> Unit)? = null) {
+fun DialogController<*>.contentView(@LayoutRes layoutResId: Int, action: ((view: View) -> Unit)? = null) {
     contentView = View.inflate(context, layoutResId, null).apply{ action?.invoke(this) }
 }
 

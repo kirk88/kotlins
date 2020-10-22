@@ -107,23 +107,13 @@ class LiveEventProxy(initializer: () -> SingleLiveEvent<Event>) {
 
 fun event(what: Int = 0, message: String? = null) = Event(what, message)
 
-inline fun event(what: Int = 0, crossinline message: () -> String?) = Event(what, message())
-
 inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) = Event(what, message).apply(init)
-
-inline fun buildEvent(what: Int = 0, crossinline message: () -> String?, crossinline init: Event.() -> Unit) = Event(what, message()).apply(init)
 
 fun progressShow(message: String? = null): Event = buildEvent(Status.SHOW_PROGRESS.code) {
     putString("message", message)
 }
 
-inline fun progressShow(crossinline message: () -> String?): Event = buildEvent(Status.SHOW_PROGRESS.code) {
-    putString("message", message())
-}
-
 fun progressDismiss(message: String? = null): Event = Event(Status.HIDE_PROGRESS.code, message)
-
-inline fun progressDismiss(crossinline message: () -> String?): Event = Event(Status.HIDE_PROGRESS.code, message())
 
 fun refreshComplete(): Event = Event(Status.REFRESH_COMPLETE.code)
 

@@ -4,10 +4,10 @@ package com.easy.kotlins.http
 /**
  * Create by LiZhanPing on 2020/8/24
  */
-class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
-    private var resources: MutableList<NiceOkFaker>? = null
+class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
+    private var resources: MutableList<OkFaker>? = null
 
-    override fun add(tag: Any, faker: NiceOkFaker): NiceOkFaker {
+    override fun add(tag: Any, faker: OkFaker): OkFaker {
         synchronized(this) {
             var list = resources
 
@@ -48,7 +48,7 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
         }
     }
 
-    override fun remove(faker: NiceOkFaker): Boolean {
+    override fun remove(faker: OkFaker): Boolean {
         if (delete(faker)) {
             faker.cancel()
             return true
@@ -56,7 +56,7 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
         return false
     }
 
-    override fun delete(faker: NiceOkFaker): Boolean {
+    override fun delete(faker: OkFaker): Boolean {
         synchronized(this) {
             val list = resources
             if (list == null || !list.remove(faker)) {
@@ -66,10 +66,10 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
         return true
     }
 
-    override fun getByTag(tag: Any): List<NiceOkFaker> {
+    override fun getByTag(tag: Any): List<OkFaker> {
         synchronized(this) {
             val list = resources ?: return emptyList()
-            val fakers: ArrayList<NiceOkFaker> = arrayListOf()
+            val fakers: ArrayList<OkFaker> = arrayListOf()
             list.forEach {
                 if (tag === it.tag) {
                     fakers.add(it)
@@ -92,13 +92,13 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<NiceOkFaker> {
 
     override fun size(): Int {
         synchronized(this) {
-            val list: List<NiceOkFaker>? = resources
+            val list: List<OkFaker>? = resources
             return list?.size ?: 0
         }
     }
 
-    override fun iterator(): Iterator<NiceOkFaker> {
-        val okFakers: List<NiceOkFaker> = resources ?: listOf()
+    override fun iterator(): Iterator<OkFaker> {
+        val okFakers: List<OkFaker> = resources ?: listOf()
         return okFakers.iterator()
     }
 

@@ -48,7 +48,7 @@ var View?.backgroundColor: Int
         this?.setBackgroundColor(value)
     }
 
-var View?.backgroundResources: Int
+var View?.backgroundResource: Int
     @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
     set(value) {
         this?.setBackgroundResource(value)
@@ -66,6 +66,12 @@ var View.endPadding: Int
         setPaddingRelative(paddingStart, paddingTop, value, paddingBottom)
     }
 
+var View?.horizontalPadding: Int
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    set(value) {
+        this?.setPaddingRelative(value, paddingTop, value, paddingBottom)
+    }
+
 var View.topPadding: Int
     get() = paddingTop
     set(value) {
@@ -78,6 +84,12 @@ var View.bottomPadding: Int
         setPaddingRelative(paddingStart, paddingTop, paddingEnd, value)
     }
 
+var View?.verticalPadding: Int
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    set(value) {
+        this?.setPaddingRelative(paddingStart, value, paddingEnd, value)
+    }
+
 var View.padding: Int
     @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
     set(value) {
@@ -88,7 +100,7 @@ var View.startMargin: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.marginStart ?: 0
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            marginStart = value
+            leftMargin = value
             requestLayout()
         }
     }
@@ -97,7 +109,17 @@ var View.endMargin: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.marginEnd ?: 0
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            marginEnd = value
+            rightMargin = value
+            requestLayout()
+        }
+    }
+
+var View.horizontalMargin: Int
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    set(value) {
+        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+            leftMargin = value
+            rightMargin = value
             requestLayout()
         }
     }
@@ -115,6 +137,16 @@ var View.bottomMargin: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+            bottomMargin = value
+            requestLayout()
+        }
+    }
+
+var View.verticalMargin: Int
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    set(value) {
+        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+            topMargin = value
             bottomMargin = value
             requestLayout()
         }

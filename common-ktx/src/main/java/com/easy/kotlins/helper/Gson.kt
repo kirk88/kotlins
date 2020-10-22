@@ -63,12 +63,12 @@ fun Any?.toJsonOrNull(): String? = this?.let { gson.toJson(it) }
 
 fun Any.toJson(): String = gson.toJson(this)
 
-inline fun <reified T> JsonObject?.getAsObject(name: String? = null): T? {
-    return this?.let { gson.fromJson(if (name != null) it.get(name) else it, T::class.java) }
+inline fun <reified T> JsonObject.getAsObject(name: String? = null): T {
+    return gson.fromJson(if (name != null) this.get(name) else this, T::class.java)
 }
 
-inline fun <reified T> JsonObject?.getAsArray(name: String): List<T>? {
-    return this?.let { gson.fromJson(it.getAsJsonArray(name), listType(T::class.java)) }
+inline fun <reified T> JsonObject.getAsArray(name: String): List<T>? {
+    return gson.fromJson(this.get(name), listType(T::class.java))
 }
 
 fun JsonObject.getAsString(name: String, defaultValue: String? = null): String? = this.get(name)?.asString ?: defaultValue

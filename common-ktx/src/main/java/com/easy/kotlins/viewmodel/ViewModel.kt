@@ -12,7 +12,7 @@ import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
 import com.easy.kotlins.event.LiveEventProxy
 import com.easy.kotlins.helper.SingleLiveEvent
-import com.easy.kotlins.http.NiceOkFaker
+import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
 import com.easy.kotlins.http.SimpleOkFakerScope
 
@@ -26,16 +26,16 @@ open class ViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
     var event: Event? by liveEventProxy
 
 
-    fun get(action: NiceOkFaker.() -> Unit): NiceOkFaker {
-        val faker = NiceOkFaker.get(action)
+    fun get(action: OkFaker.() -> Unit): OkFaker {
+        val faker = OkFaker.get(action)
         return faker.tag?.let {
             add(it, faker)
         } ?: add(javaClass.simpleName, faker)
     }
 
 
-    fun post(action: NiceOkFaker.() -> Unit): NiceOkFaker {
-        val faker = NiceOkFaker.post(action)
+    fun post(action: OkFaker.() -> Unit): OkFaker {
+        val faker = OkFaker.post(action)
         return faker.tag?.let {
             add(it, faker)
         } ?: add(javaClass.simpleName, faker)
