@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
 import com.easy.kotlins.event.LiveEventProxy
-import com.easy.kotlins.helper.SingleLiveEvent
+import com.easy.kotlins.event.SingleLiveEvent
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
 import com.easy.kotlins.http.SimpleOkFakerScope

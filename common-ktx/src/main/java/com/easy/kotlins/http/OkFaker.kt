@@ -217,21 +217,27 @@ class OkFaker(private val okFaker: OkRequest) {
     }
 
     fun <T> mapResponse(action: (response: String) -> T): OkFaker = this.apply {
-        okFaker.mapResponse(OkFunction<Response, OkSource<T>> {
-            return@OkFunction OkSource.just(action(it.body()!!.string()))
+        okFaker.mapResponse(object : OkFunction<Response, OkSource<T>>{
+            override fun apply(r: Response): OkSource<T> {
+                return OkSource.just(action(r.body()!!.string()))
+            }
         })
     }
 
 
     fun <T> mapJsonResponse(action: (response: JsonObject) -> T): OkFaker = this.apply {
-        okFaker.mapResponse(OkFunction<Response, OkSource<T>> {
-            return@OkFunction OkSource.just(action(it.body()!!.string().toJsonObject()))
+        okFaker.mapResponse(object : OkFunction<Response, OkSource<T>>{
+            override fun apply(r: Response): OkSource<T> {
+                return OkSource.just(action(r.body()!!.string().toJsonObject()))
+            }
         })
     }
 
     fun <T> mapError(action: (error: Throwable) -> T): OkFaker = this.apply {
-        okFaker.mapError(OkFunction<Throwable, OkSource<T>> {
-            return@OkFunction OkSource.just(action(it))
+        okFaker.mapError(object : OkFunction<Throwable, OkSource<T>>{
+            override fun apply(t: Throwable): OkSource<T> {
+                return OkSource.just(action(t))
+            }
         })
     }
 
@@ -291,7 +297,7 @@ class OkFaker(private val okFaker: OkRequest) {
     }
 
     fun onSingleResult(onSuccess: () -> Unit, onError: (error: Throwable) -> Unit): OkFaker = this.apply {
-        onSuccess(onSuccess)
+        onSingleSuccess(onSuccess)
         onError(onError)
     }
 
@@ -317,7 +323,7 @@ class OkFaker(private val okFaker: OkRequest) {
     }
 
     fun request(): OkFaker = this.apply {
-        okFaker.enqueue(object : OkStartedCallback<Any> {
+        okFaker.enqueue(object : OkCallback<Any> {
             override fun onStart() {
                 onStart?.invoke()
             }
@@ -372,18 +378,12 @@ class OkFaker(private val okFaker: OkRequest) {
 
     companion object {
 
-        fun get(url: String? = null, action: (OkFaker.() -> Unit)? = null): OkFaker {
-            return OkFaker(OkFaker.newGet()).apply {
-                url?.let { url(it) }
-                action?.invoke(this)
-            }
+        fun get(action: OkFaker.() -> Unit): OkFaker {
+            return OkFaker(OkRequest(OkRequest.Method.GET)).apply(action)
         }
 
-        fun post(url: String? = null, action: (OkFaker.() -> Unit)? = null): OkFaker {
-            return OkFaker(OkFaker.newPost()).apply {
-                url?.let { url(it) }
-                action?.invoke(this)
-            }
+        fun post(action: OkFaker.() -> Unit): OkFaker {
+            return OkFaker(OkRequest(OkRequest.Method.POST)).apply(action)
         }
 
     }

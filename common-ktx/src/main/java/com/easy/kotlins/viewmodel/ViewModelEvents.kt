@@ -10,8 +10,8 @@ object ViewModelEvents {
     fun observe(owner: Any) {
         when {
             owner !is EventObservableView ||
-                    owner !is ViewModelOwner<*> ||
-                    owner.viewModel !is ViewModel -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
+            owner !is ViewModelOwner<*> ||
+            owner.viewModel !is ViewModel -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
             else -> (owner.viewModel as ViewModel).observeEvent(owner)
         }
     }

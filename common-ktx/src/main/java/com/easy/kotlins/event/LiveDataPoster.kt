@@ -1,4 +1,4 @@
-package com.easy.kotlins.helper
+package com.easy.kotlins.event
 
 import android.os.Handler
 import android.os.Looper

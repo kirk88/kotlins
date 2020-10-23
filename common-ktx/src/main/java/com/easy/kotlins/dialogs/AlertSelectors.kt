@@ -24,5 +24,6 @@ fun <D : DialogInterface> Context.selector(
             this.title = title
         }
         items(items, onClick)
+        show()
     }
 }
