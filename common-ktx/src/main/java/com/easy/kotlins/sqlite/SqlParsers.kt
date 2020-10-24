@@ -26,7 +26,7 @@ interface RowParser<out T> {
 }
 
 interface MapRowParser<out T> {
-    fun parseRow(columns: Map<String, Any?>): T
+    fun parseRow(columns: Map<String, ColumnValue>): T
 }
 
 private class SingleColumnParser<out T> : RowParser<T> {
@@ -58,14 +58,14 @@ val DoubleParser: RowParser<Double> = SingleColumnParser()
 val StringParser: RowParser<String> = SingleColumnParser()
 val BlobParser: RowParser<ByteArray> = SingleColumnParser()
 
-fun <T: Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
+fun <T : Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
     if (count != 1)
         throw SQLiteException("parseSingle accepts only cursors with a single entry")
     moveToFirst()
     return parser.parseRow(readColumnsArray(this))
 }
 
-fun <T: Any> Cursor.parseOpt(parser: RowParser<T>): T? = use {
+fun <T : Any> Cursor.parseOpt(parser: RowParser<T>): T? = use {
     if (count > 1)
         throw SQLiteException("parseSingle accepts only cursors with a single entry or empty cursors")
     if (count == 0)
@@ -74,7 +74,7 @@ fun <T: Any> Cursor.parseOpt(parser: RowParser<T>): T? = use {
     return parser.parseRow(readColumnsArray(this))
 }
 
-fun <T: Any> Cursor.parseList(parser: RowParser<T>): List<T> = use {
+fun <T : Any> Cursor.parseList(parser: RowParser<T>): List<T> = use {
     val list = ArrayList<T>(count)
     moveToFirst()
     while (!isAfterLast) {
@@ -84,14 +84,14 @@ fun <T: Any> Cursor.parseList(parser: RowParser<T>): List<T> = use {
     return list
 }
 
-fun <T: Any> Cursor.parseSingle(parser: MapRowParser<T>): T = use {
+fun <T : Any> Cursor.parseSingle(parser: MapRowParser<T>): T = use {
     if (count != 1)
         throw SQLiteException("parseSingle accepts only cursors with getCount() == 1")
     moveToFirst()
     return parser.parseRow(readColumnsMap(this))
 }
 
-fun <T: Any> Cursor.parseOpt(parser: MapRowParser<T>): T? = use {
+fun <T : Any> Cursor.parseOpt(parser: MapRowParser<T>): T? = use {
     if (count > 1)
         throw SQLiteException("parseSingle accepts only cursors with getCount() == 1 or empty cursors")
     if (count == 0)
@@ -100,7 +100,7 @@ fun <T: Any> Cursor.parseOpt(parser: MapRowParser<T>): T? = use {
     return parser.parseRow(readColumnsMap(this))
 }
 
-fun <T: Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
+fun <T : Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
     val list = ArrayList<T>(count)
     moveToFirst()
     while (!isAfterLast) {
@@ -128,16 +128,8 @@ fun Cursor.asMapSequence(): Sequence<Map<String, Any?>> {
     return CursorMapSequence(this)
 }
 
-private fun Cursor.getColumnValue(index: Int): Any? {
-    if (isNull(index)) return null
-
-    return when (getType(index)) {
-        Cursor.FIELD_TYPE_INTEGER -> getLong(index)
-        Cursor.FIELD_TYPE_FLOAT -> getDouble(index)
-        Cursor.FIELD_TYPE_STRING -> getString(index)
-        Cursor.FIELD_TYPE_BLOB -> getBlob(index)
-        else -> null
-    }
+private fun Cursor.getColumnValue(index: Int): ColumnValue {
+    return ColumnValue(this, index)
 }
 
 private fun readColumnsArray(cursor: Cursor): Array<Any?> {
@@ -149,9 +141,9 @@ private fun readColumnsArray(cursor: Cursor): Array<Any?> {
     return arr
 }
 
-private fun readColumnsMap(cursor: Cursor): Map<String, Any?> {
+private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
-    val map = hashMapOf<String, Any?>()
+    val map = hashMapOf<String, ColumnValue>()
     for (i in 0 until count) {
         map[cursor.getColumnName(i)] = cursor.getColumnValue(i)
     }
@@ -182,4 +174,29 @@ private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, Any?>
         cursor.moveToNext()
         return readColumnsMap(cursor)
     }
+}
+
+class ColumnValue(private val cursor: Cursor, private val index: Int) {
+    val isNull: Boolean = cursor.isNull(index)
+
+    val stringValue: String?
+        get() = cursor.getString(index)
+
+    val shortValue: Short
+        get() = cursor.getShort(index)
+
+    val intValue: Int
+        get() = cursor.getInt(index)
+
+    val longValue: Long
+        get() = cursor.getLong(index)
+
+    val floatValue: Float
+        get() = cursor.getFloat(index)
+
+    val doubleValue: Double
+        get() = cursor.getDouble(index)
+
+    val blobValue: ByteArray
+        get() = cursor.getBlob(index)
 }

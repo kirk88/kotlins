@@ -70,6 +70,26 @@ open class CommonRecyclerAdapter<ITEM>(protected val context: Context) :
         itemChildLongClickListener = listener
     }
 
+    fun callOnItemClick(holder: ItemViewHolder){
+        if (onItemClick(holder)) return
+        itemClickListener?.invoke(this, holder)
+    }
+
+    fun callOnItemLongClick(holder: ItemViewHolder){
+        if (onItemLongClick(holder)) return
+        itemLongClickListener?.invoke(this, holder)
+    }
+
+    fun callOnItemChildClick(holder: ItemViewHolder, view: View){
+        if(onItemChildClick(holder, view)) return
+        itemChildClickListener?.invoke(this, holder, view)
+    }
+
+    fun callOnItemChildLongClick(holder: ItemViewHolder, view: View){
+        if(onItemChildLongClick(holder, view)) return
+        itemChildLongClickListener?.invoke(this, holder, view)
+    }
+
     fun <DELEGATE : ItemViewDelegate<ITEM>> addItemViewDelegate(viewType: Int, delegate: DELEGATE) {
         itemDelegates[viewType] = delegate
     }
@@ -441,7 +461,7 @@ open class CommonRecyclerAdapter<ITEM>(protected val context: Context) :
             else -> {
                 val holder = ItemViewHolder(
                         layoutInflater.inflate(
-                                itemDelegates.getValue(viewType).layoutId,
+                                itemDelegates.getValue(viewType).resource,
                                 parent,
                                 false
                         )

@@ -7,26 +7,29 @@ import androidx.recyclerview.widget.RecyclerView
 
 class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    val clickViews: Set<View> by lazy { hashSetOf() }
-    val longClickViews: Set<View> by lazy { hashSetOf() }
+    private val _clickViews: MutableSet<View> = mutableSetOf()
+    val clickViews: Set<View> = _clickViews
+
+    private val _longClickViews: MutableSet<View> = mutableSetOf()
+    val longClickViews: Set<View> = _longClickViews
 
     fun addOnClickListener(vararg views: View) {
-        (clickViews as HashSet<View>).addAll(views)
+        _clickViews.addAll(views)
     }
 
     fun addOnLongClickListener(vararg views: View) {
-        (longClickViews as HashSet<View>).addAll(views)
+        _longClickViews.addAll(views)
     }
 
     fun removeOnClickListener(vararg views: View) {
-        (clickViews as HashSet<View>).removeAll(views)
+        _clickViews.removeAll(views)
         views.forEach {
             it.setOnClickListener(null)
         }
     }
 
     fun removeOnLongClickListener(vararg views: View) {
-        (longClickViews as HashSet<View>).removeAll(views)
+        _longClickViews.removeAll(views)
         views.forEach {
             it.setOnLongClickListener(null)
         }

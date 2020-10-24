@@ -32,7 +32,7 @@ fun String.heightLight(keywords: String?, color: Int = Color.RED): CharSequence 
     }
 }
 
-fun String.heightLight(start: Int, end: Int = this.length, @ColorInt color: Int = Color.RED): CharSequence {
+fun String.heightLight(start: Int = 0, end: Int = this.length, @ColorInt color: Int = Color.RED): CharSequence {
     return if (start < 0 || end > length) this else SpannableString(this).apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
@@ -40,9 +40,13 @@ fun String.heightLight(start: Int, end: Int = this.length, @ColorInt color: Int 
 
 fun String?.notNull(def: String = ""): String = if (this == null || this == "null") def else this
 
-fun String?.notEmpty(def: String = ""): String = if (this?.isNotEmpty() == true) this else def
+fun String?.notNullOrEmpty(def: String = ""): String = if (this.isNullOrEmpty()) def else this
 
-fun String?.notBlank(def: String = ""): String = if (this?.isNotBlank() == true) this else def
+fun String?.notNullOrBlank(def: String = ""): String = if (this.isNullOrBlank()) def else this
+
+fun String.notEmpty(def: String = ""): String = if (this.isEmpty()) def else this
+
+fun String.notBlank(def: String = ""): String = if (this.isBlank()) def else this
 
 fun CharSequence.splitNotBlank(vararg delimiters: String, limit: Int = 0): List<String> {
     return split(delimiters = delimiters, limit = limit).filter { it.isNotBlank() }

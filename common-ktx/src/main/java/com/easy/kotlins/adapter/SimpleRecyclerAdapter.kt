@@ -3,11 +3,11 @@ package com.easy.kotlins.adapter
 import android.content.Context
 import androidx.annotation.LayoutRes
 
-abstract class SimpleRecyclerAdapter<ITEM>(context: Context, @LayoutRes private val layoutId: Int) :
+abstract class SimpleRecyclerAdapter<ITEM>(context: Context, @LayoutRes private val resource: Int) :
     CommonRecyclerAdapter<ITEM>(context) {
 
     init {
-        addItemViewDelegate(0, object : ItemViewDelegate<ITEM>(context, layoutId) {
+        addItemViewDelegate(0, object : ItemViewDelegate<ITEM>(context, resource) {
 
             override fun convert(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
                 this@SimpleRecyclerAdapter.convert(holder, item, payloads)
