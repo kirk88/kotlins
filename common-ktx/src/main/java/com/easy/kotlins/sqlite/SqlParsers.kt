@@ -128,6 +128,18 @@ fun Cursor.asMapSequence(): Sequence<Map<String, Any?>> {
     return CursorMapSequence(this)
 }
 
+private fun Cursor.getValue(index: Int): Any? {
+    if (isNull(index)) return null
+
+    return when (getType(index)) {
+        Cursor.FIELD_TYPE_INTEGER -> getLong(index)
+        Cursor.FIELD_TYPE_FLOAT -> getDouble(index)
+        Cursor.FIELD_TYPE_STRING -> getString(index)
+        Cursor.FIELD_TYPE_BLOB -> getBlob(index)
+        else -> null
+    }
+}
+
 private fun Cursor.getColumnValue(index: Int): ColumnValue {
     return ColumnValue(this, index)
 }
@@ -136,11 +148,10 @@ private fun readColumnsArray(cursor: Cursor): Array<Any?> {
     val count = cursor.columnCount
     val arr = arrayOfNulls<Any?>(count)
     for (i in 0 until count) {
-        arr[i] = cursor.getColumnValue(i)
+        arr[i] = cursor.getValue(i)
     }
     return arr
 }
-
 private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
     val map = hashMapOf<String, ColumnValue>()

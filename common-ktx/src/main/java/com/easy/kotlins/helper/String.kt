@@ -32,8 +32,8 @@ fun String.heightLight(keywords: String?, color: Int = Color.RED): CharSequence 
     }
 }
 
-fun String.heightLight(start: Int = 0, end: Int = this.length, @ColorInt color: Int = Color.RED): CharSequence {
-    return if (start < 0 || end > length) this else SpannableString(this).apply {
+fun String.heightLight(start: Int = 0, end: Int = length, @ColorInt color: Int = Color.RED): CharSequence? {
+    return SpannableString(this).apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
