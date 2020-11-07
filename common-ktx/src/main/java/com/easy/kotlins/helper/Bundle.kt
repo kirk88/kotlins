@@ -55,21 +55,29 @@ fun Bundle.toMap(): Map<String, Any?> = run {
 }
 
 fun Bundle.putLargeData(key: String, value: LargeData) {
-    putString(key, LargeDataBag.set(value.name, value.value))
+    putString(key, LargeDataBag.set(value))
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Bundle.getLargeData(key: String): T? {
-    return getString(key)?.let { name -> LargeDataBag.get(name) as T? }
+fun <T> Bundle.getLargeDataValue(key: String): T? {
+    return getString(key)?.let { name -> LargeDataBag.get(name)?.value as T? }
+}
+
+fun Bundle.getLargeData(key: String): LargeData? {
+    return getString(key)?.let { name -> LargeDataBag.get(name) }
 }
 
 fun Intent.putLargeData(key: String, value: LargeData) {
-    putExtra(key, LargeDataBag.set(value.name, value.value))
+    putExtra(key, LargeDataBag.set(value))
+}
+
+fun Intent.getLargeData(key: String): LargeData? {
+    return getStringExtra(key)?.let { name -> LargeDataBag.get(name) }
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Intent.getLargeData(key: String): T? {
-    return getStringExtra(key)?.let { name -> LargeDataBag.get(name) as T? }
+fun <T> Intent.getLargeDataValue(key: String): T? {
+    return getStringExtra(key)?.let { name -> LargeDataBag.get(name)?.value as T? }
 }
 
 fun largeDataOf(name: String, value: Any?) = LargeData(name, value)
@@ -80,14 +88,14 @@ data class LargeData(val name: String, val value: Any?)
 
 object LargeDataBag {
 
-    private val dataMap: MutableMap<String, Any?> by lazy { mutableMapOf() }
+    private val dataMap: MutableMap<String, LargeData?> by lazy { mutableMapOf() }
 
-    fun set(name: String, value: Any?): String {
-        dataMap[name] = value
-        return name
+    fun set(largeData: LargeData): String {
+        dataMap[largeData.name] = largeData
+        return largeData.name
     }
 
-    fun get(name: String): Any? {
+    fun get(name: String): LargeData? {
         return dataMap[name]
     }
 
