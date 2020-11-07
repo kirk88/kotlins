@@ -72,6 +72,10 @@ fun <T> Intent.getLargeData(key: String): T? {
     return getStringExtra(key)?.let { name -> LargeDataBag.get(name) as T? }
 }
 
+fun largeDataOf(name: String, value: Any?) = LargeData(name, value)
+
+fun largeDataOf(value: Any?) = LargeData(System.currentTimeMillis().toString(), value)
+
 data class LargeData(val name: String, val value: Any?)
 
 object LargeDataBag {
