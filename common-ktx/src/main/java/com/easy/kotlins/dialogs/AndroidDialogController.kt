@@ -25,6 +25,12 @@ internal class AndroidDialogController(override val context: Context, @StyleRes 
             dialog.setContentView(value)
         }
 
+    override var contentResource: Int
+        get() = error("no getter")
+        set(value) {
+            dialog.setContentView(value)
+        }
+
     override var isCancelable: Boolean
         get() = error("no getter")
         set(value) {

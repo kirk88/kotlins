@@ -51,6 +51,20 @@ dependencies {
     api "androidx.fragment:fragment-ktx:1.2.5"
     api "androidx.sqlite:sqlite-ktx:2.1.0"
 
+    def nav_version = "2.3.0"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    def datastore_version = "1.0.0-alpha02"
+    implementation "androidx.datastore:datastore-preferences:$datastore_version"
+    implementation "androidx.datastore:datastore-core:$datastore_version"
+
+    // Preferences DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha02"
+
+    // Proto DataStore
+    implementation "androidx.datastore:datastore-core:1.0.0-alpha02"
+
     api "com.facebook.stetho:stetho-okhttp3:1.5.0"
     api "com.squareup.okhttp3:logging-interceptor:3.9.0"
 

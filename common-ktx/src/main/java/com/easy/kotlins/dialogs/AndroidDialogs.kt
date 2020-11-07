@@ -12,12 +12,12 @@ import androidx.fragment.app.Fragment
  * Create by LiZhanPing on 2020/9/26
  */
 
-inline fun Fragment.buildDialog(@StyleRes themeResId: Int = 0, noinline init: DialogController<Dialog>.() -> Unit): DialogController<Dialog> {
+inline fun Fragment.buildDialog(themeResId: Int = 0, noinline init: DialogController<Dialog>.() -> Unit): Dialog {
     return requireActivity().buildDialog(themeResId, init)
 }
 
-fun Context.buildDialog(@StyleRes themeResId: Int = 0, init: DialogController<Dialog>.() -> Unit): DialogController<Dialog> {
-    return AndroidDialogController(this, themeResId).apply(init)
+fun Context.buildDialog(themeResId: Int = 0, init: DialogController<Dialog>.() -> Unit): Dialog {
+    return AndroidDialogController(this, themeResId).apply(init).dialog
 }
 
 inline fun Fragment.dialog(@StyleRes themeResId: Int = 0, noinline init: DialogController<Dialog>.() -> Unit): Dialog {

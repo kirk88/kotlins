@@ -1,69 +1,185 @@
 package com.easy.kotlins.helper
 
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.text.style.ImageSpan
 import androidx.annotation.ColorInt
+import com.google.gson.JsonParser
 
 /**
  * Create by LiZhanPing on 2020/8/27
  */
 
-fun String?.asEditable(): Editable? {
-    return this?.let { Editable.Factory.getInstance().newEditable(it) }
-}
+fun CharSequence.asEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
-fun String?.asSpannableBuilder(): SpannableStringBuilder {
-    return SpannableStringBuilder(this ?: "")
-}
+fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =
+    if (this is SpannableStringBuilder) this else SpannableStringBuilder(this)
 
-fun String.heightLight(keywords: String?, color: Int = Color.RED): CharSequence {
+fun CharSequence.heightLight(keywords: String?, color: Int = Color.RED): CharSequence {
     return if (keywords.isNullOrBlank()) this else keywords.let {
         SpannableString(this).also {
             var result = keywords.toRegex().find(it)
             while (result != null) {
-                it.setSpan(ForegroundColorSpan(color), result.range.first, result.range.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                it.setSpan(
+                    ForegroundColorSpan(color),
+                    result.range.first,
+                    result.range.last + 1,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
                 result = result.next()
             }
         }
     }
 }
 
-fun String.heightLight(start: Int = 0, end: Int = length, @ColorInt color: Int = Color.RED): CharSequence? {
+fun CharSequence.heightLight(
+    start: Int = 0,
+    end: Int = length,
+    @ColorInt color: Int = Color.RED
+): CharSequence? {
     return SpannableString(this).apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
 
-fun String?.notNull(def: String = ""): String = if (this == null || this == "null") def else this
-
-fun String?.notNullOrEmpty(def: String = ""): String = if (this.isNullOrEmpty()) def else this
-
-fun String?.notNullOrBlank(def: String = ""): String = if (this.isNullOrBlank()) def else this
-
-fun String.notEmpty(def: String = ""): String = if (this.isEmpty()) def else this
-
-fun String.notBlank(def: String = ""): String = if (this.isBlank()) def else this
-
-fun CharSequence.splitNotBlank(vararg delimiters: String, limit: Int = 0): List<String> {
-    return split(delimiters = delimiters, limit = limit).filter { it.isNotBlank() }
+fun CharSequence.insertImage(
+    drawable: Drawable,
+    where: Int,
+    textSize: Int = 0,
+    prefix: String = "",
+    postfix: String = ""
+): SpannableStringBuilder {
+    if (textSize >= 0) drawable.setBounds(0, 0, textSize, textSize)
+    return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
+        setSpan(
+            CenterAlignImageSpan(drawable),
+            prefix.length,
+            length - postfix.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    })
 }
 
-fun <K, V> Map<K, V>.joinKeysToString(separator: CharSequence = ", "): String {
-    return keys.joinToString(separator)
+class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
+
+    override fun draw(
+        canvas: Canvas,
+        text: CharSequence,
+        start: Int,
+        end: Int,
+        x: Float,
+        top: Int,
+        y: Int,
+        bottom: Int,
+        paint: Paint
+    ) {
+        val d = drawable
+        val fm = paint.fontMetricsInt
+        val transY = (y + fm.descent + y + fm.ascent) / 2 - d.bounds.bottom / 2
+        canvas.save()
+        canvas.translate(x, transY.toFloat())
+        d.draw(canvas)
+        canvas.restore()
+    }
 }
 
-fun <K, V> Map<K, V>.joinValuesToString(separator: CharSequence = ", "): String {
-    return values.joinToString(separator)
+fun CharSequence.withSpan(
+    what: Any,
+    start: Int = 0,
+    end: Int = length,
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+): CharSequence {
+    return this.asSpannableBuilder().apply {
+        setSpan(what, start, end, flags)
+    }
 }
 
-fun <K, V, A : Appendable> Map<K, V>.joinKeysTo(buffer: A, separator: CharSequence = ", "): A {
-    return keys.joinTo(buffer, separator)
+inline fun String?.notNull(defaultValue: () -> String = { "" }): String =
+    if (this == null || this == "null") defaultValue() else this
+
+inline fun String?.notNullOrEmpty(defaultValue: () -> String = { "" }): String =
+    if (this.isNullOrEmpty()) defaultValue() else this
+
+inline fun String?.notNullOrBlank(defaultValue: () -> String = { "" }): String =
+    if (this.isNullOrBlank()) defaultValue() else this
+
+inline fun String.notEmpty(defaultValue: () -> String = { "" }): String = if (this.isEmpty()) defaultValue() else this
+
+inline fun String.notBlank(defaultValue: () -> String = { "" }): String = if (this.isBlank()) defaultValue() else this
+
+inline fun String?.ifNull(defaultValue: () -> String?): String? =
+    if (this == null || this == "null") defaultValue() else this
+
+inline fun String?.ifNullOrEmpty(defaultValue: () -> String?): String? =
+    if (this.isNullOrEmpty()) defaultValue() else this
+
+inline fun String?.ifNullOrBlank(defaultValue: () -> String?): String? =
+    if (this.isNullOrBlank()) defaultValue() else this
+
+inline fun String.ifEmpty(defaultValue: () -> String?): String? = if (this.isNotEmpty()) defaultValue() else this
+
+inline fun String.ifBlack(defaultValue: () -> String?): String? = if (this.isBlank()) defaultValue() else this
+
+val String.isJsonArray: Boolean
+    get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonArray ?: false
+
+val String.isJsonObject: Boolean
+    get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonObject ?: false
+
+fun CharSequence.splitNotBlank(vararg delimiters: String, ignoreCase: Boolean = false, limit: Int = 0): List<String> {
+    return split(delimiters = delimiters, ignoreCase, limit).filter { it.isNotBlank() }
 }
 
-fun <K, V, A : Appendable> Map<K, V>.joinValuesTo(buffer: A, separator: CharSequence = ", "): A {
-    return values.joinTo(buffer, separator)
+
+fun <K, V> Map<K, V>.joinKeysToString(
+    separator: CharSequence = ", ",
+    prefix: CharSequence = "",
+    postfix: CharSequence = "",
+    limit: Int = -1,
+    truncated: CharSequence = "...",
+    transform: ((K) -> CharSequence)? = null
+): String {
+    return keys.joinToString(separator, prefix, postfix, limit, truncated, transform)
+}
+
+fun <K, V> Map<K, V>.joinValuesToString(
+    separator: CharSequence = ", ",
+    prefix: CharSequence = "",
+    postfix: CharSequence = "",
+    limit: Int = -1,
+    truncated: CharSequence = "...",
+    transform: ((V) -> CharSequence)? = null
+): String {
+    return values.joinToString(separator, prefix, postfix, limit, truncated, transform)
+}
+
+fun <K, V, A : Appendable> Map<K, V>.joinKeysTo(
+    buffer: A,
+    separator: CharSequence = ", ",
+    prefix: CharSequence = "",
+    postfix: CharSequence = "",
+    limit: Int = -1,
+    truncated: CharSequence = "...",
+    transform: ((K) -> CharSequence)? = null
+): A {
+    return keys.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
+}
+
+fun <K, V, A : Appendable> Map<K, V>.joinValuesTo(
+    buffer: A,
+    separator: CharSequence = ", ",
+    prefix: CharSequence = "",
+    postfix: CharSequence = "",
+    limit: Int = -1,
+    truncated: CharSequence = "...",
+    transform: ((V) -> CharSequence)? = null
+): A {
+    return values.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
 }

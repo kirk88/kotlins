@@ -74,12 +74,12 @@ val Fragment.isActive: Boolean
 
 fun Fragment.finishActivity() = activity?.finish()
 
-inline fun <T : Fragment> T.ofBundle(crossinline action: Bundle.() -> Unit): T = apply {
+inline fun <T : Fragment> T.withBundle(crossinline action: Bundle.() -> Unit): T = apply {
     val args = arguments ?: Bundle().also { arguments = it }
     args.apply(action)
 }
 
-fun <T : Fragment> T.ofBundle(vararg pairs: Pair<String, Any>): T = apply {
+fun <T : Fragment> T.withBundle(vararg pairs: Pair<String, Any?>): T = apply {
     val args = arguments ?: Bundle().also { arguments = it }
     args.putAll(pairs.toBundle())
 }
@@ -88,7 +88,7 @@ inline fun <reified A : Activity> Fragment.startActivity(noinline action: (Inten
     startActivity(Intent(context, A::class.java).apply { action?.invoke(this) })
 }
 
-inline fun <reified A : Activity> Fragment.startActivity(vararg pairs: Pair<String, Any>) {
+inline fun <reified A : Activity> Fragment.startActivity(vararg pairs: Pair<String, Any?>) {
     startActivity(Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) })
 }
 
@@ -96,7 +96,7 @@ inline fun <reified A : Activity> Context.startActivity(noinline action: (Intent
     startActivity(Intent(this, A::class.java).apply { action?.invoke(this) })
 }
 
-inline fun <reified A : Activity> Context.startActivity(vararg pairs: Pair<String, Any>) {
+inline fun <reified A : Activity> Context.startActivity(vararg pairs: Pair<String, Any?>) {
     startActivity(Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) })
 }
 
@@ -104,7 +104,7 @@ inline fun <reified A : Activity> Fragment.startActivityForResult(requestCode: I
     startActivityForResult(Intent(context, A::class.java).apply { action?.invoke(this) }, requestCode)
 }
 
-inline fun <reified A : Activity> Fragment.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any>) {
+inline fun <reified A : Activity> Fragment.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any?>) {
     startActivityForResult(Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) }, requestCode)
 }
 
@@ -112,27 +112,8 @@ inline fun <reified A : Activity> Activity.startActivityForResult(requestCode: I
     startActivityForResult(Intent(this, A::class.java).apply { action?.invoke(this) }, requestCode)
 }
 
-inline fun <reified A : Activity> Activity.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any>) {
+inline fun <reified A : Activity> Activity.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any?>) {
     startActivityForResult(Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) }, requestCode)
-}
-
-fun Array<out Pair<String, Any>>.toBundle(): Bundle = run {
-    val bundle = Bundle()
-    for ((key, value) in this) {
-        when (value) {
-            is Boolean -> bundle.putBoolean(key, value)
-            is Double -> bundle.putDouble(key, value)
-            is Float -> bundle.putFloat(key, value)
-            is Int -> bundle.putInt(key, value)
-            is Long -> bundle.putLong(key, value)
-            is Short -> bundle.putShort(key, value)
-            is String -> bundle.putString(key, value)
-            is Parcelable -> bundle.putParcelable(key, value)
-            is Serializable -> bundle.putSerializable(key, value)
-            else -> throw IllegalArgumentException("unsupported value type: ${value.javaClass.name}")
-        }
-    }
-    return@run bundle
 }
 
 fun Context.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
@@ -157,3 +138,10 @@ val Fragment.application: Application
 
         return application ?: requireActivity().application
     }
+
+
+val Context.screenWidthPixels: Int
+    get() = resources.displayMetrics.widthPixels
+
+val Context.screenHeightPixels: Int
+    get() = resources.displayMetrics.heightPixels

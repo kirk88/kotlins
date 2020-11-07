@@ -9,20 +9,26 @@ import java.io.ObjectOutputStream
  * Create by LiZhanPing on 2020/8/25
  */
 
-inline fun <T, R> T.transform(crossinline transform: (T) -> R): R {
-    return transform(this)
+
+inline fun <T, R> T.transform(crossinline transform: (value: T) -> R): R {
+    return transform.invoke(this)
 }
 
-fun <T> Boolean.opt(right: T, wrong: T): T {
+fun <T: Any> Boolean.opt(right: T, wrong: T): T {
     return if (this) right else wrong
 }
 
-fun <T> Boolean.opt(right: () -> T, wrong: () -> T): T {
+
+fun <T: Any> Boolean.opt(right: () -> T, wrong: () -> T): T {
     return if (this) right() else wrong()
 }
 
-fun Boolean.opt(rightAction: () -> Unit, wrongAction: () -> Unit){
-    if(this) rightAction() else wrongAction()
+fun <T: Any?> Boolean.optNulls(right: T?, wrong: T?): T? {
+    return if (this) right else wrong
+}
+
+fun <T: Any?> Boolean.optNulls(right: () -> T?, wrong: () -> T?): T? {
+    return if (this) right() else wrong()
 }
 
 fun Any.serialize(): String? = runCatching {

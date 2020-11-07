@@ -21,6 +21,9 @@ interface DialogController<out D : DialogInterface> {
     var contentView: View
         @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
 
+    var contentResource: Int
+        @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
+
     var isCancelable: Boolean
         @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
 

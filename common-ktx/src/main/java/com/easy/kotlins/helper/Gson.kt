@@ -86,8 +86,6 @@ fun JsonObject.getAsShort(name: String, defaultValue: Short = 0.S): Short = this
 
 fun JsonObject.getAsByte(name: String, defaultValue: Byte? = null): Byte? = this.get(name)?.asByte ?: defaultValue
 
-fun JsonObject.getAsChar(name: String, defaultValue: Char? = null): Char? = this.get(name)?.asCharacter ?: defaultValue
-
 fun JsonObject.getAsBigDecimal(name: String, defaultValue: BigDecimal = BigDecimal.ZERO): BigDecimal = this.get(name)?.asBigDecimal ?: defaultValue
 
 fun JsonObject.getAsBigInteger(name: String, defaultValue: BigInteger = BigInteger.ZERO): BigInteger = this.get(name)?.asBigInteger ?: defaultValue
