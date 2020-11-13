@@ -23,11 +23,11 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         //left, top, right, bottom
         int childCount = parent.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            View child = parent.getChildAt(i);
+            final View child = parent.getChildAt(i);
 
             int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
 
-            Divider divider = getDivider(parent, itemPosition);
+            Divider divider = getDivider(parent, child, itemPosition);
 
             if (divider.getLeftSideLine().isVisible()) {
                 int lineSize = divider.getLeftSideLine().getSize();
@@ -180,7 +180,7 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
         int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
 
-        Divider divider = getDivider(parent, itemPosition);
+        Divider divider = getDivider(parent, child, itemPosition);
         int left = divider.getLeftSideLine().isVisible() ? divider.getLeftSideLine().getSize() : 0;
         int top = divider.getTopSideLine().isVisible() ? divider.getTopSideLine().getSize() : 0;
         int right = divider.getRightSideLine().isVisible() ? divider.getRightSideLine().getSize() : 0;
@@ -190,7 +190,7 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
     }
 
 
-    public abstract Divider getDivider(@NonNull RecyclerView parent, int itemPosition);
+    public abstract Divider getDivider(@NonNull RecyclerView parent, @NonNull View child, int itemPosition);
 
 
 }
