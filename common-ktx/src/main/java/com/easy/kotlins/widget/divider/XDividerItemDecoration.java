@@ -33,30 +33,30 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
                 int lineSize = divider.getLeftSideLine().getSize();
                 int startPadding = divider.getLeftSideLine().getStartPadding();
                 int endPadding = divider.getLeftSideLine().getEndPadding();
-                drawChildLeftVertical(child, c, parent, divider.getLeftSideLine().getColor(), lineSize, startPadding, endPadding);
+                drawChildLeftVertical(child, c, divider.getLeftSideLine().getColor(), lineSize, startPadding, endPadding);
             }
             if (divider.getTopSideLine().isVisible()) {
                 int lineSize = divider.getTopSideLine().getSize();
                 int startPadding = divider.getTopSideLine().getStartPadding();
                 int endPadding = divider.getTopSideLine().getEndPadding();
-                drawChildTopHorizontal(child, c, parent, divider.topSideLine.getColor(), lineSize, startPadding, endPadding);
+                drawChildTopHorizontal(child, c, divider.topSideLine.getColor(), lineSize, startPadding, endPadding);
             }
             if (divider.getRightSideLine().isVisible()) {
                 int lineSize = divider.getRightSideLine().getSize();
                 int startPadding = divider.getRightSideLine().getStartPadding();
                 int endPadding = divider.getRightSideLine().getEndPadding();
-                drawChildRightVertical(child, c, parent, divider.getRightSideLine().getColor(), lineSize, startPadding, endPadding);
+                drawChildRightVertical(child, c, divider.getRightSideLine().getColor(), lineSize, startPadding, endPadding);
             }
             if (divider.getBottomSideLine().isVisible()) {
                 int lineSize = divider.getBottomSideLine().getSize();
                 int startPadding = divider.getBottomSideLine().getStartPadding();
                 int endPadding = divider.getBottomSideLine().getEndPadding();
-                drawChildBottomHorizontal(child, c, parent, divider.getBottomSideLine().getColor(), lineSize, startPadding, endPadding);
+                drawChildBottomHorizontal(child, c, divider.getBottomSideLine().getColor(), lineSize, startPadding, endPadding);
             }
         }
     }
 
-    private void drawChildBottomHorizontal(View child, Canvas c, RecyclerView parent, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
+    private void drawChildBottomHorizontal(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
         final int leftPadding;
         final int rightPadding;
 
@@ -86,7 +86,7 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
     }
 
-    private void drawChildTopHorizontal(View child, Canvas c, RecyclerView parent, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
+    private void drawChildTopHorizontal(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
         final int leftPadding;
         final int rightPadding;
 
@@ -115,7 +115,7 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
     }
 
-    private void drawChildLeftVertical(View child, Canvas c, RecyclerView parent, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
+    private void drawChildLeftVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
         final int topPadding;
         final int bottomPadding;
 
@@ -144,7 +144,7 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
     }
 
-    private void drawChildRightVertical(View child, Canvas c, RecyclerView parent, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
+    private void drawChildRightVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
         final int topPadding;
         final int bottomPadding;
 
@@ -173,12 +173,12 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
     }
 
     @Override
-    public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+    public void getItemOffsets(@NonNull Rect outRect, @NonNull View child, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
 
         //outRect 看源码可知这里只是把Rect类型的outRect作为一个封装了left,right,top,bottom的数据结构,
         //作为传递left,right,top,bottom的偏移值来用的
 
-        int itemPosition = ((RecyclerView.LayoutParams) view.getLayoutParams()).getViewLayoutPosition();
+        int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
 
         Divider divider = getDivider(parent, itemPosition);
         int left = divider.getLeftSideLine().isVisible() ? divider.getLeftSideLine().getSize() : 0;
