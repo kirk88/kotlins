@@ -10,11 +10,11 @@ import kotlin.DeprecationLevel.ERROR
 var TextView?.string: String?
     get() = this?.text?.toString()
     set(value) {
-        this?.text = value.asEditable()
+        this?.text = value?.asEditable()
     }
 
 var TextView?.textResource: Int
-    @Deprecated(message = "NO_GETTER", level = ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
     set(value) {
         this?.setText(value)
     }

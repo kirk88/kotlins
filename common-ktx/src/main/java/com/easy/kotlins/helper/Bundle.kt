@@ -8,17 +8,6 @@ import java.io.Serializable
 /**
  * Create by LiZhanPing on 2020/9/23
  */
-
-@Suppress("UNCHECKED_CAST")
-fun <T: Serializable> Bundle.requireSerializable(key: String): T = getSerializable(key) as T
-
-fun <T: Parcelable> Bundle.requireParcelable(key: String): T = getParcelable<T>(key) as T
-
-@Suppress("UNCHECKED_CAST")
-fun <T: Serializable> Intent.requireSerializableExtra(key: String): T = getSerializableExtra(key) as T
-
-fun <T: Parcelable> Intent.requireParcelableExtra(key: String): T = getParcelableExtra(key) as T
-
 @Suppress("UNCHECKED_CAST")
 fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
     val bundle = Bundle()
@@ -44,7 +33,6 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
     }
     return@run bundle
 }
-
 
 fun Bundle.toMap(): Map<String, Any?> = run {
     val map = mutableMapOf<String, Any?>()

@@ -5,5 +5,5 @@ package com.easy.kotlins.http.core
  */
 interface OkFunction<T, R> {
     @Throws(Exception::class)
-    fun apply(r: T): R
+    fun apply(r: T): OkResult<R>
 }

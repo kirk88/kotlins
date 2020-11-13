@@ -72,10 +72,10 @@ fun SQLiteDatabase.select(tableName: String, vararg columns: String): SelectQuer
 }
 
 fun SQLiteDatabase.update(tableName: String, vararg values: Pair<String, Any?>): UpdateQueryBuilder {
-    return AndroidSdkDatabaseUpdateQueryBuilder(this, tableName, values)
+    return AndroidDatabaseUpdateQueryBuilder(this, tableName, values)
 }
 
-fun SQLiteDatabase.delete(tableName: String, whereClause: String = "", vararg args: Pair<String, Any>): Int {
+fun SQLiteDatabase.delete(tableName: String, whereClause: String, vararg args: Pair<String, Any>): Int {
     return delete(tableName, applyArguments(whereClause, *args), null)
 }
 

@@ -30,9 +30,6 @@ abstract class UpdateQueryBuilder(
     private var selection: String? = null
     private var nativeSelectionArgs: Array<out String>? = null
 
-    @Deprecated("Use whereArgs() instead.", ReplaceWith("whereArgs(select, *args)"))
-    fun where(select: String, vararg args: Pair<String, Any>) = whereArgs(select, *args)
-
     fun whereArgs(select: String, vararg args: Pair<String, Any>): UpdateQueryBuilder {
         if (selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
@@ -47,9 +44,6 @@ abstract class UpdateQueryBuilder(
         selection = applyArguments(select, argsMap)
         return this
     }
-
-    @Deprecated("Use whereArgs() instead.", ReplaceWith("whereArgs(select)"))
-    fun where(select: String) = whereArgs(select)
 
     fun whereArgs(select: String): UpdateQueryBuilder {
         if (selectionApplied)
@@ -72,37 +66,32 @@ abstract class UpdateQueryBuilder(
         return this
     }
 
-    @Deprecated("Use whereSimple() instead", replaceWith = ReplaceWith("whereSimple(select, *args)"))
-    fun whereSupport(select: String, vararg args: String): UpdateQueryBuilder {
-        return whereSimple(select, *args)
-    }
-
-    fun exec(): Int {
+    fun exec(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
         val finalSelection = if (selectionApplied) selection else null
         val finalSelectionArgs = if (selectionApplied && useNativeSelection) nativeSelectionArgs else null
-        return execUpdate(tableName, values.toContentValues(), finalSelection, finalSelectionArgs)
+        return execUpdate(tableName, values.toContentValues(), finalSelection, finalSelectionArgs, conflictAlgorithm)
     }
 
-    abstract fun execUpdate(
-            table: String,
-            values: ContentValues,
-            whereClause: String?,
-            whereArgs: Array<out String>?
+    protected abstract fun execUpdate(
+        table: String,
+        values: ContentValues,
+        whereClause: String?,
+        whereArgs: Array<out String>?,
+        conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE
     ): Int
-
 }
 
-class AndroidSdkDatabaseUpdateQueryBuilder(
-        private val db: SQLiteDatabase,
-        table: String,
-        values: Array<out Pair<String, Any?>>
+class AndroidDatabaseUpdateQueryBuilder(
+    private val db: SQLiteDatabase,
+    table: String,
+    values: Array<out Pair<String, Any?>>
 ) : UpdateQueryBuilder(table, values) {
 
     override fun execUpdate(
-            table: String,
-            values: ContentValues,
-            whereClause: String?,
-            whereArgs: Array<out String>?
-    ) = db.update(table, values, whereClause, whereArgs)
-
+        table: String,
+        values: ContentValues,
+        whereClause: String?,
+        whereArgs: Array<out String>?,
+        conflictAlgorithm: Int
+    ) = db.updateWithOnConflict(table, values, whereClause, whereArgs, conflictAlgorithm)
 }

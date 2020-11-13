@@ -14,16 +14,6 @@ import androidx.viewpager.widget.ViewPager
  * Create by LiZhanPing on 2020/8/24
  */
 
-@Deprecated(message = "use isVisible replaced", replaceWith = ReplaceWith("isVisible"))
-fun View.visible(visible: Boolean = true) {
-    visibility = if (visible) View.VISIBLE else View.INVISIBLE
-}
-
-@Deprecated(message = "use isGone replaced", replaceWith = ReplaceWith("isGone"))
-fun View.gone(gone: Boolean = true) {
-    visibility = if (gone) View.GONE else View.VISIBLE
-}
-
 var View.isVisible: Boolean
     get() = visibility == View.VISIBLE
     set(value) {

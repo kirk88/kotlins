@@ -110,16 +110,6 @@ fun <T : Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
     return list
 }
 
-@Deprecated("Use asSequence() instead", ReplaceWith("asSequence()"))
-fun Cursor.sequence(): Sequence<Array<Any?>> {
-    return CursorSequence(this)
-}
-
-@Deprecated("Use asMapSequence() instead", ReplaceWith("asMapSequence()"))
-fun Cursor.mapSequence(): Sequence<Map<String, Any?>> {
-    return CursorMapSequence(this)
-}
-
 fun Cursor.asSequence(): Sequence<Array<Any?>> {
     return CursorSequence(this)
 }

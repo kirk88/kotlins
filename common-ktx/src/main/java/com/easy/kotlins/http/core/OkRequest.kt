@@ -3,7 +3,6 @@ package com.easy.kotlins.http.core
 import com.easy.kotlins.http.core.extension.DownloadExtension
 import com.easy.kotlins.http.core.extension.DownloadExtension.OnProgressListener
 import okhttp3.*
-import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -28,20 +27,19 @@ class OkRequest constructor(private val method: Method) {
     private var canceled = false
     private var executed = false
     private var downloadExtension: DownloadExtension? = null
-    private var mapErrorFunc: OkFunction<Throwable, out OkSource<*>>? = null
-    private var mapResponseFunc: OkFunction<Response, out OkSource<*>>? = null
+    private var mapErrorFunc: OkFunction<Throwable, *>? = null
+    private var mapResponseFunc: OkFunction<Response, *>? = null
 
     enum class Method {
         GET, POST
     }
 
-    fun client(client: OkHttpClient?): OkRequest {
+    fun client(client: OkHttpClient): OkRequest {
         this.client = client
         return this
     }
 
-    fun url(url: String?): OkRequest {
-        if (url == null) return this
+    fun url(url: String): OkRequest {
         val httpUrl = HttpUrl.parse(url)
         urlBuilder = httpUrl?.newBuilder()
         return this
@@ -388,10 +386,10 @@ class OkRequest constructor(private val method: Method) {
      *
      *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    */
+     */
     fun <T> mapResponseEvenError(
-        func1: OkFunction<Response, OkSource<T>>,
-        func2: OkFunction<Throwable, OkSource<T>>
+        func1: OkFunction<Response, T>,
+        func2: OkFunction<Throwable, T>
     ): OkRequest {
         mapResponseFunc = func1
         mapErrorFunc = func2
@@ -402,8 +400,8 @@ class OkRequest constructor(private val method: Method) {
      * response convert to <T> which you need
      *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    */
-    fun <T> mapResponse(func: OkFunction<Response, OkSource<T>>): OkRequest {
+     */
+    fun <T> mapResponse(func: OkFunction<Response, T>): OkRequest {
         mapResponseFunc = func
         return this
     }
@@ -412,8 +410,8 @@ class OkRequest constructor(private val method: Method) {
      * response convert to <T> which you need
      *
      * you must make the <T> type equals the method enqueue or safeExecute return type
-    */
-    fun <T> mapError(func: OkFunction<Throwable, OkSource<T>>): OkRequest {
+     */
+    fun <T> mapError(func: OkFunction<Throwable, T>): OkRequest {
         mapErrorFunc = func
         return this
     }
@@ -435,19 +433,7 @@ class OkRequest constructor(private val method: Method) {
             ).get()
         }
         downloadExtension?.addHeaderTo(builder)
-        return checkClient(client).newCall(builder.build())
-    }
-
-    private fun checkClient(client: OkHttpClient?): OkHttpClient {
-        requireNotNull(client) { "OkHttpClient must not be null" }
-        if (downloadExtension == null) return client
-        val builder = client.newBuilder()
-        for (interceptor in builder.interceptors()) {
-            if (interceptor is HttpLoggingInterceptor) {
-                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
-            }
-        }
-        return builder.build()
+        return requireNotNull(client) { "OkHttpClient must not be null" }.newCall(builder.build())
     }
 
     @Throws(Exception::class)
@@ -476,43 +462,37 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     @Throws(Exception::class)
     fun <T> execute(): T? {
-        val response = rawExecute()
-        val result = mapResponseFunc?.let {
-            val source = it.apply(response)
-            if (source.error != null) {
-                throw Exception(source.error)
-            }
-            source
-        } ?: throw NullPointerException("mapResponseFunc must not be null")
-        return result as T?
+        return when (val source = mapResponseFunc?.apply(rawExecute())) {
+            is OkResult.Success -> source.data as T?
+            is OkResult.Error -> throw source.exception
+            else -> throw NullPointerException("mapResponseFunc must not be null")
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> safeExecute(defResult: T): T {
-        try {
-            return execute() ?: defResult
+        return try {
+            execute() ?: defResult
         } catch (t: Throwable) {
-            mapErrorFunc?.let {
-                try {
-                    val source = it.apply(t)
-                    if (source.error != null) {
-                        throw source.error!!
-                    }
-                    return source.source as T
-                } catch (t1: Throwable) {
-                    t1.printStackTrace()
+            try {
+                when (val source = mapErrorFunc?.apply(t)) {
+                    is OkResult.Success -> source.data as T
+                    is OkResult.Error -> throw source.exception
+                    else -> defResult
                 }
-            } ?: t.printStackTrace()
+            } catch (t1: Throwable) {
+                defResult
+            }
         }
-        return defResult
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T> safeExecute(): T? {
         return safeExecute(null)
     }
 
     @JvmOverloads
-    fun <T: Any> enqueue(callback: OkCallback<T>? = null) {
+    fun <T : Any> enqueue(callback: OkCallback<T>? = null) {
         var call: Call?
         var failure: Throwable?
         synchronized(this) {
@@ -538,15 +518,23 @@ class OkRequest constructor(private val method: Method) {
         }
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callOnFailure(callback, e)
+                try {
+                    callOnFailure(callback, e)
+                } finally {
+                    onComplete(callback)
+                }
             }
 
             @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
-                if (callback is OkDownloadCallback) {
-                    callOnDownloadResponse(callback as OkDownloadCallback, response)
-                } else {
-                    callOnResponse(callback, response)
+                try {
+                    if (callback is OkDownloadCallback) {
+                        callOnDownloadResponse(callback as OkDownloadCallback, response)
+                    } else {
+                        callOnResponse(callback, response)
+                    }
+                } finally {
+                    onComplete(callback)
                 }
             }
         })
@@ -555,45 +543,26 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> callOnFailure(callback: OkCallback<T>?, e: Exception) {
         try {
-            if (mapErrorFunc != null) {
-                try {
-                    val source = mapErrorFunc!!.apply(e)
-                    if (source.error != null) {
-                        throw source.error!!
-                    }
-                    onSuccess(callback, source.source as T)
-                } catch (t: Throwable) {
-                    onError(callback, t)
-                }
-            } else {
-                onError(callback, e)
+            when (val source = mapErrorFunc?.apply(e)) {
+                is OkResult.Success -> onSuccess(callback, source.data as T)
+                is OkResult.Error -> throw source.exception
+                else -> onError(callback, e)
             }
-        } finally {
-            onComplete(callback)
+        } catch (t: Throwable) {
+            onError(callback, t)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T: Any> callOnResponse(callback: OkCallback<T>?, response: Response) {
+    private fun <T : Any> callOnResponse(callback: OkCallback<T>?, response: Response) {
         try {
-            if (mapResponseFunc != null) {
-                try {
-                    val source = mapResponseFunc!!.apply(response)
-                    if (source.error != null) {
-                        throw source.error!!
-                    }
-                    onSuccess(callback, source.source as T)
-                } catch (t: Throwable) {
-                    onError(callback, t)
-                }
-            } else {
-                onError(
-                    callback,
-                    IllegalStateException("mapResponseFunc must not be null")
-                )
+            when (val source = mapResponseFunc?.apply(response)) {
+                is OkResult.Success -> onSuccess(callback, source.data as T)
+                is OkResult.Error -> throw source.exception
+                else -> onSuccess(callback as OkCallback<String>?, response.body()?.string()!!)
             }
-        } finally {
-            onComplete(callback)
+        } catch (t: Throwable) {
+            onError(callback, t)
         }
     }
 
@@ -628,12 +597,10 @@ class OkRequest constructor(private val method: Method) {
             }
         } catch (e: Exception) {
             onError(callback, e)
-        } finally {
-            onComplete(callback)
         }
     }
 
-    private fun <T: Any> onSuccess(callback: OkCallback<T>?, result: T) {
+    private fun <T : Any> onSuccess(callback: OkCallback<T>?, result: T) {
         OkCallbacks.success(callback, result)
     }
 

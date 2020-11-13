@@ -157,10 +157,6 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
-    @Deprecated("Use whereArgs(select, args) instead.", ReplaceWith("whereArgs(select, args)"))
-    fun where(select: String, vararg args: Pair<String, Any>): SelectQueryBuilder {
-        return whereArgs(select, *args)
-    }
 
     fun whereArgs(select: String, vararg args: Pair<String, Any>): SelectQueryBuilder {
         if (selectionApplied) {
@@ -171,11 +167,6 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         useNativeSelection = false
         selection = applyArguments(select, *args)
         return this
-    }
-
-    @Deprecated("Use whereArgs(select) instead.", ReplaceWith("whereArgs(select)"))
-    fun where(select: String): SelectQueryBuilder {
-        return whereArgs(select)
     }
 
     fun whereArgs(select: String): SelectQueryBuilder {
@@ -201,10 +192,6 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
-    @Deprecated("Use whereSimple() instead", replaceWith = ReplaceWith("whereSimple(select, *args)"))
-    fun whereSupport(select: String, vararg args: String): SelectQueryBuilder {
-        return whereSimple(select, *args)
-    }
 }
 
 class AndroidSdkDatabaseSelectQueryBuilder(

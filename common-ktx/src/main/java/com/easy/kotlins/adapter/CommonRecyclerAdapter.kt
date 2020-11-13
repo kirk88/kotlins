@@ -199,20 +199,6 @@ open class CommonRecyclerAdapter<ITEM>(protected val context: Context) :
         }
     }
 
-    fun setItemWhile(item: ITEM, payload: Any? = null, predicate: (ITEM) -> Boolean) {
-        synchronized(lock) {
-            for (position in 0 until actualItemCount) {
-                if (predicate(modifiableItems[position])) {
-                    if (item != null) {
-                        modifiableItems[position] = item
-                    }
-                    notifyItemChanged(position + headerCount, payload)
-                    break
-                }
-            }
-        }
-    }
-
     fun addItem(item: ITEM) {
         synchronized(lock) {
             val oldSize = actualItemCount
@@ -330,6 +316,18 @@ open class CommonRecyclerAdapter<ITEM>(protected val context: Context) :
         synchronized(lock) {
             if (position in 0 until actualItemCount) {
                 notifyItemChanged(position + headerCount, payload)
+            }
+        }
+    }
+
+    fun replaceItemWhile(item: ITEM, payload: Any? = null, predicate: (ITEM) -> Boolean) {
+        synchronized(lock) {
+            for (position in 0 until actualItemCount) {
+                if (predicate(modifiableItems[position])) {
+                    modifiableItems[position] = item
+                    notifyItemChanged(position + headerCount, payload)
+                    break
+                }
             }
         }
     }
