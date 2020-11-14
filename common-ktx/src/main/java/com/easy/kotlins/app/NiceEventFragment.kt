@@ -2,7 +2,6 @@ package com.easy.kotlins.app
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
@@ -14,7 +13,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventFragment(layoutID: Int) : NiceFragment(layoutID), EventObservableView {
+abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId), EventObservableView {
 
     open val refreshView: RefreshView? = null
 

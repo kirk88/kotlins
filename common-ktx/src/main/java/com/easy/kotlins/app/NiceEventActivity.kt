@@ -12,7 +12,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventActivity(layoutID: Int) : NiceActivity(layoutID), EventObservableView {
+abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId), EventObservableView {
 
     open val refreshView: RefreshView? = null
 

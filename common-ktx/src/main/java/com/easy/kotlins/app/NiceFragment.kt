@@ -10,7 +10,7 @@ import com.easy.kotlins.viewmodel.ViewModelEvents
 /**
  * Create by LiZhanPing on 2020/8/22
  */
-abstract class NiceFragment(val layoutID: Int) : Fragment() {
+abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
 
     private var isLoaded = false
     private var isVisibleToUser = false
@@ -19,7 +19,7 @@ abstract class NiceFragment(val layoutID: Int) : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(layoutID, container, false)
+        return inflater.inflate(layoutResId, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -27,7 +27,7 @@ abstract class NiceFragment(val layoutID: Int) : Fragment() {
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        onBindData(savedInstanceState)
+        view.post { onBindData(savedInstanceState) }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

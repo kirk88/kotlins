@@ -459,7 +459,7 @@ open class CommonRecyclerAdapter<ITEM>(protected val context: Context) :
             else -> {
                 val holder = ItemViewHolder(
                         layoutInflater.inflate(
-                                itemDelegates.getValue(viewType).resource,
+                                itemDelegates.getValue(viewType).layoutResId,
                                 parent,
                                 false
                         )

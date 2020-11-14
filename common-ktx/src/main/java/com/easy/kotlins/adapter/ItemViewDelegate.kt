@@ -3,7 +3,7 @@ package com.easy.kotlins.adapter
 import android.content.Context
 import androidx.annotation.LayoutRes
 
-abstract class ItemViewDelegate<ITEM>(protected val context: Context,@LayoutRes val resource: Int) {
+abstract class ItemViewDelegate<ITEM>(protected val context: Context,@LayoutRes val layoutResId: Int) {
 
     /**
      * 如果使用了事件回调,回调里不要直接使用item,会出现不更新的问题,

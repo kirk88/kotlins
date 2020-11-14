@@ -8,15 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 /**
  * Create by LiZhanPing on 2020/8/24
  */
-abstract class NiceActivity(private val layoutID: Int) : AppCompatActivity() {
+abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layoutID)
+        setContentView(layoutResId)
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        onBindData(savedInstanceState)
+        window.decorView.post { onBindData(savedInstanceState) }
     }
 
     @CallSuper

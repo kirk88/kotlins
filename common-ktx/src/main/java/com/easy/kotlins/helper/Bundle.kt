@@ -13,6 +13,7 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
     val bundle = Bundle()
     for ((key, value) in this) {
         when (value) {
+            is LargeExtra -> bundle.putLargeExtra(key, value)
             is Boolean -> bundle.putBoolean(key, value)
             is Double -> bundle.putDouble(key, value)
             is Float -> bundle.putFloat(key, value)
@@ -25,10 +26,10 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
             is Serializable -> bundle.putSerializable(key, value)
             is ArrayList<*> -> when (value.firstOrNull()) {
                 is String -> bundle.putStringArrayList(key, value as ArrayList<String>)
+                is Int -> bundle.putIntegerArrayList(key, value as ArrayList<Int>)
                 is CharSequence -> bundle.putCharSequenceArrayList(key, value as ArrayList<CharSequence>)
                 is Parcelable -> bundle.putParcelableArrayList(key, value as ArrayList<out Parcelable>)
             }
-            is LargeData -> bundle.putLargeData(key, value)
         }
     }
     return@run bundle
@@ -42,49 +43,66 @@ fun Bundle.toMap(): Map<String, Any?> = run {
     map
 }
 
-fun Bundle.putLargeData(key: String, value: LargeData) {
-    putString(key, LargeDataBag.set(value))
+fun Bundle.putLargeExtra(key: String, value: LargeExtra) {
+    putString(key, LargeExtrasBag.set(value))
+}
+
+fun Bundle.putLargeExtra(key: String, value: Any?) {
+    putString(key, LargeExtrasBag.set(LargeExtra(value)))
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Bundle.getLargeDataValue(key: String): T? {
-    return getString(key)?.let { name -> LargeDataBag.get(name)?.value as T? }
+fun <T> Bundle.getLargeExtra(key: String): T? {
+    return getString(key)?.let { dataKey -> LargeExtrasBag.get(dataKey) as? T? }
 }
 
-fun Bundle.getLargeData(key: String): LargeData? {
-    return getString(key)?.let { name -> LargeDataBag.get(name) }
+fun <T> Bundle.getLargeExtra(key: String, defaultValue: T): T {
+    return getLargeExtra<T>(key) ?: defaultValue
 }
 
-fun Intent.putLargeData(key: String, value: LargeData) {
-    putExtra(key, LargeDataBag.set(value))
+fun <T> Bundle.getLargeExtra(key: String, defaultValue: () -> T): T {
+    return getLargeExtra<T>(key) ?: defaultValue()
 }
 
-fun Intent.getLargeData(key: String): LargeData? {
-    return getStringExtra(key)?.let { name -> LargeDataBag.get(name) }
+fun Intent.putLargeExtra(key: String, value: LargeExtra) {
+    putExtra(key, LargeExtrasBag.set(LargeExtra(value)))
+}
+
+fun Intent.putLargeExtra(key: String, value: Any?) {
+    putExtra(key, LargeExtrasBag.set(LargeExtra(value)))
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Intent.getLargeDataValue(key: String): T? {
-    return getStringExtra(key)?.let { name -> LargeDataBag.get(name)?.value as T? }
+fun <T> Intent.getLargeExtra(key: String): T? {
+    return getStringExtra(key)?.let { dataKey -> LargeExtrasBag.get(dataKey) as? T? }
 }
 
-fun largeDataOf(name: String, value: Any?) = LargeData(name, value)
+fun <T> Intent.getLargeExtra(key: String, defaultValue: T): T {
+    return getLargeExtra<T>(key) ?: defaultValue
+}
 
-fun largeDataOf(value: Any?) = LargeData(System.currentTimeMillis().toString(), value)
+fun <T> Intent.getLargeExtra(key: String, defaultValue: () -> T): T {
+    return getLargeExtra<T>(key) ?: defaultValue()
+}
 
-data class LargeData(val name: String, val value: Any?)
+fun largeExtraOf(value: Any?): LargeExtra = LargeExtra(value)
 
-object LargeDataBag {
+class LargeExtra(val value: Any?) {
+    val name: String by lazy { System.currentTimeMillis().toString() }
+}
 
-    private val dataMap: MutableMap<String, LargeData?> by lazy { mutableMapOf() }
+private object LargeExtrasBag {
 
-    fun set(largeData: LargeData): String {
-        dataMap[largeData.name] = largeData
-        return largeData.name
+    private val dataMap: MutableMap<String, Any?> by lazy { mutableMapOf() }
+
+    fun set(extra: LargeExtra): String {
+        return extra.name.also {
+            dataMap[it] = extra.value
+        }
     }
 
-    fun get(name: String): LargeData? {
-        return dataMap[name]
+    fun get(key: String): Any? {
+        return dataMap.remove(key)
     }
 
 }
