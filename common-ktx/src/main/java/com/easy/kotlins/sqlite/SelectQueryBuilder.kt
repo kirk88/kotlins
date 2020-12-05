@@ -180,7 +180,7 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
-    fun whereSimple(select: String, vararg args: String): SelectQueryBuilder {
+    fun whereSimple(select: String, vararg args: Any): SelectQueryBuilder {
         if (selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
@@ -188,7 +188,7 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         selectionApplied = true
         useNativeSelection = true
         selection = select
-        nativeSelectionArgs = args
+        nativeSelectionArgs = args.map { it.toString() }.toTypedArray()
         return this
     }
 

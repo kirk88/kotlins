@@ -3,14 +3,8 @@ package com.easy.kotlins.adapter
 /**
  * Create by LiZhanPing on 2020/8/31
  */
-interface MultipleItem {
+interface AdapterItem {
 
     val type: Int
-
-}
-
-interface MultiplyItem: MultipleItem {
-
-    val original: Any?
 
 }

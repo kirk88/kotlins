@@ -2,9 +2,21 @@ package com.easy.kotlins.adapter
 
 import android.content.Context
 import androidx.annotation.LayoutRes
+import com.easy.kotlins.adapter.anim.ItemViewAnimation
 
-abstract class SimpleRecyclerAdapter<ITEM>(context: Context, @LayoutRes private val layoutResId: Int) :
-    CommonRecyclerAdapter<ITEM>(context) {
+abstract class SimpleRecyclerAdapter<ITEM>(
+    context: Context, @LayoutRes private val layoutResId: Int,
+    vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
+    itemAnimation: ItemViewAnimation? = null,
+    itemClickable: Boolean = false,
+    itemLongClickable: Boolean = false
+) : CommonRecyclerAdapter<ITEM>(
+    context = context,
+    itemDelegates = itemDelegates,
+    itemAnimation = itemAnimation,
+    itemClickable = itemClickable,
+    itemLongClickable = itemLongClickable
+) {
 
     init {
         addItemViewDelegate(0, object : ItemViewDelegate<ITEM>(context, layoutResId) {

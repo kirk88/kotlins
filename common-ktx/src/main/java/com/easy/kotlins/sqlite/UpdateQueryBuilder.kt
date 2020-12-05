@@ -15,61 +15,69 @@
  */
 
 @file:Suppress("unused")
+
 package com.easy.kotlins.sqlite.db
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 
 abstract class UpdateQueryBuilder(
-        private val tableName: String,
-        private val values: Array<out Pair<String, Any?>>
+    private val tableName: String,
+    private val values: Array<out Pair<String, Any?>>
 ) {
 
-    private var selectionApplied = false
-    private var useNativeSelection = false
-    private var selection: String? = null
-    private var nativeSelectionArgs: Array<out String>? = null
+    private var whereCauseApplied = false
+    private var useNativeWhereCause = false
+    private var simpleWhereCause: String? = null
+    private var nativeWhereArgs: Array<out String>? = null
 
-    fun whereArgs(select: String, vararg args: Pair<String, Any>): UpdateQueryBuilder {
-        if (selectionApplied) {
+    fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
+        if (whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        selectionApplied = true
-        useNativeSelection = false
-        val argsMap = args.fold(hashMapOf<String, Any>()) { map, arg ->
+        whereCauseApplied = true
+        useNativeWhereCause = false
+        val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
             map[arg.first] = arg.second
             map
         }
-        selection = applyArguments(select, argsMap)
+        simpleWhereCause = applyArguments(whereCause, whereArgsMap)
         return this
     }
 
-    fun whereArgs(select: String): UpdateQueryBuilder {
-        if (selectionApplied)
+    fun whereArgs(whereCause: String): UpdateQueryBuilder {
+        if (whereCauseApplied)
             throw IllegalStateException("Query selection was already applied.")
 
-        selectionApplied = true
-        useNativeSelection = false
-        selection = select
+        whereCauseApplied = true
+        useNativeWhereCause = false
+        simpleWhereCause = whereCause
         return this
     }
 
-    fun whereSimple(select: String, vararg args: String): UpdateQueryBuilder {
-        if (selectionApplied)
+    fun whereSimple(whereCause: String, vararg whereArgs: Any): UpdateQueryBuilder {
+        if (whereCauseApplied)
             throw IllegalStateException("Query selection was already applied.")
 
-        selectionApplied = true
-        useNativeSelection = true
-        selection = select
-        nativeSelectionArgs = args
+        whereCauseApplied = true
+        useNativeWhereCause = true
+        simpleWhereCause = whereCause
+        nativeWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
     fun exec(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
-        val finalSelection = if (selectionApplied) selection else null
-        val finalSelectionArgs = if (selectionApplied && useNativeSelection) nativeSelectionArgs else null
-        return execUpdate(tableName, values.toContentValues(), finalSelection, finalSelectionArgs, conflictAlgorithm)
+        val finalSelection = if (whereCauseApplied) simpleWhereCause else null
+        val finalSelectionArgs =
+            if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
+        return execUpdate(
+            tableName,
+            values.toContentValues(),
+            finalSelection,
+            finalSelectionArgs,
+            conflictAlgorithm
+        )
     }
 
     protected abstract fun execUpdate(

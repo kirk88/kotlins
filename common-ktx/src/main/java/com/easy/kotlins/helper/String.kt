@@ -22,9 +22,9 @@ fun CharSequence.asEditable(): Editable = Editable.Factory.getInstance().newEdit
 fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =
     if (this is SpannableStringBuilder) this else SpannableStringBuilder(this)
 
-fun CharSequence.heightLight(keywords: String?, color: Int = Color.RED): CharSequence {
-    return if (keywords.isNullOrBlank()) this else keywords.let {
-        SpannableString(this).also {
+fun CharSequence.heightLight(keywords: String?, color: Int = Color.RED): SpannableStringBuilder {
+    return if (keywords.isNullOrBlank()) this.asSpannableBuilder() else keywords.let {
+        SpannableStringBuilder(this).also {
             var result = keywords.toRegex().find(it)
             while (result != null) {
                 it.setSpan(
@@ -43,20 +43,21 @@ fun CharSequence.heightLight(
     start: Int = 0,
     end: Int = length,
     @ColorInt color: Int = Color.RED
-): CharSequence? {
-    return SpannableString(this).apply {
+): SpannableStringBuilder? {
+    return this.asSpannableBuilder().apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
 
 fun CharSequence.insertImage(
-    drawable: Drawable,
     where: Int,
+    drawable: Drawable,
     textSize: Int = 0,
     prefix: String = "",
     postfix: String = ""
 ): SpannableStringBuilder {
-    if (textSize >= 0) drawable.setBounds(0, 0, textSize, textSize)
+    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
         setSpan(
             CenterAlignImageSpan(drawable),
@@ -65,6 +66,54 @@ fun CharSequence.insertImage(
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
     })
+}
+
+fun CharSequence.appendImage(
+    drawable: Drawable,
+    textSize: Int = 0,
+    prefix: String = "",
+    postfix: String = ""
+): SpannableStringBuilder {
+    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
+        setSpan(
+            CenterAlignImageSpan(drawable),
+            prefix.length,
+            length - postfix.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    })
+}
+
+fun CharSequence.append(
+    text: CharSequence,
+    span: Any? = null,
+    start: Int = 0,
+    end: Int = text.length,
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        append(text.asSpannableBuilder().also {
+            it.setSpan(span, start, end, flags)
+        })
+    }
+}
+
+fun CharSequence.appendLine(
+    text: CharSequence,
+    span: Any? = null,
+    start: Int = 0,
+    end: Int = text.length,
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        append('\n').append(text.asSpannableBuilder().also {
+            if (span != null) {
+                it.setSpan(span, start, end, flags)
+            }
+        })
+    }
 }
 
 class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
@@ -110,22 +159,11 @@ inline fun String?.notNullOrEmpty(defaultValue: () -> String = { "" }): String =
 inline fun String?.notNullOrBlank(defaultValue: () -> String = { "" }): String =
     if (this.isNullOrBlank()) defaultValue() else this
 
-inline fun String.notEmpty(defaultValue: () -> String = { "" }): String = if (this.isEmpty()) defaultValue() else this
+inline fun String.notEmpty(defaultValue: () -> String = { "" }): String =
+    if (this.isEmpty()) defaultValue() else this
 
-inline fun String.notBlank(defaultValue: () -> String = { "" }): String = if (this.isBlank()) defaultValue() else this
-
-inline fun String?.ifNull(defaultValue: () -> String?): String? =
-    if (this == null || this == "null") defaultValue() else this
-
-inline fun String?.ifNullOrEmpty(defaultValue: () -> String?): String? =
-    if (this.isNullOrEmpty()) defaultValue() else this
-
-inline fun String?.ifNullOrBlank(defaultValue: () -> String?): String? =
-    if (this.isNullOrBlank()) defaultValue() else this
-
-inline fun String.ifEmpty(defaultValue: () -> String?): String? = if (this.isNotEmpty()) defaultValue() else this
-
-inline fun String.ifBlack(defaultValue: () -> String?): String? = if (this.isBlank()) defaultValue() else this
+inline fun String.notBlank(defaultValue: () -> String = { "" }): String =
+    if (this.isBlank()) defaultValue() else this
 
 val String.isJsonArray: Boolean
     get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonArray ?: false
@@ -133,7 +171,11 @@ val String.isJsonArray: Boolean
 val String.isJsonObject: Boolean
     get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonObject ?: false
 
-fun CharSequence.splitNotBlank(vararg delimiters: String, ignoreCase: Boolean = false, limit: Int = 0): List<String> {
+fun CharSequence.splitNotBlank(
+    vararg delimiters: String,
+    ignoreCase: Boolean = false,
+    limit: Int = 0
+): List<String> {
     return split(delimiters = delimiters, ignoreCase, limit).filter { it.isNotBlank() }
 }
 

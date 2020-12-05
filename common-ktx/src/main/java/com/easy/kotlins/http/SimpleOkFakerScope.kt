@@ -7,7 +7,7 @@ package com.easy.kotlins.http
 class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
     private var resources: MutableList<OkFaker>? = null
 
-    override fun add(tag: Any, faker: OkFaker): OkFaker {
+    override fun addRequest(faker: OkFaker) {
         synchronized(this) {
             var list = resources
 
@@ -16,12 +16,11 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
                 resources = list
             }
 
-            list.add(faker.apply { tag(tag) })
+            list.add(faker)
         }
-        return faker
     }
 
-    override fun removeByTag(tag: Any) {
+    override fun cancelByTag(tag: Any) {
         synchronized(this) {
             val list = resources ?: return
             val it = list.iterator()
@@ -35,51 +34,18 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
         }
     }
 
-    override fun deleteByTag(tag: Any) {
-        synchronized(this) {
-            val list = resources ?: return
-            val it = list.iterator()
-            while (it.hasNext()) {
-                val faker = it.next()
-                if (tag === faker.tag) {
-                    it.remove()
-                }
-            }
-        }
-    }
-
-    override fun remove(faker: OkFaker): Boolean {
-        if (delete(faker)) {
-            faker.cancel()
-            return true
-        }
-        return false
-    }
-
-    override fun delete(faker: OkFaker): Boolean {
+    override fun cancel(faker: OkFaker): Boolean {
         synchronized(this) {
             val list = resources
-            if (list == null || !list.remove(faker)) {
-                return false
+            if (list != null && list.remove(faker)) {
+                faker.cancel()
+                return true
             }
-        }
-        return true
-    }
-
-    override fun getByTag(tag: Any): List<OkFaker> {
-        synchronized(this) {
-            val list = resources ?: return emptyList()
-            val fakers: ArrayList<OkFaker> = arrayListOf()
-            list.forEach {
-                if (tag === it.tag) {
-                    fakers.add(it)
-                }
-            }
-            return fakers
+            return false
         }
     }
 
-    override fun clear() {
+    override fun cancelAll(){
         synchronized(this) {
             val list = resources
             resources = null
@@ -90,7 +56,7 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
         }
     }
 
-    override fun size(): Int {
+    override fun count(): Int {
         synchronized(this) {
             val list: List<OkFaker>? = resources
             return list?.size ?: 0

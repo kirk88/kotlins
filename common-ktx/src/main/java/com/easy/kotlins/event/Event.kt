@@ -66,7 +66,12 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
         }
     }
 
+}
 
+class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what){
+    override fun toString(): String {
+        return "MultipleEvent(what=$what, events=$events)"
+    }
 }
 
 object Status {
@@ -83,23 +88,34 @@ object Status {
     const val REFRESH_FAILURE = STATUS_BASE + 6
     const val LOADMORE_FAILURE = STATUS_BASE + 7
 
+    const val SHOW_LOADING = STATUS_BASE + 8
+    const val SHOW_EMPTY = STATUS_BASE + 9
+    const val SHOW_ERROR = STATUS_BASE + 10
+    const val SHOW_CONTENT = STATUS_BASE + 11
 }
 
-class LiveEventProxy(initializer: () -> SingleLiveEvent<Event>) {
+class LiveEventProxy {
 
-    private val liveEvent: SingleLiveEvent<Event> by lazy { initializer() }
+    private val liveEvents: MutableMap<LifecycleOwner, SingleLiveEvent<Event>> by lazy { mutableMapOf() }
+
+    private var latestEvent: Event? = null
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): Event? {
-        return liveEvent.value
+        return latestEvent
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Event?) {
-        LiveDataPoster.post(liveEvent, value)
+        latestEvent = value
+
+        liveEvents.values.forEach {
+            LiveDataPoster.post(it, value)
+        }
     }
 
     fun observe(owner: LifecycleOwner, observer: Observer<Event>) {
-        liveEvent.observe(owner, observer)
+        liveEvents.getOrPut(owner) { SingleLiveEvent() }.observe(owner, observer)
     }
+
 }
 
 fun event(what: Int = 0, message: String? = null) = Event(what, message)
@@ -118,6 +134,21 @@ fun refreshFailed(): Event = Event(Status.REFRESH_FAILURE)
 
 fun loadMoreFailed(): Event = Event(Status.LOADMORE_FAILURE)
 
+fun loadingShow(message: String? = null) = Event(Status.SHOW_LOADING, message)
+
+fun emptyShow(message: String? = null) = Event(Status.SHOW_EMPTY, message)
+
+fun errorShow(message: String? = null) = Event(Status.SHOW_ERROR, message)
+
+fun contentShow() = Event(Status.SHOW_CONTENT)
+
+fun multipleEvent(what: Int, events: List<Event>) = MultipleEvent(what, events)
+
+fun multipleEvent(events: List<Event>) = MultipleEvent(events = events)
+
+fun multipleEvent(what: Int = 0, vararg events: Event) = MultipleEvent(what, events.toList())
+
+fun multipleEvent(vararg events: Event) = MultipleEvent(events = events.toList())
 
 interface EventObservableView : LifecycleOwner {
 
