@@ -3,6 +3,7 @@ package com.easy.kotlins.helper
 import com.easy.kotlins.event.*
 import com.easy.kotlins.http.OkFaker
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import java.io.Serializable
@@ -85,9 +86,9 @@ enum class LoadMode {
     LOAD, REFRESH, LOADMORE
 }
 
-class Loader private constructor(val mode: LoadMode, val scope: CoroutineScope = MainScope()) {
+class Loader private constructor(val mode: LoadMode, val scope: CoroutineScope, val delayed: Long) {
     companion object {
-        fun with(mode: LoadMode, scope: CoroutineScope) = Loader(mode, scope)
+        fun with(mode: LoadMode, scope: CoroutineScope = MainScope(), delayed: Long = 0) = Loader(mode, scope, delayed)
     }
 }
 
@@ -132,7 +133,7 @@ fun <T> OkFaker.loadPlugin(
 
     onSuccess<List<T>> {
         step(loader.scope) {
-            add(20) {
+            add {
                 onEvent(
                     when (loader.mode) {
                         LoadMode.LOAD -> it.isEmpty().opt(emptyShow(), contentShow())
@@ -142,7 +143,7 @@ fun <T> OkFaker.loadPlugin(
                 )
             }
 
-            add(40) {
+            add(loader.delayed) {
                 onApply(it)
             }
         }
@@ -150,7 +151,7 @@ fun <T> OkFaker.loadPlugin(
 
     onError {
         step(loader.scope) {
-            add(20) {
+            add {
                 onEvent(
                     when (loader.mode) {
                         LoadMode.LOAD -> errorShow(it.message)
@@ -160,7 +161,7 @@ fun <T> OkFaker.loadPlugin(
                 )
             }
 
-            add(40) {
+            add(loader.delayed) {
                 onError?.invoke(it)
             }
         }
