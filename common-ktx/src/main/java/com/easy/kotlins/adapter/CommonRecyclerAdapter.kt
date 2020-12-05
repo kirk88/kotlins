@@ -568,7 +568,6 @@ open class CommonRecyclerAdapter<ITEM>(
 
     @CallSuper
     override fun onViewAttachedToWindow(holder: ItemViewHolder) {
-        super.onViewAttachedToWindow(holder)
         itemAnimation?.getAnimators(holder)?.forEach { it.start() }
     }
 
