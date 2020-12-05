@@ -13,7 +13,7 @@ import java.text.MessageFormat
 class DownloadExtension private constructor(path: String, continuing: Boolean) : OkExtension() {
     private val file: File?
 
-    fun addHeaderTo(builder: Request.Builder) {
+    override fun onRequest(builder: Request.Builder) {
         val range = if (file!!.exists()) file.length() else 0L
         builder.header(
             DOWNLOAD_HEADER_RANGE_NAME,
@@ -21,8 +21,16 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
         )
     }
 
+    override fun onResponse(response: Response): Boolean {
+        return false
+    }
+
+    override fun onError(error: Throwable): Boolean {
+        return false
+    }
+
     @Throws(Exception::class)
-    fun download(response: Response, listener: OnProgressListener): File? {
+    fun onResponse(response: Response, listener: OnProgressListener): File? {
         if (file == null) {
             throw NullPointerException("download path must not be null")
         }
@@ -75,7 +83,7 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
     }
 
     private val isCanceled: Boolean
-        get() = request != null && request.isCanceled
+        get() = request.isCanceled
 
     interface OnProgressListener {
         fun onProgress(downloadedBytes: Long, totalBytes: Long)

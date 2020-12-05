@@ -1,6 +1,8 @@
 package com.easy.kotlins.http.core.extension
 
 import com.easy.kotlins.http.core.OkRequest
+import okhttp3.Request
+import okhttp3.Response
 
 /**
  * Create by LiZhanPing on 2020/8/26
@@ -16,4 +18,10 @@ abstract class OkExtension {
     fun install(faker: OkRequest?) {
         _request = faker
     }
+
+    abstract fun onRequest(builder: Request.Builder)
+
+    abstract fun onResponse(response: Response): Boolean
+
+    abstract fun onError(error: Throwable): Boolean
 }

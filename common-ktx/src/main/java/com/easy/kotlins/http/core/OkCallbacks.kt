@@ -35,7 +35,7 @@ internal object OkCallbacks {
                     callOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    callOnError(body.callback, body.args[0] as Throwable)
+                    callOnError(body.callback, body.args[0] as OkException)
                 }
                 MSG_WHAT_ON_UPDATE -> {
                     callOnProgress(
@@ -57,9 +57,9 @@ internal object OkCallbacks {
         }
     }
 
-    fun error(callback: OkCallback<*>?, error: Throwable?) {
+    fun error(callback: OkCallback<*>?, error: Throwable) {
         if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error!!)).sendToTarget()
+            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, OkException(cause = error))).sendToTarget()
         }
     }
 
@@ -130,11 +130,11 @@ internal object OkCallbacks {
         try {
             callback.onSuccess(result)
         } catch (e: Exception) {
-            callOnError(callback, e)
+            callOnError(callback, OkException(cause = e))
         }
     }
 
-    private fun callOnError(callback: OkCallback<*>, e: Throwable) {
+    private fun callOnError(callback: OkCallback<*>, e: OkException) {
         try {
             if (BuildConfig.DEBUG) {
                 Log.e(OkRequest::class.simpleName, e.localizedMessage, e)

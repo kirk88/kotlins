@@ -6,6 +6,6 @@ package com.easy.kotlins.http.core
 interface OkCallback<T> {
     fun onStart()
     fun onSuccess(result: T)
-    fun onError(error: Throwable)
+    fun onError(error: OkException)
     fun onComplete()
 }

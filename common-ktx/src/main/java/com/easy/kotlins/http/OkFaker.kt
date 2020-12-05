@@ -17,13 +17,13 @@ class OkFaker(private val request: OkRequest) {
 
     private var onStart: (() -> Unit)? = null
     private var onSuccess: ((Any) -> Unit)? = null
-    private var onError: ((Throwable) -> Unit)? = null
+    private var onError: ((OkException) -> Unit)? = null
     private var onComplete: (() -> Unit)? = null
 
     private var onDownloadStart: (() -> Unit)? = null
     private var onDownloadCancel: (() -> Unit)? = null
     private var onDownloadSuccess: ((File) -> Unit)? = null
-    private var onDownloadError: ((Throwable) -> Unit)? = null
+    private var onDownloadError: ((OkException) -> Unit)? = null
     private var onDownloadProgress: ((Long, Long) -> Unit)? = null
     private var onDownloadComplete: (() -> Unit)? = null
 
@@ -222,29 +222,17 @@ class OkFaker(private val request: OkRequest) {
         request.body(body())
     }
 
-    fun <T> mapResponse(action: (response: String) -> T): OkFaker = this.apply {
-        request.mapResponse(object : OkFunction<Response, T?> {
-            override fun apply(r: Response): OkResult<T?> {
-                return OkResult.Success(action(r.body()!!.string()))
-            }
-        })
+    fun <T> mapRawResponse(action: (response: Response) -> T): OkFaker = this.apply {
+        request.mapResponse(OkFunction { r -> OkResult.Success(action(r)) })
     }
 
 
-    fun <T> mapJsonResponse(action: (response: JsonObject) -> T): OkFaker = this.apply {
-        request.mapResponse(object : OkFunction<Response, T> {
-            override fun apply(r: Response): OkResult<T> {
-                return OkResult.Success(action(r.body()!!.string().toJsonObject()))
-            }
-        })
+    fun <T> mapResponse(action: (response: JsonObject) -> T): OkFaker = this.apply {
+        request.mapResponse(OkFunction { r -> OkResult.Success(action(r.body()!!.string().toJsonObject())) })
     }
 
     fun <T> mapError(action: (error: Throwable) -> T): OkFaker = this.apply {
-        request.mapError(object : OkFunction<Throwable, T> {
-            override fun apply(r: Throwable): OkResult<T> {
-                return OkResult.Success(action(r))
-            }
-        })
+        request.mapError(OkFunction { r -> OkResult.Success(action(r)) })
     }
 
     fun onStart(action: () -> Unit): OkFaker = this.apply {
@@ -256,11 +244,11 @@ class OkFaker(private val request: OkRequest) {
         onSuccess = { action(it as T) }
     }
 
-    fun onSingleSuccess(action: () -> Unit): OkFaker = this.apply {
+    fun onSimpleSuccess(action: () -> Unit): OkFaker = this.apply {
         onSuccess = { action() }
     }
 
-    fun onError(action: (error: Throwable) -> Unit): OkFaker = this.apply {
+    fun onError(action: (error: OkException) -> Unit): OkFaker = this.apply {
         onError = action
     }
 
@@ -276,7 +264,7 @@ class OkFaker(private val request: OkRequest) {
         onDownloadSuccess = action
     }
 
-    fun onDownloadError(action: (error: Throwable) -> Unit): OkFaker = this.apply {
+    fun onDownloadError(action: (error: OkException) -> Unit): OkFaker = this.apply {
         onDownloadError = action
     }
 
@@ -293,7 +281,7 @@ class OkFaker(private val request: OkRequest) {
         onDownloadComplete = action
     }
 
-    fun <T> onResult(onSuccess: (result: T) -> Unit, onError: (error: Throwable) -> Unit): OkFaker =
+    fun <T> onResult(onSuccess: (result: T) -> Unit, onError: (error: OkException) -> Unit): OkFaker =
         this.apply {
             onSuccess(onSuccess)
             onError(onError)
@@ -330,7 +318,7 @@ class OkFaker(private val request: OkRequest) {
                 onSuccess?.invoke(result)
             }
 
-            override fun onError(error: Throwable) {
+            override fun onError(error: OkException) {
                 onError?.invoke(error)
             }
 
@@ -355,7 +343,7 @@ class OkFaker(private val request: OkRequest) {
                 onDownloadProgress?.invoke(downloadedBytes, totalBytes)
             }
 
-            override fun onError(error: Throwable) {
+            override fun onError(error: OkException) {
                 onDownloadError?.invoke(error)
             }
 

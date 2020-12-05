@@ -2,6 +2,7 @@ package com.easy.kotlins.http.core
 
 import com.easy.kotlins.http.core.extension.DownloadExtension
 import com.easy.kotlins.http.core.extension.DownloadExtension.OnProgressListener
+import com.easy.kotlins.http.core.extension.OkExtension
 import okhttp3.*
 import java.io.File
 import java.io.IOException
@@ -26,12 +27,12 @@ class OkRequest constructor(private val method: Method) {
     @Volatile
     private var canceled = false
     private var executed = false
-    private var downloadExtension: DownloadExtension? = null
+    private var extension: OkExtension? = null
     private var mapErrorFunc: OkFunction<Throwable, *>? = null
     private var mapResponseFunc: OkFunction<Response, *>? = null
 
     enum class Method {
-        GET, POST
+        GET, POST, DELETE, PUT, HEAD, PATCH
     }
 
     fun client(client: OkHttpClient): OkRequest {
@@ -56,7 +57,7 @@ class OkRequest constructor(private val method: Method) {
     }
 
     fun downloadExtension(downloadExtension: DownloadExtension): OkRequest {
-        this.downloadExtension = downloadExtension
+        this.extension = downloadExtension
         downloadExtension.install(this)
         return this
     }
@@ -418,22 +419,23 @@ class OkRequest constructor(private val method: Method) {
 
     @Throws(Exception::class)
     private fun createCall(): Call {
-        requireNotNull(urlBuilder) { "request Url is null or invalid" }
-        val builder = when (method) {
-            Method.POST -> {
-                body = when {
-                    multiBuilder != null -> multiBuilder!!.build()
-                    formBuilder != null -> formBuilder!!.build()
-                    else -> FormBody.Builder().build()
-                }
-                requestBuilder.url(urlBuilder!!.build()).post(body!!)
+        val client = requireNotNull(client) { "OkHttpClient must not be null" }
+        val url = requireNotNull(urlBuilder?.build()) { "request Url is null or invalid" }
+        val body =
+            body ?: multiBuilder?.build() ?: formBuilder?.build() ?: FormBody.Builder().build()
+        return requestBuilder.url(url).let {
+            when (method) {
+                Method.GET -> it.get()
+                Method.POST -> it.post(body)
+                Method.DELETE -> it.delete(body)
+                Method.PUT -> it.put(body)
+                Method.HEAD -> it.head()
+                Method.PATCH -> it.patch(body)
             }
-            Method.GET -> requestBuilder.url(
-                urlBuilder!!.build()
-            ).get()
+        }.let {
+            extension?.onRequest(it)
+            client.newCall(it.build())
         }
-        downloadExtension?.addHeaderTo(builder)
-        return requireNotNull(client) { "OkHttpClient must not be null" }.newCall(builder.build())
     }
 
     @Throws(Exception::class)
@@ -543,6 +545,8 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> callOnFailure(callback: OkCallback<T>?, e: Exception) {
         try {
+            if(extension?.onError(e) == true) return
+
             when (val source = mapErrorFunc?.apply(e)) {
                 is OkResult.Success -> onSuccess(callback, source.data as T)
                 is OkResult.Error -> throw source.exception
@@ -556,6 +560,8 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> callOnResponse(callback: OkCallback<T>?, response: Response) {
         try {
+            if(extension?.onResponse(response) == true) return
+
             when (val source = mapResponseFunc?.apply(response)) {
                 is OkResult.Success -> onSuccess(callback, source.data as T)
                 is OkResult.Error -> throw source.exception
@@ -568,10 +574,9 @@ class OkRequest constructor(private val method: Method) {
 
     private fun callOnDownloadResponse(callback: OkDownloadCallback, response: Response) {
         try {
-            if (downloadExtension == null) {
-                throw NullPointerException("download extension must not be null")
-            }
-            val progressListener = object : OnProgressListener {
+            check(extension != null && extension is DownloadExtension) { "the extension is null or not a DownloadExtension" }
+
+            (extension as DownloadExtension).onResponse(response, object : OnProgressListener {
                 override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
                     this@OkRequest.onProgress(
                         callback,
@@ -579,20 +584,20 @@ class OkRequest constructor(private val method: Method) {
                         totalBytes
                     )
                 }
-            }
-            val destFile = downloadExtension!!.download(response, progressListener)
-            when {
-                destFile != null -> {
-                    onSuccess(callback, destFile)
-                }
-                isCanceled -> {
-                    onCancel(callback)
-                }
-                else -> {
-                    onError(
-                        callback,
-                        IOException("download not completed, response code: " + response.code() + " , message: " + response.message())
-                    )
+            }).let {
+                when {
+                    it != null -> {
+                        onSuccess(callback, it)
+                    }
+                    isCanceled -> {
+                        onCancel(callback)
+                    }
+                    else -> {
+                        onError(
+                            callback,
+                            IOException("download not completed, response code: " + response.code() + " , message: " + response.message())
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
