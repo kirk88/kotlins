@@ -7,7 +7,7 @@ package com.easy.kotlins.http
 class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
     private var resources: MutableList<OkFaker>? = null
 
-    override fun addRequest(faker: OkFaker) {
+    override fun add(faker: OkFaker) {
         synchronized(this) {
             var list = resources
 
@@ -17,6 +17,27 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
             }
 
             list.add(faker)
+        }
+    }
+
+    override fun remove(faker: OkFaker) {
+        synchronized(this) {
+            val list = resources ?: return
+
+            list.remove(faker)
+        }
+    }
+
+    override fun removeByTag(tag: Any) {
+        synchronized(this) {
+            val list = resources ?: return
+            val it = list.iterator()
+            while (it.hasNext()) {
+                val faker = it.next()
+                if (tag === faker.tag) {
+                    it.remove()
+                }
+            }
         }
     }
 
@@ -45,7 +66,7 @@ class SimpleOkFakerScope : OkFakerScope, Iterable<OkFaker> {
         }
     }
 
-    override fun cancelAll(){
+    override fun cancelAll() {
         synchronized(this) {
             val list = resources
             resources = null

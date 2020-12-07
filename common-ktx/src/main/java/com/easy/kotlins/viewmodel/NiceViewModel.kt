@@ -24,12 +24,12 @@ open class NiceViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
 
 
     fun get(action: OkFaker.() -> Unit): OkFaker {
-        return OkFaker.get(action).also { addRequest(it) }
+        return OkFaker.get(action).also { add(it) }
     }
 
 
     fun post(action: OkFaker.() -> Unit): OkFaker {
-        return OkFaker.post(action).also { addRequest(it) }
+        return OkFaker.post(action).also { add(it) }
     }
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {

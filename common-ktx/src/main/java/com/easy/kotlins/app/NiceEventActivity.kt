@@ -14,8 +14,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
-    EventObservableView {
+abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId), EventObservableView {
 
     open val refreshView: RefreshView? = null
 
@@ -62,6 +61,9 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
             Status.SHOW_CONTENT -> loadingView?.showContent()
             else -> event.message?.let { toast(it) }
         }
+
+        val intent = event.getIntent() ?: return
+        startActivity(intent)
     }
 
     open fun onViewModelEventChanged(event: Event): Boolean {

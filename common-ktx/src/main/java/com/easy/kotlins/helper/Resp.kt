@@ -2,10 +2,9 @@ package com.easy.kotlins.helper
 
 import com.easy.kotlins.event.*
 import com.easy.kotlins.http.OkFaker
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import okhttp3.Response
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -88,7 +87,8 @@ enum class LoadMode {
 
 class Loader private constructor(val mode: LoadMode, val scope: CoroutineScope, val delayed: Long) {
     companion object {
-        fun with(mode: LoadMode, scope: CoroutineScope = MainScope(), delayed: Long = 0) = Loader(mode, scope, delayed)
+        fun with(mode: LoadMode, scope: CoroutineScope = MainScope(), delayed: Long = 50) =
+            Loader(mode, scope, delayed)
     }
 }
 
@@ -109,15 +109,12 @@ fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
 }
 
 fun OkFaker.responsePlugin(
-    codeKey: String = "status",
-    codeSuccess: Int = 1,
-    dataKey: String = "data",
-    transform: ((JsonElement) -> Any)? = null
+    precondition: (Response) -> Boolean = { it.isSuccessful },
+    transform: ((String) -> Any)? = null
 ) {
-    mapResponse {
-//        if (it.code(codeKey) == codeSuccess) {
-//            it[dataKey].let { element -> transform?.invoke(element) ?: element }
-//        } else mineError { it.message() }
+    mapRawResponse {
+        if (precondition(it)) transform?.invoke(it.body()!!.string())
+        else error("Invalid response")
     }
 }
 

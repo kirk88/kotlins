@@ -5,7 +5,11 @@ package com.easy.kotlins.http
  */
 interface OkFakerScope {
 
-    fun addRequest(faker: OkFaker)
+    fun add(faker: OkFaker)
+
+    fun remove(faker: OkFaker)
+
+    fun removeByTag(tag: Any)
 
     fun cancelByTag(tag: Any)
 

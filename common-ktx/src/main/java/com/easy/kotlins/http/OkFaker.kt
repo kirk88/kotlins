@@ -376,24 +376,24 @@ class OkFaker(private val request: OkRequest) {
 
 }
 
-inline class RequestPairs<T>(
-    private val pairs: Map<String, T> = mutableMapOf()
-) : Iterable<Map.Entry<String, T>> {
+class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
+
+    private val pairs: MutableMap<String, T> = mutableMapOf()
 
     operator fun String.minus(value: T) {
-        (pairs as MutableMap)[this] = value
+        pairs[this] = value
     }
 
     fun put(key: String, value: T) {
-        key.minus(value)
+        pairs[key] = value
     }
 
     fun putAll(pairsFrom: Map<String, T>) {
-        (pairs as MutableMap<String, T>).putAll(pairsFrom)
+        pairs.putAll(pairsFrom)
     }
 
     fun remove(key: String): T? {
-        return (pairs as MutableMap<String, T>).remove(key)
+        return pairs.remove(key)
     }
 
     override fun toString(): String {

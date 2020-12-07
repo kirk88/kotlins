@@ -62,6 +62,9 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId), 
             Status.SHOW_CONTENT -> loadingView?.showContent()
             else -> event.message?.let { toast(it) }
         }
+
+        val intent = event.getIntent() ?: return
+        startActivity(intent)
     }
 
     open fun onViewModelEventChanged(event: Event): Boolean {

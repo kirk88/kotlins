@@ -1,5 +1,6 @@
 package com.easy.kotlins.event
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -16,12 +17,25 @@ import kotlin.reflect.KProperty
 open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
     private val extras: Bundle by lazy { Bundle() }
 
-    fun getString(key: String, defaultValue: String? = null): String? = extras.getString(key, defaultValue)
+    private var intent: Intent? = null
+
+
+    fun getString(key: String, defaultValue: String? = null): String? =
+        extras.getString(key, defaultValue)
+
     fun getInt(key: String, defaultValue: Int = 0): Int = extras.getInt(key, defaultValue)
-    fun getLong(key: String, defaultValue: Long = 0.toLong()): Long = extras.getLong(key, defaultValue)
-    fun getFloat(key: String, defaultValue: Float = 0.toFloat()): Float = extras.getFloat(key, defaultValue)
-    fun getDouble(key: String, defaultValue: Double = 0.toDouble()): Double = extras.getDouble(key, defaultValue)
-    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean = extras.getBoolean(key, defaultValue)
+    fun getLong(key: String, defaultValue: Long = 0.toLong()): Long =
+        extras.getLong(key, defaultValue)
+
+    fun getFloat(key: String, defaultValue: Float = 0.toFloat()): Float =
+        extras.getFloat(key, defaultValue)
+
+    fun getDouble(key: String, defaultValue: Double = 0.toDouble()): Double =
+        extras.getDouble(key, defaultValue)
+
+    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean =
+        extras.getBoolean(key, defaultValue)
+
     fun <T : Parcelable> getParcelable(key: String): T? = extras.getParcelable<T>(key)
 
     @Suppress("UNCHECKED_CAST")
@@ -35,10 +49,21 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
     fun putBoolean(key: String, value: Boolean) = extras.putBoolean(key, value)
     fun putParcelable(key: String, value: Parcelable?) = extras.putParcelable(key, value)
     fun putSerializable(key: String, value: Serializable?) = extras.putSerializable(key, value)
+    fun putAll(bundle: Bundle) = extras.putAll(bundle)
+
+
+    fun setIntent(intent: Intent) {
+        this.intent = intent
+    }
+
+    fun getIntent(): Intent? {
+        return this.intent
+    }
 
     constructor(parcel: Parcel) : this(
-            parcel.readInt(),
-            parcel.readString()) {
+        parcel.readInt(),
+        parcel.readString()
+    ) {
         extras.putAll(parcel.readBundle(Bundle::class.java.classLoader))
     }
 
@@ -68,7 +93,7 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
 
 }
 
-class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what){
+class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what) {
     override fun toString(): String {
         return "MultipleEvent(what=$what, events=$events)"
     }
@@ -120,7 +145,8 @@ class LiveEventProxy {
 
 fun event(what: Int = 0, message: String? = null) = Event(what, message)
 
-inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) = Event(what, message).apply(init)
+inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) =
+    Event(what, message).apply(init)
 
 fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 
@@ -128,7 +154,8 @@ fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
 fun refreshCompleted(): Event = Event(Status.REFRESH_COMPLETE)
 
-fun loadMoreCompleted(hasMore: Boolean = true): Event = Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+fun loadMoreCompleted(hasMore: Boolean = true): Event =
+    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
 fun refreshFailed(): Event = Event(Status.REFRESH_FAILURE)
 
