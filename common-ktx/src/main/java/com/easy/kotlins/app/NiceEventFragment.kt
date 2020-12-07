@@ -23,9 +23,10 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId), 
 
     open val loadingView: LoadingView? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         ViewModelEvents.observe(this)
-        super.onViewCreated(view, savedInstanceState)
     }
 
     final override fun onEventChanged(event: Event) {

@@ -1,6 +1,8 @@
 package com.easy.kotlins.helper
 
 import com.easy.kotlins.event.*
+import com.easy.kotlins.http.BodyFromDataPart
+import com.easy.kotlins.http.FileFormDataPart
 import com.easy.kotlins.http.OkFaker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -91,7 +93,11 @@ fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
-    formParameters(params.toMap())
+    if (params.any { it.second is BodyFromDataPart || it.second is FileFormDataPart }) {
+        formDataParts(*params)
+    } else {
+        formParameters(*params)
+    }
 
 }
 
@@ -99,7 +105,11 @@ fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
 
     url(url)
 
-    formParameters(params)
+    if (params.any { it.value is BodyFromDataPart || it.value is FileFormDataPart }) {
+        formDataParts(params)
+    } else {
+        formParameters(params)
+    }
 
 }
 

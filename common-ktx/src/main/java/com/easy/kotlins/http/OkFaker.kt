@@ -168,43 +168,31 @@ class OkFaker(private val request: OkRequest) {
 
     fun formDataParts(formDataParts: Map<String, Any?>): OkFaker = this.apply {
         formDataParts.forEach {
-            request.addFormDataPart(it.key, it.value.toString())
+            it.value.let { value ->
+                when (value) {
+                    is BodyFromDataPart -> request.addFormDataPart(it.key, value.filename, value.body)
+                    is FileFormDataPart -> request.addFormDataPart(it.key, value.type, value.file)
+                    else -> request.addFormDataPart(it.key, value.toString())
+                }
+            }
         }
     }
 
     fun formDataParts(vararg formDataParts: Pair<String, Any?>): OkFaker = this.apply {
         formDataParts.forEach {
-            request.addFormDataPart(it.first, it.second.toString())
+            it.second.let { value ->
+                when (value) {
+                    is BodyFromDataPart -> request.addFormDataPart(
+                        it.first,
+                        value.filename,
+                        value.body
+                    )
+                    is FileFormDataPart -> request.addFormDataPart(it.first, value.type, value.file)
+                    else -> request.addFormDataPart(it.first, value.toString())
+                }
+            }
         }
     }
-
-    fun formDataBodyParts(action: RequestPairs<Pair<String, RequestBody>>.() -> Unit): OkFaker =
-        this.apply {
-            RequestPairs<Pair<String, RequestBody>>().apply(action).forEach {
-                request.addFormDataPart(it.key, it.value.first, it.value.second)
-            }
-        }
-
-    fun formDataBodyParts(formDataBodyParts: Iterable<Map.Entry<String, Pair<String, RequestBody>>>): OkFaker =
-        this.apply {
-            formDataBodyParts.forEach {
-                request.addFormDataPart(it.key, it.value.first, it.value.second)
-            }
-        }
-
-    fun formDataFileParts(action: RequestPairs<Pair<MediaType, File>>.() -> Unit): OkFaker =
-        this.apply {
-            RequestPairs<Pair<MediaType, File>>().apply(action).forEach {
-                request.addFormDataPart(it.key, it.value.first, it.value.second)
-            }
-        }
-
-    fun formDataFileParts(formDataFileParts: Iterable<Map.Entry<String, Pair<MediaType, File>>>): OkFaker =
-        this.apply {
-            formDataFileParts.forEach {
-                request.addFormDataPart(it.key, it.value.first, it.value.second)
-            }
-        }
 
     fun parts(action: ArrayList<RequestBody>.() -> Unit): OkFaker = this.apply {
         arrayListOf<RequestBody>().apply(action).forEach {
@@ -218,6 +206,10 @@ class OkFaker(private val request: OkRequest) {
         }
     }
 
+    fun body(body: RequestBody): OkFaker = this.apply {
+        request.body(body)
+    }
+
     fun body(body: () -> RequestBody): OkFaker = this.apply {
         request.body(body())
     }
@@ -228,7 +220,13 @@ class OkFaker(private val request: OkRequest) {
 
 
     fun <T> mapResponse(action: (response: JsonObject) -> T): OkFaker = this.apply {
-        request.mapResponse(OkFunction { r -> OkResult.Success(action(r.body()!!.string().toJsonObject())) })
+        request.mapResponse(OkFunction { r ->
+            OkResult.Success(
+                action(
+                    r.body()!!.string().toJsonObject()
+                )
+            )
+        })
     }
 
     fun <T> mapError(action: (error: Throwable) -> T): OkFaker = this.apply {
@@ -281,7 +279,10 @@ class OkFaker(private val request: OkRequest) {
         onDownloadComplete = action
     }
 
-    fun <T> onResult(onSuccess: (result: T) -> Unit, onError: (error: OkException) -> Unit): OkFaker =
+    fun <T> onResult(
+        onSuccess: (result: T) -> Unit,
+        onError: (error: OkException) -> Unit
+    ): OkFaker =
         this.apply {
             onSuccess(onSuccess)
             onError(onError)
@@ -375,6 +376,9 @@ class OkFaker(private val request: OkRequest) {
     }
 
 }
+
+data class BodyFromDataPart(val body: RequestBody, val filename: String? = null)
+data class FileFormDataPart(val file: File, val type: MediaType)
 
 class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
 

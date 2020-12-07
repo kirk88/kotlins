@@ -1,5 +1,7 @@
 package com.easy.kotlins.event
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
@@ -7,6 +9,7 @@ import android.os.Parcelable
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.easy.kotlins.helper.opt
+import com.easy.kotlins.helper.toBundle
 import java.io.Serializable
 import kotlin.reflect.KProperty
 
@@ -50,7 +53,7 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
     fun putParcelable(key: String, value: Parcelable?) = extras.putParcelable(key, value)
     fun putSerializable(key: String, value: Serializable?) = extras.putSerializable(key, value)
     fun putAll(bundle: Bundle) = extras.putAll(bundle)
-
+    fun putAll(event: Event) = extras.putAll(event.extras)
 
     fun setIntent(intent: Intent) {
         this.intent = intent
@@ -58,6 +61,12 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
 
     fun getIntent(): Intent? {
         return this.intent
+    }
+
+    fun copy(what: Int = 0, message: String? = null): Event {
+        return Event(what, message).also {
+            it.putAll(this)
+        }
     }
 
     constructor(parcel: Parcel) : this(
@@ -94,6 +103,13 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
 }
 
 class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what) {
+
+    fun copy(what: Int = 0, events: List<Event>): Event {
+        return MultipleEvent(what, events).also {
+            it.putAll(this)
+        }
+    }
+
     override fun toString(): String {
         return "MultipleEvent(what=$what, events=$events)"
     }
@@ -147,6 +163,12 @@ fun event(what: Int = 0, message: String? = null) = Event(what, message)
 
 inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) =
     Event(what, message).apply(init)
+
+inline fun <reified T: Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) = buildEvent {
+    setIntent(Intent(context, T::class.java).apply {
+        putExtras(pairs.toBundle())
+    })
+}
 
 fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 

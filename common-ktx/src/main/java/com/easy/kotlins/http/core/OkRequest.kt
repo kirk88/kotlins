@@ -178,138 +178,120 @@ class OkRequest constructor(private val method: Method) {
     }
 
     fun addFormParameter(key: String, value: String): OkRequest {
-        ensureFormBody()
-        formBuilder!!.add(key, value)
+        ensureFormBody().add(key, value)
         return this
     }
 
     fun addFormParameter(key: String, value: Int): OkRequest {
-        ensureFormBody()
-        formBuilder!!.add(key, value.toString())
+        ensureFormBody().add(key, value.toString())
         return this
     }
 
     fun addFormParameter(key: String, value: Long): OkRequest {
-        ensureFormBody()
-        formBuilder!!.add(key, value.toString())
+        ensureFormBody().add(key, value.toString())
         return this
     }
 
     fun addFormParameter(key: String, value: Float): OkRequest {
-        ensureFormBody()
-        formBuilder!!.add(key, value.toString())
+        ensureFormBody().add(key, value.toString())
         return this
     }
 
     fun addFormParameter(key: String, value: Double): OkRequest {
-        ensureFormBody()
-        formBuilder!!.add(key, value.toString())
+        ensureFormBody().add(key, value.toString())
         return this
     }
 
     fun addFormParameters(parameters: Map<String, String?>): OkRequest {
-        ensureFormBody()
         for ((key, value) in parameters) {
-            formBuilder!!.add(key, value.toString())
+            ensureFormBody().add(key, value.toString())
         }
         return this
     }
 
     fun addEncodedFormParameter(key: String, value: String): OkRequest {
-        ensureFormBody()
-        formBuilder!!.addEncoded(key, value)
+        ensureFormBody().addEncoded(key, value)
         return this
     }
 
     fun addEncodedFormParameter(key: String, value: Int): OkRequest {
-        ensureFormBody()
-        formBuilder!!.addEncoded(key, value.toString())
+        ensureFormBody().addEncoded(key, value.toString())
         return this
     }
 
     fun addEncodedFormParameter(key: String, value: Long): OkRequest {
-        ensureFormBody()
-        formBuilder!!.addEncoded(key, value.toString())
+        ensureFormBody().addEncoded(key, value.toString())
         return this
     }
 
     fun addEncodedFormParameter(key: String, value: Float): OkRequest {
-        ensureFormBody()
-        formBuilder!!.addEncoded(key, value.toString())
+        ensureFormBody().addEncoded(key, value.toString())
         return this
     }
 
     fun addEncodedFormParameter(key: String, value: Double): OkRequest {
-        ensureFormBody()
-        formBuilder!!.addEncoded(key, value.toString())
+        ensureFormBody().addEncoded(key, value.toString())
         return this
     }
 
     fun addEncodedFormParameters(parameters: Map<String, Any?>): OkRequest {
-        ensureFormBody()
         for ((key, value) in parameters) {
-            formBuilder!!.addEncoded(key, value.toString())
+            ensureFormBody().addEncoded(key, value.toString())
         }
         return this
     }
 
     fun addPart(part: MultipartBody.Part): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addPart(part)
+        ensureMultiBody().addPart(part)
         return this
     }
 
     fun addPart(body: RequestBody): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addPart(body)
+        ensureMultiBody().addPart(body)
         return this
     }
 
     fun addPart(headers: Headers?, body: RequestBody): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addPart(headers, body)
+        ensureMultiBody().addPart(headers, body)
         return this
     }
 
     fun addFormDataPart(name: String, value: String): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, value)
+        ensureMultiBody().addFormDataPart(name, value)
         return this
     }
 
     fun addFormDataPart(name: String, value: Int): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, value.toString())
+        ensureMultiBody().addFormDataPart(name, value.toString())
         return this
     }
 
     fun addFormDataPart(name: String, value: Long): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, value.toString())
+        ensureMultiBody().addFormDataPart(name, value.toString())
         return this
     }
 
     fun addFormDataPart(name: String, value: Float): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, value.toString())
+        ensureMultiBody().addFormDataPart(name, value.toString())
         return this
     }
 
     fun addFormDataPart(name: String, value: Double): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, value.toString())
+        ensureMultiBody().addFormDataPart(name, value.toString())
         return this
     }
 
-    fun addFormDataPart(name: String, filename: String?, body: RequestBody): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, filename, body)
+    fun addFormDataPart(name: String, filename: String?, body: RequestBody, ): OkRequest {
+        ensureMultiBody().addFormDataPart(name, filename, body)
         return this
     }
 
-    fun addFormDataPart(name: String, mediaType: MediaType?, file: File): OkRequest {
-        ensureMultiBody()
-        multiBuilder!!.addFormDataPart(name, file.name, RequestBody.create(mediaType, file))
+    fun addFormDataPart(name: String, type: MediaType, file: File): OkRequest {
+        ensureMultiBody().addFormDataPart(
+            name,
+            file.name,
+            RequestBody.create(type, file)
+        )
         return this
     }
 
@@ -368,18 +350,18 @@ class OkRequest constructor(private val method: Method) {
         return this
     }
 
-    private fun ensureFormBody() {
-        if (formBuilder == null) {
-            formBuilder = FormBody.Builder()
+    private fun ensureFormBody(): FormBody.Builder {
+        return formBuilder ?: FormBody.Builder().also {
+            formBuilder = it
+            multiBuilder = null
         }
-        multiBuilder = null
     }
 
-    private fun ensureMultiBody() {
-        if (multiBuilder == null) {
-            multiBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+    private fun ensureMultiBody(): MultipartBody.Builder {
+        return multiBuilder ?: MultipartBody.Builder().setType(MultipartBody.FORM).also {
+            multiBuilder = it
+            formBuilder = null
         }
-        formBuilder = null
     }
 
     /**
@@ -545,7 +527,7 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> callOnFailure(callback: OkCallback<T>?, e: Exception) {
         try {
-            if(extension?.onError(e) == true) return
+            if (extension?.onError(e) == true) return
 
             when (val source = mapErrorFunc?.apply(e)) {
                 is OkResult.Success -> onSuccess(callback, source.data as T)
@@ -560,7 +542,7 @@ class OkRequest constructor(private val method: Method) {
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> callOnResponse(callback: OkCallback<T>?, response: Response) {
         try {
-            if(extension?.onResponse(response) == true) return
+            if (extension?.onResponse(response) == true) return
 
             when (val source = mapResponseFunc?.apply(response)) {
                 is OkResult.Success -> onSuccess(callback, source.data as T)
