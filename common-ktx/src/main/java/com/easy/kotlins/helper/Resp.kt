@@ -85,12 +85,7 @@ enum class LoadMode {
     LOAD, REFRESH, LOADMORE
 }
 
-class Loader private constructor(val mode: LoadMode, val scope: CoroutineScope, val delayed: Long) {
-    companion object {
-        fun with(mode: LoadMode, scope: CoroutineScope = MainScope(), delayed: Long = 50) =
-            Loader(mode, scope, delayed)
-    }
-}
+class Loader(val mode: LoadMode, val scope: CoroutineScope = MainScope(), val delayed: Long = 50)
 
 fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
