@@ -11,7 +11,7 @@ import java.net.URL
 /**
  * Create by LiZhanPing on 2020/4/27
  */
-internal class OkRequest constructor(private val method: OkRequestMethod) {
+class OkRequest constructor(private val method: OkRequestMethod) {
     private val requestBuilder: Request.Builder by lazy { Request.Builder() }
 
     private var httpClient: OkHttpClient? = null
@@ -451,6 +451,15 @@ internal class OkRequest constructor(private val method: OkRequestMethod) {
     @Throws(Exception::class)
     fun <T : Any> execute(): T? {
         return transformResponse(responseMapper, rawExecute())
+    }
+
+    fun <T : Any> safeExecute(errorHandler: ((Throwable) -> Unit)? = null): T? {
+        return try {
+            execute()
+        } catch (error: Throwable) {
+            errorHandler?.invoke(error)
+            null
+        }
     }
 
     fun <T : Any> enqueue(callback: OkCallback<T>? = null) {

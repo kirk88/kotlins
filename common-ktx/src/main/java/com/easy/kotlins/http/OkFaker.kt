@@ -32,6 +32,58 @@ class OkFaker(method: OkRequestMethod) {
     private var onDownloadSuccess: ((File) -> Unit)? = null
     private var onDownloadProgress: ((Long, Long) -> Unit)? = null
 
+    private val callback: OkCallback<out Any> by lazy {
+        if (onDownloadSuccess == null && onDownloadProgress == null) {
+            object : OkCallback<Any> {
+                override fun onStart() {
+                    onStart?.invoke()
+                }
+
+                override fun onSuccess(result: Any) {
+                    onSuccess?.invoke(result)
+                }
+
+                override fun onError(error: OkException) {
+                    onError?.invoke(error)
+                }
+
+                override fun onCancel() {
+                    onCancel?.invoke()
+                }
+
+                override fun onComplete() {
+                    onComplete?.invoke()
+                }
+            }
+        } else {
+            object : OkDownloadCallback {
+                override fun onStart() {
+                    onStart?.invoke()
+                }
+
+                override fun onSuccess(result: File) {
+                    onDownloadSuccess?.invoke(result)
+                }
+
+                override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
+                    onDownloadProgress?.invoke(downloadedBytes, totalBytes)
+                }
+
+                override fun onError(error: OkException) {
+                    onError?.invoke(error)
+                }
+
+                override fun onCancel() {
+                    onCancel?.invoke()
+                }
+
+                override fun onComplete() {
+                    onComplete?.invoke()
+                }
+            }
+        }
+    }
+
     val isCanceled: Boolean
         get() = request.isCanceled
 
@@ -289,56 +341,11 @@ class OkFaker(method: OkRequestMethod) {
         return request.execute()
     }
 
+    fun <T : Any> safeExecute(errorHandler: ((Throwable) -> Unit)? = null): T? {
+        return request.safeExecute(errorHandler)
+    }
+
     fun enqueue(): OkFaker = this.apply {
-        val callback = if (onDownloadSuccess == null && onDownloadProgress == null) {
-            object : OkCallback<Any> {
-                override fun onStart() {
-                    onStart?.invoke()
-                }
-
-                override fun onSuccess(result: Any) {
-                    onSuccess?.invoke(result)
-                }
-
-                override fun onError(error: OkException) {
-                    onError?.invoke(error)
-                }
-
-                override fun onCancel() {
-                    onCancel?.invoke()
-                }
-
-                override fun onComplete() {
-                    onComplete?.invoke()
-                }
-            }
-        } else {
-            object : OkDownloadCallback {
-                override fun onStart() {
-                    onStart?.invoke()
-                }
-
-                override fun onSuccess(result: File) {
-                    onDownloadSuccess?.invoke(result)
-                }
-
-                override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
-                    onDownloadProgress?.invoke(downloadedBytes, totalBytes)
-                }
-
-                override fun onError(error: OkException) {
-                    onError?.invoke(error)
-                }
-
-                override fun onCancel() {
-                    onCancel?.invoke()
-                }
-
-                override fun onComplete() {
-                    onComplete?.invoke()
-                }
-            }
-        }
         request.enqueue(callback)
     }
 
