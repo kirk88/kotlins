@@ -1,7 +1,8 @@
-package com.easy.kotlins.http.core.extension
+package com.easy.kotlins.http.extension
 
 import okhttp3.Request
 import okhttp3.Response
+import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
@@ -10,15 +11,21 @@ import java.text.MessageFormat
 /**
  * Create by LiZhanPing on 2020/8/25
  */
-class DownloadExtension private constructor(path: String, continuing: Boolean) : OkExtension() {
+class DownloadExtension private constructor(path: String, continuing: Boolean) : OkExtension,
+    Closeable {
+
     private val file: File?
 
-    override fun onRequest(builder: Request.Builder) {
+    @Volatile
+    private var closed = false
+
+    override fun shouldInterceptRequest(builder: Request.Builder): Request {
         val range = if (file!!.exists()) file.length() else 0L
         builder.header(
             DOWNLOAD_HEADER_RANGE_NAME,
             MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
         )
+        return builder.build()
     }
 
     override fun onResponse(response: Response): Boolean {
@@ -27,6 +34,10 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
 
     override fun onError(error: Throwable): Boolean {
         return false
+    }
+
+    override fun close() {
+        closed = true
     }
 
     @Throws(Exception::class)
@@ -61,12 +72,12 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
                         val buf = ByteArray(4096)
                         var len = 0
                         accessFile.seek(readBytes)
-                        while (!isCanceled && inputStream.read(buf).also { len = it } != -1) {
+                        while (!closed && inputStream.read(buf).also { len = it } != -1) {
                             readBytes += len.toLong()
                             accessFile.write(buf, 0, len)
                             onProgress(listener, readBytes, totalBytes)
                         }
-                        if (!isCanceled && readBytes == totalBytes) {
+                        if (!closed && readBytes == totalBytes) {
                             return rename(srcFile)
                         }
                     }
@@ -78,15 +89,12 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
     }
 
     private fun onProgress(listener: OnProgressListener?, downloadedBytes: Long, totalBytes: Long) {
-        if (isCanceled) return
-        listener?.onProgress(downloadedBytes, totalBytes)
+        if (closed) return
+        listener?.onProgressChanged(downloadedBytes, totalBytes)
     }
 
-    private val isCanceled: Boolean
-        get() = request.isCanceled
-
     interface OnProgressListener {
-        fun onProgress(downloadedBytes: Long, totalBytes: Long)
+        fun onProgressChanged(downloadedBytes: Long, totalBytes: Long)
     }
 
     companion object {

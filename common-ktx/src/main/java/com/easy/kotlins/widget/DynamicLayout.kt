@@ -1,4 +1,4 @@
-package com.load.dynamiclayout
+package com.easy.kotlins.widget
 
 import android.app.Activity
 import android.content.Context
@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
-import com.easy.kotlins.widget.LoadingView
 import com.example.dynamiclayout.R
 
 class DynamicLayout @JvmOverloads constructor(

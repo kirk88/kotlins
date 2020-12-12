@@ -5,10 +5,12 @@ import com.easy.kotlins.http.BodyFromDataPart
 import com.easy.kotlins.http.FileFormDataPart
 import com.easy.kotlins.http.OkFaker
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import okhttp3.Response
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Create by LiZhanPing on 2020/8/25
@@ -87,7 +89,11 @@ enum class LoadMode {
     LOAD, REFRESH, LOADMORE
 }
 
-class Loader(val mode: LoadMode, val scope: CoroutineScope = MainScope(), val delayed: Long = 50)
+class Loader(
+    val mode: LoadMode,
+    val context: CoroutineContext = Dispatchers.Main.immediate,
+    val delayed: Long = 50
+)
 
 fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
@@ -134,7 +140,7 @@ fun <T> OkFaker.loadPlugin(
     }
 
     onSuccess<List<T>> {
-        step(loader.scope) {
+        step(loader.context) {
             add {
                 onEvent(
                     when (loader.mode) {
@@ -152,7 +158,7 @@ fun <T> OkFaker.loadPlugin(
     }
 
     onError {
-        step(loader.scope) {
+        step(loader.context) {
             add {
                 onEvent(
                     when (loader.mode) {
@@ -170,7 +176,7 @@ fun <T> OkFaker.loadPlugin(
     }
 }
 
-fun <T> OkFaker.loadPlugin(
+fun <T: Any> OkFaker.loadPlugin(
     message: String? = null,
     onEvent: (Event) -> Unit,
     onApply: (T) -> Unit,

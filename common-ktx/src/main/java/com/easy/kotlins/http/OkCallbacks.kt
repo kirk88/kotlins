@@ -1,4 +1,4 @@
-package com.easy.kotlins.http.core
+package com.easy.kotlins.http
 
 import android.os.Handler
 import android.os.Looper
@@ -23,19 +23,17 @@ internal object OkCallbacks {
             val body = msg.obj as MessageBody
             when (msg.what) {
                 MSG_WHAT_ON_START -> {
-                    @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
-                    callOnStart(callback)
+                    callOnStart(body.callback)
                 }
                 MSG_WHAT_ON_COMPLETE -> {
-                    @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
-                    callOnComplete(callback)
+                    callOnComplete(body.callback)
                 }
                 MSG_WHAT_ON_SUCCESS -> {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     callOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    callOnError(body.callback, body.args[0] as OkException)
+                    callOnError(body.callback, body.args[0] as Throwable)
                 }
                 MSG_WHAT_ON_UPDATE -> {
                     callOnProgress(
@@ -45,43 +43,43 @@ internal object OkCallbacks {
                     )
                 }
                 MSG_WHAT_ON_CANCEL -> {
-                    callOnCancel(body.callback as OkDownloadCallback)
+                    callOnCancel(body.callback)
                 }
             }
         }
     }
 
-    fun <T: Any> success(callback: OkCallback<T>?, result: T) {
+    fun <T: Any> onSuccess(callback: OkCallback<T>?, result: T) {
         if (callback != null) {
             HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result)).sendToTarget()
         }
     }
 
-    fun error(callback: OkCallback<*>?, error: Throwable) {
+    fun onError(callback: OkCallback<*>?, error: Throwable) {
         if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, OkException(cause = error))).sendToTarget()
+            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
         }
     }
 
-    fun start(callback: OkCallback<*>?) {
+    fun onStart(callback: OkCallback<*>?) {
         if (callback != null) {
             HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
         }
     }
 
-    fun complete(callback: OkCallback<*>?) {
+    fun onComplete(callback: OkCallback<*>?) {
         if (callback != null) {
             HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
         }
     }
 
-    fun cancel(callback: OkDownloadCallback?) {
+    fun onCancel(callback: OkCallback<*>?) {
         if (callback != null) {
             HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
         }
     }
 
-    fun progress(callback: OkDownloadCallback?, downloadedBytes: Long, totalBytes: Long) {
+    fun onProgress(callback: OkDownloadCallback?, downloadedBytes: Long, totalBytes: Long) {
         if (callback != null) {
             HANDLER.obtainMessage(
                 MSG_WHAT_ON_UPDATE,
@@ -106,7 +104,7 @@ internal object OkCallbacks {
         }
     }
 
-    private fun callOnCancel(callback: OkDownloadCallback) {
+    private fun callOnCancel(callback: OkCallback<*>) {
         try {
             callback.onCancel()
         } catch (t: Throwable) {
@@ -126,26 +124,23 @@ internal object OkCallbacks {
         }
     }
 
-    private fun <T> callOnSuccess(callback: OkCallback<T>, result: T) {
+    private fun <T: Any> callOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
         } catch (e: Exception) {
-            callOnError(callback, OkException(cause = e))
+            callOnError(callback, OkException(message = e.message, cause = e))
         }
     }
 
-    private fun callOnError(callback: OkCallback<*>, e: OkException) {
+    private fun callOnError(callback: OkCallback<*>, e: Throwable) {
         try {
-            if (BuildConfig.DEBUG) {
-                Log.e(OkRequest::class.simpleName, e.localizedMessage, e)
-            }
-            callback.onError(e)
+            callback.onError(OkException(message = e.message, cause = e))
         } catch (t: Throwable) {
             t.printStackTrace()
         }
     }
 
-    internal class MessageBody(val callback: OkCallback<*>, vararg args: Any) {
+    private class MessageBody(val callback: OkCallback<*>, vararg args: Any) {
         val args: Array<Any> = arrayOf(args)
     }
 }

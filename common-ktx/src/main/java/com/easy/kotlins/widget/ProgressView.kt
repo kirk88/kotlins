@@ -1,7 +1,5 @@
 package com.easy.kotlins.widget
 
-import com.load.dynamiclayout.DynamicLayout
-
 /**
  * Create by LiZhanPing on 2020/10/11
  */

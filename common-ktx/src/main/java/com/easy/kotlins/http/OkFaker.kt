@@ -1,31 +1,36 @@
 package com.easy.kotlins.http
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.liveData
 import com.easy.kotlins.helper.forEach
 import com.easy.kotlins.helper.toJson
 import com.easy.kotlins.helper.toJsonObject
-import com.easy.kotlins.http.core.*
+import com.easy.kotlins.http.extension.OkExtension
 import com.google.gson.JsonObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import okhttp3.*
 import java.io.File
 import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Create by LiZhanPing on 2020/8/22
  */
 
-class OkFaker(private val request: OkRequest) {
+class OkFaker(method: OkRequestMethod) {
+
+    private val request: OkRequest = OkRequest(method)
 
     private var onStart: (() -> Unit)? = null
     private var onSuccess: ((Any) -> Unit)? = null
     private var onError: ((OkException) -> Unit)? = null
+    private var onCancel: (() -> Unit)? = null
     private var onComplete: (() -> Unit)? = null
 
-    private var onDownloadStart: (() -> Unit)? = null
-    private var onDownloadCancel: (() -> Unit)? = null
     private var onDownloadSuccess: ((File) -> Unit)? = null
-    private var onDownloadError: ((OkException) -> Unit)? = null
     private var onDownloadProgress: ((Long, Long) -> Unit)? = null
-    private var onDownloadComplete: (() -> Unit)? = null
 
     val isCanceled: Boolean
         get() = request.isCanceled
@@ -34,7 +39,7 @@ class OkFaker(private val request: OkRequest) {
         get() = request.isExecuted
 
     val tag: Any?
-        get() = request.tag()
+        get() = request.tag
 
     fun client(client: () -> OkHttpClient): OkFaker = this.apply {
         request.client(client())
@@ -56,7 +61,7 @@ class OkFaker(private val request: OkRequest) {
         request.tag(tag())
     }
 
-    fun tag(tag: Any) {
+    fun tag(tag: Any): OkFaker = this.apply {
         request.tag(tag)
     }
 
@@ -66,6 +71,14 @@ class OkFaker(private val request: OkRequest) {
 
     fun cacheControl(cacheControl: CacheControl): OkFaker = this.apply {
         request.cacheControl(cacheControl)
+    }
+
+    fun extension(extension: OkExtension) = this.apply {
+        request.extension(extension)
+    }
+
+    fun extension(extension: () -> OkExtension) = this.apply {
+        request.extension(extension())
     }
 
     fun headers(action: RequestPairs<Any?>.() -> Unit): OkFaker = this.apply {
@@ -170,7 +183,11 @@ class OkFaker(private val request: OkRequest) {
         formDataParts.forEach {
             it.value.let { value ->
                 when (value) {
-                    is BodyFromDataPart -> request.addFormDataPart(it.key, value.filename, value.body)
+                    is BodyFromDataPart -> request.addFormDataPart(
+                        it.key,
+                        value.filename,
+                        value.body
+                    )
                     is FileFormDataPart -> request.addFormDataPart(it.key, value.type, value.file)
                     else -> request.addFormDataPart(it.key, value.toString())
                 }
@@ -187,7 +204,11 @@ class OkFaker(private val request: OkRequest) {
                         value.filename,
                         value.body
                     )
-                    is FileFormDataPart -> request.addFormDataPart(it.first, value.type, value.file)
+                    is FileFormDataPart -> request.addFormDataPart(
+                        it.first,
+                        value.type,
+                        value.file
+                    )
                     else -> request.addFormDataPart(it.first, value.toString())
                 }
             }
@@ -214,23 +235,23 @@ class OkFaker(private val request: OkRequest) {
         request.body(body())
     }
 
-    fun <T> mapRawResponse(action: (response: Response) -> T): OkFaker = this.apply {
-        request.mapResponse(OkFunction { r -> OkResult.Success(action(r)) })
-    }
-
-
-    fun <T> mapResponse(action: (response: JsonObject) -> T): OkFaker = this.apply {
-        request.mapResponse(OkFunction { r ->
-            OkResult.Success(
-                action(
-                    r.body()!!.string().toJsonObject()
-                )
-            )
+    fun <T> mapRawResponse(transform: (response: Response) -> T): OkFaker = this.apply {
+        request.mapResponse(OkMapper { value ->
+            OkResult.Success(transform(value))
         })
     }
 
-    fun <T> mapError(action: (error: Throwable) -> T): OkFaker = this.apply {
-        request.mapError(OkFunction { r -> OkResult.Success(action(r)) })
+
+    fun <T> mapResponse(transform: (response: JsonObject) -> T): OkFaker = this.apply {
+        request.mapResponse(OkMapper { value ->
+            OkResult.Success(transform(value.body()!!.string().toJsonObject()))
+        })
+    }
+
+    fun <T> mapError(transform: (error: Throwable) -> T): OkFaker = this.apply {
+        request.mapError(OkMapper { value ->
+            OkResult.Success(transform(value))
+        })
     }
 
     fun onStart(action: () -> Unit): OkFaker = this.apply {
@@ -238,7 +259,7 @@ class OkFaker(private val request: OkRequest) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> onSuccess(action: (result: T) -> Unit): OkFaker = this.apply {
+    fun <T : Any> onSuccess(action: (result: T) -> Unit): OkFaker = this.apply {
         onSuccess = { action(it as T) }
     }
 
@@ -254,16 +275,8 @@ class OkFaker(private val request: OkRequest) {
         onComplete = action
     }
 
-    fun onDownloadStart(action: () -> Unit): OkFaker = this.apply {
-        onDownloadStart = action
-    }
-
-    fun onDownloadSuccess(action: (file: File) -> Unit): OkFaker = this.apply {
+    fun onDownloadSuccess(action: (File) -> Unit): OkFaker = this.apply {
         onDownloadSuccess = action
-    }
-
-    fun onDownloadError(action: (error: OkException) -> Unit): OkFaker = this.apply {
-        onDownloadError = action
     }
 
     fun onDownloadProgress(action: (downloadedBytes: Long, totalBytes: Long) -> Unit): OkFaker =
@@ -271,92 +284,62 @@ class OkFaker(private val request: OkRequest) {
             onDownloadProgress = action
         }
 
-    fun onDownloadCancel(action: () -> Unit): OkFaker = this.apply {
-        onDownloadCancel = action
-    }
-
-    fun onDownloadComplete(action: () -> Unit): OkFaker = this.apply {
-        onDownloadComplete = action
-    }
-
-    fun <T> onResult(
-        onSuccess: (result: T) -> Unit,
-        onError: (error: OkException) -> Unit
-    ): OkFaker =
-        this.apply {
-            onSuccess(onSuccess)
-            onError(onError)
-        }
-
-    @Suppress("UNCHECKED_CAST")
     @Throws(Exception::class)
-    fun <T> execute(): T? {
-        return request.execute() as? T
+    fun <T : Any> execute(): T? {
+        return request.execute()
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T> safeExecute(defaultValue: T): T {
-        return request.safeExecute() ?: defaultValue
-    }
+    fun enqueue(): OkFaker = this.apply {
+        val callback = if (onDownloadSuccess == null && onDownloadProgress == null) {
+            object : OkCallback<Any> {
+                override fun onStart() {
+                    onStart?.invoke()
+                }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T> safeExecute(defaultValue: () -> T): T {
-        return request.safeExecute() ?: defaultValue()
-    }
+                override fun onSuccess(result: Any) {
+                    onSuccess?.invoke(result)
+                }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T> safeExecute(): T? {
-        return request.safeExecute()
-    }
+                override fun onError(error: OkException) {
+                    onError?.invoke(error)
+                }
 
-    fun request(): OkFaker = this.apply {
-        request.enqueue(object : OkCallback<Any> {
-            override fun onStart() {
-                onStart?.invoke()
+                override fun onCancel() {
+                    onCancel?.invoke()
+                }
+
+                override fun onComplete() {
+                    onComplete?.invoke()
+                }
             }
+        } else {
+            object : OkDownloadCallback {
+                override fun onStart() {
+                    onStart?.invoke()
+                }
 
-            override fun onSuccess(result: Any) {
-                onSuccess?.invoke(result)
+                override fun onSuccess(result: File) {
+                    onDownloadSuccess?.invoke(result)
+                }
+
+                override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
+                    onDownloadProgress?.invoke(downloadedBytes, totalBytes)
+                }
+
+                override fun onError(error: OkException) {
+                    onError?.invoke(error)
+                }
+
+                override fun onCancel() {
+                    onCancel?.invoke()
+                }
+
+                override fun onComplete() {
+                    onComplete?.invoke()
+                }
             }
-
-            override fun onError(error: OkException) {
-                onError?.invoke(error)
-            }
-
-            override fun onComplete() {
-                onComplete?.invoke()
-            }
-        })
-    }
-
-    fun download(): OkFaker = this.apply {
-        request.enqueue(object : OkDownloadCallback {
-
-            override fun onStart() {
-                onDownloadStart?.invoke()
-            }
-
-            override fun onSuccess(result: File) {
-                onDownloadSuccess?.invoke(result)
-            }
-
-            override fun onProgress(downloadedBytes: Long, totalBytes: Long) {
-                onDownloadProgress?.invoke(downloadedBytes, totalBytes)
-            }
-
-            override fun onError(error: OkException) {
-                onDownloadError?.invoke(error)
-            }
-
-            override fun onComplete() {
-                onDownloadComplete?.invoke()
-            }
-
-            override fun onCancel() {
-                onDownloadCancel?.invoke()
-            }
-
-        })
+        }
+        request.enqueue(callback)
     }
 
     fun cancel() {
@@ -365,14 +348,23 @@ class OkFaker(private val request: OkRequest) {
 
     companion object {
 
-        fun get(action: OkFaker.() -> Unit): OkFaker {
-            return OkFaker(OkRequest(OkRequest.Method.GET)).apply(action)
-        }
+        fun get(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.GET).apply(action)
 
-        fun post(action: OkFaker.() -> Unit): OkFaker {
-            return OkFaker(OkRequest(OkRequest.Method.POST)).apply(action)
-        }
+        fun post(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.POST).apply(action)
 
+        fun delete(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.DELETE).apply(action)
+
+        fun put(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.PUT).apply(action)
+
+        fun head(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.HEAD).apply(action)
+
+        fun patch(action: OkFaker.() -> Unit): OkFaker =
+            OkFaker(OkRequestMethod.PATCH).apply(action)
     }
 
 }
@@ -439,4 +431,15 @@ inline fun requestPairsOf(
             }
         }
     }.apply(action)
+}
+
+fun <T : Any> OkFaker.asFlow(): Flow<T?> = flow {
+    emit(execute<T>())
+}
+
+fun <T : Any> OkFaker.asLiveData(
+    context: CoroutineContext = EmptyCoroutineContext,
+    timeoutInMillis: Long = 5000L
+): LiveData<T?> = liveData(context, timeoutInMillis) {
+    emit(execute<T>())
 }

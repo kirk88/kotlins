@@ -119,8 +119,6 @@ object Status {
 
     private const val STATUS_BASE = 10000
 
-    const val NONE = -1
-
     const val SHOW_PROGRESS = STATUS_BASE + 1
     const val DISMISS_PROGRESS = STATUS_BASE + 2
     const val REFRESH_COMPLETE = STATUS_BASE + 3

@@ -1,3 +1,2 @@
 include ':common-ktx'
-include ':dynamiclayout'
 rootProject.name = "kotlins"

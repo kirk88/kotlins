@@ -1,19 +1,12 @@
 package com.easy.kotlins.helper
 
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-fun interface Task {
-
-    fun run()
-
-}
+typealias Task = suspend CoroutineScope.() -> Unit
 
 interface SuspendedTask {
 
@@ -24,27 +17,47 @@ interface SuspendedTask {
 class Stepper {
 
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
+    private var job: Job? = null
+    private var context: CoroutineContext? = null
 
-    fun add(delayed: Long = 0, context: CoroutineContext = EmptyCoroutineContext, task: Task): Stepper {
-        channel.offer(DelayedTask(delayed, context, task))
-        return this
+    val coroutineContext: CoroutineContext
+        get() = context ?: EmptyCoroutineContext
+
+    suspend fun send(
+        delayed: Long = 0,
+        context: CoroutineContext = EmptyCoroutineContext,
+        task: Task
+    ) {
+        channel.send(DelayedTask(delayed, context, task))
     }
 
-    suspend fun run(): Stepper {
+    fun add(
+        delayed: Long = 0,
+        context: CoroutineContext = EmptyCoroutineContext,
+        task: Task
+    ) {
+        channel.offer(DelayedTask(delayed, context, task))
+    }
+
+    suspend fun start(): Stepper {
         for (task in channel) {
             task.run()
         }
         return this
     }
 
-    fun run(scope: CoroutineScope): Stepper {
-        scope.launch {
-            run()
+    fun start(context: CoroutineContext): Stepper {
+        CoroutineScope(context.plus(SupervisorJob().also {
+            this.job = it
+        }).also {
+            this.context = it
+        }).launch {
+            start()
         }
         return this
     }
 
-    suspend fun take(): SuspendedTask {
+    suspend fun receive(): SuspendedTask {
         return channel.receive()
     }
 
@@ -54,19 +67,27 @@ class Stepper {
 
     fun cancel() {
         channel.cancel()
+        job?.cancel()
     }
 
     fun close() {
         channel.close()
     }
 
-    private class DelayedTask(private val delayed: Long, private val context: CoroutineContext, private val task: Task) : SuspendedTask {
+    private class DelayedTask(
+        private val delayed: Long,
+        private val context: CoroutineContext,
+        private val task: Task
+    ) : SuspendedTask {
 
-        override suspend fun run() {
-            withContext(context) {
-                delay(delayed)
+        override suspend fun run() = withContext(context) {
+            delay(delayed)
 
-                task.run()
+            try {
+                task()
+            } catch (exception: Throwable) {
+                val errorHandler = context[CoroutineExceptionHandler] ?: throw exception
+                errorHandler.handleException(coroutineContext, exception)
             }
         }
 
@@ -74,10 +95,11 @@ class Stepper {
 
 }
 
-fun step(scope: CoroutineScope, init: Stepper.() -> Unit): Stepper = Stepper().apply {
-    init()
-    run(scope)
-}
+fun step(context: CoroutineContext = EmptyCoroutineContext, init: Stepper.() -> Unit): Stepper =
+    Stepper().apply {
+        init()
+        start(context)
+    }
 
 fun stepOf(vararg tasks: Pair<Long, Task>): Stepper = Stepper().apply {
     tasks.forEach {

@@ -36,66 +36,67 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     private var having: String? = null
     private var limit: String? = null
 
-    private var selectionApplied = false
-    private var useNativeSelection = false
-    private var selection: String? = null
-    private var nativeSelectionArgs: Array<out String>? = null
+    private var whereCauseApplied = false
+    private var useNativeWhereCause = false
+    private var simpleWhereCause: String? = null
+    private var nativeWhereArgs: Array<out String>? = null
 
     fun <T> exec(f: Cursor.() -> T): T {
         return doExec().use(f)
     }
 
-    inline fun <T : Any> parseSingle(parser: RowParser<T>): Unit = doExec().use {
+    fun <T : Any> parseSingle(parser: RowParser<T>): Unit = doExec().use {
         it.parseSingle(parser)
     }
 
-    inline fun <T : Any> parseOpt(parser: RowParser<T>): Unit = doExec().use {
+    fun <T : Any> parseOpt(parser: RowParser<T>): Unit = doExec().use {
         it.parseOpt(parser)
     }
 
-    inline fun <T : Any> parseList(parser: RowParser<T>): Unit = doExec().use {
+    fun <T : Any> parseList(parser: RowParser<T>): Unit = doExec().use {
         it.parseList(parser)
     }
 
-    inline fun <T : Any> parseSingle(parser: MapRowParser<T>): T = doExec().use {
+    fun <T : Any> parseSingle(parser: MapRowParser<T>): T = doExec().use {
         it.parseSingle(parser)
     }
 
-    inline fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = doExec().use {
+    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = doExec().use {
         it.parseOpt(parser)
     }
 
-    inline fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = doExec().use {
+    fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = doExec().use {
         it.parseList(parser)
     }
 
-    @PublishedApi
-    internal fun doExec(): Cursor {
-        val finalSelection = if (selectionApplied) selection else null
-        val finalSelectionArgs = if (selectionApplied && useNativeSelection) nativeSelectionArgs else null
-        val finalColumns = if(columnsApplied) columns.toTypedArray() else null
-        val finalGroupBy = if(groupByApplied) groupBy.joinToString(", ") else null
-        val finalOrderBy = if(orderByApplied) orderBy.joinToString(", ") else null
-        return execQuery(distinct, tableName,
-                finalColumns,
-                finalSelection,
-                finalSelectionArgs,
-                finalGroupBy,
-                having,
-                finalOrderBy,
-                limit)
+    private fun doExec(): Cursor {
+        val finalWhereCause = if (whereCauseApplied) simpleWhereCause else null
+        val finalWhereArgs = if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
+        val finalColumns = if (columnsApplied) columns.toTypedArray() else null
+        val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
+        val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null
+        return execQuery(
+            distinct, tableName,
+            finalColumns,
+            finalWhereCause,
+            finalWhereArgs,
+            finalGroupBy,
+            having,
+            finalOrderBy,
+            limit
+        )
     }
 
     protected abstract fun execQuery(
-            distinct: Boolean,
-            tableName: String,
-            columns: Array<String>?,
-            selection: String?,
-            selectionArgs: Array<out String>?,
-            groupBy: String?,
-            having: String?,
-            orderBy: String?,
-            limit: String?
+        distinct: Boolean,
+        tableName: String,
+        columns: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+        groupBy: String?,
+        having: String?,
+        orderBy: String?,
+        limit: String?
     ): Cursor
 
     fun distinct(): SelectQueryBuilder {
@@ -121,7 +122,10 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
-    fun orderBy(value: String, direction: SqlOrderDirection = SqlOrderDirection.ASC): SelectQueryBuilder {
+    fun orderBy(
+        value: String,
+        direction: SqlOrderDirection = SqlOrderDirection.ASC
+    ): SelectQueryBuilder {
         orderByApplied = true
         orderBy.add(if (direction == SqlOrderDirection.DESC) "$value DESC" else value)
         return this
@@ -148,7 +152,7 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     }
 
     fun having(having: String, vararg args: Pair<String, Any>): SelectQueryBuilder {
-        if (selectionApplied) {
+        if (whereCauseApplied) {
             throw IllegalStateException("Query having was already applied.")
         }
 
@@ -158,59 +162,69 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     }
 
 
-    fun whereArgs(select: String, vararg args: Pair<String, Any>): SelectQueryBuilder {
-        if (selectionApplied) {
+    fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): SelectQueryBuilder {
+        if (whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        selectionApplied = true
-        useNativeSelection = false
-        selection = applyArguments(select, *args)
+        whereCauseApplied = true
+        useNativeWhereCause = false
+        simpleWhereCause = applyArguments(whereCause, *whereArgs)
         return this
     }
 
-    fun whereArgs(select: String): SelectQueryBuilder {
-        if (selectionApplied) {
+    fun whereArgs(whereCause: String): SelectQueryBuilder {
+        if (whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        selectionApplied = true
-        useNativeSelection = false
-        selection = select
+        whereCauseApplied = true
+        useNativeWhereCause = false
+        simpleWhereCause = whereCause
         return this
     }
 
-    fun whereSimple(select: String, vararg args: Any): SelectQueryBuilder {
-        if (selectionApplied) {
+    fun whereSimple(whereCause: String, vararg whereArgs: Any): SelectQueryBuilder {
+        if (whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        selectionApplied = true
-        useNativeSelection = true
-        selection = select
-        nativeSelectionArgs = args.map { it.toString() }.toTypedArray()
+        whereCauseApplied = true
+        useNativeWhereCause = true
+        simpleWhereCause = whereCause
+        nativeWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
 }
 
 class AndroidSdkDatabaseSelectQueryBuilder(
-        private val db: SQLiteDatabase,
-        tableName: String
+    private val db: SQLiteDatabase,
+    tableName: String
 ) : SelectQueryBuilder(tableName) {
 
     override fun execQuery(
-            distinct: Boolean,
-            tableName: String,
-            columns: Array<String>?,
-            selection: String?,
-            selectionArgs: Array<out String>?,
-            groupBy: String?,
-            having: String?,
-            orderBy: String?,
-            limit: String?
+        distinct: Boolean,
+        tableName: String,
+        columns: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+        groupBy: String?,
+        having: String?,
+        orderBy: String?,
+        limit: String?
     ): Cursor {
-        return db.query(distinct, tableName, columns, selection, selectionArgs, groupBy, having, orderBy, limit)
+        return db.query(
+            distinct,
+            tableName,
+            columns,
+            selection,
+            selectionArgs,
+            groupBy,
+            having,
+            orderBy,
+            limit
+        )
     }
 
 }

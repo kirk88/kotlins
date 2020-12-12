@@ -1,4 +1,4 @@
-package com.easy.kotlins.http.core
+package com.easy.kotlins.http
 
 import java.io.File
 
@@ -8,5 +8,4 @@ import java.io.File
  */
 interface OkDownloadCallback : OkCallback<File> {
     fun onProgress(downloadedBytes: Long, totalBytes: Long)
-    fun onCancel()
 }
