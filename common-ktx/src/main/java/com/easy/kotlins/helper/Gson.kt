@@ -42,21 +42,13 @@ inline fun <reified T> JsonArray.parse(): List<T>{
     return gson.fromJson(this, listType(T::class.java))
 }
 
-fun String.toJsonObject(): JsonObject {
-    return parseJsonObject(this)
-}
-
-fun String.toJsonArray(): JsonArray {
-    return  parseJsonObject(this)
-}
-
 fun String.toJsonElement(): JsonElement? {
     return  gson.fromJson(this, JsonElement::class.java)
 }
 
-fun Any.toJsonObject(): JsonObject = gson.fromJson(this.toJson(), JsonObject::class.java)
+fun Any.toJsonObject(): JsonObject = if(this is String) parseJsonObject(this) else gson.fromJson(this.toJson(), JsonObject::class.java)
 
-fun Any.toJsonArray(): JsonArray =  gson.fromJson(this.toJson(), JsonArray::class.java)
+fun Any.toJsonArray(): JsonArray =  if(this is String) parseJsonObject(this) else gson.fromJson(this.toJson(), JsonArray::class.java)
 
 fun Any?.toJsonOrNull(): String? = this?.let { gson.toJson(it) }
 
@@ -74,15 +66,15 @@ fun JsonObject.getAsString(name: String, defaultValue: String? = null): String? 
 
 fun JsonObject.getAsNumber(name: String, defaultValue: Number? = null): Number? = this.get(name)?.asNumber ?: defaultValue
 
-fun JsonObject.getAsDouble(name: String, defaultValue: Double = 0.D): Double = this.get(name)?.asDouble ?: defaultValue
+fun JsonObject.getAsDouble(name: String, defaultValue: Double = 0.toDouble()): Double = this.get(name)?.asDouble ?: defaultValue
 
-fun JsonObject.getAsFloat(name: String, defaultValue: Float = 0.F): Float = this.get(name)?.asFloat ?: defaultValue
+fun JsonObject.getAsFloat(name: String, defaultValue: Float = 0.toFloat()): Float = this.get(name)?.asFloat ?: defaultValue
 
-fun JsonObject.getAsLong(name: String, defaultValue: Long = 0.L): Long = this.get(name)?.asLong ?: defaultValue
+fun JsonObject.getAsLong(name: String, defaultValue: Long = 0.toLong()): Long = this.get(name)?.asLong ?: defaultValue
 
-fun JsonObject.getAsInt(name: String, defaultValue: Int = 0.I): Int = this.get(name)?.asInt ?: defaultValue
+fun JsonObject.getAsInt(name: String, defaultValue: Int = 0): Int = this.get(name)?.asInt ?: defaultValue
 
-fun JsonObject.getAsShort(name: String, defaultValue: Short = 0.S): Short = this.get(name)?.asShort ?: defaultValue
+fun JsonObject.getAsShort(name: String, defaultValue: Short = 0.toShort()): Short = this.get(name)?.asShort ?: defaultValue
 
 fun JsonObject.getAsByte(name: String, defaultValue: Byte? = null): Byte? = this.get(name)?.asByte ?: defaultValue
 

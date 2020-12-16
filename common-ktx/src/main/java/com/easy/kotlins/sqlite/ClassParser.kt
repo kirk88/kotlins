@@ -18,11 +18,12 @@
 
 package com.easy.kotlins.sqlite.db
 
+import com.easy.kotlins.sqlite.ClassParserConstructor
+import com.easy.kotlins.sqlite.Column
+import com.easy.kotlins.sqlite.ColumnConverter
+import com.easy.kotlins.sqlite.IgnoreInTable
 import com.easy.kotlins.sqlite.db.JavaSqliteUtils.PRIMITIVES_TO_WRAPPERS
 import java.lang.reflect.Modifier
-
-@Target(AnnotationTarget.CONSTRUCTOR)
-annotation class ClassParserConstructor
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun <reified T : Any> classParser(): RowParser<T> = classParser(T::class.java)
@@ -31,7 +32,9 @@ inline fun <reified T : Any> classParser(): RowParser<T> = classParser(T::class.
 internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
     val applicableConstructors = clazz.declaredConstructors.filter { ctr ->
         if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
-        val types = ctr.parameterTypes
+        val types = ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
+            type to annotations
+        }
         return@filter types.isNotEmpty() && types.all(::hasApplicableType)
     }
 
@@ -41,27 +44,39 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
 
     val preferredConstructor = if (applicableConstructors.size > 1) {
         applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
-                ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
+            ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
     } else {
         applicableConstructors[0]
     }
 
     return object : RowParser<T> {
-        private val parameterTypes = preferredConstructor.parameterTypes
+        private val parameterAnnotations = preferredConstructor.parameterAnnotations
+        private val parameterTypes = preferredConstructor.parameterTypes.filterIndexed { index, _ ->
+            parameterAnnotations[index].none { it is IgnoreInTable }
+        }
 
+        @Suppress("UNCHECKED_CAST")
         override fun parseRow(columns: Array<Any?>): T {
             if (parameterTypes.size != columns.size) {
                 val columnsRendered = columns.joinToString(prefix = "[", postfix = "]")
-                val parameterTypesRendered = parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
-                throw IllegalArgumentException("Class parser for ${preferredConstructor.name} " +
-                        "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)")
+                val parameterTypesRendered =
+                    parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+                throw IllegalArgumentException(
+                    "Class parser for ${preferredConstructor.name} " +
+                            "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
+                )
             }
 
             for (index in parameterTypes.indices) {
                 val type = parameterTypes[index]
+                val annotations = parameterAnnotations[index]
                 val columnValue = columns[index]
-                if (!type.isInstance(columnValue)) {
-                    // 'columns' array is created in Anko so it's safe to modify it directly
+
+                val column = annotations.find { it is Column } as Column?
+                if (columnValue != null && column != null) {
+                    val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
+                    columns[index] = converter.toValue(columnValue)
+                } else if (!type.isInstance(columnValue)) {
                     columns[index] = castValue(columnValue, type)
                 }
             }
@@ -72,18 +87,18 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
     }
 }
 
-private fun hasApplicableType(type: Class<*>): Boolean {
-    if (type.isPrimitive) {
+private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
+    if (type.first.isPrimitive || type.second.any { it is IgnoreInTable }) {
         return true
     }
 
-    return when (type) {
+    return when (type.first) {
         java.lang.String::class.java, java.lang.CharSequence::class.java,
         java.lang.Long::class.java, java.lang.Integer::class.java,
         java.lang.Byte::class.java, java.lang.Character::class.java,
         java.lang.Boolean::class.java, java.lang.Float::class.java,
         java.lang.Double::class.java, java.lang.Short::class.java -> true
-        else -> false
+        else -> type.second.any { it is Column }
     }
 }
 
@@ -141,7 +156,8 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
     }
 
     if (value is String && value.length == 1
-            && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)) {
+        && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)
+    ) {
         return value[0]
     }
 

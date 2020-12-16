@@ -22,8 +22,16 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Parcel
+import android.os.Parcelable
+import com.easy.kotlins.helper.parseJsonArray
+import com.easy.kotlins.helper.toJson
+import com.easy.kotlins.sqlite.*
+import com.google.gson.annotations.SerializedName
+import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
+import kotlin.reflect.KClass
 
 enum class SqlOrderDirection { ASC, DESC }
 
@@ -33,59 +41,110 @@ fun SQLiteDatabase.insert(tableName: String, vararg values: Pair<String, Any?>):
     return insert(tableName, null, values.toContentValues())
 }
 
+fun SQLiteDatabase.insert(tableName: String, valuesFrom: Any): Long {
+    return insert(tableName, values = valuesFrom.toPairs())
+}
+
 fun SQLiteDatabase.insertOrThrow(tableName: String, vararg values: Pair<String, Any?>): Long {
     return insertOrThrow(tableName, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.insertWithOnConflict(tableName: String, conflictAlgorithm: Int, vararg values: Pair<String, Any?>): Long {
+fun SQLiteDatabase.insertOrThrow(tableName: String, valuesFrom: Any): Long {
+    return insertOrThrow(tableName, values = valuesFrom.toPairs())
+}
+
+fun SQLiteDatabase.insertWithOnConflict(
+    tableName: String,
+    conflictAlgorithm: Int,
+    vararg values: Pair<String, Any?>
+): Long {
     return insertWithOnConflict(tableName, null, values.toContentValues(), conflictAlgorithm)
+}
+
+fun SQLiteDatabase.insertWithOnConflict(
+    tableName: String,
+    conflictAlgorithm: Int,
+    valuesFrom: Any
+): Long {
+    return insertWithOnConflict(tableName, conflictAlgorithm, values = valuesFrom.toPairs())
 }
 
 fun SQLiteDatabase.replace(tableName: String, vararg values: Pair<String, Any?>): Long {
     return replace(tableName, null, values.toContentValues())
 }
 
+fun SQLiteDatabase.replace(tableName: String, valuesFrom: Any): Long {
+    return replace(tableName, values = valuesFrom.toPairs())
+}
+
 fun SQLiteDatabase.replaceOrThrow(tableName: String, vararg values: Pair<String, Any?>): Long {
     return replaceOrThrow(tableName, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.transaction(code: SQLiteDatabase.() -> Unit) {
-    try {
+fun SQLiteDatabase.replaceOrThrow(tableName: String, valuesFrom: Any): Long {
+    return replaceOrThrow(tableName, values = valuesFrom.toPairs())
+}
+
+fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T? {
+    return try {
         beginTransaction()
-        code()
+        val result = action()
         setTransactionSuccessful()
+        result
     } catch (e: TransactionAbortException) {
-        // Do nothing, just stop the transaction
+        null
     } finally {
         endTransaction()
     }
 }
 
 fun SQLiteDatabase.select(tableName: String): SelectQueryBuilder {
-    return AndroidSdkDatabaseSelectQueryBuilder(this, tableName)
+    return AndroidDatabaseSelectQueryBuilder(this, tableName)
 }
 
 fun SQLiteDatabase.select(tableName: String, vararg columns: String): SelectQueryBuilder {
-    val builder = AndroidSdkDatabaseSelectQueryBuilder(this, tableName)
+    val builder = AndroidDatabaseSelectQueryBuilder(this, tableName)
     builder.columns(*columns)
     return builder
 }
 
-fun SQLiteDatabase.update(tableName: String, vararg values: Pair<String, Any?>): UpdateQueryBuilder {
+fun SQLiteDatabase.update(
+    tableName: String,
+    vararg values: Pair<String, Any?>
+): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, tableName, values)
 }
 
-fun SQLiteDatabase.delete(tableName: String, whereClause: String, vararg args: Pair<String, Any>): Int {
-    return delete(tableName, applyArguments(whereClause, *args), null)
+fun SQLiteDatabase.update(
+    tableName: String,
+    valuesFrom: Any
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, tableName, valuesFrom.toPairs())
 }
 
-fun SQLiteDatabase.createTable(tableName: String, ifNotExists: Boolean = false, vararg columns: Pair<String, SqlType>) {
+fun SQLiteDatabase.delete(
+    tableName: String,
+    whereClause: String = "",
+    vararg whereArgs: Pair<String, Any>
+): Int {
+    return delete(tableName, applyArguments(whereClause, *whereArgs), null)
+}
+
+fun SQLiteDatabase.createTable(
+    tableName: String,
+    ifNotExists: Boolean = false,
+    vararg columns: Pair<String, SqlType>
+) {
     val escapedTableName = tableName.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     execSQL(
-            columns.joinToString(", ", prefix = "CREATE TABLE $ifNotExistsText `$escapedTableName`(", postfix = ");") { col ->
-                "${col.first} ${col.second.render()}"
-            }
+        columns.joinToString(
+            ", ",
+            prefix = "CREATE TABLE $ifNotExistsText `$escapedTableName`(",
+            postfix = ");"
+        ) { col ->
+            "${col.first} ${col.second.render()}"
+        }
     )
 }
 
@@ -95,17 +154,23 @@ fun SQLiteDatabase.dropTable(tableName: String, ifExists: Boolean = false) {
     execSQL("DROP TABLE $ifExistsText `$escapedTableName`;")
 }
 
-fun SQLiteDatabase.createIndex(indexName: String, tableName: String, unique: Boolean = false, ifNotExists: Boolean = false, vararg columns: String) {
+fun SQLiteDatabase.createIndex(
+    indexName: String,
+    tableName: String,
+    unique: Boolean = false,
+    ifNotExists: Boolean = false,
+    vararg columns: String
+) {
     val escapedIndexName = indexName.replace("`", "``")
     val escapedTableName = tableName.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     val uniqueText = if (unique) "UNIQUE" else ""
     execSQL(
-            columns.joinToString(
-                    separator = ",",
-                    prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
-                    postfix = ");"
-            )
+        columns.joinToString(
+            separator = ",",
+            prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
+            postfix = ");"
+        )
     )
 }
 
@@ -115,7 +180,11 @@ fun SQLiteDatabase.dropIndex(indexName: String, ifExists: Boolean = false) {
     execSQL("DROP INDEX $ifExistsText `$escapedIndexName`;")
 }
 
-fun SQLiteDatabase.addColumn(tableName: String, ifNotExists: Boolean = false, column: Pair<String, SqlType>) {
+fun SQLiteDatabase.createColumn(
+    tableName: String,
+    ifNotExists: Boolean = false,
+    column: Pair<String, SqlType>
+) {
     val escapedTableName = tableName.replace("`", "``")
     val exists = if (ifNotExists) {
         rawQuery("SELECT * FROM $tableName LIMIT 0", null).use {
@@ -129,10 +198,14 @@ fun SQLiteDatabase.addColumn(tableName: String, ifNotExists: Boolean = false, co
     }
 }
 
-fun SQLiteDatabase.addColumns(tableName: String, ifNotExists: Boolean = false, vararg columns: Pair<String, SqlType>) {
+fun SQLiteDatabase.createColumns(
+    tableName: String,
+    ifNotExists: Boolean = false,
+    vararg columns: Pair<String, SqlType>
+) {
     transaction {
         columns.forEach {
-            addColumn(tableName, ifNotExists, it)
+            createColumn(tableName, ifNotExists, it)
         }
     }
 }
@@ -189,19 +262,41 @@ fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
     return values
 }
 
+@Suppress("UNCHECKED_CAST")
+fun Any.toPairs(): Array<Pair<String, Any?>> {
+    if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
+        throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
+    }
+    return javaClass.declaredFields.filterNot {
+        it.annotations.forEach { a-> println(a.annotationClass.simpleName) }
+        Modifier.isTransient(it.modifiers)
+                || Modifier.isStatic(it.modifiers)
+                || it.isAnnotationPresent(IgnoreInTable::class.java)
+    }.map {
+        it.isAccessible = true
+        if(it.isAnnotationPresent(Column::class.java)){
+            val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
+            val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
+            column.name.ifEmpty { it.name  } to it.get(this)?.let { value -> converter.fromValue(value) }
+        }else {
+            it.name to it.get(this)
+        }
+    }.toTypedArray()
+}
+
 abstract class ManagedSQLiteOpenHelper(
-        context: Context,
-        name: String?,
-        factory: SQLiteDatabase.CursorFactory? = null,
-        version: Int = 1
+    context: Context,
+    name: String?,
+    factory: SQLiteDatabase.CursorFactory? = null,
+    version: Int = 1
 ) : SQLiteOpenHelper(context, name, factory, version) {
 
     private val counter = AtomicInteger()
     private var db: SQLiteDatabase? = null
 
-    fun <T> use(f: SQLiteDatabase.() -> T): T {
+    fun <T> use(action: SQLiteDatabase.() -> T): T {
         try {
-            return openDatabase().f()
+            return openDatabase().action()
         } finally {
             closeDatabase()
         }
@@ -221,4 +316,99 @@ abstract class ManagedSQLiteOpenHelper(
             db?.close()
         }
     }
+}
+
+class ReferencesConverter : ColumnConverter<List<Pie>, String> {
+    override fun fromValue(value: List<Pie>): String {
+        return value.toJson()
+    }
+
+    override fun toValue(value: String): List<Pie> {
+        return parseJsonArray(value) ?: emptyList()
+    }
+}
+
+data class Pie(
+    val id: Int? = null,
+    var size: String? = null,
+    var result: String? = null,
+    var color: String? = null,
+    @SerializedName("jj")
+    val unit: String? = null,
+    val dir: String? = null,
+    val title: String? = null
+): Parcelable{
+    constructor(parcel: Parcel) : this(
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeValue(id)
+        parcel.writeString(size)
+        parcel.writeString(result)
+        parcel.writeString(color)
+        parcel.writeString(unit)
+        parcel.writeString(dir)
+        parcel.writeString(title)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Pie> {
+        override fun createFromParcel(parcel: Parcel): Pie {
+            return Pie(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Pie?> {
+            return arrayOfNulls(size)
+        }
+    }
+
+}
+
+@TableClass
+data class SimpleHealthProject (
+    @Transient
+    var id: Long = 0,
+    val bid: String?,
+    val name: String?,
+    @Column(converter = ReferencesConverter::class)
+    val references: List<Pie>?,//参考值
+    @Column(name = "title")
+    var title: String? = null,
+    @IgnoreInTable
+    val analyze: String? = null,
+    @IgnoreInTable
+    var guide: String? = null,
+    @IgnoreInTable
+    var tip: String? = null
+)
+
+fun main() {
+    val t = SimpleHealthProject(bid = "100", name="jack", references = listOf(Pie()), title = "fdsa")
+
+    t.javaClass.declaredFields.filterNot {
+        it.declaredAnnotations.forEach { a -> println(a.annotationClass.simpleName) }
+        Modifier.isTransient(it.modifiers)
+                || Modifier.isStatic(it.modifiers)
+                || it.isAnnotationPresent(IgnoreInTable::class.java)
+    }.map {
+        it.isAccessible = true
+        if(it.isAnnotationPresent(Column::class.java)){
+            val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
+            val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
+            column.name.ifEmpty { it.name  } to it.get(t)?.let { value -> converter.fromValue(value) }
+        }else {
+            it.name to it.get(t)
+        }
+    }.toTypedArray()
 }

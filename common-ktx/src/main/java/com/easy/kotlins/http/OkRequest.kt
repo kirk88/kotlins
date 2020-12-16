@@ -483,9 +483,7 @@ class OkRequest constructor(private val method: OkRequestMethod) {
             OkCallbacks.onError(callback, failure!!)
             return
         }
-        if (!canceled) {
-            OkCallbacks.onStart(callback)
-        }
+        OkCallbacks.onStart(callback)
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 try {

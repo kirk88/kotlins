@@ -41,8 +41,8 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     private var simpleWhereCause: String? = null
     private var nativeWhereArgs: Array<out String>? = null
 
-    fun <T> exec(f: Cursor.() -> T): T {
-        return doExec().use(f)
+    fun <T> exec(action: Cursor.() -> T): T {
+        return doExec().use(action)
     }
 
     fun <T : Any> parseSingle(parser: RowParser<T>): Unit = doExec().use {
@@ -151,13 +151,13 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
-    fun having(having: String, vararg args: Pair<String, Any>): SelectQueryBuilder {
+    fun having(having: String, vararg havingArgs: Pair<String, Any>): SelectQueryBuilder {
         if (whereCauseApplied) {
             throw IllegalStateException("Query having was already applied.")
         }
 
         havingApplied = true
-        this.having = applyArguments(having, *args)
+        this.having = applyArguments(having, *havingArgs)
         return this
     }
 
@@ -198,7 +198,7 @@ abstract class SelectQueryBuilder(private val tableName: String) {
 
 }
 
-class AndroidSdkDatabaseSelectQueryBuilder(
+class AndroidDatabaseSelectQueryBuilder(
     private val db: SQLiteDatabase,
     tableName: String
 ) : SelectQueryBuilder(tableName) {

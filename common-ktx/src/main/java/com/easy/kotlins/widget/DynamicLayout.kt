@@ -21,7 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
-import com.example.dynamiclayout.R
+import com.easy.kotlins.R
 
 class DynamicLayout @JvmOverloads constructor(
     context: Context,

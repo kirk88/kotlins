@@ -69,9 +69,6 @@ fun View.longToast(@StringRes msgId: Int) {
     context.longToast(msgId)
 }
 
-val Fragment.isActive: Boolean
-    get() = isVisible || userVisibleHint
-
 fun Fragment.finishActivity() = activity?.finish()
 
 inline fun <T : Fragment> T.withBundle(crossinline action: Bundle.() -> Unit): T = apply {

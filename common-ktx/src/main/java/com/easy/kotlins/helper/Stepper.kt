@@ -17,11 +17,11 @@ interface SuspendedTask {
 class Stepper {
 
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
-    private var job: Job? = null
-    private var context: CoroutineContext? = null
+    private var runningJob: Job? = null
+    private var runningContext: CoroutineContext? = null
 
     val coroutineContext: CoroutineContext
-        get() = context ?: EmptyCoroutineContext
+        get() = runningContext ?: EmptyCoroutineContext
 
     suspend fun send(
         delayed: Long = 0,
@@ -47,11 +47,11 @@ class Stepper {
     }
 
     fun start(context: CoroutineContext): Stepper {
-        CoroutineScope(context.plus(SupervisorJob().also {
-            this.job = it
-        }).also {
-            this.context = it
-        }).launch {
+        val scope = CoroutineScope(Dispatchers.Main.immediate + context + SupervisorJob()).also {
+            runningContext = it.coroutineContext
+        }
+
+        runningJob = scope.launch {
             start()
         }
         return this
@@ -67,7 +67,7 @@ class Stepper {
 
     fun cancel() {
         channel.cancel()
-        job?.cancel()
+        runningJob?.cancel()
     }
 
     fun close() {

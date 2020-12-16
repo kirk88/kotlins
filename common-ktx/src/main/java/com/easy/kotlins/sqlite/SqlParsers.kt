@@ -15,6 +15,7 @@
  */
 
 @file:Suppress("unused")
+
 package com.easy.kotlins.sqlite.db
 
 import android.database.Cursor
@@ -131,7 +132,7 @@ private fun Cursor.getValue(index: Int): Any? {
 }
 
 private fun Cursor.getColumnValue(index: Int): ColumnValue {
-    return ColumnValue(this, index)
+    return ColumnValue(this.getValue(index))
 }
 
 private fun readColumnsArray(cursor: Cursor): Array<Any?> {
@@ -142,6 +143,7 @@ private fun readColumnsArray(cursor: Cursor): Array<Any?> {
     }
     return arr
 }
+
 private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
     val map = hashMapOf<String, ColumnValue>()
@@ -177,27 +179,20 @@ private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, Any?>
     }
 }
 
-class ColumnValue(private val cursor: Cursor, private val index: Int) {
-    val isNull: Boolean = cursor.isNull(index)
+class ColumnValue internal constructor(private val value: Any?) {
+    fun isNull(): Boolean = value == null
 
-    val stringValue: String?
-        get() = cursor.getString(index)
+    fun asString(defaultValue: String = ""): String = value?.toString() ?: defaultValue
 
-    val shortValue: Short
-        get() = cursor.getShort(index)
+    fun asBlob(defaultValue: ByteArray = byteArrayOf()) = value as? ByteArray ?: defaultValue
 
-    val intValue: Int
-        get() = cursor.getInt(index)
+    fun asLong(defaultValue: Long = 0.toLong()) = value as? Long ?: defaultValue
 
-    val longValue: Long
-        get() = cursor.getLong(index)
+    fun asShort(defaultValue: Short = 0.toShort()) = (value as? Long)?.toShort() ?: defaultValue
 
-    val floatValue: Float
-        get() = cursor.getFloat(index)
+    fun asInt(defaultValue: Int = 0) = (value as? Long)?.toInt() ?: defaultValue
 
-    val doubleValue: Double
-        get() = cursor.getDouble(index)
+    fun asDouble(defaultValue: Double = 0.toDouble()) = value as? Double ?: defaultValue
 
-    val blobValue: ByteArray
-        get() = cursor.getBlob(index)
+    fun asFloat(defaultValue: Float = 0.toFloat()) = (value as? Double)?.toFloat() ?: defaultValue
 }

@@ -383,7 +383,7 @@ class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
         pairs[this] = value
     }
 
-    fun put(key: String, value: T) {
+    operator fun set(key: String, value: T) {
         pairs[key] = value
     }
 
@@ -425,12 +425,11 @@ inline fun requestPairsOf(
     crossinline action: RequestPairs<Any?>.() -> Unit = {}
 ): RequestPairs<Any?> {
     return RequestPairs<Any?>().apply {
-        val source = if (copyFrom is String) copyFrom.toJsonObject() else copyFrom.toJsonObject()
-        source.forEach { key, element ->
+        copyFrom.toJsonObject().forEach { key, element ->
             when {
-                element == null || element.isJsonNull && serializeNulls -> key - element.toString()
-                element.isJsonArray || element.isJsonObject -> key - element.toString()
-                element.isJsonPrimitive -> key - element.asString
+                element == null || element.isJsonNull && serializeNulls -> this[key] = element.toString()
+                element.isJsonArray || element.isJsonObject -> this[key] = element.toString()
+                element.isJsonPrimitive -> this[key] = element.asString
             }
         }
     }.apply(action)
