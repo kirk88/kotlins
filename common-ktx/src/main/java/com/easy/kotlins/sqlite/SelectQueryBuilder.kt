@@ -1,19 +1,3 @@
-/*
- * Copyright 2016 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:Suppress("unused", "NOTHING_TO_INLINE")
 
 package com.easy.kotlins.sqlite.db
@@ -41,42 +25,39 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     private var simpleWhereCause: String? = null
     private var nativeWhereArgs: Array<out String>? = null
 
+    fun <T : Any> parseSingle(parser: RowParser<T>): T = exec {
+        parseSingle(parser)
+    }
+
+    fun <T : Any> parseOpt(parser: RowParser<T>): T? = exec {
+        parseOpt(parser)
+    }
+
+    fun <T : Any> parseList(parser: RowParser<T>): List<T> = exec {
+        parseList(parser)
+    }
+
+    fun <T : Any> parseSingle(parser: MapRowParser<T>): T = exec {
+        parseSingle(parser)
+    }
+
+    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = exec {
+        parseOpt(parser)
+    }
+
+    fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = exec {
+        parseList(parser)
+    }
+
     fun <T> exec(action: Cursor.() -> T): T {
-        return doExec().use(action)
-    }
-
-    fun <T : Any> parseSingle(parser: RowParser<T>): Unit = doExec().use {
-        it.parseSingle(parser)
-    }
-
-    fun <T : Any> parseOpt(parser: RowParser<T>): Unit = doExec().use {
-        it.parseOpt(parser)
-    }
-
-    fun <T : Any> parseList(parser: RowParser<T>): Unit = doExec().use {
-        it.parseList(parser)
-    }
-
-    fun <T : Any> parseSingle(parser: MapRowParser<T>): T = doExec().use {
-        it.parseSingle(parser)
-    }
-
-    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = doExec().use {
-        it.parseOpt(parser)
-    }
-
-    fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = doExec().use {
-        it.parseList(parser)
-    }
-
-    private fun doExec(): Cursor {
         val finalWhereCause = if (whereCauseApplied) simpleWhereCause else null
         val finalWhereArgs = if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
         val finalColumns = if (columnsApplied) columns.toTypedArray() else null
         val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
         val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null
         return execQuery(
-            distinct, tableName,
+            distinct,
+            tableName,
             finalColumns,
             finalWhereCause,
             finalWhereArgs,
@@ -84,7 +65,7 @@ abstract class SelectQueryBuilder(private val tableName: String) {
             having,
             finalOrderBy,
             limit
-        )
+        ).use(action)
     }
 
     protected abstract fun execQuery(

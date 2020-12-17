@@ -1,19 +1,3 @@
-/*
- * Copyright 2016 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:Suppress("unused")
 
 package com.easy.kotlins.sqlite.db
@@ -22,20 +6,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.os.Parcel
-import android.os.Parcelable
-import com.easy.kotlins.helper.parseJsonArray
-import com.easy.kotlins.helper.toJson
-import com.easy.kotlins.sqlite.*
-import com.google.gson.annotations.SerializedName
+import com.easy.kotlins.helper.opt
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
-import kotlin.reflect.KClass
 
 enum class SqlOrderDirection { ASC, DESC }
-
-class TransactionAbortException : RuntimeException()
 
 fun SQLiteDatabase.insert(tableName: String, vararg values: Pair<String, Any?>): Long {
     return insert(tableName, null, values.toContentValues())
@@ -85,17 +61,16 @@ fun SQLiteDatabase.replaceOrThrow(tableName: String, valuesFrom: Any): Long {
     return replaceOrThrow(tableName, values = valuesFrom.toPairs())
 }
 
-fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T? {
-    return try {
+fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
+    val result: T
+    try {
         beginTransaction()
-        val result = action()
+        result = action()
         setTransactionSuccessful()
-        result
-    } catch (e: TransactionAbortException) {
-        null
     } finally {
         endTransaction()
     }
+    return result
 }
 
 fun SQLiteDatabase.select(tableName: String): SelectQueryBuilder {
@@ -204,8 +179,8 @@ fun SQLiteDatabase.createColumns(
     vararg columns: Pair<String, SqlType>
 ) {
     transaction {
-        columns.forEach {
-            createColumn(tableName, ifNotExists, it)
+        for (column in columns) {
+            createColumn(tableName, ifNotExists, column)
         }
     }
 }
@@ -242,7 +217,7 @@ internal fun applyArguments(whereClause: String, args: Map<String, Any>): String
     return buffer.toString()
 }
 
-fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
+internal fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
     val values = ContentValues()
     for ((key, value) in this) {
         when (value) {
@@ -263,23 +238,27 @@ fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun Any.toPairs(): Array<Pair<String, Any?>> {
+internal fun Any.toPairs(): Array<Pair<String, Any?>> {
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
     }
     return javaClass.declaredFields.filterNot {
-        it.annotations.forEach { a-> println(a.annotationClass.simpleName) }
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
-                || it.isAnnotationPresent(IgnoreInTable::class.java)
+                || it.isAnnotationPresent(IgnoredOnTable::class.java)
     }.map {
         it.isAccessible = true
-        if(it.isAnnotationPresent(Column::class.java)){
-            val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
-            column.name.ifEmpty { it.name  } to it.get(this)?.let { value -> converter.fromValue(value) }
-        }else {
-            it.name to it.get(this)
+
+        val value = it.get(this)
+        if (it.isAnnotationPresent(ColumnConverter::class.java)) {
+            val annotation = it.getAnnotation(ColumnConverter::class.java)
+                ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
+            it.name to if (value != null) ColumnConverters.get(annotation.converter)
+                .fromValue(value) else value
+        } else {
+            it.name to if (it.type == java.lang.Boolean.TYPE || it.type == java.lang.Boolean::class.java)
+                (value as Boolean? ?: false).opt(1, 0)
+            else value
         }
     }.toTypedArray()
 }
@@ -294,9 +273,12 @@ abstract class ManagedSQLiteOpenHelper(
     private val counter = AtomicInteger()
     private var db: SQLiteDatabase? = null
 
-    fun <T> use(action: SQLiteDatabase.() -> T): T {
+    fun <T> use(inTransaction: Boolean = false, action: SQLiteDatabase.() -> T): T {
         try {
-            return openDatabase().action()
+            return openDatabase().let {
+                if (inTransaction) it.transaction(action)
+                else it.action()
+            }
         } finally {
             closeDatabase()
         }
