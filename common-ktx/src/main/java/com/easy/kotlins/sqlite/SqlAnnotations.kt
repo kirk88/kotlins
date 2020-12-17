@@ -9,11 +9,11 @@ annotation class TableClass
 annotation class ClassParserConstructor
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.SOURCE)
+@Repeatable
 annotation class IgnoreInTable
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.RUNTIME)
+@Repeatable
 annotation class Column(
     val name: String = "",
     val converter: KClass<out ColumnConverter<out Any, out Any>> = DefaultColumnConverter::class
