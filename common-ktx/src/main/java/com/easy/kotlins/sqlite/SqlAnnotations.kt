@@ -12,6 +12,7 @@ annotation class ClassParserConstructor
 annotation class IgnoredOnTable
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
-annotation class ColumnConverter(
+annotation class Column(
+    val name: String = "",
     val converter: KClass<out ValueConverter<out Any, out Any>> = DefaultValueConverter::class
 )

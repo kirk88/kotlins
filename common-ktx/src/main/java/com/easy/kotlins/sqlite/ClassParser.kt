@@ -52,7 +52,7 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
                 val annotations = parameterAnnotations[index]
                 val column = row[index]
 
-                val annotation = annotations.find { it is ColumnConverter } as ColumnConverter?
+                val annotation = annotations.find { it is Column } as Column?
                 if (!column.isNull() && annotation != null) {
                     args[index] = ColumnConverters.get(annotation.converter).toValue(column.value()!!)
                 } else {
@@ -67,7 +67,7 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
 }
 
 private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
-    if (type.first.isPrimitive || type.second.any { it is ColumnConverter }) {
+    if (type.first.isPrimitive || type.second.any { it is Column }) {
         return true
     }
 

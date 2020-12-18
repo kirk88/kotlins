@@ -250,10 +250,10 @@ internal fun Any.toPairs(): Array<Pair<String, Any?>> {
         it.isAccessible = true
 
         val value = it.get(this)
-        if (it.isAnnotationPresent(ColumnConverter::class.java)) {
-            val annotation = it.getAnnotation(ColumnConverter::class.java)
+        if (it.isAnnotationPresent(Column::class.java)) {
+            val annotation = it.getAnnotation(Column::class.java)
                 ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            it.name to if (value != null) ColumnConverters.get(annotation.converter)
+            annotation.name.ifEmpty { it.name } to if (value != null) ColumnConverters.get(annotation.converter)
                 .fromValue(value) else value
         } else {
             it.name to if (it.type == java.lang.Boolean.TYPE || it.type == java.lang.Boolean::class.java)
