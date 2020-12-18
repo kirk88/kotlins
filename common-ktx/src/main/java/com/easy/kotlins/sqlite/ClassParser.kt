@@ -61,7 +61,7 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
             }
 
             @Suppress("UNCHECKED_CAST")
-            return preferredConstructor.newInstance(args) as T
+            return preferredConstructor.newInstance(*args) as T
         }
     }
 }
