@@ -394,7 +394,8 @@ class OkRequest constructor(private val method: OkRequestMethod) {
                 OkRequestMethod.PATCH -> it.patch(body)
             }
         }.let {
-            client.newCall(extension?.shouldInterceptRequest(it) ?: it.build())
+            val request: Request = it.build()
+            client.newCall(extension?.shouldInterceptRequest(request) ?: request)
         }
     }
 
@@ -543,7 +544,9 @@ class OkRequest constructor(private val method: OkRequestMethod) {
         try {
             check(extension != null && extension is DownloadExtension) { "The extension is null or not a DownloadExtension" }
 
-            (extension as DownloadExtension).use {
+            val downloadException = extension as DownloadExtension
+
+            downloadException.use {
                 val file = it.onResponse(response, object : OnProgressListener {
                     override fun onProgressChanged(downloadedBytes: Long, totalBytes: Long) {
                         OkCallbacks.onProgress(

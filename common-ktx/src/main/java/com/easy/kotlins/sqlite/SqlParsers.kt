@@ -198,30 +198,22 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
     }
 
     if (value is Long) {
-        if (type == java.lang.Integer.TYPE || type == java.lang.Integer::class.java) {
-            return value.toInt()
-        } else if (type == java.lang.Short.TYPE || type == java.lang.Short::class.java) {
-            return value.toShort()
-        } else if (type == java.lang.Byte.TYPE || type == java.lang.Byte::class.java) {
-            return value.toByte()
-        } else if (type == java.lang.Boolean.TYPE || type == java.lang.Boolean::class.java) {
-            return value != 0L
-        } else if (type == java.lang.Character.TYPE || type == java.lang.Character::class.java) {
-            return value.toChar()
+        when (type) {
+            java.lang.Integer.TYPE, java.lang.Integer::class.java -> return value.toInt()
+            java.lang.Short.TYPE, java.lang.Short::class.java -> return value.toShort()
+            java.lang.Byte.TYPE, java.lang.Byte::class.java -> return value.toByte()
+            java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> return value != 0L
+            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toChar()
         }
     }
 
     if (value is Int) {
-        if (type == java.lang.Long.TYPE || type == java.lang.Long::class.java) {
-            return value.toLong()
-        } else if (type == java.lang.Short.TYPE || type == java.lang.Short::class.java) {
-            return value.toShort()
-        } else if (type == java.lang.Byte.TYPE || type == java.lang.Byte::class.java) {
-            return value.toByte()
-        } else if (type == java.lang.Boolean.TYPE || type == java.lang.Boolean::class.java) {
-            return value != 0
-        } else if (type == java.lang.Character.TYPE || type == java.lang.Character::class.java) {
-            return value.toChar()
+        when (type) {
+            java.lang.Long.TYPE, java.lang.Long::class.java -> return value.toLong()
+            java.lang.Short.TYPE, java.lang.Short::class.java -> return value.toShort()
+            java.lang.Byte.TYPE, java.lang.Byte::class.java -> return value.toByte()
+            java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> return value != 0L
+            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toChar()
         }
     }
 

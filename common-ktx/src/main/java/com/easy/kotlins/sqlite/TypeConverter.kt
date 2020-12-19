@@ -13,7 +13,7 @@ class DefaultValueConverter : ValueConverter<Any, Any> {
     override fun toValue(value: Any): Any = value
 }
 
-object ColumnConverters {
+internal object ColumnConverters {
 
     private val CONVERTERS: MutableMap<KClass<out ValueConverter<*, *>>, ValueConverter<Any, Any>> by lazy { mutableMapOf() }
 

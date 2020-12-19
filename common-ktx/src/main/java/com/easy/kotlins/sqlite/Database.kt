@@ -6,7 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.easy.kotlins.helper.opt
+import com.easy.kotlins.sqlite.ColumnReflections
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
@@ -242,25 +242,11 @@ internal fun Any.toPairs(): Array<Pair<String, Any?>> {
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
     }
-    return javaClass.declaredFields.filterNot {
+    return ColumnReflections.get(this) {
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
                 || it.isAnnotationPresent(IgnoredOnTable::class.java)
-    }.map {
-        it.isAccessible = true
-
-        val value = it.get(this)
-        if (it.isAnnotationPresent(Column::class.java)) {
-            val annotation = it.getAnnotation(Column::class.java)
-                ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            annotation.name.ifEmpty { it.name } to if (value != null) ColumnConverters.get(annotation.converter)
-                .fromValue(value) else value
-        } else {
-            it.name to if (it.type == java.lang.Boolean.TYPE || it.type == java.lang.Boolean::class.java)
-                (value as Boolean? ?: false).opt(1, 0)
-            else value
-        }
-    }.toTypedArray()
+    }
 }
 
 abstract class ManagedSQLiteOpenHelper(

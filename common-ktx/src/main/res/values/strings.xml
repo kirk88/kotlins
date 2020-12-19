@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">kotlins</string>
+
+    <string name="load_empty_tip">暂无数据~</string>
+    <string name="load_progress_tip">加载中…</string>
+    <string name="load_error_tip">加载失败~</string>
+    <string name="load_retry_tip">点击重试</string>
 </resources>

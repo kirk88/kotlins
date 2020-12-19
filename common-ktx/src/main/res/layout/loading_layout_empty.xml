@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="20dp"
-        tools:text="暂无数据" />
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.EmptyText"
+        tools:text="@string/load_empty_tip" />
 
 </LinearLayout>
