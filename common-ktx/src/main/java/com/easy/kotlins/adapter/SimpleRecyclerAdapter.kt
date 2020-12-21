@@ -12,10 +12,10 @@ abstract class SimpleRecyclerAdapter<ITEM>(
     itemLongClickable: Boolean = false
 ) : CommonRecyclerAdapter<ITEM>(
     context = context,
-    itemDelegates = itemDelegates,
     itemAnimation = itemAnimation,
     itemClickable = itemClickable,
-    itemLongClickable = itemLongClickable
+    itemLongClickable = itemLongClickable,
+    itemDelegates = itemDelegates
 ) {
 
     init {
