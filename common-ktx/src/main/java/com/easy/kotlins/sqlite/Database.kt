@@ -6,7 +6,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.easy.kotlins.sqlite.ColumnReflections
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
