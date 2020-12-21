@@ -285,7 +285,7 @@ class OkFaker(method: OkRequestMethod) {
         }
 
     @Throws(Exception::class)
-    fun <T : Any> execute(): T? {
+    fun <T : Any> execute(): T {
         return request.execute()
     }
 

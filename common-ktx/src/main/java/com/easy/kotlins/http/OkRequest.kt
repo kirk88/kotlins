@@ -450,15 +450,20 @@ class OkRequest constructor(private val method: OkRequestMethod) {
     }
 
     @Throws(Exception::class)
-    fun <T : Any> execute(): T? {
-        return transformResponse(responseMapper, rawExecute())
+    fun <T : Any> execute(): T {
+        try {
+            return transformResponse(responseMapper, rawExecute())
+                ?: throw NullPointerException("Result is null")
+        } catch (error: Throwable) {
+            throw OkException(cause = error)
+        }
     }
 
-    fun <T : Any> safeExecute(errorHandler: ((Throwable) -> Unit)? = null): T? {
+    fun <T : Any> safeExecute(errorHandler: ((OkException) -> Unit)? = null): T? {
         return try {
             execute()
         } catch (error: Throwable) {
-            errorHandler?.invoke(error)
+            errorHandler?.invoke(OkException(cause = error))
             null
         }
     }
