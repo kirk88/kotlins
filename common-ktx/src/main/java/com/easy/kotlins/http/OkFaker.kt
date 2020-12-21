@@ -435,13 +435,13 @@ inline fun requestPairsOf(
     }.apply(action)
 }
 
-fun <T : Any> OkFaker.asFlow(): Flow<T?> = flow {
+fun <T : Any> OkFaker.asFlow(): Flow<T> = flow {
     emit(execute<T>())
 }
 
 fun <T : Any> OkFaker.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
-): LiveData<T?> = liveData(context, timeoutInMillis) {
+): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(execute<T>())
 }
