@@ -1,5 +1,6 @@
 package com.easy.kotlins.helper
 
+import android.os.Bundle
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -79,6 +80,58 @@ inline fun <reified T : Fragment> FragmentManager.replaceNow(@IdRes id: Int, var
         } else {
             it.commitNow()
         }
+        fragment
+    }
+}
+
+inline fun <reified T : Fragment> FragmentManager.show(@IdRes id: Int, tag: String? = null, allowingStateLoss: Boolean = false, args: Bundle.() -> Unit = { }): Fragment {
+    return beginTransaction().let {
+        val fragmentTag = tag ?: T::class.simpleName
+
+        val fragment = findFragmentByTag(fragmentTag) ?: T::class.java.newInstance().apply {
+            arguments = Bundle().apply(args)
+        }
+
+        for (existedFragment in fragments) {
+            if (existedFragment.id != id) continue
+
+            it.hide(existedFragment)
+        }
+
+        if (fragment.isAdded) {
+            it.show(fragment)
+        } else {
+            it.add(id, fragment, fragmentTag)
+        }
+
+        if (allowingStateLoss) {
+            it.commitAllowingStateLoss()
+        } else {
+            it.commit()
+        }
+        fragment
+    }
+}
+
+/**
+ * hide fragment which showed by @see [show]
+ */
+inline fun <reified T : Fragment> FragmentManager.hide(@IdRes id: Int, tag: String? = null, allowingStateLoss: Boolean = false): Fragment? {
+    for (existedFragment in fragments) {
+        if (existedFragment.id == id) break
+        return null
+    }
+    val fragment = findFragmentByTag(tag ?: T::class.simpleName) ?: return null
+    return beginTransaction().let {
+
+        it.hide(fragment)
+
+        if (allowingStateLoss) {
+            it.commitAllowingStateLoss()
+        } else {
+            it.commit()
+        }
+
         fragment
     }
 }
