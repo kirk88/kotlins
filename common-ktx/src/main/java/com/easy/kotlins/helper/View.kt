@@ -9,6 +9,7 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
 
 /**
  * Create by LiZhanPing on 2020/8/24
@@ -173,7 +174,7 @@ var View.layoutHeight: Int
     }
 
 operator fun <T : View> View.get(@IdRes id: Int): T = findViewById<T>(id)
-        ?: error("can not find view by id: $id")
+    ?: error("can not find view by id: $id")
 
 inline fun View.onClick(crossinline action: (view: View) -> Unit) {
     setOnClickListener { v -> action(v) }
@@ -269,7 +270,11 @@ inline fun ViewGroup.forEachChildIndexed(action: (index: Int, view: View) -> Uni
 
 inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit) {
     addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-        override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
         }
 
         override fun onPageSelected(position: Int) {
@@ -280,4 +285,57 @@ inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit)
         }
 
     })
+}
+
+inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Tab) -> Unit) {
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab?) {
+            tab?.let { action(it) }
+        }
+
+        override fun onTabUnselected(tab: TabLayout.Tab?) {
+            tab?.let { action(it) }
+        }
+
+        override fun onTabReselected(tab: TabLayout.Tab?) {
+        }
+    })
+}
+
+fun TabLayout.Tab.onTabSelectedChanged(action: (tab: TabLayout.Tab) -> Unit) {
+    val parent = this.parent ?: throw IllegalStateException("Tab is not attached to TabLayout")
+    val wrapper: TabSelectedChangedListenerWrapper =
+        parent.tag as TabSelectedChangedListenerWrapper?
+            ?: TabSelectedChangedListenerWrapper().also {
+                parent.tag = it
+                parent.addOnTabSelectedListener(it)
+            }
+
+    wrapper.addListener(action)
+}
+
+private class TabSelectedChangedListenerWrapper : TabLayout.OnTabSelectedListener {
+
+    private val listeners = mutableListOf<(tab: TabLayout.Tab) -> Unit>()
+
+    fun addListener(action: (tab: TabLayout.Tab) -> Unit) {
+        listeners.add(action)
+    }
+
+    override fun onTabSelected(tab: TabLayout.Tab?) {
+        tab ?: return
+        for (listener in listeners) {
+            listener(tab)
+        }
+    }
+
+    override fun onTabUnselected(tab: TabLayout.Tab?) {
+        tab ?: return
+        for (listener in listeners) {
+            listener(tab)
+        }
+    }
+
+    override fun onTabReselected(tab: TabLayout.Tab?) {
+    }
 }

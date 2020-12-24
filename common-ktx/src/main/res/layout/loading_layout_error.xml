@@ -27,7 +27,7 @@
         tools:textAppearance="@style/TextAppearance.DynamicLayout.ErrorText" />
 
     <Button
-        android:id="@id/retry_button"
+        android:id="@id/error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
@@ -35,7 +35,7 @@
         android:minWidth="220dp"
         tools:background="@drawable/loading_layout_button"
         tools:text="@string/load_retry_tip"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.RetryButtonText"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.ButtonText"
         tools:textColor="#ffffff" />
 
 </LinearLayout>

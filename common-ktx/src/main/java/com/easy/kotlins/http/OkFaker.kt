@@ -6,9 +6,10 @@ import com.easy.kotlins.helper.forEach
 import com.easy.kotlins.helper.toJson
 import com.easy.kotlins.helper.toJsonObject
 import com.easy.kotlins.http.extension.OkExtension
-import com.google.gson.JsonObject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import okhttp3.*
 import java.io.File
 import kotlin.collections.set
@@ -235,18 +236,12 @@ class OkFaker(method: OkRequestMethod) {
         request.body(body())
     }
 
-    fun <T> mapRawResponse(transform: (response: Response) -> T): OkFaker = this.apply {
+    fun <T> mapResponse(transform: (response: Response) -> T): OkFaker = this.apply {
         request.mapResponse(OkMapper { value ->
             OkResult.Success(transform(value))
         })
     }
 
-
-    fun <T> mapResponse(transform: (response: JsonObject) -> T): OkFaker = this.apply {
-        request.mapResponse(OkMapper { value ->
-            OkResult.Success(transform(value.body()!!.string().toJsonObject()))
-        })
-    }
 
     fun <T> mapError(transform: (error: Throwable) -> T): OkFaker = this.apply {
         request.mapError(OkMapper { value ->
@@ -289,8 +284,8 @@ class OkFaker(method: OkRequestMethod) {
         return request.execute()
     }
 
-    fun <T : Any> safeExecute(errorHandler: ((Throwable) -> Unit)? = null): T? {
-        return request.safeExecute(errorHandler)
+    fun <T : Any> safeExecute(): T? {
+        return request.safeExecute()
     }
 
     fun enqueue(): OkFaker = this.apply {
@@ -425,9 +420,12 @@ inline fun requestPairsOf(
     crossinline action: RequestPairs<Any?>.() -> Unit = {}
 ): RequestPairs<Any?> {
     return RequestPairs<Any?>().apply {
-        copyFrom.toJsonObject().forEach { key, element ->
+        val source: String =
+            if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJson()
+        source.toJsonObject().forEach { key, element ->
             when {
-                element == null || element.isJsonNull && serializeNulls -> this[key] = element.toString()
+                element == null || element.isJsonNull && serializeNulls -> this[key] =
+                    element.toString()
                 element.isJsonArray || element.isJsonObject -> this[key] = element.toString()
                 element.isJsonPrimitive -> this[key] = element.asString
             }
@@ -435,9 +433,9 @@ inline fun requestPairsOf(
     }.apply(action)
 }
 
-fun <T : Any> OkFaker.asFlow(): Flow<T> = flow {
-    emit(execute<T>())
-}
+fun <T : Any> OkFaker.asFlow(): Flow<T> = flow<T> {
+    emit(execute())
+}.flowOn(Dispatchers.IO)
 
 fun <T : Any> OkFaker.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,

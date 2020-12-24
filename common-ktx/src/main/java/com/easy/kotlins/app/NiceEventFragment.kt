@@ -1,27 +1,21 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
-import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
 import com.easy.kotlins.event.MultipleEvent
 import com.easy.kotlins.event.Status
-import com.easy.kotlins.event.livebus.liveBus
-import com.easy.kotlins.event.livebus.observeStickyActive
-import com.easy.kotlins.event.livebus.simpleLiveBus
-import com.easy.kotlins.helper.Task
-import com.easy.kotlins.helper.stepOf
 import com.easy.kotlins.helper.toast
-import com.easy.kotlins.http.OkFaker
+import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.widget.LoadingView
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
-import kotlinx.coroutines.Dispatchers
 
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId), EventObservableView {
+abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
+    EventObservableView {
 
     open val refreshView: RefreshView? = null
 
@@ -33,15 +27,6 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId), 
         super.onCreate(savedInstanceState)
 
         ViewModelEvents.observe(this)
-
-        stepOf(
-            10L to {
-
-            },
-            20L to {
-
-            }
-        ).start(Dispatchers.Main.immediate)
     }
 
     final override fun onEventChanged(event: Event) {

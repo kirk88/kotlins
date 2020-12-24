@@ -20,7 +20,18 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="20dp"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.EmptyText"
-        tools:text="@string/load_empty_tip" />
+        tools:text="@string/load_empty_tip"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.EmptyText" />
 
+    <Button
+        android:id="@id/empty_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:gravity="center"
+        android:minWidth="220dp"
+        android:visibility="gone"
+        tools:background="@drawable/loading_layout_button"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.ButtonText"
+        tools:textColor="#ffffff" />
 </LinearLayout>

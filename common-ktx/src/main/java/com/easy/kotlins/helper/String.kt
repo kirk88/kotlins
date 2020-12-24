@@ -86,6 +86,23 @@ fun CharSequence.appendImage(
     })
 }
 
+fun CharSequence.insert(
+    where: Int,
+    text: CharSequence,
+    span: Any? = null,
+    start: Int = 0,
+    end: Int = text.length,
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        insert(where, text.asSpannableBuilder().also {
+            if (span != null) {
+                it.setSpan(span, start, end, flags)
+            }
+        })
+    }
+}
+
 fun CharSequence.append(
     text: CharSequence,
     span: Any? = null,
@@ -95,7 +112,9 @@ fun CharSequence.append(
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
         append(text.asSpannableBuilder().also {
-            it.setSpan(span, start, end, flags)
+            if (span != null) {
+                it.setSpan(span, start, end, flags)
+            }
         })
     }
 }
