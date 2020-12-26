@@ -133,17 +133,19 @@ object Status {
     const val SHOW_CONTENT = STATUS_BASE + 11
 }
 
-class LiveEventProxy {
+private val NO_EVENT = Event()
+
+class LiveEventDelegate {
 
     private val liveEvents: MutableMap<LifecycleOwner, SingleLiveEvent<Event>> by lazy { mutableMapOf() }
 
-    private var latestEvent: Event? = null
+    private var latestEvent: Event = NO_EVENT
 
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Event? {
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): Event {
         return latestEvent
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Event?) {
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Event) {
         latestEvent = value
 
         liveEvents.values.forEach {
@@ -162,11 +164,12 @@ fun event(what: Int = 0, message: String? = null) = Event(what, message)
 inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) =
     Event(what, message).apply(init)
 
-inline fun <reified T: Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) = buildEvent {
-    setIntent(Intent(context, T::class.java).apply {
-        putExtras(pairs.toBundle())
-    })
-}
+inline fun <reified T : Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) =
+    buildEvent {
+        setIntent(Intent(context, T::class.java).apply {
+            putExtras(pairs.toBundle())
+        })
+    }
 
 fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 

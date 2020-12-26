@@ -6,9 +6,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-fun interface Task {
-    fun run()
-}
+typealias Task = suspend CoroutineScope.() -> Unit
 
 interface SuspendedTask {
 
@@ -59,7 +57,7 @@ class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
             delay(delayed)
 
             try {
-                task.run()
+                task()
             } catch (exception: Throwable) {
                 val errorHandler = coroutineContext[CoroutineExceptionHandler] ?: throw exception
                 errorHandler.handleException(coroutineContext, exception)

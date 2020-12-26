@@ -1,6 +1,7 @@
 package com.easy.kotlins.helper
 
 import androidx.lifecycle.MutableLiveData
+import com.easy.kotlins.adapter.CommonRecyclerAdapter
 import com.easy.kotlins.event.*
 import com.easy.kotlins.http.BodyFromDataPart
 import com.easy.kotlins.http.FileFormDataPart
@@ -37,8 +38,6 @@ fun <T> pagedList(pager: Pager, dataList: List<T>?): PagedList<T> = dataList.let
     }))
 }
 
-fun PagedList<*>.isEmpty() = this.list.isNullOrEmpty()
-
 fun PagedList<*>?.isNullOrEmpty() = this?.list?.isNullOrEmpty()
 
 fun PagedList<*>.isNotEmpty() = !this.list.isNullOrEmpty()
@@ -46,7 +45,31 @@ fun PagedList<*>.isNotEmpty() = !this.list.isNullOrEmpty()
 open class PagedList<T> internal constructor(
     val page: Int,
     val list: List<T>?
-) : Serializable {
+) : Serializable, Collection<T> {
+
+    override val size: Int
+        get() = list?.size ?: 0
+
+    override fun contains(element: T): Boolean {
+        return list?.contains(element) ?: false
+    }
+
+    override fun containsAll(elements: Collection<T>): Boolean {
+        return list?.containsAll(elements) ?: false
+    }
+
+    override fun isEmpty(): Boolean {
+        return list?.isEmpty() ?: true
+    }
+
+    override fun iterator(): Iterator<T> {
+        return (list ?: emptyList()).iterator()
+    }
+
+    fun dispatchTo(adapter: CommonRecyclerAdapter<T>) {
+        if (page == 1) adapter.setItems(list)
+        else list?.let { adapter.addItems(it) }
+    }
 
     companion object {
 
@@ -179,7 +202,7 @@ fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.requestPlugin(url: String, loader: Loader, vararg params: Pair<String, Any?>) {
+fun OkFaker.requestPlugin(loader: Loader, url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -190,7 +213,7 @@ fun OkFaker.requestPlugin(url: String, loader: Loader, vararg params: Pair<Strin
 
 }
 
-fun OkFaker.requestPlugin(url: String, loader: Loader, params: Map<String, Any?>) {
+fun OkFaker.requestPlugin(loader: Loader, url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -228,7 +251,7 @@ fun <T : Any> OkFaker.loadPlugin(
     onSuccess<T> {
         step(loader.context) {
             add {
-                if (it is List<*>) {
+                if (it is Collection<*>) {
                     onEvent?.invoke(
                         when (loader.mode) {
                             LoadMode.START -> it.isEmpty().opt(emptyShow(), contentShow())
