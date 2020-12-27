@@ -23,17 +23,19 @@
         android:paddingStart="20dp"
         android:paddingTop="20dp"
         android:paddingEnd="20dp"
-        tools:text="无网络连接，请检查您的网络..." />
+        tools:text="@string/load_error_tip"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.ErrorText" />
 
     <Button
-        android:id="@id/retry_button"
+        android:id="@id/error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:gravity="center"
         android:minWidth="220dp"
         tools:background="@drawable/loading_layout_button"
-        tools:text="点击重试"
+        tools:text="@string/load_retry_tip"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.ButtonText"
         tools:textColor="#ffffff" />
 
 </LinearLayout>

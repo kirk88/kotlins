@@ -43,7 +43,7 @@ fun CharSequence.heightLight(
     start: Int = 0,
     end: Int = length,
     @ColorInt color: Int = Color.RED
-): SpannableStringBuilder? {
+): SpannableStringBuilder {
     return this.asSpannableBuilder().apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
@@ -86,6 +86,23 @@ fun CharSequence.appendImage(
     })
 }
 
+fun CharSequence.insert(
+    where: Int,
+    text: CharSequence,
+    span: Any? = null,
+    start: Int = 0,
+    end: Int = text.length,
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        insert(where, text.asSpannableBuilder().also {
+            if (span != null) {
+                it.setSpan(span, start, end, flags)
+            }
+        })
+    }
+}
+
 fun CharSequence.append(
     text: CharSequence,
     span: Any? = null,
@@ -95,7 +112,9 @@ fun CharSequence.append(
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
         append(text.asSpannableBuilder().also {
-            it.setSpan(span, start, end, flags)
+            if (span != null) {
+                it.setSpan(span, start, end, flags)
+            }
         })
     }
 }
@@ -150,33 +169,27 @@ fun CharSequence.withSpan(
     }
 }
 
-inline fun String?.notNull(defaultValue: () -> String = { "" }): String =
-    if (this == null || this == "null") defaultValue() else this
+inline fun <R: CharSequence, C: R> C?.ifNull(defaultValue: () -> R): R =
+    this ?: defaultValue()
 
-inline fun String?.notNullOrEmpty(defaultValue: () -> String = { "" }): String =
+inline fun <R: CharSequence, C: R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
     if (this.isNullOrEmpty()) defaultValue() else this
 
-inline fun String?.notNullOrBlank(defaultValue: () -> String = { "" }): String =
+inline fun <R: CharSequence, C: R> C?.ifNullOrBlack(defaultValue: () -> R): R =
     if (this.isNullOrBlank()) defaultValue() else this
 
-inline fun String.notEmpty(defaultValue: () -> String = { "" }): String =
-    if (this.isEmpty()) defaultValue() else this
-
-inline fun String.notBlank(defaultValue: () -> String = { "" }): String =
-    if (this.isBlank()) defaultValue() else this
-
 val String.isJsonArray: Boolean
-    get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonArray ?: false
+    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonArray ?: false
 
 val String.isJsonObject: Boolean
-    get() = this.runCatching { JsonParser().parse(this) }.getOrNull()?.isJsonObject ?: false
+    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonObject ?: false
 
 fun CharSequence.splitNotBlank(
     vararg delimiters: String,
     ignoreCase: Boolean = false,
     limit: Int = 0
 ): List<String> {
-    return split(delimiters = delimiters, ignoreCase, limit).filter { it.isNotBlank() }
+    return split(ignoreCase = ignoreCase, limit = limit, delimiters = delimiters).filter { it.isNotBlank() }
 }
 
 

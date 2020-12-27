@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.LiveEventProxy
+import com.easy.kotlins.event.LiveEventDelegate
 import com.easy.kotlins.helper.weak
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
@@ -19,8 +19,8 @@ import com.easy.kotlins.http.SimpleOkFakerScope
 
 open class NiceViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
 
-    private val liveEventProxy = LiveEventProxy()
-    var event: Event? by liveEventProxy
+    private val liveEventDelegate = LiveEventDelegate()
+    var event: Event by liveEventDelegate
 
 
     fun get(action: OkFaker.() -> Unit): OkFaker {
@@ -33,11 +33,11 @@ open class NiceViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
     }
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventProxy.observe(owner, EventObserver(observer))
+        liveEventDelegate.observe(owner, EventObserver(observer))
     }
 
     fun observeEvent(owner: EventObservableView) {
-        liveEventProxy.observe(owner, EventViewObserver(owner))
+        liveEventDelegate.observe(owner, EventViewObserver(owner))
     }
 
     @CallSuper

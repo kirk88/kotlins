@@ -1,6 +1,5 @@
 package com.easy.kotlins.sqlite.db;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,9 +7,11 @@ class JavaSqlitePrimitives {
     private JavaSqlitePrimitives() {}
 
     static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
-    
+
+    static final Class<?> c = Character.class;
+
     static {
-        PRIMITIVES_TO_WRAPPERS = new HashMap<Class<?>, Class<?>>();
+        PRIMITIVES_TO_WRAPPERS = new HashMap<>();
         PRIMITIVES_TO_WRAPPERS.put(boolean.class, Boolean.class);
         PRIMITIVES_TO_WRAPPERS.put(byte.class, Byte.class);
         PRIMITIVES_TO_WRAPPERS.put(char.class, Character.class);

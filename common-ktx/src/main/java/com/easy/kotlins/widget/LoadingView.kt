@@ -36,6 +36,12 @@ interface LoadingView {
 
     fun setEmptyText(@StringRes textId: Int): LoadingView
 
+    fun setEmptyButtonText(text: CharSequence): LoadingView
+
+    fun setEmptyButtonText(@StringRes textId: Int): LoadingView
+
+    fun setEmptyClickListener(listener: View.OnClickListener?): LoadingView
+
     fun setLoadingText(text: CharSequence): LoadingView
 
     fun setLoadingText(@StringRes textId: Int): LoadingView
@@ -48,9 +54,9 @@ interface LoadingView {
 
     fun setErrorText(@StringRes textId: Int): LoadingView
 
-    fun setRetryButtonText(text: CharSequence): LoadingView
+    fun setErrorButtonText(text: CharSequence): LoadingView
 
-    fun setRetryButtonText(@StringRes textId: Int): LoadingView
+    fun setErrorButtonText(@StringRes textId: Int): LoadingView
 
-    fun setRetryListener(listener: View.OnClickListener?): LoadingView
+    fun setErrorClickListener(listener: View.OnClickListener?): LoadingView
 }

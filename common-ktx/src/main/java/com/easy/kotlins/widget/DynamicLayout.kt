@@ -43,15 +43,19 @@ class DynamicLayout @JvmOverloads constructor(
     private var emptyText: CharSequence
     private var emptyTextColor: Int
     private var emptyTextAppearance: Int
+    private var emptyButtonBackground: Drawable?
+    private var emptyButtonText: CharSequence?
+    private var emptyButtonTextColor: Int
+    private var emptyButtonTextAppearance: Int
 
     private var errorImage: Drawable?
     private var errorText: CharSequence
     private var errorTextColor: Int
     private var errorTextAppearance: Int
-    private var retryButtonBackground: Drawable?
-    private var retryButtonText: CharSequence
-    private var retryButtonTextColor: Int
-    private var retryButtonTextAppearance: Int
+    private var errorButtonBackground: Drawable?
+    private var errorButtonText: CharSequence?
+    private var errorButtonTextColor: Int
+    private var errorButtonTextAppearance: Int
 
     private var loadingProgressColor: Int
     private var loadingProgressDrawable: Drawable?
@@ -59,10 +63,17 @@ class DynamicLayout @JvmOverloads constructor(
     private var loadingTextColor: Int
     private var loadingTextAppearance: Int
 
-    private var retryListener: OnClickListener? = null
-    private val retryButtonClickListener = OnClickListener { v ->
-        if (retryListener != null) {
-            retryListener!!.onClick(v)
+    private var errorClickListener: OnClickListener? = null
+    private val errorButtonClickListener = OnClickListener { v ->
+        if (errorClickListener != null) {
+            errorClickListener!!.onClick(v)
+        }
+    }
+
+    private var emptyClickListener: OnClickListener? = null
+    private val emptyButtonClickListener = OnClickListener { v ->
+        if (emptyClickListener != null) {
+            emptyClickListener!!.onClick(v)
         }
     }
 
@@ -143,6 +154,24 @@ class DynamicLayout @JvmOverloads constructor(
         return setEmptyText(context.getText(textId))
     }
 
+    override fun setEmptyButtonText(text: CharSequence): LoadingView {
+        emptyButtonText = text
+        findViewById<TextView>(R.id.empty_button)?.let {
+            it.text = text
+            it.visibility = if(text.isBlank()) View.GONE else View.VISIBLE
+        }
+        return this
+    }
+
+    override fun setEmptyButtonText(@StringRes textId: Int): LoadingView {
+        return setEmptyButtonText(context.getText(textId))
+    }
+
+    override fun setEmptyClickListener(listener: OnClickListener?): LoadingView {
+        emptyClickListener = listener
+        return this
+    }
+
     override fun setLoadingText(text: CharSequence): DynamicLayout {
         loadingText = text
         findViewById<TextView>(R.id.loading_text)?.text = text
@@ -173,18 +202,21 @@ class DynamicLayout @JvmOverloads constructor(
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setRetryButtonText(text: CharSequence): DynamicLayout {
-        retryButtonText = text
-        findViewById<TextView>(R.id.retry_button)?.text = text
+    override fun setErrorButtonText(text: CharSequence): DynamicLayout {
+        errorButtonText = text
+        findViewById<TextView>(R.id.error_button)?.let {
+            it.text = text
+            it.visibility = if(text.isBlank()) View.GONE else View.VISIBLE
+        }
         return this
     }
 
-    override fun setRetryButtonText(@StringRes textId: Int): DynamicLayout {
-        return setRetryButtonText(context.getText(textId))
+    override fun setErrorButtonText(@StringRes textId: Int): DynamicLayout {
+        return setErrorButtonText(context.getText(textId))
     }
 
-    override fun setRetryListener(listener: OnClickListener?): DynamicLayout {
-        retryListener = listener
+    override fun setErrorClickListener(listener: OnClickListener?): DynamicLayout {
+        errorClickListener = listener
         return this
     }
 
@@ -209,7 +241,17 @@ class DynamicLayout @JvmOverloads constructor(
             }
         }.also {
             it.visibility = View.VISIBLE
-            if (indexOfChild(it) < 0) addView(it)
+            if (indexOfChild(it) >= 0) return@also
+
+            if (viewType == TYPE_CONTENT_VIEW) {
+                addView(
+                    it,
+                    0,
+                    LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+                )
+            } else {
+                addView(it)
+            }
         }
 
         this.showType = viewType
@@ -224,15 +266,28 @@ class DynamicLayout @JvmOverloads constructor(
             TYPE_EMPTY_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.empty_image)
                 val textView = view.findViewById<TextView>(R.id.empty_text)
+                val emptyButton = view.findViewById<Button>(R.id.empty_button)
                 imageView?.setImageDrawable(this.emptyImage)
                 textView?.let {
-                    it.text = this.emptyText
+                    it.text = emptyText
                     if (emptyTextAppearance != NO_RESOURCE_ID) {
                         TextViewCompat.setTextAppearance(it, emptyTextAppearance)
                     }
                     if (emptyTextColor != NO_COLOR) {
                         it.setTextColor(emptyTextColor)
                     }
+                }
+                emptyButton?.let {
+                    it.background = emptyButtonBackground
+                    it.text = emptyButtonText
+                    if (emptyButtonTextAppearance != NO_RESOURCE_ID) {
+                        TextViewCompat.setTextAppearance(it, emptyButtonTextAppearance)
+                    }
+                    if (emptyButtonTextColor != NO_COLOR) {
+                        it.setTextColor(emptyButtonTextColor)
+                    }
+                    it.setOnClickListener(emptyButtonClickListener)
+                    it.visibility = if(emptyButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
                 }
             }
             TYPE_LOADING_VIEW -> {
@@ -248,7 +303,7 @@ class DynamicLayout @JvmOverloads constructor(
                     }
                 }
                 textView?.let {
-                    it.text = this.loadingText
+                    it.text = loadingText
                     if (loadingTextAppearance != NO_RESOURCE_ID) {
                         TextViewCompat.setTextAppearance(it, loadingTextAppearance)
                     }
@@ -260,10 +315,10 @@ class DynamicLayout @JvmOverloads constructor(
             TYPE_ERROR_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.error_image)
                 val textView = view.findViewById<TextView>(R.id.error_text)
-                val retryButton = view.findViewById<Button>(R.id.retry_button)
+                val errorButton = view.findViewById<Button>(R.id.error_button)
                 imageView?.setImageDrawable(this.errorImage)
                 textView?.let {
-                    it.text = this.errorText
+                    it.text = errorText
                     if (errorTextAppearance != NO_RESOURCE_ID) {
                         TextViewCompat.setTextAppearance(it, errorTextAppearance)
                     }
@@ -271,16 +326,17 @@ class DynamicLayout @JvmOverloads constructor(
                         it.setTextColor(errorTextColor)
                     }
                 }
-                retryButton?.let {
-                    it.background = retryButtonBackground
-                    it.text = retryButtonText
-                    if (retryButtonTextAppearance != NO_RESOURCE_ID) {
-                        TextViewCompat.setTextAppearance(it, retryButtonTextAppearance)
+                errorButton?.let {
+                    it.background = errorButtonBackground
+                    it.text = errorButtonText
+                    if (errorButtonTextAppearance != NO_RESOURCE_ID) {
+                        TextViewCompat.setTextAppearance(it, errorButtonTextAppearance)
                     }
-                    if (retryButtonTextColor != NO_COLOR) {
-                        it.setTextColor(retryButtonTextColor)
+                    if (errorButtonTextColor != NO_COLOR) {
+                        it.setTextColor(errorButtonTextColor)
                     }
-                    it.setOnClickListener(retryButtonClickListener)
+                    it.setOnClickListener(errorButtonClickListener)
+                    it.visibility = if(errorButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -343,20 +399,31 @@ class DynamicLayout @JvmOverloads constructor(
         emptyTextColor = a.getColor(R.styleable.DynamicLayout_emptyTextColor, NO_COLOR)
         emptyTextAppearance =
             a.getResourceId(R.styleable.DynamicLayout_emptyTextAppearance, NO_RESOURCE_ID)
+        emptyButtonText = a.getText(R.styleable.DynamicLayout_emptyButtonText)
+        emptyButtonTextColor = a.getColor(R.styleable.DynamicLayout_emptyButtonTextColor, NO_COLOR)
+        emptyButtonTextAppearance =
+            a.getResourceId(R.styleable.DynamicLayout_emptyButtonTextAppearance, NO_RESOURCE_ID)
+        emptyButtonBackground = a.getDrawable(R.styleable.DynamicLayout_emptyButtonBackground)
+        if (emptyButtonBackground == null) {
+            val color = a.getColor(R.styleable.DynamicLayout_emptyButtonBackground, NO_COLOR)
+            if (color != NO_COLOR) {
+                emptyButtonBackground = ColorDrawable(color)
+            }
+        }
         errorImage = a.getDrawable(R.styleable.DynamicLayout_errorImage)
         errorText = a.getText(R.styleable.DynamicLayout_errorText)
         errorTextColor = a.getColor(R.styleable.DynamicLayout_errorTextColor, NO_COLOR)
         errorTextAppearance =
             a.getResourceId(R.styleable.DynamicLayout_errorTextAppearance, NO_RESOURCE_ID)
-        retryButtonText = a.getText(R.styleable.DynamicLayout_retryButtonText)
-        retryButtonTextColor = a.getColor(R.styleable.DynamicLayout_retryButtonTextColor, NO_COLOR)
-        retryButtonTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_retryButtonTextAppearance, NO_RESOURCE_ID)
-        retryButtonBackground = a.getDrawable(R.styleable.DynamicLayout_retryButtonBackground)
-        if (retryButtonBackground == null) {
-            val color = a.getColor(R.styleable.DynamicLayout_retryButtonBackground, NO_COLOR)
+        errorButtonText = a.getText(R.styleable.DynamicLayout_errorButtonText)
+        errorButtonTextColor = a.getColor(R.styleable.DynamicLayout_errorButtonTextColor, NO_COLOR)
+        errorButtonTextAppearance =
+            a.getResourceId(R.styleable.DynamicLayout_errorButtonTextAppearance, NO_RESOURCE_ID)
+        errorButtonBackground = a.getDrawable(R.styleable.DynamicLayout_errorButtonBackground)
+        if (errorButtonBackground == null) {
+            val color = a.getColor(R.styleable.DynamicLayout_errorButtonBackground, NO_COLOR)
             if (color != NO_COLOR) {
-                retryButtonBackground = ColorDrawable(color)
+                errorButtonBackground = ColorDrawable(color)
             }
         }
         loadingProgressColor = a.getColor(R.styleable.DynamicLayout_loadingProgressColor, NO_COLOR)

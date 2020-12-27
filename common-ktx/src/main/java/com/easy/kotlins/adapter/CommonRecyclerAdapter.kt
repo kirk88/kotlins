@@ -491,6 +491,8 @@ open class CommonRecyclerAdapter<ITEM>(
                 itemDelegates.getValue(viewType)
                     .registerListener(holder)
 
+                registerListener(holder)
+
                 holder.clickViews.onClick {
                     if (!onItemChildClick(holder, it))
                         itemChildClickListener?.invoke(this, holder, it)
@@ -521,6 +523,10 @@ open class CommonRecyclerAdapter<ITEM>(
                 holder
             }
         }
+    }
+
+    open fun registerListener(holder: ItemViewHolder) {
+
     }
 
     final override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {

@@ -12,10 +12,10 @@ abstract class SimpleRecyclerAdapter<ITEM>(
     itemLongClickable: Boolean = false
 ) : CommonRecyclerAdapter<ITEM>(
     context = context,
-    itemDelegates = itemDelegates,
     itemAnimation = itemAnimation,
     itemClickable = itemClickable,
-    itemLongClickable = itemLongClickable
+    itemLongClickable = itemLongClickable,
+    itemDelegates = itemDelegates
 ) {
 
     init {
@@ -25,9 +25,6 @@ abstract class SimpleRecyclerAdapter<ITEM>(
                 this@SimpleRecyclerAdapter.convert(holder, item, payloads)
             }
 
-            override fun registerListener(holder: ItemViewHolder) {
-                this@SimpleRecyclerAdapter.registerListener(holder)
-            }
         })
     }
 
@@ -37,10 +34,4 @@ abstract class SimpleRecyclerAdapter<ITEM>(
      */
     abstract fun convert(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>)
 
-    /**
-     * 注册事件
-     */
-    open fun registerListener(holder: ItemViewHolder) {
-
-    }
 }

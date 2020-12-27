@@ -14,22 +14,12 @@ interface SuspendedTask {
 
 }
 
-class Stepper {
+class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
+
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + context)
 
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
     private var runningJob: Job? = null
-    private var runningContext: CoroutineContext? = null
-
-    val coroutineContext: CoroutineContext
-        get() = runningContext ?: EmptyCoroutineContext
-
-    suspend fun send(
-        delayed: Long = 0,
-        context: CoroutineContext = EmptyCoroutineContext,
-        task: Task
-    ) {
-        channel.send(DelayedTask(delayed, context, task))
-    }
 
     fun add(
         delayed: Long = 0,
@@ -39,30 +29,13 @@ class Stepper {
         channel.offer(DelayedTask(delayed, context, task))
     }
 
-    suspend fun start(): Stepper {
-        for (task in channel) {
-            task.run()
-        }
-        return this
-    }
-
-    fun start(context: CoroutineContext): Stepper {
-        val scope = CoroutineScope(Dispatchers.Main.immediate + context + SupervisorJob()).also {
-            runningContext = it.coroutineContext
-        }
-
+    fun start(): Stepper {
         runningJob = scope.launch {
-            start()
+            for (task in channel) {
+                task.run()
+            }
         }
         return this
-    }
-
-    suspend fun receive(): SuspendedTask {
-        return channel.receive()
-    }
-
-    fun poll(): SuspendedTask? {
-        return channel.poll()
     }
 
     fun cancel() {
@@ -80,13 +53,13 @@ class Stepper {
         private val task: Task
     ) : SuspendedTask {
 
-        override suspend fun run() = withContext(context) {
+        override suspend fun run() = withContext(Dispatchers.Main.immediate + context) {
             delay(delayed)
 
             try {
                 task()
             } catch (exception: Throwable) {
-                val errorHandler = context[CoroutineExceptionHandler] ?: throw exception
+                val errorHandler = coroutineContext[CoroutineExceptionHandler] ?: throw exception
                 errorHandler.handleException(coroutineContext, exception)
             }
         }
@@ -95,14 +68,10 @@ class Stepper {
 
 }
 
-fun step(context: CoroutineContext = EmptyCoroutineContext, init: Stepper.() -> Unit): Stepper =
-    Stepper().apply {
-        init()
-        start(context)
-    }
+fun step(context: CoroutineContext = EmptyCoroutineContext, action: Stepper.() -> Unit): Stepper =
+    Stepper(context).apply(action).start()
 
-fun stepOf(vararg tasks: Pair<Long, Task>): Stepper = Stepper().apply {
-    tasks.forEach {
-        add(it.first, task = it.second)
-    }
-}
+fun step(vararg tasks: Task, context: CoroutineContext = EmptyCoroutineContext): Stepper =
+    Stepper(context).apply {
+        tasks.forEach { add(task = it) }
+    }.start()

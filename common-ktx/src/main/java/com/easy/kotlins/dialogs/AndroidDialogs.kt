@@ -30,11 +30,11 @@ fun Context.dialog(@StyleRes themeResId: Int = 0, init: DialogController<Dialog>
     }.show()
 }
 
-fun Fragment.customDialog(@StyleRes themeResId: Int = 0, @LayoutRes layoutResId: Int, init: View.(dialog: DialogInterface) -> Unit): Dialog {
+fun Fragment.customDialog(@StyleRes themeResId: Int = 0, @LayoutRes layoutResId: Int, init: (view: View, dialog: DialogInterface) -> Unit): Dialog {
     return requireActivity().customDialog(themeResId, layoutResId, init)
 }
 
-fun Context.customDialog(@StyleRes themeResId: Int = 0, @LayoutRes layoutResId: Int, init: View.(dialog: DialogInterface) -> Unit): Dialog {
+fun Context.customDialog(@StyleRes themeResId: Int = 0, @LayoutRes layoutResId: Int, init: (view: View, dialog: DialogInterface) -> Unit): Dialog {
     return AndroidDialogController(this, themeResId).apply {
         contentView {
             val view = View.inflate(context, layoutResId, null)

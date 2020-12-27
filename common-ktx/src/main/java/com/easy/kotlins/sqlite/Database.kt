@@ -1,19 +1,3 @@
-/*
- * Copyright 2016 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:Suppress("unused")
 
 package com.easy.kotlins.sqlite.db
@@ -22,19 +6,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.os.Parcel
-import android.os.Parcelable
-import com.easy.kotlins.helper.parseJsonArray
-import com.easy.kotlins.helper.toJson
-import com.easy.kotlins.sqlite.*
-import com.google.gson.annotations.SerializedName
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
 enum class SqlOrderDirection { ASC, DESC }
-
-class TransactionAbortException : RuntimeException()
 
 fun SQLiteDatabase.insert(tableName: String, vararg values: Pair<String, Any?>): Long {
     return insert(tableName, null, values.toContentValues())
@@ -84,17 +60,16 @@ fun SQLiteDatabase.replaceOrThrow(tableName: String, valuesFrom: Any): Long {
     return replaceOrThrow(tableName, values = valuesFrom.toPairs())
 }
 
-fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T? {
-    return try {
+fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
+    val result: T
+    try {
         beginTransaction()
-        val result = action()
+        result = action()
         setTransactionSuccessful()
-        result
-    } catch (e: TransactionAbortException) {
-        null
     } finally {
         endTransaction()
     }
+    return result
 }
 
 fun SQLiteDatabase.select(tableName: String): SelectQueryBuilder {
@@ -203,8 +178,8 @@ fun SQLiteDatabase.createColumns(
     vararg columns: Pair<String, SqlType>
 ) {
     transaction {
-        columns.forEach {
-            createColumn(tableName, ifNotExists, it)
+        for (column in columns) {
+            createColumn(tableName, ifNotExists, column)
         }
     }
 }
@@ -241,7 +216,7 @@ internal fun applyArguments(whereClause: String, args: Map<String, Any>): String
     return buffer.toString()
 }
 
-fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
+internal fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
     val values = ContentValues()
     for ((key, value) in this) {
         when (value) {
@@ -262,25 +237,15 @@ fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun Any.toPairs(): Array<Pair<String, Any?>> {
+internal fun Any.toPairs(): Array<Pair<String, Any?>> {
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
     }
-    return javaClass.declaredFields.filterNot {
-        it.annotations.forEach { a-> println(a.annotationClass.simpleName) }
+    return ColumnReflections.get(this) {
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
                 || it.isAnnotationPresent(IgnoredOnTable::class.java)
-    }.map {
-        it.isAccessible = true
-        if(it.isAnnotationPresent(Column::class.java)){
-            val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            val converter = ColumnConverters.get(column.converter)
-            column.name.ifEmpty { it.name  } to it.get(this)?.let { value -> converter.fromValue(value) }
-        }else {
-            it.name to it.get(this)
-        }
-    }.toTypedArray()
+    }
 }
 
 abstract class ManagedSQLiteOpenHelper(
@@ -293,9 +258,12 @@ abstract class ManagedSQLiteOpenHelper(
     private val counter = AtomicInteger()
     private var db: SQLiteDatabase? = null
 
-    fun <T> use(action: SQLiteDatabase.() -> T): T {
+    fun <T> use(inTransaction: Boolean = false, action: SQLiteDatabase.() -> T): T {
         try {
-            return openDatabase().action()
+            return openDatabase().let {
+                if (inTransaction) it.transaction(action)
+                else it.action()
+            }
         } finally {
             closeDatabase()
         }
@@ -314,100 +282,5 @@ abstract class ManagedSQLiteOpenHelper(
         if (counter.decrementAndGet() == 0) {
             db?.close()
         }
-    }
-}
-
-class ReferencesConverter : ColumnConverter<List<Pie>, String> {
-    override fun fromValue(value: List<Pie>): String {
-        return value.toJson()
-    }
-
-    override fun toValue(value: String): List<Pie> {
-        return parseJsonArray(value) ?: emptyList()
-    }
-}
-
-data class Pie(
-    val id: Int? = null,
-    var size: String? = null,
-    var result: String? = null,
-    var color: String? = null,
-    @SerializedName("jj")
-    val unit: String? = null,
-    val dir: String? = null,
-    val title: String? = null
-): Parcelable{
-    constructor(parcel: Parcel) : this(
-        parcel.readValue(Int::class.java.classLoader) as? Int,
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString()
-    ) {
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeValue(id)
-        parcel.writeString(size)
-        parcel.writeString(result)
-        parcel.writeString(color)
-        parcel.writeString(unit)
-        parcel.writeString(dir)
-        parcel.writeString(title)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Pie> {
-        override fun createFromParcel(parcel: Parcel): Pie {
-            return Pie(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Pie?> {
-            return arrayOfNulls(size)
-        }
-    }
-
-}
-
-
-
-@TableClass
-data class SimpleHealthProject (
-        @Transient
-        var id: Long = 0,
-        val bid: String?,
-        val name: String?,
-        @Column(converter = ReferencesConverter::class)
-        val references: List<Pie>?,//参考值
-        @Column(name = "title")
-        var title: String? = null,
-        @IgnoredOnTable
-        val analyze: String? = null,
-        @IgnoredOnTable
-        var guide: String? = null,
-        @IgnoredOnTable
-        var tip: String? = null
-)
-
-
-
-fun main() {
-    val t = SimpleHealthProject(bid = "100", name="jack", references = listOf(Pie()), title = "fdsa")
-
-    t.javaClass.declaredConstructors.forEach {
-        it.parameterAnnotations.forEach { a ->
-            println(a.joinToString { b -> b.annotationClass.simpleName ?: "null" })
-        }
-    }
-
-    t.javaClass.declaredFields.forEach {
-println(it.name)
-//        println("${it.isAnnotationPresent(IgnoreInTable::class.java)}")
-        println(it.annotations.joinToString { a -> a.annotationClass.simpleName?:"null" })
     }
 }

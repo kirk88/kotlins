@@ -1,91 +1,19 @@
-/*
- * Copyright 2016 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:Suppress("unused")
 
 package com.easy.kotlins.sqlite.db
 
-import com.easy.kotlins.sqlite.*
-import com.easy.kotlins.sqlite.db.JavaSqlitePrimitives.PRIMITIVES_TO_WRAPPERS
+import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
+
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun <reified T : Any> classParser(): RowParser<T> = classParser(T::class.java)
 
 @PublishedApi
-internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
-    val applicableConstructors = clazz.declaredConstructors.filter { ctr ->
-        if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
-        val types = ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
-            type to annotations
-        }
-        return@filter types.isNotEmpty() && types.all(::hasApplicableType)
-    }
-
-    if (applicableConstructors.isEmpty()) {
-        throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
-    }
-
-    val preferredConstructor = if (applicableConstructors.size > 1) {
-        applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
-            ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
-    } else {
-        applicableConstructors[0]
-    }
-
-    return object : RowParser<T> {
-        private val parameterAnnotations = preferredConstructor.parameterAnnotations
-        private val parameterTypes = preferredConstructor.parameterTypes
-        private val parameterTypesChecked = parameterTypes.filterIndexed { index, _ ->
-            parameterAnnotations[index].none { it is IgnoredOnTable }
-        }
-
-        override fun parseRow(columns: Array<Any?>): T {
-            if (parameterTypesChecked.size != columns.size) {
-                val columnsRendered = columns.joinToString(prefix = "[", postfix = "]")
-                val parameterTypesRendered =
-                    parameterTypesChecked.joinToString(prefix = "[", postfix = "]") { it.name }
-                throw IllegalArgumentException(
-                    "Class parser for ${preferredConstructor.name} " +
-                            "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
-                )
-            }
-
-            for (index in parameterTypesChecked.indices) {
-                val type = parameterTypesChecked[index]
-                val annotations = parameterAnnotations[index]
-                val columnValue = columns[index]
-
-                val column = annotations.find { it is Column } as Column?
-                if (columnValue != null && column != null) {
-                    val converter = ColumnConverters.get(column.converter)
-                    columns[index] = converter.toValue(columnValue)
-                } else if (!type.isInstance(columnValue)) {
-                    columns[index] = castValue(columnValue, type)
-                }
-            }
-
-            @Suppress("UNCHECKED_CAST")
-            return preferredConstructor.newInstance(columns.copyOf(parameterTypes.size)) as T
-        }
-    }
-}
+internal fun <T> classParser(clazz: Class<T>): RowParser<T> = ClassParsers.get(clazz)
 
 private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
-    if (type.first.isPrimitive || type.second.any { it is IgnoredOnTable }) {
+    if (type.first.isPrimitive || type.second.any { it is Column }) {
         return true
     }
 
@@ -94,69 +22,82 @@ private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean 
         java.lang.Long::class.java, java.lang.Integer::class.java,
         java.lang.Byte::class.java, java.lang.Character::class.java,
         java.lang.Boolean::class.java, java.lang.Float::class.java,
-        java.lang.Double::class.java, java.lang.Short::class.java -> true
-        else -> type.second.any { it is Column }
+        java.lang.Double::class.java, java.lang.Short::class.java,
+        ByteArray::class.java -> true
+        else -> false
     }
 }
 
-private fun castValue(value: Any?, type: Class<*>): Any? {
-    if (value == null && type.isPrimitive) {
-        throw IllegalArgumentException("null can't be converted to the value of primitive type ${type.canonicalName}")
-    }
+internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
 
-    if (value == null || type == Any::class.java) {
-        return value
-    }
+    private val preferredConstructor: Constructor<*>
+    private val parameterAnnotations: Array<Array<Annotation>>
+    private val parameterTypes: Array<Class<*>>
 
-    if (type.isPrimitive && PRIMITIVES_TO_WRAPPERS[type] == value::class.java) {
-        return value
-    }
-
-    if (value is Double && (type == java.lang.Float.TYPE || type == java.lang.Float::class.java)) {
-        return value.toFloat()
-    }
-
-    if (value is Float && (type == java.lang.Double.TYPE || type == java.lang.Double::class.java)) {
-        return value.toDouble()
-    }
-
-    if (value is Char && CharSequence::class.java.isAssignableFrom(type)) {
-        return value.toString()
-    }
-
-    if (value is Long) {
-        if (type == java.lang.Integer.TYPE || type == java.lang.Integer::class.java) {
-            return value.toInt()
-        } else if (type == java.lang.Short.TYPE || type == java.lang.Short::class.java) {
-            return value.toShort()
-        } else if (type == java.lang.Byte.TYPE || type == java.lang.Byte::class.java) {
-            return value.toByte()
-        } else if (type == java.lang.Boolean.TYPE || type == java.lang.Boolean::class.java) {
-            return value != 0L
-        } else if (type == java.lang.Character.TYPE || type == java.lang.Character::class.java) {
-            return value.toChar()
+    init {
+        val applicableConstructors = clazz.declaredConstructors.filter { ctr ->
+            if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
+            val types = ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
+                type to annotations
+            }
+            return@filter types.isNotEmpty() && types.all(::hasApplicableType)
         }
-    }
 
-    if (value is Int) {
-        if (type == java.lang.Long.TYPE || type == java.lang.Long::class.java) {
-            return value.toLong()
-        } else if (type == java.lang.Short.TYPE || type == java.lang.Short::class.java) {
-            return value.toShort()
-        } else if (type == java.lang.Byte.TYPE || type == java.lang.Byte::class.java) {
-            return value.toByte()
-        } else if (type == java.lang.Boolean.TYPE || type == java.lang.Boolean::class.java) {
-            return value != 0
-        } else if (type == java.lang.Character.TYPE || type == java.lang.Character::class.java) {
-            return value.toChar()
+        if (applicableConstructors.isEmpty()) {
+            throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
         }
+
+        preferredConstructor = if (applicableConstructors.size > 1) {
+            applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
+                ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
+        } else {
+            applicableConstructors[0]
+        }
+
+        parameterAnnotations = preferredConstructor.parameterAnnotations
+        parameterTypes = preferredConstructor.parameterTypes
     }
 
-    if (value is String && value.length == 1
-        && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)
-    ) {
-        return value[0]
+    override fun parseRow(row: Array<ColumnElement>): T {
+        if (parameterTypes.size != row.size) {
+            val columnsRendered = row.joinToString(prefix = "[", postfix = "]")
+            val parameterTypesRendered =
+                parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+            throw IllegalArgumentException(
+                "Class parser for ${preferredConstructor.name} " +
+                        "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
+            )
+        }
+
+        val args = arrayOfNulls<Any>(parameterTypes.size)
+
+        for (index in parameterTypes.indices) {
+            val type = parameterTypes[index]
+            val annotations = parameterAnnotations[index]
+            val column = row[index]
+
+            val annotation = annotations.find { it is Column } as Column?
+            if (!column.isNull() && annotation != null) {
+                args[index] = ColumnConverters.get(annotation.converter).toValue(column.value()!!)
+            } else {
+                args[index] = column.asTyped(type)
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        return preferredConstructor.newInstance(*args) as T
+    }
+}
+
+internal object ClassParsers {
+
+    private val parsers: MutableMap<Class<*>, ClassParser<*>> by lazy { mutableMapOf() }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> get(type: Class<T>): ClassParser<T> {
+        return parsers.getOrPut(type) {
+            ClassParser(type)
+        } as ClassParser<T>
     }
 
-    throw IllegalArgumentException("Value $value of type ${value::class.java} can't be cast to ${type.canonicalName}")
 }

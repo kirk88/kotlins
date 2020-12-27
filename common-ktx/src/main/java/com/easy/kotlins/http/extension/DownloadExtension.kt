@@ -19,13 +19,14 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
     @Volatile
     private var closed = false
 
-    override fun shouldInterceptRequest(builder: Request.Builder): Request {
-        val range = if (file!!.exists()) file.length() else 0L
-        builder.header(
-            DOWNLOAD_HEADER_RANGE_NAME,
-            MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
-        )
-        return builder.build()
+    override fun shouldInterceptRequest(request: Request): Request {
+        return request.newBuilder().apply {
+            val range = if (file!!.exists()) file.length() else 0L
+            header(
+                DOWNLOAD_HEADER_RANGE_NAME,
+                MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
+            )
+        }.build()
     }
 
     override fun onResponse(response: Response): Boolean {
@@ -57,35 +58,29 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
         return if (response.isSuccessful) writeStreamToFile(response, file, listener) else null
     }
 
+    @Throws(IOException::class)
     private fun writeStreamToFile(
         response: Response,
         srcFile: File,
         listener: OnProgressListener
-    ): File? {
-        val body = response.body()
-        try {
-            requireNotNull(body)
-                .byteStream().use { inputStream ->
-                    RandomAccessFile(srcFile, "rw").use { accessFile ->
-                        var readBytes = srcFile.length()
-                        val totalBytes = body.contentLength() + readBytes
-                        val buf = ByteArray(4096)
-                        var len = 0
-                        accessFile.seek(readBytes)
-                        while (!closed && inputStream.read(buf).also { len = it } != -1) {
-                            readBytes += len.toLong()
-                            accessFile.write(buf, 0, len)
-                            onProgress(listener, readBytes, totalBytes)
-                        }
-                        if (!closed && readBytes == totalBytes) {
-                            return rename(srcFile)
-                        }
-                    }
+    ): File? = response.body()?.let { body ->
+        body.byteStream().use { inputStream ->
+            return@use RandomAccessFile(srcFile, "rw").use { accessFile ->
+                var readBytes = srcFile.length()
+                val totalBytes = body.contentLength() + readBytes
+                val buffer = ByteArray(1024)
+                var length = 0
+                accessFile.seek(readBytes)
+                while (!closed && inputStream.read(buffer).also { length = it } != -1) {
+                    readBytes += length.toLong()
+                    accessFile.write(buffer, 0, length)
+                    onProgress(listener, readBytes, totalBytes)
                 }
-        } catch (e: Exception) {
-            e.printStackTrace()
+                if (!closed && readBytes == totalBytes) {
+                    rename(srcFile)
+                } else null
+            }
         }
-        return null
     }
 
     private fun onProgress(listener: OnProgressListener?, downloadedBytes: Long, totalBytes: Long) {
@@ -101,6 +96,7 @@ class DownloadExtension private constructor(path: String, continuing: Boolean) :
         private const val DOWNLOAD_SUFFIX_TMP = ".tmp" // 下载临时文件后缀
         private const val DOWNLOAD_HEADER_RANGE_NAME = "Range"
         private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes={0,number,#}-"
+
         fun create(path: String, continuing: Boolean): DownloadExtension {
             return DownloadExtension(path, continuing)
         }

@@ -20,5 +20,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="10dp"
-        tools:text="加载中..." />
+        tools:text="@string/load_progress_tip"
+        tools:textAppearance="@style/TextAppearance.DynamicLayout.LoadingText" />
 </LinearLayout>
