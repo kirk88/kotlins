@@ -8,12 +8,16 @@ annotation class TableClass
 @Target(AnnotationTarget.CONSTRUCTOR)
 annotation class ClassParserConstructor
 
-@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.SOURCE)
-annotation class IgnoreInTable
+@Repeatable
+@Retention
+@MustBeDocumented
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FIELD)
+annotation class IgnoredOnTable
 
-@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.RUNTIME)
+@Repeatable
+@Retention
+@MustBeDocumented
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FIELD)
 annotation class Column(
     val name: String = "",
     val converter: KClass<out ColumnConverter<out Any, out Any>> = DefaultColumnConverter::class

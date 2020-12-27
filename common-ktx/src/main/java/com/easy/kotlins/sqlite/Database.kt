@@ -31,7 +31,6 @@ import com.google.gson.annotations.SerializedName
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
-import kotlin.reflect.KClass
 
 enum class SqlOrderDirection { ASC, DESC }
 
@@ -271,12 +270,12 @@ fun Any.toPairs(): Array<Pair<String, Any?>> {
         it.annotations.forEach { a-> println(a.annotationClass.simpleName) }
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
-                || it.isAnnotationPresent(IgnoreInTable::class.java)
+                || it.isAnnotationPresent(IgnoredOnTable::class.java)
     }.map {
         it.isAccessible = true
         if(it.isAnnotationPresent(Column::class.java)){
             val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
+            val converter = ColumnConverters.get(column.converter)
             column.name.ifEmpty { it.name  } to it.get(this)?.let { value -> converter.fromValue(value) }
         }else {
             it.name to it.get(this)
@@ -375,40 +374,40 @@ data class Pie(
 
 }
 
+
+
 @TableClass
 data class SimpleHealthProject (
-    @Transient
-    var id: Long = 0,
-    val bid: String?,
-    val name: String?,
-    @Column(converter = ReferencesConverter::class)
-    val references: List<Pie>?,//参考值
-    @Column(name = "title")
-    var title: String? = null,
-    @IgnoreInTable
-    val analyze: String? = null,
-    @IgnoreInTable
-    var guide: String? = null,
-    @IgnoreInTable
-    var tip: String? = null
+        @Transient
+        var id: Long = 0,
+        val bid: String?,
+        val name: String?,
+        @Column(converter = ReferencesConverter::class)
+        val references: List<Pie>?,//参考值
+        @Column(name = "title")
+        var title: String? = null,
+        @IgnoredOnTable
+        val analyze: String? = null,
+        @IgnoredOnTable
+        var guide: String? = null,
+        @IgnoredOnTable
+        var tip: String? = null
 )
+
+
 
 fun main() {
     val t = SimpleHealthProject(bid = "100", name="jack", references = listOf(Pie()), title = "fdsa")
 
-    t.javaClass.declaredFields.filterNot {
-        it.declaredAnnotations.forEach { a -> println(a.annotationClass.simpleName) }
-        Modifier.isTransient(it.modifiers)
-                || Modifier.isStatic(it.modifiers)
-                || it.isAnnotationPresent(IgnoreInTable::class.java)
-    }.map {
-        it.isAccessible = true
-        if(it.isAnnotationPresent(Column::class.java)){
-            val column = it.getAnnotation(Column::class.java) ?: throw IllegalStateException("Can not get annotation for column: ${it.name}")
-            val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
-            column.name.ifEmpty { it.name  } to it.get(t)?.let { value -> converter.fromValue(value) }
-        }else {
-            it.name to it.get(t)
+    t.javaClass.declaredConstructors.forEach {
+        it.parameterAnnotations.forEach { a ->
+            println(a.joinToString { b -> b.annotationClass.simpleName ?: "null" })
         }
-    }.toTypedArray()
+    }
+
+    t.javaClass.declaredFields.forEach {
+println(it.name)
+//        println("${it.isAnnotationPresent(IgnoreInTable::class.java)}")
+        println(it.annotations.joinToString { a -> a.annotationClass.simpleName?:"null" })
+    }
 }

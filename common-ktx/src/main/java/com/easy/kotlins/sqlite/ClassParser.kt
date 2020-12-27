@@ -18,11 +18,8 @@
 
 package com.easy.kotlins.sqlite.db
 
-import com.easy.kotlins.sqlite.ClassParserConstructor
-import com.easy.kotlins.sqlite.Column
-import com.easy.kotlins.sqlite.ColumnConverter
-import com.easy.kotlins.sqlite.IgnoreInTable
-import com.easy.kotlins.sqlite.db.JavaSqliteUtils.PRIMITIVES_TO_WRAPPERS
+import com.easy.kotlins.sqlite.*
+import com.easy.kotlins.sqlite.db.JavaSqlitePrimitives.PRIMITIVES_TO_WRAPPERS
 import java.lang.reflect.Modifier
 
 @Suppress("NOTHING_TO_INLINE")
@@ -51,30 +48,30 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
 
     return object : RowParser<T> {
         private val parameterAnnotations = preferredConstructor.parameterAnnotations
-        private val parameterTypes = preferredConstructor.parameterTypes.filterIndexed { index, _ ->
-            parameterAnnotations[index].none { it is IgnoreInTable }
+        private val parameterTypes = preferredConstructor.parameterTypes
+        private val parameterTypesChecked = parameterTypes.filterIndexed { index, _ ->
+            parameterAnnotations[index].none { it is IgnoredOnTable }
         }
 
-        @Suppress("UNCHECKED_CAST")
         override fun parseRow(columns: Array<Any?>): T {
-            if (parameterTypes.size != columns.size) {
+            if (parameterTypesChecked.size != columns.size) {
                 val columnsRendered = columns.joinToString(prefix = "[", postfix = "]")
                 val parameterTypesRendered =
-                    parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+                    parameterTypesChecked.joinToString(prefix = "[", postfix = "]") { it.name }
                 throw IllegalArgumentException(
                     "Class parser for ${preferredConstructor.name} " +
                             "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
                 )
             }
 
-            for (index in parameterTypes.indices) {
-                val type = parameterTypes[index]
+            for (index in parameterTypesChecked.indices) {
+                val type = parameterTypesChecked[index]
                 val annotations = parameterAnnotations[index]
                 val columnValue = columns[index]
 
                 val column = annotations.find { it is Column } as Column?
                 if (columnValue != null && column != null) {
-                    val converter = column.converter.java.newInstance() as ColumnConverter<Any, Any>
+                    val converter = ColumnConverters.get(column.converter)
                     columns[index] = converter.toValue(columnValue)
                 } else if (!type.isInstance(columnValue)) {
                     columns[index] = castValue(columnValue, type)
@@ -82,13 +79,13 @@ internal fun <T> classParser(clazz: Class<T>): RowParser<T> {
             }
 
             @Suppress("UNCHECKED_CAST")
-            return (JavaSqliteUtils.newInstance(preferredConstructor, columns)) as T
+            return preferredConstructor.newInstance(columns.copyOf(parameterTypes.size)) as T
         }
     }
 }
 
 private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
-    if (type.first.isPrimitive || type.second.any { it is IgnoreInTable }) {
+    if (type.first.isPrimitive || type.second.any { it is IgnoredOnTable }) {
         return true
     }
 

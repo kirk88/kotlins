@@ -4,13 +4,8 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-class JavaSqliteUtils {
-    private JavaSqliteUtils() {}
-
-    @SuppressWarnings("unchecked")
-    private static <T> Class<T> wrap(Class<T> c) {
-        return c.isPrimitive() ? (Class<T>) PRIMITIVES_TO_WRAPPERS.get(c) : c;
-    }
+class JavaSqlitePrimitives {
+    private JavaSqlitePrimitives() {}
 
     static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
     
@@ -25,10 +20,6 @@ class JavaSqliteUtils {
         PRIMITIVES_TO_WRAPPERS.put(long.class, Long.class);
         PRIMITIVES_TO_WRAPPERS.put(short.class, Short.class);
         PRIMITIVES_TO_WRAPPERS.put(void.class, Void.class);
-    }
-
-    static <T> T newInstance(Constructor<T> constructor, Object[] arguments) throws Exception {
-        return constructor.newInstance(arguments);
     }
 
 }
