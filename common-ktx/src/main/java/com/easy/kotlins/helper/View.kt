@@ -176,12 +176,14 @@ var View.layoutHeight: Int
 operator fun <T : View> View.get(@IdRes id: Int): T = findViewById<T>(id)
     ?: error("can not find view by id: $id")
 
-inline fun View.onClick(crossinline action: (view: View) -> Unit) {
-    setOnClickListener { v -> action(v) }
+@Suppress("UNCHECKED_CAST")
+inline fun <T: View> T.onClick(crossinline action: (view: T) -> Unit) {
+    setOnClickListener { v -> action(v as T) }
 }
 
-inline fun View.onLongClick(crossinline action: (view: View) -> Boolean) {
-    setOnLongClickListener { v -> action(v) }
+@Suppress("UNCHECKED_CAST")
+inline fun <T: View> T.onLongClick(crossinline action: (view: T) -> Boolean) {
+    setOnLongClickListener { v -> action(v as T) }
 }
 
 inline fun Iterable<View>.onClick(crossinline action: (view: View) -> Unit) {

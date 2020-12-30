@@ -17,7 +17,7 @@ import kotlin.reflect.KProperty
  * Create by LiZhanPing on 2020/9/12
  */
 
-open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
+open class Event(val what: Int = Status.NONE, val message: String? = null) : Parcelable {
     private val extras: Bundle by lazy { Bundle() }
 
     private var intent: Intent? = null
@@ -63,7 +63,7 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
         return this.intent
     }
 
-    fun copy(what: Int = 0, message: String? = null): Event {
+    fun copy(what: Int = Status.NONE, message: String? = null): Event {
         return Event(what, message).also {
             it.putAll(this)
         }
@@ -102,9 +102,9 @@ open class Event(val what: Int = 0, val message: String? = null) : Parcelable {
 
 }
 
-class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what) {
+class MultipleEvent(what: Int = Status.NONE, val events: List<Event>) : Event(what) {
 
-    fun copy(what: Int = 0, events: List<Event>): Event {
+    fun copy(what: Int = Status.NONE, events: List<Event>): Event {
         return MultipleEvent(what, events).also {
             it.putAll(this)
         }
@@ -118,6 +118,8 @@ class MultipleEvent(what: Int = 0, val events: List<Event>) : Event(what) {
 object Status {
 
     private const val STATUS_BASE = 10000
+
+    const val NONE = -1
 
     const val SHOW_PROGRESS = STATUS_BASE + 1
     const val DISMISS_PROGRESS = STATUS_BASE + 2
@@ -135,7 +137,7 @@ object Status {
 
 private val NO_EVENT = Event()
 
-class LiveEventDelegate {
+class LiveEventProxy {
 
     private val liveEvents: MutableMap<LifecycleOwner, SingleLiveEvent<Event>> by lazy { mutableMapOf() }
 
@@ -148,8 +150,8 @@ class LiveEventDelegate {
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Event) {
         latestEvent = value
 
-        liveEvents.values.forEach {
-            LiveDataPoster.post(it, value)
+        liveEvents.toMap().forEach {
+            LiveDataPoster.post(it.value, value)
         }
     }
 
@@ -159,13 +161,26 @@ class LiveEventDelegate {
 
 }
 
-fun event(what: Int = 0, message: String? = null) = Event(what, message)
+fun event(what: Int = Status.NONE, message: String? = null) = Event(what, message)
 
-inline fun buildEvent(what: Int = 0, message: String? = null, crossinline init: Event.() -> Unit) =
-    Event(what, message).apply(init)
+inline fun buildEvent(
+    what: Int = Status.NONE,
+    message: String? = null,
+    crossinline init: Event.() -> Unit
+) = Event(what, message).apply(init)
 
 inline fun <reified T : Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) =
     buildEvent {
+        setIntent(Intent(context, T::class.java).apply {
+            putExtras(pairs.toBundle())
+        })
+    }
+
+inline fun <reified T : Activity> intentEventForResult(
+    context: Context,
+    requestCode: Int,
+    vararg pairs: Pair<String, Any?>
+) = buildEvent(requestCode) {
         setIntent(Intent(context, T::class.java).apply {
             putExtras(pairs.toBundle())
         })
@@ -196,7 +211,8 @@ fun multipleEvent(what: Int, events: List<Event>) = MultipleEvent(what, events)
 
 fun multipleEvent(events: List<Event>) = MultipleEvent(events = events)
 
-fun multipleEvent(what: Int = 0, vararg events: Event) = MultipleEvent(what, events.toList())
+fun multipleEvent(what: Int = Status.NONE, vararg events: Event) =
+    MultipleEvent(what, events.toList())
 
 fun multipleEvent(vararg events: Event) = MultipleEvent(events = events.toList())
 

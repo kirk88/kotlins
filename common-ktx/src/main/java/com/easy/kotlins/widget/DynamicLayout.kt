@@ -20,8 +20,10 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.easy.kotlins.R
+import com.easy.kotlins.helper.weak
 
 class DynamicLayout @JvmOverloads constructor(
     context: Context,
@@ -76,6 +78,8 @@ class DynamicLayout @JvmOverloads constructor(
             emptyClickListener!!.onClick(v)
         }
     }
+
+    private var dataObserver: AdapterDataObserver? = null
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -158,7 +162,7 @@ class DynamicLayout @JvmOverloads constructor(
         emptyButtonText = text
         findViewById<TextView>(R.id.empty_button)?.let {
             it.text = text
-            it.visibility = if(text.isBlank()) View.GONE else View.VISIBLE
+            it.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
         return this
     }
@@ -206,7 +210,7 @@ class DynamicLayout @JvmOverloads constructor(
         errorButtonText = text
         findViewById<TextView>(R.id.error_button)?.let {
             it.text = text
-            it.visibility = if(text.isBlank()) View.GONE else View.VISIBLE
+            it.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
         return this
     }
@@ -218,6 +222,18 @@ class DynamicLayout @JvmOverloads constructor(
     override fun setErrorClickListener(listener: OnClickListener?): DynamicLayout {
         errorClickListener = listener
         return this
+    }
+
+    override fun attachTo(adapter: RecyclerView.Adapter<*>) {
+        if(dataObserver != null) dataObserver!!.unregister()
+        dataObserver = AdapterDataObserver(adapter) { this }.also {
+            it.register()
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        dataObserver?.unregister()
     }
 
     private fun addContentView(view: View?) {
@@ -287,7 +303,7 @@ class DynamicLayout @JvmOverloads constructor(
                         it.setTextColor(emptyButtonTextColor)
                     }
                     it.setOnClickListener(emptyButtonClickListener)
-                    it.visibility = if(emptyButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
+                    it.visibility = if (emptyButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
                 }
             }
             TYPE_LOADING_VIEW -> {
@@ -336,7 +352,7 @@ class DynamicLayout @JvmOverloads constructor(
                         it.setTextColor(errorButtonTextColor)
                     }
                     it.setOnClickListener(errorButtonClickListener)
-                    it.visibility = if(errorButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
+                    it.visibility = if (errorButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -348,6 +364,41 @@ class DynamicLayout @JvmOverloads constructor(
         if (this.showType != viewType) view.visibility = View.INVISIBLE
 
         return view
+    }
+
+    private class AdapterDataObserver(
+        internal val adapter: RecyclerView.Adapter<*>,
+        dynamicLayout: () -> DynamicLayout
+    ) : RecyclerView.AdapterDataObserver() {
+        private val layout: DynamicLayout? by weak(dynamicLayout)
+
+        override fun onChanged() {
+            if (adapter.itemCount == 0) {
+                layout?.showEmpty()
+            } else {
+                layout?.showContent()
+            }
+        }
+
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            if (adapter.itemCount > 0) {
+                layout?.showContent()
+            }
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            if (adapter.itemCount == 0) {
+                layout?.showEmpty()
+            }
+        }
+
+        fun register() {
+            adapter.registerAdapterDataObserver(this)
+        }
+
+        fun unregister() {
+            adapter.unregisterAdapterDataObserver(this)
+        }
     }
 
     companion object {

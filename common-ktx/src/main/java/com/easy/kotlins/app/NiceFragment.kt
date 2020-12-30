@@ -26,27 +26,27 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        view.post { onBindData(savedInstanceState) }
+        view.post { onPrepared(savedInstanceState) }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         isCallActivityCreated = true
         if (!isCallUserVisibleHint) isVisibleToUser = !isHidden
-        onLazyBindDataInternal(savedInstanceState)
+        onLazyPreparedInternal(savedInstanceState)
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         isVisibleToUser = !hidden
-        onLazyBindDataInternal()
+        onLazyPreparedInternal()
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
         this.isVisibleToUser = isVisibleToUser
         isCallUserVisibleHint = true
-        onLazyBindDataInternal()
+        onLazyPreparedInternal()
     }
 
     override fun onDestroyView() {
@@ -54,9 +54,9 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
         resetState()
     }
 
-    private fun onLazyBindDataInternal(savedInstanceState: Bundle? = null) {
+    private fun onLazyPreparedInternal(savedInstanceState: Bundle? = null) {
         if (!isLoaded && isVisibleToUser && isCallActivityCreated) {
-            onLazyBindData(savedInstanceState)
+            onLazyPrepared(savedInstanceState)
             isLoaded = true
         }
     }
@@ -74,7 +74,7 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
 
     open fun onBindEvent(savedInstanceState: Bundle?) {}
 
-    open fun onBindData(savedInstanceState: Bundle?) {}
+    open fun onPrepared(savedInstanceState: Bundle?) {}
 
-    open fun onLazyBindData(savedInstanceState: Bundle?) {}
+    open fun onLazyPrepared(savedInstanceState: Bundle?) {}
 }

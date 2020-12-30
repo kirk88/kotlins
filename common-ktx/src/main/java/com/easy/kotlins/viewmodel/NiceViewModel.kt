@@ -1,5 +1,6 @@
 package com.easy.kotlins.viewmodel
 
+import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.annotation.MainThread
@@ -7,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.LiveEventDelegate
+import com.easy.kotlins.event.LiveEventProxy
 import com.easy.kotlins.helper.weak
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
@@ -17,34 +18,39 @@ import com.easy.kotlins.http.SimpleOkFakerScope
  * Create by LiZhanPing on 2020/8/24
  */
 
-open class NiceViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
+interface ViewModelController : OkFakerScope {
+    var event: Event
 
-    private val liveEventDelegate = LiveEventDelegate()
-    var event: Event by liveEventDelegate
+    fun get(action: OkFaker.() -> Unit): OkFaker
 
+    fun post(action: OkFaker.() -> Unit): OkFaker
 
-    fun get(action: OkFaker.() -> Unit): OkFaker {
+    fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
+
+    fun observeEvent(owner: EventObservableView)
+}
+
+private class SimpleViewModelController : ViewModelController,
+    OkFakerScope by SimpleOkFakerScope() {
+
+    private val liveEventProxy = LiveEventProxy()
+    override var event: Event by liveEventProxy
+
+    override fun get(action: OkFaker.() -> Unit): OkFaker {
         return OkFaker.get(action).also { add(it) }
     }
 
-
-    fun post(action: OkFaker.() -> Unit): OkFaker {
+    override fun post(action: OkFaker.() -> Unit): OkFaker {
         return OkFaker.post(action).also { add(it) }
     }
 
-    fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventDelegate.observe(owner, EventObserver(observer))
+    override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
+        liveEventProxy.observe(owner, EventObserver(observer))
     }
 
-    fun observeEvent(owner: EventObservableView) {
-        liveEventDelegate.observe(owner, EventViewObserver(owner))
+    override fun observeEvent(owner: EventObservableView) {
+        liveEventProxy.observe(owner, EventViewObserver(owner))
     }
-
-    @CallSuper
-    override fun onCleared() {
-        cancelAll()
-    }
-
 
     private class EventObserver(private val observer: (event: Event) -> Unit) : Observer<Event> {
 
@@ -65,7 +71,27 @@ open class NiceViewModel : ViewModel(), OkFakerScope by SimpleOkFakerScope() {
     }
 }
 
-class StatefulViewModel(val handle: SavedStateHandle) : NiceViewModel()
+open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
+    @CallSuper
+    override fun onCleared() {
+        cancelAll()
+    }
+}
+
+open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
+    ViewModelController by SimpleViewModelController() {
+
+    @CallSuper
+    override fun onCleared() {
+        cancelAll()
+    }
+
+}
+
+open class StatefulViewModel(val state: SavedStateHandle) : NiceViewModel()
+
+open class StatefulAndroidViewModel(application: Application, val state: SavedStateHandle) :
+    NiceAndroidViewModel(application)
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(

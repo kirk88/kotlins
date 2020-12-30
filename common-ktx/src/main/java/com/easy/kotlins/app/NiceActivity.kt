@@ -16,7 +16,7 @@ abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() 
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        window.decorView.post { onBindData(savedInstanceState) }
+        window.decorView.post { onPrepared(savedInstanceState) }
     }
 
     @CallSuper
@@ -33,5 +33,5 @@ abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() 
 
     open fun onBindEvent(savedInstanceState: Bundle?) {}
 
-    open fun onBindData(savedInstanceState: Bundle?) {}
+    open fun onPrepared(savedInstanceState: Bundle?) {}
 }

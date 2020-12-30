@@ -5,6 +5,7 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
+import androidx.recyclerview.widget.RecyclerView
 
 interface LoadingView {
 
@@ -59,4 +60,6 @@ interface LoadingView {
     fun setErrorButtonText(@StringRes textId: Int): LoadingView
 
     fun setErrorClickListener(listener: View.OnClickListener?): LoadingView
+
+    fun attachTo(adapter: RecyclerView.Adapter<*>)
 }
