@@ -22,7 +22,6 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) : Par
 
     private var intent: Intent? = null
 
-
     fun getString(key: String, defaultValue: String? = null): String? =
         extras.getString(key, defaultValue)
 
@@ -102,16 +101,18 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) : Par
 
 }
 
-class MultipleEvent(what: Int = Status.NONE, val events: List<Event>) : Event(what) {
+class SingleEvent(what: Int = Status.NONE, message: String? = null) : Event(what, message)
 
-    fun copy(what: Int = Status.NONE, events: List<Event>): Event {
-        return MultipleEvent(what, events).also {
+class EventCollection(val events: List<Event>) : Event() {
+
+    fun copy(events: List<Event>): Event {
+        return EventCollection(events).also {
             it.putAll(this)
         }
     }
 
     override fun toString(): String {
-        return "MultipleEvent(what=$what, events=$events)"
+        return "MultipleEvent(events=$events)"
     }
 }
 
@@ -135,33 +136,10 @@ object Status {
     const val SHOW_CONTENT = STATUS_BASE + 11
 }
 
-private val NO_EVENT = Event()
+fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
 
-class LiveEventProxy {
-
-    private val liveEvents: MutableMap<LifecycleOwner, SingleLiveEvent<Event>> by lazy { mutableMapOf() }
-
-    private var latestEvent: Event = NO_EVENT
-
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Event {
-        return latestEvent
-    }
-
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Event) {
-        latestEvent = value
-
-        liveEvents.toMap().forEach {
-            LiveDataPoster.post(it.value, value)
-        }
-    }
-
-    fun observe(owner: LifecycleOwner, observer: Observer<Event>) {
-        liveEvents.getOrPut(owner) { SingleLiveEvent() }.observe(owner, observer)
-    }
-
-}
-
-fun event(what: Int = Status.NONE, message: String? = null) = Event(what, message)
+fun singleEvent(what: Int = Status.NONE, message: String? = null): Event =
+    SingleEvent(what, message)
 
 inline fun buildEvent(
     what: Int = Status.NONE,
@@ -169,8 +147,15 @@ inline fun buildEvent(
     crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
+inline fun buildSingleEvent(
+    what: Int = Status.NONE,
+    message: String? = null,
+    crossinline init: Event.() -> Unit
+) = SingleEvent(what, message).apply(init)
+
+
 inline fun <reified T : Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) =
-    buildEvent {
+    buildSingleEvent {
         setIntent(Intent(context, T::class.java).apply {
             putExtras(pairs.toBundle())
         })
@@ -180,41 +165,38 @@ inline fun <reified T : Activity> intentEventForResult(
     context: Context,
     requestCode: Int,
     vararg pairs: Pair<String, Any?>
-) = buildEvent(requestCode) {
-        setIntent(Intent(context, T::class.java).apply {
-            putExtras(pairs.toBundle())
-        })
-    }
+) = buildSingleEvent(requestCode) {
+    setIntent(Intent(context, T::class.java).apply {
+        putExtras(pairs.toBundle())
+    })
+}
 
-fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
+fun toastShow(message: String): Event = SingleEvent(message = message)
 
-fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
+fun progressShow(message: String? = null): Event = SingleEvent(Status.SHOW_PROGRESS, message)
 
-fun refreshCompleted(): Event = Event(Status.REFRESH_COMPLETE)
+fun progressDismiss(): Event = SingleEvent(Status.DISMISS_PROGRESS)
+
+fun refreshCompleted(): Event = SingleEvent(Status.REFRESH_COMPLETE)
 
 fun loadMoreCompleted(hasMore: Boolean = true): Event =
-    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+    SingleEvent(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
-fun refreshFailed(): Event = Event(Status.REFRESH_FAILURE)
+fun refreshFailed(): Event = SingleEvent(Status.REFRESH_FAILURE)
 
-fun loadMoreFailed(): Event = Event(Status.LOADMORE_FAILURE)
+fun loadMoreFailed(): Event = SingleEvent(Status.LOADMORE_FAILURE)
 
-fun loadingShow(message: String? = null) = Event(Status.SHOW_LOADING, message)
+fun loadingShow(message: String? = null): Event = SingleEvent(Status.SHOW_LOADING, message)
 
-fun emptyShow(message: String? = null) = Event(Status.SHOW_EMPTY, message)
+fun emptyShow(message: String? = null): Event = SingleEvent(Status.SHOW_EMPTY, message)
 
-fun errorShow(message: String? = null) = Event(Status.SHOW_ERROR, message)
+fun errorShow(message: String? = null): Event = SingleEvent(Status.SHOW_ERROR, message)
 
-fun contentShow() = Event(Status.SHOW_CONTENT)
+fun contentShow(): Event = SingleEvent(Status.SHOW_CONTENT)
 
-fun multipleEvent(what: Int, events: List<Event>) = MultipleEvent(what, events)
+fun eventOf(events: List<Event>): Event = EventCollection(events = events)
 
-fun multipleEvent(events: List<Event>) = MultipleEvent(events = events)
-
-fun multipleEvent(what: Int = Status.NONE, vararg events: Event) =
-    MultipleEvent(what, events.toList())
-
-fun multipleEvent(vararg events: Event) = MultipleEvent(events = events.toList())
+fun eventOf(vararg events: Event): Event = EventCollection(events = events.toList())
 
 interface EventObservableView : LifecycleOwner {
 

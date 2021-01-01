@@ -5,8 +5,8 @@ import androidx.lifecycle.Observer
 
 internal class SimpleLiveEvent : SimpleObservable {
 
-    private val delegate =
-        LiveEventDelegate<Nothing>()
+    private val delegate = LiveEventDelegate<Nothing>()
+    private val observers = mutableMapOf<SimpleObserver, Observer<Nothing>>()
 
     override fun call() {
         delegate.post(null)
@@ -21,33 +21,48 @@ internal class SimpleLiveEvent : SimpleObservable {
     }
 
     override fun observe(owner: LifecycleOwner, observer: SimpleObserver) {
-        delegate.observe(owner, ObserverWrapper(observer))
+        delegate.observe(owner, ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
     }
 
     override fun observeSticky(owner: LifecycleOwner, observer: SimpleObserver) {
-        delegate.observeSticky(owner, ObserverWrapper(observer))
+        delegate.observeSticky(owner, ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
+    }
+
+    override fun observeActive(owner: LifecycleOwner, observer: SimpleObserver) {
+        delegate.observeActive(owner, ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
+    }
+
+    override fun observeActiveSticky(owner: LifecycleOwner, observer: SimpleObserver) {
+        delegate.observeActive(owner, ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
     }
 
     override fun observeForever(observer: SimpleObserver) {
-        delegate.observeForever(ObserverWrapper(observer))
+        delegate.observeForever(ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
     }
 
     override fun observeStickyForever(observer: SimpleObserver) {
-        delegate.observeStickyForever(ObserverWrapper(observer))
+        delegate.observeStickyForever(ObserverWrapper(observer).also {
+            observers[observer] = it
+        })
     }
 
     override fun removeObserver(observer: SimpleObserver) {
-        delegate.removeObserver(observer as ObserverWrapper)
+        observers[observer]?.let { delegate.removeObserver(it) }
     }
 
-    private class ObserverWrapper(private val observer: SimpleObserver) : Observer<Nothing>,
-        SimpleObserver {
+    private class ObserverWrapper(private val observer: SimpleObserver) : Observer<Nothing> {
 
         override fun onChanged(t: Nothing?) {
-            onChanged()
-        }
-
-        override fun onChanged() {
             observer.onChanged()
         }
     }

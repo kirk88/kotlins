@@ -13,6 +13,10 @@ interface SimpleObservable {
 
     fun observeSticky(owner: LifecycleOwner, observer: SimpleObserver)
 
+    fun observeActive(owner: LifecycleOwner, observer: SimpleObserver)
+
+    fun observeActiveSticky(owner: LifecycleOwner, observer: SimpleObserver)
+
     fun observeForever(observer: SimpleObserver)
 
     fun observeStickyForever(observer: SimpleObserver)

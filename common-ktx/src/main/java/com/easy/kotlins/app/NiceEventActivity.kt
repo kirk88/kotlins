@@ -3,7 +3,7 @@ package com.easy.kotlins.app
 import android.os.Bundle
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.MultipleEvent
+import com.easy.kotlins.event.EventCollection
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelEvents
@@ -31,7 +31,7 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
     final override fun onEventChanged(event: Event) {
         if (onViewModelEventChanged(event)) return
 
-        if (event is MultipleEvent) {
+        if (event is EventCollection) {
             event.events.forEach { callEvent(it) }
         } else {
             callEvent(event)

@@ -5,12 +5,11 @@ import android.os.Looper
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import java.util.*
+import com.easy.kotlins.event.MutableLiveEventData
 
 internal class LiveEventDelegate<T> {
-    private val liveData = LiveEventData<T>()
-    private val observerMap: MutableMap<Observer<*>, ObserverWrapper<T>> = HashMap()
-  
+    private val liveData = MutableLiveEventData<T>()
+
     fun post(value: T?) {
         if (isMainThread) {
             postInternal(value)
@@ -46,6 +45,25 @@ internal class LiveEventDelegate<T> {
         }
     }
 
+    fun observeActive(owner: LifecycleOwner, observer: Observer<T>) {
+        if (isMainThread) {
+            observeActiveInternal(owner, observer)
+        } else {
+            HANDLER.post { observeActiveInternal(owner, observer) }
+        }
+    }
+
+    fun observeActiveSticky(
+        owner: LifecycleOwner,
+        observer: Observer<T>
+    ) {
+        if (isMainThread) {
+            observeActiveStickyInternal(owner, observer)
+        } else {
+            HANDLER.post { observeActiveStickyInternal(owner, observer) }
+        }
+    }
+
     fun observeForever(observer: Observer<T>) {
         if (isMainThread) {
             observeForeverInternal(observer)
@@ -72,53 +90,42 @@ internal class LiveEventDelegate<T> {
 
     @MainThread
     private fun postInternal(value: T?) {
-        liveData.value = value
+        liveData.setValue(value)
     }
 
     @MainThread
     private fun observeInternal(owner: LifecycleOwner, observer: Observer<T>) {
-        val observerWrapper = ObserverWrapper(observer)
-        observerWrapper.preventNextEvent = liveData.version > LiveEventData.START_VERSION
-        liveData.observe(owner, observerWrapper)
+        liveData.observe(owner, observer)
     }
 
     @MainThread
     private fun observeStickyInternal(owner: LifecycleOwner, observer: Observer<T>) {
-        liveData.observe(owner, ObserverWrapper(observer))
+        liveData.observeSticky(owner, observer)
+    }
+
+    @MainThread
+    private fun observeActiveInternal(owner: LifecycleOwner, observer: Observer<T>) {
+        liveData.observeActive(owner, observer)
+    }
+
+    @MainThread
+    private fun observeActiveStickyInternal(owner: LifecycleOwner, observer: Observer<T>) {
+        liveData.observeActiveSticky(owner, observer)
     }
 
     @MainThread
     private fun observeForeverInternal(observer: Observer<T>) {
-        val observerWrapper = ObserverWrapper(observer)
-        observerWrapper.preventNextEvent = liveData.version > LiveEventData.START_VERSION
-        observerMap[observer] = observerWrapper
-        liveData.observeForever(observerWrapper)
+        liveData.observeForever(observer)
     }
 
     @MainThread
     private fun observeStickyForeverInternal(observer: Observer<T>) {
-        val observerWrapper = ObserverWrapper(observer)
-        observerMap[observer] = observerWrapper
-        liveData.observeForever(observerWrapper)
+        liveData.observeForever(observer)
     }
 
     @MainThread
     private fun removeObserverInternal(observer: Observer<T>) {
-        if (observerMap.containsKey(observer)) {
-            observerMap.remove(observer)?.let { liveData.removeObserver(it) }
-        }
-    }
-
-    private class ObserverWrapper<T>(private val observer: Observer<T>) :
-        Observer<T> {
-        var preventNextEvent = false
-        override fun onChanged(t: T) {
-            if (preventNextEvent) {
-                preventNextEvent = false
-                return
-            }
-            observer.onChanged(t)
-        }
+        liveData.removeObserver(observer)
     }
 
     companion object {

@@ -1,7 +1,9 @@
 package com.easy.kotlins.event.livebus
 
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.easy.kotlins.event.MutableLiveEventData
 
 internal class LiveEvent<T>: Observable<T> {
 
@@ -25,6 +27,14 @@ internal class LiveEvent<T>: Observable<T> {
 
     override fun observeSticky(owner: LifecycleOwner, observer: Observer<T>) {
         delegate.observeSticky(owner, observer)
+    }
+
+    override fun observeActive(owner: LifecycleOwner, observer: Observer<T>) {
+        delegate.observeActive(owner, observer)
+    }
+
+    override fun observeActiveSticky(owner: LifecycleOwner, observer: Observer<T>) {
+        delegate.observeActiveSticky(owner, observer)
     }
 
     override fun observeForever(observer: Observer<T>) {

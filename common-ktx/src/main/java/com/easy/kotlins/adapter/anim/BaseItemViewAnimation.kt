@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.easy.kotlins.helper.opt
 
 abstract class BaseItemViewAnimation(protected open val animationMode: ItemViewAnimationMode) :
-    ItemViewAnimation {
+        ItemViewAnimation {
 
     private var lastAnimateIndex = -1
 
@@ -26,15 +26,15 @@ abstract class BaseItemViewAnimation(protected open val animationMode: ItemViewA
     }
 
     override fun start(holder: RecyclerView.ViewHolder) {
-        getAnimators(holder).let {
-            if (it.isEmpty()) return
-            AnimatorSet().apply { playTogether(*it) }.start()
+        val animators = getAnimators(holder)
+        if (animators.isNotEmpty()) {
+            AnimatorSet().apply { playTogether(*animators) }.start()
         }
     }
 
     protected abstract fun getAnimators(view: View): Array<Animator>
 
-    fun reset(){
+    fun reset() {
         lastAnimateIndex = -1
     }
 }

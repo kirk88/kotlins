@@ -8,8 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.LiveEventProxy
-import com.easy.kotlins.helper.weak
+import com.easy.kotlins.event.EventProxy
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
 import com.easy.kotlins.http.SimpleOkFakerScope
@@ -33,7 +32,7 @@ interface ViewModelController : OkFakerScope {
 private class SimpleViewModelController : ViewModelController,
     OkFakerScope by SimpleOkFakerScope() {
 
-    private val liveEventProxy = LiveEventProxy()
+    private val liveEventProxy = EventProxy()
     override var event: Event by liveEventProxy
 
     override fun get(action: OkFaker.() -> Unit): OkFaker {
@@ -45,29 +44,15 @@ private class SimpleViewModelController : ViewModelController,
     }
 
     override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventProxy.observe(owner, EventObserver(observer))
+        liveEventProxy.observe(owner){
+            if (it != null) observer(it)
+        }
     }
 
     override fun observeEvent(owner: EventObservableView) {
-        liveEventProxy.observe(owner, EventViewObserver(owner))
-    }
-
-    private class EventObserver(private val observer: (event: Event) -> Unit) : Observer<Event> {
-
-        override fun onChanged(event: Event?) {
-            if (event != null) observer(event)
+        liveEventProxy.observe(owner){
+            if(it != null) owner.onEventChanged(it)
         }
-
-    }
-
-    private class EventViewObserver(owner: EventObservableView) : Observer<Event> {
-
-        private val owner: EventObservableView? by weak { owner }
-
-        override fun onChanged(event: Event?) {
-            if (event != null) owner?.onEventChanged(event)
-        }
-
     }
 }
 

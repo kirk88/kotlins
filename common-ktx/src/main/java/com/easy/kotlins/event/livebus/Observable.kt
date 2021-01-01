@@ -14,6 +14,10 @@ interface Observable<T> {
 
     fun observeSticky(owner: LifecycleOwner, observer: Observer<T>)
 
+    fun observeActive(owner: LifecycleOwner, observer: Observer<T>)
+
+    fun observeActiveSticky(owner: LifecycleOwner, observer: Observer<T>)
+
     fun observeForever(observer: Observer<T>)
 
     fun observeStickyForever(observer: Observer<T>)
