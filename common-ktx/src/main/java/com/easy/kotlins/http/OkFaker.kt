@@ -368,18 +368,18 @@ class OkFaker(method: OkRequestMethod) {
 }
 
 data class BodyFromDataPart(val body: RequestBody, val filename: String? = null)
-data class FileFormDataPart(val file: File, val type: MediaType)
+data class FileFormDataPart(val file: File, val type: MediaType? = null)
 
 class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
 
     private val pairs: MutableMap<String, T> = mutableMapOf()
 
-    operator fun String.minus(value: T) {
-        pairs[this] = value
-    }
-
     operator fun set(key: String, value: T) {
         pairs[key] = value
+    }
+
+    infix fun String.of(value: T) {
+        pairs[this] = value
     }
 
     fun putAll(pairsFrom: Map<String, T>) {
@@ -424,8 +424,7 @@ inline fun requestPairsOf(
             if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJson()
         source.toJsonObject().forEach { key, element ->
             when {
-                element == null || element.isJsonNull && serializeNulls -> this[key] =
-                    element.toString()
+                element.isJsonNull && serializeNulls -> this[key] = element.toString()
                 element.isJsonArray || element.isJsonObject -> this[key] = element.toString()
                 element.isJsonPrimitive -> this[key] = element.asString
             }

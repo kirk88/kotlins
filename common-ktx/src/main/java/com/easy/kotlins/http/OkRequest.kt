@@ -280,7 +280,7 @@ class OkRequest constructor(private val method: OkRequestMethod) {
         return this
     }
 
-    fun addFormDataPart(name: String, type: MediaType, file: File): OkRequest {
+    fun addFormDataPart(name: String, type: MediaType?, file: File): OkRequest {
         ensureMultiBody().addFormDataPart(
             name,
             file.name,

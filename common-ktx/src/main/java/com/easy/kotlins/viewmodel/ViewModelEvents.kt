@@ -7,12 +7,11 @@ import com.easy.kotlins.event.EventObservableView
  */
 object ViewModelEvents {
 
-    fun observe(owner: Any) {
+    fun observe(owner: EventObservableView) {
         when {
-            owner !is EventObservableView ||
             owner !is ViewModelOwner<*> ||
-            owner.viewModel !is NiceViewModel -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
-            else -> (owner.viewModel as NiceViewModel).observeEvent(owner)
+            owner.viewModel !is ViewModelController -> throw IllegalArgumentException("Non-support observe event owner ${owner.javaClass.name}")
+            else -> (owner.viewModel as ViewModelController).observeEvent(owner)
         }
     }
 }

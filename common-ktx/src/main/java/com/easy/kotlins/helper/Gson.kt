@@ -110,22 +110,22 @@ fun JsonObject.getAsBigInteger(
 fun JsonObject.getAsBoolean(name: String, defaultValue: Boolean = false): Boolean =
     this.get(name)?.asBoolean ?: defaultValue
 
-inline fun JsonObject.forEach(action: (entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) =
+inline fun JsonObject.forEach(action: (entry: MutableMap.MutableEntry<String, JsonElement>) -> Unit) =
     this.entrySet()?.forEach(
         action
     )
 
-inline fun JsonObject.forEach(action: (key: String, element: JsonElement?) -> Unit) =
+inline fun JsonObject.forEach(action: (key: String, element: JsonElement) -> Unit) =
     this.entrySet()?.forEach {
         action.invoke(it.key, it.value)
     }
 
-inline fun JsonObject.forEachIndexed(action: (index: Int, entry: MutableMap.MutableEntry<String, JsonElement?>) -> Unit) =
+inline fun JsonObject.forEachIndexed(action: (index: Int, entry: MutableMap.MutableEntry<String, JsonElement>) -> Unit) =
     this.entrySet()?.forEachIndexed(
         action
     )
 
-inline fun JsonObject.forEachIndexed(action: (index: Int, key: String, element: JsonElement?) -> Unit) =
+inline fun JsonObject.forEachIndexed(action: (index: Int, key: String, element: JsonElement) -> Unit) =
     this.entrySet()?.forEachIndexed { index, entry ->
         action.invoke(index, entry.key, entry.value)
     }

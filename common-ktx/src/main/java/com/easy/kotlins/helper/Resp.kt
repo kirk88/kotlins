@@ -250,7 +250,7 @@ fun <T : Any> OkFaker.loadPlugin(
 
     onSuccess<T> {
         step(loader.context) {
-            add {
+            add(loader.delayed) {
                 if (it is Collection<*>) {
                     onEvent?.invoke(
                         when (loader.mode) {
@@ -264,7 +264,7 @@ fun <T : Any> OkFaker.loadPlugin(
                 }
             }
 
-            add(loader.delayed) {
+            add {
                 onApply(it)
             }
         }
@@ -272,7 +272,7 @@ fun <T : Any> OkFaker.loadPlugin(
 
     onError {
         step(loader.context) {
-            add {
+            add(loader.delayed) {
                 onEvent?.invoke(
                     when (loader.mode) {
                         LoadMode.START -> errorShow(it.message)
@@ -282,21 +282,25 @@ fun <T : Any> OkFaker.loadPlugin(
                 )
             }
 
-            add(loader.delayed) {
+            add {
                 onError?.invoke(it)
             }
         }
     }
 }
 
-fun <T : Any> OkFaker.loadPlugin(
+inline fun <reified T: Any> OkFaker.loadPlugin(
     loader: Loader,
     source: MutableLiveData<T>,
-    onError: ((Throwable) -> Unit)? = null,
-    onEvent: ((Event) -> Unit)? = null
+    noinline onError: ((Throwable) -> Unit)? = null,
+    noinline onEvent: ((Event) -> Unit)? = null
 ) {
     loadPlugin<T>(loader, onEvent, onError) {
-        source.value = it
+        if (T::class == PagedList::class && it is List<*>) {
+            source.value = pagedList(loader.pager, it) as T
+        } else {
+            source.value = it
+        }
     }
 }
 

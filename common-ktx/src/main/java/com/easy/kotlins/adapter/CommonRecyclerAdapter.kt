@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.easy.kotlins.adapter.anim.BaseItemViewAnimation
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
 import com.easy.kotlins.helper.onClick
 import com.easy.kotlins.helper.onLongClick
@@ -16,7 +17,7 @@ import java.util.*
 open class CommonRecyclerAdapter<ITEM>(
     protected val context: Context,
     vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
-    private var itemAnimation: ItemViewAnimation? = null,
+    private val itemAnimation: ItemViewAnimation? = null,
     private var itemClickable: Boolean = false,
     private var itemLongClickable: Boolean = false
 ) :
@@ -97,10 +98,6 @@ open class CommonRecyclerAdapter<ITEM>(
     fun setItemLongClickable(itemLongClickable: Boolean) {
         this.itemLongClickable = itemLongClickable
         notifyDataSetChanged()
-    }
-
-    fun setItemViewAnimation(itemAnimation: ItemViewAnimation) {
-        this.itemAnimation = itemAnimation
     }
 
     fun <DELEGATE : ItemViewDelegate<out ITEM>> addItemViewDelegate(
@@ -184,6 +181,10 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun setItems(items: List<ITEM>?) {
+        if(itemAnimation is BaseItemViewAnimation){
+            itemAnimation.reset()
+        }
+
         synchronized(lock) {
             if (this.modifiableItems.isNotEmpty()) {
                 this.modifiableItems.clear()
@@ -574,7 +575,7 @@ open class CommonRecyclerAdapter<ITEM>(
 
     @CallSuper
     override fun onViewAttachedToWindow(holder: ItemViewHolder) {
-        itemAnimation?.getAnimators(holder)?.forEach { it.start() }
+        itemAnimation?.start(holder)
     }
 
     private fun isHeader(position: Int): Boolean = position < headerCount

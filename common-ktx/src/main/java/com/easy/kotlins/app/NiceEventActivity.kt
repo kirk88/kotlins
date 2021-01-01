@@ -64,7 +64,11 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
         }
 
         val intent = event.getIntent() ?: return
-        startActivity(intent)
+        if (event.what == Status.NONE) {
+            startActivity(intent)
+        } else {
+            startActivityForResult(intent, event.what)
+        }
     }
 
     open fun onViewModelEventChanged(event: Event): Boolean {
