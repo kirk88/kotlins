@@ -1,12 +1,13 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.EventCollection
+import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelEvents
+import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.LoadingView
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
@@ -14,8 +15,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
-    EventObservableView {
+abstract class NiceViewModelFragment<VM: ViewModel>(layoutResId: Int) : NiceFragment(layoutResId), EventObserver, ViewModelOwner<VM> {
 
     open val refreshView: RefreshView? = null
 
@@ -24,19 +24,28 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
     open val loadingView: LoadingView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         ViewModelEvents.observe(this)
+        super.onCreate(savedInstanceState)
     }
 
     final override fun onEventChanged(event: Event) {
-        if (onViewModelEventChanged(event)) return
-
-        if (event is EventCollection) {
-            event.events.forEach { callEvent(it) }
-        } else {
-            callEvent(event)
+        if ((activity as? NiceViewModelActivity<*>)?.onInterceptViewModelEvent(event) == true) {
+            return
         }
+
+        if (onViewModelEvent(event)) {
+            return
+        }
+
+        callEvent(event)
+    }
+
+    open fun onInterceptViewModelEvent(event: Event): Boolean {
+        return false
+    }
+
+    open fun onViewModelEvent(event: Event): Boolean {
+        return false
     }
 
     private fun callEvent(event: Event) {
@@ -51,15 +60,15 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
             Status.SHOW_LOADING -> loadingView?.apply {
                 if (event.message != null) setLoadingText(event.message)
                 showLoading()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_EMPTY -> loadingView?.apply {
                 if (event.message != null) setEmptyText(event.message)
                 showEmpty()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_ERROR -> loadingView?.apply {
                 if (event.message != null) setErrorText(event.message)
                 showError()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_CONTENT -> loadingView?.showContent()
             else -> event.message?.let { toast(it) }
         }
@@ -70,9 +79,5 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
         } else {
             startActivityForResult(intent, event.what)
         }
-    }
-
-    open fun onViewModelEventChanged(event: Event): Boolean {
-        return false
     }
 }

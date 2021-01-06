@@ -7,7 +7,7 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableView
+import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.EventProxy
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
@@ -26,7 +26,7 @@ interface ViewModelController : OkFakerScope {
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
 
-    fun observeEvent(owner: EventObservableView)
+    fun observeEvent(owner: EventObserver)
 }
 
 private class SimpleViewModelController : ViewModelController,
@@ -49,7 +49,7 @@ private class SimpleViewModelController : ViewModelController,
         }
     }
 
-    override fun observeEvent(owner: EventObservableView) {
+    override fun observeEvent(owner: EventObserver) {
         liveEventProxy.observe(owner){
             if(it != null) owner.onEventChanged(it)
         }

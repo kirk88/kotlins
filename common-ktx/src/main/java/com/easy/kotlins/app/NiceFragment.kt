@@ -4,17 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
-import com.easy.kotlins.viewmodel.ViewModelEvents
 
 /**
  * Create by LiZhanPing on 2020/8/22
  */
-abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
+abstract class NiceFragment(@LayoutRes private val layoutResId: Int) : Fragment(), NiceView {
 
     private var isLoaded = false
     private var isVisibleToUser = false
-    private var isCallActivityCreated = false
+    private var isCallResume = false
     private var isCallUserVisibleHint = false
 
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -22,18 +22,17 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
     }
 
     final override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewModelEvents.observe(this)
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
         view.post { onPrepared(savedInstanceState) }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        isCallActivityCreated = true
+    override fun onResume() {
+        super.onResume()
+        isCallResume = true
         if (!isCallUserVisibleHint) isVisibleToUser = !isHidden
-        onLazyPreparedInternal(savedInstanceState)
+        onLazyPreparedInternal()
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -51,30 +50,16 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        resetState()
-    }
-
-    private fun onLazyPreparedInternal(savedInstanceState: Bundle? = null) {
-        if (!isLoaded && isVisibleToUser && isCallActivityCreated) {
-            onLazyPrepared(savedInstanceState)
-            isLoaded = true
-        }
-    }
-
-    private fun resetState() {
         isLoaded = false
         isVisibleToUser = false
-        isCallActivityCreated = false
+        isCallResume = false
         isCallUserVisibleHint = false
     }
 
-    open fun onBind(savedInstanceState: Bundle?) {}
-
-    open fun onBindView(savedInstanceState: Bundle?) {}
-
-    open fun onBindEvent(savedInstanceState: Bundle?) {}
-
-    open fun onPrepared(savedInstanceState: Bundle?) {}
-
-    open fun onLazyPrepared(savedInstanceState: Bundle?) {}
+    private fun onLazyPreparedInternal() {
+        if (!isLoaded && isVisibleToUser && isCallResume) {
+            onLazyPrepared()
+            isLoaded = true
+        }
+    }
 }

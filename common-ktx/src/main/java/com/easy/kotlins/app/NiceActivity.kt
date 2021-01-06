@@ -3,12 +3,13 @@ package com.easy.kotlins.app
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 
 /**
  * Create by LiZhanPing on 2020/8/24
  */
-abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() {
+abstract class NiceActivity(@LayoutRes private val layoutResId: Int) : AppCompatActivity(), NiceView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,7 +17,8 @@ abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() 
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        window.decorView.post { onPrepared(savedInstanceState) }
+        onPrepared(savedInstanceState)
+        window.decorView.post { onLazyPrepared() }
     }
 
     @CallSuper
@@ -27,11 +29,4 @@ abstract class NiceActivity(private val layoutResId: Int) : AppCompatActivity() 
         return super.onOptionsItemSelected(item)
     }
 
-    open fun onBind(savedInstanceState: Bundle?) {}
-
-    open fun onBindView(savedInstanceState: Bundle?) {}
-
-    open fun onBindEvent(savedInstanceState: Bundle?) {}
-
-    open fun onPrepared(savedInstanceState: Bundle?) {}
 }

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.event
 
 import android.app.Activity
@@ -103,7 +105,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) : Par
 
 class SingleEvent(what: Int = Status.NONE, message: String? = null) : Event(what, message)
 
-class EventCollection(val events: List<Event>) : Event() {
+internal class EventCollection(val events: List<Event>) : Event() {
 
     fun copy(events: List<Event>): Event {
         return EventCollection(events).also {
@@ -198,7 +200,7 @@ fun eventOf(events: List<Event>): Event = EventCollection(events = events)
 
 fun eventOf(vararg events: Event): Event = EventCollection(events = events.toList())
 
-interface EventObservableView : LifecycleOwner {
+interface EventObserver : LifecycleOwner {
 
     fun onEventChanged(event: Event)
 
