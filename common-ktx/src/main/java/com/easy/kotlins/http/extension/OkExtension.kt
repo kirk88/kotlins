@@ -8,9 +8,6 @@ import okhttp3.Response
  */
 interface OkExtension {
 
-    fun shouldInterceptRequest(builder: Request): Request
+    fun shouldInterceptRequest(request: Request): Request
 
-    fun onResponse(response: Response): Boolean
-
-    fun onError(error: Throwable): Boolean
 }

@@ -5,5 +5,5 @@ package com.easy.kotlins.http
  */
 fun interface OkMapper<T, R> {
     @Throws(Exception::class)
-    fun transform(value: T): OkResult<R>
+    fun transform(value: T): OkResult<out R>
 }

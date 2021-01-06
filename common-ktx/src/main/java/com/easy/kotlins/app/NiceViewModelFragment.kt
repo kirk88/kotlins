@@ -6,6 +6,7 @@ import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
+import com.easy.kotlins.viewmodel.ViewModelController
 import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.LoadingView
@@ -15,13 +16,14 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceViewModelFragment<VM: ViewModel>(layoutResId: Int) : NiceFragment(layoutResId), EventObserver, ViewModelOwner<VM> {
+abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layoutResId),
+    EventObserver, ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val refreshView: RefreshView? = null
 
-    open val progressView: ProgressView? = null
-
     open val loadingView: LoadingView? = null
+
+    open val progressView: ProgressView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ViewModelEvents.observe(this)

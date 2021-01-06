@@ -1,7 +1,8 @@
 package com.easy.kotlins.http
 
 import com.easy.kotlins.http.extension.DownloadExtension
-import com.easy.kotlins.http.extension.DownloadExtension.OnProgressListener
+import com.easy.kotlins.http.extension.OkCommonExtension
+import com.easy.kotlins.http.extension.OkDownloadExtension
 import com.easy.kotlins.http.extension.OkExtension
 import okhttp3.*
 import java.io.File
@@ -11,24 +12,24 @@ import java.net.URL
 /**
  * Create by LiZhanPing on 2020/4/27
  */
-class OkRequest constructor(private val method: OkRequestMethod) {
+internal class OkRequest<T> constructor(private val method: OkRequestMethod) {
     private val requestBuilder: Request.Builder by lazy { Request.Builder() }
 
     private var httpClient: OkHttpClient? = null
 
     private var urlBuilder: HttpUrl.Builder? = null
-    private var body: RequestBody? = null
+    private var requestBody: RequestBody? = null
     private var formBuilder: FormBody.Builder? = null
     private var multiBuilder: MultipartBody.Builder? = null
     private var call: Call? = null
-    private var creationFailure: Throwable? = null
+    private var creationFailure: Exception? = null
 
     @Volatile
     private var canceled = false
     private var executed = false
     private var extension: OkExtension? = null
-    private var errorMapper: OkMapper<Throwable, *>? = null
-    private var responseMapper: OkMapper<Response, *>? = null
+    private var errorMapper: OkMapper<Exception, T>? = null
+    private var responseMapper: OkMapper<Response, T>? = null
 
     val client: OkHttpClient?
         get() = httpClient
@@ -59,289 +60,237 @@ class OkRequest constructor(private val method: OkRequestMethod) {
         }
 
 
-    fun client(client: OkHttpClient): OkRequest {
+    fun client(client: OkHttpClient): OkRequest<T> = this.apply {
         this.httpClient = client
-        return this
     }
 
-    fun url(url: String): OkRequest {
+    fun url(url: String): OkRequest<T> = this.apply {
         urlBuilder = HttpUrl.parse(url)?.newBuilder()
-        return this
     }
 
-    fun tag(tag: Any): OkRequest {
+    fun tag(tag: Any): OkRequest<T> = this.apply {
         requestBuilder.tag(tag)
-        return this
     }
 
-    fun cacheControl(cacheControl: CacheControl): OkRequest {
+    fun cacheControl(cacheControl: CacheControl): OkRequest<T> = this.apply {
         requestBuilder.cacheControl(cacheControl)
-        return this
     }
 
-    fun extension(extension: OkExtension): OkRequest {
+    fun extension(extension: OkExtension): OkRequest<T> = this.apply {
         this.extension = extension
-        return this
     }
 
-    fun addEncodedQueryParameter(key: String, value: String): OkRequest {
+    fun addEncodedQueryParameter(key: String, value: String): OkRequest<T> = this.apply {
         urlBuilder?.addEncodedQueryParameter(key, value)
-        return this
     }
 
-    fun addQueryParameter(key: String, value: String): OkRequest {
+    fun addQueryParameter(key: String, value: String): OkRequest<T> = this.apply {
         urlBuilder?.addQueryParameter(key, value)
-        return this
     }
 
-    fun addEncodedQueryParameter(key: String, value: Int): OkRequest {
+    fun addEncodedQueryParameter(key: String, value: Int): OkRequest<T> = this.apply {
         urlBuilder?.addEncodedQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addQueryParameter(key: String, value: Int): OkRequest {
+    fun addQueryParameter(key: String, value: Int): OkRequest<T> = this.apply {
         urlBuilder?.addQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addEncodedQueryParameter(key: String, value: Long): OkRequest {
+    fun addEncodedQueryParameter(key: String, value: Long): OkRequest<T> = this.apply {
         urlBuilder?.addEncodedQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addQueryParameter(key: String, value: Long): OkRequest {
+    fun addQueryParameter(key: String, value: Long): OkRequest<T> = this.apply {
         urlBuilder?.addQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addEncodedQueryParameter(key: String, value: Float): OkRequest {
+    fun addEncodedQueryParameter(key: String, value: Float): OkRequest<T> = this.apply {
         urlBuilder?.addEncodedQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addQueryParameter(key: String, value: Float): OkRequest {
+    fun addQueryParameter(key: String, value: Float): OkRequest<T> = this.apply {
         urlBuilder?.addQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addEncodedQueryParameter(key: String, value: Double): OkRequest {
+    fun addEncodedQueryParameter(key: String, value: Double): OkRequest<T> = this.apply {
         urlBuilder?.addEncodedQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addQueryParameter(key: String, value: Double): OkRequest {
+    fun addQueryParameter(key: String, value: Double): OkRequest<T> = this.apply {
         urlBuilder?.addQueryParameter(key, value.toString())
-        return this
     }
 
-    fun addEncodedQueryParameters(parameters: Map<String, String?>) {
+    fun addEncodedQueryParameters(parameters: Map<String, String?>): OkRequest<T> = this.apply {
         for ((key, value) in parameters) {
             urlBuilder?.addEncodedQueryParameter(key, value.toString())
         }
     }
 
-    fun addQueryParameters(parameters: Map<String, String?>) {
+    fun addQueryParameters(parameters: Map<String, String?>): OkRequest<T> = this.apply {
         for ((key, value) in parameters) {
             urlBuilder?.addQueryParameter(key, value.toString())
         }
     }
 
-    fun removeAllQueryParameters(key: String): OkRequest {
+    fun removeAllQueryParameters(key: String): OkRequest<T> = this.apply {
         urlBuilder?.removeAllQueryParameters(key)
-        return this
     }
 
-    fun removeAllEncodedQueryParameters(key: String): OkRequest {
+    fun removeAllEncodedQueryParameters(key: String): OkRequest<T> = this.apply {
         urlBuilder?.removeAllEncodedQueryParameters(key)
-        return this
     }
 
-    fun body(mediaType: MediaType?, body: String): OkRequest {
-        this.body = RequestBody.create(mediaType, body)
-        return this
+    fun body(mediaType: MediaType?, body: String): OkRequest<T> = this.apply {
+        requestBody = RequestBody.create(mediaType, body)
     }
 
-    fun body(mediaType: MediaType?, file: File): OkRequest {
-        body = RequestBody.create(mediaType, file)
-        return this
+    fun body(mediaType: MediaType?, file: File): OkRequest<T> = this.apply {
+        requestBody = RequestBody.create(mediaType, file)
     }
 
-    fun body(body: RequestBody): OkRequest {
-        this.body = body
-        return this
+    fun body(body: RequestBody): OkRequest<T> = this.apply {
+        requestBody = body
     }
 
-    fun addFormParameter(key: String, value: String): OkRequest {
+    fun addFormParameter(key: String, value: String): OkRequest<T> = this.apply {
         ensureFormBody().add(key, value)
-        return this
     }
 
-    fun addFormParameter(key: String, value: Int): OkRequest {
+    fun addFormParameter(key: String, value: Int): OkRequest<T> = this.apply {
         ensureFormBody().add(key, value.toString())
-        return this
     }
 
-    fun addFormParameter(key: String, value: Long): OkRequest {
+    fun addFormParameter(key: String, value: Long): OkRequest<T> = this.apply {
         ensureFormBody().add(key, value.toString())
-        return this
     }
 
-    fun addFormParameter(key: String, value: Float): OkRequest {
+    fun addFormParameter(key: String, value: Float): OkRequest<T> = this.apply {
         ensureFormBody().add(key, value.toString())
-        return this
     }
 
-    fun addFormParameter(key: String, value: Double): OkRequest {
+    fun addFormParameter(key: String, value: Double): OkRequest<T> = this.apply {
         ensureFormBody().add(key, value.toString())
-        return this
     }
 
-    fun addFormParameters(parameters: Map<String, String?>): OkRequest {
+    fun addFormParameters(parameters: Map<String, String?>): OkRequest<T> = this.apply {
         for ((key, value) in parameters) {
             ensureFormBody().add(key, value.toString())
         }
-        return this
     }
 
-    fun addEncodedFormParameter(key: String, value: String): OkRequest {
+    fun addEncodedFormParameter(key: String, value: String): OkRequest<T> = this.apply {
         ensureFormBody().addEncoded(key, value)
-        return this
     }
 
-    fun addEncodedFormParameter(key: String, value: Int): OkRequest {
+    fun addEncodedFormParameter(key: String, value: Int): OkRequest<T> = this.apply {
         ensureFormBody().addEncoded(key, value.toString())
-        return this
     }
 
-    fun addEncodedFormParameter(key: String, value: Long): OkRequest {
+    fun addEncodedFormParameter(key: String, value: Long): OkRequest<T> = this.apply {
         ensureFormBody().addEncoded(key, value.toString())
-        return this
     }
 
-    fun addEncodedFormParameter(key: String, value: Float): OkRequest {
+    fun addEncodedFormParameter(key: String, value: Float): OkRequest<T> = this.apply {
         ensureFormBody().addEncoded(key, value.toString())
-        return this
     }
 
-    fun addEncodedFormParameter(key: String, value: Double): OkRequest {
+    fun addEncodedFormParameter(key: String, value: Double): OkRequest<T> = this.apply {
         ensureFormBody().addEncoded(key, value.toString())
-        return this
     }
 
-    fun addEncodedFormParameters(parameters: Map<String, Any?>): OkRequest {
+    fun addEncodedFormParameters(parameters: Map<String, Any?>): OkRequest<T> = this.apply {
         for ((key, value) in parameters) {
             ensureFormBody().addEncoded(key, value.toString())
         }
-        return this
     }
 
-    fun addPart(part: MultipartBody.Part): OkRequest {
+    fun addPart(part: MultipartBody.Part): OkRequest<T> = this.apply {
         ensureMultiBody().addPart(part)
-        return this
     }
 
-    fun addPart(body: RequestBody): OkRequest {
+    fun addPart(body: RequestBody): OkRequest<T> = this.apply {
         ensureMultiBody().addPart(body)
-        return this
     }
 
-    fun addPart(headers: Headers?, body: RequestBody): OkRequest {
+    fun addPart(headers: Headers?, body: RequestBody): OkRequest<T> = this.apply {
         ensureMultiBody().addPart(headers, body)
-        return this
     }
 
-    fun addFormDataPart(name: String, value: String): OkRequest {
+    fun addFormDataPart(name: String, value: String): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(name, value)
-        return this
     }
 
-    fun addFormDataPart(name: String, value: Int): OkRequest {
+    fun addFormDataPart(name: String, value: Int): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(name, value.toString())
-        return this
     }
 
-    fun addFormDataPart(name: String, value: Long): OkRequest {
+    fun addFormDataPart(name: String, value: Long): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(name, value.toString())
-        return this
     }
 
-    fun addFormDataPart(name: String, value: Float): OkRequest {
+    fun addFormDataPart(name: String, value: Float): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(name, value.toString())
-        return this
     }
 
-    fun addFormDataPart(name: String, value: Double): OkRequest {
+    fun addFormDataPart(name: String, value: Double): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(name, value.toString())
-        return this
     }
 
-    fun addFormDataPart(name: String, filename: String?, body: RequestBody): OkRequest {
-        ensureMultiBody().addFormDataPart(name, filename, body)
-        return this
-    }
+    fun addFormDataPart(name: String, filename: String?, body: RequestBody): OkRequest<T> =
+        this.apply {
+            ensureMultiBody().addFormDataPart(name, filename, body)
+        }
 
-    fun addFormDataPart(name: String, type: MediaType?, file: File): OkRequest {
+    fun addFormDataPart(name: String, type: MediaType?, file: File): OkRequest<T> = this.apply {
         ensureMultiBody().addFormDataPart(
             name,
             file.name,
             RequestBody.create(type, file)
         )
-        return this
     }
 
-    fun setHeader(key: String, value: String): OkRequest {
+    fun setHeader(key: String, value: String): OkRequest<T> = this.apply {
         requestBuilder.header(key, value)
-        return this
     }
 
-    fun setHeader(key: String, value: Int): OkRequest {
+    fun setHeader(key: String, value: Int): OkRequest<T> = this.apply {
         requestBuilder.header(key, value.toString())
-        return this
     }
 
-    fun setHeader(key: String, value: Long): OkRequest {
+    fun setHeader(key: String, value: Long): OkRequest<T> = this.apply {
         requestBuilder.header(key, value.toString())
-        return this
     }
 
-    fun setHeader(key: String, value: Float): OkRequest {
+    fun setHeader(key: String, value: Float): OkRequest<T> = this.apply {
         requestBuilder.header(key, value.toString())
-        return this
     }
 
-    fun setHeader(key: String, value: Double): OkRequest {
+    fun setHeader(key: String, value: Double): OkRequest<T> = this.apply {
         requestBuilder.header(key, value.toString())
-        return this
     }
 
-    fun addHeader(key: String, value: String): OkRequest {
+    fun addHeader(key: String, value: String): OkRequest<T> = this.apply {
         requestBuilder.addHeader(key, value)
-        return this
     }
 
-    fun addHeader(key: String, value: Int): OkRequest {
+    fun addHeader(key: String, value: Int): OkRequest<T> = this.apply {
         requestBuilder.addHeader(key, value.toString())
-        return this
     }
 
-    fun addHeader(key: String, value: Long): OkRequest {
+    fun addHeader(key: String, value: Long): OkRequest<T> = this.apply {
         requestBuilder.addHeader(key, value.toString())
-        return this
     }
 
-    fun addHeader(key: String, value: Float): OkRequest {
+    fun addHeader(key: String, value: Float): OkRequest<T> = this.apply {
         requestBuilder.addHeader(key, value.toString())
-        return this
     }
 
-    fun addHeader(key: String, value: Double): OkRequest {
+    fun addHeader(key: String, value: Double): OkRequest<T> = this.apply {
         requestBuilder.addHeader(key, value.toString())
-        return this
     }
 
-    fun removeHeader(key: String): OkRequest {
+    fun removeHeader(key: String): OkRequest<T> = this.apply {
         requestBuilder.removeHeader(key)
-        return this
     }
 
     private fun ensureFormBody(): FormBody.Builder {
@@ -358,24 +307,12 @@ class OkRequest constructor(private val method: OkRequestMethod) {
         }
     }
 
-    /**
-     * response convert to <T> which you need
-     *
-     * you must make the <T> type equals the method enqueue or safeExecute return type
-     */
-    fun <T> mapResponse(mapper: OkMapper<Response, T>): OkRequest {
+    fun mapResponse(mapper: OkMapper<Response, T>): OkRequest<T> = this.apply {
         responseMapper = mapper
-        return this
     }
 
-    /**
-     * response convert to <T> which you need
-     *
-     * you must make the <T> type equals the method enqueue or safeExecute return type
-     */
-    fun <T> mapError(mapper: OkMapper<Throwable, T>): OkRequest {
+    fun mapError(mapper: OkMapper<Exception, T>): OkRequest<T> = this.apply {
         errorMapper = mapper
-        return this
     }
 
     @Throws(Exception::class)
@@ -383,7 +320,8 @@ class OkRequest constructor(private val method: OkRequestMethod) {
         val client = requireNotNull(httpClient) { "OkHttpClient must not be null" }
         val url = requireNotNull(urlBuilder?.build()) { "request Url is null or invalid" }
         val body =
-            body ?: multiBuilder?.build() ?: formBuilder?.build() ?: FormBody.Builder().build()
+            requestBody ?: formBuilder?.build() ?: multiBuilder?.build() ?: FormBody.Builder()
+                .build()
         return requestBuilder.url(url).let {
             when (method) {
                 OkRequestMethod.GET -> it.get()
@@ -423,53 +361,51 @@ class OkRequest constructor(private val method: OkRequestMethod) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> transformResponse(
-        responseMapper: OkMapper<Response, *>?,
-        response: Response
+    private fun transformResponse(
+        response: Response,
+        responseMapper: OkMapper<Response, T>?
     ): T? {
         val mapper = responseMapper ?: OkMapper {
             OkResult.Success(it as T)
         }
         return when (val result = mapper.transform(response)) {
-            is OkResult.Success -> result.data as T
+            is OkResult.Success -> result.data
             is OkResult.Error -> throw result.exception
-            else -> null
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> transformError(
-        errorMapper: OkMapper<Throwable, *>?,
-        error: Throwable
+    private fun transformError(
+        error: Exception,
+        errorMapper: OkMapper<Exception, T>?
     ): T? {
         return when (val result = errorMapper?.transform(error)) {
-            is OkResult.Success -> result.data as T
+            is OkResult.Success -> result.data
             is OkResult.Error -> throw result.exception
             else -> null
         }
     }
 
     @Throws(Exception::class)
-    fun <T : Any> execute(): T {
+    fun execute(): T {
         return try {
-            transformResponse(responseMapper, rawExecute())
+            transformResponse(rawExecute(), responseMapper)
                 ?: throw NullPointerException("Result is null")
-        } catch (error: Throwable) {
-            transformError(errorMapper, error) ?: throw OkException(cause = error)
+        } catch (error: Exception) {
+            transformError(error, errorMapper) ?: throw error
         }
     }
 
-    fun <T : Any> safeExecute(): T? {
+    fun safeExecute(): T? {
         return try {
             execute()
-        } catch (error: Throwable) {
+        } catch (error: Exception) {
             null
         }
     }
 
-    fun <T : Any> enqueue(callback: OkCallback<T>? = null) {
+    fun enqueue(callback: OkCallback<T>? = null) {
         var call: Call?
-        var failure: Throwable?
+        var failure: Exception?
         synchronized(this) {
             call = this.call
             failure = creationFailure
@@ -488,7 +424,9 @@ class OkRequest constructor(private val method: OkRequestMethod) {
             OkCallbacks.onError(callback, failure!!)
             return
         }
+
         OkCallbacks.onStart(callback)
+
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 try {
@@ -514,69 +452,52 @@ class OkRequest constructor(private val method: OkRequestMethod) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> callOnFailure(callback: OkCallback<T>?, exception: Exception) {
+    private fun callOnFailure(callback: OkCallback<T>?, exception: Exception) {
         if (isCanceled) {
             OkCallbacks.onCancel(callback)
             return
         }
 
         try {
-            if (extension?.onError(exception) == true) return
+            if ((extension as? OkCommonExtension)?.onError(exception) == true) return
 
-            transformError<T>(errorMapper, exception)?.also {
+            transformError(exception, errorMapper)?.also {
                 OkCallbacks.onSuccess(callback, it)
             } ?: throw exception
-        } catch (error: Throwable) {
+        } catch (error: Exception) {
             OkCallbacks.onError(callback, error)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> callOnResponse(callback: OkCallback<T>?, response: Response) {
+    private fun callOnResponse(callback: OkCallback<T>?, response: Response) {
         try {
-            if (extension?.onResponse(response) == true) return
+            if ((extension as? OkCommonExtension)?.onResponse(response) == true) return
 
-            transformResponse<T>(responseMapper, response)?.also {
+            transformResponse(response, responseMapper)?.also {
                 OkCallbacks.onSuccess(callback, it)
             } ?: throw NullPointerException("Response parse failure, the result is null")
-        } catch (error: Throwable) {
-            OkCallbacks.onError(callback, error)
+        } catch (error: Exception) {
+            callOnFailure(callback, error)
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun callOnDownloadResponse(callback: OkDownloadCallback, response: Response) {
         try {
-            check(extension != null && extension is DownloadExtension) { "The extension is null or not a DownloadExtension" }
+            check(extension != null && extension is OkDownloadExtension) { "The extension is null or not a OkDownloadExtension" }
 
-            val downloadException = extension as DownloadExtension
-
-            downloadException.use {
-                val file = it.onResponse(response, object : OnProgressListener {
-                    override fun onProgressChanged(downloadedBytes: Long, totalBytes: Long) {
-                        OkCallbacks.onProgress(
-                            callback,
-                            downloadedBytes,
-                            totalBytes
-                        )
-                    }
-                })
-
-                when {
-                    file != null -> {
-                        OkCallbacks.onSuccess(callback, file)
-                    }
-                    isCanceled -> {
-                        OkCallbacks.onCancel(callback)
-                    }
-                    else -> {
-                        OkCallbacks.onError(
-                            callback,
-                            IOException("Download not completed, response code: " + response.code() + " , message: " + response.message())
-                        )
-                    }
-                }
+            val file: File = (extension as OkDownloadExtension).onResponse(response) { downloadedBytes, totalBytes ->
+                OkCallbacks.onProgress(callback, downloadedBytes, totalBytes)
             }
-        } catch (error: Throwable) {
+
+            OkCallbacks.onSuccess(callback, file)
+        } catch (error: Exception) {
+            if (isCanceled) {
+                OkCallbacks.onCancel(callback)
+                return
+            }
+
             OkCallbacks.onError(callback, error)
         }
     }

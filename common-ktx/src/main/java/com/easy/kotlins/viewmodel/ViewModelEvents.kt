@@ -8,10 +8,7 @@ import com.easy.kotlins.event.EventObserver
  */
 object ViewModelEvents {
 
-    fun <T> observe(owner: T) where T : ViewModelOwner<*>, T : EventObserver {
-        val model = owner.viewModel
-        if (model is ViewModelController) {
-            model.observeEvent(owner)
-        }
+    fun <T, VM> observe(owner: T) where VM : ViewModel, VM : ViewModelController, T : ViewModelOwner<VM>, T : EventObserver {
+        owner.viewModel.observeEvent(owner)
     }
 }

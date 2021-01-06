@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.viewmodel
 
 import android.app.Application
@@ -32,8 +34,8 @@ interface ViewModelController : OkFakerScope {
 private class SimpleViewModelController : ViewModelController,
     OkFakerScope by SimpleOkFakerScope() {
 
-    private val liveEventProxy = EventProxy()
-    override var event: Event by liveEventProxy
+    private val eventProxy = EventProxy()
+    override var event: Event by eventProxy
 
     override fun get(action: OkFaker.() -> Unit): OkFaker {
         return OkFaker.get(action).also { add(it) }
@@ -44,23 +46,25 @@ private class SimpleViewModelController : ViewModelController,
     }
 
     override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventProxy.observe(owner){
+        eventProxy.observe(owner){
             if (it != null) observer(it)
         }
     }
 
     override fun observeEvent(owner: EventObserver) {
-        liveEventProxy.observe(owner){
+        eventProxy.observe(owner){
             if(it != null) owner.onEventChanged(it)
         }
     }
 }
 
 open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
+
     @CallSuper
     override fun onCleared() {
         cancelAll()
     }
+
 }
 
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),

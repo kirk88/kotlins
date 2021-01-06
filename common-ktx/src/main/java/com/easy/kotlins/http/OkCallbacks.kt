@@ -33,7 +33,7 @@ internal object OkCallbacks {
                     callOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    callOnError(body.callback, body.args[0] as Throwable)
+                    callOnError(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_UPDATE -> {
                     callOnProgress(
@@ -49,13 +49,13 @@ internal object OkCallbacks {
         }
     }
 
-    fun <T: Any> onSuccess(callback: OkCallback<T>?, result: T) {
+    fun <T> onSuccess(callback: OkCallback<T>?, result: T) {
         if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result)).sendToTarget()
+            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result as Any)).sendToTarget()
         }
     }
 
-    fun onError(callback: OkCallback<*>?, error: Throwable) {
+    fun onError(callback: OkCallback<*>?, error: Exception) {
         if (callback != null) {
             HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
         }
@@ -124,17 +124,17 @@ internal object OkCallbacks {
         }
     }
 
-    private fun <T: Any> callOnSuccess(callback: OkCallback<T>, result: T) {
+    private fun <T> callOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
         } catch (e: Exception) {
-            callOnError(callback, OkException(message = e.message, cause = e))
+            callOnError(callback, e)
         }
     }
 
-    private fun callOnError(callback: OkCallback<*>, e: Throwable) {
+    private fun callOnError(callback: OkCallback<*>, error: Exception) {
         try {
-            callback.onError(OkException(message = e.message, cause = e))
+            callback.onError(error)
         } catch (t: Throwable) {
             t.printStackTrace()
         }
