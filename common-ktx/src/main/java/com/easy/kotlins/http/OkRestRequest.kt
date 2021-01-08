@@ -13,11 +13,29 @@ import java.io.File
 class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
 
     private var requestBody: RequestBody? = null
+        set(value) {
+            field = value
+            formBuilder = null
+            multiBuilder = null
+        }
 
     private var formBuilder: FormBody.Builder? = null
-        get() = if (field == null) FormBody.Builder().also { field = it } else field
+        get() = if (field == null) {
+            FormBody.Builder().also {
+                field = it
+                multiBuilder = null
+                requestBody = null
+            }
+        } else field
+
     private var multiBuilder: MultipartBody.Builder? = null
-        get() = if (field == null) MultipartBody.Builder().also { field = it } else field
+        get() = if (field == null) {
+            MultipartBody.Builder().also {
+                field = it
+                formBuilder = null
+                requestBody = null
+            }
+        } else field
 
     private var extension: OkExtension? = null
 
@@ -49,28 +67,8 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
         multiBuilder?.addPart(body)
     }
 
-    fun addPart(headers: Headers?, body: RequestBody) {
-        multiBuilder?.addPart(headers, body)
-    }
-
     fun addFormDataPart(name: String, value: String) {
         multiBuilder?.addFormDataPart(name, value)
-    }
-
-    fun addFormDataPart(name: String, value: Int) {
-        multiBuilder?.addFormDataPart(name, value.toString())
-    }
-
-    fun addFormDataPart(name: String, value: Long) {
-        multiBuilder?.addFormDataPart(name, value.toString())
-    }
-
-    fun addFormDataPart(name: String, value: Float) {
-        multiBuilder?.addFormDataPart(name, value.toString())
-    }
-
-    fun addFormDataPart(name: String, value: Double) {
-        multiBuilder?.addFormDataPart(name, value.toString())
     }
 
     fun addFormDataPart(name: String, filename: String?, body: RequestBody) {
@@ -91,7 +89,8 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
 
     override fun createRealRequest(): Request {
         val body = OkRequestBody(
-            requestBody ?: multiBuilder?.build() ?: formBuilder?.build() ?: FormBody.Builder().build()
+            requestBody ?: multiBuilder?.build() ?: formBuilder?.build() ?: FormBody.Builder()
+                .build()
         ) { bytes, totalBytes ->
             callOnProgress(bytes, totalBytes)
         }
@@ -116,17 +115,6 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
     override fun onResponse(response: Response): Boolean {
         if ((extension as? OkRestExtension)?.onResponse(response) == true) return true
         return false
-    }
-
-    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, T>?): T? {
-        val mapper = errorMapper ?: OkMapper { throw it }
-        return mapper.map(exception)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun mapResponse(response: Response, responseMapper: OkMapper<Response, T>?): T? {
-        val mapper = responseMapper ?: OkMapper { it as T }
-        return mapper.map(response)
     }
 
 }

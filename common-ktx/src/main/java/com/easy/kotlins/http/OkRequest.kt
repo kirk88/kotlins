@@ -175,8 +175,6 @@ abstract class OkRequest<T> {
         return call!!
     }
 
-    protected abstract fun createRealRequest(): Request
-
     @Throws(Exception::class)
     protected open fun onFailure(exception: Exception): Boolean {
         return false
@@ -187,15 +185,24 @@ abstract class OkRequest<T> {
         return false
     }
 
-    protected abstract fun mapResponse(
+    @Suppress("UNCHECKED_CAST")
+    protected open fun mapResponse(
         response: Response,
         responseMapper: OkMapper<Response, T>?
-    ): T?
+    ): T? {
+        val mapper = responseMapper ?: OkMapper { it as T }
+        return mapper.map(response)
+    }
 
-    protected abstract fun mapError(
+    protected open fun mapError(
         exception: Exception,
         errorMapper: OkMapper<Exception, T>?
-    ): T?
+    ): T? {
+        val mapper = errorMapper ?: OkMapper { throw it }
+        return mapper.map(exception)
+    }
+
+    protected abstract fun createRealRequest(): Request
 
     protected fun callOnStart() {
         OkCallbacks.onCancel(callback)

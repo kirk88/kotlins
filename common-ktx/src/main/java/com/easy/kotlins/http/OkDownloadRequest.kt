@@ -20,16 +20,6 @@ class OkDownloadRequest : OkRequest<File>() {
         return extension?.shouldInterceptRequest(request) ?: request
     }
 
-    override fun mapResponse(response: Response, responseMapper: OkMapper<Response, File>?): File? {
-        responseMapper ?: return null
-        return responseMapper.map(response)
-    }
-
-    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, File>?): File? {
-        errorMapper ?: return null
-        return errorMapper.map(exception)
-    }
-
     override fun onResponse(response: Response): Boolean {
         val downloadExtension = extension ?: return false
 
@@ -39,6 +29,16 @@ class OkDownloadRequest : OkRequest<File>() {
 
         callOnSuccess(file)
         return true
+    }
+
+    override fun mapResponse(response: Response, responseMapper: OkMapper<Response, File>?): File? {
+        responseMapper ?: return null
+        return responseMapper.map(response)
+    }
+
+    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, File>?): File? {
+        errorMapper ?: return null
+        return errorMapper.map(exception)
     }
 
 }
