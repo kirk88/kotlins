@@ -221,3 +221,14 @@ fun <T : Any> OkFaker<T>.asLiveData(
 ): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(execute())
 }
+
+fun main() {
+    OkFaker.get<String> {
+        url("http://www.baidu.com")
+
+        onSuccess {
+            println(it)
+        }
+    }.enqueue()
+
+}

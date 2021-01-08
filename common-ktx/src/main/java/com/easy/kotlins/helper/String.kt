@@ -86,7 +86,7 @@ fun CharSequence.appendImage(
     })
 }
 
-class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
+internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
 
     override fun draw(
         canvas: Canvas,

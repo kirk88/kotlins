@@ -2,19 +2,16 @@ package com.easy.kotlins.widget
 
 import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.activity
-import com.easy.kotlins.helper.isVisible
 import com.easy.kotlins.helper.textResource
 import com.easy.kotlins.helper.weak
 
@@ -39,10 +36,10 @@ interface ProgressViewFactory {
 
 }
 
-internal class SimpleProgressViewFactory(private val parentProducer: () -> View) : ProgressViewFactory {
+internal class SimpleProgressViewFactory(private val parent: View) : ProgressViewFactory {
 
     override fun create(): ProgressView {
-        return SimpleProgressView(parentProducer())
+        return SimpleProgressView(parent)
     }
 
 }
@@ -83,7 +80,7 @@ internal class SimpleProgressView(parent: View) : PopupWindow(), ProgressView {
 }
 
 val View.progressViewFactory: ProgressViewFactory
-    get() = SimpleProgressViewFactory { this }
+    get() = SimpleProgressViewFactory(this)
 
 val Context.progressViewFactory: ProgressViewFactory
     get() {

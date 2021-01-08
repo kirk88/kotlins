@@ -190,7 +190,7 @@ abstract class OkRequest<T> {
         response: Response,
         responseMapper: OkMapper<Response, T>?
     ): T {
-        val mapper = responseMapper ?: OkMapper { it as T }
+        val mapper = responseMapper ?: OkMapper { it.body()?.string() as T }
         return mapper.map(response)
     }
 
