@@ -17,12 +17,15 @@ abstract class NiceFragment(private val layoutResId: Int) : Fragment() {
     private var isCallActivityCreated = false
     private var isCallUserVisibleHint = false
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(layoutResId, container, false)
     }
 
     final override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewModelEvents.observe(this)
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)

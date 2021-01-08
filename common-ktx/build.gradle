@@ -67,9 +67,4 @@ dependencies {
     api "com.google.code.gson:gson:2.8.6"
 
     api "androidx.recyclerview:recyclerview:1.2.0-beta01"
-
-    def roomVersion = "2.2.1"
-    implementation "androidx.room:room-runtime:$roomVersion"
-    implementation "androidx.room:room-ktx:$roomVersion"
-
 }

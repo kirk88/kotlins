@@ -44,14 +44,14 @@ private class SimpleViewModelController : ViewModelController,
     }
 
     override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventProxy.observe(owner){
+        liveEventProxy.observe(owner) {
             if (it != null) observer(it)
         }
     }
 
     override fun observeEvent(owner: EventObservableView) {
-        liveEventProxy.observe(owner){
-            if(it != null) owner.onEventChanged(it)
+        liveEventProxy.observe(owner) {
+            if (it != null) owner.onEventChanged(it)
         }
     }
 }
@@ -80,30 +80,30 @@ open class StatefulAndroidViewModel(application: Application, val state: SavedSt
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
 ): VM {
-    return ViewModelProvider(
-        viewModelStore, factoryProducer
-            ?: defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    val factoryPromise = factoryProducer ?: {
+        defaultViewModelProviderFactory
+    }
+    return ViewModelProvider(viewModelStore, factoryPromise()).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.activityViewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
 ): VM {
-    return ViewModelProvider(
-        requireActivity().viewModelStore, factoryProducer
-            ?: requireActivity().defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    val factoryPromise = factoryProducer ?: {
+        defaultViewModelProviderFactory
+    }
+    return ViewModelProvider( requireActivity().viewModelStore, factoryPromise()).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> ComponentActivity.viewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
 ): VM {
-    return ViewModelProvider(
-        viewModelStore, factoryProducer
-            ?: defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    val factoryPromise = factoryProducer ?: {
+        defaultViewModelProviderFactory
+    }
+    return ViewModelProvider(viewModelStore, factoryPromise()).get(VM::class.java)
 }

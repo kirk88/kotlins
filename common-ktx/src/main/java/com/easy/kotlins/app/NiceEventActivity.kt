@@ -1,12 +1,14 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObservableView
 import com.easy.kotlins.event.EventCollection
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelEvents
+import com.easy.kotlins.viewmodel.viewModel
 import com.easy.kotlins.widget.LoadingView
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
@@ -19,9 +21,9 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
 
     open val refreshView: RefreshView? = null
 
-    open val progressView: ProgressView? = null
-
     open val loadingView: LoadingView? = null
+
+    open val progressView: ProgressView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ViewModelEvents.observe(this)
@@ -31,14 +33,6 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
     final override fun onEventChanged(event: Event) {
         if (onViewModelEventChanged(event)) return
 
-        if (event is EventCollection) {
-            event.events.forEach { callEvent(it) }
-        } else {
-            callEvent(event)
-        }
-    }
-
-    private fun callEvent(event: Event) {
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()

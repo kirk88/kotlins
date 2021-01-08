@@ -443,6 +443,7 @@ open class LiveEventData<T> {
         }
 
         open fun detachObserver() {}
+
         fun activeStateChanged(newActive: Boolean) {
             if (newActive == active) {
                 return

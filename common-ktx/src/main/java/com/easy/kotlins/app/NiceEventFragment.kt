@@ -19,27 +19,19 @@ abstract class NiceEventFragment(layoutResId: Int) : NiceFragment(layoutResId),
 
     open val refreshView: RefreshView? = null
 
-    open val progressView: ProgressView? = null
-
     open val loadingView: LoadingView? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    open val progressView: ProgressView? = null
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         ViewModelEvents.observe(this)
+        super.onCreate(savedInstanceState)
     }
 
     final override fun onEventChanged(event: Event) {
         if (onViewModelEventChanged(event)) return
 
-        if (event is EventCollection) {
-            event.events.forEach { callEvent(it) }
-        } else {
-            callEvent(event)
-        }
-    }
-
-    private fun callEvent(event: Event) {
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
