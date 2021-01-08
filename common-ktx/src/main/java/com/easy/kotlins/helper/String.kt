@@ -172,18 +172,15 @@ fun CharSequence.withSpan(
 fun String.justify(ems: Int): SpannableStringBuilder {
     return asSpannableBuilder().apply {
         val chars: CharArray = toCharArray()
-        if (chars.size >= ems || chars.size == 1) {
+        if (chars.size >= ems || chars.size <= 1) {
             return@apply
         }
         val size = chars.size
         val scale = (ems - size).toFloat() / (size - 1)
-        for (i in 0 until size) {
-            append(chars[i])
-            if (i != size - 1) {
-                val blank = SpannableString("　")
-                blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                append(blank)
-            }
+        for (index in 1 until size - 1) {
+            val blank = SpannableString("　")
+            blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            insert(index, blank)
         }
     }
 }
