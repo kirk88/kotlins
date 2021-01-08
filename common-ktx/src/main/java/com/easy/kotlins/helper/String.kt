@@ -177,7 +177,7 @@ fun String.justify(ems: Int): SpannableStringBuilder {
         }
         val size = chars.size
         val scale = (ems - size).toFloat() / (size - 1)
-        for (index in 1 until size - 1) {
+        for (index in 1 until size) {
             val blank = SpannableString("　")
             blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             insert(index, blank)
