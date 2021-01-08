@@ -1,15 +1,15 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.text.Editable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.Spanned
+import android.text.*
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
+import android.text.style.ScaleXSpan
 import androidx.annotation.ColorInt
 import com.google.gson.JsonParser
 
@@ -86,6 +86,29 @@ fun CharSequence.appendImage(
     })
 }
 
+class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
+
+    override fun draw(
+        canvas: Canvas,
+        text: CharSequence,
+        start: Int,
+        end: Int,
+        x: Float,
+        top: Int,
+        y: Int,
+        bottom: Int,
+        paint: Paint
+    ) {
+        val d = drawable
+        val fm = paint.fontMetricsInt
+        val transY = (y + fm.descent + y + fm.ascent) / 2 - d.bounds.bottom / 2
+        canvas.save()
+        canvas.translate(x, transY.toFloat())
+        d.draw(canvas)
+        canvas.restore()
+    }
+}
+
 fun CharSequence.insert(
     where: Int,
     text: CharSequence,
@@ -135,39 +158,41 @@ fun CharSequence.appendLine(
     }
 }
 
-class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
-
-    override fun draw(
-        canvas: Canvas,
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        x: Float,
-        top: Int,
-        y: Int,
-        bottom: Int,
-        paint: Paint
-    ) {
-        val d = drawable
-        val fm = paint.fontMetricsInt
-        val transY = (y + fm.descent + y + fm.ascent) / 2 - d.bounds.bottom / 2
-        canvas.save()
-        canvas.translate(x, transY.toFloat())
-        d.draw(canvas)
-        canvas.restore()
-    }
-}
-
 fun CharSequence.withSpan(
     what: Any,
     start: Int = 0,
     end: Int = length,
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-): CharSequence {
-    return this.asSpannableBuilder().apply {
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
         setSpan(what, start, end, flags)
     }
 }
+
+fun String.justify(ems: Int): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        val chars: CharArray = toCharArray()
+        if (chars.size >= ems || chars.size == 1) {
+            return@apply
+        }
+        val size = chars.size
+        val scale = (ems - size).toFloat() / (size - 1)
+        for (i in 0 until size) {
+            append(chars[i])
+            if (i != size - 1) {
+                val blank = SpannableString("　")
+                blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                append(blank)
+            }
+        }
+    }
+}
+
+val String.isJsonArray: Boolean
+    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonArray ?: false
+
+val String.isJsonObject: Boolean
+    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonObject ?: false
 
 inline fun <R: CharSequence, C: R> C?.ifNull(defaultValue: () -> R): R =
     this ?: defaultValue()
@@ -178,20 +203,13 @@ inline fun <R: CharSequence, C: R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
 inline fun <R: CharSequence, C: R> C?.ifNullOrBlack(defaultValue: () -> R): R =
     if (this.isNullOrBlank()) defaultValue() else this
 
-val String.isJsonArray: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonArray ?: false
-
-val String.isJsonObject: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonObject ?: false
-
-fun CharSequence.splitNotBlank(
+fun CharSequence.splitSkipBlank(
     vararg delimiters: String,
     ignoreCase: Boolean = false,
     limit: Int = 0
 ): List<String> {
     return split(ignoreCase = ignoreCase, limit = limit, delimiters = delimiters).filter { it.isNotBlank() }
 }
-
 
 fun <K, V> Map<K, V>.joinKeysToString(
     separator: CharSequence = ", ",

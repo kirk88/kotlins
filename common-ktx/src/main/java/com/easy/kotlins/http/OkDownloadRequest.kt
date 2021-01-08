@@ -31,13 +31,13 @@ class OkDownloadRequest : OkRequest<File>() {
         return true
     }
 
-    override fun mapResponse(response: Response, responseMapper: OkMapper<Response, File>?): File? {
-        responseMapper ?: return null
+    override fun mapResponse(response: Response, responseMapper: OkMapper<Response, File>?): File {
+        responseMapper ?: throw NullPointerException("ResponseMapper is null")
         return responseMapper.map(response)
     }
 
-    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, File>?): File? {
-        errorMapper ?: return null
+    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, File>?): File {
+        errorMapper ?: throw NullPointerException("ErrorMapper is null")
         return errorMapper.map(exception)
     }
 

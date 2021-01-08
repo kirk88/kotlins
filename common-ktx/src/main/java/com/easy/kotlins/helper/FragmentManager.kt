@@ -21,6 +21,16 @@ inline fun FragmentManager.commit(allowingStateLoss: Boolean = false, crossinlin
     }
 }
 
+inline fun FragmentManager.commitNow(allowingStateLoss: Boolean = false, crossinline body: FragmentTransaction.() -> FragmentTransaction) {
+    beginTransaction().body().let {
+        if (allowingStateLoss) {
+            it.commitNowAllowingStateLoss()
+        } else {
+            it.commitNow()
+        }
+    }
+}
+
 inline fun <reified T : Fragment> FragmentManager.add(@IdRes id: Int, vararg args: Pair<String, Any?>, tag: String? = null, allowingStateLoss: Boolean = false): Fragment {
     return beginTransaction().let {
         val fragment = T::class.java.newInstance().withBundle(*args)
@@ -29,6 +39,19 @@ inline fun <reified T : Fragment> FragmentManager.add(@IdRes id: Int, vararg arg
             it.commitAllowingStateLoss()
         } else {
             it.commit()
+        }
+        fragment
+    }
+}
+
+inline fun <reified T : Fragment> FragmentManager.addNow(@IdRes id: Int, vararg args: Pair<String, Any?>, tag: String? = null, allowingStateLoss: Boolean = false): Fragment {
+    return beginTransaction().let {
+        val fragment = T::class.java.newInstance().withBundle(*args)
+        it.add(id, fragment, tag)
+        if (allowingStateLoss) {
+            it.commitNowAllowingStateLoss()
+        } else {
+            it.commitNow()
         }
         fragment
     }
@@ -47,29 +70,6 @@ inline fun <reified T : Fragment> FragmentManager.replace(@IdRes id: Int, vararg
     }
 }
 
-
-inline fun FragmentManager.commitNow(allowingStateLoss: Boolean = false, crossinline body: FragmentTransaction.() -> FragmentTransaction) {
-    beginTransaction().body().let {
-        if (allowingStateLoss) {
-            it.commitNowAllowingStateLoss()
-        } else {
-            it.commitNow()
-        }
-    }
-}
-
-inline fun <reified T : Fragment> FragmentManager.addNow(@IdRes id: Int, vararg args: Pair<String, Any?>, tag: String? = null, allowingStateLoss: Boolean = false): Fragment {
-    return beginTransaction().let {
-        val fragment = T::class.java.newInstance().withBundle(*args)
-        it.add(id, fragment, tag)
-        if (allowingStateLoss) {
-            it.commitNowAllowingStateLoss()
-        } else {
-            it.commitNow()
-        }
-        fragment
-    }
-}
 
 inline fun <reified T : Fragment> FragmentManager.replaceNow(@IdRes id: Int, vararg args: Pair<String, Any?>, tag: String? = null, allowingStateLoss: Boolean = false): Fragment {
     return beginTransaction().let {
@@ -121,7 +121,7 @@ inline fun <reified T : Fragment> FragmentManager.hide(@IdRes id: Int, tag: Stri
         if (existedFragment.id == id) break
         return null
     }
-    val fragment = findFragmentByTag(tag ?: T::class.simpleName) ?: return null
+    val fragment = findFragmentByTag(tag ?: T::class.java.name) ?: return null
     return beginTransaction().let {
 
         it.hide(fragment)

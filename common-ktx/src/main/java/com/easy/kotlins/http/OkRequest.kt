@@ -189,7 +189,7 @@ abstract class OkRequest<T> {
     protected open fun mapResponse(
         response: Response,
         responseMapper: OkMapper<Response, T>?
-    ): T? {
+    ): T {
         val mapper = responseMapper ?: OkMapper { it as T }
         return mapper.map(response)
     }
@@ -197,9 +197,8 @@ abstract class OkRequest<T> {
     protected open fun mapError(
         exception: Exception,
         errorMapper: OkMapper<Exception, T>?
-    ): T? {
-        val mapper = errorMapper ?: OkMapper { throw it }
-        return mapper.map(exception)
+    ): T {
+        return errorMapper?.map(exception) ?: throw exception
     }
 
     protected abstract fun createRealRequest(): Request
@@ -240,11 +239,10 @@ abstract class OkRequest<T> {
                 return
             }
 
-            val result = mapError(exception, errorMapper)
-            if (result != null) {
-                callOnSuccess(result)
-            } else {
+            if (errorMapper == null) {
                 callOnError(exception)
+            } else {
+                callOnSuccess(mapError(exception, errorMapper))
             }
         } catch (e: Exception) {
             callOnError(e)
@@ -258,9 +256,7 @@ abstract class OkRequest<T> {
                 return
             }
 
-            val result = mapResponse(response, responseMapper)
-                ?: throw NullPointerException("Result is null")
-            callOnSuccess(result)
+            callOnSuccess(mapResponse(response, responseMapper))
         } catch (e: Exception) {
             callOnFailure(e)
         }
