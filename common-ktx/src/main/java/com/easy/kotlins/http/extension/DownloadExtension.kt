@@ -1,10 +1,11 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.http.extension
 
 import com.easy.kotlins.http.ProgressAction
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
-import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
@@ -70,7 +71,6 @@ open class DownloadExtension private constructor(path: String, private val conti
             val tmpFilePath = srcFile.absolutePath
             val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_SUFFIX_TMP)))
 
-            // 下载完成后去除临时文件后缀
             return if (srcFile.renameTo(destFile)) {
                 destFile
             } else throw IOException("Rename file failed")

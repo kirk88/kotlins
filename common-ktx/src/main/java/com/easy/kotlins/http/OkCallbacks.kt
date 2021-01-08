@@ -3,8 +3,6 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
-import com.facebook.stetho.BuildConfig
 
 /**
  * Create by LiZhanPing on 2020/4/27
@@ -36,8 +34,9 @@ internal object OkCallbacks {
                     callOnError(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_UPDATE -> {
+                    @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     callOnProgress(
-                        body.callback as OkDownloadCallback,
+                        callback,
                         body.args[0] as Long,
                         body.args[1] as Long
                     )
@@ -50,42 +49,37 @@ internal object OkCallbacks {
     }
 
     fun <T> onSuccess(callback: OkCallback<T>?, result: T) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result as Any)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result as Any))
+            .sendToTarget()
     }
 
     fun onError(callback: OkCallback<*>?, error: Exception) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
     }
 
     fun onComplete(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
     }
 
     fun onCancel(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
     }
 
-    fun onProgress(callback: OkDownloadCallback?, downloadedBytes: Long, totalBytes: Long) {
-        if (callback != null) {
-            HANDLER.obtainMessage(
-                MSG_WHAT_ON_UPDATE,
-                MessageBody(callback, downloadedBytes, totalBytes)
-            ).sendToTarget()
-        }
+    fun onProgress(callback: OkCallback<*>?, bytes: Long, totalBytes: Long) {
+        if(callback == null) return
+        HANDLER.obtainMessage(
+            MSG_WHAT_ON_UPDATE,
+            MessageBody(callback, bytes, totalBytes)
+        ).sendToTarget()
     }
 
     private fun callOnStart(callback: OkCallback<*>) {
@@ -113,12 +107,12 @@ internal object OkCallbacks {
     }
 
     private fun callOnProgress(
-        callback: OkDownloadCallback,
-        downloadedBytes: Long,
+        callback: OkCallback<*>,
+        bytes: Long,
         totalBytes: Long
     ) {
         try {
-            callback.onProgress(downloadedBytes, totalBytes)
+            callback.onProgress(bytes, totalBytes)
         } catch (t: Throwable) {
             t.printStackTrace()
         }
