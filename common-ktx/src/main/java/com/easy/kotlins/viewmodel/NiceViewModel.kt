@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.viewmodel
 
 import android.app.Application
@@ -7,60 +9,63 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableView
+import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.EventProxy
+import com.easy.kotlins.http.OkDownloader
 import com.easy.kotlins.http.OkFaker
-import com.easy.kotlins.http.OkFakerScope
-import com.easy.kotlins.http.SimpleOkFakerScope
+import com.easy.kotlins.http.OkManagerScope
+import com.easy.kotlins.http.SimpleOkManagerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
  */
 
-interface ViewModelController : OkFakerScope {
+interface ViewModelController : OkManagerScope {
     var event: Event
 
-    fun get(action: OkFaker.() -> Unit): OkFaker
+    fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
-    fun post(action: OkFaker.() -> Unit): OkFaker
+    fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
 
-    fun observeEvent(owner: EventObservableView)
+    fun observeEvent(owner: EventObserver)
 }
 
 private class SimpleViewModelController : ViewModelController,
-    OkFakerScope by SimpleOkFakerScope() {
+    OkManagerScope by SimpleOkManagerScope() {
 
-    private val liveEventProxy = EventProxy()
-    override var event: Event by liveEventProxy
+    private val eventProxy = EventProxy()
+    override var event: Event by eventProxy
 
-    override fun get(action: OkFaker.() -> Unit): OkFaker {
+    override fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T> {
         return OkFaker.get(action).also { add(it) }
     }
 
-    override fun post(action: OkFaker.() -> Unit): OkFaker {
+    override fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T> {
         return OkFaker.post(action).also { add(it) }
     }
 
     override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        liveEventProxy.observe(owner) {
+        eventProxy.observe(owner){
             if (it != null) observer(it)
         }
     }
 
-    override fun observeEvent(owner: EventObservableView) {
-        liveEventProxy.observe(owner) {
-            if (it != null) owner.onEventChanged(it)
+    override fun observeEvent(owner: EventObserver) {
+        eventProxy.observe(owner){
+            if(it != null) owner.onEventChanged(it)
         }
     }
 }
 
 open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
+
     @CallSuper
     override fun onCleared() {
         cancelAll()
     }
+
 }
 
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
@@ -80,30 +85,30 @@ open class StatefulAndroidViewModel(application: Application, val state: SavedSt
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(
-    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
-    val factoryPromise = factoryProducer ?: {
-        defaultViewModelProviderFactory
-    }
-    return ViewModelProvider(viewModelStore, factoryPromise()).get(VM::class.java)
+    return ViewModelProvider(
+        viewModelStore, factoryProducer
+            ?: defaultViewModelProviderFactory
+    ).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.activityViewModel(
-    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
-    val factoryPromise = factoryProducer ?: {
-        defaultViewModelProviderFactory
-    }
-    return ViewModelProvider( requireActivity().viewModelStore, factoryPromise()).get(VM::class.java)
+    return ViewModelProvider(
+        requireActivity().viewModelStore, factoryProducer
+            ?: requireActivity().defaultViewModelProviderFactory
+    ).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> ComponentActivity.viewModel(
-    noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
-    val factoryPromise = factoryProducer ?: {
-        defaultViewModelProviderFactory
-    }
-    return ViewModelProvider(viewModelStore, factoryPromise()).get(VM::class.java)
+    return ViewModelProvider(
+        viewModelStore, factoryProducer
+            ?: defaultViewModelProviderFactory
+    ).get(VM::class.java)
 }

@@ -5,8 +5,9 @@ package com.easy.kotlins.http
  */
 interface OkCallback<T> {
     fun onStart()
+    fun onProgress(bytes: Long, totalBytes: Long)
     fun onSuccess(result: T)
-    fun onError(error: OkException)
+    fun onError(error: Exception)
     fun onCancel()
     fun onComplete()
 }

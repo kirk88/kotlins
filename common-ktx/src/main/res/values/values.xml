@@ -11,14 +11,18 @@
     <item name="loading_progress" type="id" />
     <item name="loading_text" type="id" />
 
+    <item name="progress_panel" type="id" />
+    <item name="progress_bar" type="id" />
+    <item name="progress_text" type="id" />
+
     <attr name="dynamicLayoutStyle" format="reference" />
 
     <style name="DynamicLayout" />
 
     <style name="DynamicLayout.Style">
-        <item name="emptyLayout">@layout/loading_layout_empty</item>
-        <item name="loadingLayout">@layout/loading_layout_loading</item>
-        <item name="errorLayout">@layout/loading_layout_error</item>
+        <item name="emptyLayout">@layout/layout_empty</item>
+        <item name="loadingLayout">@layout/layout_loading</item>
+        <item name="errorLayout">@layout/layout_error</item>
 
         <item name="emptyImage">@null</item>
         <item name="emptyText">@string/load_empty_tip</item>

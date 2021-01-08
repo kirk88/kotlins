@@ -8,6 +8,7 @@ import com.easy.kotlins.event.*
 import com.easy.kotlins.http.BodyFromDataPart
 import com.easy.kotlins.http.FileFormDataPart
 import com.easy.kotlins.http.OkFaker
+import com.easy.kotlins.http.OkMapper
 import kotlinx.coroutines.Dispatchers
 import okhttp3.Response
 import java.io.Serializable
@@ -129,7 +130,7 @@ enum class LoadMode {
     START, REFRESH, LOADMORE
 }
 
-class Loader(
+class LoadConfig(
     context: CoroutineContext = Dispatchers.Main.immediate,
     delayed: Long = 0
 ) {
@@ -154,33 +155,33 @@ class Loader(
     val pageSize: Int
         get() = _pageSize
 
-    fun with(mode: LoadMode): Loader {
+    fun with(mode: LoadMode): LoadConfig {
         this._mode = mode
         return this
     }
 
-    fun on(context: CoroutineContext): Loader {
+    fun on(context: CoroutineContext): LoadConfig {
         _context = context
         return this
     }
 
-    fun delayed(delayed: Long): Loader {
+    fun delayed(delayed: Long): LoadConfig {
         _delayed = delayed
         return this
     }
 
-    fun page(page: Int): Loader {
+    fun page(page: Int): LoadConfig {
         _pager.set(page)
         return this
     }
 
-    fun pageSize(pageSize: Int): Loader {
+    fun pageSize(pageSize: Int): LoadConfig {
         _pageSize = pageSize
         return this
     }
 }
 
-fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -192,7 +193,7 @@ fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
 }
 
-fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
+fun OkFaker<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -204,34 +205,35 @@ fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.requestPlugin(loader: Loader, url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
     formParameters(mutableMapOf(*params).apply {
-        put("page", loader.page)
-        put("pagesize", loader.pageSize)
+        put("page", config.page)
+        put("pageSize", config.pageSize)
     })
 
 }
 
-fun OkFaker.requestPlugin(loader: Loader, url: String, params: Map<String, Any?>) {
+fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, params: Map<String, Any?>) {
 
     url(url)
 
     formParameters(params.toMutableMap().apply {
-        put("page", loader.page)
-        put("pagesize", loader.pageSize)
+        put("page", config.page)
+        put("pageSize", config.pageSize)
     })
+
 }
 
-fun <T> OkFaker.responsePlugin(
+fun <T> OkFaker<T>.responsePlugin(
     precondition: (Response) -> Boolean = { it.isSuccessful },
-    errorMapper: ((Throwable) -> T)? = null,
-    resultMapper: (String) -> T
+    errorMapper: OkMapper<Exception, T>? = null,
+    resultMapper: OkMapper<String, T>
 ) {
     mapResponse {
-        if (precondition(it)) resultMapper(it.body()!!.string())
+        if (precondition(it)) resultMapper.map(it.body()!!.string())
         else error("Invalid response")
     }
 
@@ -240,22 +242,23 @@ fun <T> OkFaker.responsePlugin(
     }
 }
 
-fun <T : Any> OkFaker.loadPlugin(
-    loader: Loader,
+fun <T> OkFaker<T>.loadPlugin(
+    config: LoadConfig,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,
     onApply: (T) -> Unit
 ) {
+
     onStart {
-        if (loader.mode == LoadMode.START) onEvent?.invoke(loadingShow())
+        if (config.mode == LoadMode.START) onEvent?.invoke(loadingShow())
     }
 
-    onSuccess<T> {
-        step(loader.context) {
-            add(loader.delayed) {
+    onSuccess {
+        step(config.context) {
+            add(config.delayed) {
                 if (it is Collection<*>) {
                     onEvent?.invoke(
-                        when (loader.mode) {
+                        when (config.mode) {
                             LoadMode.START -> it.isEmpty().opt(emptyShow(), contentShow())
                             LoadMode.REFRESH -> refreshCompleted()
                             LoadMode.LOADMORE -> loadMoreCompleted(it.isNotEmpty())
@@ -273,10 +276,10 @@ fun <T : Any> OkFaker.loadPlugin(
     }
 
     onError {
-        step(loader.context) {
-            add(loader.delayed) {
+        step(config.context) {
+            add(config.delayed) {
                 onEvent?.invoke(
-                    when (loader.mode) {
+                    when (config.mode) {
                         LoadMode.START -> errorShow(it.message)
                         LoadMode.REFRESH -> refreshFailed()
                         LoadMode.LOADMORE -> loadMoreFailed()
@@ -291,22 +294,22 @@ fun <T : Any> OkFaker.loadPlugin(
     }
 }
 
-inline fun <reified T: Any> OkFaker.loadPlugin(
-    loader: Loader,
+inline fun <reified T> OkFaker<T>.loadPlugin(
+    config: LoadConfig,
     source: MutableLiveData<T>,
     noinline onError: ((Throwable) -> Unit)? = null,
     noinline onEvent: ((Event) -> Unit)? = null
 ) {
-    loadPlugin<T>(loader, onEvent, onError) {
+    loadPlugin(config, onEvent, onError) {
         if (T::class == PagedList::class && it is List<*>) {
-            source.value = pagedList(loader.pager, it) as T
+            source.value = pagedList(config.pager, it) as T
         } else {
             source.value = it
         }
     }
 }
 
-fun <T : Any> OkFaker.loadPlugin(
+fun <T> OkFaker<T>.loadPlugin(
     message: String? = null,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,
@@ -316,31 +319,8 @@ fun <T : Any> OkFaker.loadPlugin(
         onEvent?.invoke(progressShow(message))
     }
 
-    onSuccess<T> {
+    onSuccess {
         onApply(it)
-    }
-
-    onError {
-        onError?.invoke(it)
-    }
-
-    onComplete {
-        onEvent?.invoke(progressDismiss())
-    }
-}
-
-fun OkFaker.loadPlugin(
-    message: String? = null,
-    onEvent: ((Event) -> Unit)? = null,
-    onError: ((Throwable) -> Unit)? = null,
-    onApply: () -> Unit
-) {
-    onStart {
-        onEvent?.invoke(progressShow(message))
-    }
-
-    onSimpleSuccess {
-        onApply()
     }
 
     onError {

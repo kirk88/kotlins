@@ -3,8 +3,6 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
-import com.facebook.stetho.BuildConfig
 
 /**
  * Create by LiZhanPing on 2020/4/27
@@ -33,11 +31,12 @@ internal object OkCallbacks {
                     callOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    callOnError(body.callback, body.args[0] as Throwable)
+                    callOnError(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_UPDATE -> {
+                    @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     callOnProgress(
-                        body.callback as OkDownloadCallback,
+                        callback,
                         body.args[0] as Long,
                         body.args[1] as Long
                     )
@@ -49,43 +48,38 @@ internal object OkCallbacks {
         }
     }
 
-    fun <T: Any> onSuccess(callback: OkCallback<T>?, result: T) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result)).sendToTarget()
-        }
+    fun <T> onSuccess(callback: OkCallback<T>?, result: T) {
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result as Any))
+            .sendToTarget()
     }
 
-    fun onError(callback: OkCallback<*>?, error: Throwable) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
-        }
+    fun onError(callback: OkCallback<*>?, error: Exception) {
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
     }
 
     fun onComplete(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
     }
 
     fun onCancel(callback: OkCallback<*>?) {
-        if (callback != null) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
-        }
+        if(callback == null) return
+        HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
     }
 
-    fun onProgress(callback: OkDownloadCallback?, downloadedBytes: Long, totalBytes: Long) {
-        if (callback != null) {
-            HANDLER.obtainMessage(
-                MSG_WHAT_ON_UPDATE,
-                MessageBody(callback, downloadedBytes, totalBytes)
-            ).sendToTarget()
-        }
+    fun onProgress(callback: OkCallback<*>?, bytes: Long, totalBytes: Long) {
+        if(callback == null) return
+        HANDLER.obtainMessage(
+            MSG_WHAT_ON_UPDATE,
+            MessageBody(callback, bytes, totalBytes)
+        ).sendToTarget()
     }
 
     private fun callOnStart(callback: OkCallback<*>) {
@@ -113,28 +107,28 @@ internal object OkCallbacks {
     }
 
     private fun callOnProgress(
-        callback: OkDownloadCallback,
-        downloadedBytes: Long,
+        callback: OkCallback<*>,
+        bytes: Long,
         totalBytes: Long
     ) {
         try {
-            callback.onProgress(downloadedBytes, totalBytes)
+            callback.onProgress(bytes, totalBytes)
         } catch (t: Throwable) {
             t.printStackTrace()
         }
     }
 
-    private fun <T: Any> callOnSuccess(callback: OkCallback<T>, result: T) {
+    private fun <T> callOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
         } catch (e: Exception) {
-            callOnError(callback, OkException(message = e.message, cause = e))
+            callOnError(callback, e)
         }
     }
 
-    private fun callOnError(callback: OkCallback<*>, e: Throwable) {
+    private fun callOnError(callback: OkCallback<*>, error: Exception) {
         try {
-            callback.onError(OkException(message = e.message, cause = e))
+            callback.onError(error)
         } catch (t: Throwable) {
             t.printStackTrace()
         }

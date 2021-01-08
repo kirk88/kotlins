@@ -6,6 +6,7 @@ import kotlin.reflect.KProperty
 fun <T> weak(initializer: () -> T) = Weak(initializer)
 
 class Weak<T>(initializer: () -> T) {
+
     private var reference = WeakReference(initializer())
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T? {
@@ -15,4 +16,5 @@ class Weak<T>(initializer: () -> T) {
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
         reference = WeakReference(value)
     }
+
 }

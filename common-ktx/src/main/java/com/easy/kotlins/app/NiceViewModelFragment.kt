@@ -1,14 +1,14 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
-import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableView
-import com.easy.kotlins.event.EventCollection
+import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
+import com.easy.kotlins.viewmodel.ViewModelController
 import com.easy.kotlins.viewmodel.ViewModelEvents
-import com.easy.kotlins.viewmodel.viewModel
+import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.LoadingView
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
@@ -16,8 +16,8 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
-    EventObservableView {
+abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layoutResId),
+    EventObserver, ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val refreshView: RefreshView? = null
 
@@ -31,8 +31,26 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
     }
 
     final override fun onEventChanged(event: Event) {
-        if (onViewModelEventChanged(event)) return
+        if ((activity as? NiceViewModelActivity<*>)?.onInterceptViewModelEvent(event) == true) {
+            return
+        }
 
+        if (onViewModelEvent(event)) {
+            return
+        }
+
+        callEvent(event)
+    }
+
+    open fun onInterceptViewModelEvent(event: Event): Boolean {
+        return false
+    }
+
+    open fun onViewModelEvent(event: Event): Boolean {
+        return false
+    }
+
+    private fun callEvent(event: Event) {
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
@@ -44,15 +62,15 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
             Status.SHOW_LOADING -> loadingView?.apply {
                 if (event.message != null) setLoadingText(event.message)
                 showLoading()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_EMPTY -> loadingView?.apply {
                 if (event.message != null) setEmptyText(event.message)
                 showEmpty()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_ERROR -> loadingView?.apply {
                 if (event.message != null) setErrorText(event.message)
                 showError()
-            } ?: event.message?.let { toast(it) }
+            }
             Status.SHOW_CONTENT -> loadingView?.showContent()
             else -> event.message?.let { toast(it) }
         }
@@ -63,9 +81,5 @@ abstract class NiceEventActivity(layoutResId: Int) : NiceActivity(layoutResId),
         } else {
             startActivityForResult(intent, event.what)
         }
-    }
-
-    open fun onViewModelEventChanged(event: Event): Boolean {
-        return false
     }
 }

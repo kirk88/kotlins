@@ -7,15 +7,15 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.Parcelable
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import java.io.Serializable
 
 /**
  * Create by LiZhanPing on 2020/8/22
@@ -97,29 +97,63 @@ inline fun <reified A : Activity> Context.startActivity(vararg pairs: Pair<Strin
     startActivity(Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) })
 }
 
-inline fun <reified A : Activity> Fragment.startActivityForResult(requestCode: Int, noinline action: (Intent.() -> Unit)? = null) {
-    startActivityForResult(Intent(context, A::class.java).apply { action?.invoke(this) }, requestCode)
+inline fun <reified A : Activity> Fragment.startActivityForResult(
+    requestCode: Int,
+    noinline action: (Intent.() -> Unit)? = null
+) {
+    startActivityForResult(
+        Intent(context, A::class.java).apply { action?.invoke(this) },
+        requestCode
+    )
 }
 
-inline fun <reified A : Activity> Fragment.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any?>) {
-    startActivityForResult(Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) }, requestCode)
+inline fun <reified A : Activity> Fragment.startActivityForResult(
+    requestCode: Int,
+    vararg pairs: Pair<String, Any?>
+) {
+    startActivityForResult(
+        Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) },
+        requestCode
+    )
 }
 
-inline fun <reified A : Activity> Activity.startActivityForResult(requestCode: Int, noinline action: (Intent.() -> Unit)? = null) {
+inline fun <reified A : Activity> Activity.startActivityForResult(
+    requestCode: Int,
+    noinline action: (Intent.() -> Unit)? = null
+) {
     startActivityForResult(Intent(this, A::class.java).apply { action?.invoke(this) }, requestCode)
 }
 
-inline fun <reified A : Activity> Activity.startActivityForResult(requestCode: Int, vararg pairs: Pair<String, Any?>) {
-    startActivityForResult(Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) }, requestCode)
+inline fun <reified A : Activity> Activity.startActivityForResult(
+    requestCode: Int,
+    vararg pairs: Pair<String, Any?>
+) {
+    startActivityForResult(
+        Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) },
+        requestCode
+    )
 }
 
 fun Context.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
-fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(ContextCompat.getDrawable(this, resId))
+fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
+    ContextCompat.getDrawable(
+        this,
+        resId
+    )
+)
 
-fun Fragment.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(requireContext(), resId)
+fun Fragment.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(
+    requireContext(),
+    resId
+)
 
-fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(ContextCompat.getDrawable(requireContext(), resId))
+fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
+    ContextCompat.getDrawable(
+        requireContext(),
+        resId
+    )
+)
 
 val Fragment.application: Application
     get() {
@@ -142,3 +176,26 @@ val Context.screenWidthPixels: Int
 
 val Context.screenHeightPixels: Int
     get() = resources.displayMetrics.heightPixels
+
+val Context.activity: Activity?
+    get() = scanActivity(this)
+
+val Context.appCompatActivity: AppCompatActivity?
+    get() = scanCompatActivity(this)
+
+private tailrec fun scanActivity(context: Context): Activity? {
+    return when (context) {
+        is Activity -> context
+        is ContextWrapper -> scanActivity(context.baseContext)
+        else -> null
+    }
+}
+
+private tailrec fun scanCompatActivity(context: Context?): AppCompatActivity? {
+    return when (context) {
+        is AppCompatActivity -> context
+        is androidx.appcompat.view.ContextThemeWrapper -> scanCompatActivity(context.baseContext)
+        is ContextThemeWrapper -> scanCompatActivity(context.baseContext)
+        else -> null
+    }
+}
