@@ -234,12 +234,12 @@ open class LiveEventData<T> {
      */
     @MainThread
     open fun observeActive(owner: LifecycleOwner, observer: Observer<in T>) {
-        observe(owner, observer, false)
+        observeActive(owner, observer, false)
     }
 
     @MainThread
     open fun observeActiveSticky(owner: LifecycleOwner, observer: Observer<in T>) {
-        observe(owner, observer, true)
+        observeActive(owner, observer, true)
     }
 
     /**

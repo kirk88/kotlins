@@ -180,7 +180,7 @@ class Loader(
     }
 }
 
-fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -192,7 +192,7 @@ fun OkFaker.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
 }
 
-fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
+fun OkFaker<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -204,7 +204,7 @@ fun OkFaker.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.requestPlugin(loader: Loader, url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker<*>.requestPlugin(loader: Loader, url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -215,7 +215,7 @@ fun OkFaker.requestPlugin(loader: Loader, url: String, vararg params: Pair<Strin
 
 }
 
-fun OkFaker.requestPlugin(loader: Loader, url: String, params: Map<String, Any?>) {
+fun OkFaker<*>.requestPlugin(loader: Loader, url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -223,9 +223,10 @@ fun OkFaker.requestPlugin(loader: Loader, url: String, params: Map<String, Any?>
         put("page", loader.page)
         put("pagesize", loader.pageSize)
     })
+
 }
 
-fun <T> OkFaker.responsePlugin(
+fun <T> OkFaker<T>.responsePlugin(
     precondition: (Response) -> Boolean = { it.isSuccessful },
     errorMapper: ((Throwable) -> T)? = null,
     resultMapper: (String) -> T
@@ -240,7 +241,7 @@ fun <T> OkFaker.responsePlugin(
     }
 }
 
-fun <T : Any> OkFaker.loadPlugin(
+fun <T> OkFaker<T>.loadPlugin(
     loader: Loader,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,
@@ -250,7 +251,7 @@ fun <T : Any> OkFaker.loadPlugin(
         if (loader.mode == LoadMode.START) onEvent?.invoke(loadingShow())
     }
 
-    onSuccess<T> {
+    onSuccess {
         step(loader.context) {
             add(loader.delayed) {
                 if (it is Collection<*>) {
@@ -291,13 +292,13 @@ fun <T : Any> OkFaker.loadPlugin(
     }
 }
 
-inline fun <reified T: Any> OkFaker.loadPlugin(
+inline fun <reified T> OkFaker<T>.loadPlugin(
     loader: Loader,
     source: MutableLiveData<T>,
     noinline onError: ((Throwable) -> Unit)? = null,
     noinline onEvent: ((Event) -> Unit)? = null
 ) {
-    loadPlugin<T>(loader, onEvent, onError) {
+    loadPlugin(loader, onEvent, onError) {
         if (T::class == PagedList::class && it is List<*>) {
             source.value = pagedList(loader.pager, it) as T
         } else {
@@ -306,7 +307,7 @@ inline fun <reified T: Any> OkFaker.loadPlugin(
     }
 }
 
-fun <T : Any> OkFaker.loadPlugin(
+fun <T> OkFaker<T>.loadPlugin(
     message: String? = null,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,
@@ -316,31 +317,8 @@ fun <T : Any> OkFaker.loadPlugin(
         onEvent?.invoke(progressShow(message))
     }
 
-    onSuccess<T> {
+    onSuccess {
         onApply(it)
-    }
-
-    onError {
-        onError?.invoke(it)
-    }
-
-    onComplete {
-        onEvent?.invoke(progressDismiss())
-    }
-}
-
-fun OkFaker.loadPlugin(
-    message: String? = null,
-    onEvent: ((Event) -> Unit)? = null,
-    onError: ((Throwable) -> Unit)? = null,
-    onApply: () -> Unit
-) {
-    onStart {
-        onEvent?.invoke(progressShow(message))
-    }
-
-    onSimpleSuccess {
-        onApply()
     }
 
     onError {

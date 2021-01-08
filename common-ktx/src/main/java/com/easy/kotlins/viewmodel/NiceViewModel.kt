@@ -11,20 +11,21 @@ import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.EventProxy
+import com.easy.kotlins.http.OkDownloader
 import com.easy.kotlins.http.OkFaker
-import com.easy.kotlins.http.OkFakerScope
-import com.easy.kotlins.http.SimpleOkFakerScope
+import com.easy.kotlins.http.OkManagerScope
+import com.easy.kotlins.http.SimpleOkManagerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
  */
 
-interface ViewModelController : OkFakerScope {
+interface ViewModelController : OkManagerScope {
     var event: Event
 
-    fun get(action: OkFaker.() -> Unit): OkFaker
+    fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
-    fun post(action: OkFaker.() -> Unit): OkFaker
+    fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
 
@@ -32,16 +33,16 @@ interface ViewModelController : OkFakerScope {
 }
 
 private class SimpleViewModelController : ViewModelController,
-    OkFakerScope by SimpleOkFakerScope() {
+    OkManagerScope by SimpleOkManagerScope() {
 
     private val eventProxy = EventProxy()
     override var event: Event by eventProxy
 
-    override fun get(action: OkFaker.() -> Unit): OkFaker {
+    override fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T> {
         return OkFaker.get(action).also { add(it) }
     }
 
-    override fun post(action: OkFaker.() -> Unit): OkFaker {
+    override fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T> {
         return OkFaker.post(action).also { add(it) }
     }
 
