@@ -36,7 +36,7 @@ class SimpleOkManagerScope : OkManagerScope, Iterable<OkManager<*, *>> {
         return false
     }
 
-    override fun cancelAll() {
+    override fun clear() {
         synchronized(this) {
             val list = resources
             resources = null

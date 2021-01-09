@@ -151,7 +151,7 @@ class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
 
     private val pairs: MutableMap<String, T> = mutableMapOf()
 
-    infix fun String.of(value: T) {
+    infix fun String.to(value: T) {
         pairs[this] = value
     }
 
@@ -169,10 +169,6 @@ class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
 
     override fun toString(): String {
         return pairs.toJson()
-    }
-
-    fun toArrayString(): String {
-        return listOf(pairs).toJson()
     }
 
     override fun iterator(): Iterator<Map.Entry<String, T>> {

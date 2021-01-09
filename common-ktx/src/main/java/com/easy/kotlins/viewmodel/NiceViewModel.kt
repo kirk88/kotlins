@@ -9,9 +9,8 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObserver
+import com.easy.kotlins.event.EventObservableOwner
 import com.easy.kotlins.event.EventProxy
-import com.easy.kotlins.http.OkDownloader
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkManagerScope
 import com.easy.kotlins.http.SimpleOkManagerScope
@@ -29,7 +28,15 @@ interface ViewModelController : OkManagerScope {
 
     fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
 
-    fun observeEvent(owner: EventObserver)
+    fun observeEvent(owner: EventObservableOwner)
+}
+
+interface ViewModelEventObservableOwner : EventObservableOwner {
+
+    fun onInterceptViewModelEvent(event: Event): Boolean
+
+    fun onViewModelEvent(event: Event): Boolean
+
 }
 
 private class SimpleViewModelController : ViewModelController,
@@ -47,23 +54,20 @@ private class SimpleViewModelController : ViewModelController,
     }
 
     override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        eventProxy.observe(owner){
-            if (it != null) observer(it)
-        }
+        eventProxy.observe(owner, observer)
     }
 
-    override fun observeEvent(owner: EventObserver) {
-        eventProxy.observe(owner){
-            if(it != null) owner.onEventChanged(it)
-        }
+    override fun observeEvent(owner: EventObservableOwner) {
+        eventProxy.observe(owner)
     }
+
 }
 
 open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
 
     @CallSuper
     override fun onCleared() {
-        cancelAll()
+        clear()
     }
 
 }
@@ -73,7 +77,7 @@ open class NiceAndroidViewModel(application: Application) : AndroidViewModel(app
 
     @CallSuper
     override fun onCleared() {
-        cancelAll()
+        clear()
     }
 
 }

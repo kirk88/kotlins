@@ -2,14 +2,29 @@ package com.easy.kotlins.http
 
 import okhttp3.*
 import java.io.IOException
+import java.net.URI
+import java.net.URL
 
 abstract class OkRequest<T> {
 
-    protected val requestBuilder: Request.Builder by lazy { Request.Builder() }
-    protected val urlBuilder: HttpUrl.Builder by lazy {
-        val requestUrl = url ?: throw NullPointerException("Url is null")
-        HttpUrl.parse(requestUrl)?.newBuilder() ?: throw IllegalStateException("Url parse failed")
-    }
+    protected val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
+    protected val requestBuilder: Request.Builder = Request.Builder()
+
+    private var httpUrl: HttpUrl? = null
+        set(value) {
+            field = value
+            value ?: return
+            urlBuilder.scheme(value.scheme())
+                .encodedUsername(value.encodedUsername())
+                .encodedPassword(value.encodedPassword())
+                .host(value.host())
+                .port(value.port())
+                .encodedPath(value.encodedPath())
+                .encodedQuery(value.encodedQuery())
+                .encodedFragment(value.encodedFragment())
+        }
+
+    private var httpClient: OkHttpClient? = null
 
     private var call: Call? = null
     private var creationFailure: Exception? = null
@@ -20,24 +35,10 @@ abstract class OkRequest<T> {
 
     private var errorMapper: OkMapper<Exception, T>? = null
     private var responseMapper: OkMapper<Response, T>? = null
-
     private var callback: OkCallback<T>? = null
 
-    var client: OkHttpClient? = null
-
-    var url: String? = null
-
-    var tag: Any? = null
-        set(value) {
-            field = value
-            if (value != null) requestBuilder.tag(value)
-        }
-
-    var cacheControl: CacheControl? = null
-        set(value) {
-            field = value
-            if (value != null) requestBuilder.cacheControl(value)
-        }
+    val tag: Any?
+        get() = call?.request()?.tag()
 
     val isExecuted: Boolean
         get() {
@@ -57,6 +58,30 @@ abstract class OkRequest<T> {
         synchronized(this) { call?.cancel() }
     }
 
+    fun client(client: OkHttpClient) {
+        httpClient = client
+    }
+
+    fun url(url: URL) {
+        httpUrl = HttpUrl.get(url)
+    }
+
+    fun url(uri: URI) {
+        httpUrl = HttpUrl.get(uri)
+    }
+
+    fun url(url: String) {
+        httpUrl = HttpUrl.parse(url)
+    }
+
+    fun tag(tag: Any) {
+        requestBuilder.tag(tag)
+    }
+
+    fun cacheControl(cacheControl: CacheControl) {
+        requestBuilder.cacheControl(cacheControl)
+    }
+
     fun setHeader(key: String, value: String) {
         requestBuilder.header(key, value)
     }
@@ -73,15 +98,23 @@ abstract class OkRequest<T> {
         urlBuilder.addQueryParameter(key, value)
     }
 
+    fun setQueryParameter(key: String, value: String) {
+        urlBuilder.setQueryParameter(key, value)
+    }
+
     fun addEncodedQueryParameter(key: String, value: String) {
         urlBuilder.addEncodedQueryParameter(key, value)
     }
 
-    fun removeAllQueryParameters(key: String) {
+    fun setEncodedQueryParameter(key: String, value: String) {
+        urlBuilder.setEncodedQueryParameter(key, value)
+    }
+
+    fun removeQueryParameters(key: String) {
         urlBuilder.removeAllQueryParameters(key)
     }
 
-    fun removeAllEncodedQueryParameters(key: String) {
+    fun removeEncodedQueryParameters(key: String) {
         urlBuilder.removeAllEncodedQueryParameters(key)
     }
 
@@ -140,7 +173,6 @@ abstract class OkRequest<T> {
                 }
             }
 
-            @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
                 try {
                     callOnResponse(response)
@@ -153,30 +185,30 @@ abstract class OkRequest<T> {
 
     @Throws(Exception::class)
     protected fun createRealCall(): Call {
-        var call: Call?
+        var realCall: Call?
         synchronized(this) {
             check(!executed) { "Already Executed" }
-            check(client != null) { "OkHttpClient is null" }
+            check(httpClient != null) { "OkHttpClient is null" }
             executed = true
-            call = this.call
+            realCall = this.call
             if (creationFailure != null) {
-                throw creationFailure as Exception
+                throw creationFailure!!
             }
-            if (call == null) {
+            if (realCall == null) {
                 try {
-                    this.call = client!!.newCall(createRealRequest())
-                    call = this.call
-                } catch (exception: Exception) {
-                    creationFailure = exception
-                    throw exception
+                    this.call = httpClient!!.newCall(createRealRequest())
+                    realCall = this.call
+                } catch (e: Exception) {
+                    creationFailure = e
+                    throw e
                 }
             }
         }
-        return call!!
+        return realCall!!
     }
 
     @Throws(Exception::class)
-    protected open fun onFailure(exception: Exception): Boolean {
+    protected open fun onFailure(error: Exception): Boolean {
         return false
     }
 
@@ -195,16 +227,16 @@ abstract class OkRequest<T> {
     }
 
     protected open fun mapError(
-        exception: Exception,
+        error: Exception,
         errorMapper: OkMapper<Exception, T>?
     ): T {
-        return errorMapper?.map(exception) ?: throw exception
+        return errorMapper?.map(error) ?: throw error
     }
 
     protected abstract fun createRealRequest(): Request
 
     protected fun callOnStart() {
-        OkCallbacks.onCancel(callback)
+        OkCallbacks.onStart(callback)
     }
 
     protected fun callOnProgress(bytes: Long, totalBytes: Long) {
@@ -215,8 +247,8 @@ abstract class OkRequest<T> {
         OkCallbacks.onSuccess(callback, result)
     }
 
-    protected fun callOnError(exception: Exception) {
-        OkCallbacks.onError(callback, exception)
+    protected fun callOnError(error: Exception) {
+        OkCallbacks.onError(callback, error)
     }
 
     protected fun callOnCancel() {
@@ -228,21 +260,21 @@ abstract class OkRequest<T> {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun callOnFailure(exception: Exception) {
+    private fun callOnFailure(error: Exception) {
         try {
             if (isCanceled) {
                 callOnCancel()
                 return
             }
 
-            if (onFailure(exception)) {
+            if (onFailure(error)) {
                 return
             }
 
             if (errorMapper == null) {
-                callOnError(exception)
+                callOnError(error)
             } else {
-                callOnSuccess(mapError(exception, errorMapper))
+                callOnSuccess(mapError(error, errorMapper))
             }
         } catch (e: Exception) {
             callOnError(e)

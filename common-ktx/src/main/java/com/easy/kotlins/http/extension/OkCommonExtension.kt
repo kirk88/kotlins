@@ -2,7 +2,7 @@ package com.easy.kotlins.http.extension
 
 import okhttp3.Response
 
-interface OkRestExtension : OkExtension {
+interface OkCommonExtension : OkExtension {
 
     fun onResponse(response: Response): Boolean
 

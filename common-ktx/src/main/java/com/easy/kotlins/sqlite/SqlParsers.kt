@@ -13,7 +13,7 @@ interface MapRowParser<out T> {
     fun parseRow(row: Map<String, ColumnElement>): T
 }
 
-private class SingleColumnParser<out T>(val modifier: ((ColumnElement) -> T)) : RowParser<T> {
+private class SingleColumnParser<out T>(val modifier: (ColumnElement) -> T) : RowParser<T> {
     override fun parseRow(row: Array<ColumnElement>): T {
         if (row.size != 1)
             throw SQLiteException("Invalid row: row for SingleColumnParser must contain exactly one column")

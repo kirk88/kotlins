@@ -199,9 +199,3 @@ fun contentShow(): Event = SingleEvent(Status.SHOW_CONTENT)
 fun eventOf(events: List<Event>): Event = EventCollection(events = events)
 
 fun eventOf(vararg events: Event): Event = EventCollection(events = events.toList())
-
-interface EventObserver : LifecycleOwner {
-
-    fun onEventChanged(event: Event)
-
-}

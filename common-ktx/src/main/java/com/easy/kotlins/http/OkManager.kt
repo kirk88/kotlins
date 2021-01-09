@@ -1,7 +1,10 @@
 package com.easy.kotlins.http
 
+import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import java.net.URI
+import java.net.URL
 
 typealias Action<T> = (T) -> Unit
 typealias SimpleAction = () -> Unit
@@ -37,15 +40,27 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         get() = request.tag
 
     fun client(client: OkHttpClient) {
-        request.client = client
+        request.client(client)
     }
 
     fun url(url: String) {
-        request.url = url
+        request.url(url)
+    }
+
+    fun url(url: URL) {
+        request.url(url)
+    }
+
+    fun uri(uri: URI) {
+        request.url(uri)
     }
 
     fun tag(tag: Any) {
-        request.tag = tag
+        request.tag(tag)
+    }
+
+    fun cacheControl(cacheControl: CacheControl) {
+        request.cacheControl(cacheControl)
     }
 
     fun headers(operation: RequestPairs<Any?>.() -> Unit) {
@@ -66,19 +81,55 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    fun addHeaders(operation: RequestPairs<Any?>.() -> Unit) {
+        RequestPairs<Any?>().apply(operation).forEach {
+            request.addHeader(it.key, it.value.toString())
+        }
+    }
+
+    fun addHeaders(headers: Map<String, Any?>) {
+        headers.forEach {
+            request.addHeader(it.key, it.value.toString())
+        }
+    }
+
+    fun addHeaders(vararg headers: Pair<String, Any?>) {
+        headers.forEach {
+            request.addHeader(it.first, it.second.toString())
+        }
+    }
+
     fun queryParameters(operation: RequestPairs<Any?>.() -> Unit) {
         RequestPairs<Any?>().apply(operation).forEach {
-            request.addQueryParameter(it.key, it.value.toString())
+            request.setQueryParameter(it.key, it.value.toString())
         }
     }
 
     fun queryParameters(queryParameters: Map<String, Any?>) {
         queryParameters.forEach {
-            request.addQueryParameter(it.key, it.value.toString())
+            request.setQueryParameter(it.key, it.value.toString())
         }
     }
 
     fun queryParameters(vararg queryParameters: Pair<String, Any?>) {
+        queryParameters.forEach {
+            request.setQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun addQueryParameters(operation: RequestPairs<Any?>.() -> Unit) {
+        RequestPairs<Any?>().apply(operation).forEach {
+            request.addQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addQueryParameters(queryParameters: Map<String, Any?>) {
+        queryParameters.forEach {
+            request.addQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) {
         queryParameters.forEach {
             request.addQueryParameter(it.first, it.second.toString())
         }
@@ -86,17 +137,35 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
 
     fun encodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) {
         RequestPairs<Any?>().apply(operation).forEach {
-            request.addEncodedQueryParameter(it.key, it.value.toString())
+            request.setEncodedQueryParameter(it.key, it.value.toString())
         }
     }
 
     fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) {
         encodedQueryParameters.forEach {
-            request.addEncodedQueryParameter(it.key, it.value.toString())
+            request.setEncodedQueryParameter(it.key, it.value.toString())
         }
     }
 
     fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) {
+        encodedQueryParameters.forEach {
+            request.setEncodedQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) {
+        RequestPairs<Any?>().apply(operation).forEach {
+            request.addEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) {
+        encodedQueryParameters.forEach {
+            request.addEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) {
         encodedQueryParameters.forEach {
             request.addEncodedQueryParameter(it.first, it.second.toString())
         }
@@ -171,6 +240,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         for (action in progressActions) {
             action(bytes, totalBytes)
         }
+
     }
 
     protected fun callOnSuccess(result: T) {

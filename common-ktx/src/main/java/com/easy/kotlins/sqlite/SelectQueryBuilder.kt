@@ -5,7 +5,7 @@ package com.easy.kotlins.sqlite.db
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 
-abstract class SelectQueryBuilder(private val tableName: String) {
+abstract class SelectQueryBuilder(private val table: String) {
 
     private var columnsApplied = false
     private val columns: MutableList<String> by lazy { mutableListOf() }
@@ -24,61 +24,6 @@ abstract class SelectQueryBuilder(private val tableName: String) {
     private var useNativeWhereCause = false
     private var simpleWhereCause: String? = null
     private var nativeWhereArgs: Array<out String>? = null
-
-    fun <T : Any> parseSingle(parser: RowParser<T>): T = exec {
-        parseSingle(parser)
-    }
-
-    fun <T : Any> parseOpt(parser: RowParser<T>): T? = exec {
-        parseOpt(parser)
-    }
-
-    fun <T : Any> parseList(parser: RowParser<T>): List<T> = exec {
-        parseList(parser)
-    }
-
-    fun <T : Any> parseSingle(parser: MapRowParser<T>): T = exec {
-        parseSingle(parser)
-    }
-
-    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = exec {
-        parseOpt(parser)
-    }
-
-    fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = exec {
-        parseList(parser)
-    }
-
-    fun <T> exec(action: Cursor.() -> T): T {
-        val finalWhereCause = if (whereCauseApplied) simpleWhereCause else null
-        val finalWhereArgs = if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
-        val finalColumns = if (columnsApplied) columns.toTypedArray() else null
-        val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
-        val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null
-        return execQuery(
-            distinct,
-            tableName,
-            finalColumns,
-            finalWhereCause,
-            finalWhereArgs,
-            finalGroupBy,
-            having,
-            finalOrderBy,
-            limit
-        ).use(action)
-    }
-
-    protected abstract fun execQuery(
-        distinct: Boolean,
-        tableName: String,
-        columns: Array<String>?,
-        selection: String?,
-        selectionArgs: Array<out String>?,
-        groupBy: String?,
-        having: String?,
-        orderBy: String?,
-        limit: String?
-    ): Cursor
 
     fun distinct(): SelectQueryBuilder {
         this.distinct = true
@@ -177,16 +122,71 @@ abstract class SelectQueryBuilder(private val tableName: String) {
         return this
     }
 
+    fun <T : Any> parseSingle(parser: RowParser<T>): T = execute {
+        parseSingle(parser)
+    }
+
+    fun <T : Any> parseOpt(parser: RowParser<T>): T? = execute {
+        parseOpt(parser)
+    }
+
+    fun <T : Any> parseList(parser: RowParser<T>): List<T> = execute {
+        parseList(parser)
+    }
+
+    fun <T : Any> parseSingle(parser: MapRowParser<T>): T = execute {
+        parseSingle(parser)
+    }
+
+    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = execute {
+        parseOpt(parser)
+    }
+
+    fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = execute {
+        parseList(parser)
+    }
+
+    fun <T> execute(action: Cursor.() -> T): T {
+        val finalWhereCause = if (whereCauseApplied) simpleWhereCause else null
+        val finalWhereArgs = if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
+        val finalColumns = if (columnsApplied) columns.toTypedArray() else null
+        val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
+        val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null
+        return query(
+            distinct,
+            table,
+            finalColumns,
+            finalWhereCause,
+            finalWhereArgs,
+            finalGroupBy,
+            having,
+            finalOrderBy,
+            limit
+        ).use(action)
+    }
+
+    protected abstract fun query(
+        distinct: Boolean,
+        table: String,
+        columns: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+        groupBy: String?,
+        having: String?,
+        orderBy: String?,
+        limit: String?
+    ): Cursor
+
 }
 
 class AndroidDatabaseSelectQueryBuilder(
     private val db: SQLiteDatabase,
-    tableName: String
-) : SelectQueryBuilder(tableName) {
+    table: String
+) : SelectQueryBuilder(table) {
 
-    override fun execQuery(
+    override fun query(
         distinct: Boolean,
-        tableName: String,
+        table: String,
         columns: Array<String>?,
         selection: String?,
         selectionArgs: Array<out String>?,
@@ -197,7 +197,7 @@ class AndroidDatabaseSelectQueryBuilder(
     ): Cursor {
         return db.query(
             distinct,
-            tableName,
+            table,
             columns,
             selection,
             selectionArgs,

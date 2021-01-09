@@ -36,9 +36,9 @@ class OkDownloadRequest : OkRequest<File>() {
         return responseMapper.map(response)
     }
 
-    override fun mapError(exception: Exception, errorMapper: OkMapper<Exception, File>?): File {
+    override fun mapError(error: Exception, errorMapper: OkMapper<Exception, File>?): File {
         errorMapper ?: throw NullPointerException("ErrorMapper is null")
-        return errorMapper.map(exception)
+        return errorMapper.map(error)
     }
 
 }

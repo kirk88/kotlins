@@ -11,7 +11,7 @@ interface OkManagerScope {
 
     fun remove(manager: OkManager<*, *>): Boolean
 
-    fun cancelAll()
+    fun clear()
 
     fun size(): Int
 }

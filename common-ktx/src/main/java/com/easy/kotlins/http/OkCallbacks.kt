@@ -49,33 +49,33 @@ internal object OkCallbacks {
     }
 
     fun <T> onSuccess(callback: OkCallback<T>?, result: T) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, result as Any))
             .sendToTarget()
     }
 
     fun onError(callback: OkCallback<*>?, error: Exception) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>?) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
     }
 
     fun onComplete(callback: OkCallback<*>?) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
     }
 
     fun onCancel(callback: OkCallback<*>?) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
     }
 
     fun onProgress(callback: OkCallback<*>?, bytes: Long, totalBytes: Long) {
-        if(callback == null) return
+        if (callback == null) return
         HANDLER.obtainMessage(
             MSG_WHAT_ON_UPDATE,
             MessageBody(callback, bytes, totalBytes)
@@ -135,6 +135,6 @@ internal object OkCallbacks {
     }
 
     private class MessageBody(val callback: OkCallback<*>, vararg args: Any) {
-        val args: Array<Any> = arrayOf(args)
+        val args: Array<Any> = arrayOf(*args)
     }
 }

@@ -3,7 +3,7 @@
 package com.easy.kotlins.http
 
 import com.easy.kotlins.http.extension.OkExtension
-import com.easy.kotlins.http.extension.OkRestExtension
+import com.easy.kotlins.http.extension.OkCommonExtension
 import okhttp3.*
 import java.io.File
 
@@ -12,32 +12,64 @@ import java.io.File
  */
 class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
 
+    private var formBuilderApplied = false
+    private var formBuilder: FormBody.Builder? = null
+        get() = field ?: FormBody.Builder().also { field = it }
+        set(value) {
+            field = value
+            formBuilderApplied = true
+            multipartBuilderApplied = false
+        }
+
+    private var multipartBuilderApplied = false
+    private var multipartBuilder: MultipartBody.Builder? = null
+        get() = field ?: MultipartBody.Builder().also { field = it }
+        set(value) {
+            field = value
+            formBuilderApplied = false
+            multipartBuilderApplied = true
+        }
+
     private var requestBody: RequestBody? = null
         set(value) {
             field = value
-            formBuilder = null
-            multiBuilder = null
+            formBuilderApplied = false
+            multipartBuilderApplied = false
         }
 
-    private var formBuilder: FormBody.Builder? = null
-        get() = if (field == null) {
-            FormBody.Builder().also {
-                field = it
-                multiBuilder = null
-                requestBody = null
-            }
-        } else field
-
-    private var multiBuilder: MultipartBody.Builder? = null
-        get() = if (field == null) {
-            MultipartBody.Builder().also {
-                field = it
-                formBuilder = null
-                requestBody = null
-            }
-        } else field
-
     private var extension: OkExtension? = null
+
+    fun addFormParameter(key: String, value: String) {
+        formBuilder?.add(key, value)
+    }
+
+    fun addEncodedFormParameter(key: String, value: String) {
+        formBuilder?.addEncoded(key, value)
+    }
+
+    fun addFormDataPart(name: String, value: String) {
+        multipartBuilder?.addFormDataPart(name, value)
+    }
+
+    fun addFormDataPart(name: String, filename: String?, body: RequestBody) {
+        multipartBuilder?.addFormDataPart(name, filename, body)
+    }
+
+    fun addFormDataPart(name: String, mediaType: MediaType?, file: File) {
+        multipartBuilder?.addFormDataPart(
+            name,
+            file.name,
+            RequestBody.create(mediaType, file)
+        )
+    }
+
+    fun addPart(part: MultipartBody.Part) {
+        multipartBuilder?.addPart(part)
+    }
+
+    fun addPart(body: RequestBody) {
+        multipartBuilder?.addPart(body)
+    }
 
     fun body(mediaType: MediaType?, body: String) {
         requestBody = RequestBody.create(mediaType, body)
@@ -51,50 +83,21 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
         requestBody = body
     }
 
-    fun addFormParameter(key: String, value: String) {
-        formBuilder?.add(key, value)
-    }
-
-    fun addEncodedFormParameter(key: String, value: String) {
-        formBuilder?.addEncoded(key, value)
-    }
-
-    fun addPart(part: MultipartBody.Part) {
-        multiBuilder?.addPart(part)
-    }
-
-    fun addPart(body: RequestBody) {
-        multiBuilder?.addPart(body)
-    }
-
-    fun addFormDataPart(name: String, value: String) {
-        multiBuilder?.addFormDataPart(name, value)
-    }
-
-    fun addFormDataPart(name: String, filename: String?, body: RequestBody) {
-        multiBuilder?.addFormDataPart(name, filename, body)
-    }
-
-    fun addFormDataPart(name: String, type: MediaType?, file: File) {
-        multiBuilder?.addFormDataPart(
-            name,
-            file.name,
-            RequestBody.create(type, file)
-        )
-    }
-
     fun extension(extension: OkExtension) {
         this.extension = extension
     }
 
     override fun createRealRequest(): Request {
-        val body = OkRequestBody(
-            requestBody ?: multiBuilder?.build() ?: formBuilder?.build() ?: FormBody.Builder()
-                .build()
-        ) { bytes, totalBytes ->
-            callOnProgress(bytes, totalBytes)
+        val body: RequestBody by lazy {
+            val formBody = if (formBuilderApplied) formBuilder?.build() else null
+            val multipartBody = if (multipartBuilderApplied) multipartBuilder?.build() else null
+            OkRequestBody(
+                requestBody ?: formBody ?: multipartBody ?: FormBody.Builder().build()
+            ) { bytes, totalBytes ->
+                callOnProgress(bytes, totalBytes)
+            }
         }
-        val request = requestBuilder.url(urlBuilder.build()).let {
+        val request = requestBuilder.url(urlBuilder.build()).also {
             when (method) {
                 OkRequestMethod.GET -> it.get()
                 OkRequestMethod.POST -> it.post(body)
@@ -107,13 +110,13 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
         return extension?.shouldInterceptRequest(request) ?: request
     }
 
-    override fun onFailure(exception: Exception): Boolean {
-        if ((extension as? OkRestExtension)?.onError(exception) == true) return true
+    override fun onFailure(error: Exception): Boolean {
+        if ((extension as? OkCommonExtension)?.onError(error) == true) return true
         return false
     }
 
     override fun onResponse(response: Response): Boolean {
-        if ((extension as? OkRestExtension)?.onResponse(response) == true) return true
+        if ((extension as? OkCommonExtension)?.onResponse(response) == true) return true
         return false
     }
 

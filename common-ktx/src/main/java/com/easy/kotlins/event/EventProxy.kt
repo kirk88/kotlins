@@ -22,8 +22,12 @@ class EventProxy {
         }
     }
 
-    fun observe(owner: LifecycleOwner, observer: Observer<Event>) {
-        liveEvent.observe(owner, observer)
+    fun observe(owner: LifecycleOwner, observer: (Event) -> Unit) {
+        liveEvent.observe(owner) { if (it != null) observer(it) }
+    }
+
+    fun observe(owner: EventObservableOwner) {
+        liveEvent.observe(owner) { if (it != null) owner.onEventChanged(it) }
     }
 
     companion object {
@@ -60,4 +64,10 @@ internal class SingleLiveEvent : MutableLiveEventData<Event>() {
         pending.set(true)
         super.setValue(value)
     }
+}
+
+interface EventObservableOwner : LifecycleOwner {
+
+    fun onEventChanged(event: Event)
+
 }

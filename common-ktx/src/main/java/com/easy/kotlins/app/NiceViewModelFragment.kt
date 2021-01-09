@@ -3,10 +3,11 @@ package com.easy.kotlins.app
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObserver
+import com.easy.kotlins.event.EventObservableOwner
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelController
+import com.easy.kotlins.viewmodel.ViewModelEventObservableOwner
 import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.LoadingView
@@ -17,7 +18,8 @@ import com.easy.kotlins.widget.RefreshView
  * Create by LiZhanPing on 2020/9/18
  */
 abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layoutResId),
-    EventObserver, ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
+    ViewModelEventObservableOwner,
+    ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val refreshView: RefreshView? = null
 
@@ -31,7 +33,7 @@ abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layout
     }
 
     final override fun onEventChanged(event: Event) {
-        if ((activity as? NiceViewModelActivity<*>)?.onInterceptViewModelEvent(event) == true) {
+        if ((activity as? ViewModelEventObservableOwner)?.onInterceptViewModelEvent(event) == true) {
             return
         }
 
@@ -42,11 +44,11 @@ abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layout
         callEvent(event)
     }
 
-    open fun onInterceptViewModelEvent(event: Event): Boolean {
+    override fun onInterceptViewModelEvent(event: Event): Boolean {
         return false
     }
 
-    open fun onViewModelEvent(event: Event): Boolean {
+    override fun onViewModelEvent(event: Event): Boolean {
         return false
     }
 

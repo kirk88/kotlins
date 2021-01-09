@@ -6,7 +6,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 
 abstract class UpdateQueryBuilder(
-    private val tableName: String,
+    private val table: String,
     private val values: Array<out Pair<String, Any?>>
 ) {
 
@@ -51,12 +51,12 @@ abstract class UpdateQueryBuilder(
         return this
     }
 
-    fun exec(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
+    fun execute(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
         val finalSelection = if (whereCauseApplied) simpleWhereCause else null
         val finalSelectionArgs =
             if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
-        return execUpdate(
-            tableName,
+        return update(
+            table,
             values.toContentValues(),
             finalSelection,
             finalSelectionArgs,
@@ -64,7 +64,7 @@ abstract class UpdateQueryBuilder(
         )
     }
 
-    protected abstract fun execUpdate(
+    protected abstract fun update(
         table: String,
         values: ContentValues,
         whereClause: String?,
@@ -79,7 +79,7 @@ class AndroidDatabaseUpdateQueryBuilder(
     values: Array<out Pair<String, Any?>>
 ) : UpdateQueryBuilder(table, values) {
 
-    override fun execUpdate(
+    override fun update(
         table: String,
         values: ContentValues,
         whereClause: String?,

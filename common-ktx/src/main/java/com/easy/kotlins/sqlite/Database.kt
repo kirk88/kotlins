@@ -12,52 +12,182 @@ import java.util.regex.Pattern
 
 enum class SqlOrderDirection { ASC, DESC }
 
-fun SQLiteDatabase.insert(tableName: String, vararg values: Pair<String, Any?>): Long {
-    return insert(tableName, null, values.toContentValues())
+
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param values this array contains the initial column values for the row,
+ * The [Pair.first]  should be the column names and the  [Pair.second] the
+ * column values
+ */
+fun SQLiteDatabase.insert(table: String, vararg values: Pair<String, Any?>): Long {
+    return insert(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.insert(tableName: String, valuesFrom: Any): Long {
-    return insert(tableName, values = valuesFrom.toPairs())
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
+ */
+fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
+    return insert(table, values = valuesFrom.toPairs())
 }
 
-fun SQLiteDatabase.insertOrThrow(tableName: String, vararg values: Pair<String, Any?>): Long {
-    return insertOrThrow(tableName, null, values.toContentValues())
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param values this array contains the initial column values for the row,
+ * The [Pair.first]  should be the column names and the  [Pair.second] the
+ * column values
+ *
+ * @throws [android.database.SQLException]
+ */
+fun SQLiteDatabase.insertOrThrow(table: String, vararg values: Pair<String, Any?>): Long {
+    return insertOrThrow(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.insertOrThrow(tableName: String, valuesFrom: Any): Long {
-    return insertOrThrow(tableName, values = valuesFrom.toPairs())
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
+ *
+ * @throws [android.database.SQLException]
+ */
+fun SQLiteDatabase.insertOrThrow(table: String, valuesFrom: Any): Long {
+    return insertOrThrow(table, values = valuesFrom.toPairs())
 }
 
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param conflictAlgorithm for insert conflict resolver
+ *
+ * @param values this array contains the initial column values for the row,
+ * The [Pair.first]  should be the column names and the  [Pair.second] the
+ * column values
+ */
 fun SQLiteDatabase.insertWithOnConflict(
-    tableName: String,
+    table: String,
     conflictAlgorithm: Int,
     vararg values: Pair<String, Any?>
 ): Long {
-    return insertWithOnConflict(tableName, null, values.toContentValues(), conflictAlgorithm)
+    return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
 
+/**
+ * Convenience method for inserting a row into the database.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param conflictAlgorithm for insert conflict resolver
+ *
+ * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
+ */
 fun SQLiteDatabase.insertWithOnConflict(
-    tableName: String,
+    table: String,
     conflictAlgorithm: Int,
     valuesFrom: Any
 ): Long {
-    return insertWithOnConflict(tableName, conflictAlgorithm, values = valuesFrom.toPairs())
+    return insertWithOnConflict(table, conflictAlgorithm, values = valuesFrom.toPairs())
 }
 
-fun SQLiteDatabase.replace(tableName: String, vararg values: Pair<String, Any?>): Long {
-    return replace(tableName, null, values.toContentValues())
+/**
+ * Convenience method for replacing a row in the database.
+ * Inserts a new row if a row does not already exist.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param values this array contains the initial column values for the row,
+ * The [Pair.first]  should be the column names and the  [Pair.second] the
+ * column values
+ */
+fun SQLiteDatabase.replace(table: String, vararg values: Pair<String, Any?>): Long {
+    return replace(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.replace(tableName: String, valuesFrom: Any): Long {
-    return replace(tableName, values = valuesFrom.toPairs())
+/**
+ * Convenience method for replacing a row in the database.
+ * Inserts a new row if a row does not already exist.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
+ */
+fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
+    return replace(table, values = valuesFrom.toPairs())
 }
 
-fun SQLiteDatabase.replaceOrThrow(tableName: String, vararg values: Pair<String, Any?>): Long {
-    return replaceOrThrow(tableName, null, values.toContentValues())
+
+/**
+ * Convenience method for replacing a row in the database.
+ * Inserts a new row if a row does not already exist.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param values this array contains the initial column values for the row,
+ * The [Pair.first]  should be the column names and the  [Pair.second] the
+ * column values
+ *
+ * @throws [android.database.SQLException]
+ */
+fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: Pair<String, Any?>): Long {
+    return replaceOrThrow(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.replaceOrThrow(tableName: String, valuesFrom: Any): Long {
-    return replaceOrThrow(tableName, values = valuesFrom.toPairs())
+/**
+ * Convenience method for replacing a row in the database.
+ * Inserts a new row if a row does not already exist.
+ *
+ * @param table the table to insert the row into
+ *
+ * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
+ *
+ * @throws [android.database.SQLException]
+ */
+fun SQLiteDatabase.replaceOrThrow(table: String, valuesFrom: Any): Long {
+    return replaceOrThrow(table, values = valuesFrom.toPairs())
+}
+
+fun SQLiteDatabase.select(table: String): SelectQueryBuilder {
+    return AndroidDatabaseSelectQueryBuilder(this, table)
+}
+
+fun SQLiteDatabase.select(table: String, vararg columns: String): SelectQueryBuilder {
+    val builder = AndroidDatabaseSelectQueryBuilder(this, table)
+    builder.columns(*columns)
+    return builder
+}
+
+fun SQLiteDatabase.update(
+    table: String,
+    vararg values: Pair<String, Any?>
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, table, values)
+}
+
+fun SQLiteDatabase.update(
+    table: String,
+    valuesFrom: Any
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, table, valuesFrom.toPairs())
+}
+
+fun SQLiteDatabase.delete(
+    table: String,
+    whereClause: String = "",
+    vararg whereArgs: Pair<String, Any>
+): Int {
+    return delete(table, applyArguments(whereClause, *whereArgs), null)
 }
 
 fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
@@ -72,44 +202,12 @@ fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
     return result
 }
 
-fun SQLiteDatabase.select(tableName: String): SelectQueryBuilder {
-    return AndroidDatabaseSelectQueryBuilder(this, tableName)
-}
-
-fun SQLiteDatabase.select(tableName: String, vararg columns: String): SelectQueryBuilder {
-    val builder = AndroidDatabaseSelectQueryBuilder(this, tableName)
-    builder.columns(*columns)
-    return builder
-}
-
-fun SQLiteDatabase.update(
-    tableName: String,
-    vararg values: Pair<String, Any?>
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, tableName, values)
-}
-
-fun SQLiteDatabase.update(
-    tableName: String,
-    valuesFrom: Any
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, tableName, valuesFrom.toPairs())
-}
-
-fun SQLiteDatabase.delete(
-    tableName: String,
-    whereClause: String = "",
-    vararg whereArgs: Pair<String, Any>
-): Int {
-    return delete(tableName, applyArguments(whereClause, *whereArgs), null)
-}
-
 fun SQLiteDatabase.createTable(
-    tableName: String,
+    table: String,
     ifNotExists: Boolean = false,
     vararg columns: Pair<String, SqlType>
 ) {
-    val escapedTableName = tableName.replace("`", "``")
+    val escapedTableName = table.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     execSQL(
         columns.joinToString(
@@ -122,21 +220,21 @@ fun SQLiteDatabase.createTable(
     )
 }
 
-fun SQLiteDatabase.dropTable(tableName: String, ifExists: Boolean = false) {
-    val escapedTableName = tableName.replace("`", "``")
+fun SQLiteDatabase.dropTable(table: String, ifExists: Boolean = false) {
+    val escapedTableName = table.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
     execSQL("DROP TABLE $ifExistsText `$escapedTableName`;")
 }
 
 fun SQLiteDatabase.createIndex(
     indexName: String,
-    tableName: String,
+    table: String,
     unique: Boolean = false,
     ifNotExists: Boolean = false,
     vararg columns: String
 ) {
     val escapedIndexName = indexName.replace("`", "``")
-    val escapedTableName = tableName.replace("`", "``")
+    val escapedTableName = table.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     val uniqueText = if (unique) "UNIQUE" else ""
     execSQL(
@@ -155,13 +253,13 @@ fun SQLiteDatabase.dropIndex(indexName: String, ifExists: Boolean = false) {
 }
 
 fun SQLiteDatabase.createColumn(
-    tableName: String,
+    table: String,
     ifNotExists: Boolean = false,
     column: Pair<String, SqlType>
 ) {
-    val escapedTableName = tableName.replace("`", "``")
+    val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
-        rawQuery("SELECT * FROM $tableName LIMIT 0", null).use {
+        rawQuery("SELECT * FROM $table LIMIT 0", null).use {
             it.getColumnIndex(column.first) != -1
         }
     } else {
@@ -173,13 +271,13 @@ fun SQLiteDatabase.createColumn(
 }
 
 fun SQLiteDatabase.createColumns(
-    tableName: String,
+    table: String,
     ifNotExists: Boolean = false,
     vararg columns: Pair<String, SqlType>
 ) {
     transaction {
         for (column in columns) {
-            createColumn(tableName, ifNotExists, column)
+            createColumn(table, ifNotExists, column)
         }
     }
 }
@@ -236,8 +334,10 @@ internal fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
     return values
 }
 
-@Suppress("UNCHECKED_CAST")
 internal fun Any.toPairs(): Array<Pair<String, Any?>> {
+    if (this is Map<*, *>) {
+        return this.map { it.key.toString() to it.value }.toTypedArray()
+    }
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
     }

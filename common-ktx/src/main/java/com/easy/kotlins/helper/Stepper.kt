@@ -58,7 +58,7 @@ class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
 
             try {
                 task()
-            } catch (exception: Throwable) {
+            } catch (exception: Exception) {
                 val errorHandler = coroutineContext[CoroutineExceptionHandler] ?: throw exception
                 errorHandler.handleException(coroutineContext, exception)
             }

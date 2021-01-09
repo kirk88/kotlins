@@ -16,11 +16,9 @@ internal class FieldWrapper(private val field: Field) {
             ).fromValue(fieldValue) else fieldValue
         } else {
             field.name to if (field.type == java.lang.Boolean.TYPE || field.type == java.lang.Boolean::class.java)
-                (fieldValue as Boolean? ?: false).opt(1, 0)
-            else fieldValue
+                (fieldValue as Boolean? ?: false).opt(1, 0) else fieldValue
         })
     }
-
 
 }
 

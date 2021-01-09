@@ -86,14 +86,15 @@ inline fun <reified T : Fragment> FragmentManager.replaceNow(@IdRes id: Int, var
 
 inline fun <reified T : Fragment> FragmentManager.show(@IdRes id: Int, tag: String? = null, allowingStateLoss: Boolean = false, args: Bundle.() -> Unit = { }): Fragment {
     return beginTransaction().let {
-        val fragmentTag = tag ?: T::class.simpleName
+        val javaClass = T::class.java
+        val fragmentTag = tag ?: javaClass.canonicalName
 
-        val fragment = findFragmentByTag(fragmentTag) ?: T::class.java.newInstance().apply {
+        val fragment = findFragmentByTag(fragmentTag) ?: javaClass.newInstance().apply {
             arguments = Bundle().apply(args)
         }
 
         for (existedFragment in fragments) {
-            if (existedFragment.id != id) continue
+            if (existedFragment == fragment) continue
 
             it.hide(existedFragment)
         }
@@ -117,12 +118,15 @@ inline fun <reified T : Fragment> FragmentManager.show(@IdRes id: Int, tag: Stri
  * hide fragment which showed by @see [show]
  */
 inline fun <reified T : Fragment> FragmentManager.hide(@IdRes id: Int, tag: String? = null, allowingStateLoss: Boolean = false): Fragment? {
-    for (existedFragment in fragments) {
-        if (existedFragment.id == id) break
-        return null
-    }
-    val fragment = findFragmentByTag(tag ?: T::class.java.name) ?: return null
+    val javaClass = T::class.java
+    val fragmentTag = tag ?: javaClass.canonicalName
+
+    val fragment = findFragmentByTag(tag ?: fragmentTag) ?: javaClass.newInstance()
     return beginTransaction().let {
+
+        if (!fragment.isAdded) {
+            it.add(id, fragment, fragmentTag)
+        }
 
         it.hide(fragment)
 

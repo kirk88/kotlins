@@ -22,29 +22,26 @@ internal class OkRequestBody(
 
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
-        if (bufferedSink == null) {
-            bufferedSink = Okio.buffer(sink(sink))
-        }
-        body.writeTo(bufferedSink!!)
-        bufferedSink!!.flush()
+        val wrappedSink = bufferedSink ?: Okio.buffer(SinkWrapper(sink)).also { bufferedSink = it }
+        body.writeTo(wrappedSink)
+        wrappedSink.flush()
     }
 
-    private fun sink(sink: Sink): Sink {
-        return object : ForwardingSink(sink) {
-            var wroteBytes = 0L
+    private inner class SinkWrapper(sink: Sink) : ForwardingSink(sink) {
 
-            var totalBytes = 0L
+        var wroteBytes = 0L
 
-            @Throws(IOException::class)
-            override fun write(source: Buffer, byteCount: Long) {
-                super.write(source, byteCount)
-                if (totalBytes == 0L) {
-                    totalBytes = contentLength()
-                }
-                wroteBytes += byteCount
-                action(wroteBytes, totalBytes)
+        var totalBytes = 0L
+
+        @Throws(IOException::class)
+        override fun write(source: Buffer, byteCount: Long) {
+            super.write(source, byteCount)
+            if (totalBytes == 0L) {
+                totalBytes = contentLength()
             }
+            wroteBytes += byteCount
+            action(wroteBytes, totalBytes)
         }
-    }
 
+    }
 }
