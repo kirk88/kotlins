@@ -87,8 +87,8 @@ fun <T> Intent.getLargeExtra(key: String, defaultValue: () -> T): T {
 
 fun largeExtraOf(value: Any?): LargeExtra = LargeExtra(value)
 
-class LargeExtra(val value: Any?) {
-    val name: String by lazy { System.currentTimeMillis().toString() }
+data class LargeExtra(val value: Any?) {
+    val name: String = System.nanoTime().toString()
 }
 
 private object LargeExtrasBag {
