@@ -170,17 +170,21 @@ fun CharSequence.withSpan(
 }
 
 fun String.justify(ems: Int): SpannableStringBuilder {
-    return asSpannableBuilder().apply {
-        val chars: CharArray = toCharArray()
-        if (chars.size >= ems || chars.size <= 1) {
-            return@apply
-        }
+    val builder = SpannableStringBuilder()
+    val chars = this.toCharArray()
+    if (chars.size >= ems || chars.size <= 1) {
+        return builder.append(this)
+    }
+    return builder.apply {
         val size = chars.size
         val scale = (ems - size).toFloat() / (size - 1)
-        for (index in 1 until size) {
+        for (index in 0 until size) {
+            append(chars[index])
+            if (index == size - 1) break
+
             val blank = SpannableString("　")
             blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            insert(index, blank)
+            append(blank)
         }
     }
 }
