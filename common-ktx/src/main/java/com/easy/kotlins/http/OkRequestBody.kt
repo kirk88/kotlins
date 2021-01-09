@@ -29,18 +29,15 @@ internal class OkRequestBody(
 
     private inner class SinkWrapper(sink: Sink) : ForwardingSink(sink) {
 
-        var wroteBytes = 0L
+        val totalBytes = contentLength()
 
-        var totalBytes = 0L
+        var writtenBytes = 0L
 
         @Throws(IOException::class)
         override fun write(source: Buffer, byteCount: Long) {
             super.write(source, byteCount)
-            if (totalBytes == 0L) {
-                totalBytes = contentLength()
-            }
-            wroteBytes += byteCount
-            action(wroteBytes, totalBytes)
+            writtenBytes += byteCount
+            action(writtenBytes, totalBytes)
         }
 
     }
