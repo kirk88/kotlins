@@ -11,7 +11,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.ScaleXSpan
 import androidx.annotation.ColorInt
-import com.google.gson.JsonParser
 
 /**
  * Create by LiZhanPing on 2020/8/27
@@ -52,11 +51,12 @@ fun CharSequence.heightLight(
 fun CharSequence.insertImage(
     where: Int,
     drawable: Drawable,
-    textSize: Int = 0,
+    width: Int = 0,
+    height: Int = 0,
     prefix: String = "",
     postfix: String = ""
 ): SpannableStringBuilder {
-    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
         setSpan(
@@ -70,11 +70,12 @@ fun CharSequence.insertImage(
 
 fun CharSequence.appendImage(
     drawable: Drawable,
-    textSize: Int = 0,
+    width: Int = 0,
+    height: Int = 0,
     prefix: String = "",
     postfix: String = ""
 ): SpannableStringBuilder {
-    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
         setSpan(
@@ -189,19 +190,13 @@ fun String.justify(ems: Int): SpannableStringBuilder {
     }
 }
 
-val String.isJsonArray: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonArray ?: false
-
-val String.isJsonObject: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonObject ?: false
-
-inline fun <R: CharSequence, C: R> C?.ifNull(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R =
     this ?: defaultValue()
 
-inline fun <R: CharSequence, C: R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
     if (this.isNullOrEmpty()) defaultValue() else this
 
-inline fun <R: CharSequence, C: R> C?.ifNullOrBlack(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R =
     if (this.isNullOrBlank()) defaultValue() else this
 
 fun CharSequence.splitSkipBlank(
@@ -209,7 +204,11 @@ fun CharSequence.splitSkipBlank(
     ignoreCase: Boolean = false,
     limit: Int = 0
 ): List<String> {
-    return split(ignoreCase = ignoreCase, limit = limit, delimiters = delimiters).filter { it.isNotBlank() }
+    return split(
+        ignoreCase = ignoreCase,
+        limit = limit,
+        delimiters = delimiters
+    ).filter { it.isNotBlank() }
 }
 
 fun <K, V> Map<K, V>.joinKeysToString(
