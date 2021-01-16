@@ -12,8 +12,7 @@ abstract class OkRequest<T> {
 
     private var httpUrl: HttpUrl? = null
         set(value) {
-            field = value
-            value ?: return
+            field = requireNotNull(value) { "Url is null" }
             urlBuilder.scheme(value.scheme())
                 .encodedUsername(value.encodedUsername())
                 .encodedPassword(value.encodedPassword())
