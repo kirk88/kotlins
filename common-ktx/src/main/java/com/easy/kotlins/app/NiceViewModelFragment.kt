@@ -1,9 +1,10 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.app
 
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableOwner
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelController
@@ -37,22 +38,18 @@ abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layout
             return
         }
 
-        if (onViewModelEvent(event)) {
+        if (dispatchViewModelEvent(event)) {
             return
         }
 
-        callEvent(event)
+        onViewModelEvent(event)
     }
 
     override fun onInterceptViewModelEvent(event: Event): Boolean {
         return false
     }
 
-    override fun onViewModelEvent(event: Event): Boolean {
-        return false
-    }
-
-    private fun callEvent(event: Event) {
+    override fun dispatchViewModelEvent(event: Event): Boolean {
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
@@ -77,11 +74,15 @@ abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layout
             else -> event.message?.let { toast(it) }
         }
 
-        val intent = event.getIntent() ?: return
+        val intent = event.getIntent() ?: return false
         if (event.what == Status.NONE) {
             startActivity(intent)
         } else {
             startActivityForResult(intent, event.what)
         }
+        return true
+    }
+
+    override fun onViewModelEvent(event: Event) {
     }
 }

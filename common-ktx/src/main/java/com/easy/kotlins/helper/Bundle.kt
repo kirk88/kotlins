@@ -44,16 +44,16 @@ fun Bundle.toMap(): Map<String, Any?> = run {
 }
 
 fun Bundle.putLargeExtra(key: String, value: LargeExtra) {
-    putString(key, LargeExtrasBag.set(value))
+    putString(key, LargeExtras.put(value))
 }
 
 fun Bundle.putLargeExtra(key: String, value: Any?) {
-    putString(key, LargeExtrasBag.set(LargeExtra(value)))
+    putString(key, LargeExtras.put(LargeExtra(value)))
 }
 
 @Suppress("UNCHECKED_CAST")
 fun <T> Bundle.getLargeExtra(key: String): T? {
-    return getString(key)?.let { dataKey -> LargeExtrasBag.get(dataKey) as? T? }
+    return getString(key)?.let { name -> LargeExtras.get(name) as T? }
 }
 
 fun <T> Bundle.getLargeExtra(key: String, defaultValue: T): T {
@@ -65,16 +65,16 @@ fun <T> Bundle.getLargeExtra(key: String, defaultValue: () -> T): T {
 }
 
 fun Intent.putLargeExtra(key: String, value: LargeExtra) {
-    putExtra(key, LargeExtrasBag.set(LargeExtra(value)))
+    putExtra(key, LargeExtras.put(LargeExtra(value)))
 }
 
 fun Intent.putLargeExtra(key: String, value: Any?) {
-    putExtra(key, LargeExtrasBag.set(LargeExtra(value)))
+    putExtra(key, LargeExtras.put(LargeExtra(value)))
 }
 
 @Suppress("UNCHECKED_CAST")
 fun <T> Intent.getLargeExtra(key: String): T? {
-    return getStringExtra(key)?.let { dataKey -> LargeExtrasBag.get(dataKey) as? T? }
+    return getStringExtra(key)?.let { name -> LargeExtras.get(name) as T? }
 }
 
 fun <T> Intent.getLargeExtra(key: String, defaultValue: T): T {
@@ -91,18 +91,18 @@ data class LargeExtra(val value: Any?) {
     val name: String = System.nanoTime().toString()
 }
 
-private object LargeExtrasBag {
+private object LargeExtras {
 
     private val dataMap: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
-    fun set(extra: LargeExtra): String {
+    fun put(extra: LargeExtra): String {
         return extra.name.also {
             dataMap[it] = extra.value
         }
     }
 
-    fun get(key: String): Any? {
-        return dataMap.remove(key)
+    fun get(name: String): Any? {
+        return dataMap.remove(name)
     }
 
 }

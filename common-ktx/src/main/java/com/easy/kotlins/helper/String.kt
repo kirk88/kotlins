@@ -5,13 +5,13 @@ package com.easy.kotlins.helper
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.text.*
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.ScaleXSpan
 import androidx.annotation.ColorInt
-import com.google.gson.JsonParser
 
 /**
  * Create by LiZhanPing on 2020/8/27
@@ -52,11 +52,12 @@ fun CharSequence.heightLight(
 fun CharSequence.insertImage(
     where: Int,
     drawable: Drawable,
-    textSize: Int = 0,
+    width: Int = 0,
+    height: Int = 0,
     prefix: String = "",
     postfix: String = ""
 ): SpannableStringBuilder {
-    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
         setSpan(
@@ -70,11 +71,12 @@ fun CharSequence.insertImage(
 
 fun CharSequence.appendImage(
     drawable: Drawable,
-    textSize: Int = 0,
+    width: Int = 0,
+    height: Int = 0,
     prefix: String = "",
     postfix: String = ""
 ): SpannableStringBuilder {
-    if (textSize > 0) drawable.setBounds(0, 0, textSize, textSize)
+    if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
         setSpan(
@@ -100,12 +102,34 @@ internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
         paint: Paint
     ) {
         val d = drawable
-        val fm = paint.fontMetricsInt
-        val transY = (y + fm.descent + y + fm.ascent) / 2 - d.bounds.bottom / 2
+        val transY = ((bottom - top) - d.bounds.bottom) / 2 + top
         canvas.save()
         canvas.translate(x, transY.toFloat())
         d.draw(canvas)
         canvas.restore()
+    }
+
+    override fun getSize(
+        paint: Paint,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        fm: Paint.FontMetricsInt?
+    ): Int {
+        val d = drawable
+        val rect: Rect = d.bounds
+        if (fm != null) {
+            val fmInt: Paint.FontMetricsInt = paint.fontMetricsInt
+            val fontHeight: Int = fmInt.bottom - fmInt.top
+            val drHeight: Int = rect.bottom - rect.top
+            val top = drHeight / 2 - fontHeight / 4
+            val bottom = drHeight / 2 + fontHeight / 4
+            fm.ascent = -bottom
+            fm.top = -bottom
+            fm.bottom = top
+            fm.descent = top
+        }
+        return rect.right
     }
 }
 
@@ -189,19 +213,13 @@ fun String.justify(ems: Int): SpannableStringBuilder {
     }
 }
 
-val String.isJsonArray: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonArray ?: false
-
-val String.isJsonObject: Boolean
-    get() = this.runCatching { JsonParser.parseString(this) }.getOrNull()?.isJsonObject ?: false
-
-inline fun <R: CharSequence, C: R> C?.ifNull(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R =
     this ?: defaultValue()
 
-inline fun <R: CharSequence, C: R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
     if (this.isNullOrEmpty()) defaultValue() else this
 
-inline fun <R: CharSequence, C: R> C?.ifNullOrBlack(defaultValue: () -> R): R =
+inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R =
     if (this.isNullOrBlank()) defaultValue() else this
 
 fun CharSequence.splitSkipBlank(
@@ -209,7 +227,11 @@ fun CharSequence.splitSkipBlank(
     ignoreCase: Boolean = false,
     limit: Int = 0
 ): List<String> {
-    return split(ignoreCase = ignoreCase, limit = limit, delimiters = delimiters).filter { it.isNotBlank() }
+    return split(
+        ignoreCase = ignoreCase,
+        limit = limit,
+        delimiters = delimiters
+    ).filter { it.isNotBlank() }
 }
 
 fun <K, V> Map<K, V>.joinKeysToString(

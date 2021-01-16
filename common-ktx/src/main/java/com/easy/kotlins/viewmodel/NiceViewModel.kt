@@ -35,7 +35,9 @@ interface ViewModelEventObservableOwner : EventObservableOwner {
 
     fun onInterceptViewModelEvent(event: Event): Boolean
 
-    fun onViewModelEvent(event: Event): Boolean
+    fun dispatchViewModelEvent(event: Event): Boolean
+
+    fun onViewModelEvent(event: Event)
 
 }
 
