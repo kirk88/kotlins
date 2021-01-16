@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.easy.kotlins.helper.toBundle
 import com.pharmacist.base.better.kotlin.app.ActivityResultCallback
 
 class BridegRequest {
@@ -70,6 +71,26 @@ inline fun <reified T : Activity> Fragment.startActivityForResult(
         requestCode,
         callback
     )
+}
+
+inline fun <reified T : Activity> FragmentActivity.startActivityForResult(
+    requestCode: Int,
+    vararg args: Pair<String, Any?>,
+    callback: ActivityResultCallback
+) {
+    BridegRequest(this).startActivityForResult(Intent(this, T::class.java).apply {
+        putExtras(args.toBundle())
+    }, requestCode, callback)
+}
+
+inline fun <reified T : Activity> Fragment.startActivityForResult(
+    requestCode: Int,
+    vararg args: Pair<String, Any?>,
+    callback: ActivityResultCallback
+) {
+    BridegRequest(this).startActivityForResult(Intent(requireContext(), T::class.java).apply {
+        putExtras(args.toBundle())
+    }, requestCode, callback)
 }
 
 fun FragmentActivity.requestPermissions(

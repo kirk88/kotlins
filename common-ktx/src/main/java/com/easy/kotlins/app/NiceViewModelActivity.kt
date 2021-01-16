@@ -3,6 +3,7 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.Status
@@ -35,7 +36,8 @@ abstract class NiceViewModelActivity<VM>(layoutResId: Int) : NiceActivity(layout
 
     final override fun onEventChanged(event: Event) {
         if (supportFragmentManager.fragments.any {
-                (it as? ViewModelEventObservableOwner)?.onInterceptViewModelEvent(
+                val isActive = it.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                isActive && (it as? ViewModelEventObservableOwner)?.onInterceptViewModelEvent(
                     event
                 ) == true
             }) {

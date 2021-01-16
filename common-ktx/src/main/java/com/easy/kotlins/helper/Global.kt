@@ -71,65 +71,65 @@ fun View.longToast(@StringRes msgId: Int) {
 
 fun Fragment.finishActivity() = activity?.finish()
 
-inline fun <T : Fragment> T.withBundle(crossinline action: Bundle.() -> Unit): T = apply {
+inline fun <T : Fragment> T.withBundle(crossinline block: Bundle.() -> Unit): T = apply {
     val args = arguments ?: Bundle().also { arguments = it }
-    args.apply(action)
+    args.apply(block)
 }
 
-fun <T : Fragment> T.withBundle(vararg pairs: Pair<String, Any?>): T = apply {
-    val args = arguments ?: Bundle().also { arguments = it }
-    args.putAll(pairs.toBundle())
+fun <T : Fragment> T.withBundle(vararg args: Pair<String, Any?>): T = apply {
+    val bundle = arguments ?: Bundle().also { arguments = it }
+    bundle.putAll(args.toBundle())
 }
 
-inline fun <reified A : Activity> Fragment.startActivity(noinline action: (Intent.() -> Unit)? = null) {
-    startActivity(Intent(context, A::class.java).apply { action?.invoke(this) })
+inline fun <reified A : Activity> Fragment.startActivity(noinline block: (Intent.() -> Unit)? = null) {
+    startActivity(Intent(context, A::class.java).apply { block?.invoke(this) })
 }
 
-inline fun <reified A : Activity> Fragment.startActivity(vararg pairs: Pair<String, Any?>) {
-    startActivity(Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) })
+inline fun <reified A : Activity> Fragment.startActivity(vararg args: Pair<String, Any?>) {
+    startActivity(Intent(context, A::class.java).apply { putExtras(args.toBundle()) })
 }
 
-inline fun <reified A : Activity> Context.startActivity(noinline action: (Intent.() -> Unit)? = null) {
-    startActivity(Intent(this, A::class.java).apply { action?.invoke(this) })
+inline fun <reified A : Activity> Context.startActivity(noinline block: (Intent.() -> Unit)? = null) {
+    startActivity(Intent(this, A::class.java).apply { block?.invoke(this) })
 }
 
-inline fun <reified A : Activity> Context.startActivity(vararg pairs: Pair<String, Any?>) {
-    startActivity(Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) })
+inline fun <reified A : Activity> Context.startActivity(vararg args: Pair<String, Any?>) {
+    startActivity(Intent(this, A::class.java).apply { putExtras(args.toBundle()) })
 }
 
 inline fun <reified A : Activity> Fragment.startActivityForResult(
     requestCode: Int,
-    noinline action: (Intent.() -> Unit)? = null
+    noinline block: (Intent.() -> Unit)? = null
 ) {
     startActivityForResult(
-        Intent(context, A::class.java).apply { action?.invoke(this) },
+        Intent(context, A::class.java).apply { block?.invoke(this) },
         requestCode
     )
 }
 
 inline fun <reified A : Activity> Fragment.startActivityForResult(
     requestCode: Int,
-    vararg pairs: Pair<String, Any?>
+    vararg args: Pair<String, Any?>
 ) {
     startActivityForResult(
-        Intent(context, A::class.java).apply { putExtras(pairs.toBundle()) },
+        Intent(context, A::class.java).apply { putExtras(args.toBundle()) },
         requestCode
     )
 }
 
 inline fun <reified A : Activity> Activity.startActivityForResult(
     requestCode: Int,
-    noinline action: (Intent.() -> Unit)? = null
+    noinline block: (Intent.() -> Unit)? = null
 ) {
-    startActivityForResult(Intent(this, A::class.java).apply { action?.invoke(this) }, requestCode)
+    startActivityForResult(Intent(this, A::class.java).apply { block?.invoke(this) }, requestCode)
 }
 
 inline fun <reified A : Activity> Activity.startActivityForResult(
     requestCode: Int,
-    vararg pairs: Pair<String, Any?>
+    vararg args: Pair<String, Any?>
 ) {
     startActivityForResult(
-        Intent(this, A::class.java).apply { putExtras(pairs.toBundle()) },
+        Intent(this, A::class.java).apply { putExtras(args.toBundle()) },
         requestCode
     )
 }
