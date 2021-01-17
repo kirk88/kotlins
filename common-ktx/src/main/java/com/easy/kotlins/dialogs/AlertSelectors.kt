@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.fragment.app.Fragment
 
-inline fun <D : DialogInterface> Fragment.selector(
-        noinline factory: AlertBuilderFactory<D>,
+fun <D : DialogInterface> Fragment.selector(
+        factory: AlertBuilderFactory<D>,
         themeResId: Int = 0,
         title: CharSequence? = null,
         items: List<CharSequence>,
-        noinline onClick: (DialogInterface, CharSequence, Int) -> Unit
+        onClick: (DialogInterface, CharSequence, Int) -> Unit
 ) = requireActivity().selector(factory, themeResId, title, items, onClick)
 
 fun <D : DialogInterface> Context.selector(

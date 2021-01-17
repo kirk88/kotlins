@@ -5,11 +5,11 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
-inline fun Fragment.alertBuilder(
+fun Fragment.alertBuilder(
         themeResId: Int = 0,
         title: CharSequence? = null,
         message: CharSequence? = null,
-        noinline init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+        init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
 ): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeResId, title, message, init)
 
 fun Context.alertBuilder(
@@ -29,11 +29,11 @@ fun Context.alertBuilder(
     }
 }
 
-inline fun Fragment.alert(
+fun Fragment.alert(
         themeResId: Int = 0,
         title: CharSequence? = null,
         message: CharSequence? = null,
-        noinline init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+        init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
 ): AlertDialog = requireActivity().alert(themeResId, title, message, init)
 
 fun Context.alert(

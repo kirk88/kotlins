@@ -5,6 +5,8 @@ package com.easy.kotlins.http
 import com.easy.kotlins.http.extension.OkExtension
 import com.easy.kotlins.http.extension.OkCommonExtension
 import okhttp3.*
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 /**
@@ -55,11 +57,11 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
         multipartBuilder?.addFormDataPart(name, filename, body)
     }
 
-    fun addFormDataPart(name: String, mediaType: MediaType?, file: File) {
+    fun addFormDataPart(name: String, contentType: MediaType?, file: File) {
         multipartBuilder?.addFormDataPart(
             name,
             file.name,
-            RequestBody.create(mediaType, file)
+            file.asRequestBody(contentType)
         )
     }
 
@@ -71,12 +73,16 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
         multipartBuilder?.addPart(body)
     }
 
-    fun body(mediaType: MediaType?, body: String) {
-        requestBody = RequestBody.create(mediaType, body)
+    fun addPart(headers: Headers?, body: RequestBody) {
+        multipartBuilder?.addPart(headers, body)
     }
 
-    fun body(mediaType: MediaType?, file: File) {
-        requestBody = RequestBody.create(mediaType, file)
+    fun body(contentType: MediaType?, body: String) {
+        requestBody = body.toRequestBody(contentType)
+    }
+
+    fun body(contentType: MediaType?, file: File) {
+        requestBody = file.asRequestBody(contentType)
     }
 
     fun body(body: RequestBody) {

@@ -88,14 +88,14 @@ fun AlertBuilder<*>.customView(view: () -> View) {
     customView = view()
 }
 
-inline fun AlertBuilder<*>.okButton(noinline handler: ((dialog: DialogInterface) -> Unit)? = null) =
+fun AlertBuilder<*>.okButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
         positiveButton(android.R.string.ok, handler)
 
-inline fun AlertBuilder<*>.cancelButton(noinline handler: ((dialog: DialogInterface) -> Unit)? = null) =
+fun AlertBuilder<*>.cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
         negativeButton(android.R.string.cancel, handler)
 
-inline fun AlertBuilder<*>.yesButton(noinline handler: ((dialog: DialogInterface) -> Unit)? = null) =
+fun AlertBuilder<*>.yesButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
         positiveButton(android.R.string.yes, handler)
 
-inline fun AlertBuilder<*>.noButton(noinline handler: ((dialog: DialogInterface) -> Unit)? = null) =
+fun AlertBuilder<*>.noButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
         negativeButton(android.R.string.no, handler)

@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.fragment.app.Fragment
 
-inline fun Fragment.selector(
+fun Fragment.selector(
         themeResId: Int = 0,
         title: CharSequence? = null,
         items: List<CharSequence>,
-        noinline onClick: (DialogInterface, Int) -> Unit
+        onClick: (DialogInterface, Int) -> Unit
 ) = activity?.selector(themeResId, title, items, onClick)
 
 fun Context.selector(

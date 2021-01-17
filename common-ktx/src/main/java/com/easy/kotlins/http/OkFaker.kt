@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -61,6 +62,12 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
         }
     }
 
+    fun parts(vararg parts: BodyPart) {
+        parts.forEach {
+            request.addPart(it.headers, it.body)
+        }
+    }
+
     fun formDataParts(operation: RequestPairs<Any?>.() -> Unit) {
         RequestPairs<Any?>().apply(operation).forEach {
             request.addFormDataPart(it.key, it.value.toString())
@@ -76,7 +83,11 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
                         value.filename,
                         value.body
                     )
-                    is FileFormDataPart -> request.addFormDataPart(it.key, value.type, value.file)
+                    is FileFormDataPart -> request.addFormDataPart(
+                        it.key,
+                        value.contentType,
+                        value.file
+                    )
                     else -> request.addFormDataPart(it.key, value.toString())
                 }
             }
@@ -94,7 +105,7 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
                     )
                     is FileFormDataPart -> request.addFormDataPart(
                         it.first,
-                        value.type,
+                        value.contentType,
                         value.file
                     )
                     else -> request.addFormDataPart(it.first, value.toString())
@@ -146,8 +157,9 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
 
 }
 
+data class BodyPart(val body: RequestBody, val headers: Headers? = null)
 data class BodyFromDataPart(val body: RequestBody, val filename: String? = null)
-data class FileFormDataPart(val file: File, val type: MediaType? = null)
+data class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
 class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
 
