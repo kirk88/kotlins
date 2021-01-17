@@ -24,10 +24,10 @@ class OkDownloadRequest : OkRequest<File>() {
         val downloadExtension = extension ?: return false
 
         val file: File = downloadExtension.onResponse(response) { bytes, totalBytes ->
-            callOnProgress(bytes, totalBytes)
+            dispatchOnProgress(bytes, totalBytes)
         }
 
-        callOnSuccess(file)
+        dispatchOnSuccess(file)
         return true
     }
 

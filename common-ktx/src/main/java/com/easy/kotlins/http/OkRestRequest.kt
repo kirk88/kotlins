@@ -100,7 +100,7 @@ class OkRestRequest<T>(private val method: OkRequestMethod) : OkRequest<T>() {
             OkRequestBody(
                 requestBody ?: formBody ?: multipartBody ?: FormBody.Builder().build()
             ) { bytes, totalBytes ->
-                callOnProgress(bytes, totalBytes)
+                dispatchOnProgress(bytes, totalBytes)
             }
         }
         val request = requestBuilder.url(urlBuilder.build()).also {

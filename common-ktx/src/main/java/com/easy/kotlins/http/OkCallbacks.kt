@@ -21,28 +21,28 @@ internal object OkCallbacks {
             val body = msg.obj as MessageBody
             when (msg.what) {
                 MSG_WHAT_ON_START -> {
-                    callOnStart(body.callback)
+                    dispatchOnStart(body.callback)
                 }
                 MSG_WHAT_ON_COMPLETE -> {
-                    callOnComplete(body.callback)
+                    dispatchOnComplete(body.callback)
                 }
                 MSG_WHAT_ON_SUCCESS -> {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
-                    callOnSuccess(callback, body.args[0])
+                    dispatchOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    callOnError(body.callback, body.args[0] as Exception)
+                    dispatchOnError(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_UPDATE -> {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
-                    callOnProgress(
+                    dispatchOnProgress(
                         callback,
                         body.args[0] as Long,
                         body.args[1] as Long
                     )
                 }
                 MSG_WHAT_ON_CANCEL -> {
-                    callOnCancel(body.callback)
+                    dispatchOnCancel(body.callback)
                 }
             }
         }
@@ -82,7 +82,7 @@ internal object OkCallbacks {
         ).sendToTarget()
     }
 
-    private fun callOnStart(callback: OkCallback<*>) {
+    private fun dispatchOnStart(callback: OkCallback<*>) {
         try {
             callback.onStart()
         } catch (t: Throwable) {
@@ -90,7 +90,7 @@ internal object OkCallbacks {
         }
     }
 
-    private fun callOnComplete(callback: OkCallback<*>) {
+    private fun dispatchOnComplete(callback: OkCallback<*>) {
         try {
             callback.onComplete()
         } catch (t: Throwable) {
@@ -98,7 +98,7 @@ internal object OkCallbacks {
         }
     }
 
-    private fun callOnCancel(callback: OkCallback<*>) {
+    private fun dispatchOnCancel(callback: OkCallback<*>) {
         try {
             callback.onCancel()
         } catch (t: Throwable) {
@@ -106,7 +106,7 @@ internal object OkCallbacks {
         }
     }
 
-    private fun callOnProgress(
+    private fun dispatchOnProgress(
         callback: OkCallback<*>,
         bytes: Long,
         totalBytes: Long
@@ -118,15 +118,15 @@ internal object OkCallbacks {
         }
     }
 
-    private fun <T> callOnSuccess(callback: OkCallback<T>, result: T) {
+    private fun <T> dispatchOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
         } catch (e: Exception) {
-            callOnError(callback, e)
+            dispatchOnError(callback, e)
         }
     }
 
-    private fun callOnError(callback: OkCallback<*>, error: Exception) {
+    private fun dispatchOnError(callback: OkCallback<*>, error: Exception) {
         try {
             callback.onError(error)
         } catch (t: Throwable) {

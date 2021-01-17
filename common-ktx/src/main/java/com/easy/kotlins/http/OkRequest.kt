@@ -1,7 +1,6 @@
 package com.easy.kotlins.http
 
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.io.IOException
 import java.net.URI
@@ -159,26 +158,26 @@ abstract class OkRequest<T> {
         }
 
         if (failure != null) {
-            callOnError(failure)
+            dispatchOnError(failure)
             return
         }
 
-        callOnStart()
+        dispatchOnStart()
 
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 try {
-                    callOnFailure(e)
+                    dispatchOnFailure(e)
                 } finally {
-                    callOnComplete()
+                    dispatchOnComplete()
                 }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 try {
-                    callOnResponse(response)
+                    dispatchOnResponse(response)
                 } finally {
-                    callOnComplete()
+                    dispatchOnComplete()
                 }
             }
         })
@@ -236,35 +235,35 @@ abstract class OkRequest<T> {
 
     protected abstract fun createRealRequest(): Request
 
-    protected fun callOnStart() {
+    protected fun dispatchOnStart() {
         OkCallbacks.onStart(callback)
     }
 
-    protected fun callOnProgress(bytes: Long, totalBytes: Long) {
+    protected fun dispatchOnProgress(bytes: Long, totalBytes: Long) {
         OkCallbacks.onProgress(callback, bytes, totalBytes)
     }
 
-    protected fun callOnSuccess(result: T) {
+    protected fun dispatchOnSuccess(result: T) {
         OkCallbacks.onSuccess(callback, result)
     }
 
-    protected fun callOnError(error: Exception) {
+    protected fun dispatchOnError(error: Exception) {
         OkCallbacks.onError(callback, error)
     }
 
-    protected fun callOnCancel() {
+    protected fun dispatchOnCancel() {
         OkCallbacks.onCancel(callback)
     }
 
-    protected fun callOnComplete() {
+    protected fun dispatchOnComplete() {
         OkCallbacks.onComplete(callback)
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun callOnFailure(error: Exception) {
+    private fun dispatchOnFailure(error: Exception) {
         try {
             if (isCanceled) {
-                callOnCancel()
+                dispatchOnCancel()
                 return
             }
 
@@ -273,25 +272,25 @@ abstract class OkRequest<T> {
             }
 
             if (errorMapper == null) {
-                callOnError(error)
+                dispatchOnError(error)
             } else {
-                callOnSuccess(mapError(error, errorMapper))
+                dispatchOnSuccess(mapError(error, errorMapper))
             }
         } catch (e: Exception) {
-            callOnError(e)
+            dispatchOnError(e)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun callOnResponse(response: Response) {
+    private fun dispatchOnResponse(response: Response) {
         try {
             if (onResponse(response)) {
                 return
             }
 
-            callOnSuccess(mapResponse(response, responseMapper))
+            dispatchOnSuccess(mapResponse(response, responseMapper))
         } catch (e: Exception) {
-            callOnFailure(e)
+            dispatchOnFailure(e)
         }
     }
 }

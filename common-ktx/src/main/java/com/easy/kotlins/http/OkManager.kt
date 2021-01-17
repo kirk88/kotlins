@@ -228,7 +228,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnStart() {
+    protected fun dispatchOnStart() {
         if (!onStartApplied) return
 
         for (action in startActions) {
@@ -237,7 +237,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnProgress(bytes: Long, totalBytes: Long) {
+    protected fun dispatchOnProgress(bytes: Long, totalBytes: Long) {
         if (!onProgressApplied) return
 
         for (action in progressActions) {
@@ -247,7 +247,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnSuccess(result: T) {
+    protected fun dispatchOnSuccess(result: T) {
         if (!onSuccessApplied) return
 
         for (action in successActions) {
@@ -256,7 +256,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnError(error: Exception) {
+    protected fun dispatchOnError(error: Exception) {
         if (!onErrorApplied) return
 
         for (action in errorActions) {
@@ -265,7 +265,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnCancel() {
+    protected fun dispatchOnCancel() {
         if (!onCancelApplied) return
 
         for (action in cancelActions) {
@@ -274,7 +274,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
     }
 
     @MainThread
-    protected fun callOnComplete() {
+    protected fun dispatchOnComplete() {
         if (!onCompleteApplied) return
 
         for (action in completeActions) {
@@ -286,27 +286,27 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         request.setCallback(object : OkCallback<T> {
 
             override fun onStart() {
-                callOnStart()
+                dispatchOnStart()
             }
 
             override fun onProgress(bytes: Long, totalBytes: Long) {
-                callOnProgress(bytes, totalBytes)
+                dispatchOnProgress(bytes, totalBytes)
             }
 
             override fun onSuccess(result: T) {
-                callOnSuccess(result)
+                dispatchOnSuccess(result)
             }
 
             override fun onError(error: Exception) {
-                callOnError(error)
+                dispatchOnError(error)
             }
 
             override fun onCancel() {
-                callOnCancel()
+                dispatchOnCancel()
             }
 
             override fun onComplete() {
-                callOnComplete()
+                dispatchOnComplete()
             }
 
         })
