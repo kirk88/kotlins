@@ -11,7 +11,8 @@ ext {
 
     publisher = [
             group_id   : "com.easy.kotlins",
-            artifact_id: "common-ktx"
+            artifact_id: "common-ktx",
+            version    : "1.0.0"
     ]
 
     dependencies = [

@@ -3,18 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'maven'
 
-uploadArchives {
-    repositories.mavenDeployer {
-        def deployPath = file(getProperty('aar.deployPath'))
-        repository(url: "file://${deployPath.absolutePath}")
-        pom.project {
-            groupId rootProject.ext.publisher.group_id
-            artifactId rootProject.ext.publisher.artifact_id
-            version rootProject.ext.android.version_name
-        }
-    }
-}
-
 android {
     compileSdkVersion rootProject.ext.android.compile_sdk_version
     buildToolsVersion rootProject.ext.android.build_tools_version
@@ -70,4 +58,26 @@ dependencies {
     api rootProject.ext.dependencies.design
     api rootProject.ext.dependencies.fragment_ktx
     api rootProject.ext.dependencies.recyclerview
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        def deployPath = file(getProperty('aar.deployPath'))
+        repository(url: "file://${deployPath.absolutePath}")
+        pom.project {
+            groupId rootProject.ext.publisher.group_id
+            artifactId rootProject.ext.publisher.artifact_id
+            version rootProject.ext.publisher.version
+        }
+    }
+}
+
+task androidSourcesJar(type: Jar) {
+    getArchiveClassifier().convention("sources")
+    getArchiveClassifier().set("sources")
+    from android.sourceSets.main.java.sourceFiles
+}
+
+artifacts {
+    archives androidSourcesJar
 }
