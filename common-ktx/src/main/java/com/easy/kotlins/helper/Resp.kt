@@ -233,7 +233,7 @@ fun <T> OkFaker<T>.responsePlugin(
     resultMapper: OkMapper<String, T>
 ) {
     mapResponse {
-        if (precondition(it)) resultMapper.map(it.body()!!.string())
+        if (precondition(it)) resultMapper.map(it.body!!.string())
         else error("Invalid response")
     }
 

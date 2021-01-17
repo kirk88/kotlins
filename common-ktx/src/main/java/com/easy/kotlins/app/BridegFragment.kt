@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.SparseArray
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.pharmacist.base.better.kotlin.app.ActivityResultCallback
 
 class BridegFragment : Fragment() {
     private val activityResultCallbacks: SparseArray<ActivityResultCallback> by lazy {

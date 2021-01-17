@@ -7,7 +7,6 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.easy.kotlins.helper.toBundle
-import com.pharmacist.base.better.kotlin.app.ActivityResultCallback
 
 class BridegRequest {
 

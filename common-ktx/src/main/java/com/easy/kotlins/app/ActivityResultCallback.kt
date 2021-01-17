@@ -1,4 +1,4 @@
-package com.pharmacist.base.better.kotlin.app
+package com.easy.kotlins.app
 
 import android.content.Intent
 

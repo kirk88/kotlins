@@ -1,6 +1,8 @@
 package com.easy.kotlins.http
 
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.io.IOException
 import java.net.URI
 import java.net.URL
@@ -13,14 +15,14 @@ abstract class OkRequest<T> {
     private var httpUrl: HttpUrl? = null
         set(value) {
             field = requireNotNull(value) { "Url is null" }
-            urlBuilder.scheme(value.scheme())
-                .encodedUsername(value.encodedUsername())
-                .encodedPassword(value.encodedPassword())
-                .host(value.host())
-                .port(value.port())
-                .encodedPath(value.encodedPath())
-                .encodedQuery(value.encodedQuery())
-                .encodedFragment(value.encodedFragment())
+            urlBuilder.scheme(value.scheme)
+                .encodedUsername(value.encodedUsername)
+                .encodedPassword(value.encodedPassword)
+                .host(value.host)
+                .port(value.port)
+                .encodedPath(value.encodedPath)
+                .encodedQuery(value.encodedQuery)
+                .encodedFragment(value.encodedFragment)
         }
 
     private var httpClient: OkHttpClient? = null
@@ -42,13 +44,13 @@ abstract class OkRequest<T> {
     val isExecuted: Boolean
         get() {
             if (executed) return true
-            synchronized(this) { return call?.isExecuted == true }
+            synchronized(this) { return call?.isExecuted() == true }
         }
 
     val isCanceled: Boolean
         get() {
             if (canceled) return true
-            synchronized(this) { return call?.isCanceled == true }
+            synchronized(this) { return call?.isCanceled() == true }
         }
 
     fun cancel() {
@@ -62,15 +64,15 @@ abstract class OkRequest<T> {
     }
 
     fun url(url: URL) {
-        httpUrl = HttpUrl.get(url)
+        httpUrl = url.toHttpUrlOrNull()
     }
 
     fun url(uri: URI) {
-        httpUrl = HttpUrl.get(uri)
+        httpUrl = uri.toHttpUrlOrNull()
     }
 
     fun url(url: String) {
-        httpUrl = HttpUrl.parse(url)
+        httpUrl = url.toHttpUrlOrNull()
     }
 
     fun tag(tag: Any) {
@@ -221,7 +223,7 @@ abstract class OkRequest<T> {
         response: Response,
         responseMapper: OkMapper<Response, T>?
     ): T {
-        val mapper = responseMapper ?: OkMapper { it.body()?.string() as T }
+        val mapper = responseMapper ?: OkMapper { it.body?.string() as T }
         return mapper.map(response)
     }
 

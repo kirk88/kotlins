@@ -22,7 +22,7 @@ internal class OkRequestBody(
 
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
-        val wrappedSink = bufferedSink ?: Okio.buffer(SinkWrapper(sink)).also { bufferedSink = it }
+        val wrappedSink = bufferedSink ?: SinkWrapper(sink).buffer().also { bufferedSink = it }
         body.writeTo(wrappedSink)
         wrappedSink.flush()
     }

@@ -34,8 +34,8 @@ open class DownloadExtension private constructor(path: String, private val conti
             file.delete()
         }
 
-        val body: ResponseBody = response.body()
-            ?: throw NullPointerException("ResponseBody is null, response code: " + response.code() + " , message: " + response.message())
+        val body: ResponseBody = response.body
+            ?: throw NullPointerException("ResponseBody is null, response code: " + response.code + " , message: " + response.message)
         return writeStreamToFile(body, file, action)
     }
 

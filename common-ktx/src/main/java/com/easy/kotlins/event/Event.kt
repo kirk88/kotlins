@@ -8,18 +8,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import com.easy.kotlins.helper.opt
 import com.easy.kotlins.helper.toBundle
 import java.io.Serializable
-import kotlin.reflect.KProperty
 
 /**
  * Create by LiZhanPing on 2020/9/12
  */
 
-open class Event(val what: Int = Status.NONE, val message: String? = null) : Parcelable {
+open class Event(val what: Int = Status.NONE, val message: String? = null) {
     private val extras: Bundle by lazy { Bundle() }
 
     private var intent: Intent? = null
@@ -67,37 +64,6 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) : Par
     fun copy(what: Int = Status.NONE, message: String? = null): Event {
         return Event(what, message).also {
             it.putAll(this)
-        }
-    }
-
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readString()
-    ) {
-        extras.putAll(parcel.readBundle(Bundle::class.java.classLoader))
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(what)
-        parcel.writeString(message)
-        parcel.writeBundle(extras)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun toString(): String {
-        return "Event(what=$what, message=$message, extras=$extras)"
-    }
-
-    companion object CREATOR : Parcelable.Creator<Event> {
-        override fun createFromParcel(parcel: Parcel): Event {
-            return Event(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Event?> {
-            return arrayOfNulls(size)
         }
     }
 
