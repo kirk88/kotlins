@@ -1,10 +1,7 @@
 package com.easy.kotlins.http
 
+class DefaultOkManagerScope: OkManagerScope, Iterable<OkManager<*, *>> {
 
-/**
- * Create by LiZhanPing on 2020/8/24
- */
-class SimpleOkManagerScope : OkManagerScope, Iterable<OkManager<*, *>> {
     private var resources: MutableList<OkManager<*, *>>? = null
 
     override fun add(manager: OkManager<*, *>) {
@@ -56,8 +53,8 @@ class SimpleOkManagerScope : OkManagerScope, Iterable<OkManager<*, *>> {
     }
 
     override fun iterator(): Iterator<OkManager<*, *>> {
-        val okFakers: List<OkManager<*, *>> = resources ?: emptyList()
-        return okFakers.iterator()
+        val list: List<OkManager<*, *>> = resources ?: emptyList()
+        return list.iterator()
     }
 
 }

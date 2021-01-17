@@ -1,5 +1,6 @@
 package com.easy.kotlins.http
 
+import androidx.annotation.MainThread
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -226,6 +227,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         request.enqueue()
     }
 
+    @MainThread
     protected fun callOnStart() {
         if (!onStartApplied) return
 
@@ -234,6 +236,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    @MainThread
     protected fun callOnProgress(bytes: Long, totalBytes: Long) {
         if (!onProgressApplied) return
 
@@ -243,6 +246,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
 
     }
 
+    @MainThread
     protected fun callOnSuccess(result: T) {
         if (!onSuccessApplied) return
 
@@ -251,6 +255,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    @MainThread
     protected fun callOnError(error: Exception) {
         if (!onErrorApplied) return
 
@@ -259,6 +264,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    @MainThread
     protected fun callOnCancel() {
         if (!onCancelApplied) return
 
@@ -267,6 +273,7 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    @MainThread
     protected fun callOnComplete() {
         if (!onCompleteApplied) return
 

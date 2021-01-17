@@ -5,13 +5,15 @@ package com.easy.kotlins.http
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.easy.kotlins.helper.forEach
-import com.easy.kotlins.helper.toJson
-import com.easy.kotlins.helper.toJsonObject
+import com.easy.kotlins.helper.toJSON
+import com.easy.kotlins.helper.toJSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import okhttp3.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import java.io.File
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
@@ -168,7 +170,7 @@ class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
     }
 
     override fun toString(): String {
-        return pairs.toJson()
+        return pairs.toJSON()
     }
 
     override fun iterator(): Iterator<Map.Entry<String, T>> {
@@ -196,12 +198,11 @@ fun requestPairsOf(
 ): RequestPairs<Any?> {
     return RequestPairs<Any?>().apply {
         val source: String =
-            if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJson()
-        source.toJsonObject().forEach { key, element ->
+            if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJSON()
+        source.toJSONObject().forEach { key, element ->
             when {
-                element.isJsonNull && serializeNulls -> put(key, element.toString())
-                element.isJsonArray || element.isJsonObject -> put(key, element.toString())
-                element.isJsonPrimitive -> put(key, element.asString)
+                element.isJSONNull && serializeNulls -> put(key, element.asString())
+                else -> put(key, element.asString())
             }
         }
     }.also { operation?.invoke(it) }
@@ -216,15 +217,4 @@ fun <T : Any> OkFaker<T>.asLiveData(
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(execute())
-}
-
-fun main() {
-    OkFaker.get<String> {
-        url("http://www.baidu.com")
-
-        onSuccess {
-            println(it)
-        }
-    }.enqueue()
-
 }

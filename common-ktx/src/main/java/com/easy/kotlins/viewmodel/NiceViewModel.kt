@@ -13,7 +13,7 @@ import com.easy.kotlins.event.EventObservableOwner
 import com.easy.kotlins.event.EventProxy
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkManagerScope
-import com.easy.kotlins.http.SimpleOkManagerScope
+import com.easy.kotlins.http.DefaultOkManagerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
@@ -42,7 +42,7 @@ interface ViewModelEventObservableOwner : EventObservableOwner {
 }
 
 private class SimpleViewModelController : ViewModelController,
-    OkManagerScope by SimpleOkManagerScope() {
+    OkManagerScope by DefaultOkManagerScope() {
 
     private val eventProxy = EventProxy()
     override var event: Event by eventProxy
