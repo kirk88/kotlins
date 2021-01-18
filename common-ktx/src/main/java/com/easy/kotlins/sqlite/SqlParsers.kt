@@ -146,12 +146,11 @@ private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, Colum
     }
 }
 
-class ColumnElement internal constructor(private val value: Any?) {
+class ColumnElement internal constructor(internal val value: Any?) {
     fun isNull(): Boolean = value == null
 
-    fun value(): Any? = value
-
-    fun asTyped(type: Class<*>): Any? = castValue(value, type)
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> asTyped(type: Class<T>): T? = castValue(value, type) as T?
 
     fun asString(defaultValue: String = ""): String = value?.toString() ?: defaultValue
 
@@ -171,6 +170,8 @@ class ColumnElement internal constructor(private val value: Any?) {
         return "Column(value: $value)"
     }
 }
+
+inline fun <reified T : Any> ColumnElement.asTyped(): T? = asTyped(T::class.java)
 
 private fun castValue(value: Any?, type: Class<*>): Any? {
     if (value == null && type.isPrimitive) {

@@ -78,7 +78,7 @@ internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
 
             val annotation = annotations.find { it is Column } as Column?
             if (!column.isNull() && annotation != null) {
-                args[index] = ColumnConverters.get(annotation.converter).toValue(column.value()!!)
+                args[index] = ColumnConverters.get(annotation.converter).toValue(column.value!!)
             } else {
                 args[index] = column.asTyped(type)
             }
