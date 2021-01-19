@@ -3,6 +3,7 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import androidx.annotation.LayoutRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
@@ -19,7 +20,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceViewModelActivity<VM>(layoutResId: Int) : NiceActivity(layoutResId),
+abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : NiceActivity(layoutResId),
     ViewModelEventObservableOwner,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 

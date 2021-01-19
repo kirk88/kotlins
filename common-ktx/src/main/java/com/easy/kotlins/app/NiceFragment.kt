@@ -10,20 +10,12 @@ import androidx.fragment.app.Fragment
 /**
  * Create by LiZhanPing on 2020/8/22
  */
-abstract class NiceFragment(@LayoutRes private val layoutResId: Int) : Fragment(), NiceView {
+abstract class NiceFragment(@LayoutRes layoutResId: Int = 0) : Fragment(layoutResId), NiceView {
 
     private var isLoaded = false
     private var isVisibleToUser = false
     private var isCallResume = false
     private var isCallUserVisibleHint = false
-
-    final override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(layoutResId, container, false)
-    }
 
     final override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         onBind(savedInstanceState)

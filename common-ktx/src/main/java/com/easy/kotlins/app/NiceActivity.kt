@@ -9,11 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 /**
  * Create by LiZhanPing on 2020/8/24
  */
-abstract class NiceActivity(@LayoutRes private val layoutResId: Int) : AppCompatActivity(), NiceView {
+abstract class NiceActivity(@LayoutRes layoutResId: Int) : AppCompatActivity(layoutResId), NiceView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layoutResId)
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)

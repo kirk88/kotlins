@@ -3,6 +3,7 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.Status
@@ -18,7 +19,7 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceViewModelFragment<VM>(layoutResId: Int) : NiceFragment(layoutResId),
+abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) : NiceFragment(layoutResId),
     ViewModelEventObservableOwner,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
