@@ -26,9 +26,9 @@ interface ViewModelController : OkManagerScope {
 
     fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
-    fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit)
+    fun addEventObserver(owner: LifecycleOwner, observer: (event: Event) -> Unit)
 
-    fun observeEvent(owner: EventObservableOwner)
+    fun addEventObserver(owner: EventObservableOwner)
 }
 
 interface ViewModelEventObservableOwner : EventObservableOwner {
@@ -55,12 +55,12 @@ private class SimpleViewModelController : ViewModelController,
         return OkFaker.post(action).also { add(it) }
     }
 
-    override fun observeEvent(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        eventProxy.observe(owner, observer)
+    override fun addEventObserver(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
+        eventProxy.addEventObserver(owner, observer)
     }
 
-    override fun observeEvent(owner: EventObservableOwner) {
-        eventProxy.observe(owner)
+    override fun addEventObserver(owner: EventObservableOwner) {
+        eventProxy.addEventObserver(owner)
     }
 
 }

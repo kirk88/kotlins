@@ -2,15 +2,10 @@
 
 package com.easy.kotlins.helper
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.text.*
-import android.text.style.ForegroundColorSpan
-import android.text.style.ImageSpan
-import android.text.style.ScaleXSpan
+import android.text.style.*
 import androidx.annotation.ColorInt
 
 /**
@@ -22,30 +17,58 @@ fun CharSequence.asEditable(): Editable = Editable.Factory.getInstance().newEdit
 fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =
     if (this is SpannableStringBuilder) this else SpannableStringBuilder(this)
 
-fun CharSequence.heightLight(keywords: String?, color: Int = Color.RED): SpannableStringBuilder {
-    return if (keywords.isNullOrBlank()) this.asSpannableBuilder() else keywords.let {
-        SpannableStringBuilder(this).also {
-            var result = keywords.toRegex().find(it)
-            while (result != null) {
-                it.setSpan(
-                    ForegroundColorSpan(color),
+fun CharSequence.highlight(
+    target: String?,
+    @ColorInt color: Int = Color.RED,
+    size: Int = 0,
+    style: Int = Typeface.NORMAL
+): SpannableStringBuilder {
+    return asSpannableBuilder().apply {
+        target ?: return@apply
+        var result = target.toRegex().find(this)
+        while (result != null) {
+            setSpan(
+                ForegroundColorSpan(color),
+                result.range.first,
+                result.range.last + 1,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            if (size != 0) {
+                setSpan(
+                    AbsoluteSizeSpan(size),
                     result.range.first,
                     result.range.last + 1,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                result = result.next()
             }
+            if (style != Typeface.NORMAL) {
+                setSpan(
+                    StyleSpan(style),
+                    result.range.first,
+                    result.range.last + 1,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            result = result.next()
         }
     }
 }
 
-fun CharSequence.heightLight(
+fun CharSequence.highlight(
     start: Int = 0,
     end: Int = length,
-    @ColorInt color: Int = Color.RED
+    @ColorInt color: Int = Color.RED,
+    size: Int = 0,
+    style: Int = Typeface.NORMAL
 ): SpannableStringBuilder {
-    return this.asSpannableBuilder().apply {
+    return asSpannableBuilder().apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (size != 0) {
+            setSpan(AbsoluteSizeSpan(size), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        if (style != Typeface.NORMAL) {
+            setSpan(StyleSpan(style), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
     }
 }
 

@@ -15,7 +15,7 @@ import com.easy.kotlins.helper.onLongClick
 import java.util.*
 
 open class CommonRecyclerAdapter<ITEM>(
-    protected val context: Context,
+    val context: Context,
     vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
     private val itemAnimation: ItemViewAnimation? = null,
     private var itemClickable: Boolean = false,
@@ -116,6 +116,8 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun addHeaderView(header: View) {
+        (header.parent as? ViewGroup)?.removeView(header)
+
         synchronized(lock) {
             val position = headerViews.size()
             headerViews.put(TYPE_HEADER_VIEW + headerViews.size(), header)
@@ -124,6 +126,8 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun addFooterView(footer: View) {
+        (footer.parent as? ViewGroup)?.removeView(footer)
+
         synchronized(lock) {
             val position = actualItemCount + footerViews.size()
             footerViews.put(TYPE_FOOTER_VIEW + footerViews.size(), footer)
@@ -329,7 +333,7 @@ open class CommonRecyclerAdapter<ITEM>(
             val position = this.modifiableItems.indexOf(item)
             if (position >= 0) {
                 this.modifiableItems[position] = item
-                notifyItemChanged(position, payload)
+                notifyItemChanged(position + headerCount, payload)
             }
         }
     }

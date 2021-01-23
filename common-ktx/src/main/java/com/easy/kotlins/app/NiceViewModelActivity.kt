@@ -37,7 +37,7 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : Nice
 
     final override fun onEventChanged(event: Event) {
         if (supportFragmentManager.fragments.any {
-                val isActive = it.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                val isActive = it.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
                 isActive && (it as? ViewModelEventObservableOwner)?.onInterceptViewModelEvent(
                     event
                 ) == true

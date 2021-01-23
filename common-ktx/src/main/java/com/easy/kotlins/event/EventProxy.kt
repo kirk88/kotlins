@@ -22,12 +22,12 @@ class EventProxy {
         }
     }
 
-    fun observe(owner: LifecycleOwner, observer: (Event) -> Unit) {
-        liveEvent.observe(owner) { if (it != null) observer(it) }
+    fun addEventObserver(owner: LifecycleOwner, observer: (Event) -> Unit) {
+        liveEvent.observeActive(owner) { if (it != null) observer(it) }
     }
 
-    fun observe(owner: EventObservableOwner) {
-        liveEvent.observe(owner) { if (it != null) owner.onEventChanged(it) }
+    fun addEventObserver(owner: EventObservableOwner) {
+        liveEvent.observeActive(owner) { if (it != null) owner.onEventChanged(it) }
     }
 
     companion object {

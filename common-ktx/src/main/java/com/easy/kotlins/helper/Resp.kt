@@ -151,12 +151,15 @@ class LoadConfig(
     val pager: Pager
         get() = _pager
     val page: Int
-        get() = _pager.also { if (mode != LoadMode.LOADMORE) it.reset() }.get()
+        get() = _pager.get()
     val pageSize: Int
         get() = _pageSize
 
     fun with(mode: LoadMode): LoadConfig {
         this._mode = mode
+        if (mode != LoadMode.LOADMORE) {
+            this._pager.reset()
+        }
         return this
     }
 
