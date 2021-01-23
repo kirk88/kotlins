@@ -379,6 +379,10 @@ open class CommonRecyclerAdapter<ITEM>(
         }
     }
 
+    fun refreshItems(payload: Any? = null) {
+        notifyItemRangeChanged(0, itemCount, payload)
+    }
+
     fun containsItem(item: ITEM): Boolean {
         synchronized(lock) {
             return modifiableItems.contains(item)
