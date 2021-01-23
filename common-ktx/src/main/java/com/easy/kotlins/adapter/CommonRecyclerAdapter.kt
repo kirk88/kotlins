@@ -380,7 +380,7 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun refreshItems(payload: Any? = null) {
-        notifyItemRangeChanged(0, itemCount, payload)
+        notifyItemRangeChanged(headerCount, actualItemCount, payload)
     }
 
     fun containsItem(item: ITEM): Boolean {
