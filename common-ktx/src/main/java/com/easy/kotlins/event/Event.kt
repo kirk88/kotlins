@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
 import com.easy.kotlins.helper.opt
 import com.easy.kotlins.helper.toBundle
@@ -67,6 +66,21 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Event
+
+        if (what != other.what) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return what
+    }
+
 }
 
 class SingleEvent(what: Int = Status.NONE, message: String? = null) : Event(what, message)
@@ -82,6 +96,7 @@ internal class EventCollection(val events: List<Event>) : Event() {
     override fun toString(): String {
         return "MultipleEvent(events=$events)"
     }
+
 }
 
 object Status {
@@ -102,6 +117,8 @@ object Status {
     const val SHOW_EMPTY = STATUS_BASE + 9
     const val SHOW_ERROR = STATUS_BASE + 10
     const val SHOW_CONTENT = STATUS_BASE + 11
+
+    const val FINISH_ACTIVITY = STATUS_BASE + 12
 }
 
 fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
@@ -122,14 +139,16 @@ inline fun buildSingleEvent(
 ) = SingleEvent(what, message).apply(init)
 
 
-inline fun <reified T : Activity> intentEvent(context: Context, vararg pairs: Pair<String, Any?>) =
-    buildSingleEvent {
+inline fun <reified T : Activity> activityLauncher(
+    context: Context,
+    vararg pairs: Pair<String, Any?>
+) = buildSingleEvent {
         setIntent(Intent(context, T::class.java).apply {
             putExtras(pairs.toBundle())
         })
     }
 
-inline fun <reified T : Activity> intentEventForResult(
+inline fun <reified T : Activity> activityLauncherForResult(
     context: Context,
     requestCode: Int,
     vararg pairs: Pair<String, Any?>
@@ -139,28 +158,38 @@ inline fun <reified T : Activity> intentEventForResult(
     })
 }
 
-fun toastShow(message: String): Event = SingleEvent(message = message)
+fun activityResult(vararg pairs: Pair<String, Any?>) = buildSingleEvent {
+    setIntent(Intent().apply {
+        putExtras(pairs.toBundle())
+    })
+}
 
-fun progressShow(message: String? = null): Event = SingleEvent(Status.SHOW_PROGRESS, message)
+fun activityResult(code: Int, vararg pairs: Pair<String, Any?>) = buildSingleEvent(code) {
+    setIntent(Intent().apply {
+        putExtras(pairs.toBundle())
+    })
+}
 
-fun progressDismiss(): Event = SingleEvent(Status.DISMISS_PROGRESS)
+fun progressShower(message: String? = null): Event = SingleEvent(Status.SHOW_PROGRESS, message)
 
-fun refreshCompleted(): Event = SingleEvent(Status.REFRESH_COMPLETE)
+fun progressDismissal(): Event = SingleEvent(Status.DISMISS_PROGRESS)
 
-fun loadMoreCompleted(hasMore: Boolean = true): Event =
+fun refreshCompletion(): Event = SingleEvent(Status.REFRESH_COMPLETE)
+
+fun loadMoreCompletion(hasMore: Boolean = true): Event =
     SingleEvent(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
-fun refreshFailed(): Event = SingleEvent(Status.REFRESH_FAILURE)
+fun refreshFailure(): Event = SingleEvent(Status.REFRESH_FAILURE)
 
-fun loadMoreFailed(): Event = SingleEvent(Status.LOADMORE_FAILURE)
+fun loadMoreFailure(): Event = SingleEvent(Status.LOADMORE_FAILURE)
 
-fun loadingShow(message: String? = null): Event = SingleEvent(Status.SHOW_LOADING, message)
+fun loadingShower(message: String? = null): Event = SingleEvent(Status.SHOW_LOADING, message)
 
-fun emptyShow(message: String? = null): Event = SingleEvent(Status.SHOW_EMPTY, message)
+fun emptyShower(message: String? = null): Event = SingleEvent(Status.SHOW_EMPTY, message)
 
-fun errorShow(message: String? = null): Event = SingleEvent(Status.SHOW_ERROR, message)
+fun errorShower(message: String? = null): Event = SingleEvent(Status.SHOW_ERROR, message)
 
-fun contentShow(): Event = SingleEvent(Status.SHOW_CONTENT)
+fun contentShower(): Event = SingleEvent(Status.SHOW_CONTENT)
 
 fun eventOf(events: List<Event>): Event = EventCollection(events = events)
 

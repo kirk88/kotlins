@@ -70,7 +70,21 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
 
     fun formDataParts(operation: RequestPairs<Any?>.() -> Unit) {
         RequestPairs<Any?>().apply(operation).forEach {
-            request.addFormDataPart(it.key, it.value.toString())
+            it.value.let { value ->
+                when (value) {
+                    is BodyFromDataPart -> request.addFormDataPart(
+                        it.key,
+                        value.filename,
+                        value.body
+                    )
+                    is FileFormDataPart -> request.addFormDataPart(
+                        it.key,
+                        value.contentType,
+                        value.file
+                    )
+                    else -> request.addFormDataPart(it.key, value.toString())
+                }
+            }
         }
     }
 
@@ -161,9 +175,11 @@ data class BodyPart(val body: RequestBody, val headers: Headers? = null)
 data class BodyFromDataPart(val body: RequestBody, val filename: String? = null)
 data class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
-class RequestPairs<T> : Iterable<Map.Entry<String, T>> {
+class RequestPairs<T>(
+    pairs: Map<String, T> = mutableMapOf()
+) : Iterable<Map.Entry<String, T>> {
 
-    private val pairs: MutableMap<String, T> = mutableMapOf()
+    private val pairs: MutableMap<String, T> = pairs.toMutableMap()
 
     infix fun String.to(value: T) {
         pairs[this] = value
@@ -208,6 +224,9 @@ fun requestPairsOf(
     serializeNulls: Boolean = false,
     operation: (RequestPairs<Any?>.() -> Unit)? = null
 ): RequestPairs<Any?> {
+    if (copyFrom is Map<*, *>) {
+        return RequestPairs(copyFrom.mapKeys { it.key.toString() })
+    }
     return RequestPairs<Any?>().apply {
         val source: String =
             if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJSON()

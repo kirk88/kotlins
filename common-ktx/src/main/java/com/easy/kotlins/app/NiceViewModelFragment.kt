@@ -2,6 +2,7 @@
 
 package com.easy.kotlins.app
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
@@ -76,10 +77,15 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) : Nice
         }
 
         val intent = event.getIntent() ?: return false
-        if (event.what == Status.NONE) {
-            startActivity(intent)
-        } else {
-            startActivityForResult(intent, event.what)
+        when {
+            intent.component == null -> {
+                activity?.let {
+                    it.setResult(Activity.RESULT_OK, intent)
+                    it.finish()
+                }
+            }
+            event.what == Status.NONE -> startActivity(intent)
+            else -> startActivityForResult(intent, event.what)
         }
         return true
     }

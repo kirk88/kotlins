@@ -253,7 +253,7 @@ fun <T> OkFaker<T>.loadPlugin(
 ) {
 
     onStart {
-        if (config.mode == LoadMode.START) onEvent?.invoke(loadingShow())
+        if (config.mode == LoadMode.START) onEvent?.invoke(loadingShower())
     }
 
     onSuccess {
@@ -262,13 +262,13 @@ fun <T> OkFaker<T>.loadPlugin(
                 if (it is Collection<*>) {
                     onEvent?.invoke(
                         when (config.mode) {
-                            LoadMode.START -> it.isEmpty().opt(emptyShow(), contentShow())
-                            LoadMode.REFRESH -> refreshCompleted()
-                            LoadMode.LOADMORE -> loadMoreCompleted(it.isNotEmpty())
+                            LoadMode.START -> it.isNotEmpty().opt(contentShower(), emptyShower())
+                            LoadMode.REFRESH -> it.isNotEmpty().opt(refreshCompletion(), emptyShower())
+                            LoadMode.LOADMORE -> loadMoreCompletion(it.isNotEmpty())
                         }
                     )
                 } else {
-                    onEvent?.invoke(contentShow())
+                    onEvent?.invoke(contentShower())
                 }
             }
 
@@ -283,9 +283,9 @@ fun <T> OkFaker<T>.loadPlugin(
             add(config.delayed) {
                 onEvent?.invoke(
                     when (config.mode) {
-                        LoadMode.START -> errorShow(it.message)
-                        LoadMode.REFRESH -> refreshFailed()
-                        LoadMode.LOADMORE -> loadMoreFailed()
+                        LoadMode.START -> errorShower(it.message)
+                        LoadMode.REFRESH -> refreshFailure()
+                        LoadMode.LOADMORE -> loadMoreFailure()
                     }
                 )
             }
@@ -319,7 +319,7 @@ fun <T> OkFaker<T>.loadPlugin(
     onApply: (T) -> Unit
 ) {
     onStart {
-        onEvent?.invoke(progressShow(message))
+        onEvent?.invoke(progressShower(message))
     }
 
     onSuccess {

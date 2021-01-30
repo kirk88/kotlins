@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.easy.kotlins.adapter.anim.BaseItemViewAnimation
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
-import com.easy.kotlins.helper.onClick
-import com.easy.kotlins.helper.onLongClick
 import java.util.*
 
 open class CommonRecyclerAdapter<ITEM>(
@@ -29,9 +27,12 @@ open class CommonRecyclerAdapter<ITEM>(
     private val itemDelegates: HashMap<Int, ItemViewDelegate<out ITEM>> = hashMapOf(*itemDelegates)
 
     private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
-    private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? = null
-    private var itemChildClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Unit)? = null
-    private var itemChildLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Boolean)? = null
+    private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =
+        null
+    private var itemChildClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Unit)? =
+        null
+    private var itemChildLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Boolean)? =
+        null
 
     private val lock: Any = Any()
 
@@ -185,7 +186,7 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun setItems(items: List<ITEM>?) {
-        if(itemAnimation is BaseItemViewAnimation){
+        if (itemAnimation is BaseItemViewAnimation) {
             itemAnimation.reset()
         }
 
@@ -426,7 +427,7 @@ open class CommonRecyclerAdapter<ITEM>(
 
     fun getActualPosition(position: Int): Int = position - headerCount
 
-    operator fun get(position: Int): ITEM = modifiableItems[position - headerCount]
+    fun getItem(position: Int): ITEM = modifiableItems[position - headerCount]
 
     fun getItemOrNull(position: Int): ITEM? = modifiableItems.getOrNull(position - headerCount)
 
@@ -502,19 +503,19 @@ open class CommonRecyclerAdapter<ITEM>(
 
                 registerListener(holder)
 
-                holder.clickViews.onClick {
+                holder.setOnChildClickListener {
                     if (!onItemChildClick(holder, it))
                         itemChildClickListener?.invoke(this, holder, it)
                 }
 
-                holder.longClickViews.onLongClick {
+                holder.setOnChildLongClickListener {
                     if (!onItemChildLongClick(holder, it))
                         itemChildLongClickListener?.invoke(this, holder, it) ?: false
                     else true
                 }
 
                 if (itemClickListener != null || itemClickable) {
-                    holder.itemView.setOnClickListener {
+                    holder.setOnClickListener {
                         if (!onItemClick(holder)) {
                             itemClickListener?.invoke(this, holder)
                         }
@@ -522,7 +523,7 @@ open class CommonRecyclerAdapter<ITEM>(
                 }
 
                 if (itemLongClickListener != null || itemLongClickable) {
-                    holder.itemView.setOnLongClickListener {
+                    holder.setOnLongClickListener {
                         if (!onItemLongClick(holder))
                             itemLongClickListener?.invoke(this, holder) ?: false
                         else true
@@ -595,5 +596,12 @@ open class CommonRecyclerAdapter<ITEM>(
         private const val TYPE_FOOTER_VIEW = Int.MAX_VALUE - 999
     }
 
-
 }
+
+operator fun <T> CommonRecyclerAdapter<T>.get(position: Int): T = getItem(position)
+
+operator fun <T> CommonRecyclerAdapter<T>.plus(item: T) = addItem(item)
+
+operator fun <T> CommonRecyclerAdapter<T>.plus(items: List<T>) = addItems(items)
+
+operator fun <T> CommonRecyclerAdapter<T>.plusAssign(items: List<T>) = setItems(items)

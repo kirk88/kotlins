@@ -19,14 +19,14 @@ fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =
 
 fun CharSequence.highlight(
     target: String?,
+    startIndex: Int = 0,
     @ColorInt color: Int = Color.RED,
     size: Int = 0,
     style: Int = Typeface.NORMAL
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
         target ?: return@apply
-        var result = target.toRegex().find(this)
-        while (result != null) {
+        for (result in target.toRegex().findAll(this, startIndex)) {
             setSpan(
                 ForegroundColorSpan(color),
                 result.range.first,
@@ -49,7 +49,6 @@ fun CharSequence.highlight(
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             }
-            result = result.next()
         }
     }
 }
@@ -181,11 +180,7 @@ fun CharSequence.append(
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
-        append(text.asSpannableBuilder().also {
-            if (span != null) {
-                it.setSpan(span, start, end, flags)
-            }
-        })
+        append(if (span != null) text.withSpan(span, start, end, flags) else span)
     }
 }
 
@@ -197,11 +192,7 @@ fun CharSequence.appendLine(
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
-        append('\n').append(text.asSpannableBuilder().also {
-            if (span != null) {
-                it.setSpan(span, start, end, flags)
-            }
-        })
+        append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else span)
     }
 }
 

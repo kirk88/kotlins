@@ -82,10 +82,13 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : Nice
         }
 
         val intent = event.getIntent() ?: return false
-        if (event.what == Status.NONE) {
-            startActivity(intent)
-        } else {
-            startActivityForResult(intent, event.what)
+        when {
+            intent.component == null -> {
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+            event.what == Status.NONE -> startActivity(intent)
+            else -> startActivityForResult(intent, event.what)
         }
         return false
     }
