@@ -600,8 +600,12 @@ open class CommonRecyclerAdapter<ITEM>(
 
 operator fun <T> CommonRecyclerAdapter<T>.get(position: Int): T = getItem(position)
 
-operator fun <T> CommonRecyclerAdapter<T>.plus(item: T) = addItem(item)
+operator fun <T, A: CommonRecyclerAdapter<T>> A.plus(item: T): A = this.apply { addItem(item) }
 
-operator fun <T> CommonRecyclerAdapter<T>.plus(items: List<T>) = addItems(items)
+operator fun <T, A: CommonRecyclerAdapter<T>> A.plus(items: List<T>): A = this.apply { addItems(items) }
+
+operator fun <T, A: CommonRecyclerAdapter<T>> A.minus(item: T): A = this.apply { removeItem(item) }
+
+operator fun <T, A: CommonRecyclerAdapter<T>> A.minus(items: List<T>): A = this.apply { removeItems(items) }
 
 operator fun <T> CommonRecyclerAdapter<T>.plusAssign(items: List<T>) = setItems(items)
