@@ -94,6 +94,14 @@ abstract class OkRequest<T> {
         requestBuilder.removeHeader(key)
     }
 
+    fun setUsername(username: String){
+        urlBuilder.username(username)
+    }
+
+    fun setPassword(password: String){
+        urlBuilder.password(password)
+    }
+
     fun addQueryParameter(key: String, value: String) {
         urlBuilder.addQueryParameter(key, value)
     }
