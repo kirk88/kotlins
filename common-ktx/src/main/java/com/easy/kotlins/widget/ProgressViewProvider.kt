@@ -69,7 +69,7 @@ internal class SimpleProgressView(parent: View) : PopupWindow(), ProgressView {
         contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
         if (!isShowing) {
             val view = parent ?: return
-            view.post { showAtLocation(view, Gravity.CENTER, 0, 0) }
+            view.post { showAtLocation(view.rootView, Gravity.CENTER, 0, 0) }
         }
     }
 

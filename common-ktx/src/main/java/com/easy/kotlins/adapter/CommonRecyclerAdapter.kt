@@ -472,7 +472,7 @@ open class CommonRecyclerAdapter<ITEM>(
     final override fun getItemViewType(position: Int): Int {
         return when {
             isHeader(position) -> TYPE_HEADER_VIEW + position
-            isFooter(position) -> TYPE_FOOTER_VIEW + position - actualItemCount - headerCount
+            isFooter(position) -> TYPE_FOOTER_VIEW + position
             else -> getItemOrNull(position)?.let {
                 getItemViewType(it, getActualPosition(position))
             } ?: 0
@@ -485,7 +485,7 @@ open class CommonRecyclerAdapter<ITEM>(
                 ItemViewHolder(headerViews.get(viewType))
             }
 
-            viewType >= TYPE_FOOTER_VIEW -> {
+            viewType > TYPE_FOOTER_VIEW -> {
                 ItemViewHolder(footerViews.get(viewType))
             }
 
@@ -593,19 +593,21 @@ open class CommonRecyclerAdapter<ITEM>(
 
     companion object {
         private const val TYPE_HEADER_VIEW = Int.MIN_VALUE
-        private const val TYPE_FOOTER_VIEW = Int.MAX_VALUE - 999
+        private const val TYPE_FOOTER_VIEW = Int.MAX_VALUE / 2
     }
 
 }
 
 operator fun <T> CommonRecyclerAdapter<T>.get(position: Int): T = getItem(position)
 
-operator fun <T, A: CommonRecyclerAdapter<T>> A.plus(item: T): A = this.apply { addItem(item) }
+operator fun <T, A : CommonRecyclerAdapter<T>> A.plus(item: T): A = this.apply { addItem(item) }
 
-operator fun <T, A: CommonRecyclerAdapter<T>> A.plus(items: List<T>): A = this.apply { addItems(items) }
+operator fun <T, A : CommonRecyclerAdapter<T>> A.plus(items: List<T>): A =
+    this.apply { addItems(items) }
 
-operator fun <T, A: CommonRecyclerAdapter<T>> A.minus(item: T): A = this.apply { removeItem(item) }
+operator fun <T, A : CommonRecyclerAdapter<T>> A.minus(item: T): A = this.apply { removeItem(item) }
 
-operator fun <T, A: CommonRecyclerAdapter<T>> A.minus(items: List<T>): A = this.apply { removeItems(items) }
+operator fun <T, A : CommonRecyclerAdapter<T>> A.minus(items: List<T>): A =
+    this.apply { removeItems(items) }
 
 operator fun <T> CommonRecyclerAdapter<T>.plusAssign(items: List<T>) = setItems(items)

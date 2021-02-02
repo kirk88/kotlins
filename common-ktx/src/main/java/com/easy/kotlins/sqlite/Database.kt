@@ -10,8 +10,18 @@ import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
-enum class SqlOrderDirection { ASC, DESC }
+interface SqlColumnCell {
 
+    val name: String
+
+    val value: Any
+
+    companion object {
+        fun create(name: String, value: Any): SqlColumnCell = SqlColumnCellImpl(name, value)
+    }
+}
+
+enum class SqlOrderDirection { ASC, DESC }
 
 /**
  * Convenience method for inserting a row into the database.
@@ -205,7 +215,7 @@ fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
 fun SQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean = false,
-    vararg columns: Pair<String, SqlType>
+    vararg columns: SqlColumnProperty
 ) {
     val escapedTableName = table.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
@@ -214,9 +224,7 @@ fun SQLiteDatabase.createTable(
             ", ",
             prefix = "CREATE TABLE $ifNotExistsText `$escapedTableName`(",
             postfix = ");"
-        ) { col ->
-            "${col.first} ${col.second.render()}"
-        }
+        ) { col -> col.render() }
     )
 }
 
@@ -246,6 +254,26 @@ fun SQLiteDatabase.createIndex(
     )
 }
 
+fun SQLiteDatabase.createIndex(
+    indexName: String,
+    tableName: String,
+    unique: Boolean = false,
+    ifNotExists: Boolean = false,
+    vararg columns: SqlColumnProperty
+) {
+    val escapedIndexName = indexName.replace("`", "``")
+    val escapedTableName = tableName.replace("`", "``")
+    val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
+    val uniqueText = if (unique) "UNIQUE" else ""
+    execSQL(
+        columns.joinToString(
+            separator = ",",
+            prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
+            postfix = ");"
+        ) { it.name }
+    )
+}
+
 fun SQLiteDatabase.dropIndex(indexName: String, ifExists: Boolean = false) {
     val escapedIndexName = indexName.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
@@ -255,25 +283,25 @@ fun SQLiteDatabase.dropIndex(indexName: String, ifExists: Boolean = false) {
 fun SQLiteDatabase.createColumn(
     table: String,
     ifNotExists: Boolean = false,
-    column: Pair<String, SqlType>
+    column: SqlColumnProperty
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
         rawQuery("SELECT * FROM $table LIMIT 0", null).use {
-            it.getColumnIndex(column.first) != -1
+            it.getColumnIndex(column.name) != -1
         }
     } else {
         false
     }
     if (!exists) {
-        execSQL("ALTER TABLE $escapedTableName ADD ${column.first} ${column.second.render()}")
+        execSQL("ALTER TABLE $escapedTableName ADD ${column.render()}")
     }
 }
 
 fun SQLiteDatabase.createColumns(
     table: String,
     ifNotExists: Boolean = false,
-    vararg columns: Pair<String, SqlType>
+    vararg columns: SqlColumnProperty
 ) {
     transaction {
         for (column in columns) {
@@ -384,3 +412,6 @@ abstract class ManagedSQLiteOpenHelper(
         }
     }
 }
+
+private open class SqlColumnCellImpl(override val name: String, override val value: Any) :
+    SqlColumnCell
