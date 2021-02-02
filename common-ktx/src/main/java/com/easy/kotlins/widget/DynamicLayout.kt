@@ -36,7 +36,7 @@ class DynamicLayout @JvmOverloads constructor(
     private val views = mutableMapOf<Int, View>()
 
     @ViewType
-    private var showType = 0
+    private var viewType = 0
     private var emptyLayoutId: Int
     private var loadingLayoutId: Int
     private var errorLayoutId: Int
@@ -49,6 +49,7 @@ class DynamicLayout @JvmOverloads constructor(
     private var emptyButtonText: CharSequence?
     private var emptyButtonTextColor: Int
     private var emptyButtonTextAppearance: Int
+    private var emptyButtonVisible: Boolean
 
     private var errorImage: Drawable?
     private var errorText: CharSequence
@@ -58,6 +59,7 @@ class DynamicLayout @JvmOverloads constructor(
     private var errorButtonText: CharSequence?
     private var errorButtonTextColor: Int
     private var errorButtonTextAppearance: Int
+    private var errorButtonVisible: Boolean
 
     private var loadingProgressColor: Int
     private var loadingProgressDrawable: Drawable?
@@ -65,28 +67,37 @@ class DynamicLayout @JvmOverloads constructor(
     private var loadingTextColor: Int
     private var loadingTextAppearance: Int
 
-    private var errorClickListener: OnClickListener? = null
-    private val errorButtonClickListener = OnClickListener { v ->
-        if (errorClickListener != null) {
-            errorClickListener!!.onClick(v)
+    private val defaultShowType: Int
+
+    private var errorActionListener: OnActionListener? = null
+    private val errorButtonClickListener = OnClickListener { _ ->
+        if (errorActionListener != null) {
+            errorActionListener!!.onAction(this)
         }
     }
 
-    private var emptyClickListener: OnClickListener? = null
-    private val emptyButtonClickListener = OnClickListener { v ->
-        if (emptyClickListener != null) {
-            emptyClickListener!!.onClick(v)
+    private var emptyActionListener: OnActionListener? = null
+    private val emptyButtonClickListener = OnClickListener { _ ->
+        if (emptyActionListener != null) {
+            emptyActionListener!!.onAction(this)
         }
     }
 
-    private var dataObserver: AdapterDataObserver? = null
+    private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onFinishInflate() {
         super.onFinishInflate()
         check(childCount <= 1) { "DynamicLayout can host only one direct child in layout" }
-        setView(getChildAt(0), TYPE_CONTENT_VIEW)
+
+        if (childCount == 1) {
+            addView(TYPE_CONTENT_VIEW, getChildAt(0))
+        }
+
+        if(!isInEditMode){
+            show(defaultShowType)
+        }
     }
 
     override fun showLoading() {
@@ -105,56 +116,63 @@ class DynamicLayout @JvmOverloads constructor(
         show(TYPE_CONTENT_VIEW)
     }
 
-    override fun setLoadingView(@LayoutRes layoutResId: Int): DynamicLayout {
-        setView(layoutResId, TYPE_LOADING_VIEW)
+    override fun setContentView(layoutResId: Int): LoadingView {
+        addView(TYPE_CONTENT_VIEW, layoutResId, viewType == TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setLoadingView(view: View): DynamicLayout {
-        if (views.containsValue(view)) return this
-        setView(view, TYPE_LOADING_VIEW)
+    override fun setContentView(view: View): LoadingView {
+        addView(TYPE_CONTENT_VIEW, view, viewType == TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setEmptyView(@LayoutRes layoutResId: Int): DynamicLayout {
-        setView(layoutResId, TYPE_EMPTY_VIEW)
+    override fun setLoadingView(@LayoutRes layoutResId: Int): LoadingView {
+        addView(TYPE_LOADING_VIEW, layoutResId, viewType == TYPE_LOADING_VIEW)
+        return this
+    }
+
+    override fun setLoadingView(view: View): LoadingView {
+        addView(TYPE_LOADING_VIEW, view, viewType == TYPE_LOADING_VIEW)
+        return this
+    }
+
+    override fun setEmptyView(@LayoutRes layoutResId: Int): LoadingView {
+        addView(TYPE_EMPTY_VIEW, layoutResId, viewType == TYPE_EMPTY_VIEW)
         return this
     }
 
     override fun setEmptyView(view: View): DynamicLayout {
-        if (views.containsValue(view)) return this
-        setView(view, TYPE_EMPTY_VIEW)
+        addView(TYPE_EMPTY_VIEW, view, viewType == TYPE_EMPTY_VIEW)
         return this
     }
 
-    override fun setErrorView(@LayoutRes layoutResId: Int): DynamicLayout {
-        setView(layoutResId, TYPE_ERROR_VIEW)
+    override fun setErrorView(@LayoutRes layoutResId: Int): LoadingView {
+        addView(TYPE_ERROR_VIEW, layoutResId, viewType == TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setErrorView(view: View): DynamicLayout {
-        if (views.containsValue(view)) return this
-        setView(view, TYPE_ERROR_VIEW)
+    override fun setErrorView(view: View): LoadingView {
+        addView(TYPE_ERROR_VIEW, view, viewType == TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setEmptyImage(drawable: Drawable?): DynamicLayout {
+    override fun setEmptyImage(drawable: Drawable?): LoadingView {
         emptyImage = drawable
         findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setEmptyImage(@DrawableRes drawableId: Int): DynamicLayout {
+    override fun setEmptyImage(@DrawableRes drawableId: Int): LoadingView {
         return setEmptyImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setEmptyText(text: CharSequence): DynamicLayout {
+    override fun setEmptyText(text: CharSequence): LoadingView {
         emptyText = text
         findViewById<TextView>(R.id.empty_text)?.text = text
         return this
     }
 
-    override fun setEmptyText(@StringRes textId: Int): DynamicLayout {
+    override fun setEmptyText(@StringRes textId: Int): LoadingView {
         return setEmptyText(context.getText(textId))
     }
 
@@ -162,7 +180,7 @@ class DynamicLayout @JvmOverloads constructor(
         emptyButtonText = text
         findViewById<TextView>(R.id.empty_button)?.let {
             it.text = text
-            it.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+            it.visibility = if (text.isBlank()) GONE else VISIBLE
         }
         return this
     }
@@ -171,113 +189,131 @@ class DynamicLayout @JvmOverloads constructor(
         return setEmptyButtonText(context.getText(textId))
     }
 
-    override fun setEmptyClickListener(listener: OnClickListener?): LoadingView {
-        emptyClickListener = listener
+    override fun setEmptyButtonVisible(visible: Boolean): LoadingView {
+        emptyButtonVisible = visible
+        findViewById<TextView>(R.id.empty_button)?.apply {
+            visibility = if (visible) VISIBLE else GONE
+        }
         return this
     }
 
-    override fun setLoadingText(text: CharSequence): DynamicLayout {
+    override fun setEmptyActionListener(listener: OnActionListener): LoadingView {
+        emptyActionListener = listener
+        return this
+    }
+
+    override fun setLoadingText(text: CharSequence): LoadingView {
         loadingText = text
         findViewById<TextView>(R.id.loading_text)?.text = text
         return this
     }
 
-    override fun setLoadingText(@StringRes textId: Int): DynamicLayout {
+    override fun setLoadingText(@StringRes textId: Int): LoadingView {
         return setLoadingText(context.getText(textId))
     }
 
-    override fun setErrorImage(drawable: Drawable?): DynamicLayout {
+    override fun setErrorImage(drawable: Drawable?): LoadingView {
         errorImage = drawable
         findViewById<ImageView>(R.id.error_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setErrorImage(@DrawableRes drawableId: Int): DynamicLayout {
+    override fun setErrorImage(@DrawableRes drawableId: Int): LoadingView {
         return setErrorImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setErrorText(text: CharSequence): DynamicLayout {
+    override fun setErrorText(text: CharSequence): LoadingView {
         emptyText = text
         findViewById<TextView>(R.id.error_text)?.text = text
         return this
     }
 
-    override fun setErrorText(@StringRes textId: Int): DynamicLayout {
+    override fun setErrorText(@StringRes textId: Int): LoadingView {
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setErrorButtonText(text: CharSequence): DynamicLayout {
+    override fun setErrorButtonText(text: CharSequence): LoadingView {
         errorButtonText = text
         findViewById<TextView>(R.id.error_button)?.let {
             it.text = text
-            it.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+            it.visibility = if (text.isBlank()) GONE else VISIBLE
         }
         return this
     }
 
-    override fun setErrorButtonText(@StringRes textId: Int): DynamicLayout {
+    override fun setErrorButtonText(@StringRes textId: Int): LoadingView {
         return setErrorButtonText(context.getText(textId))
     }
 
-    override fun setErrorClickListener(listener: OnClickListener?): DynamicLayout {
-        errorClickListener = listener
+    override fun setErrorButtonVisible(visible: Boolean): LoadingView {
+        errorButtonVisible = visible
+        findViewById<TextView>(R.id.error_button)?.apply {
+            visibility = if (visible) VISIBLE else GONE
+        }
         return this
     }
 
-    override fun attachTo(adapter: RecyclerView.Adapter<*>) {
-        if(dataObserver != null) dataObserver!!.unregister()
-        dataObserver = AdapterDataObserver(adapter) { this }.also {
-            it.register()
+    override fun setErrorActionListener(listener: OnActionListener): LoadingView {
+        errorActionListener = listener
+        return this
+    }
+
+    override fun attachTo(adapter: RecyclerView.Adapter<*>): LoadingView {
+        if (dataObservers == null) {
+            dataObservers = mutableMapOf()
         }
+        dataObservers!!.getOrPut(adapter) {
+            AdapterDataObserver(adapter) { this }
+        }.register()
+        return this
+    }
+
+    override fun detachTo(adapter: RecyclerView.Adapter<*>): LoadingView {
+        dataObservers?.get(adapter)?.unregister()
+        return this
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        dataObserver?.unregister()
-    }
-
-    private fun addContentView(view: View?) {
-        requireNotNull(view) { "content view can not be null" }
-        setView(view, TYPE_CONTENT_VIEW)
+        dataObservers?.forEach {
+            it.value.unregister()
+        }
     }
 
     private fun show(@ViewType viewType: Int) {
-        if (this.showType == viewType) return
+        if (this.viewType == viewType) return
 
-        views.filterKeys { it != viewType }.forEach {
-            it.value.visibility = View.INVISIBLE
+        this.viewType = viewType
+
+        for ((type, view) in views) {
+            if (type == viewType) continue
+
+            view.visibility = INVISIBLE
         }
 
-        views.getOrPut(viewType) {
+        views.getOrElse(viewType) {
             when (viewType) {
-                TYPE_EMPTY_VIEW -> setView(emptyLayoutId, TYPE_EMPTY_VIEW)
-                TYPE_LOADING_VIEW -> setView(loadingLayoutId, TYPE_LOADING_VIEW)
-                TYPE_ERROR_VIEW -> setView(errorLayoutId, TYPE_ERROR_VIEW)
-                else -> error("can not find view by key: $viewType")
+                TYPE_EMPTY_VIEW -> addView(TYPE_EMPTY_VIEW, emptyLayoutId, true)
+                TYPE_LOADING_VIEW -> addView(TYPE_LOADING_VIEW, loadingLayoutId, true)
+                TYPE_ERROR_VIEW -> addView(TYPE_ERROR_VIEW, errorLayoutId, true)
+                TYPE_CONTENT_VIEW -> error("Content view must not be null")
+                else -> error("Can not find view by key: $viewType")
             }
-        }.also {
-            it.visibility = View.VISIBLE
-            if (indexOfChild(it) >= 0) return@also
+        }.visibility = VISIBLE
+    }
 
-            if (viewType == TYPE_CONTENT_VIEW) {
-                addView(
-                    it,
-                    0,
-                    LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-                )
-            } else {
-                addView(it)
-            }
+    private fun addView(
+        @ViewType viewType: Int,
+        @LayoutRes layoutResId: Int,
+        attach: Boolean = false
+    ): View {
+        return addView(viewType, inflater.inflate(layoutResId, this, false), attach)
+    }
+
+    private fun addView(@ViewType viewType: Int, view: View, attach: Boolean = false): View {
+        views[viewType] = view.also {
+            it.visibility = if (viewType == viewType) VISIBLE else INVISIBLE
         }
-
-        this.showType = viewType
-    }
-
-    private fun setView(@LayoutRes layoutResId: Int, @ViewType showType: Int): View {
-        return setView(inflater.inflate(layoutResId, this, false), showType)
-    }
-
-    private fun setView(view: View, @ViewType viewType: Int): View {
         when (viewType) {
             TYPE_EMPTY_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.empty_image)
@@ -303,7 +339,7 @@ class DynamicLayout @JvmOverloads constructor(
                         it.setTextColor(emptyButtonTextColor)
                     }
                     it.setOnClickListener(emptyButtonClickListener)
-                    it.visibility = if (emptyButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
+                    it.visibility = if (emptyButtonVisible) VISIBLE else GONE
                 }
             }
             TYPE_LOADING_VIEW -> {
@@ -352,16 +388,18 @@ class DynamicLayout @JvmOverloads constructor(
                         it.setTextColor(errorButtonTextColor)
                     }
                     it.setOnClickListener(errorButtonClickListener)
-                    it.visibility = if (errorButtonText.isNullOrBlank()) View.GONE else View.VISIBLE
+                    it.visibility = if (errorButtonVisible) VISIBLE else GONE
                 }
             }
         }
 
-        views.put(viewType, view).let {
-            if (viewType != TYPE_CONTENT_VIEW && indexOfChild(it) > 0) removeView(it)
+        if (attach && indexOfChild(view) < 0) {
+            if (viewType == TYPE_CONTENT_VIEW) {
+                addView(view, 0, view.layoutParams ?: LayoutParams(-1, -1))
+            } else {
+                addView(view)
+            }
         }
-
-        if (this.showType != viewType) view.visibility = View.INVISIBLE
 
         return view
     }
@@ -370,6 +408,9 @@ class DynamicLayout @JvmOverloads constructor(
         internal val adapter: RecyclerView.Adapter<*>,
         dynamicLayout: () -> DynamicLayout
     ) : RecyclerView.AdapterDataObserver() {
+
+        private var registed: Boolean = false
+
         private val layout: DynamicLayout? by weak(dynamicLayout)
 
         override fun onChanged() {
@@ -393,11 +434,21 @@ class DynamicLayout @JvmOverloads constructor(
         }
 
         fun register() {
+            if (registed) {
+                return
+            }
+
             adapter.registerAdapterDataObserver(this)
+            registed = true
         }
 
         fun unregister() {
+            if (!registed) {
+                return
+            }
+
             adapter.unregisterAdapterDataObserver(this)
+            registed = false
         }
     }
 
@@ -421,7 +472,7 @@ class DynamicLayout @JvmOverloads constructor(
             val index = parent.indexOfChild(view)
             parent.removeView(view)
             val layout = DynamicLayout(view.context)
-            layout.addContentView(view)
+            layout.setContentView(view)
             parent.addView(layout, index, lp)
             return layout
         }
@@ -461,6 +512,8 @@ class DynamicLayout @JvmOverloads constructor(
                 emptyButtonBackground = ColorDrawable(color)
             }
         }
+        emptyButtonVisible = a.getBoolean(R.styleable.DynamicLayout_emptyButtonVisible, true)
+
         errorImage = a.getDrawable(R.styleable.DynamicLayout_errorImage)
         errorText = a.getText(R.styleable.DynamicLayout_errorText)
         errorTextColor = a.getColor(R.styleable.DynamicLayout_errorTextColor, NO_COLOR)
@@ -477,12 +530,17 @@ class DynamicLayout @JvmOverloads constructor(
                 errorButtonBackground = ColorDrawable(color)
             }
         }
+        errorButtonVisible = a.getBoolean(R.styleable.DynamicLayout_errorButtonVisible, true)
+
+
         loadingProgressColor = a.getColor(R.styleable.DynamicLayout_loadingProgressColor, NO_COLOR)
         loadingProgressDrawable = a.getDrawable(R.styleable.DynamicLayout_loadingProgressDrawable)
         loadingText = a.getText(R.styleable.DynamicLayout_loadingText)
         loadingTextColor = a.getColor(R.styleable.DynamicLayout_loadingTextColor, NO_COLOR)
         loadingTextAppearance =
             a.getResourceId(R.styleable.DynamicLayout_loadingTextAppearance, NO_RESOURCE_ID)
+
+        defaultShowType = a.getInt(R.styleable.DynamicLayout_defaultShow, TYPE_LOADING_VIEW)
         a.recycle()
     }
 }

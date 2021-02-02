@@ -17,6 +17,10 @@ interface LoadingView {
 
     fun showContent()
 
+    fun setContentView(@LayoutRes layoutResId: Int): LoadingView
+
+    fun setContentView(view: View): LoadingView
+
     fun setLoadingView(@LayoutRes layoutResId: Int): LoadingView
 
     fun setLoadingView(view: View): LoadingView
@@ -41,7 +45,9 @@ interface LoadingView {
 
     fun setEmptyButtonText(@StringRes textId: Int): LoadingView
 
-    fun setEmptyClickListener(listener: View.OnClickListener?): LoadingView
+    fun setEmptyButtonVisible(visible: Boolean): LoadingView
+
+    fun setEmptyActionListener(listener: OnActionListener): LoadingView
 
     fun setLoadingText(text: CharSequence): LoadingView
 
@@ -59,7 +65,15 @@ interface LoadingView {
 
     fun setErrorButtonText(@StringRes textId: Int): LoadingView
 
-    fun setErrorClickListener(listener: View.OnClickListener?): LoadingView
+    fun setErrorButtonVisible(visible: Boolean): LoadingView
 
-    fun attachTo(adapter: RecyclerView.Adapter<*>)
+    fun setErrorActionListener(listener: OnActionListener): LoadingView
+
+    fun attachTo(adapter: RecyclerView.Adapter<*>): LoadingView
+
+    fun detachTo(adapter: RecyclerView.Adapter<*>): LoadingView
+}
+
+fun interface OnActionListener {
+    fun onAction(view: LoadingView)
 }

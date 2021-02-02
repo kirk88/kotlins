@@ -100,6 +100,14 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
+    fun username(username: String){
+        request.setUsername(username)
+    }
+
+    fun password(password: String){
+        request.setPassword(password)
+    }
+
     fun queryParameters(operation: RequestPairs<Any?>.() -> Unit) {
         RequestPairs<Any?>().apply(operation).forEach {
             request.setQueryParameter(it.key, it.value.toString())

@@ -331,6 +331,6 @@ fun <T> OkFaker<T>.loadPlugin(
     }
 
     onComplete {
-        onEvent?.invoke(progressDismiss())
+        onEvent?.invoke(progressDismissal())
     }
 }

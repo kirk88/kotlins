@@ -72,6 +72,13 @@
         <attr name="loadingLayout" format="reference" />
         <!-- 错误布局资源id -->
         <attr name="errorLayout" format="reference" />
+        <!-- 默认显示布局  -->
+        <attr name="defaultShow" format="enum">
+            <enum name="content" value="0x001"/>
+            <enum name="empty" value="0x002" />
+            <enum name="loading" value="0x003" />
+            <enum name="error" value="0x004" />
+        </attr>
 
         <!-- 空布局图片 -->
         <attr name="emptyImage" format="reference" />
@@ -89,6 +96,8 @@
         <attr name="emptyButtonTextAppearance" format="reference" />
         <!-- 空布局按钮背景 -->
         <attr name="emptyButtonBackground" format="reference" />
+        <!-- 空布局按钮显示与否 -->
+        <attr name="emptyButtonVisible" format="boolean"/>
 
         <!-- 错误布局图片 -->
         <attr name="errorImage" format="reference" />
@@ -106,6 +115,8 @@
         <attr name="errorButtonTextAppearance" format="reference" />
         <!-- 错误布局重试按钮背景 -->
         <attr name="errorButtonBackground" format="reference" />
+        <!-- 错误布局按钮显示与否 -->
+        <attr name="errorButtonVisible" format="boolean"/>
 
         <!-- 加载中布局进度条颜色 -->
         <attr name="loadingProgressColor" />

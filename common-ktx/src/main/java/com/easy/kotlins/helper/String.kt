@@ -180,7 +180,7 @@ fun CharSequence.append(
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
-        append(if (span != null) text.withSpan(span, start, end, flags) else span)
+        append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
 }
 
@@ -192,7 +192,7 @@ fun CharSequence.appendLine(
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): SpannableStringBuilder {
     return asSpannableBuilder().apply {
-        append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else span)
+        append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
 }
 
