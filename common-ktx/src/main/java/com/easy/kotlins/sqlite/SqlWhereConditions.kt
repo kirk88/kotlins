@@ -54,15 +54,15 @@ fun String.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
 }
 
 fun String.equal(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this = ${escapedString(value)}")
+    return SqlWhereConditionImpl("$this = ${value.toEscapedString()}")
 }
 
 fun String.like(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this LIKE ${escapedString(value)}")
+    return SqlWhereConditionImpl("$this LIKE ${value.toEscapedString()}")
 }
 
 fun String.glob(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this GLOB ${escapedString(value)}")
+    return SqlWhereConditionImpl("$this GLOB ${value.toEscapedString()}")
 }
 
 fun String.greaterThan(value: Int): SqlWhereCondition {
@@ -78,7 +78,7 @@ fun String.any(vararg values: Any): SqlWhereCondition {
             ",",
             "$this IN (",
             ")"
-    ) { escapedString(it) })
+    ) { it.toEscapedString() })
 }
 
 fun String.none(vararg values: Any): SqlWhereCondition {
@@ -86,7 +86,7 @@ fun String.none(vararg values: Any): SqlWhereCondition {
             ",",
             "$this NOT IN (",
             ")"
-    ) { escapedString(it) })
+    ) { it.toEscapedString() })
 }
 
 fun String.notNull(): SqlWhereCondition {
@@ -126,21 +126,21 @@ internal fun applyArguments(whereClause: String, args: Map<String, Any>): String
         val key = matcher.group(2)
         val value = args[key] ?: throw IllegalStateException("Can't find a value for key $key")
 
-        matcher.appendReplacement(buffer, matcher.group(1) + escapedString(value))
+        matcher.appendReplacement(buffer, matcher.group(1) + value.toEscapedString())
     }
     matcher.appendTail(buffer)
     return buffer.toString()
 }
 
-private fun escapedString(value: Any): String {
-    return if (value is Int || value is Long || value is Byte || value is Short) {
-        value.toString()
-    } else if (value is Boolean) {
-        if (value) "1" else "0"
-    } else if (value is Float || value is Double) {
-        value.toString()
+private fun Any.toEscapedString(): String {
+    return if (this is Int || this is Long || this is Byte || this is Short) {
+        this.toString()
+    } else if (this is Boolean) {
+        if (this) "1" else "0"
+    } else if (this is Float || this is Double) {
+        this.toString()
     } else {
-        '\'' + value.toString().replace("'", "''") + '\''
+        '\'' + this.toString().replace("'", "''") + '\''
     }
 }
 

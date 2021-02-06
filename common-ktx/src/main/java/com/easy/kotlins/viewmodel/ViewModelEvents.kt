@@ -3,7 +3,6 @@ package com.easy.kotlins.viewmodel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
-import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.EventObserverOwner
 
 /**

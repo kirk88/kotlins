@@ -5,7 +5,6 @@ package com.easy.kotlins.app
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.annotation.LayoutRes
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObserverOwner
