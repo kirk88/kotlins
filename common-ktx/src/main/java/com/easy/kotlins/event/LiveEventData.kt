@@ -99,6 +99,7 @@ open class LiveEventData<T> {
             if (initiator != null) {
                 considerNotify(initiator)
             } else {
+                @Suppress("INACCESSIBLE_TYPE")
                 val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> = observers.iteratorWithAdditions()
                 while (iterator.hasNext()) {
                     considerNotify(iterator.next().value)
@@ -117,7 +118,7 @@ open class LiveEventData<T> {
             // ignore
             return
         }
-        val wrapper: LifecycleBoundObserver = LifecycleBoundObserver(owner, observer, isSticky)
+        val wrapper = LifecycleBoundObserver(owner, observer, isSticky)
         val existing: ObserverWrapper? = observers.putIfAbsent(observer, wrapper)
         require(!(existing != null && !existing.isAttachedTo(owner))) { "Cannot add the same observer" + " with different lifecycles" }
         if (existing != null) {
@@ -132,7 +133,7 @@ open class LiveEventData<T> {
             // ignore
             return
         }
-        val wrapper: LifecycleBoundObserver = LifecycleActiveObserver(owner, observer, isSticky)
+        val wrapper = LifecycleActiveObserver(owner, observer, isSticky)
         val existing: ObserverWrapper? = observers.putIfAbsent(observer, wrapper)
         require(!(existing != null && !existing.isAttachedTo(owner))) { "Cannot add the same observer" + " with different lifecycles" }
         if (existing != null) {
@@ -143,7 +144,7 @@ open class LiveEventData<T> {
 
     @MainThread
     private fun observeForever(observer: Observer<in T>, isSticky: Boolean) {
-        val wrapper: AlwaysActiveObserver = AlwaysActiveObserver(observer, isSticky)
+        val wrapper = AlwaysActiveObserver(observer, isSticky)
         val existing: ObserverWrapper? = observers.putIfAbsent(observer, wrapper)
         require(existing !is LifecycleBoundObserver) { "Cannot add the same observer" + " with different lifecycles" }
         if (existing != null) {
