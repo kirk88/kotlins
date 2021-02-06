@@ -1,14 +1,11 @@
 package com.easy.kotlins.event
 
-import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KProperty
 
 class EventDelegate {
 
-    private val liveEvent = SingleLiveEvent()
+    private val liveEvent = MutableLiveEventData<Event>()
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): Event {
         return liveEvent.getValue() ?: NOT_SET
@@ -26,7 +23,7 @@ class EventDelegate {
         liveEvent.observeActive(owner) { if (it != null) observer.onEventChanged(it) }
     }
 
-    fun addEventObserver(owner: EventObserverOwner){
+    fun addEventObserver(owner: EventObserverOwner) {
         liveEvent.observeActive(owner) { if (it != null) owner.onEventChanged(it) }
     }
 
@@ -34,36 +31,6 @@ class EventDelegate {
         private val NOT_SET = Event()
     }
 
-}
-
-internal class SingleLiveEvent : MutableLiveEventData<Event>() {
-    private val pending: AtomicBoolean = AtomicBoolean(false)
-
-    override fun observe(owner: LifecycleOwner, observer: Observer<in Event>) {
-        super.observe(owner) {
-            if (it !is SingleEvent) {
-                observer.onChanged(it)
-            } else if (pending.compareAndSet(true, false)) {
-                observer.onChanged(it)
-            }
-        }
-    }
-
-    override fun observeForever(observer: Observer<in Event>) {
-        super.observeForever {
-            if (it !is SingleEvent) {
-                observer.onChanged(it)
-            } else if (pending.compareAndSet(true, false)) {
-                observer.onChanged(it)
-            }
-        }
-    }
-
-    @MainThread
-    override fun setValue(value: Event?) {
-        pending.set(true)
-        super.setValue(value)
-    }
 }
 
 fun interface EventObserver {
