@@ -13,6 +13,8 @@ android {
         versionCode rootProject.ext.android.version_code
         versionName rootProject.ext.android.version_name
 
+        multiDexEnabled true
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

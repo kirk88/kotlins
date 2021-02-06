@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObserver
-import com.easy.kotlins.event.EventObserverOwner
+import com.easy.kotlins.event.EventLifecycleObserver
 import com.easy.kotlins.event.EventDelegate
 import com.easy.kotlins.http.DefaultOkManagerScope
 import com.easy.kotlins.http.OkFaker
@@ -29,7 +29,7 @@ interface ViewModelController : OkManagerScope {
 
     fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
 
-    fun addEventObserver(owner: EventObserverOwner)
+    fun addEventObserver(observer: EventLifecycleObserver)
 }
 
 interface ViewModelEventDispatcher {
@@ -60,8 +60,8 @@ private class SimpleViewModelController : ViewModelController,
         eventDelegate.addEventObserver(owner, observer)
     }
 
-    override fun addEventObserver(owner: EventObserverOwner) {
-        eventDelegate.addEventObserver(owner)
+    override fun addEventObserver(observer: EventLifecycleObserver) {
+        eventDelegate.addEventObserver(observer)
     }
 }
 

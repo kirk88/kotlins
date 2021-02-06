@@ -14,7 +14,8 @@ interface SqlWhereCondition {
     infix fun or(condition: SqlWhereCondition): SqlWhereCondition
 }
 
-private class SqlWhereConditionImpl(override val whereCause: String, args: Array<out Any>? = null) : SqlWhereCondition {
+private class SqlWhereConditionImpl(override val whereCause: String, args: Array<out Any>? = null) :
+    SqlWhereCondition {
 
     override val whereArgs: Array<out String>? = args?.map { it.toString() }?.toTypedArray()
 
@@ -75,17 +76,17 @@ fun String.lessThan(value: Int): SqlWhereCondition {
 
 fun String.any(vararg values: Any): SqlWhereCondition {
     return SqlWhereConditionImpl(values.joinToString(
-            ",",
-            "$this IN (",
-            ")"
+        ",",
+        "$this IN (",
+        ")"
     ) { it.toEscapedString() })
 }
 
 fun String.none(vararg values: Any): SqlWhereCondition {
     return SqlWhereConditionImpl(values.joinToString(
-            ",",
-            "$this NOT IN (",
-            ")"
+        ",",
+        "$this NOT IN (",
+        ")"
     ) { it.toEscapedString() })
 }
 
@@ -97,8 +98,12 @@ fun String.isNull(): SqlWhereCondition {
     return SqlWhereConditionImpl("$this IS NULL")
 }
 
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Any): SqlWhereCondition = this.name.whereArgs(*whereArgs)
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition =this.name.whereArgs(*whereArgs)
+fun SqlColumnProperty.whereArgs(vararg whereArgs: Any): SqlWhereCondition =
+    this.name.whereArgs(*whereArgs)
+
+fun SqlColumnProperty.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition =
+    this.name.whereArgs(*whereArgs)
+
 fun SqlColumnProperty.equal(value: Any): SqlWhereCondition = this.name.equal(value)
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition = this.name.like(value)
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition = this.name.glob(value)
@@ -123,29 +128,26 @@ internal fun applyArguments(whereClause: String, args: Map<String, Any>): String
     val matcher = ARG_PATTERN.matcher(whereClause)
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
-        val key = matcher.group(2)
+        val key = matcher.group(2) ?: continue
         val value = args[key] ?: throw IllegalStateException("Can't find a value for key $key")
 
-        matcher.appendReplacement(buffer, matcher.group(1) + value.toEscapedString())
+        matcher.appendReplacement(buffer, "${matcher.group(1)}${value.toEscapedString()}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
 }
 
 private fun Any.toEscapedString(): String {
-    return if (this is Int || this is Long || this is Byte || this is Short) {
+    return if (this is Number) {
         this.toString()
     } else if (this is Boolean) {
         if (this) "1" else "0"
-    } else if (this is Float || this is Double) {
-        this.toString()
     } else {
         '\'' + this.toString().replace("'", "''") + '\''
     }
 }
 
 fun main() {
-
     val builder = "id".equal(90) and "name".like("%小李%") or "id".any(1, 2, 3, 4)
 
     println(builder.whereCause)

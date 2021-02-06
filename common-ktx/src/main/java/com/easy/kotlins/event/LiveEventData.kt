@@ -84,7 +84,7 @@ open class LiveEventData<T> {
             return
         }
         observer.lastVersion = version
-        // noinspection unchecked
+        @Suppress("UNCHECKED_CAST")
         observer.observer.onChanged(data as T)
     }
 
@@ -331,8 +331,8 @@ open class LiveEventData<T> {
      * @return the current value
      */
     fun getValue(): T? {
+        @Suppress("UNCHECKED_CAST")
         return if (data !== NOT_SET) {
-            // noinspection unchecked
             data as T
         } else null
     }

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.easy.kotlins.sqlite.SqlColumnCell
 import com.easy.kotlins.sqlite.SqlColumnProperty
+import com.easy.kotlins.sqlite.applyArguments
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
@@ -299,38 +300,6 @@ fun SQLiteDatabase.createColumns(
             createColumn(table, ifNotExists, column)
         }
     }
-}
-
-private val ARG_PATTERN: Pattern = Pattern.compile("([^\\\\])\\{([^{}]+)\\}")
-
-internal fun applyArguments(whereClause: String, vararg args: Pair<String, Any>): String {
-    val argsMap = args.fold(hashMapOf<String, Any>()) { map, arg ->
-        map[arg.first] = arg.second
-        map
-    }
-    return applyArguments(whereClause, argsMap)
-}
-
-internal fun applyArguments(whereClause: String, args: Map<String, Any>): String {
-    val matcher = ARG_PATTERN.matcher(whereClause)
-    val buffer = StringBuffer(whereClause.length)
-    while (matcher.find()) {
-        val key = matcher.group(2)
-        val value = args[key] ?: throw IllegalStateException("Can't find a value for key $key")
-
-        val valueString = if (value is Int || value is Long || value is Byte || value is Short) {
-            value.toString()
-        } else if (value is Boolean) {
-            if (value) "1" else "0"
-        } else if (value is Float || value is Double) {
-            value.toString()
-        } else {
-            '\'' + value.toString().replace("'", "''") + '\''
-        }
-        matcher.appendReplacement(buffer, matcher.group(1) + valueString)
-    }
-    matcher.appendTail(buffer)
-    return buffer.toString()
 }
 
 internal fun Array<out SqlColumnCell>.toContentValues(): ContentValues {

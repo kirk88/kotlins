@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import com.easy.kotlins.sqlite.SqlColumnCell
 import com.easy.kotlins.sqlite.SqlWhereCondition
+import com.easy.kotlins.sqlite.applyArguments
 
 abstract class UpdateQueryBuilder(
     private val table: String,

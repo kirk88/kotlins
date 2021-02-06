@@ -5,6 +5,7 @@ package com.easy.kotlins.sqlite.db
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.easy.kotlins.sqlite.SqlWhereCondition
+import com.easy.kotlins.sqlite.applyArguments
 
 abstract class SelectQueryBuilder(private val table: String) {
 

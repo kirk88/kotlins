@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun <reified T : Any> classParser(): RowParser<T> = classParser(T::class.java)
 
 @PublishedApi
@@ -93,8 +92,8 @@ internal object ClassParsers {
 
     private val parsers: MutableMap<Class<*>, ClassParser<*>> by lazy { mutableMapOf() }
 
-    @Suppress("UNCHECKED_CAST")
     fun <T> get(type: Class<T>): ClassParser<T> {
+        @Suppress("UNCHECKED_CAST")
         return parsers.getOrPut(type) {
             ClassParser(type)
         } as ClassParser<T>

@@ -13,7 +13,6 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
     val bundle = Bundle()
     for ((key, value) in this) {
         when (value) {
-            is LargeExtra -> bundle.putLargeExtra(key, value)
             is Boolean -> bundle.putBoolean(key, value)
             is Double -> bundle.putDouble(key, value)
             is Float -> bundle.putFloat(key, value)
@@ -24,12 +23,7 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
             is CharSequence -> bundle.putCharSequence(key, value)
             is Parcelable -> bundle.putParcelable(key, value)
             is Serializable -> bundle.putSerializable(key, value)
-            is ArrayList<*> -> when (value.firstOrNull()) {
-                is String -> bundle.putStringArrayList(key, value as ArrayList<String>)
-                is Int -> bundle.putIntegerArrayList(key, value as ArrayList<Int>)
-                is CharSequence -> bundle.putCharSequenceArrayList(key, value as ArrayList<CharSequence>)
-                is Parcelable -> bundle.putParcelableArrayList(key, value as ArrayList<out Parcelable>)
-            }
+            is LargeExtra -> bundle.putLargeExtra(key, value)
         }
     }
     return@run bundle
@@ -47,61 +41,69 @@ fun Bundle.putLargeExtra(key: String, value: LargeExtra) {
     putString(key, LargeExtras.put(value))
 }
 
-fun Bundle.putLargeExtra(key: String, value: Any?) {
-    putString(key, LargeExtras.put(LargeExtra(value)))
+fun <T> Bundle.getLargeExtra(key: String): LargeExtra? {
+    return getString(key)?.let { name -> LargeExtras.get(name) }
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T> Bundle.getLargeExtra(key: String): T? {
+fun <T> Bundle.getLargeExtraValue(key: String): T? {
+    @Suppress("UNCHECKED_CAST")
     return getString(key)?.let { name -> LargeExtras.get(name) as T? }
 }
 
-fun <T> Bundle.getLargeExtra(key: String, defaultValue: T): T {
-    return getLargeExtra<T>(key) ?: defaultValue
+fun <T> Bundle.getLargeExtraValue(key: String, defaultValue: T): T {
+    return getLargeExtraValue<T>(key) ?: defaultValue
 }
 
-fun <T> Bundle.getLargeExtra(key: String, defaultValue: () -> T): T {
-    return getLargeExtra<T>(key) ?: defaultValue()
+fun <T> Bundle.getLargeExtraValue(key: String, defaultValue: () -> T): T {
+    return getLargeExtraValue<T>(key) ?: defaultValue()
 }
 
 fun Intent.putLargeExtra(key: String, value: LargeExtra) {
-    putExtra(key, LargeExtras.put(LargeExtra(value)))
+    putExtra(key, LargeExtras.put(value))
 }
 
-fun Intent.putLargeExtra(key: String, value: Any?) {
-    putExtra(key, LargeExtras.put(LargeExtra(value)))
+fun <T> Intent.getLargeExtra(key: String): LargeExtra? {
+    return getStringExtra(key)?.let { name -> LargeExtras.get(name) }
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T> Intent.getLargeExtra(key: String): T? {
+fun <T> Intent.getLargeExtraValue(key: String): T? {
+    @Suppress("UNCHECKED_CAST")
     return getStringExtra(key)?.let { name -> LargeExtras.get(name) as T? }
 }
 
-fun <T> Intent.getLargeExtra(key: String, defaultValue: T): T {
-    return getLargeExtra<T>(key) ?: defaultValue
+fun <T> Intent.getLargeExtraValue(key: String, defaultValue: T): T {
+    return getLargeExtraValue<T>(key) ?: defaultValue
 }
 
-fun <T> Intent.getLargeExtra(key: String, defaultValue: () -> T): T {
-    return getLargeExtra<T>(key) ?: defaultValue()
+fun <T> Intent.getLargeExtraValue(key: String, defaultValue: () -> T): T {
+    return getLargeExtraValue<T>(key) ?: defaultValue()
 }
 
-fun largeExtraOf(value: Any?): LargeExtra = LargeExtra(value)
+fun LargeExtra(value: Any?): LargeExtra = LargeExtraImpl(value)
 
-data class LargeExtra(val value: Any?) {
-    val name: String = System.nanoTime().toString()
+interface LargeExtra {
+    val name: String
+
+    val value: Any?
+}
+
+private class LargeExtraImpl(override val value: Any?) : LargeExtra {
+
+    override val name: String = System.nanoTime().toString()
+
 }
 
 private object LargeExtras {
 
-    private val dataMap: MutableMap<String, Any?> by lazy { mutableMapOf() }
+    private val dataMap: MutableMap<String, LargeExtra> by lazy { mutableMapOf() }
 
     fun put(extra: LargeExtra): String {
         return extra.name.also {
-            dataMap[it] = extra.value
+            dataMap[it] = extra
         }
     }
 
-    fun get(name: String): Any? {
+    fun get(name: String): LargeExtra? {
         return dataMap.remove(name)
     }
 

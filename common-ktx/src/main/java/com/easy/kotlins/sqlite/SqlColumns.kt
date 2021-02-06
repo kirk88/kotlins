@@ -43,4 +43,6 @@ private open class SqlColumnPropertyImpl(override val name: String, override val
 
 }
 
-operator fun String.minus(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
+infix fun String.and(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
+infix fun String.and(value: String?): SqlColumnCell = SqlColumnCellImpl(this, value)
+infix fun String.and(value: Number): SqlColumnCell = SqlColumnCellImpl(this, value)

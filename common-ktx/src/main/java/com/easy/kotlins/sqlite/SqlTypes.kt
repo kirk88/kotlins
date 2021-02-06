@@ -3,7 +3,7 @@
 package com.easy.kotlins.sqlite.db
 
 import com.easy.kotlins.sqlite.SqlColumnProperty
-import com.easy.kotlins.sqlite.minus
+import com.easy.kotlins.sqlite.and
 
 interface SqlType {
     val name: String
@@ -56,7 +56,7 @@ fun FOREIGN_KEY(
     referenceColumn: String,
     vararg actions: SqlTypeModifier
 ): SqlColumnProperty {
-    return "" - SqlTypeImpl(
+    return "" and SqlTypeImpl(
         "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${
             actions.map { it.modifier }.joinToString("") { " $it" }
         }"

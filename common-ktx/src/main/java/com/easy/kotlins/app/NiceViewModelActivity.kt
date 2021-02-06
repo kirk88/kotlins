@@ -7,7 +7,7 @@ import android.view.MotionEvent
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObserverOwner
+import com.easy.kotlins.event.EventLifecycleObserver
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelController
@@ -23,7 +23,7 @@ import com.easy.kotlins.widget.RefreshView
  */
 abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
     NiceActivity(layoutResId),
-    EventObserverOwner,
+    EventLifecycleObserver,
     ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
@@ -51,11 +51,16 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
             return true
         }
 
-        if (supportFragmentManager.fragments.any {
-                (it as? ViewModelEventDispatcher)?.dispatchViewModelEvent(
-                    event
-                ) == true
-            }) {
+        var dispatched = false
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment !is ViewModelEventDispatcher) continue
+
+            if (fragment.dispatchViewModelEvent(event)) {
+                dispatched = true
+            }
+        }
+
+        if (dispatched) {
             return true
         }
 
