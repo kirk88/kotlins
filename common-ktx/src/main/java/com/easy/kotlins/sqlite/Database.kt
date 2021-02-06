@@ -6,20 +6,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.easy.kotlins.sqlite.SqlColumnCell
+import com.easy.kotlins.sqlite.SqlColumnProperty
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
-
-interface SqlColumnCell {
-
-    val name: String
-
-    val value: Any
-
-    companion object {
-        fun create(name: String, value: Any): SqlColumnCell = SqlColumnCellImpl(name, value)
-    }
-}
 
 enum class SqlOrderDirection { ASC, DESC }
 
@@ -32,7 +23,7 @@ enum class SqlOrderDirection { ASC, DESC }
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
  */
-fun SQLiteDatabase.insert(table: String, vararg values: Pair<String, Any?>): Long {
+fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnCell): Long {
     return insert(table, null, values.toContentValues())
 }
 
@@ -44,7 +35,7 @@ fun SQLiteDatabase.insert(table: String, vararg values: Pair<String, Any?>): Lon
  * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
  */
 fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
-    return insert(table, values = valuesFrom.toPairs())
+    return insert(table, values = valuesFrom.toColumnValues())
 }
 
 /**
@@ -58,7 +49,7 @@ fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
  *
  * @throws [android.database.SQLException]
  */
-fun SQLiteDatabase.insertOrThrow(table: String, vararg values: Pair<String, Any?>): Long {
+fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnCell): Long {
     return insertOrThrow(table, null, values.toContentValues())
 }
 
@@ -72,7 +63,7 @@ fun SQLiteDatabase.insertOrThrow(table: String, vararg values: Pair<String, Any?
  * @throws [android.database.SQLException]
  */
 fun SQLiteDatabase.insertOrThrow(table: String, valuesFrom: Any): Long {
-    return insertOrThrow(table, values = valuesFrom.toPairs())
+    return insertOrThrow(table, values = valuesFrom.toColumnValues())
 }
 
 /**
@@ -89,7 +80,7 @@ fun SQLiteDatabase.insertOrThrow(table: String, valuesFrom: Any): Long {
 fun SQLiteDatabase.insertWithOnConflict(
     table: String,
     conflictAlgorithm: Int,
-    vararg values: Pair<String, Any?>
+    vararg values: SqlColumnCell
 ): Long {
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
@@ -108,7 +99,7 @@ fun SQLiteDatabase.insertWithOnConflict(
     conflictAlgorithm: Int,
     valuesFrom: Any
 ): Long {
-    return insertWithOnConflict(table, conflictAlgorithm, values = valuesFrom.toPairs())
+    return insertWithOnConflict(table, conflictAlgorithm, values = valuesFrom.toColumnValues())
 }
 
 /**
@@ -121,7 +112,7 @@ fun SQLiteDatabase.insertWithOnConflict(
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
  */
-fun SQLiteDatabase.replace(table: String, vararg values: Pair<String, Any?>): Long {
+fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnCell): Long {
     return replace(table, null, values.toContentValues())
 }
 
@@ -134,7 +125,7 @@ fun SQLiteDatabase.replace(table: String, vararg values: Pair<String, Any?>): Lo
  * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
  */
 fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
-    return replace(table, values = valuesFrom.toPairs())
+    return replace(table, values = valuesFrom.toColumnValues())
 }
 
 
@@ -150,7 +141,7 @@ fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
  *
  * @throws [android.database.SQLException]
  */
-fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: Pair<String, Any?>): Long {
+fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnCell): Long {
     return replaceOrThrow(table, null, values.toContentValues())
 }
 
@@ -165,7 +156,7 @@ fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: Pair<String, Any
  * @throws [android.database.SQLException]
  */
 fun SQLiteDatabase.replaceOrThrow(table: String, valuesFrom: Any): Long {
-    return replaceOrThrow(table, values = valuesFrom.toPairs())
+    return replaceOrThrow(table, values = valuesFrom.toColumnValues())
 }
 
 fun SQLiteDatabase.select(table: String): SelectQueryBuilder {
@@ -180,7 +171,7 @@ fun SQLiteDatabase.select(table: String, vararg columns: String): SelectQueryBui
 
 fun SQLiteDatabase.update(
     table: String,
-    vararg values: Pair<String, Any?>
+    vararg values: SqlColumnCell
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table, values)
 }
@@ -189,7 +180,7 @@ fun SQLiteDatabase.update(
     table: String,
     valuesFrom: Any
 ): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table, valuesFrom.toPairs())
+    return AndroidDatabaseUpdateQueryBuilder(this, table, valuesFrom.toColumnValues())
 }
 
 fun SQLiteDatabase.delete(
@@ -342,10 +333,11 @@ internal fun applyArguments(whereClause: String, args: Map<String, Any>): String
     return buffer.toString()
 }
 
-internal fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
+internal fun Array<out SqlColumnCell>.toContentValues(): ContentValues {
     val values = ContentValues()
-    for ((key, value) in this) {
-        when (value) {
+    for (cell in this) {
+        val key = cell.name
+        when (val value = cell.value) {
             null -> values.putNull(key)
             is Boolean -> values.put(key, value)
             is Byte -> values.put(key, value)
@@ -362,9 +354,9 @@ internal fun Array<out Pair<String, Any?>>.toContentValues(): ContentValues {
     return values
 }
 
-internal fun Any.toPairs(): Array<Pair<String, Any?>> {
+internal fun Any.toColumnValues(): Array<SqlColumnCell> {
     if (this is Map<*, *>) {
-        return this.map { it.key.toString() to it.value }.toTypedArray()
+        return this.map { SqlColumnCell.create(it.key.toString(), it.value) }.toTypedArray()
     }
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
@@ -412,6 +404,3 @@ abstract class ManagedSQLiteOpenHelper(
         }
     }
 }
-
-private open class SqlColumnCellImpl(override val name: String, override val value: Any) :
-    SqlColumnCell

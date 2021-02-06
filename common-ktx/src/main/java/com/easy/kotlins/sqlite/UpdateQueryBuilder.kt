@@ -4,16 +4,27 @@ package com.easy.kotlins.sqlite.db
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import com.easy.kotlins.sqlite.SqlColumnCell
+import com.easy.kotlins.sqlite.SqlWhereCondition
 
 abstract class UpdateQueryBuilder(
     private val table: String,
-    private val values: Array<out Pair<String, Any?>>
+    private val cells: Array<out SqlColumnCell>
 ) {
 
     private var whereCauseApplied = false
-    private var useNativeWhereCause = false
-    private var simpleWhereCause: String? = null
-    private var nativeWhereArgs: Array<out String>? = null
+    private var updateWhereCause: String? = null
+    private var updateWhereArgs: Array<out String>? = null
+
+    fun whereArgs(whereCondition: SqlWhereCondition){
+        if (whereCauseApplied) {
+            throw IllegalStateException("Query selection was already applied.")
+        }
+
+        whereCauseApplied = true
+        updateWhereCause = whereCondition.whereCause
+        updateWhereArgs = whereCondition.whereArgs
+    }
 
     fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
         if (whereCauseApplied) {
@@ -21,12 +32,11 @@ abstract class UpdateQueryBuilder(
         }
 
         whereCauseApplied = true
-        useNativeWhereCause = false
         val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
             map[arg.first] = arg.second
             map
         }
-        simpleWhereCause = applyArguments(whereCause, whereArgsMap)
+        updateWhereCause = applyArguments(whereCause, whereArgsMap)
         return this
     }
 
@@ -35,8 +45,7 @@ abstract class UpdateQueryBuilder(
             throw IllegalStateException("Query selection was already applied.")
 
         whereCauseApplied = true
-        useNativeWhereCause = false
-        simpleWhereCause = whereCause
+        updateWhereCause = whereCause
         return this
     }
 
@@ -45,19 +54,17 @@ abstract class UpdateQueryBuilder(
             throw IllegalStateException("Query selection was already applied.")
 
         whereCauseApplied = true
-        useNativeWhereCause = true
-        simpleWhereCause = whereCause
-        nativeWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
+        updateWhereCause = whereCause
+        updateWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
     fun execute(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
-        val finalSelection = if (whereCauseApplied) simpleWhereCause else null
-        val finalSelectionArgs =
-            if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
+        val finalSelection = if (whereCauseApplied) updateWhereCause else null
+        val finalSelectionArgs = if (whereCauseApplied) updateWhereArgs else null
         return update(
             table,
-            values.toContentValues(),
+            cells.toContentValues(),
             finalSelection,
             finalSelectionArgs,
             conflictAlgorithm
@@ -76,8 +83,8 @@ abstract class UpdateQueryBuilder(
 class AndroidDatabaseUpdateQueryBuilder(
     private val db: SQLiteDatabase,
     table: String,
-    values: Array<out Pair<String, Any?>>
-) : UpdateQueryBuilder(table, values) {
+    cells: Array<out SqlColumnCell>
+) : UpdateQueryBuilder(table, cells) {
 
     override fun update(
         table: String,

@@ -4,6 +4,7 @@ package com.easy.kotlins.sqlite.db
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.easy.kotlins.sqlite.SqlWhereCondition
 
 abstract class SelectQueryBuilder(private val table: String) {
 
@@ -21,9 +22,8 @@ abstract class SelectQueryBuilder(private val table: String) {
     private var limit: String? = null
 
     private var whereCauseApplied = false
-    private var useNativeWhereCause = false
-    private var simpleWhereCause: String? = null
-    private var nativeWhereArgs: Array<out String>? = null
+    private var selectWhereCause: String? = null
+    private var selectWhereArgs: Array<out String>? = null
 
     fun distinct(): SelectQueryBuilder {
         this.distinct = true
@@ -87,6 +87,16 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
+    fun whereArgs(whereCondition: SqlWhereCondition): SelectQueryBuilder {
+        if (whereCauseApplied) {
+            throw IllegalStateException("Query selection was already applied.")
+        }
+
+        whereCauseApplied = true
+        selectWhereCause = whereCondition.whereCause
+        selectWhereArgs = whereCondition.whereArgs
+        return this
+    }
 
     fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): SelectQueryBuilder {
         if (whereCauseApplied) {
@@ -94,8 +104,7 @@ abstract class SelectQueryBuilder(private val table: String) {
         }
 
         whereCauseApplied = true
-        useNativeWhereCause = false
-        simpleWhereCause = applyArguments(whereCause, *whereArgs)
+        selectWhereCause = applyArguments(whereCause, *whereArgs)
         return this
     }
 
@@ -105,8 +114,7 @@ abstract class SelectQueryBuilder(private val table: String) {
         }
 
         whereCauseApplied = true
-        useNativeWhereCause = false
-        simpleWhereCause = whereCause
+        selectWhereCause = whereCause
         return this
     }
 
@@ -116,9 +124,8 @@ abstract class SelectQueryBuilder(private val table: String) {
         }
 
         whereCauseApplied = true
-        useNativeWhereCause = true
-        simpleWhereCause = whereCause
-        nativeWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
+        selectWhereCause = whereCause
+        selectWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
@@ -147,8 +154,8 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun <T> execute(action: Cursor.() -> T): T {
-        val finalWhereCause = if (whereCauseApplied) simpleWhereCause else null
-        val finalWhereArgs = if (whereCauseApplied && useNativeWhereCause) nativeWhereArgs else null
+        val finalWhereCause = if (whereCauseApplied) selectWhereCause else null
+        val finalWhereArgs = if (whereCauseApplied) selectWhereArgs else null
         val finalColumns = if (columnsApplied) columns.toTypedArray() else null
         val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
         val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null

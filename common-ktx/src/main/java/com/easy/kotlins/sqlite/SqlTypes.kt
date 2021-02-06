@@ -1,6 +1,9 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "FunctionName")
 
 package com.easy.kotlins.sqlite.db
+
+import com.easy.kotlins.sqlite.SqlColumnProperty
+import com.easy.kotlins.sqlite.minus
 
 interface SqlType {
     val name: String
@@ -27,22 +30,6 @@ val REAL: SqlType = SqlTypeImpl("REAL")
 val TEXT: SqlType = SqlTypeImpl("TEXT")
 val BLOB: SqlType = SqlTypeImpl("BLOB")
 
-interface SqlColumnProperty {
-
-    val name: String
-
-    val type: SqlType
-
-    fun render(): String
-
-    operator fun plus(value: Any): SqlColumnCell
-
-    companion object{
-        fun create(name: String, type: SqlType): SqlColumnProperty = SqlColumnImpl(name, type)
-    }
-
-}
-
 enum class ConstraintActions {
     SET_NULL,
     SET_DEFAULT,
@@ -63,8 +50,17 @@ fun ON_DELETE(constraintActions: ConstraintActions): SqlTypeModifier {
     return SqlTypeModifierImpl("ON DELETE $constraintActions")
 }
 
-fun FOREIGN_KEY(columnName: String, referenceTable: String, referenceColumn: String, vararg actions: SqlTypeModifier): SqlColumnProperty {
-    return "" of SqlTypeImpl("FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${actions.map { it.modifier }.joinToString("") { " $it" }}")
+fun FOREIGN_KEY(
+    columnName: String,
+    referenceTable: String,
+    referenceColumn: String,
+    vararg actions: SqlTypeModifier
+): SqlColumnProperty {
+    return "" - SqlTypeImpl(
+        "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${
+            actions.map { it.modifier }.joinToString("") { " $it" }
+        }"
+    )
 }
 
 val PRIMARY_KEY: SqlTypeModifier = SqlTypeModifierImpl("PRIMARY KEY")
@@ -95,13 +91,3 @@ private open class SqlTypeImpl(override val name: String, val modifiers: String?
 }
 
 private open class SqlTypeModifierImpl(override val modifier: String) : SqlTypeModifier
-
-private open class SqlColumnImpl(override val name: String, override val type: SqlType): SqlColumnProperty{
-
-    override fun render(): String = "$name ${type.render()}"
-
-    override fun plus(value: Any): SqlColumnCell = SqlColumnCell.create(name, value)
-
-}
-
-infix fun String.of(type: SqlType): SqlColumnProperty = SqlColumnImpl(this, type)

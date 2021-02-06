@@ -3,14 +3,16 @@
 package com.easy.kotlins.app
 
 import android.os.Bundle
+import android.view.MotionEvent
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import com.easy.kotlins.event.Event
+import com.easy.kotlins.event.EventObserverOwner
 import com.easy.kotlins.event.Status
 import com.easy.kotlins.helper.toast
 import com.easy.kotlins.viewmodel.ViewModelController
-import com.easy.kotlins.viewmodel.ViewModelEventObservableOwner
+import com.easy.kotlins.viewmodel.ViewModelEventDispatcher
 import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.LoadingView
@@ -20,8 +22,10 @@ import com.easy.kotlins.widget.RefreshView
 /**
  * Create by LiZhanPing on 2020/9/18
  */
-abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : NiceActivity(layoutResId),
-    ViewModelEventObservableOwner,
+abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
+    NiceActivity(layoutResId),
+    EventObserverOwner,
+    ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val refreshView: RefreshView? = null
@@ -31,25 +35,12 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : Nice
     open val progressView: ProgressView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ViewModelEvents.observe(this)
+        ViewModelEvents.observeOnActivity(this)
         super.onCreate(savedInstanceState)
     }
 
     final override fun onEventChanged(event: Event) {
-        if (supportFragmentManager.fragments.any {
-                val isActive = it.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
-                isActive && (it as? ViewModelEventObservableOwner)?.onInterceptViewModelEvent(
-                    event
-                ) == true
-            }) {
-            return
-        }
-
-        if (dispatchViewModelEvent(event)) {
-            return
-        }
-
-        onViewModelEvent(event)
+        dispatchViewModelEvent(event)
     }
 
     override fun onInterceptViewModelEvent(event: Event): Boolean {
@@ -57,6 +48,22 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : Nice
     }
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
+        if (onInterceptViewModelEvent(event)) {
+            return true
+        }
+
+        if (supportFragmentManager.fragments.any {
+                (it as? ViewModelEventDispatcher)?.dispatchViewModelEvent(
+                    event
+                ) == true
+            }) {
+            return true
+        }
+
+        return onViewModelEvent(event)
+    }
+
+    override fun onViewModelEvent(event: Event): Boolean {
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
@@ -90,9 +97,10 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) : Nice
             event.what == Status.NONE -> startActivity(intent)
             else -> startActivityForResult(intent, event.what)
         }
-        return false
+        return true
     }
 
-    override fun onViewModelEvent(event: Event) {
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        return super.dispatchTouchEvent(ev)
     }
 }

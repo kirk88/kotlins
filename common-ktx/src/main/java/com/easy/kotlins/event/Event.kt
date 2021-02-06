@@ -83,21 +83,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
 }
 
-class SingleEvent(what: Int = Status.NONE, message: String? = null) : Event(what, message)
-
-internal class EventCollection(val events: List<Event>) : Event() {
-
-    fun copy(events: List<Event>): Event {
-        return EventCollection(events).also {
-            it.putAll(this)
-        }
-    }
-
-    override fun toString(): String {
-        return "MultipleEvent(events=$events)"
-    }
-
-}
+internal class EventCollection(val events: List<Event>) : Event()
 
 object Status {
 
@@ -123,8 +109,6 @@ object Status {
 
 fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
 
-fun singleEvent(what: Int = Status.NONE, message: String? = null): Event =
-    SingleEvent(what, message)
 
 inline fun buildEvent(
     what: Int = Status.NONE,
@@ -132,17 +116,10 @@ inline fun buildEvent(
     crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
-inline fun buildSingleEvent(
-    what: Int = Status.NONE,
-    message: String? = null,
-    crossinline init: Event.() -> Unit
-) = SingleEvent(what, message).apply(init)
-
-
 inline fun <reified T : Activity> activityLauncher(
     context: Context,
     vararg pairs: Pair<String, Any?>
-) = buildSingleEvent {
+) = buildEvent {
         setIntent(Intent(context, T::class.java).apply {
             putExtras(pairs.toBundle())
         })
@@ -152,44 +129,44 @@ inline fun <reified T : Activity> activityLauncherForResult(
     context: Context,
     requestCode: Int,
     vararg pairs: Pair<String, Any?>
-) = buildSingleEvent(requestCode) {
+) = buildEvent(requestCode) {
     setIntent(Intent(context, T::class.java).apply {
         putExtras(pairs.toBundle())
     })
 }
 
-fun activityResult(vararg pairs: Pair<String, Any?>) = buildSingleEvent {
+fun activityResult(vararg pairs: Pair<String, Any?>) = buildEvent {
     setIntent(Intent().apply {
         putExtras(pairs.toBundle())
     })
 }
 
-fun activityResult(code: Int, vararg pairs: Pair<String, Any?>) = buildSingleEvent(code) {
+fun activityResult(code: Int, vararg pairs: Pair<String, Any?>) = buildEvent(code) {
     setIntent(Intent().apply {
         putExtras(pairs.toBundle())
     })
 }
 
-fun progressShower(message: String? = null): Event = SingleEvent(Status.SHOW_PROGRESS, message)
+fun progressShower(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 
-fun progressDismissal(): Event = SingleEvent(Status.DISMISS_PROGRESS)
+fun progressDismissal(): Event = Event(Status.DISMISS_PROGRESS)
 
-fun refreshCompletion(): Event = SingleEvent(Status.REFRESH_COMPLETE)
+fun refreshCompletion(): Event = Event(Status.REFRESH_COMPLETE)
 
 fun loadMoreCompletion(hasMore: Boolean = true): Event =
-    SingleEvent(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
-fun refreshFailure(): Event = SingleEvent(Status.REFRESH_FAILURE)
+fun refreshFailure(): Event = Event(Status.REFRESH_FAILURE)
 
-fun loadMoreFailure(): Event = SingleEvent(Status.LOADMORE_FAILURE)
+fun loadMoreFailure(): Event = Event(Status.LOADMORE_FAILURE)
 
-fun loadingShower(message: String? = null): Event = SingleEvent(Status.SHOW_LOADING, message)
+fun loadingShower(message: String? = null): Event = Event(Status.SHOW_LOADING, message)
 
-fun emptyShower(message: String? = null): Event = SingleEvent(Status.SHOW_EMPTY, message)
+fun emptyShower(message: String? = null): Event = Event(Status.SHOW_EMPTY, message)
 
-fun errorShower(message: String? = null): Event = SingleEvent(Status.SHOW_ERROR, message)
+fun errorShower(message: String? = null): Event = Event(Status.SHOW_ERROR, message)
 
-fun contentShower(): Event = SingleEvent(Status.SHOW_CONTENT)
+fun contentShower(): Event = Event(Status.SHOW_CONTENT)
 
 fun eventOf(events: List<Event>): Event = EventCollection(events = events)
 

@@ -6,7 +6,7 @@ import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KProperty
 
-class EventProxy {
+class EventDelegate {
 
     private val liveEvent = SingleLiveEvent()
 
@@ -22,11 +22,11 @@ class EventProxy {
         }
     }
 
-    fun addEventObserver(owner: LifecycleOwner, observer: (Event) -> Unit) {
-        liveEvent.observeActive(owner) { if (it != null) observer(it) }
+    fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
+        liveEvent.observeActive(owner) { if (it != null) observer.onEventChanged(it) }
     }
 
-    fun addEventObserver(owner: EventObservableOwner) {
+    fun addEventObserver(owner: EventObserverOwner){
         liveEvent.observeActive(owner) { if (it != null) owner.onEventChanged(it) }
     }
 
@@ -66,8 +66,8 @@ internal class SingleLiveEvent : MutableLiveEventData<Event>() {
     }
 }
 
-interface EventObservableOwner : LifecycleOwner {
-
+fun interface EventObserver {
     fun onEventChanged(event: Event)
-
 }
+
+interface EventObserverOwner : EventObserver, LifecycleOwner

@@ -181,7 +181,7 @@ class RequestPairs<T>(
 
     private val pairs: MutableMap<String, T> = pairs.toMutableMap()
 
-    infix fun String.of(value: T) {
+    operator fun String.minus(value: T) {
         pairs[this] = value
     }
 

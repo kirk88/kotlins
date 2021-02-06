@@ -9,11 +9,12 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObservableOwner
-import com.easy.kotlins.event.EventProxy
+import com.easy.kotlins.event.EventObserver
+import com.easy.kotlins.event.EventObserverOwner
+import com.easy.kotlins.event.EventDelegate
+import com.easy.kotlins.http.DefaultOkManagerScope
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkManagerScope
-import com.easy.kotlins.http.DefaultOkManagerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
@@ -26,26 +27,26 @@ interface ViewModelController : OkManagerScope {
 
     fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T>
 
-    fun addEventObserver(owner: LifecycleOwner, observer: (event: Event) -> Unit)
+    fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
 
-    fun addEventObserver(owner: EventObservableOwner)
+    fun addEventObserver(owner: EventObserverOwner)
 }
 
-interface ViewModelEventObservableOwner : EventObservableOwner {
+interface ViewModelEventDispatcher {
 
     fun onInterceptViewModelEvent(event: Event): Boolean
 
     fun dispatchViewModelEvent(event: Event): Boolean
 
-    fun onViewModelEvent(event: Event)
+    fun onViewModelEvent(event: Event): Boolean
 
 }
 
 private class SimpleViewModelController : ViewModelController,
     OkManagerScope by DefaultOkManagerScope() {
 
-    private val eventProxy = EventProxy()
-    override var event: Event by eventProxy
+    private val eventDelegate = EventDelegate()
+    override var event: Event by eventDelegate
 
     override fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T> {
         return OkFaker.get(action).also { add(it) }
@@ -55,14 +56,13 @@ private class SimpleViewModelController : ViewModelController,
         return OkFaker.post(action).also { add(it) }
     }
 
-    override fun addEventObserver(owner: LifecycleOwner, observer: (event: Event) -> Unit) {
-        eventProxy.addEventObserver(owner, observer)
+    override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
+        eventDelegate.addEventObserver(owner, observer)
     }
 
-    override fun addEventObserver(owner: EventObservableOwner) {
-        eventProxy.addEventObserver(owner)
+    override fun addEventObserver(owner: EventObserverOwner) {
+        eventDelegate.addEventObserver(owner)
     }
-
 }
 
 open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
