@@ -22,22 +22,16 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
     fun getString(key: String, defaultValue: String? = null): String? =
         extras.getString(key, defaultValue)
-
     fun getInt(key: String, defaultValue: Int = 0): Int = extras.getInt(key, defaultValue)
     fun getLong(key: String, defaultValue: Long = 0.toLong()): Long =
         extras.getLong(key, defaultValue)
-
     fun getFloat(key: String, defaultValue: Float = 0.toFloat()): Float =
         extras.getFloat(key, defaultValue)
-
     fun getDouble(key: String, defaultValue: Double = 0.toDouble()): Double =
         extras.getDouble(key, defaultValue)
-
     fun getBoolean(key: String, defaultValue: Boolean = false): Boolean =
         extras.getBoolean(key, defaultValue)
-
     fun <T : Parcelable> getParcelable(key: String): T? = extras.getParcelable<T>(key)
-
     @Suppress("UNCHECKED_CAST")
     fun <T : Serializable> getSerializable(key: String): T? = extras.getSerializable(key) as? T
 
@@ -50,7 +44,6 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
     fun putParcelable(key: String, value: Parcelable?) = extras.putParcelable(key, value)
     fun putSerializable(key: String, value: Serializable?) = extras.putSerializable(key, value)
     fun putAll(bundle: Bundle) = extras.putAll(bundle)
-    fun putAll(event: Event) = extras.putAll(event.extras)
 
     fun setIntent(intent: Intent) {
         this.intent = intent
@@ -62,7 +55,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
     fun copy(what: Int = Status.NONE, message: String? = null): Event {
         return Event(what, message).also {
-            it.putAll(this)
+            it.putAll(extras)
         }
     }
 
@@ -105,10 +98,10 @@ object Status {
     const val SHOW_CONTENT = STATUS_BASE + 11
 
     const val FINISH_ACTIVITY = STATUS_BASE + 12
+
 }
 
 fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
-
 
 inline fun buildEvent(
     what: Int = Status.NONE,
