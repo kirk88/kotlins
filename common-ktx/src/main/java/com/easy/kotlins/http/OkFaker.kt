@@ -128,14 +128,14 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
         }
     }
 
-    fun parts(operation: ArrayList<RequestBody>.() -> Unit) {
-        arrayListOf<RequestBody>().apply(operation).forEach {
+    fun parts(operation: MutableList<RequestBody>.() -> Unit) {
+        mutableListOf<RequestBody>().apply(operation).forEach {
             request.addPart(it)
         }
     }
 
-    fun multiParts(operation: ArrayList<MultipartBody.Part>.() -> Unit) {
-        arrayListOf<MultipartBody.Part>().apply(operation).forEach {
+    fun multiParts(operation: MutableList<MultipartBody.Part>.() -> Unit) {
+        mutableListOf<MultipartBody.Part>().apply(operation).forEach {
             request.addPart(it)
         }
     }
