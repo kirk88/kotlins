@@ -231,9 +231,8 @@ fun requestPairsOf(
         val source: String =
             if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJSON()
         source.toJSONObject().forEach { key, element ->
-            when {
-                element.isJSONNull && serializeNulls -> put(key, element.asString())
-                else -> put(key, element.asString())
+            if (!element.isJSONNull || serializeNulls) {
+                put(key, element.asString())
             }
         }
     }.also { operation?.invoke(it) }
