@@ -5,7 +5,7 @@ package com.easy.kotlins.helper
 import androidx.lifecycle.MutableLiveData
 import com.easy.kotlins.adapter.CommonRecyclerAdapter
 import com.easy.kotlins.event.*
-import com.easy.kotlins.http.BodyFromDataPart
+import com.easy.kotlins.http.BodyFormDataPart
 import com.easy.kotlins.http.FileFormDataPart
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkMapper
@@ -188,7 +188,7 @@ fun OkFaker<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
-    if (params.any { it.second is BodyFromDataPart || it.second is FileFormDataPart }) {
+    if (params.any { it.second is BodyFormDataPart || it.second is FileFormDataPart }) {
         formDataParts(*params)
     } else {
         formParameters(*params)
@@ -200,7 +200,7 @@ fun OkFaker<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
     url(url)
 
-    if (params.any { it.value is BodyFromDataPart || it.value is FileFormDataPart }) {
+    if (params.any { it.value is BodyFormDataPart || it.value is FileFormDataPart }) {
         formDataParts(params)
     } else {
         formParameters(params)
@@ -248,12 +248,12 @@ fun <T> OkFaker<T>.responsePlugin(
 fun <T> OkFaker<T>.loadPlugin(
     config: LoadConfig,
     onEvent: ((Event) -> Unit)? = null,
-    onError: ((Throwable) -> Unit)? = null,
+    onError: ((Exception) -> Unit)? = null,
     onApply: (T) -> Unit
 ) {
 
     onStart {
-        if (config.mode == LoadMode.START) onEvent?.invoke(loadingShower())
+        if (config.mode == LoadMode.START) onEvent?.invoke(loadingShow())
     }
 
     onSuccess {
@@ -262,13 +262,14 @@ fun <T> OkFaker<T>.loadPlugin(
                 if (it is Collection<*>) {
                     onEvent?.invoke(
                         when (config.mode) {
-                            LoadMode.START -> it.isNotEmpty().opt(contentShower(), emptyShower())
-                            LoadMode.REFRESH -> it.isNotEmpty().opt(refreshCompletion(), emptyShower())
-                            LoadMode.LOADMORE -> loadMoreCompletion(it.isNotEmpty())
+                            LoadMode.START -> it.isNotEmpty().opt(contentShow(), emptyShow())
+                            LoadMode.REFRESH -> it.isNotEmpty()
+                                .opt(refreshSuccess(), emptyShow())
+                            LoadMode.LOADMORE -> loadMoreSuccess(it.isNotEmpty())
                         }
                     )
                 } else {
-                    onEvent?.invoke(contentShower())
+                    onEvent?.invoke(contentShow())
                 }
             }
 
@@ -283,9 +284,9 @@ fun <T> OkFaker<T>.loadPlugin(
             add(config.delayed) {
                 onEvent?.invoke(
                     when (config.mode) {
-                        LoadMode.START -> errorShower(it.message)
+                        LoadMode.START -> errorShow(it.message)
                         LoadMode.REFRESH -> refreshFailure()
-                        LoadMode.LOADMORE -> loadMoreFailure()
+                        LoadMode.LOADMORE -> refreshFailure()
                     }
                 )
             }
@@ -319,7 +320,7 @@ fun <T> OkFaker<T>.loadPlugin(
     onApply: (T) -> Unit
 ) {
     onStart {
-        onEvent?.invoke(progressShower(message))
+        onEvent?.invoke(progressShow(message))
     }
 
     onSuccess {
@@ -331,6 +332,6 @@ fun <T> OkFaker<T>.loadPlugin(
     }
 
     onComplete {
-        onEvent?.invoke(progressDismissal())
+        onEvent?.invoke(progressDismiss())
     }
 }

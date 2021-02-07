@@ -71,9 +71,9 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
-            Status.REFRESH_COMPLETE -> refreshView?.finishRefresh()
-            Status.LOADMORE_COMPLETE -> refreshView?.finishLoadMore()
-            Status.LOADMORE_COMPLETE_NO_MORE -> refreshView?.finishLoadMore(false)
+            Status.REFRESH_SUCCESS -> refreshView?.finishRefresh()
+            Status.LOADMORE_SUCCESS -> refreshView?.finishLoadMore()
+            Status.LOADMORE_SUCCESS_NO_MORE -> refreshView?.finishLoadMore(false)
             Status.REFRESH_FAILURE -> refreshView?.refreshFailed()
             Status.LOADMORE_FAILURE -> refreshView?.loadMoreFailed()
             Status.SHOW_LOADING -> loadingView?.apply {

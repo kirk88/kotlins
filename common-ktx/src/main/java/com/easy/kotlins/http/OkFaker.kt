@@ -72,7 +72,7 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
         RequestPairs<Any?>().apply(operation).forEach {
             it.value.let { value ->
                 when (value) {
-                    is BodyFromDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> request.addFormDataPart(
                         it.key,
                         value.filename,
                         value.body
@@ -92,7 +92,7 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
         formDataParts.forEach {
             it.value.let { value ->
                 when (value) {
-                    is BodyFromDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> request.addFormDataPart(
                         it.key,
                         value.filename,
                         value.body
@@ -112,7 +112,7 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
         formDataParts.forEach {
             it.second.let { value ->
                 when (value) {
-                    is BodyFromDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> request.addFormDataPart(
                         it.first,
                         value.filename,
                         value.body
@@ -172,7 +172,7 @@ class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRes
 }
 
 data class BodyPart(val body: RequestBody, val headers: Headers? = null)
-data class BodyFromDataPart(val body: RequestBody, val filename: String? = null)
+data class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
 data class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
 class RequestPairs<T>(

@@ -22,16 +22,22 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
     fun getString(key: String, defaultValue: String? = null): String? =
         extras.getString(key, defaultValue)
+
     fun getInt(key: String, defaultValue: Int = 0): Int = extras.getInt(key, defaultValue)
     fun getLong(key: String, defaultValue: Long = 0.toLong()): Long =
         extras.getLong(key, defaultValue)
+
     fun getFloat(key: String, defaultValue: Float = 0.toFloat()): Float =
         extras.getFloat(key, defaultValue)
+
     fun getDouble(key: String, defaultValue: Double = 0.toDouble()): Double =
         extras.getDouble(key, defaultValue)
+
     fun getBoolean(key: String, defaultValue: Boolean = false): Boolean =
         extras.getBoolean(key, defaultValue)
+
     fun <T : Parcelable> getParcelable(key: String): T? = extras.getParcelable<T>(key)
+
     @Suppress("UNCHECKED_CAST")
     fun <T : Serializable> getSerializable(key: String): T? = extras.getSerializable(key) as? T
 
@@ -86,9 +92,9 @@ object Status {
 
     const val SHOW_PROGRESS = STATUS_BASE + 1
     const val DISMISS_PROGRESS = STATUS_BASE + 2
-    const val REFRESH_COMPLETE = STATUS_BASE + 3
-    const val LOADMORE_COMPLETE = STATUS_BASE + 4
-    const val LOADMORE_COMPLETE_NO_MORE = STATUS_BASE + 5
+    const val REFRESH_SUCCESS = STATUS_BASE + 3
+    const val LOADMORE_SUCCESS = STATUS_BASE + 4
+    const val LOADMORE_SUCCESS_NO_MORE = STATUS_BASE + 5
     const val REFRESH_FAILURE = STATUS_BASE + 6
     const val LOADMORE_FAILURE = STATUS_BASE + 7
 
@@ -103,22 +109,26 @@ object Status {
 
 fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
 
+fun event(events: List<Event>): Event = EventCollection(events = events)
+
+fun event(vararg events: Event): Event = EventCollection(events = events.toList())
+
 inline fun buildEvent(
     what: Int = Status.NONE,
     message: String? = null,
     crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
-inline fun <reified T : Activity> activityLauncher(
+inline fun <reified T : Activity> activityStart(
     context: Context,
     vararg pairs: Pair<String, Any?>
 ) = buildEvent {
-        setIntent(Intent(context, T::class.java).apply {
-            putExtras(pairs.toBundle())
-        })
-    }
+    setIntent(Intent(context, T::class.java).apply {
+        putExtras(pairs.toBundle())
+    })
+}
 
-inline fun <reified T : Activity> activityLauncherForResult(
+inline fun <reified T : Activity> activityStartForResult(
     context: Context,
     requestCode: Int,
     vararg pairs: Pair<String, Any?>
@@ -128,39 +138,37 @@ inline fun <reified T : Activity> activityLauncherForResult(
     })
 }
 
-fun activityResult(vararg pairs: Pair<String, Any?>) = buildEvent {
+fun activityResults(vararg pairs: Pair<String, Any?>) = buildEvent {
     setIntent(Intent().apply {
         putExtras(pairs.toBundle())
     })
 }
 
-fun activityResult(code: Int, vararg pairs: Pair<String, Any?>) = buildEvent(code) {
+fun activityResults(code: Int, vararg pairs: Pair<String, Any?>) = buildEvent(code) {
     setIntent(Intent().apply {
         putExtras(pairs.toBundle())
     })
 }
 
-fun progressShower(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
+fun activityFinish(): Event = event(Status.FINISH_ACTIVITY)
 
-fun progressDismissal(): Event = Event(Status.DISMISS_PROGRESS)
+fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
 
-fun refreshCompletion(): Event = Event(Status.REFRESH_COMPLETE)
+fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
-fun loadMoreCompletion(hasMore: Boolean = true): Event =
-    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+fun refreshSuccess(): Event = Event(Status.REFRESH_SUCCESS)
 
 fun refreshFailure(): Event = Event(Status.REFRESH_FAILURE)
 
+fun loadMoreSuccess(hasMore: Boolean = true): Event =
+    Event(hasMore.opt(Status.LOADMORE_SUCCESS, Status.LOADMORE_SUCCESS_NO_MORE))
+
 fun loadMoreFailure(): Event = Event(Status.LOADMORE_FAILURE)
 
-fun loadingShower(message: String? = null): Event = Event(Status.SHOW_LOADING, message)
+fun loadingShow(message: String? = null): Event = Event(Status.SHOW_LOADING, message)
 
-fun emptyShower(message: String? = null): Event = Event(Status.SHOW_EMPTY, message)
+fun emptyShow(message: String? = null): Event = Event(Status.SHOW_EMPTY, message)
 
-fun errorShower(message: String? = null): Event = Event(Status.SHOW_ERROR, message)
+fun errorShow(message: String? = null): Event = Event(Status.SHOW_ERROR, message)
 
-fun contentShower(): Event = Event(Status.SHOW_CONTENT)
-
-fun eventOf(events: List<Event>): Event = EventCollection(events = events)
-
-fun eventOf(vararg events: Event): Event = EventCollection(events = events.toList())
+fun contentShow(): Event = Event(Status.SHOW_CONTENT)
