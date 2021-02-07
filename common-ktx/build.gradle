@@ -22,10 +22,6 @@ android {
         viewBinding true
     }
 
-    packagingOptions {
-        exclude 'META-INF/ASL2.0'
-    }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -56,15 +52,14 @@ dependencies {
     api rootProject.ext.dependencies.lifecycle_livedata_ktx
     api rootProject.ext.dependencies.datastore_preferences
     api rootProject.ext.dependencies.datastore_core
-    api rootProject.ext.dependencies.okhttp
-    api rootProject.ext.dependencies.okhttp_logging
-    api rootProject.ext.dependencies.jackson_core
-    api rootProject.ext.dependencies.jackson_mapper
     api rootProject.ext.dependencies.appcompat
     api rootProject.ext.dependencies.design
     api rootProject.ext.dependencies.fragment_ktx
     api rootProject.ext.dependencies.constraintlayout
     api rootProject.ext.dependencies.recyclerview
+    api rootProject.ext.dependencies.okhttp
+    api rootProject.ext.dependencies.okhttp_logging
+    api rootProject.ext.dependencies.jackson
 }
 
 uploadArchives {
@@ -79,9 +74,13 @@ uploadArchives {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 task androidSourcesJar(type: Jar) {
-    getArchiveClassifier().convention("sources")
-    getArchiveClassifier().set("sources")
+    archiveClassifier.convention("sources")
+    archiveClassifier.set("sources")
     from android.sourceSets.main.java.sourceFiles
 }
 

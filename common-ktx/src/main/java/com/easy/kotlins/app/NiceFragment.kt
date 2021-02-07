@@ -38,6 +38,7 @@ abstract class NiceFragment(@LayoutRes layoutResId: Int = 0) : Fragment(layoutRe
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        @Suppress("DEPRECATION")
         super.setUserVisibleHint(isVisibleToUser)
         this.isVisibleToUser = isVisibleToUser
         isCallUserVisibleHint = true

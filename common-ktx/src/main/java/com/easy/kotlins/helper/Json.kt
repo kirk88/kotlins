@@ -1,16 +1,19 @@
 package com.easy.kotlins.helper
 
-import org.codehaus.jackson.JsonParser
-import org.codehaus.jackson.map.ObjectMapper
-import org.codehaus.jackson.type.JavaType
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.json.JSONArray
 import org.json.JSONObject
 
 @PublishedApi
-internal val objectMapper = ObjectMapper().also {
-    it.configure(JsonParser.Feature.ALLOW_COMMENTS, true)
-    it.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-    it.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+internal val objectMapper = JsonMapper.builder()
+    .addModule(KotlinModule(strictNullChecks = true))
+    .build()
+
+@PublishedApi
+internal fun type(parametrized: Class<*>, vararg parameterClasses: Class<*>): JavaType? {
+    return objectMapper.typeFactory.constructParametricType(parametrized, *parameterClasses)
 }
 
 inline fun <reified T> String.parseAsJSONObject(): T {
@@ -18,7 +21,7 @@ inline fun <reified T> String.parseAsJSONObject(): T {
 }
 
 inline fun <reified T> String.parseAsJSONArray(): List<T> {
-    return objectMapper.readValue(this, typeOfList(T::class.java))
+    return objectMapper.readValue(this, type(ArrayList::class.java, T::class.java))
 }
 
 inline fun <reified T> JSONObject.parse(): T {
@@ -26,7 +29,7 @@ inline fun <reified T> JSONObject.parse(): T {
 }
 
 inline fun <reified T> JSONArray.parse(): List<T> {
-    return objectMapper.readValue(this.toString(), typeOfList(T::class.java))
+    return objectMapper.readValue(this.toString(), type(ArrayList::class.java, T::class.java))
 }
 
 fun Any.toJSONObject(): JSONObject =
@@ -38,26 +41,6 @@ fun Any.toJSONArray(): JSONArray =
 fun Any?.toJSONOrNull(): String? = if (this == null) null else objectMapper.writeValueAsString(this)
 
 fun Any.toJSON(): String = objectMapper.writeValueAsString(this)
-
-fun typeOfList(type: Class<*>): JavaType? {
-    return type(ArrayList::class.java, type)
-}
-
-fun typeOfSet(type: Class<*>): JavaType? {
-    return type(HashSet::class.java, type)
-}
-
-fun typeOfMap(keyType: Class<*>, valueType: Class<*>): JavaType? {
-    return type(HashMap::class.java, keyType, valueType)
-}
-
-fun typeOfArray(type: Class<*>): JavaType? {
-    return objectMapper.typeFactory.constructArrayType(type)
-}
-
-fun type(rawType: Class<*>, vararg typeArguments: Class<*>): JavaType? {
-    return objectMapper.typeFactory.constructParametricType(rawType, *typeArguments)
-}
 
 fun JSONObject.forEach(block: (key: String, element: JSONElement) -> Unit) {
     for (key in keys()) {
