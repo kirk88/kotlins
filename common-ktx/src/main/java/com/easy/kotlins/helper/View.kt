@@ -160,51 +160,33 @@ var View.margin: Int
 var View.layoutWidth: Int
     get() = width
     set(value) {
-        layoutParams?.apply {
-            width = value
-            requestLayout()
-        }
+        layoutParams?.width = value
+        requestLayout()
     }
 
 var View.layoutHeight: Int
     get() = height
     set(value) {
-        layoutParams?.apply {
-            height = value
-            requestLayout()
-        }
+        layoutParams?.height = value
+        requestLayout()
     }
 
 operator fun <T : View> View.get(@IdRes id: Int): T = findViewById<T>(id)
     ?: error("can not find view by id: $id")
 
-@Suppress("UNCHECKED_CAST")
-inline fun <T: View> T.onClick(crossinline action: (view: T) -> Unit) {
+inline fun <T : View> T.onClick(crossinline action: (view: T) -> Unit) {
+    @Suppress("UNCHECKED_CAST")
     setOnClickListener { v -> action(v as T) }
 }
 
-@Suppress("UNCHECKED_CAST")
-inline fun <T: View> T.onLongClick(crossinline action: (view: T) -> Boolean) {
+inline fun <T : View> T.onLongClick(crossinline action: (view: T) -> Boolean) {
+    @Suppress("UNCHECKED_CAST")
     setOnLongClickListener { v -> action(v as T) }
 }
 
-inline fun Iterable<View>.onClick(crossinline action: (view: View) -> Unit) {
-    val clickListener: View.OnClickListener = View.OnClickListener { v -> action(v) }
-    forEach {
-        it.setOnClickListener(clickListener)
-    }
-}
-
-inline fun Iterable<View>.onLongClick(crossinline action: (view: View) -> Boolean) {
-    val longClickListener: View.OnLongClickListener = View.OnLongClickListener { v -> action(v) }
-    forEach {
-        it.setOnLongClickListener(longClickListener)
-    }
-}
-
-@Suppress("ClickableViewAccessibility")
-inline fun View.onTouch(crossinline action: (view: View, event: MotionEvent) -> Boolean) {
-    setOnTouchListener { v, event -> action(v, event) }
+inline fun <T: View> View.onTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
+    @Suppress("ClickableViewAccessibility", "UNCHECKED_CAST")
+    setOnTouchListener { v, event -> action(v as T, event) }
 }
 
 inline fun TextView.onTextChanged(crossinline action: (text: CharSequence?) -> Unit) {
@@ -304,42 +286,4 @@ inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Ta
         override fun onTabReselected(tab: TabLayout.Tab?) {
         }
     })
-}
-
-fun TabLayout.Tab.onTabSelectedChanged(action: (tab: TabLayout.Tab) -> Unit) {
-    val parent = this.parent ?: throw IllegalStateException("Tab is not attached to TabLayout")
-    val wrapper: TabSelectedChangedListenerWrapper =
-        parent.tag as TabSelectedChangedListenerWrapper?
-            ?: TabSelectedChangedListenerWrapper().also {
-                parent.tag = it
-                parent.addOnTabSelectedListener(it)
-            }
-
-    wrapper.addListener(action)
-}
-
-private class TabSelectedChangedListenerWrapper : TabLayout.OnTabSelectedListener {
-
-    private val listeners = mutableListOf<(tab: TabLayout.Tab) -> Unit>()
-
-    fun addListener(action: (tab: TabLayout.Tab) -> Unit) {
-        listeners.add(action)
-    }
-
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        tab ?: return
-        for (listener in listeners) {
-            listener(tab)
-        }
-    }
-
-    override fun onTabUnselected(tab: TabLayout.Tab?) {
-        tab ?: return
-        for (listener in listeners) {
-            listener(tab)
-        }
-    }
-
-    override fun onTabReselected(tab: TabLayout.Tab?) {
-    }
 }
