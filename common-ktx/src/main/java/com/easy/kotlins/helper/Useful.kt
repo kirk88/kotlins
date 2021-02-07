@@ -8,16 +8,9 @@ import java.io.ObjectOutputStream
 /**
  * Create by LiZhanPing on 2020/8/25
  */
-
-
-inline fun <T, R> T.transform(crossinline transform: (value: T) -> R): R {
-    return transform.invoke(this)
-}
-
 fun <T: Any> Boolean.opt(right: T, wrong: T): T {
     return if (this) right else wrong
 }
-
 
 fun <T: Any> Boolean.opt(right: () -> T, wrong: () -> T): T {
     return if (this) right() else wrong()
@@ -40,9 +33,9 @@ fun Any.serialize(): String? = runCatching {
     }
 }.getOrNull()
 
-@Suppress("UNCHECKED_CAST")
 fun <T : Any> String.deserialize(): T? = runCatching {
     ObjectInputStream(ByteArrayInputStream(this.toByteArray(charset("ISO-8859-1")))).use {
+        @Suppress("UNCHECKED_CAST")
         it.readObject() as? T
     }
 }.getOrNull()

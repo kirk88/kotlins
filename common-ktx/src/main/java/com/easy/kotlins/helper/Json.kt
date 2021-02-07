@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 @PublishedApi
@@ -42,31 +43,45 @@ fun Any?.toJSONOrNull(): String? = if (this == null) null else objectMapper.writ
 
 fun Any.toJSON(): String = objectMapper.writeValueAsString(this)
 
-fun JSONObject.forEach(block: (key: String, element: JSONElement) -> Unit) {
+@Throws(JSONException::class)
+fun JSONObject.getValue(name: String): JSONValue = JSONValue(this.get(name))
+
+fun JSONObject.optValue(name: String): JSONValue = JSONValue(this.opt(name))
+
+val JSONArray.values: List<JSONValue>
+    get() {
+        val values = mutableListOf<JSONValue>()
+        for (index in 0 until this.length()) {
+            values.add(JSONValue(this.opt(index)))
+        }
+        return values
+    }
+
+fun JSONObject.forEach(block: (key: String, value: JSONValue) -> Unit) {
     for (key in keys()) {
-        block(key, JSONElement(opt(key)))
+        block(key, JSONValue(opt(key)))
     }
 }
 
-fun JSONObject.forEachIndexed(block: (index: Int, key: String, element: JSONElement) -> Unit) {
+fun JSONObject.forEachIndexed(block: (index: Int, key: String, value: JSONValue) -> Unit) {
     for ((index, key) in keys().withIndex()) {
-        block(index, key, JSONElement(opt(key)))
+        block(index, key, JSONValue(opt(key)))
     }
 }
 
-fun JSONArray.forEach(block: (element: JSONElement) -> Unit) {
+fun JSONArray.forEach(block: (value: JSONValue) -> Unit) {
     for (index in 0 until length()) {
-        block(JSONElement(opt(index)))
+        block(JSONValue(opt(index)))
     }
 }
 
-fun JSONArray.forEachIndexed(block: (index: Int, element: JSONElement) -> Unit) {
+fun JSONArray.forEachIndexed(block: (index: Int, value: JSONValue) -> Unit) {
     for (index in 0 until length()) {
-        block(index, JSONElement(opt(index)))
+        block(index, JSONValue(opt(index)))
     }
 }
 
-class JSONElement(private val value: Any?) {
+class JSONValue(val value: Any?) {
 
     val isJSONNull: Boolean
         get() = value == null

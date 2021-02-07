@@ -4,13 +4,13 @@ package com.easy.kotlins.sqlite.db
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
-import com.easy.kotlins.sqlite.SqlColumnCell
+import com.easy.kotlins.sqlite.SqlColumnElement
 import com.easy.kotlins.sqlite.SqlWhereCondition
 import com.easy.kotlins.sqlite.applyArguments
 
 abstract class UpdateQueryBuilder(
     private val table: String,
-    private val cells: Array<out SqlColumnCell>
+    private val values: Array<out SqlColumnElement>
 ) {
 
     private var whereCauseApplied = false
@@ -65,7 +65,7 @@ abstract class UpdateQueryBuilder(
         val finalSelectionArgs = if (whereCauseApplied) updateWhereArgs else null
         return update(
             table,
-            cells.toContentValues(),
+            values.toContentValues(),
             finalSelection,
             finalSelectionArgs,
             conflictAlgorithm
@@ -84,8 +84,8 @@ abstract class UpdateQueryBuilder(
 class AndroidDatabaseUpdateQueryBuilder(
     private val db: SQLiteDatabase,
     table: String,
-    cells: Array<out SqlColumnCell>
-) : UpdateQueryBuilder(table, cells) {
+    values: Array<out SqlColumnElement>
+) : UpdateQueryBuilder(table, values) {
 
     override fun update(
         table: String,

@@ -6,12 +6,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.easy.kotlins.sqlite.SqlColumnCell
+import com.easy.kotlins.sqlite.SqlColumnElement
 import com.easy.kotlins.sqlite.SqlColumnProperty
 import com.easy.kotlins.sqlite.applyArguments
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.regex.Pattern
 
 enum class SqlOrderDirection { ASC, DESC }
 
@@ -24,7 +23,7 @@ enum class SqlOrderDirection { ASC, DESC }
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
  */
-fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnCell): Long {
+fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnElement): Long {
     return insert(table, null, values.toContentValues())
 }
 
@@ -50,7 +49,7 @@ fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
  *
  * @throws [android.database.SQLException]
  */
-fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnCell): Long {
+fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnElement): Long {
     return insertOrThrow(table, null, values.toContentValues())
 }
 
@@ -81,7 +80,7 @@ fun SQLiteDatabase.insertOrThrow(table: String, valuesFrom: Any): Long {
 fun SQLiteDatabase.insertWithOnConflict(
     table: String,
     conflictAlgorithm: Int,
-    vararg values: SqlColumnCell
+    vararg values: SqlColumnElement
 ): Long {
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
@@ -113,7 +112,7 @@ fun SQLiteDatabase.insertWithOnConflict(
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
  */
-fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnCell): Long {
+fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnElement): Long {
     return replace(table, null, values.toContentValues())
 }
 
@@ -142,7 +141,7 @@ fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
  *
  * @throws [android.database.SQLException]
  */
-fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnCell): Long {
+fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnElement): Long {
     return replaceOrThrow(table, null, values.toContentValues())
 }
 
@@ -172,7 +171,7 @@ fun SQLiteDatabase.select(table: String, vararg columns: String): SelectQueryBui
 
 fun SQLiteDatabase.update(
     table: String,
-    vararg values: SqlColumnCell
+    vararg values: SqlColumnElement
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table, values)
 }
@@ -302,11 +301,11 @@ fun SQLiteDatabase.createColumns(
     }
 }
 
-internal fun Array<out SqlColumnCell>.toContentValues(): ContentValues {
+internal fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
-    for (cell in this) {
-        val key = cell.name
-        when (val value = cell.value) {
+    for (element in this) {
+        val key = element.name
+        when (val value = element.value) {
             null -> values.putNull(key)
             is Boolean -> values.put(key, value)
             is Byte -> values.put(key, value)
@@ -323,9 +322,9 @@ internal fun Array<out SqlColumnCell>.toContentValues(): ContentValues {
     return values
 }
 
-internal fun Any.toColumnValues(): Array<SqlColumnCell> {
+internal fun Any.toColumnValues(): Array<SqlColumnElement> {
     if (this is Map<*, *>) {
-        return this.map { SqlColumnCell.create(it.key.toString(), it.value) }.toTypedArray()
+        return this.map { SqlColumnElement.create(it.key.toString(), it.value) }.toTypedArray()
     }
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")

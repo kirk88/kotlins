@@ -57,7 +57,7 @@ internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
         parameterTypes = preferredConstructor.parameterTypes
     }
 
-    override fun parseRow(row: Array<ColumnElement>): T {
+    override fun parseRow(row: Array<SqlColumnValue>): T {
         if (parameterTypes.size != row.size) {
             val columnsRendered = row.joinToString(prefix = "[", postfix = "]")
             val parameterTypesRendered =

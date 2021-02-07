@@ -3,14 +3,14 @@ package com.easy.kotlins.sqlite
 import com.easy.kotlins.sqlite.db.SqlType
 
 
-interface SqlColumnCell {
+interface SqlColumnElement {
 
     val name: String
 
     val value: Any?
 
     companion object {
-        fun create(name: String, value: Any?): SqlColumnCell = SqlColumnCellImpl(name, value)
+        fun create(name: String, value: Any?): SqlColumnElement = SqlColumnElementImpl(name, value)
     }
 }
 
@@ -22,7 +22,7 @@ interface SqlColumnProperty {
 
     fun render(): String
 
-    operator fun plus(value: Any): SqlColumnCell
+    operator fun plus(value: Any): SqlColumnElement
 
     companion object {
         fun create(name: String, type: SqlType): SqlColumnProperty =
@@ -31,18 +31,18 @@ interface SqlColumnProperty {
 
 }
 
-private open class SqlColumnCellImpl(override val name: String, override val value: Any?) :
-    SqlColumnCell
+private open class SqlColumnElementImpl(override val name: String, override val value: Any?) :
+    SqlColumnElement
 
 private open class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
     SqlColumnProperty {
 
     override fun render(): String = "$name ${type.render()}"
 
-    override fun plus(value: Any): SqlColumnCell = SqlColumnCell.create(name, value)
+    override fun plus(value: Any): SqlColumnElement = SqlColumnElement.create(name, value)
 
 }
 
 infix fun String.and(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
-infix fun String.and(value: String?): SqlColumnCell = SqlColumnCellImpl(this, value)
-infix fun String.and(value: Number): SqlColumnCell = SqlColumnCellImpl(this, value)
+infix fun String.and(value: String?): SqlColumnElement = SqlColumnElementImpl(this, value)
+infix fun String.and(value: Number): SqlColumnElement = SqlColumnElementImpl(this, value)

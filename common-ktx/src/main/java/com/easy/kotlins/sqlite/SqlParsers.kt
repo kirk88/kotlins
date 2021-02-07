@@ -6,15 +6,15 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteException
 
 interface RowParser<out T> {
-    fun parseRow(row: Array<ColumnElement>): T
+    fun parseRow(row: Array<SqlColumnValue>): T
 }
 
 interface MapRowParser<out T> {
-    fun parseRow(row: Map<String, ColumnElement>): T
+    fun parseRow(row: Map<String, SqlColumnValue>): T
 }
 
-private class SingleColumnParser<out T>(val modifier: (ColumnElement) -> T) : RowParser<T> {
-    override fun parseRow(row: Array<ColumnElement>): T {
+private class SingleColumnParser<out T>(val modifier: (SqlColumnValue) -> T) : RowParser<T> {
+    override fun parseRow(row: Array<SqlColumnValue>): T {
         if (row.size != 1)
             throw SQLiteException("Invalid row: row for SingleColumnParser must contain exactly one column")
         @Suppress("UNCHECKED_CAST")
@@ -22,13 +22,13 @@ private class SingleColumnParser<out T>(val modifier: (ColumnElement) -> T) : Ro
     }
 }
 
-val ShortParser: RowParser<Short> = SingleColumnParser(modifier = ColumnElement::asShort)
-val IntParser: RowParser<Int> = SingleColumnParser(modifier = ColumnElement::asInt)
-val LongParser: RowParser<Long> = SingleColumnParser(modifier = ColumnElement::asLong)
-val FloatParser: RowParser<Float> = SingleColumnParser(modifier = ColumnElement::asFloat)
-val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = ColumnElement::asDouble)
-val StringParser: RowParser<String> = SingleColumnParser(modifier = ColumnElement::asString)
-val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = ColumnElement::asBlob)
+val ShortParser: RowParser<Short> = SingleColumnParser(modifier = SqlColumnValue::asShort)
+val IntParser: RowParser<Int> = SingleColumnParser(modifier = SqlColumnValue::asInt)
+val LongParser: RowParser<Long> = SingleColumnParser(modifier = SqlColumnValue::asLong)
+val FloatParser: RowParser<Float> = SingleColumnParser(modifier = SqlColumnValue::asFloat)
+val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = SqlColumnValue::asDouble)
+val StringParser: RowParser<String> = SingleColumnParser(modifier = SqlColumnValue::asString)
+val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = SqlColumnValue::asBlob)
 
 fun <T : Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
     if (count != 1)
@@ -82,15 +82,15 @@ fun <T : Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
     return list
 }
 
-fun Cursor.asSequence(): Sequence<Array<ColumnElement>> {
+fun Cursor.asSequence(): Sequence<Array<SqlColumnValue>> {
     return CursorSequence(this)
 }
 
-fun Cursor.asMapSequence(): Sequence<Map<String, ColumnElement>> {
+fun Cursor.asMapSequence(): Sequence<Map<String, SqlColumnValue>> {
     return CursorMapSequence(this)
 }
 
-private fun Cursor.getColumnValue(index: Int): ColumnElement {
+private fun Cursor.getColumnValue(index: Int): SqlColumnValue {
     val value = if (isNull(index)) null
     else when (getType(index)) {
         Cursor.FIELD_TYPE_INTEGER -> getLong(index)
@@ -99,54 +99,54 @@ private fun Cursor.getColumnValue(index: Int): ColumnElement {
         Cursor.FIELD_TYPE_BLOB -> getBlob(index)
         else -> null
     }
-    return ColumnElement(value)
+    return SqlColumnValue(value)
 }
 
-private fun readColumnsArray(cursor: Cursor): Array<ColumnElement> {
+private fun readColumnsArray(cursor: Cursor): Array<SqlColumnValue> {
     val count = cursor.columnCount
-    val list = ArrayList<ColumnElement>(count)
+    val list = ArrayList<SqlColumnValue>(count)
     for (i in 0 until count) {
         list.add(cursor.getColumnValue(i))
     }
     return list.toTypedArray()
 }
 
-private fun readColumnsMap(cursor: Cursor): Map<String, ColumnElement> {
+private fun readColumnsMap(cursor: Cursor): Map<String, SqlColumnValue> {
     val count = cursor.columnCount
-    val map = hashMapOf<String, ColumnElement>()
+    val map = hashMapOf<String, SqlColumnValue>()
     for (i in 0 until count) {
         map[cursor.getColumnName(i)] = cursor.getColumnValue(i)
     }
     return map
 }
 
-private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, ColumnElement>> {
+private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, SqlColumnValue>> {
     override fun iterator() = CursorMapIterator(cursor)
 }
 
-private class CursorSequence(val cursor: Cursor) : Sequence<Array<ColumnElement>> {
+private class CursorSequence(val cursor: Cursor) : Sequence<Array<SqlColumnValue>> {
     override fun iterator() = CursorIterator(cursor)
 }
 
-private class CursorIterator(val cursor: Cursor) : Iterator<Array<ColumnElement>> {
+private class CursorIterator(val cursor: Cursor) : Iterator<Array<SqlColumnValue>> {
     override fun hasNext() = cursor.position < cursor.count - 1
 
-    override fun next(): Array<ColumnElement> {
+    override fun next(): Array<SqlColumnValue> {
         cursor.moveToNext()
         return readColumnsArray(cursor)
     }
 }
 
-private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, ColumnElement>> {
+private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, SqlColumnValue>> {
     override fun hasNext() = cursor.position < cursor.count - 1
 
-    override fun next(): Map<String, ColumnElement> {
+    override fun next(): Map<String, SqlColumnValue> {
         cursor.moveToNext()
         return readColumnsMap(cursor)
     }
 }
 
-class ColumnElement internal constructor(internal val value: Any?) {
+class SqlColumnValue internal constructor(internal val value: Any?) {
     fun isNull(): Boolean = value == null
 
     @Suppress("UNCHECKED_CAST")
@@ -171,8 +171,9 @@ class ColumnElement internal constructor(internal val value: Any?) {
     }
 }
 
-inline fun <reified T : Any> ColumnElement.asTyped(): T? = asTyped(T::class.java)
+inline fun <reified T : Any> SqlColumnValue.asTyped(): T? = asTyped(T::class.java)
 
+@Suppress("RemoveRedundantQualifierName")
 private fun castValue(value: Any?, type: Class<*>): Any? {
     if (value == null && type.isPrimitive) {
         throw IllegalArgumentException("null can't be converted to the value of primitive type ${type.canonicalName}")
