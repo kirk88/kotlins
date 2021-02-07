@@ -1,6 +1,5 @@
 package com.easy.kotlins.http
 
-import androidx.annotation.MainThread
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -30,6 +29,62 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
 
     private var onCompleteApplied = false
     private val completeActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+
+    private val defaultCallback = object : OkCallback<T> {
+
+        override fun onStart() {
+            if (!onStartApplied) return
+
+            for (action in startActions) {
+                action()
+            }
+        }
+
+        override fun onProgress(bytes: Long, totalBytes: Long) {
+            if (!onProgressApplied) return
+
+            for (action in progressActions) {
+                action(bytes, totalBytes)
+            }
+        }
+
+        override fun onSuccess(result: T) {
+            if (!onSuccessApplied) return
+
+            for (action in successActions) {
+                action(result)
+            }
+        }
+
+        override fun onError(error: Exception) {
+            if (!onErrorApplied) return
+
+            for (action in errorActions) {
+                action(error)
+            }
+        }
+
+        override fun onCancel() {
+            if (!onCancelApplied) return
+
+            for (action in cancelActions) {
+                action()
+            }
+        }
+
+        override fun onComplete() {
+            if (!onCompleteApplied) return
+
+            for (action in completeActions) {
+                action()
+            }
+        }
+
+    }
+
+    init {
+        request.setCallback(defaultCallback)
+    }
 
     val isCanceled: Boolean
         get() = request.isCanceled
@@ -100,11 +155,11 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         }
     }
 
-    fun username(username: String){
+    fun username(username: String) {
         request.setUsername(username)
     }
 
-    fun password(password: String){
+    fun password(password: String) {
         request.setPassword(password)
     }
 
@@ -235,88 +290,4 @@ abstract class OkManager<T, R : OkRequest<T>>(protected val request: R) {
         request.enqueue()
     }
 
-    @MainThread
-    protected fun dispatchOnStart() {
-        if (!onStartApplied) return
-
-        for (action in startActions) {
-            action()
-        }
-    }
-
-    @MainThread
-    protected fun dispatchOnProgress(bytes: Long, totalBytes: Long) {
-        if (!onProgressApplied) return
-
-        for (action in progressActions) {
-            action(bytes, totalBytes)
-        }
-
-    }
-
-    @MainThread
-    protected fun dispatchOnSuccess(result: T) {
-        if (!onSuccessApplied) return
-
-        for (action in successActions) {
-            action(result)
-        }
-    }
-
-    @MainThread
-    protected fun dispatchOnError(error: Exception) {
-        if (!onErrorApplied) return
-
-        for (action in errorActions) {
-            action(error)
-        }
-    }
-
-    @MainThread
-    protected fun dispatchOnCancel() {
-        if (!onCancelApplied) return
-
-        for (action in cancelActions) {
-            action()
-        }
-    }
-
-    @MainThread
-    protected fun dispatchOnComplete() {
-        if (!onCompleteApplied) return
-
-        for (action in completeActions) {
-            action()
-        }
-    }
-
-    init {
-        request.setCallback(object : OkCallback<T> {
-
-            override fun onStart() {
-                dispatchOnStart()
-            }
-
-            override fun onProgress(bytes: Long, totalBytes: Long) {
-                dispatchOnProgress(bytes, totalBytes)
-            }
-
-            override fun onSuccess(result: T) {
-                dispatchOnSuccess(result)
-            }
-
-            override fun onError(error: Exception) {
-                dispatchOnError(error)
-            }
-
-            override fun onCancel() {
-                dispatchOnCancel()
-            }
-
-            override fun onComplete() {
-                dispatchOnComplete()
-            }
-
-        })
-    }
 }

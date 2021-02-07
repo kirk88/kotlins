@@ -146,9 +146,3 @@ private fun Any.toEscapedString(): String {
         '\'' + this.toString().replace("'", "''") + '\''
     }
 }
-
-fun main() {
-    val builder = "id".equal(90) and "name".like("%小李%") or "id".any(1, 2, 3, 4)
-
-    println(builder.whereCause)
-}
