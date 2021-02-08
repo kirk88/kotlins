@@ -11,12 +11,9 @@ import java.net.URL
 
 internal class OkRequest(
     private val client: OkHttpClient,
-    private val method: OkRequestMethod,
-    private val url: HttpUrl,
-    private val requestBody: RequestBody?,
-    private val requestBuilder: Request.Builder,
+    private val request: Request,
     private val requestInterceptors: List<OkRequestInterceptor>,
-    private val responseInterceptors: List<OkResponseInterceptor>
+    private val responseInterceptors: List<OkResponseInterceptor>,
 ) {
 
     private var call: Call? = null
@@ -25,9 +22,6 @@ internal class OkRequest(
     @Volatile
     private var canceled = false
     private var executed = false
-
-    val tag: Any?
-        get() = call?.request()?.tag()
 
     val isExecuted: Boolean
         get() {
@@ -40,6 +34,10 @@ internal class OkRequest(
             if (canceled) return true
             synchronized(this) { return call?.isCanceled() == true }
         }
+
+    fun tag(): Any? = request.tag()
+
+    fun <T> tag(type: Class<out T>): T? = request.tag(type)
 
     fun cancel() {
         if (canceled) return
@@ -70,15 +68,11 @@ internal class OkRequest(
 
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                if (!dispatchOnCancel(callback)) {
-                    dispatchOnFailure(callback, e)
-                }
+                dispatchOnFailure(callback, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (!dispatchOnCancel(callback)) {
-                    dispatchOnResponse(callback, response)
-                }
+                dispatchOnResponse(callback, response)
             }
         })
     }
@@ -88,20 +82,28 @@ internal class OkRequest(
     }
 
     private fun dispatchOnFailure(callback: OkCallback<Response>, e: Exception) {
+        if (dispatchOnCancel(callback)) {
+            return
+        }
+
         try {
-            callback.onError(e)
+            callback.onFailure(e)
         } finally {
-            callback.onComplete()
+            callback.onCompletion()
         }
     }
 
     private fun dispatchOnResponse(callback: OkCallback<Response>, response: Response) {
+        if (dispatchOnCancel(callback)) {
+            return
+        }
+
         try {
             callback.onSuccess(processResponse(response))
         } catch (e: Exception) {
-            callback.onError(e)
+            callback.onFailure(e)
         } finally {
-            callback.onComplete()
+            callback.onCompletion()
         }
     }
 
@@ -117,6 +119,7 @@ internal class OkRequest(
     private fun createCall(): Call {
         var realCall: Call?
         synchronized(this) {
+            check(!canceled) { "Already canceled" }
             check(!executed) { "Already executed" }
             executed = true
             realCall = this.call
@@ -125,7 +128,7 @@ internal class OkRequest(
             }
             if (realCall == null) {
                 try {
-                    this.call = client.newCall(createRequest())
+                    this.call = client.newCall(processRequest(request))
                     realCall = this.call
                 } catch (e: Exception) {
                     creationFailure = e
@@ -134,13 +137,6 @@ internal class OkRequest(
             }
         }
         return realCall!!
-    }
-
-    private fun createRequest(): Request {
-        val request = requestBuilder.url(url).also {
-            it.method(method.name, requestBody)
-        }.build()
-        return processRequest(request)
     }
 
     private fun processRequest(request: Request): Request {
@@ -159,10 +155,10 @@ internal class OkRequest(
         return handledResponse
     }
 
-    class Builder(private val method: OkRequestMethod = OkRequestMethod.GET) {
-        private val requestBuilder: Request.Builder = Request.Builder()
+    class Builder(private val method: OkRequestMethod) {
 
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
+        private val requestBuilder: Request.Builder = Request.Builder()
 
         private var formBuilderApplied = false
         private var formBuilder: FormBody.Builder? = null
@@ -194,12 +190,11 @@ internal class OkRequest(
         private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
         private val responseInterceptors = mutableListOf<OkResponseInterceptor>()
 
-        fun client(client: OkHttpClient): Builder {
+        fun client(client: OkHttpClient) = apply {
             this.client = client
-            return this
         }
 
-        fun url(url: HttpUrl): Builder {
+        fun url(url: HttpUrl) = apply {
             urlBuilder.scheme(url.scheme)
                 .encodedUsername(url.encodedUsername)
                 .encodedPassword(url.encodedPassword)
@@ -208,143 +203,116 @@ internal class OkRequest(
                 .encodedPath(url.encodedPath)
                 .encodedQuery(url.encodedQuery)
                 .encodedFragment(url.encodedFragment)
-            return this
         }
 
-        fun url(url: String): Builder {
-            return url(url.toHttpUrl())
-        }
+        fun url(url: String) = url(url.toHttpUrl())
 
-        fun url(url: URL): Builder {
-            return url(url.toString().toHttpUrl())
-        }
+        fun url(url: URL) = url(url.toString().toHttpUrl())
 
-        fun url(uri: URI): Builder {
-            return url(uri.toString().toHttpUrl())
-        }
+        fun url(uri: URI) = url(uri.toString().toHttpUrl())
 
-        fun tag(tag: Any): Builder {
+        fun tag(tag: Any?) = apply {
             requestBuilder.tag(tag)
-            return this
         }
 
-        fun cacheControl(cacheControl: CacheControl): Builder {
+        fun <T : Any> tag(type: Class<in T>, tag: T?) = apply {
+            requestBuilder.tag(type, tag)
+        }
+
+        fun cacheControl(cacheControl: CacheControl) = apply {
             requestBuilder.cacheControl(cacheControl)
-            return this
         }
 
-        fun header(key: String, value: String): Builder {
-            requestBuilder.header(key, value)
-            return this
+        fun header(name: String, value: String) = apply {
+            requestBuilder.header(name, value)
         }
 
-        fun addHeader(key: String, value: String): Builder {
-            requestBuilder.addHeader(key, value)
-            return this
+        fun addHeader(name: String, value: String) = apply {
+            requestBuilder.addHeader(name, value)
         }
 
-        fun removeHeader(key: String): Builder {
-            requestBuilder.removeHeader(key)
-            return this
+        fun removeHeader(name: String) = apply {
+            requestBuilder.removeHeader(name)
         }
 
-        fun username(username: String): Builder {
+        fun username(username: String) = apply {
             urlBuilder.username(username)
-            return this
         }
 
-        fun password(password: String): Builder {
+        fun password(password: String) = apply {
             urlBuilder.password(password)
-            return this
         }
 
-        fun addQueryParameter(key: String, value: String): Builder {
-            urlBuilder.addQueryParameter(key, value)
-            return this
+        fun addQueryParameter(name: String, value: String) = apply {
+            urlBuilder.addQueryParameter(name, value)
         }
 
-        fun setQueryParameter(key: String, value: String): Builder {
-            urlBuilder.setQueryParameter(key, value)
-            return this
+        fun setQueryParameter(name: String, value: String) = apply {
+            urlBuilder.setQueryParameter(name, value)
         }
 
-        fun addEncodedQueryParameter(key: String, value: String): Builder {
-            urlBuilder.addEncodedQueryParameter(key, value)
-            return this
+        fun addEncodedQueryParameter(name: String, value: String) = apply {
+            urlBuilder.addEncodedQueryParameter(name, value)
         }
 
-        fun setEncodedQueryParameter(key: String, value: String): Builder {
-            urlBuilder.setEncodedQueryParameter(key, value)
-            return this
+        fun setEncodedQueryParameter(name: String, value: String) = apply {
+            urlBuilder.setEncodedQueryParameter(name, value)
         }
 
-        fun removeQueryParameters(key: String): Builder {
-            urlBuilder.removeAllQueryParameters(key)
-            return this
+        fun removeQueryParameters(name: String) = apply {
+            urlBuilder.removeAllQueryParameters(name)
         }
 
-        fun removeEncodedQueryParameters(key: String): Builder {
-            urlBuilder.removeAllEncodedQueryParameters(key)
-            return this
+        fun removeEncodedQueryParameters(name: String) = apply {
+            urlBuilder.removeAllEncodedQueryParameters(name)
         }
 
-        fun addFormParameter(key: String, value: String): Builder {
-            formBuilder?.add(key, value)
-            return this
+        fun addFormParameter(name: String, value: String) = apply {
+            formBuilder?.add(name, value)
         }
 
-        fun addEncodedFormParameter(key: String, value: String): Builder {
-            formBuilder?.addEncoded(key, value)
-            return this
+        fun addEncodedFormParameter(name: String, value: String) = apply {
+            formBuilder?.addEncoded(name, value)
         }
 
-        fun addFormDataPart(name: String, value: String): Builder {
+        fun addFormDataPart(name: String, value: String) = apply {
             multipartBuilder?.addFormDataPart(name, value)
-            return this
         }
 
-        fun addFormDataPart(name: String, filename: String?, body: RequestBody): Builder {
+        fun addFormDataPart(name: String, filename: String?, body: RequestBody) = apply {
             multipartBuilder?.addFormDataPart(name, filename, body)
-            return this
         }
 
-        fun addFormDataPart(name: String, contentType: MediaType?, file: File): Builder {
+        fun addFormDataPart(name: String, contentType: MediaType?, file: File) = apply {
             multipartBuilder?.addFormDataPart(
                 name,
                 file.name,
                 file.asRequestBody(contentType)
             )
-            return this
         }
 
-        fun addPart(part: MultipartBody.Part): Builder {
+        fun addPart(part: MultipartBody.Part) = apply {
             multipartBuilder?.addPart(part)
-            return this
         }
 
-        fun addPart(body: RequestBody): Builder {
+        fun addPart(body: RequestBody) = apply {
             multipartBuilder?.addPart(body)
-            return this
         }
 
-        fun addPart(headers: Headers?, body: RequestBody): Builder {
+        fun addPart(headers: Headers?, body: RequestBody) = apply {
             multipartBuilder?.addPart(headers, body)
-            return this
         }
 
-        fun body(contentType: MediaType?, body: String): Builder {
+        fun body(contentType: MediaType?, body: String) = apply {
             requestBody = body.toRequestBody(contentType)
-            return this
         }
 
-        fun body(contentType: MediaType?, file: File): Builder {
+        fun body(contentType: MediaType?, file: File) = apply {
             requestBody = file.asRequestBody(contentType)
-            return this
         }
 
-        fun body(body: RequestBody): Builder {
+        fun body(body: RequestBody) = apply {
             requestBody = body
-            return this
         }
 
         fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
@@ -362,16 +330,17 @@ internal class OkRequest(
         }
 
         fun build(): OkRequest {
+            val request = requestBuilder.url(urlBuilder.build())
+                .method(method.name, createRequestBody())
+                .build()
             return OkRequest(
                 requireNotNull(client) { "OkHttpClient must not be null" },
-                method,
-                urlBuilder.build(),
-                createRequestBody(),
-                requestBuilder,
+                request,
                 requestInterceptors,
-                responseInterceptors
+                responseInterceptors,
             )
         }
+
     }
 
 }

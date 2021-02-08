@@ -14,7 +14,7 @@ internal object OkCallbacks {
     private const val MSG_WHAT_ON_SUCCESS = MSG_WHAT_BASE + 2
     private const val MSG_WHAT_ON_ERROR = MSG_WHAT_BASE + 3
     private const val MSG_WHAT_ON_CANCEL = MSG_WHAT_BASE + 4
-    private const val MSG_WHAT_ON_COMPLETE = MSG_WHAT_BASE + 5
+    private const val MSG_WHAT_ON_COMPLETION = MSG_WHAT_BASE + 5
     private val HANDLER: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             val body = msg.obj as MessageBody
@@ -22,15 +22,15 @@ internal object OkCallbacks {
                 MSG_WHAT_ON_START -> {
                     dispatchOnStart(body.callback)
                 }
-                MSG_WHAT_ON_COMPLETE -> {
-                    dispatchOnComplete(body.callback)
+                MSG_WHAT_ON_COMPLETION -> {
+                    dispatchOnCompletion(body.callback)
                 }
                 MSG_WHAT_ON_SUCCESS -> {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     dispatchOnSuccess(callback, body.args[0])
                 }
                 MSG_WHAT_ON_ERROR -> {
-                    dispatchOnError(body.callback, body.args[0] as Exception)
+                    dispatchOnFailure(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_CANCEL -> {
                     dispatchOnCancel(body.callback)
@@ -45,7 +45,7 @@ internal object OkCallbacks {
             .sendToTarget()
     }
 
-    fun onError(callback: OkCallback<*>?, error: Exception) {
+    fun onFailure(callback: OkCallback<*>?, error: Exception) {
         if (callback == null) return
         HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
     }
@@ -55,9 +55,9 @@ internal object OkCallbacks {
         HANDLER.obtainMessage(MSG_WHAT_ON_START, MessageBody(callback)).sendToTarget()
     }
 
-    fun onComplete(callback: OkCallback<*>?) {
+    fun onCompletion(callback: OkCallback<*>?) {
         if (callback == null) return
-        HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETE, MessageBody(callback)).sendToTarget()
+        HANDLER.obtainMessage(MSG_WHAT_ON_COMPLETION, MessageBody(callback)).sendToTarget()
     }
 
     fun onCancel(callback: OkCallback<*>?) {
@@ -72,9 +72,9 @@ internal object OkCallbacks {
         }
     }
 
-    private fun dispatchOnComplete(callback: OkCallback<*>) {
+    private fun dispatchOnCompletion(callback: OkCallback<*>) {
         try {
-            callback.onComplete()
+            callback.onCompletion()
         } catch (ignored: Exception) {
         }
     }
@@ -93,9 +93,9 @@ internal object OkCallbacks {
         }
     }
 
-    private fun dispatchOnError(callback: OkCallback<*>, error: Exception) {
+    private fun dispatchOnFailure(callback: OkCallback<*>, error: Exception) {
         try {
-            callback.onError(error)
+            callback.onFailure(error)
         } catch (ignored: Exception) {
         }
     }

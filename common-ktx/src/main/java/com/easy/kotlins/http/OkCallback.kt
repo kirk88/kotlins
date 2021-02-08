@@ -6,9 +6,9 @@ interface OkCallback<T> {
 
     fun onSuccess(result: T)
 
-    fun onError(error: Exception)
+    fun onFailure(error: Exception)
 
-    fun onComplete()
+    fun onCompletion()
 
     fun onCancel()
 

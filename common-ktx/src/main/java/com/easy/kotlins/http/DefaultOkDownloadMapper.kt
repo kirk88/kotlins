@@ -1,5 +1,6 @@
 package com.easy.kotlins.http
 
+import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -32,7 +33,6 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     }
 
     open fun onProgress(readBytes: Long, totalBytes: Long) {
-
     }
 
     private fun writeStreamToFile(
