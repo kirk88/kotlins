@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package com.easy.kotlins.http
 
 import androidx.lifecycle.LiveData
@@ -11,165 +9,476 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import okhttp3.Headers
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.*
 import java.io.File
-import kotlin.collections.set
+import java.net.URI
+import java.net.URL
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-/**
- * Create by LiZhanPing on 2020/8/22
- */
+class OkFaker<T> internal constructor(method: OkRequestMethod) {
 
-class OkFaker<T>(method: OkRequestMethod) : OkManager<T, OkRestRequest<T>>(OkRestRequest(method)) {
+    private val builder = OkRequest.Builder(method)
 
-    fun formParameters(operation: RequestPairs<Any?>.() -> Unit) {
+    private var request: OkRequest? = null
+
+    val isCanceled: Boolean
+        get() = request?.isCanceled ?: false
+
+    val isExecuted: Boolean
+        get() = request?.isExecuted ?: false
+
+    val tag: Any?
+        get() = request?.tag
+
+    private var onStartApplied = false
+    private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+
+    private var onSuccessApplied = false
+    private val onSuccessActions: MutableList<Action<T>> by lazy { mutableListOf() }
+
+    private var onErrorApplied = false
+    private val onErrorActions: MutableList<Action<Exception>> by lazy { mutableListOf() }
+
+    private var onCancelApplied = false
+    private val onCancelActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+
+    private var onCompleteApplied = false
+    private val onCompleteActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+
+    private val transformer = OkTransformer<T>()
+
+    fun client(client: OkHttpClient) = this.apply {
+        builder.client(client)
+    }
+
+    fun url(url: String) = this.apply {
+        builder.url(url)
+    }
+
+    fun url(url: URL) = this.apply {
+        builder.url(url)
+    }
+
+    fun uri(uri: URI) = this.apply {
+        builder.url(uri)
+    }
+
+    fun tag(tag: Any) = this.apply {
+        builder.tag(tag)
+    }
+
+    fun cacheControl(cacheControl: CacheControl) = this.apply {
+        builder.cacheControl(cacheControl)
+    }
+
+    fun headers(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
         RequestPairs<Any?>().apply(operation).forEach {
-            request.addFormParameter(it.key, it.value.toString())
+            builder.header(it.key, it.value.toString())
         }
     }
 
-    fun formParameters(formParameters: Map<String, Any?>) {
-        formParameters.forEach {
-            request.addFormParameter(it.key, it.value.toString())
+    fun headers(headers: Map<String, Any?>) = this.apply {
+        headers.forEach {
+            builder.header(it.key, it.value.toString())
         }
     }
 
-    fun formParameters(vararg formParameters: Pair<String, Any?>) {
-        formParameters.forEach {
-            request.addFormParameter(it.first, it.second.toString())
+    fun headers(vararg headers: Pair<String, Any?>) = this.apply {
+        headers.forEach {
+            builder.header(it.first, it.second.toString())
         }
     }
 
-    fun encodedFormParameters(operation: RequestPairs<Any?>.() -> Unit) {
+    fun addHeaders(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
         RequestPairs<Any?>().apply(operation).forEach {
-            request.addEncodedFormParameter(it.key, it.value.toString())
+            builder.addHeader(it.key, it.value.toString())
         }
     }
 
-    fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) {
+    fun addHeaders(headers: Map<String, Any?>) = this.apply {
+        headers.forEach {
+            builder.addHeader(it.key, it.value.toString())
+        }
+    }
+
+    fun addHeaders(vararg headers: Pair<String, Any?>) = this.apply {
+        headers.forEach {
+            builder.addHeader(it.first, it.second.toString())
+        }
+    }
+
+    fun username(username: String) = this.apply {
+        builder.username(username)
+    }
+
+    fun password(password: String) = this.apply {
+        builder.password(password)
+    }
+
+    fun queryParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.setQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun queryParameters(queryParameters: Map<String, Any?>) = this.apply {
+        queryParameters.forEach {
+            builder.setQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun queryParameters(vararg queryParameters: Pair<String, Any?>) = this.apply {
+        queryParameters.forEach {
+            builder.setQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun addQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.addQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addQueryParameters(queryParameters: Map<String, Any?>) = this.apply {
+        queryParameters.forEach {
+            builder.addQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = this.apply {
+        queryParameters.forEach {
+            builder.addQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun encodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.setEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = this.apply {
+        encodedQueryParameters.forEach {
+            builder.setEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = this.apply {
+        encodedQueryParameters.forEach {
+            builder.setEncodedQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.addEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = this.apply {
+        encodedQueryParameters.forEach {
+            builder.addEncodedQueryParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = this.apply {
+        encodedQueryParameters.forEach {
+            builder.addEncodedQueryParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun formParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.addFormParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun formParameters(formParameters: Map<String, Any?>) = this.apply {
+        formParameters.forEach {
+            builder.addFormParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun formParameters(vararg formParameters: Pair<String, Any?>) = this.apply {
+        formParameters.forEach {
+            builder.addFormParameter(it.first, it.second.toString())
+        }
+    }
+
+    fun encodedFormParameters(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
+        RequestPairs<Any?>().apply(operation).forEach {
+            builder.addEncodedFormParameter(it.key, it.value.toString())
+        }
+    }
+
+    fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = this.apply {
         encodedFormParameters.forEach {
-            request.addEncodedFormParameter(it.key, it.value.toString())
+            builder.addEncodedFormParameter(it.key, it.value.toString())
         }
     }
 
-    fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) {
+    fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = this.apply {
         encodedFormParameters.forEach {
-            request.addEncodedFormParameter(it.first, it.second.toString())
+            builder.addEncodedFormParameter(it.first, it.second.toString())
         }
     }
 
-    fun parts(vararg parts: BodyPart) {
+    fun parts(vararg parts: BodyPart) = this.apply {
         parts.forEach {
-            request.addPart(it.headers, it.body)
+            builder.addPart(it.headers, it.body)
         }
     }
 
-    fun formDataParts(operation: RequestPairs<Any?>.() -> Unit) {
+    fun formDataParts(operation: RequestPairs<Any?>.() -> Unit) = this.apply {
         RequestPairs<Any?>().apply(operation).forEach {
             it.value.let { value ->
                 when (value) {
-                    is BodyFormDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> builder.addFormDataPart(
                         it.key,
                         value.filename,
                         value.body
                     )
-                    is FileFormDataPart -> request.addFormDataPart(
+                    is FileFormDataPart -> builder.addFormDataPart(
                         it.key,
                         value.contentType,
                         value.file
                     )
-                    else -> request.addFormDataPart(it.key, value.toString())
+                    else -> builder.addFormDataPart(it.key, value.toString())
                 }
             }
         }
     }
 
-    fun formDataParts(formDataParts: Map<String, Any?>) {
+    fun formDataParts(formDataParts: Map<String, Any?>) = this.apply {
         formDataParts.forEach {
             it.value.let { value ->
                 when (value) {
-                    is BodyFormDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> builder.addFormDataPart(
                         it.key,
                         value.filename,
                         value.body
                     )
-                    is FileFormDataPart -> request.addFormDataPart(
+                    is FileFormDataPart -> builder.addFormDataPart(
                         it.key,
                         value.contentType,
                         value.file
                     )
-                    else -> request.addFormDataPart(it.key, value.toString())
+                    else -> builder.addFormDataPart(it.key, value.toString())
                 }
             }
         }
     }
 
-    fun formDataParts(vararg formDataParts: Pair<String, Any?>) {
+    fun formDataParts(vararg formDataParts: Pair<String, Any?>) = this.apply {
         formDataParts.forEach {
             it.second.let { value ->
                 when (value) {
-                    is BodyFormDataPart -> request.addFormDataPart(
+                    is BodyFormDataPart -> builder.addFormDataPart(
                         it.first,
                         value.filename,
                         value.body
                     )
-                    is FileFormDataPart -> request.addFormDataPart(
+                    is FileFormDataPart -> builder.addFormDataPart(
                         it.first,
                         value.contentType,
                         value.file
                     )
-                    else -> request.addFormDataPart(it.first, value.toString())
+                    else -> builder.addFormDataPart(it.first, value.toString())
                 }
             }
         }
     }
 
-    fun parts(operation: MutableList<RequestBody>.() -> Unit) {
+    fun parts(operation: MutableList<RequestBody>.() -> Unit) = this.apply {
         mutableListOf<RequestBody>().apply(operation).forEach {
-            request.addPart(it)
+            builder.addPart(it)
         }
     }
 
-    fun multiParts(operation: MutableList<MultipartBody.Part>.() -> Unit) {
+    fun multiParts(operation: MutableList<MultipartBody.Part>.() -> Unit) = this.apply {
         mutableListOf<MultipartBody.Part>().apply(operation).forEach {
-            request.addPart(it)
+            builder.addPart(it)
         }
     }
 
-    fun body(body: RequestBody) {
-        request.body(body)
+    fun body(body: RequestBody) = this.apply {
+        builder.body(body)
     }
 
-    fun body(body: () -> RequestBody) {
-        request.body(body())
+    fun body(body: () -> RequestBody) = this.apply {
+        builder.body(body())
+    }
+
+    fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
+        builder.addRequestInterceptor(interceptor)
+    }
+
+    fun addResponseInterceptor(interceptor: OkResponseInterceptor) {
+        builder.addResponseInterceptor(interceptor)
+    }
+
+    fun mapResponse(mapper: OkMapper<Response, T>) = this.apply {
+        transformer.mapResponse(mapper)
+        if (mapper is OkDownloadMapper) {
+            builder.addRequestInterceptor(mapper)
+        }
+    }
+
+    fun mapError(mapper: OkMapper<Exception, T>) = this.apply {
+        transformer.mapError(mapper)
+    }
+
+    fun onStart(action: SimpleAction) = this.apply {
+        onStartApplied = true
+        onStartActions.add(action)
+    }
+
+    fun onSuccess(action: Action<T>) = this.apply {
+        onSuccessApplied = true
+        onSuccessActions.add(action)
+    }
+
+    fun onError(action: Action<Exception>) = this.apply {
+        onErrorApplied = true
+        onErrorActions.add(action)
+    }
+
+    fun onCancel(action: SimpleAction) = this.apply {
+        onCancelApplied = true
+        onCancelActions.add(action)
+    }
+
+    fun onComplete(action: SimpleAction) = this.apply {
+        onCompleteApplied = true
+        onCompleteActions.add(action)
+    }
+
+    fun cancel() {
+        request?.cancel()
+    }
+
+    @Throws(Exception::class)
+    fun execute(): T {
+        return transformer.transformResponse(getRequest().execute())
+    }
+
+    fun safeExecute(): T? {
+        return runCatching { execute() }.getOrNull()
+    }
+
+    fun safeExecute(defaultValue: () -> T): T {
+        return safeExecute() ?: defaultValue()
+    }
+
+    fun enqueue() = this.apply {
+        getRequest().enqueue(ResponseHandler(transformer, object : OkCallback<T> {
+            override fun onStart() {
+                if (onStartApplied) {
+                    for (action in onStartActions) action()
+                }
+            }
+
+            override fun onSuccess(result: T) {
+                if (onSuccessApplied) {
+                    for (action in onSuccessActions) action(result)
+                }
+            }
+
+            override fun onError(error: Exception) {
+                if (onErrorApplied) {
+                    for (action in onErrorActions) action(error)
+                }
+            }
+
+            override fun onComplete() {
+                if (onCompleteApplied) {
+                    for (action in onCompleteActions) action()
+                }
+            }
+
+            override fun onCancel() {
+                if (onCancelApplied) {
+                    for (action in onCancelActions) action()
+                }
+            }
+        }))
+    }
+
+    private fun getRequest(): OkRequest {
+        return request ?: builder.build().also {
+            request = it
+        }
+    }
+
+    private class ResponseHandler<T>(
+        private val transformer: OkTransformer<T>,
+        private val callback: OkCallback<T>
+    ) : OkCallback<Response> {
+        override fun onStart() {
+            OkCallbacks.onStart(callback)
+        }
+
+        override fun onSuccess(result: Response) {
+            runCatching {
+                transformer.transformResponse(result)
+            }.onFailure {
+                OkCallbacks.onError(callback, Exception(it))
+            }.onSuccess {
+                OkCallbacks.onSuccess(callback, it)
+            }
+        }
+
+        override fun onError(error: Exception) {
+            OkCallbacks.onError(callback, error)
+        }
+
+        override fun onComplete() {
+            OkCallbacks.onComplete(callback)
+        }
+
+        override fun onCancel() {
+            OkCallbacks.onCancel(callback)
+        }
     }
 
     companion object {
 
-        fun <T> get(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.GET).apply(block)
+        fun <T> get(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.GET).apply {
+                block?.invoke(this)
+            }
 
-        fun <T> post(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.POST).apply(block)
+        fun <T> post(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.POST).apply {
+                block?.invoke(this)
+            }
 
-        fun <T> delete(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.DELETE).apply(block)
+        fun <T> delete(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.DELETE).apply {
+                block?.invoke(this)
+            }
 
-        fun <T> put(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.PUT).apply(block)
+        fun <T> put(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.PUT).apply {
+                block?.invoke(this)
+            }
 
-        fun <T> head(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.HEAD).apply(block)
+        fun <T> head(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.HEAD).apply {
+                block?.invoke(this)
+            }
 
-        fun <T> patch(block: OkFaker<T>.() -> Unit): OkFaker<T> =
-            OkFaker<T>(OkRequestMethod.PATCH).apply(block)
+        fun <T> patch(block: (OkFaker<T>.() -> Unit)? = null): OkFaker<T> =
+            OkFaker<T>(OkRequestMethod.PATCH).apply {
+                block?.invoke(this)
+            }
+
     }
-
 }
+
+typealias Action<T> = (T) -> Unit
+typealias SimpleAction = () -> Unit
 
 data class BodyPart(val body: RequestBody, val headers: Headers? = null)
 data class BodyFormDataPart(val body: RequestBody, val filename: String? = null)

@@ -12,15 +12,15 @@ import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.event.EventLifecycleObserver
 import com.easy.kotlins.event.EventDelegate
-import com.easy.kotlins.http.DefaultOkManagerScope
+import com.easy.kotlins.http.DefaultOkFakerScope
 import com.easy.kotlins.http.OkFaker
-import com.easy.kotlins.http.OkManagerScope
+import com.easy.kotlins.http.OkFakerScope
 
 /**
  * Create by LiZhanPing on 2020/8/24
  */
 
-interface ViewModelController : OkManagerScope {
+interface ViewModelController : OkFakerScope {
     var event: Event
 
     fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T>
@@ -43,7 +43,7 @@ interface ViewModelEventDispatcher {
 }
 
 private class SimpleViewModelController : ViewModelController,
-    OkManagerScope by DefaultOkManagerScope() {
+    OkFakerScope by DefaultOkFakerScope() {
 
     private val eventDelegate = EventDelegate()
     override var event: Event by eventDelegate

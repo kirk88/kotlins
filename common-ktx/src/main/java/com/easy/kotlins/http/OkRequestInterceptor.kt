@@ -1,8 +1,8 @@
-package com.easy.kotlins.http.extension
+package com.easy.kotlins.http
 
 import okhttp3.Request
 
-interface OkExtension {
+fun interface OkRequestInterceptor {
 
     fun shouldInterceptRequest(request: Request): Request
 

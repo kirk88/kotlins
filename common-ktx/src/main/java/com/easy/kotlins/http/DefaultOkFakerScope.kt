@@ -1,10 +1,10 @@
 package com.easy.kotlins.http
 
-class DefaultOkManagerScope: OkManagerScope, Iterable<OkManager<*, *>> {
+class DefaultOkFakerScope: OkFakerScope, Iterable<OkFaker<*>> {
 
-    private var resources: MutableList<OkManager<*, *>>? = null
+    private var resources: MutableList<OkFaker<*>>? = null
 
-    override fun add(manager: OkManager<*, *>) {
+    override fun add(manager: OkFaker<*>) {
         synchronized(this) {
             var list = resources
 
@@ -17,7 +17,7 @@ class DefaultOkManagerScope: OkManagerScope, Iterable<OkManager<*, *>> {
         }
     }
 
-    override fun delete(manager: OkManager<*, *>): Boolean {
+    override fun delete(manager: OkFaker<*>): Boolean {
         synchronized(this) {
             val list = resources ?: return false
 
@@ -25,7 +25,7 @@ class DefaultOkManagerScope: OkManagerScope, Iterable<OkManager<*, *>> {
         }
     }
 
-    override fun remove(manager: OkManager<*, *>): Boolean {
+    override fun remove(manager: OkFaker<*>): Boolean {
         if (delete(manager)) {
             manager.cancel()
             return true
@@ -45,15 +45,15 @@ class DefaultOkManagerScope: OkManagerScope, Iterable<OkManager<*, *>> {
     }
 
     override fun size(): Int {
-        var list: List<OkManager<*, *>>?
+        var list: List<OkFaker<*>>?
         synchronized(this) {
             list = resources
         }
         return list?.size ?: 0
     }
 
-    override fun iterator(): Iterator<OkManager<*, *>> {
-        val list: List<OkManager<*, *>> = resources ?: emptyList()
+    override fun iterator(): Iterator<OkFaker<*>> {
+        val list: List<OkFaker<*>> = resources ?: emptyList()
         return list.iterator()
     }
 

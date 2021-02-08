@@ -1,30 +1,23 @@
 package com.easy.kotlins.http
 
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.net.URL
 
-abstract class OkRequest<T> {
-
-    protected val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
-    protected val requestBuilder: Request.Builder = Request.Builder()
-
-    private var httpUrl: HttpUrl? = null
-        set(value) {
-            field = requireNotNull(value) { "Url is null" }
-            urlBuilder.scheme(value.scheme)
-                .encodedUsername(value.encodedUsername)
-                .encodedPassword(value.encodedPassword)
-                .host(value.host)
-                .port(value.port)
-                .encodedPath(value.encodedPath)
-                .encodedQuery(value.encodedQuery)
-                .encodedFragment(value.encodedFragment)
-        }
-
-    private var httpClient: OkHttpClient? = null
+internal class OkRequest(
+    private val client: OkHttpClient,
+    private val method: OkRequestMethod,
+    private val url: HttpUrl,
+    private val requestBody: RequestBody?,
+    private val requestBuilder: Request.Builder,
+    private val requestInterceptors: List<OkRequestInterceptor>,
+    private val responseInterceptors: List<OkResponseInterceptor>
+) {
 
     private var call: Call? = null
     private var creationFailure: Exception? = null
@@ -32,10 +25,6 @@ abstract class OkRequest<T> {
     @Volatile
     private var canceled = false
     private var executed = false
-
-    private var errorMapper: OkMapper<Exception, T>? = null
-    private var responseMapper: OkMapper<Response, T>? = null
-    private var callback: OkCallback<T>? = null
 
     val tag: Any?
         get() = call?.request()?.tag()
@@ -58,145 +47,77 @@ abstract class OkRequest<T> {
         synchronized(this) { call?.cancel() }
     }
 
-    fun client(client: OkHttpClient) {
-        httpClient = client
+    @Throws(IOException::class)
+    fun execute(): Response {
+        return processResponse(createCall().execute())
     }
 
-    fun url(url: URL) {
-        httpUrl = url.toHttpUrlOrNull()
-    }
-
-    fun url(uri: URI) {
-        httpUrl = uri.toHttpUrlOrNull()
-    }
-
-    fun url(url: String) {
-        httpUrl = url.toHttpUrlOrNull()
-    }
-
-    fun tag(tag: Any) {
-        requestBuilder.tag(tag)
-    }
-
-    fun cacheControl(cacheControl: CacheControl) {
-        requestBuilder.cacheControl(cacheControl)
-    }
-
-    fun setHeader(key: String, value: String) {
-        requestBuilder.header(key, value)
-    }
-
-    fun addHeader(key: String, value: String) {
-        requestBuilder.addHeader(key, value)
-    }
-
-    fun removeHeader(key: String) {
-        requestBuilder.removeHeader(key)
-    }
-
-    fun setUsername(username: String){
-        urlBuilder.username(username)
-    }
-
-    fun setPassword(password: String){
-        urlBuilder.password(password)
-    }
-
-    fun addQueryParameter(key: String, value: String) {
-        urlBuilder.addQueryParameter(key, value)
-    }
-
-    fun setQueryParameter(key: String, value: String) {
-        urlBuilder.setQueryParameter(key, value)
-    }
-
-    fun addEncodedQueryParameter(key: String, value: String) {
-        urlBuilder.addEncodedQueryParameter(key, value)
-    }
-
-    fun setEncodedQueryParameter(key: String, value: String) {
-        urlBuilder.setEncodedQueryParameter(key, value)
-    }
-
-    fun removeQueryParameters(key: String) {
-        urlBuilder.removeAllQueryParameters(key)
-    }
-
-    fun removeEncodedQueryParameters(key: String) {
-        urlBuilder.removeAllEncodedQueryParameters(key)
-    }
-
-    fun mapResponse(mapper: OkMapper<Response, T>) {
-        this.responseMapper = mapper
-    }
-
-    fun mapError(mapper: OkMapper<Exception, T>) {
-        this.errorMapper = mapper
-    }
-
-    fun setCallback(callback: OkCallback<T>) {
-        this.callback = callback
-    }
-
-    @Throws(Exception::class)
-    fun execute(): T {
-        return try {
-            val response = createRealCall().execute()
-            mapResponse(response, responseMapper) ?: throw NullPointerException("Result is null")
-        } catch (e: Exception) {
-            mapError(e, errorMapper) ?: throw e
-        }
-    }
-
-    fun safeExecute(): T? {
-        return try {
-            execute()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    fun enqueue() {
+    fun enqueue(callback: OkCallback<Response>) {
         var call: Call? = null
         var failure: Exception? = null
         try {
-            call = createRealCall()
+            call = createCall()
         } catch (e: Exception) {
             failure = e
         }
 
         if (failure != null) {
-            dispatchOnError(failure)
+            dispatchOnFailure(callback, failure)
             return
         }
 
-        dispatchOnStart()
+        dispatchOnStart(callback)
 
         call!!.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                try {
-                    dispatchOnFailure(e)
-                } finally {
-                    dispatchOnComplete()
+                if (!dispatchOnCancel(callback)) {
+                    dispatchOnFailure(callback, e)
                 }
             }
 
             override fun onResponse(call: Call, response: Response) {
-                try {
-                    dispatchOnResponse(response)
-                } finally {
-                    dispatchOnComplete()
+                if (!dispatchOnCancel(callback)) {
+                    dispatchOnResponse(callback, response)
                 }
             }
         })
     }
 
+    private fun dispatchOnStart(callback: OkCallback<Response>) {
+        callback.onStart()
+    }
+
+    private fun dispatchOnFailure(callback: OkCallback<Response>, e: Exception) {
+        try {
+            callback.onError(e)
+        } finally {
+            callback.onComplete()
+        }
+    }
+
+    private fun dispatchOnResponse(callback: OkCallback<Response>, response: Response) {
+        try {
+            callback.onSuccess(processResponse(response))
+        } catch (e: Exception) {
+            callback.onError(e)
+        } finally {
+            callback.onComplete()
+        }
+    }
+
+    private fun dispatchOnCancel(callback: OkCallback<Response>): Boolean {
+        if (canceled) {
+            callback.onCancel()
+            return true
+        }
+        return false
+    }
+
     @Throws(Exception::class)
-    protected fun createRealCall(): Call {
+    private fun createCall(): Call {
         var realCall: Call?
         synchronized(this) {
-            check(!executed) { "Already Executed" }
-            check(httpClient != null) { "OkHttpClient is null" }
+            check(!executed) { "Already executed" }
             executed = true
             realCall = this.call
             if (creationFailure != null) {
@@ -204,7 +125,7 @@ abstract class OkRequest<T> {
             }
             if (realCall == null) {
                 try {
-                    this.call = httpClient!!.newCall(createRealRequest())
+                    this.call = client.newCall(createRequest())
                     realCall = this.call
                 } catch (e: Exception) {
                     creationFailure = e
@@ -215,90 +136,242 @@ abstract class OkRequest<T> {
         return realCall!!
     }
 
-    @Throws(Exception::class)
-    protected open fun onFailure(error: Exception): Boolean {
-        return false
+    private fun createRequest(): Request {
+        val request = requestBuilder.url(url).also {
+            it.method(method.name, requestBody)
+        }.build()
+        return processRequest(request)
     }
 
-    @Throws(Exception::class)
-    protected open fun onResponse(response: Response): Boolean {
-        return false
+    private fun processRequest(request: Request): Request {
+        var handledRequest = request
+        for (interceptor in requestInterceptors) {
+            handledRequest = interceptor.shouldInterceptRequest(handledRequest)
+        }
+        return handledRequest
     }
 
-    @Suppress("UNCHECKED_CAST")
-    protected open fun mapResponse(
-        response: Response,
-        responseMapper: OkMapper<Response, T>?
-    ): T {
-        val mapper = responseMapper ?: OkMapper { it.body?.string() as T }
-        return mapper.map(response)
+    private fun processResponse(response: Response): Response {
+        var handledResponse = response
+        for (interceptor in responseInterceptors) {
+            handledResponse = interceptor.shouldInterceptResponse(handledResponse)
+        }
+        return handledResponse
     }
 
-    protected open fun mapError(
-        error: Exception,
-        errorMapper: OkMapper<Exception, T>?
-    ): T {
-        return errorMapper?.map(error) ?: throw error
-    }
+    class Builder(private val method: OkRequestMethod) {
+        private val requestBuilder: Request.Builder = Request.Builder()
 
-    protected abstract fun createRealRequest(): Request
+        private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
 
-    protected fun dispatchOnStart() {
-        OkCallbacks.onStart(callback)
-    }
-
-    protected fun dispatchOnProgress(bytes: Long, totalBytes: Long) {
-        OkCallbacks.onProgress(callback, bytes, totalBytes)
-    }
-
-    protected fun dispatchOnSuccess(result: T) {
-        OkCallbacks.onSuccess(callback, result)
-    }
-
-    protected fun dispatchOnError(error: Exception) {
-        OkCallbacks.onError(callback, error)
-    }
-
-    protected fun dispatchOnCancel() {
-        OkCallbacks.onCancel(callback)
-    }
-
-    protected fun dispatchOnComplete() {
-        OkCallbacks.onComplete(callback)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun dispatchOnFailure(error: Exception) {
-        try {
-            if (isCanceled) {
-                dispatchOnCancel()
-                return
+        private var formBuilderApplied = false
+        private var formBuilder: FormBody.Builder? = null
+            get() = field ?: FormBody.Builder().also { field = it }
+            set(value) {
+                field = value
+                formBuilderApplied = true
+                multipartBuilderApplied = false
             }
 
-            if (onFailure(error)) {
-                return
+        private var multipartBuilderApplied = false
+        private var multipartBuilder: MultipartBody.Builder? = null
+            get() = field ?: MultipartBody.Builder().also { field = it }
+            set(value) {
+                field = value
+                formBuilderApplied = false
+                multipartBuilderApplied = true
             }
 
-            if (errorMapper == null) {
-                dispatchOnError(error)
-            } else {
-                dispatchOnSuccess(mapError(error, errorMapper))
+        private var requestBody: RequestBody? = null
+            set(value) {
+                field = value
+                formBuilderApplied = false
+                multipartBuilderApplied = false
             }
-        } catch (e: Exception) {
-            dispatchOnError(e)
+
+        private var client: OkHttpClient? = null
+
+        private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
+        private val responseInterceptors = mutableListOf<OkResponseInterceptor>()
+
+        fun client(client: OkHttpClient): Builder {
+            this.client = client
+            return this
+        }
+
+        fun url(url: HttpUrl): Builder {
+            urlBuilder.scheme(url.scheme)
+                .encodedUsername(url.encodedUsername)
+                .encodedPassword(url.encodedPassword)
+                .host(url.host)
+                .port(url.port)
+                .encodedPath(url.encodedPath)
+                .encodedQuery(url.encodedQuery)
+                .encodedFragment(url.encodedFragment)
+            return this
+        }
+
+        fun url(url: String): Builder {
+            return url(url.toHttpUrl())
+        }
+
+        fun url(url: URL): Builder {
+            return url(url.toString().toHttpUrl())
+        }
+
+        fun url(uri: URI): Builder {
+            return url(uri.toString().toHttpUrl())
+        }
+
+        fun tag(tag: Any): Builder {
+            requestBuilder.tag(tag)
+            return this
+        }
+
+        fun cacheControl(cacheControl: CacheControl): Builder {
+            requestBuilder.cacheControl(cacheControl)
+            return this
+        }
+
+        fun header(key: String, value: String): Builder {
+            requestBuilder.header(key, value)
+            return this
+        }
+
+        fun addHeader(key: String, value: String): Builder {
+            requestBuilder.addHeader(key, value)
+            return this
+        }
+
+        fun removeHeader(key: String): Builder {
+            requestBuilder.removeHeader(key)
+            return this
+        }
+
+        fun username(username: String): Builder {
+            urlBuilder.username(username)
+            return this
+        }
+
+        fun password(password: String): Builder {
+            urlBuilder.password(password)
+            return this
+        }
+
+        fun addQueryParameter(key: String, value: String): Builder {
+            urlBuilder.addQueryParameter(key, value)
+            return this
+        }
+
+        fun setQueryParameter(key: String, value: String): Builder {
+            urlBuilder.setQueryParameter(key, value)
+            return this
+        }
+
+        fun addEncodedQueryParameter(key: String, value: String): Builder {
+            urlBuilder.addEncodedQueryParameter(key, value)
+            return this
+        }
+
+        fun setEncodedQueryParameter(key: String, value: String): Builder {
+            urlBuilder.setEncodedQueryParameter(key, value)
+            return this
+        }
+
+        fun removeQueryParameters(key: String): Builder {
+            urlBuilder.removeAllQueryParameters(key)
+            return this
+        }
+
+        fun removeEncodedQueryParameters(key: String): Builder {
+            urlBuilder.removeAllEncodedQueryParameters(key)
+            return this
+        }
+
+        fun addFormParameter(key: String, value: String): Builder {
+            formBuilder?.add(key, value)
+            return this
+        }
+
+        fun addEncodedFormParameter(key: String, value: String): Builder {
+            formBuilder?.addEncoded(key, value)
+            return this
+        }
+
+        fun addFormDataPart(name: String, value: String): Builder {
+            multipartBuilder?.addFormDataPart(name, value)
+            return this
+        }
+
+        fun addFormDataPart(name: String, filename: String?, body: RequestBody): Builder {
+            multipartBuilder?.addFormDataPart(name, filename, body)
+            return this
+        }
+
+        fun addFormDataPart(name: String, contentType: MediaType?, file: File): Builder {
+            multipartBuilder?.addFormDataPart(
+                name,
+                file.name,
+                file.asRequestBody(contentType)
+            )
+            return this
+        }
+
+        fun addPart(part: MultipartBody.Part): Builder {
+            multipartBuilder?.addPart(part)
+            return this
+        }
+
+        fun addPart(body: RequestBody): Builder {
+            multipartBuilder?.addPart(body)
+            return this
+        }
+
+        fun addPart(headers: Headers?, body: RequestBody): Builder {
+            multipartBuilder?.addPart(headers, body)
+            return this
+        }
+
+        fun body(contentType: MediaType?, body: String): Builder {
+            requestBody = body.toRequestBody(contentType)
+            return this
+        }
+
+        fun body(contentType: MediaType?, file: File): Builder {
+            requestBody = file.asRequestBody(contentType)
+            return this
+        }
+
+        fun body(body: RequestBody): Builder {
+            requestBody = body
+            return this
+        }
+
+        fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
+            requestInterceptors.add(interceptor)
+        }
+
+        fun addResponseInterceptor(interceptor: OkResponseInterceptor) {
+            responseInterceptors.add(interceptor)
+        }
+
+        private fun createRequestBody(): RequestBody? {
+            val formBody = if (formBuilderApplied) formBuilder?.build() else null
+            val multipartBody = if (multipartBuilderApplied) multipartBuilder?.build() else null
+            return requestBody ?: formBody ?: multipartBody
+        }
+
+        fun build(): OkRequest {
+            return OkRequest(
+                requireNotNull(client) { "OkHttpClient must not be null" },
+                method,
+                urlBuilder.build(),
+                createRequestBody(),
+                requestBuilder,
+                requestInterceptors,
+                responseInterceptors
+            )
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun dispatchOnResponse(response: Response) {
-        try {
-            if (onResponse(response)) {
-                return
-            }
-
-            dispatchOnSuccess(mapResponse(response, responseMapper))
-        } catch (e: Exception) {
-            dispatchOnFailure(e)
-        }
-    }
 }

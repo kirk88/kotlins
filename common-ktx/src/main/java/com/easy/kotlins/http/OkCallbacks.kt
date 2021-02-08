@@ -13,9 +13,8 @@ internal object OkCallbacks {
     private const val MSG_WHAT_ON_START = MSG_WHAT_BASE + 1
     private const val MSG_WHAT_ON_SUCCESS = MSG_WHAT_BASE + 2
     private const val MSG_WHAT_ON_ERROR = MSG_WHAT_BASE + 3
-    private const val MSG_WHAT_ON_UPDATE = MSG_WHAT_BASE + 4
-    private const val MSG_WHAT_ON_CANCEL = MSG_WHAT_BASE + 5
-    private const val MSG_WHAT_ON_COMPLETE = MSG_WHAT_BASE + 6
+    private const val MSG_WHAT_ON_CANCEL = MSG_WHAT_BASE + 4
+    private const val MSG_WHAT_ON_COMPLETE = MSG_WHAT_BASE + 5
     private val HANDLER: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             val body = msg.obj as MessageBody
@@ -32,14 +31,6 @@ internal object OkCallbacks {
                 }
                 MSG_WHAT_ON_ERROR -> {
                     dispatchOnError(body.callback, body.args[0] as Exception)
-                }
-                MSG_WHAT_ON_UPDATE -> {
-                    @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
-                    dispatchOnProgress(
-                        callback,
-                        body.args[0] as Long,
-                        body.args[1] as Long
-                    )
                 }
                 MSG_WHAT_ON_CANCEL -> {
                     dispatchOnCancel(body.callback)
@@ -74,63 +65,38 @@ internal object OkCallbacks {
         HANDLER.obtainMessage(MSG_WHAT_ON_CANCEL, MessageBody(callback)).sendToTarget()
     }
 
-    fun onProgress(callback: OkCallback<*>?, bytes: Long, totalBytes: Long) {
-        if (callback == null) return
-        HANDLER.obtainMessage(
-            MSG_WHAT_ON_UPDATE,
-            MessageBody(callback, bytes, totalBytes)
-        ).sendToTarget()
-    }
-
     private fun dispatchOnStart(callback: OkCallback<*>) {
         try {
             callback.onStart()
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (ignored: Exception) {
         }
     }
 
     private fun dispatchOnComplete(callback: OkCallback<*>) {
         try {
             callback.onComplete()
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (ignored: Exception) {
         }
     }
 
     private fun dispatchOnCancel(callback: OkCallback<*>) {
         try {
             callback.onCancel()
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-    }
-
-    private fun dispatchOnProgress(
-        callback: OkCallback<*>,
-        bytes: Long,
-        totalBytes: Long
-    ) {
-        try {
-            callback.onProgress(bytes, totalBytes)
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (ignored: Exception) {
         }
     }
 
     private fun <T> dispatchOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
-        } catch (e: Exception) {
-            dispatchOnError(callback, e)
+        } catch (ignored: Exception) {
         }
     }
 
     private fun dispatchOnError(callback: OkCallback<*>, error: Exception) {
         try {
             callback.onError(error)
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (ignored: Exception) {
         }
     }
 

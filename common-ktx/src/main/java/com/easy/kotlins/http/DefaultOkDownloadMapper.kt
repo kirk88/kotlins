@@ -1,8 +1,5 @@
-@file:Suppress("unused")
+package com.easy.kotlins.http
 
-package com.easy.kotlins.http.extension
-
-import com.easy.kotlins.http.ProgressAction
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -11,11 +8,8 @@ import java.io.IOException
 import java.io.RandomAccessFile
 import java.text.MessageFormat
 
-/**
- * Create by LiZhanPing on 2020/8/25
- */
-open class DownloadExtension private constructor(path: String, private val continuing: Boolean) :
-    OkDownloadExtension {
+open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
+    OkDownloadMapper<Response, File> {
 
     private val file: File by lazy { File(path + DOWNLOAD_SUFFIX_TMP) }
 
@@ -29,20 +23,21 @@ open class DownloadExtension private constructor(path: String, private val conti
         }.build()
     }
 
-    override fun onResponse(response: Response, action: ProgressAction): File {
+    override fun map(value: Response): File {
         if (file.exists() && !continuing) {
             file.delete()
         }
 
-        val body: ResponseBody = response.body
-            ?: throw NullPointerException("ResponseBody is null, response code: " + response.code + " , message: " + response.message)
-        return writeStreamToFile(body, file, action)
+        return writeStreamToFile(requireNotNull(value.body) { "ResponseBody is null" }, file)
     }
 
-    protected open fun writeStreamToFile(
+    open fun onProgress(readBytes: Long, totalBytes: Long) {
+
+    }
+
+    private fun writeStreamToFile(
         body: ResponseBody,
         srcFile: File,
-        action: ProgressAction
     ): File = body.use {
         val inputStream = it.byteStream()
         return@use RandomAccessFile(srcFile, "rw").use { accessFile ->
@@ -54,7 +49,7 @@ open class DownloadExtension private constructor(path: String, private val conti
             while (inputStream.read(buffer).also { len -> length = len } != -1) {
                 readBytes += length.toLong()
                 accessFile.write(buffer, 0, length)
-                action(readBytes, totalBytes)
+                onProgress(readBytes, totalBytes)
             }
             if (readBytes == totalBytes) {
                 rename(srcFile)
@@ -76,14 +71,5 @@ open class DownloadExtension private constructor(path: String, private val conti
             } else throw IOException("Rename file failed")
         }
 
-        fun create(path: String, continuing: Boolean): DownloadExtension {
-            return DownloadExtension(path, continuing)
-        }
-
-        fun create(path: String): DownloadExtension {
-            return DownloadExtension(path, false)
-        }
-
     }
-
 }

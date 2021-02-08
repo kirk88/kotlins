@@ -1,5 +1,5 @@
 package com.easy.kotlins.http
 
-enum class OkRequestMethod {
+internal enum class OkRequestMethod {
     GET, POST, DELETE, PUT, HEAD, PATCH
 }
