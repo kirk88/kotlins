@@ -159,7 +159,7 @@ internal class OkRequest(
         return handledResponse
     }
 
-    class Builder(private val method: OkRequestMethod) {
+    class Builder(private val method: OkRequestMethod = OkRequestMethod.GET) {
         private val requestBuilder: Request.Builder = Request.Builder()
 
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
