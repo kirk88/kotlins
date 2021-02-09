@@ -12,9 +12,10 @@ internal object OkCallbacks {
     private const val MSG_WHAT_BASE = 1000000000
     private const val MSG_WHAT_ON_START = MSG_WHAT_BASE + 1
     private const val MSG_WHAT_ON_SUCCESS = MSG_WHAT_BASE + 2
-    private const val MSG_WHAT_ON_ERROR = MSG_WHAT_BASE + 3
+    private const val MSG_WHAT_ON_FAILURE = MSG_WHAT_BASE + 3
     private const val MSG_WHAT_ON_CANCEL = MSG_WHAT_BASE + 4
     private const val MSG_WHAT_ON_COMPLETION = MSG_WHAT_BASE + 5
+
     private val HANDLER: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             val body = msg.obj as MessageBody
@@ -29,7 +30,7 @@ internal object OkCallbacks {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     dispatchOnSuccess(callback, body.args[0])
                 }
-                MSG_WHAT_ON_ERROR -> {
+                MSG_WHAT_ON_FAILURE -> {
                     dispatchOnFailure(body.callback, body.args[0] as Exception)
                 }
                 MSG_WHAT_ON_CANCEL -> {
@@ -47,7 +48,7 @@ internal object OkCallbacks {
 
     fun onFailure(callback: OkCallback<*>?, error: Exception) {
         if (callback == null) return
-        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
+        HANDLER.obtainMessage(MSG_WHAT_ON_FAILURE, MessageBody(callback, error)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>?) {

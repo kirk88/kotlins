@@ -14,6 +14,20 @@ import okhttp3.Headers.Companion.toHeaders
 import java.io.File
 import java.net.URI
 import java.net.URL
+import kotlin.collections.Iterable
+import kotlin.collections.Iterator
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.forEach
+import kotlin.collections.iterator
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.putAll
+import kotlin.collections.set
+import kotlin.collections.toMap
+import kotlin.collections.toMutableMap
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -33,6 +47,9 @@ class OkFaker<T> internal constructor(
     val isExecuted: Boolean
         get() = request.isExecuted
 
+    fun tag(): Any? = request.tag()
+
+    fun <T> tag(type: Class<out T>): T? = request.tag(type)
 
     fun cancel() = request.cancel()
 
@@ -109,7 +126,7 @@ class OkFaker<T> internal constructor(
     }
 
     class Builder<T>(method: OkRequestMethod) {
-        private val builder = OkRequest.Builder(method)
+        private val builder = OkRequest.Builder(method, CONFIG)
 
         private var onStartApplied = false
         private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -140,24 +157,16 @@ class OkFaker<T> internal constructor(
             builder.url(url)
         }
 
-        fun uri(uri: URI) = apply {
+        fun url(uri: URI) = apply {
             builder.url(uri)
-        }
-
-        fun tag(tag: Any?) = apply {
-            builder.tag(tag)
-        }
-
-        fun <T> tag(type: Class<in T>, tag: T?) = apply {
-            builder.tag(type, tag)
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             builder.cacheControl(cacheControl)
         }
 
-        fun headers(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun headers(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.header(it.key, it.value.toString())
             }
         }
@@ -174,8 +183,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addHeaders(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun addHeaders(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.addHeader(it.key, it.value.toString())
             }
         }
@@ -200,8 +209,8 @@ class OkFaker<T> internal constructor(
             builder.password(password)
         }
 
-        fun queryParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun queryParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.setQueryParameter(it.key, it.value.toString())
             }
         }
@@ -218,8 +227,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun addQueryParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.addQueryParameter(it.key, it.value.toString())
             }
         }
@@ -236,8 +245,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun encodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun encodedQueryParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.setEncodedQueryParameter(it.key, it.value.toString())
             }
         }
@@ -254,8 +263,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addEncodedQueryParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun addEncodedQueryParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.addEncodedQueryParameter(it.key, it.value.toString())
             }
         }
@@ -272,8 +281,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun formParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun formParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.addFormParameter(it.key, it.value.toString())
             }
         }
@@ -290,8 +299,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun encodedFormParameters(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun encodedFormParameters(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 builder.addEncodedFormParameter(it.key, it.value.toString())
             }
         }
@@ -308,8 +317,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun formDataParts(operation: RequestPairs<Any?>.() -> Unit) = apply {
-            RequestPairs<Any?>().apply(operation).forEach {
+        fun formDataParts(operation: RequestPairs.() -> Unit) = apply {
+            RequestPairs().apply(operation).forEach {
                 it.value.let { value ->
                     when (value) {
                         is BodyFormDataPart -> builder.addFormDataPart(
@@ -406,6 +415,14 @@ class OkFaker<T> internal constructor(
             builder.body(body())
         }
 
+        fun tag(tag: Any?) = apply {
+            builder.tag(tag)
+        }
+
+        fun <T> tag(type: Class<in T>, tag: T?) = apply {
+            builder.tag(type, tag)
+        }
+
         fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
             builder.addRequestInterceptor(interceptor)
         }
@@ -473,31 +490,42 @@ class OkFaker<T> internal constructor(
 
     companion object {
 
+        private val CONFIG = OkConfig()
+
+        @JvmStatic
+        fun config(): OkConfig = CONFIG
+
+        @JvmStatic
         fun <T> get(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.GET).apply {
                 block?.invoke(this)
             }
 
+        @JvmStatic
         fun <T> post(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.POST).apply {
                 block?.invoke(this)
             }
 
+        @JvmStatic
         fun <T> delete(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.DELETE).apply {
                 block?.invoke(this)
             }
 
+        @JvmStatic
         fun <T> put(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.PUT).apply {
                 block?.invoke(this)
             }
 
+        @JvmStatic
         fun <T> head(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.HEAD).apply {
                 block?.invoke(this)
             }
 
+        @JvmStatic
         fun <T> patch(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
             Builder<T>(OkRequestMethod.PATCH).apply {
                 block?.invoke(this)
@@ -509,31 +537,40 @@ class OkFaker<T> internal constructor(
 typealias Action<T> = (T) -> Unit
 typealias SimpleAction = () -> Unit
 
-class BodyPart(val body: RequestBody, vararg headers: Pair<String, String>){
+class BodyPart(vararg headers: Pair<String, String>, val body: RequestBody) {
     val headers: Headers = headers.toMap().toHeaders()
 }
+
 class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
 class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
-class RequestPairs<T>(
-    pairs: Map<String, T> = mutableMapOf()
-) : Iterable<Map.Entry<String, T>> {
+class RequestPairs(
+    pairs: Map<String, Any?> = mutableMapOf()
+) : Iterable<Map.Entry<String, Any?>> {
 
-    private val pairs: MutableMap<String, T> = pairs.toMutableMap()
+    private val pairs: MutableMap<String, Any?> = pairs.toMutableMap()
 
-    infix fun String.and(value: T) {
+    infix fun String.and(value: Any?) {
         pairs[this] = value
     }
 
-    fun put(key: String, value: T) {
+    fun put(key: String, value: Any?) {
         pairs[key] = value
     }
 
-    fun putAll(pairsFrom: Map<String, T>) {
+    fun putAll(pairsFrom: Map<String, Any?>) {
         pairs.putAll(pairsFrom)
     }
 
-    fun remove(key: String): T? {
+    fun putAll(pairsForm: RequestPairs) {
+        pairs.putAll(pairsForm.pairs)
+    }
+
+    fun putAll(vararg pairsFrom: Pair<String, Any?>) {
+        pairs.putAll(pairsFrom)
+    }
+
+    fun remove(key: String): Any? {
         return pairs.remove(key)
     }
 
@@ -541,38 +578,35 @@ class RequestPairs<T>(
         return pairs.toJSON()
     }
 
-    override fun iterator(): Iterator<Map.Entry<String, T>> {
+    override fun iterator(): Iterator<Map.Entry<String, Any?>> {
         return pairs.iterator()
     }
+
 }
 
-inline fun requestPairsOf(crossinline operation: RequestPairs<Any?>.() -> Unit): RequestPairs<Any?> {
-    return RequestPairs<Any?>().apply(operation)
+inline fun requestPairsOf(crossinline operation: RequestPairs.() -> Unit): RequestPairs {
+    return RequestPairs().apply(operation)
 }
 
 fun requestPairsOf(
     vararg pairs: Pair<String, Any?>,
-    operation: (RequestPairs<Any?>.() -> Unit)? = null
-): RequestPairs<Any?> {
-    return RequestPairs<Any?>().apply { putAll(pairs.toMap()) }.also {
+    operation: (RequestPairs.() -> Unit)? = null
+): RequestPairs {
+    return RequestPairs().apply { putAll(pairs.toMap()) }.also {
         operation?.invoke(it)
     }
 }
 
 fun requestPairsOf(
     copyFrom: Any,
-    serializeNulls: Boolean = false,
-    operation: (RequestPairs<Any?>.() -> Unit)? = null
-): RequestPairs<Any?> {
-    if (copyFrom is Map<*, *>) {
-        return RequestPairs(copyFrom.mapKeys { it.key.toString() })
-    }
-    return RequestPairs<Any?>().apply {
-        val source: String =
-            if (copyFrom is RequestPairs<*>) copyFrom.toString() else copyFrom.toJSON()
-        source.toJSONObject().forEach { key, element ->
-            if (!element.isJSONNull || serializeNulls) {
-                put(key, element.asString())
+    operation: (RequestPairs.() -> Unit)? = null
+): RequestPairs {
+    return RequestPairs().apply {
+        if (copyFrom is RequestPairs) {
+            putAll(copyFrom)
+        } else {
+            copyFrom.toJSON().toJSONObject().forEach { key, value ->
+                put(key, value.asString())
             }
         }
     }.also { operation?.invoke(it) }

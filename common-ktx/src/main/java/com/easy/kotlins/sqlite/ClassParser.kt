@@ -6,10 +6,10 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 
-inline fun <reified T : Any> classParser(): RowParser<T> = classParser(T::class.java)
+inline fun <reified T : Any> classParser(): MapRowParser<T> = classParser(T::class.java)
 
 @PublishedApi
-internal fun <T> classParser(clazz: Class<T>): RowParser<T> = ClassParsers.get(clazz)
+internal fun <T> classParser(clazz: Class<T>): MapRowParser<T> = ClassParsers.get(clazz)
 
 private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
     if (type.first.isPrimitive || type.second.any { it is Column }) {
@@ -27,39 +27,63 @@ private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean 
     }
 }
 
-internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
+internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 
-    private val preferredConstructor: Constructor<*>
-    private val parameterAnnotations: Array<Array<Annotation>>
-    private val parameterTypes: Array<Class<*>>
+    private val delegate: MapRowParser<T>
 
     init {
-        val applicableConstructors = clazz.declaredConstructors.filter { ctr ->
-            if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
-            val types = ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
-                type to annotations
-            }
-            return@filter types.isNotEmpty() && types.all(::hasApplicableType)
-        }
+        val constructors = clazz.declaredConstructors
 
-        if (applicableConstructors.isEmpty()) {
-            throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
-        }
+        if (constructors.none { it.isAnnotationPresent(ClassParserConstructor::class.java) }) {
+            val constructor = constructors.find { it.parameterTypes.isEmpty() }
+                ?: throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
 
-        preferredConstructor = if (applicableConstructors.size > 1) {
-            applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
-                ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
+            delegate = ClassFieldParser(constructor)
         } else {
-            applicableConstructors[0]
-        }
+            val applicableConstructors = constructors.filter { ctr ->
+                if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
+                val types = ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
+                    type to annotations
+                }
+                return@filter types.isNotEmpty() && types.all(::hasApplicableType)
+            }
 
-        parameterAnnotations = preferredConstructor.parameterAnnotations
-        parameterTypes = preferredConstructor.parameterTypes
+            if (applicableConstructors.isEmpty()) {
+                throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
+            }
+
+            val preferredConstructor = if (applicableConstructors.size > 1) {
+                applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
+                    ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
+            } else {
+                applicableConstructors[0]
+            }
+
+            val parameterAnnotations = preferredConstructor.parameterAnnotations
+            val parameterTypes = preferredConstructor.parameterTypes
+
+            delegate = ClassConstructorParser(
+                preferredConstructor,
+                parameterAnnotations,
+                parameterTypes
+            )
+        }
     }
 
-    override fun parseRow(row: Array<SqlColumnValue>): T {
+    override fun parseRow(row: Map<String, SqlColumnValue>): T {
+        return delegate.parseRow(row)
+    }
+}
+
+internal class ClassConstructorParser<T>(
+    private val preferredConstructor: Constructor<*>,
+    private val parameterAnnotations: Array<Array<Annotation>>,
+    private val parameterTypes: Array<Class<*>>
+) : MapRowParser<T> {
+
+    override fun parseRow(row: Map<String, SqlColumnValue>): T {
         if (parameterTypes.size != row.size) {
-            val columnsRendered = row.joinToString(prefix = "[", postfix = "]")
+            val columnsRendered = row.values.joinToString(prefix = "[", postfix = "]")
             val parameterTypesRendered =
                 parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
             throw IllegalArgumentException(
@@ -70,10 +94,9 @@ internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
 
         val args = arrayOfNulls<Any>(parameterTypes.size)
 
-        for (index in parameterTypes.indices) {
+        for ((index, column) in row.values.withIndex()) {
             val type = parameterTypes[index]
             val annotations = parameterAnnotations[index]
-            val column = row[index]
 
             val annotation = annotations.find { it is Column } as Column?
             if (!column.isNull() && annotation != null) {
@@ -86,6 +109,24 @@ internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
         @Suppress("UNCHECKED_CAST")
         return preferredConstructor.newInstance(*args) as T
     }
+
+}
+
+internal class ClassFieldParser<T>(
+    private val converter: Constructor<*>
+) : MapRowParser<T> {
+
+    override fun parseRow(row: Map<String, SqlColumnValue>): T {
+        val target = converter.newInstance()
+        ClassReflections.getAdapter(target) {
+            Modifier.isTransient(it.modifiers)
+                    || Modifier.isStatic(it.modifiers)
+                    || it.isAnnotationPresent(IgnoredOnTable::class.java)
+        }.write(target, row)
+        @Suppress("UNCHECKED_CAST")
+        return target as T
+    }
+
 }
 
 internal object ClassParsers {

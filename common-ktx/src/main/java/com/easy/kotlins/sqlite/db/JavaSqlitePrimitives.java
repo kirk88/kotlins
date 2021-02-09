@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 class JavaSqlitePrimitives {
-    private JavaSqlitePrimitives() {}
+    private JavaSqlitePrimitives() {
+    }
 
     static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
 

@@ -23,9 +23,9 @@ import com.easy.kotlins.http.OkFakerScope
 interface ViewModelController : OkFakerScope {
     var event: Event
 
-    fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T>
+    fun <T> get(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
 
-    fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T>
+    fun <T> post(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
 
     fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
 
@@ -48,12 +48,12 @@ private class SimpleViewModelController : ViewModelController,
     private val eventDelegate = EventDelegate()
     override var event: Event by eventDelegate
 
-    override fun <T> get(action: OkFaker<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.get(action).also { add(it) }
+    override fun <T> get(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.get(action).build().also { add(it) }
     }
 
-    override fun <T> post(action: OkFaker<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.post(action).also { add(it) }
+    override fun <T> post(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.post(action).build().also { add(it) }
     }
 
     override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {

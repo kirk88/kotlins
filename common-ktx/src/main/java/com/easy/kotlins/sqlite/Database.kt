@@ -329,11 +329,11 @@ internal fun Any.toColumnValues(): Array<SqlColumnElement> {
     if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
         throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
     }
-    return ColumnReflections.get(this) {
+    return ClassReflections.getAdapter(this) {
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
                 || it.isAnnotationPresent(IgnoredOnTable::class.java)
-    }
+    }.read(this)
 }
 
 abstract class ManagedSQLiteOpenHelper(

@@ -7,9 +7,9 @@ import kotlin.reflect.KClass
 
 internal class FieldWrapper(private val field: Field) {
 
-    fun read(reader: MutableList<SqlColumnElement>, value: Any?) {
-        val fieldValue = field.get(value)
-        reader.add(
+    fun read(reader: Any, values: MutableList<SqlColumnElement>) {
+        val fieldValue = field.get(reader)
+        values.add(
             if (field.isAnnotationPresent(Column::class.java)) {
                 val annotation = field.getAnnotation(Column::class.java)
                     ?: throw IllegalStateException("Can not get annotation for column: ${field.name}")
@@ -29,35 +29,59 @@ internal class FieldWrapper(private val field: Field) {
         )
     }
 
-}
+    fun write(writer: Any, value: SqlColumnValue) {
+        if (!value.isNull() && field.isAnnotationPresent(Column::class.java)) {
+            val annotation = field.getAnnotation(Column::class.java)
+                ?: throw IllegalStateException("Can not get annotation for column: ${field.name}")
 
-internal class ReflectAdapter(private val fields: List<FieldWrapper>) {
-
-    fun read(readFrom: Any): Array<SqlColumnElement> {
-        val reader = mutableListOf<SqlColumnElement>()
-        for (field in fields) {
-            field.read(reader, readFrom)
+            field.set(
+                writer,
+                ColumnConverters.get(
+                    annotation.converter
+                ).toValue(value)
+            )
+        } else if (field.type == java.lang.Boolean.TYPE || field.type == java.lang.Boolean::class.java) {
+            field.set(writer, value.asInt() == 1)
+        } else {
+            field.set(writer, value.asTyped(field.type))
         }
-        return reader.toTypedArray()
     }
 
 }
 
-internal object ColumnReflections {
+internal class ReflectAdapter(private val fields: Map<String, FieldWrapper>) {
+
+    fun read(reader: Any): Array<SqlColumnElement> {
+        val values = mutableListOf<SqlColumnElement>()
+        for (field in fields) {
+            field.value.read(reader, values)
+        }
+        return values.toTypedArray()
+    }
+
+    fun write(writer: Any, values: Map<String, SqlColumnValue>) {
+        for ((name, value) in values) {
+            val field = fields[name] ?: continue
+            field.write(writer, value)
+        }
+    }
+}
+
+internal object ClassReflections {
 
     private val adapters: MutableMap<KClass<out Any>, ReflectAdapter> by lazy { mutableMapOf() }
 
-    fun get(from: Any, ignored: (Field) -> Boolean): Array<SqlColumnElement> {
-        return adapters.getOrPut(from::class) {
-            val fields = mutableListOf<FieldWrapper>()
-            for (field in from.javaClass.declaredFields) {
+    fun getAdapter(value: Any, ignored: (Field) -> Boolean): ReflectAdapter {
+        return adapters.getOrPut(value::class) {
+            val fields = mutableMapOf<String, FieldWrapper>()
+            for (field in value.javaClass.declaredFields) {
                 if (ignored(field)) continue
 
                 field.isAccessible = true
-                fields.add(FieldWrapper(field))
+                fields[field.name] = FieldWrapper(field)
             }
             ReflectAdapter(fields)
-        }.read(from)
+        }
     }
 
 }

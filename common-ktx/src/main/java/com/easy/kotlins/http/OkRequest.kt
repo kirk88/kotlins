@@ -1,5 +1,9 @@
 package com.easy.kotlins.http
 
+import android.webkit.URLUtil
+import com.easy.kotlins.helper.isNetworkUrl
+import com.easy.kotlins.helper.plus
+import com.easy.kotlins.helper.toUrl
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -155,14 +159,33 @@ internal class OkRequest(
         return handledResponse
     }
 
-    class Builder(private val method: OkRequestMethod) {
+    class Builder(private val method: OkRequestMethod, private val config: OkConfig) {
 
-        private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
-        private val requestBuilder: Request.Builder = Request.Builder()
+        private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder().also {
+            for ((name, value) in config.queryParameters) {
+                it.addQueryParameter(name, value)
+            }
+        }
+        private val requestBuilder: Request.Builder = Request.Builder().also {
+            val cacheControl = config.cacheControl
+            if (cacheControl != null) {
+                it.cacheControl(cacheControl)
+            }
+
+            for ((name, value) in config.headers) {
+                it.addHeader(name, value)
+            }
+        }
 
         private var formBuilderApplied = false
         private var formBuilder: FormBody.Builder? = null
-            get() = field ?: FormBody.Builder().also { field = it }
+            get() = field ?: FormBody.Builder().also {
+                field = it
+
+                for ((name, value) in config.formParameters) {
+                    it.add(name, value)
+                }
+            }
             set(value) {
                 field = value
                 formBuilderApplied = true
@@ -194,30 +217,29 @@ internal class OkRequest(
             this.client = client
         }
 
-        fun url(url: HttpUrl) = apply {
-            urlBuilder.scheme(url.scheme)
-                .encodedUsername(url.encodedUsername)
-                .encodedPassword(url.encodedPassword)
-                .host(url.host)
-                .port(url.port)
-                .encodedPath(url.encodedPath)
-                .encodedQuery(url.encodedQuery)
-                .encodedFragment(url.encodedFragment)
+        fun url(url: String) = apply {
+            val baseUrl = config.baseUrl
+            val httpUrl: HttpUrl = if (baseUrl == null && url.isNetworkUrl()) {
+                url.toHttpUrl()
+            } else if (baseUrl != null) {
+                (baseUrl.toUrl() + url).toString().toHttpUrl()
+            } else {
+                throw IllegalArgumentException("invalid url: $url")
+            }
+
+            urlBuilder.scheme(httpUrl.scheme)
+                .encodedUsername(httpUrl.encodedUsername)
+                .encodedPassword(httpUrl.encodedPassword)
+                .host(httpUrl.host)
+                .port(httpUrl.port)
+                .encodedPath(httpUrl.encodedPath)
+                .encodedQuery(httpUrl.encodedQuery)
+                .encodedFragment(httpUrl.encodedFragment)
         }
 
-        fun url(url: String) = url(url.toHttpUrl())
+        fun url(url: URL) = url(url.toString())
 
-        fun url(url: URL) = url(url.toString().toHttpUrl())
-
-        fun url(uri: URI) = url(uri.toString().toHttpUrl())
-
-        fun tag(tag: Any?) = apply {
-            requestBuilder.tag(tag)
-        }
-
-        fun <T : Any> tag(type: Class<in T>, tag: T?) = apply {
-            requestBuilder.tag(type, tag)
-        }
+        fun url(uri: URI) = url(uri.toString())
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             requestBuilder.cacheControl(cacheControl)
@@ -315,6 +337,14 @@ internal class OkRequest(
             requestBody = body
         }
 
+        fun tag(tag: Any?) = apply {
+            requestBuilder.tag(tag)
+        }
+
+        fun <T : Any> tag(type: Class<in T>, tag: T?) = apply {
+            requestBuilder.tag(type, tag)
+        }
+
         fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
             requestInterceptors.add(interceptor)
         }
@@ -323,15 +353,16 @@ internal class OkRequest(
             responseInterceptors.add(interceptor)
         }
 
-        private fun createRequestBody(): RequestBody? {
-            val formBody = if (formBuilderApplied) formBuilder?.build() else null
-            val multipartBody = if (multipartBuilderApplied) multipartBuilder?.build() else null
-            return requestBody ?: formBody ?: multipartBody
-        }
-
         fun build(): OkRequest {
+            val body = when {
+                requestBody != null -> requestBody
+                formBuilderApplied -> formBuilder?.build()
+                multipartBuilderApplied -> multipartBuilder?.build()
+                else -> null
+            }
+
             val request = requestBuilder.url(urlBuilder.build())
-                .method(method.name, createRequestBody())
+                .method(method.name, body)
                 .build()
             return OkRequest(
                 requireNotNull(client) { "OkHttpClient must not be null" },

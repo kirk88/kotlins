@@ -184,7 +184,7 @@ class LoadConfig(
     }
 }
 
-fun OkFaker<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker.Builder<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -196,7 +196,7 @@ fun OkFaker<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
 
 }
 
-fun OkFaker<*>.requestPlugin(url: String, params: Map<String, Any?>) {
+fun OkFaker.Builder<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -208,7 +208,7 @@ fun OkFaker<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker.Builder<*>.requestPlugin(config: LoadConfig, url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -219,7 +219,7 @@ fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, vararg params: Pai
 
 }
 
-fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, params: Map<String, Any?>) {
+fun OkFaker.Builder<*>.requestPlugin(config: LoadConfig, url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -230,7 +230,7 @@ fun OkFaker<*>.requestPlugin(config: LoadConfig, url: String, params: Map<String
 
 }
 
-fun <T> OkFaker<T>.responsePlugin(
+fun <T> OkFaker.Builder<T>.responsePlugin(
     precondition: (Response) -> Boolean = { it.isSuccessful },
     errorMapper: OkMapper<Exception, T>? = null,
     resultMapper: OkMapper<String, T>
@@ -245,7 +245,7 @@ fun <T> OkFaker<T>.responsePlugin(
     }
 }
 
-fun <T> OkFaker<T>.loadPlugin(
+fun <T> OkFaker.Builder<T>.loadPlugin(
     config: LoadConfig,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Exception) -> Unit)? = null,
@@ -298,7 +298,7 @@ fun <T> OkFaker<T>.loadPlugin(
     }
 }
 
-inline fun <reified T> OkFaker<T>.loadPlugin(
+inline fun <reified T> OkFaker.Builder<T>.loadPlugin(
     config: LoadConfig,
     source: MutableLiveData<T>,
     noinline onError: ((Throwable) -> Unit)? = null,
@@ -313,7 +313,7 @@ inline fun <reified T> OkFaker<T>.loadPlugin(
     }
 }
 
-fun <T> OkFaker<T>.loadPlugin(
+fun <T> OkFaker.Builder<T>.loadPlugin(
     message: String? = null,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,

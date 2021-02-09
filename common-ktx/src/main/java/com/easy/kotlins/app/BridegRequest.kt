@@ -22,12 +22,10 @@ class BridegRequest {
 
     private fun getBridegFragment(activity: FragmentActivity): BridegFragment {
         return activity.supportFragmentManager.let {
-            var fragment = it.findFragmentByTag(BRIDEG_TAG) as? BridegFragment
-            if (fragment == null) {
-                fragment = BridegFragment()
-                it.beginTransaction().add(fragment, BRIDEG_TAG).commitNowAllowingStateLoss()
-            }
-            fragment
+            it.findFragmentByTag(BRIDEG_TAG) as? BridegFragment
+                ?: BridegFragment().also { fragment ->
+                    it.beginTransaction().add(fragment, BRIDEG_TAG).commitNowAllowingStateLoss()
+                }
         }
     }
 

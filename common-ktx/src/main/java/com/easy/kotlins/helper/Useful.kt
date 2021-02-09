@@ -4,23 +4,24 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.net.URL
 
 /**
  * Create by LiZhanPing on 2020/8/25
  */
-fun <T: Any> Boolean.opt(right: T, wrong: T): T {
+fun <T : Any> Boolean.opt(right: T, wrong: T): T {
     return if (this) right else wrong
 }
 
-fun <T: Any> Boolean.opt(right: () -> T, wrong: () -> T): T {
+fun <T : Any> Boolean.opt(right: () -> T, wrong: () -> T): T {
     return if (this) right() else wrong()
 }
 
-fun <T: Any?> Boolean.optNulls(right: T?, wrong: T?): T? {
+fun <T : Any?> Boolean.optNulls(right: T?, wrong: T?): T? {
     return if (this) right else wrong
 }
 
-fun <T: Any?> Boolean.optNulls(right: () -> T?, wrong: () -> T?): T? {
+fun <T : Any?> Boolean.optNulls(right: () -> T?, wrong: () -> T?): T? {
     return if (this) right() else wrong()
 }
 
