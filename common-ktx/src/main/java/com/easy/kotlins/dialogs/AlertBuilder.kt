@@ -1,14 +1,13 @@
 package com.easy.kotlins.dialogs
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import android.view.View
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import kotlin.DeprecationLevel.ERROR
 
 @SuppressLint("SupportAnnotationUsage")

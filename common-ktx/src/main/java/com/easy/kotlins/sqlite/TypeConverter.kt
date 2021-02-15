@@ -1,7 +1,6 @@
 package com.easy.kotlins.sqlite.db
 
 import kotlin.reflect.KClass
-import kotlin.reflect.cast
 
 interface ValueConverter<T : Any, R : Any> {
     fun fromValue(value: T): R

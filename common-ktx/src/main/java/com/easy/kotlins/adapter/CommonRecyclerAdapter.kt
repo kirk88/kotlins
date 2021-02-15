@@ -543,7 +543,6 @@ open class CommonRecyclerAdapter<ITEM>(
 
     }
 
-    @Suppress("UNCHECKED_CAST")
     final override fun onBindViewHolder(
         holder: ItemViewHolder,
         position: Int,
@@ -552,6 +551,7 @@ open class CommonRecyclerAdapter<ITEM>(
         if (!isHeader(holder.layoutPosition) && !isFooter(holder.layoutPosition)) {
             getItemOrNull(holder.layoutPosition)?.let {
                 val delegate = itemDelegates.getValue(getItemViewType(holder.layoutPosition))
+                @Suppress("UNCHECKED_CAST")
                 (delegate as ItemViewDelegate<ITEM>).convert(holder, it, payloads)
             }
         }
@@ -585,6 +585,11 @@ open class CommonRecyclerAdapter<ITEM>(
     @CallSuper
     override fun onViewAttachedToWindow(holder: ItemViewHolder) {
         itemAnimation?.start(holder)
+    }
+
+    @CallSuper
+    override fun onViewDetachedFromWindow(holder: ItemViewHolder) {
+        itemAnimation?.stop()
     }
 
     private fun isHeader(position: Int): Boolean = position < headerCount

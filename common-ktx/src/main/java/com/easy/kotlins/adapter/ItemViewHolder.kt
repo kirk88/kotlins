@@ -61,7 +61,7 @@ class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
     fun <T : View> getView(@IdRes id: Int): T {
-        return getViewOrNull<T>(id)
+        return getViewOrNull(id)
             ?: throw IllegalArgumentException("Can not find view by id: $id")
     }
 

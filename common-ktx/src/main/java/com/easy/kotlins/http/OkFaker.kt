@@ -12,22 +12,7 @@ import kotlinx.coroutines.flow.flowOn
 import okhttp3.*
 import okhttp3.Headers.Companion.toHeaders
 import java.io.File
-import java.net.URI
-import java.net.URL
-import kotlin.collections.Iterable
-import kotlin.collections.Iterator
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.MutableList
-import kotlin.collections.MutableMap
-import kotlin.collections.forEach
-import kotlin.collections.iterator
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.putAll
 import kotlin.collections.set
-import kotlin.collections.toMap
-import kotlin.collections.toMutableMap
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -149,20 +134,40 @@ class OkFaker<T> internal constructor(
             builder.client(client)
         }
 
+        fun client(client: () -> OkHttpClient) = apply {
+            builder.client(client())
+        }
+
         fun url(url: String) = apply {
             builder.url(url)
         }
 
-        fun url(url: URL) = apply {
-            builder.url(url)
-        }
-
-        fun url(uri: URI) = apply {
-            builder.url(uri)
+        fun url(url: () -> String) = apply {
+            builder.url(url())
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             builder.cacheControl(cacheControl)
+        }
+
+        fun cacheControl(cacheControl: () -> CacheControl) = apply {
+            builder.cacheControl(cacheControl())
+        }
+
+        fun username(username: String) = apply {
+            builder.username(username)
+        }
+
+        fun username(username: () -> String) = apply {
+            builder.username(username())
+        }
+
+        fun password(password: String) = apply {
+            builder.password(password)
+        }
+
+        fun password(password: () -> String) = apply {
+            builder.password(password())
         }
 
         fun headers(operation: RequestPairs.() -> Unit) = apply {
@@ -199,14 +204,6 @@ class OkFaker<T> internal constructor(
             headers.forEach {
                 builder.addHeader(it.first, it.second.toString())
             }
-        }
-
-        fun username(username: String) = apply {
-            builder.username(username)
-        }
-
-        fun password(password: String) = apply {
-            builder.password(password)
         }
 
         fun queryParameters(operation: RequestPairs.() -> Unit) = apply {
@@ -493,7 +490,7 @@ class OkFaker<T> internal constructor(
         private val CONFIG = OkConfig()
 
         @JvmStatic
-        fun config(): OkConfig = CONFIG
+        fun configSetter(): OkConfig.Setter = CONFIG.setter()
 
         @JvmStatic
         fun <T> get(block: (Builder<T>.() -> Unit)? = null): Builder<T> =
@@ -605,7 +602,7 @@ fun requestPairsOf(
         if (copyFrom is RequestPairs) {
             putAll(copyFrom)
         } else {
-            copyFrom.toJSON().toJSONObject().forEach { key, value ->
+            copyFrom.toJSONObject().forEach { key, value ->
                 put(key, value.asString())
             }
         }

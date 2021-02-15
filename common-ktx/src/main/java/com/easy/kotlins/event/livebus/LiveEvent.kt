@@ -1,9 +1,7 @@
 package com.easy.kotlins.event.livebus
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.easy.kotlins.event.MutableLiveEventData
 
 internal class LiveEvent<T>: Observable<T> {
 

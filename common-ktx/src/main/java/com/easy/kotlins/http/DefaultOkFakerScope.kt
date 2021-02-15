@@ -1,9 +1,6 @@
 package com.easy.kotlins.http
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-
-class DefaultOkFakerScope: OkFakerScope, Iterable<OkFaker<*>> {
+class DefaultOkFakerScope : OkFakerScope, Iterable<OkFaker<*>> {
 
     private var resources: MutableList<OkFaker<*>>? = null
 

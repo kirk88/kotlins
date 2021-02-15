@@ -9,9 +9,9 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.easy.kotlins.event.Event
-import com.easy.kotlins.event.EventObserver
-import com.easy.kotlins.event.EventLifecycleObserver
 import com.easy.kotlins.event.EventDelegate
+import com.easy.kotlins.event.EventLifecycleObserver
+import com.easy.kotlins.event.EventObserver
 import com.easy.kotlins.http.DefaultOkFakerScope
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
@@ -23,9 +23,9 @@ import com.easy.kotlins.http.OkFakerScope
 interface ViewModelController : OkFakerScope {
     var event: Event
 
-    fun <T> get(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
+    fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
 
-    fun <T> post(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
+    fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
 
     fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
 
@@ -48,12 +48,12 @@ private class SimpleViewModelController : ViewModelController,
     private val eventDelegate = EventDelegate()
     override var event: Event by eventDelegate
 
-    override fun <T> get(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.get(action).build().also { add(it) }
+    override fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.get(block).build().also { add(it) }
     }
 
-    override fun <T> post(action: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.post(action).build().also { add(it) }
+    override fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.post(block).build().also { add(it) }
     }
 
     override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {

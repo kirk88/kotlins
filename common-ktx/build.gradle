@@ -33,6 +33,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
 }
 
 dependencies {
@@ -60,6 +65,7 @@ dependencies {
     api rootProject.ext.dependencies.okhttp
     api rootProject.ext.dependencies.okhttp_logging
     api rootProject.ext.dependencies.jackson
+    api rootProject.ext.dependencies.coil
 }
 
 uploadArchives {

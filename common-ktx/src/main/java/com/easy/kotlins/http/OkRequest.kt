@@ -1,6 +1,5 @@
 package com.easy.kotlins.http
 
-import android.webkit.URLUtil
 import com.easy.kotlins.helper.isNetworkUrl
 import com.easy.kotlins.helper.plus
 import com.easy.kotlins.helper.toUrl
@@ -10,8 +9,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
-import java.net.URI
-import java.net.URL
 
 internal class OkRequest(
     private val client: OkHttpClient,
@@ -162,6 +159,8 @@ internal class OkRequest(
     class Builder(private val method: OkRequestMethod, private val config: OkConfig) {
 
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder().also {
+            it.username(config.username.orEmpty())
+            it.password(config.password.orEmpty())
             for ((name, value) in config.queryParameters) {
                 it.addQueryParameter(name, value)
             }
@@ -208,7 +207,7 @@ internal class OkRequest(
                 multipartBuilderApplied = false
             }
 
-        private var client: OkHttpClient? = null
+        private var client: OkHttpClient? = config.client
 
         private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
         private val responseInterceptors = mutableListOf<OkResponseInterceptor>()
@@ -236,10 +235,6 @@ internal class OkRequest(
                 .encodedQuery(httpUrl.encodedQuery)
                 .encodedFragment(httpUrl.encodedFragment)
         }
-
-        fun url(url: URL) = url(url.toString())
-
-        fun url(uri: URI) = url(uri.toString())
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             requestBuilder.cacheControl(cacheControl)
