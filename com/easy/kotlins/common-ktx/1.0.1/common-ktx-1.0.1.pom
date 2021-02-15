@@ -123,6 +123,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>io.coil-kt</groupId>
+      <artifactId>coil</artifactId>
+      <version>1.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>androidx.databinding</groupId>
       <artifactId>viewbinding</artifactId>
       <version>4.1.1</version>
