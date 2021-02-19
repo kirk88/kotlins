@@ -9,6 +9,16 @@ import java.util.*
  */
 
 
-fun Date.format(pattern: String = "yyyy-MM-dd HH:mm:ss") : String? = SimpleDateFormat(pattern, Locale.getDefault()).format(this)
+fun Date.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss") : String = SimpleDateFormat(pattern, Locale.getDefault()).format(this)
 
-fun String.parseAsDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): Date = runCatching { SimpleDateFormat(pattern, Locale.getDefault()).parse(this) }.getOrDefault(Date())
+fun Long.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String = Date(this).formatDate(pattern)
+
+fun String.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
+    var time = this.toLong()
+    if (this.length < 13) {
+        time *= 1000
+    }
+    return time.formatDate(pattern)
+}
+
+fun String.parseDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): Date = runCatching { SimpleDateFormat(pattern, Locale.getDefault()).parse(this) }.getOrDefault(Date())

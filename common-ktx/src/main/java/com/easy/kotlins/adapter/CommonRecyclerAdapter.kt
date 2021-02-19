@@ -24,7 +24,7 @@ open class CommonRecyclerAdapter<ITEM>(
     private val headerViews: SparseArray<View> by lazy { SparseArray() }
     private val footerViews: SparseArray<View> by lazy { SparseArray() }
 
-    private val itemDelegates: HashMap<Int, ItemViewDelegate<out ITEM>> = hashMapOf(*itemDelegates)
+    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> = mutableMapOf(*itemDelegates)
 
     private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
     private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =
@@ -360,10 +360,20 @@ open class CommonRecyclerAdapter<ITEM>(
 
     fun replaceItems(position: Int, item: ITEM, payload: Any? = null) {
         synchronized(lock) {
-            val oldSize = actualItemCount
-            if (position in 0 until oldSize) {
+            if (position in 0 until actualItemCount) {
                 this.modifiableItems[position] = item
                 notifyItemChanged(position + headerCount, payload)
+            }
+        }
+    }
+
+    fun replaceItems(items: List<ITEM>, payload: Any? = null) {
+        synchronized(lock) {
+            for (item in items) {
+                val position = modifiableItems.indexOf(item)
+                if (position < 0) continue
+                modifiableItems[position] = item
+                notifyItemChanged(position, payload)
             }
         }
     }
@@ -499,9 +509,9 @@ open class CommonRecyclerAdapter<ITEM>(
                 )
 
                 itemDelegates.getValue(viewType)
-                    .registerListener(holder)
+                    .onViewHolderCreated(holder)
 
-                registerListener(holder)
+                onViewHolderCreated(holder)
 
                 holder.setOnChildClickListener {
                     if (!onItemChildClick(holder, it))
@@ -535,7 +545,7 @@ open class CommonRecyclerAdapter<ITEM>(
         }
     }
 
-    open fun registerListener(holder: ItemViewHolder) {
+    open fun onViewHolderCreated(holder: ItemViewHolder) {
 
     }
 

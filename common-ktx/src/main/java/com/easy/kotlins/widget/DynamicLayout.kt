@@ -95,7 +95,7 @@ class DynamicLayout @JvmOverloads constructor(
             addView(TYPE_CONTENT_VIEW, getChildAt(0))
         }
 
-        if(!isInEditMode){
+        if (!isInEditMode) {
             show(defaultShowType)
         }
     }
@@ -305,12 +305,12 @@ class DynamicLayout @JvmOverloads constructor(
     private fun addView(
         @ViewType viewType: Int,
         @LayoutRes layoutResId: Int,
-        attach: Boolean = false
+        attachToRoot: Boolean = false
     ): View {
-        return addView(viewType, inflater.inflate(layoutResId, this, false), attach)
+        return addView(viewType, inflater.inflate(layoutResId, this, false), attachToRoot)
     }
 
-    private fun addView(@ViewType viewType: Int, view: View, attach: Boolean = false): View {
+    private fun addView(@ViewType viewType: Int, view: View, attachToRoot: Boolean = false): View {
         views[viewType] = view.also {
             it.visibility = if (viewType == viewType) VISIBLE else INVISIBLE
         }
@@ -393,9 +393,17 @@ class DynamicLayout @JvmOverloads constructor(
             }
         }
 
-        if (attach && indexOfChild(view) < 0) {
+        if (attachToRoot && indexOfChild(view) < 0) {
             if (viewType == TYPE_CONTENT_VIEW) {
-                addView(view, 0, view.layoutParams ?: LayoutParams(-1, -1))
+                val params = if (view.layoutParams is MarginLayoutParams) {
+                    MarginLayoutParams(view.layoutParams as MarginLayoutParams).apply {
+                        width = LayoutParams.MATCH_PARENT
+                        height = LayoutParams.MATCH_PARENT
+                    }
+                } else {
+                    LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+                }
+                addView(view, 0, params)
             } else {
                 addView(view)
             }

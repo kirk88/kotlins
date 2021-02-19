@@ -14,9 +14,9 @@ abstract class ItemViewDelegate<ITEM>(protected val context: Context,@LayoutRes 
 
 
     /**
-     * 注册事件
+     * 可以做一些ViewHolder初始化操作,比如设置点击事件
      */
-    open fun registerListener(holder: ItemViewHolder){
+    open fun onViewHolderCreated(holder: ItemViewHolder){
 
     }
 

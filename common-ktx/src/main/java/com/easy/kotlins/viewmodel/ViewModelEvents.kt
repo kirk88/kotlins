@@ -16,7 +16,7 @@ object ViewModelEvents {
 
     fun <T, VM> observeOnFragment(owner: T) where T : Fragment, T : EventLifecycleObserver, T : ViewModelOwner<VM>, VM : ViewModel, VM : ViewModelController {
         val activity = owner.activity
-            ?: throw IllegalArgumentException("Fragment $owner was not attach to activity")
+            ?: throw IllegalArgumentException("Fragment $owner was not attach to an activity")
         if (activity is EventLifecycleObserver) {
             return
         }
