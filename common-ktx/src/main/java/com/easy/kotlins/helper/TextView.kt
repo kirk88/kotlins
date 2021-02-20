@@ -2,7 +2,10 @@
 
 package com.easy.kotlins.helper
 
+import android.util.TypedValue
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import java.lang.reflect.TypeVariable
 import kotlin.DeprecationLevel.ERROR
 
 /**
@@ -27,6 +30,24 @@ var TextView.textColor: Int
         setTextColor(value)
     }
 
+var TextView.textColorResource: Int
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    set(value) {
+        setTextColor(ContextCompat.getColorStateList(context, value))
+    }
+
+var TextView.textPixelSize: Int
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    set(value) {
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat())
+    }
+
+var TextView.textSizeResource: Int
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    set(value) {
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimensionPixelSize(value).toFloat())
+    }
+
 fun TextView.isEmpty(): Boolean = this.text?.isEmpty() ?: true
 
 fun TextView.isBlank(): Boolean = this.text?.isBlank() ?: true
@@ -39,4 +60,4 @@ fun TextView.isNotEmpty(): Boolean = this.text?.isNotEmpty() ?: false
 
 fun TextView.isNotBlank(): Boolean = this.text?.isNotBlank() ?: false
 
-fun TextView?.setBoldTextStyle(bold: Boolean = true) = run { this?.paint?.isFakeBoldText = bold }
+fun TextView.setBoldTextStyle(bold: Boolean = true) = run { this.paint?.isFakeBoldText = bold }

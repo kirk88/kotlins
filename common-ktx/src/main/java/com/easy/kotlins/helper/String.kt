@@ -23,7 +23,7 @@ fun CharSequence.highlight(
     @ColorInt color: Int = Color.RED,
     size: Int = 0,
     style: Int = Typeface.NORMAL
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         target ?: return@apply
         for (result in target.toRegex().findAll(this, startIndex)) {
@@ -59,7 +59,7 @@ fun CharSequence.highlight(
     @ColorInt color: Int = Color.RED,
     size: Int = 0,
     style: Int = Typeface.NORMAL
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         if (size != 0) {
@@ -78,7 +78,7 @@ fun CharSequence.insertImage(
     height: Int = 0,
     prefix: String = "",
     postfix: String = ""
-): SpannableStringBuilder {
+): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
@@ -97,7 +97,7 @@ fun CharSequence.appendImage(
     height: Int = 0,
     prefix: String = "",
     postfix: String = ""
-): SpannableStringBuilder {
+): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
@@ -162,7 +162,7 @@ fun CharSequence.insert(
     start: Int = 0,
     end: Int = text.length,
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         insert(where, text.asSpannableBuilder().also {
             if (span != null) {
@@ -178,7 +178,7 @@ fun CharSequence.append(
     start: Int = 0,
     end: Int = text.length,
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
@@ -190,7 +190,7 @@ fun CharSequence.appendLine(
     start: Int = 0,
     end: Int = text.length,
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
@@ -201,7 +201,7 @@ fun CharSequence.withSpan(
     start: Int = 0,
     end: Int = length,
     flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-): SpannableStringBuilder {
+): CharSequence {
     return asSpannableBuilder().apply {
         setSpan(what, start, end, flags)
     }

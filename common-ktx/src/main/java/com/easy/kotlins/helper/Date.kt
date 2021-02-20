@@ -9,9 +9,11 @@ import java.util.*
  */
 
 
-fun Date.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss") : String = SimpleDateFormat(pattern, Locale.getDefault()).format(this)
+fun Date.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String =
+    SimpleDateFormat(pattern, Locale.getDefault()).format(this)
 
-fun Long.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String = Date(this).formatDate(pattern)
+fun Long.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String =
+    Date(this).formatDate(pattern)
 
 fun String.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
     var time = this.toLong()
@@ -21,4 +23,5 @@ fun String.formatDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
     return time.formatDate(pattern)
 }
 
-fun String.parseDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): Date = runCatching { SimpleDateFormat(pattern, Locale.getDefault()).parse(this) }.getOrDefault(Date())
+fun String.parseDate(pattern: String = "yyyy-MM-dd HH:mm:ss"): Date =
+    runCatching { SimpleDateFormat(pattern, Locale.getDefault()).parse(this) }.getOrElse { Date() }
