@@ -1,5 +1,8 @@
 package com.easy.kotlins.http
 
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -48,7 +51,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             while (inputStream.read(buffer).also { len -> length = len } != -1) {
                 readBytes += length.toLong()
                 accessFile.write(buffer, 0, length)
-                onProgress(readBytes, totalBytes)
+                HANDLER.updateProgress(this, readBytes, totalBytes)
             }
             if (readBytes == totalBytes) {
                 rename(srcFile)
@@ -56,10 +59,37 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         }
     }
 
+
+    private class ProgressHandler : Handler(Looper.getMainLooper()) {
+
+        override fun handleMessage(msg: Message) {
+            val mapper = msg.obj as DefaultOkDownloadMapper
+            val readBytes = msg.data.getLong(KEY_READ_BYTES)
+            val totalBytes = msg.data.getLong(KEY_TOTAL_BYTES)
+            mapper.onProgress(readBytes, totalBytes)
+        }
+
+        fun updateProgress(mapper: DefaultOkDownloadMapper, readBytes: Long, totalBytes: Long) {
+            sendMessage(Message().apply {
+                obj = mapper
+                data.putLong(KEY_READ_BYTES, readBytes)
+                data.putLong(KEY_TOTAL_BYTES, totalBytes)
+            })
+        }
+
+        companion object {
+            private const val KEY_READ_BYTES = "KEY_READ_BYTES"
+            private const val KEY_TOTAL_BYTES = "KEY_TOTAL_BYTES"
+        }
+
+    }
+
     companion object {
         private const val DOWNLOAD_SUFFIX_TMP = ".tmp" // 下载临时文件后缀
         private const val DOWNLOAD_HEADER_RANGE_NAME = "Range"
         private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes={0,number,#}-"
+
+        private val HANDLER = ProgressHandler()
 
         private fun rename(srcFile: File): File {
             val tmpFilePath = srcFile.absolutePath

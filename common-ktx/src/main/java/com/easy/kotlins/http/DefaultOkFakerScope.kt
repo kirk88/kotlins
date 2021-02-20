@@ -1,6 +1,6 @@
 package com.easy.kotlins.http
 
-class DefaultOkFakerScope : OkFakerScope, Iterable<OkFaker<*>> {
+class DefaultOkFakerScope : OkFakerScope {
 
     private var resources: MutableList<OkFaker<*>>? = null
 
@@ -9,7 +9,7 @@ class DefaultOkFakerScope : OkFakerScope, Iterable<OkFaker<*>> {
             var list = resources
 
             if (list == null) {
-                list = arrayListOf()
+                list = mutableListOf()
                 resources = list
             }
 

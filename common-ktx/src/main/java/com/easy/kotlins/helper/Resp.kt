@@ -20,25 +20,25 @@ import kotlin.coroutines.CoroutineContext
  */
 
 inline fun <T> pagedList(page: Int, crossinline dataList: () -> List<T>?): PagedList<T> =
-    PagedList.create(dataList(), page)
+    PagedList.create(page, dataList())
 
-fun <T> pagedList(page: Int, dataList: List<T>?): PagedList<T> = PagedList.create(dataList, page)
+fun <T> pagedList(page: Int, dataList: List<T>?): PagedList<T> = PagedList.create(page, dataList)
 
 inline fun <T> pagedList(pager: Pager, crossinline dataList: () -> List<T>?): PagedList<T> =
     dataList().let {
-        PagedList.create(it, it.isNullOrEmpty().opt({
+        PagedList.create(it.isNullOrEmpty().opt({
             pager.get()
         }, {
             pager.getAndPlus()
-        }))
+        }), it)
     }
 
 fun <T> pagedList(pager: Pager, dataList: List<T>?): PagedList<T> = dataList.let {
-    PagedList.create(it, it.isNullOrEmpty().opt({
+    PagedList.create(it.isNullOrEmpty().opt({
         pager.get()
     }, {
         pager.getAndPlus()
-    }))
+    }), it)
 }
 
 fun PagedList<*>?.isNullOrEmpty() = this?.list?.isNullOrEmpty()
@@ -76,7 +76,7 @@ open class PagedList<T> internal constructor(
 
     companion object {
 
-        fun <T> create(list: List<T>?, page: Int): PagedList<T> = PagedList(page, list)
+        fun <T> create(page: Int, list: List<T>?): PagedList<T> = PagedList(page, list)
 
     }
 
@@ -208,7 +208,11 @@ fun OkFaker.Builder<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.Builder<*>.requestPlugin(config: LoadConfig, url: String, vararg params: Pair<String, Any?>) {
+fun OkFaker.Builder<*>.requestPlugin(
+    config: LoadConfig,
+    url: String,
+    vararg params: Pair<String, Any?>
+) {
 
     url(url)
 

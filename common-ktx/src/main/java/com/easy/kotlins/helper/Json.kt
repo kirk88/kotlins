@@ -17,11 +17,11 @@ internal fun type(parametrized: Class<*>, vararg parameterClasses: Class<*>): Ja
     return objectMapper.typeFactory.constructParametricType(parametrized, *parameterClasses)
 }
 
-inline fun <reified T> String.parseAsJSONObject(): T {
+inline fun <reified T> String.parseJSONObject(): T {
     return objectMapper.readValue(this, T::class.java)
 }
 
-inline fun <reified T> String.parseAsJSONArray(): List<T> {
+inline fun <reified T> String.parseJSONArray(): List<T> {
     return objectMapper.readValue(this, type(ArrayList::class.java, T::class.java))
 }
 

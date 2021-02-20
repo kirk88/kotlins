@@ -5,12 +5,14 @@ import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.ColorRes
+import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -136,6 +138,8 @@ inline fun <reified A : Activity> Activity.startActivityForResult(
 
 fun Context.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
+fun Context.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(this, resId)
+
 fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
     ContextCompat.getDrawable(
         this,
@@ -143,7 +147,18 @@ fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNul
     )
 )
 
+fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
+
+fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDimensionPixelOffset(resId)
+
+fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
+
 fun Fragment.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(
+    requireContext(),
+    resId
+)
+
+fun Fragment.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(
     requireContext(),
     resId
 )
@@ -154,6 +169,12 @@ fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNu
         resId
     )
 )
+
+fun Fragment.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
+
+fun Fragment.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDimensionPixelOffset(resId)
+
+fun Fragment.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
 
 val Fragment.application: Application
     get() {

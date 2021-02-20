@@ -3,11 +3,19 @@ package com.easy.kotlins.viewmodel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
+import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventLifecycleObserver
 
-/**
- * Create by LiZhanPing on 2020/9/16
- */
+interface ViewModelEventDispatcher {
+
+    fun onInterceptViewModelEvent(event: Event): Boolean
+
+    fun dispatchViewModelEvent(event: Event): Boolean
+
+    fun onViewModelEvent(event: Event): Boolean
+
+}
+
 object ViewModelEvents {
 
     fun <T, VM> observeOnActivity(owner: T) where T : FragmentActivity, T : EventLifecycleObserver, T : ViewModelOwner<VM>, VM : ViewModel, VM : ViewModelController {

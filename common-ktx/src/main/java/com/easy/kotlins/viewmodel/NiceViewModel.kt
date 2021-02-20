@@ -19,42 +19,49 @@ import com.easy.kotlins.http.OkFakerScope
 /**
  * Create by LiZhanPing on 2020/8/24
  */
+interface ViewModelController : OkFakerScope, ViewModelHttpRequester {
 
-interface ViewModelController : OkFakerScope {
     var event: Event
-
-    fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
-
-    fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T>
 
     fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
 
     fun addEventObserver(observer: EventLifecycleObserver)
-}
-
-interface ViewModelEventDispatcher {
-
-    fun onInterceptViewModelEvent(event: Event): Boolean
-
-    fun dispatchViewModelEvent(event: Event): Boolean
-
-    fun onViewModelEvent(event: Event): Boolean
 
 }
 
-private class SimpleViewModelController : ViewModelController,
+interface ViewModelHttpRequester : OkFakerScope {
+
+    fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.get(block).build().also { add(it) }
+    }
+
+    fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.post(block).build().also { add(it) }
+    }
+
+    fun <T> delete(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.delete(block).build().also { add(it) }
+    }
+
+    fun <T> put(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.put(block).build().also { add(it) }
+    }
+
+    fun <T> head(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.head(block).build().also { add(it) }
+    }
+
+    fun <T> patch(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
+        return OkFaker.patch(block).build().also { add(it) }
+    }
+
+}
+
+private class DefaultViewModelController : ViewModelController,
     OkFakerScope by DefaultOkFakerScope() {
 
     private val eventDelegate = EventDelegate()
     override var event: Event by eventDelegate
-
-    override fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.get(block).build().also { add(it) }
-    }
-
-    override fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.post(block).build().also { add(it) }
-    }
 
     override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
         eventDelegate.addEventObserver(owner, observer)
@@ -63,9 +70,10 @@ private class SimpleViewModelController : ViewModelController,
     override fun addEventObserver(observer: EventLifecycleObserver) {
         eventDelegate.addEventObserver(observer)
     }
+
 }
 
-open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelController() {
+open class NiceViewModel : ViewModel(), ViewModelController by DefaultViewModelController() {
 
     @CallSuper
     override fun onCleared() {
@@ -75,7 +83,7 @@ open class NiceViewModel : ViewModel(), ViewModelController by SimpleViewModelCo
 }
 
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
-    ViewModelController by SimpleViewModelController() {
+    ViewModelController by DefaultViewModelController() {
 
     @CallSuper
     override fun onCleared() {

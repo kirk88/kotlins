@@ -4,8 +4,8 @@ import okhttp3.Response
 
 internal class OkTransformer<T> {
 
-    private var errorMapper: OkMapper<Exception, T>? = null
     private var responseMapper: OkMapper<Response, T>? = null
+    private var errorMapper: OkMapper<Exception, T>? = null
 
     fun mapResponse(mapper: OkMapper<Response, T>) = this.apply {
         responseMapper = mapper
@@ -32,4 +32,5 @@ internal class OkTransformer<T> {
     companion object {
         private val DEFAULT_RESPONSE_MAPPER = OkMapper<Response, Any> { it }
     }
+
 }
