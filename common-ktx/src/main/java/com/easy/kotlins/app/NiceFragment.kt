@@ -19,7 +19,7 @@ abstract class NiceFragment(@LayoutRes layoutResId: Int = 0) : Fragment(layoutRe
         onBind(savedInstanceState)
         onBindView(savedInstanceState)
         onBindEvent(savedInstanceState)
-        view.post { onPrepared(savedInstanceState) }
+        onPrepared(savedInstanceState)
     }
 
     override fun onResume() {

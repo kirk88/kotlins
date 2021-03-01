@@ -5,10 +5,8 @@ package com.easy.kotlins.helper
 import androidx.lifecycle.MutableLiveData
 import com.easy.kotlins.adapter.CommonRecyclerAdapter
 import com.easy.kotlins.event.*
-import com.easy.kotlins.http.BodyFormDataPart
-import com.easy.kotlins.http.FileFormDataPart
-import com.easy.kotlins.http.OkFaker
-import com.easy.kotlins.http.OkMapper
+import com.easy.kotlins.http.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import okhttp3.Response
 import java.io.Serializable
@@ -184,7 +182,10 @@ class LoadConfig(
     }
 }
 
-fun OkFaker.Builder<*>.requestPlugin(url: String, vararg params: Pair<String, Any?>) {
+operator fun LoadConfig.plus(mode: LoadMode): LoadConfig = with(mode)
+operator fun LoadConfig.plus(context: CoroutineContext): LoadConfig = on(context)
+
+fun OkFaker.Builder<*>.request(url: String, vararg params: Pair<String, Any?>) {
 
     url(url)
 
@@ -196,7 +197,7 @@ fun OkFaker.Builder<*>.requestPlugin(url: String, vararg params: Pair<String, An
 
 }
 
-fun OkFaker.Builder<*>.requestPlugin(url: String, params: Map<String, Any?>) {
+fun OkFaker.Builder<*>.request(url: String, params: Map<String, Any?>) {
 
     url(url)
 
@@ -208,7 +209,21 @@ fun OkFaker.Builder<*>.requestPlugin(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.Builder<*>.requestPlugin(
+fun OkFaker.Builder<*>.request(url: String, operation: RequestPairs<String, Any?>.() -> Unit) {
+
+    url(url)
+
+    requestPairsOf(operation).let { pairs ->
+        if (pairs.any { it.value is BodyFormDataPart || it.value is FileFormDataPart }) {
+            formDataParts(pairs.toMap())
+        } else {
+            formParameters(pairs.toMap())
+        }
+    }
+
+}
+
+fun OkFaker.Builder<*>.request(
     config: LoadConfig,
     url: String,
     vararg params: Pair<String, Any?>
@@ -223,7 +238,11 @@ fun OkFaker.Builder<*>.requestPlugin(
 
 }
 
-fun OkFaker.Builder<*>.requestPlugin(config: LoadConfig, url: String, params: Map<String, Any?>) {
+fun OkFaker.Builder<*>.request(
+    config: LoadConfig,
+    url: String,
+    params: Map<String, Any?>
+) {
 
     url(url)
 
@@ -234,7 +253,22 @@ fun OkFaker.Builder<*>.requestPlugin(config: LoadConfig, url: String, params: Ma
 
 }
 
-fun <T> OkFaker.Builder<T>.responsePlugin(
+fun OkFaker.Builder<*>.request(
+    config: LoadConfig,
+    url: String,
+    operation: RequestPairs<String, Any?>.() -> Unit
+) {
+
+    url(url)
+
+    formParameters(requestPairsOf(operation).apply {
+        put("page", config.page)
+        put("pageSize", config.pageSize)
+    }.toMap())
+
+}
+
+fun <T> OkFaker.Builder<T>.response(
     precondition: (Response) -> Boolean = { it.isSuccessful },
     errorMapper: OkMapper<Exception, T>? = null,
     resultMapper: OkMapper<String, T>
@@ -249,42 +283,44 @@ fun <T> OkFaker.Builder<T>.responsePlugin(
     }
 }
 
-fun <T> OkFaker.Builder<T>.loadPlugin(
+fun <T> OkFaker.Builder<T>.load(
     config: LoadConfig,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Exception) -> Unit)? = null,
     onApply: (T) -> Unit
 ) {
 
+    val scope = CoroutineScope(config.context)
+
     onStart {
         if (config.mode == LoadMode.START) onEvent?.invoke(loadingShow())
     }
 
     onSuccess {
-        step(config.context) {
+        step {
             add(config.delayed) {
-                if (it is Collection<*>) {
-                    onEvent?.invoke(
+                onEvent?.invoke(
+                    if (it is Collection<*>) {
                         when (config.mode) {
                             LoadMode.START -> it.isNotEmpty().opt(contentShow(), emptyShow())
                             LoadMode.REFRESH -> it.isNotEmpty()
                                 .opt(refreshSuccess(), emptyShow())
                             LoadMode.LOADMORE -> loadMoreSuccess(it.isNotEmpty())
                         }
-                    )
-                } else {
-                    onEvent?.invoke(contentShow())
-                }
+                    } else {
+                        contentShow()
+                    }
+                )
             }
 
             add {
                 onApply(it)
             }
-        }
+        }.launchIn(scope)
     }
 
     onError {
-        step(config.context) {
+        step {
             add(config.delayed) {
                 onEvent?.invoke(
                     when (config.mode) {
@@ -298,17 +334,17 @@ fun <T> OkFaker.Builder<T>.loadPlugin(
             add {
                 onError?.invoke(it)
             }
-        }
+        }.launchIn(scope)
     }
 }
 
-inline fun <reified T> OkFaker.Builder<T>.loadPlugin(
+inline fun <reified T> OkFaker.Builder<T>.load(
     config: LoadConfig,
     source: MutableLiveData<T>,
     noinline onError: ((Throwable) -> Unit)? = null,
     noinline onEvent: ((Event) -> Unit)? = null
 ) {
-    loadPlugin(config, onEvent, onError) {
+    load(config, onEvent, onError) {
         if (T::class == PagedList::class && it is List<*>) {
             source.value = pagedList(config.pager, it) as T
         } else {
@@ -317,7 +353,7 @@ inline fun <reified T> OkFaker.Builder<T>.loadPlugin(
     }
 }
 
-fun <T> OkFaker.Builder<T>.loadPlugin(
+fun <T> OkFaker.Builder<T>.load(
     message: String? = null,
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,

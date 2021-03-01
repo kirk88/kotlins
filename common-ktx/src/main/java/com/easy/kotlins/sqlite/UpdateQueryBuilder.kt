@@ -17,7 +17,7 @@ abstract class UpdateQueryBuilder(
     private var updateWhereCause: String? = null
     private var updateWhereArgs: Array<out String>? = null
 
-    fun whereArgs(whereCondition: SqlWhereCondition){
+    fun whereArgs(whereCondition: SqlWhereCondition): UpdateQueryBuilder{
         if (whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
@@ -25,6 +25,7 @@ abstract class UpdateQueryBuilder(
         whereCauseApplied = true
         updateWhereCause = whereCondition.whereCause
         updateWhereArgs = whereCondition.whereArgs
+        return this
     }
 
     fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {

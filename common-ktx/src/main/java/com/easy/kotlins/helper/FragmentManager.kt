@@ -85,14 +85,13 @@ inline fun <reified T : Fragment> FragmentManager.replaceNow(@IdRes id: Int, var
 }
 
 inline fun <reified T : Fragment> FragmentManager.show(@IdRes id: Int, tag: String? = null, allowingStateLoss: Boolean = false, args: Bundle.() -> Unit = { }): Fragment {
+    val javaClass = T::class.java
+    val fragmentTag = tag ?: javaClass.canonicalName
+
+    val fragment = findFragmentByTag(fragmentTag) ?: javaClass.newInstance().apply {
+        arguments = Bundle().apply(args)
+    }
     return beginTransaction().let {
-        val javaClass = T::class.java
-        val fragmentTag = tag ?: javaClass.canonicalName
-
-        val fragment = findFragmentByTag(fragmentTag) ?: javaClass.newInstance().apply {
-            arguments = Bundle().apply(args)
-        }
-
         for (existedFragment in fragments) {
             if (existedFragment == fragment) continue
 

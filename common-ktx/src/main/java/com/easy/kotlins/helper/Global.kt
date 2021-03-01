@@ -176,6 +176,12 @@ fun Fragment.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getD
 
 fun Fragment.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
 
+val Context.screenWidthPixels: Int
+    get() = resources.displayMetrics.widthPixels
+
+val Context.screenHeightPixels: Int
+    get() = resources.displayMetrics.heightPixels
+
 val Fragment.application: Application
     get() {
         var application: Application? = null
@@ -192,17 +198,8 @@ val Fragment.application: Application
     }
 
 
-val Context.screenWidthPixels: Int
-    get() = resources.displayMetrics.widthPixels
-
-val Context.screenHeightPixels: Int
-    get() = resources.displayMetrics.heightPixels
-
 val Context.activity: Activity?
     get() = scanActivity(this)
-
-val Context.appCompatActivity: AppCompatActivity?
-    get() = scanCompatActivity(this)
 
 private tailrec fun scanActivity(context: Context): Activity? {
     return when (context) {
@@ -211,6 +208,9 @@ private tailrec fun scanActivity(context: Context): Activity? {
         else -> null
     }
 }
+
+val Context.appCompatActivity: AppCompatActivity?
+    get() = scanCompatActivity(this)
 
 private tailrec fun scanCompatActivity(context: Context?): AppCompatActivity? {
     return when (context) {

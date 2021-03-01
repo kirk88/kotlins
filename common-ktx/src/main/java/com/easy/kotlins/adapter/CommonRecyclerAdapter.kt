@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.adapter
 
 import android.content.Context

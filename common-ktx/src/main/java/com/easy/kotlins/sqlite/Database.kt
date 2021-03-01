@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.easy.kotlins.sqlite.SqlColumnElement
 import com.easy.kotlins.sqlite.SqlColumnProperty
 import com.easy.kotlins.sqlite.applyArguments
+import java.io.Serializable
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -32,17 +33,6 @@ fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnElement): Long 
  *
  * @param table the table to insert the row into
  *
- * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
- */
-fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
-    return insert(table, values = valuesFrom.toColumnValues())
-}
-
-/**
- * Convenience method for inserting a row into the database.
- *
- * @param table the table to insert the row into
- *
  * @param values this array contains the initial column values for the row,
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
@@ -51,19 +41,6 @@ fun SQLiteDatabase.insert(table: String, valuesFrom: Any): Long {
  */
 fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnElement): Long {
     return insertOrThrow(table, null, values.toContentValues())
-}
-
-/**
- * Convenience method for inserting a row into the database.
- *
- * @param table the table to insert the row into
- *
- * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
- *
- * @throws [android.database.SQLException]
- */
-fun SQLiteDatabase.insertOrThrow(table: String, valuesFrom: Any): Long {
-    return insertOrThrow(table, values = valuesFrom.toColumnValues())
 }
 
 /**
@@ -86,23 +63,6 @@ fun SQLiteDatabase.insertWithOnConflict(
 }
 
 /**
- * Convenience method for inserting a row into the database.
- *
- * @param table the table to insert the row into
- *
- * @param conflictAlgorithm for insert conflict resolver
- *
- * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
- */
-fun SQLiteDatabase.insertWithOnConflict(
-    table: String,
-    conflictAlgorithm: Int,
-    valuesFrom: Any
-): Long {
-    return insertWithOnConflict(table, conflictAlgorithm, values = valuesFrom.toColumnValues())
-}
-
-/**
  * Convenience method for replacing a row in the database.
  * Inserts a new row if a row does not already exist.
  *
@@ -122,19 +82,6 @@ fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnElement): Long
  *
  * @param table the table to insert the row into
  *
- * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
- */
-fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
-    return replace(table, values = valuesFrom.toColumnValues())
-}
-
-
-/**
- * Convenience method for replacing a row in the database.
- * Inserts a new row if a row does not already exist.
- *
- * @param table the table to insert the row into
- *
  * @param values this array contains the initial column values for the row,
  * The [Pair.first]  should be the column names and the  [Pair.second] the
  * column values
@@ -143,20 +90,6 @@ fun SQLiteDatabase.replace(table: String, valuesFrom: Any): Long {
  */
 fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnElement): Long {
     return replaceOrThrow(table, null, values.toContentValues())
-}
-
-/**
- * Convenience method for replacing a row in the database.
- * Inserts a new row if a row does not already exist.
- *
- * @param table the table to insert the row into
- *
- * @param valuesFrom this object contains column names and values, support [Map] or entity annotated with [TableClass]
- *
- * @throws [android.database.SQLException]
- */
-fun SQLiteDatabase.replaceOrThrow(table: String, valuesFrom: Any): Long {
-    return replaceOrThrow(table, values = valuesFrom.toColumnValues())
 }
 
 fun SQLiteDatabase.select(table: String): SelectQueryBuilder {
@@ -174,13 +107,6 @@ fun SQLiteDatabase.update(
     vararg values: SqlColumnElement
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table, values)
-}
-
-fun SQLiteDatabase.update(
-    table: String,
-    valuesFrom: Any
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table, valuesFrom.toColumnValues())
 }
 
 fun SQLiteDatabase.delete(
@@ -301,7 +227,7 @@ fun SQLiteDatabase.createColumns(
     }
 }
 
-internal fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
+fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
     for (element in this) {
         val key = element.name
@@ -322,18 +248,14 @@ internal fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     return values
 }
 
-internal fun Any.toColumnValues(): Array<SqlColumnElement> {
-    if (this is Map<*, *>) {
-        return this.map { SqlColumnElement.create(it.key.toString(), it.value) }.toTypedArray()
-    }
-    if (!javaClass.isAnnotationPresent(TableClass::class.java)) {
-        throw IllegalStateException("The ${javaClass.name} Class is not annotated with TableClass")
-    }
-    return ClassReflections.getAdapter(this) {
-        Modifier.isTransient(it.modifiers)
-                || Modifier.isStatic(it.modifiers)
-                || it.isAnnotationPresent(IgnoredOnTable::class.java)
+fun DatabaseTable.toColumnElements(): Array<SqlColumnElement> {
+    return ClassReflections.getAdapter(javaClass) {
+        Modifier.isTransient(it.modifiers) || Modifier.isStatic(it.modifiers)
     }.read(this)
+}
+
+fun Map<out String, Any?>.toColumnElements(): Array<SqlColumnElement> {
+    return map { SqlColumnElement.create(it.key, it.value) }.toTypedArray()
 }
 
 abstract class ManagedSQLiteOpenHelper(

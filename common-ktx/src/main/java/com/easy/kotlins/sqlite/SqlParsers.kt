@@ -167,8 +167,9 @@ class SqlColumnValue internal constructor(internal val value: Any?) {
     fun asFloat(defaultValue: Float = 0.toFloat()) = (value as? Double)?.toFloat() ?: defaultValue
 
     override fun toString(): String {
-        return "Column(value: $value)"
+        return "SqlColumnValue(value=$value)"
     }
+
 }
 
 inline fun <reified T : Any> SqlColumnValue.asTyped(): T? = asTyped(T::class.java)

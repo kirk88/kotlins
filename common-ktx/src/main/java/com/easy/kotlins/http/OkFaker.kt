@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.*
-import okhttp3.Headers.Companion.toHeaders
 import java.io.File
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
@@ -172,8 +171,8 @@ class OkFaker<T> internal constructor(
             builder.password(password())
         }
 
-        fun headers(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.header(it.key, it.value.toString())
             }
         }
@@ -190,8 +189,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addHeaders(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.addHeader(it.key, it.value.toString())
             }
         }
@@ -208,8 +207,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun queryParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.setQueryParameter(it.key, it.value.toString())
             }
         }
@@ -226,8 +225,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addQueryParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.addQueryParameter(it.key, it.value.toString())
             }
         }
@@ -244,8 +243,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun encodedQueryParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.setEncodedQueryParameter(it.key, it.value.toString())
             }
         }
@@ -262,8 +261,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun addEncodedQueryParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.addEncodedQueryParameter(it.key, it.value.toString())
             }
         }
@@ -280,8 +279,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun formParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.addFormParameter(it.key, it.value.toString())
             }
         }
@@ -298,8 +297,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun encodedFormParameters(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 builder.addEncodedFormParameter(it.key, it.value.toString())
             }
         }
@@ -316,8 +315,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun formDataParts(operation: RequestPairs.() -> Unit) = apply {
-            RequestPairs().apply(operation).forEach {
+        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
+            requestPairsOf(operation).forEach {
                 it.value.let { value ->
                     when (value) {
                         is BodyFormDataPart -> builder.addFormDataPart(
@@ -385,12 +384,6 @@ class OkFaker<T> internal constructor(
         fun parts(vararg parts: RequestBody) = apply {
             parts.forEach {
                 builder.addPart(it)
-            }
-        }
-
-        fun parts(vararg parts: BodyPart) = apply {
-            parts.forEach {
-                builder.addPart(it.headers, it.body)
             }
         }
 
@@ -524,40 +517,36 @@ class OkFaker<T> internal constructor(
 typealias Action<T> = (T) -> Unit
 typealias SimpleAction = () -> Unit
 
-class BodyPart(vararg headers: Pair<String, String>, val body: RequestBody) {
-    val headers: Headers = headers.toMap().toHeaders()
-}
-
 class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
 class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
-class RequestPairs(
-    pairs: Map<String, Any?> = mutableMapOf()
-) : Iterable<Map.Entry<String, Any?>> {
+class RequestPairs<K, V>(
+    pairs: Map<K, V> = mutableMapOf()
+) : Iterable<Map.Entry<K, V>> {
 
-    private val pairs: MutableMap<String, Any?> = pairs.toMutableMap()
+    private val pairs: MutableMap<K, V> = pairs.toMutableMap()
 
-    infix fun String.and(value: Any?) {
+    infix fun K.and(value: V) {
         pairs[this] = value
     }
 
-    fun put(key: String, value: Any?) {
-        pairs[key] = value
+    fun put(key: K, value: V): V? {
+        return pairs.put(key, value)
     }
 
-    fun putAll(pairsFrom: Map<String, Any?>) {
+    fun putAll(pairsFrom: Map<out K, V>) {
         pairs.putAll(pairsFrom)
     }
 
-    fun putAll(pairsForm: RequestPairs) {
+    fun putAll(pairsForm: RequestPairs<out K, V>) {
         pairs.putAll(pairsForm.pairs)
     }
 
-    fun putAll(vararg pairsFrom: Pair<String, Any?>) {
+    fun putAll(vararg pairsFrom: Pair<K, V>) {
         pairs.putAll(pairsFrom)
     }
 
-    fun remove(key: String): Any? {
+    fun remove(key: String): V? {
         return pairs.remove(key)
     }
 
@@ -565,36 +554,41 @@ class RequestPairs(
         return pairs.toJSON()
     }
 
-    override fun iterator(): Iterator<Map.Entry<String, Any?>> {
+    override fun iterator(): Iterator<Map.Entry<K, V>> {
         return pairs.iterator()
     }
 
 }
 
-inline fun requestPairsOf(crossinline operation: RequestPairs.() -> Unit): RequestPairs {
-    return RequestPairs().apply(operation)
+fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = toList().map { it.key to it.value }.toMap()
+
+fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M =
+    toList().map { it.key to it.value }.toMap(destination)
+
+inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -> Unit): RequestPairs<String, Any?> {
+    return RequestPairs<String, Any?>().apply(operation)
 }
 
 fun requestPairsOf(
     vararg pairs: Pair<String, Any?>,
-    operation: (RequestPairs.() -> Unit)? = null
-): RequestPairs {
-    return RequestPairs().apply { putAll(pairs.toMap()) }.also {
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
+): RequestPairs<String, Any?> {
+    return RequestPairs<String, Any?>().apply { putAll(pairs.toMap()) }.also {
         operation?.invoke(it)
     }
 }
 
 fun requestPairsOf(
     copyFrom: Any,
-    operation: (RequestPairs.() -> Unit)? = null
-): RequestPairs {
-    return RequestPairs().apply {
-        if (copyFrom is RequestPairs) {
-            putAll(copyFrom)
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
+): RequestPairs<String, Any?> {
+    return RequestPairs<String, Any?>().apply {
+        if (copyFrom is RequestPairs<*, *>) {
+            copyFrom.toString().toJSONObject()
         } else {
-            copyFrom.toJSONObject().forEach { key, value ->
-                put(key, value.asString())
-            }
+            copyFrom.toJSONObject()
+        }.forEach { key, value ->
+            put(key, value.asString())
         }
     }.also { operation?.invoke(it) }
 }

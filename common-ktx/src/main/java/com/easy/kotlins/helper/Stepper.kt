@@ -14,9 +14,7 @@ interface SuspendedTask {
 
 }
 
-class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
-
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + context)
+class Stepper {
 
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
     private var runningJob: Job? = null
@@ -29,13 +27,18 @@ class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
         channel.offer(DelayedTask(delayed, context, task))
     }
 
-    fun start(): Stepper {
-        runningJob = scope.launch {
+    suspend fun launch() {
+        for (task in channel) {
+            task.run()
+        }
+    }
+
+    fun launchIn(scope: CoroutineScope) {
+        scope.launch {
             for (task in channel) {
                 task.run()
             }
         }
-        return this
     }
 
     fun cancel() {
@@ -68,10 +71,8 @@ class Stepper(context: CoroutineContext = EmptyCoroutineContext) {
 
 }
 
-fun step(context: CoroutineContext = EmptyCoroutineContext, action: Stepper.() -> Unit): Stepper =
-    Stepper(context).apply(action).start()
+fun step(block: Stepper.() -> Unit): Stepper = Stepper().apply(block)
 
-fun step(vararg tasks: Task, context: CoroutineContext = EmptyCoroutineContext): Stepper =
-    Stepper(context).apply {
-        tasks.forEach { add(task = it) }
-    }.start()
+fun step(vararg tasks: Task): Stepper = Stepper().apply {
+    tasks.forEach { add(task = it) }
+}

@@ -316,10 +316,6 @@ internal class OkRequest(
             multipartBuilder?.addPart(body)
         }
 
-        fun addPart(headers: Headers?, body: RequestBody) = apply {
-            multipartBuilder?.addPart(headers, body)
-        }
-
         fun body(contentType: MediaType?, body: String) = apply {
             requestBody = body.toRequestBody(contentType)
         }

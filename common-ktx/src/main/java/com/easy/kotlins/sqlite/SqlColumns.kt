@@ -32,7 +32,12 @@ interface SqlColumnProperty {
 }
 
 private open class SqlColumnElementImpl(override val name: String, override val value: Any?) :
-    SqlColumnElement
+    SqlColumnElement {
+
+    override fun toString(): String {
+        return "SqlColumnElement(name='$name', value=$value)"
+    }
+}
 
 private open class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
     SqlColumnProperty {
@@ -40,6 +45,10 @@ private open class SqlColumnPropertyImpl(override val name: String, override val
     override fun render(): String = "$name ${type.render()}"
 
     override fun plus(value: Any): SqlColumnElement = SqlColumnElement.create(name, value)
+
+    override fun toString(): String {
+        return "SqlColumnProperty(name='$name', type=$type)"
+    }
 
 }
 

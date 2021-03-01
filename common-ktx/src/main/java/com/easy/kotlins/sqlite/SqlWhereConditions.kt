@@ -38,7 +38,7 @@ private class SqlWhereConditionImpl(override val whereCause: String, args: Array
     }
 
     override fun toString(): String {
-        return "SqlWhereBuilder(whereCause: $whereCause, whereArgs: $whereArgs)"
+        return "SqlWhereCondition(whereCause: $whereCause, whereArgs: $whereArgs)"
     }
 }
 

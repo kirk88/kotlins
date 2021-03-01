@@ -17,13 +17,11 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     private val file: File by lazy { File(path + DOWNLOAD_SUFFIX_TMP) }
 
     override fun shouldInterceptRequest(request: Request): Request {
-        return request.newBuilder().apply {
-            val range = if (continuing) file.length() else 0L
-            header(
-                DOWNLOAD_HEADER_RANGE_NAME,
-                MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
-            )
-        }.build()
+        val range = if (continuing) file.length() else 0L
+        return request.newBuilder().header(
+            DOWNLOAD_HEADER_RANGE_NAME,
+            MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
+        ).build()
     }
 
     override fun map(value: Response): File {
@@ -58,7 +56,6 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             } else throw IOException("Response is closed or write file failed")
         }
     }
-
 
     private class ProgressHandler : Handler(Looper.getMainLooper()) {
 
