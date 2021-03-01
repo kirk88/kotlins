@@ -119,8 +119,6 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun addHeaderView(header: View) {
-        (header.parent as? ViewGroup)?.removeView(header)
-
         synchronized(lock) {
             val position = headerViews.size()
             headerViews.put(TYPE_HEADER_VIEW + headerViews.size(), header)
@@ -129,8 +127,6 @@ open class CommonRecyclerAdapter<ITEM>(
     }
 
     fun addFooterView(footer: View) {
-        (footer.parent as? ViewGroup)?.removeView(footer)
-
         synchronized(lock) {
             val position = actualItemCount + footerViews.size()
             footerViews.put(TYPE_FOOTER_VIEW + footerViews.size(), footer)
@@ -494,11 +490,15 @@ open class CommonRecyclerAdapter<ITEM>(
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         return when {
             viewType < TYPE_HEADER_VIEW + headerCount -> {
-                ItemViewHolder(headerViews.get(viewType))
+                ItemViewHolder(headerViews.get(viewType).also { view ->
+                    (view.parent as? ViewGroup)?.removeView(view)
+                })
             }
 
             viewType > TYPE_FOOTER_VIEW -> {
-                ItemViewHolder(footerViews.get(viewType))
+                ItemViewHolder(footerViews.get(viewType).also { view ->
+                    (view.parent as? ViewGroup)?.removeView(view)
+                })
             }
 
             else -> {
@@ -564,7 +564,7 @@ open class CommonRecyclerAdapter<ITEM>(
             getItemOrNull(holder.layoutPosition)?.let {
                 val delegate = itemDelegates.getValue(getItemViewType(holder.layoutPosition))
                 @Suppress("UNCHECKED_CAST")
-                (delegate as ItemViewDelegate<ITEM>).convert(holder, it, payloads)
+                (delegate as ItemViewDelegate<ITEM>).onBindViewHolder(holder, it, payloads)
             }
         }
     }

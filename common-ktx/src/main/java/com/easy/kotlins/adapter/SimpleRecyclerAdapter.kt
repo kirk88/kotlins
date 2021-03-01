@@ -21,13 +21,13 @@ abstract class SimpleRecyclerAdapter<ITEM>(
     init {
         addItemViewDelegate(0, object : ItemViewDelegate<ITEM>(context, layoutResId) {
 
-            override fun convert(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
-                this@SimpleRecyclerAdapter.convert(holder, item, payloads)
+            override fun onBindViewHolder(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
+                this@SimpleRecyclerAdapter.onBindViewHolder(holder, item, payloads)
             }
 
         })
     }
 
-    abstract fun convert(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>)
+    abstract fun onBindViewHolder(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>)
 
 }
