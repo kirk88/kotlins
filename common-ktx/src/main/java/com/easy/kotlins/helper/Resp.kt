@@ -185,7 +185,10 @@ class LoadConfig(
 operator fun LoadConfig.plus(mode: LoadMode): LoadConfig = with(mode)
 operator fun LoadConfig.plus(context: CoroutineContext): LoadConfig = on(context)
 
-fun OkFaker.Builder<*>.request(url: String, vararg params: Pair<String, Any?>) {
+fun <T> OkFaker.Builder<T>.request(
+    url: String,
+    vararg params: Pair<String, Any?>
+): OkFaker.Builder<T> = apply {
 
     url(url)
 
@@ -197,7 +200,10 @@ fun OkFaker.Builder<*>.request(url: String, vararg params: Pair<String, Any?>) {
 
 }
 
-fun OkFaker.Builder<*>.request(url: String, params: Map<String, Any?>) {
+fun <T> OkFaker.Builder<T>.request(
+    url: String,
+    params: Map<String, Any?>
+): OkFaker.Builder<T> = apply {
 
     url(url)
 
@@ -209,7 +215,10 @@ fun OkFaker.Builder<*>.request(url: String, params: Map<String, Any?>) {
 
 }
 
-fun OkFaker.Builder<*>.request(url: String, operation: RequestPairs<String, Any?>.() -> Unit) {
+fun <T> OkFaker.Builder<T>.request(
+    url: String,
+    operation: RequestPairs<String, Any?>.() -> Unit
+): OkFaker.Builder<T> = apply {
 
     url(url)
 
@@ -223,56 +232,11 @@ fun OkFaker.Builder<*>.request(url: String, operation: RequestPairs<String, Any?
 
 }
 
-fun OkFaker.Builder<*>.request(
-    config: LoadConfig,
-    url: String,
-    vararg params: Pair<String, Any?>
-) {
-
-    url(url)
-
-    formParameters(mutableMapOf(*params).apply {
-        put("page", config.page)
-        put("pageSize", config.pageSize)
-    })
-
-}
-
-fun OkFaker.Builder<*>.request(
-    config: LoadConfig,
-    url: String,
-    params: Map<String, Any?>
-) {
-
-    url(url)
-
-    formParameters(params.toMutableMap().apply {
-        put("page", config.page)
-        put("pageSize", config.pageSize)
-    })
-
-}
-
-fun OkFaker.Builder<*>.request(
-    config: LoadConfig,
-    url: String,
-    operation: RequestPairs<String, Any?>.() -> Unit
-) {
-
-    url(url)
-
-    formParameters(requestPairsOf(operation).apply {
-        put("page", config.page)
-        put("pageSize", config.pageSize)
-    }.toMap())
-
-}
-
 fun <T> OkFaker.Builder<T>.response(
     precondition: (Response) -> Boolean = { it.isSuccessful },
     errorMapper: OkMapper<Exception, T>? = null,
     resultMapper: OkMapper<String, T>
-) {
+): OkFaker.Builder<T> = apply {
     mapResponse {
         if (precondition(it)) resultMapper.map(it.body!!.string())
         else error("Invalid response")
@@ -288,7 +252,7 @@ fun <T> OkFaker.Builder<T>.load(
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Exception) -> Unit)? = null,
     onApply: (T) -> Unit
-) {
+): OkFaker.Builder<T> = apply {
 
     val scope = CoroutineScope(config.context)
 
@@ -343,13 +307,11 @@ inline fun <reified T> OkFaker.Builder<T>.load(
     source: MutableLiveData<T>,
     noinline onError: ((Throwable) -> Unit)? = null,
     noinline onEvent: ((Event) -> Unit)? = null
-) {
-    load(config, onEvent, onError) {
-        if (T::class == PagedList::class && it is List<*>) {
-            source.value = pagedList(config.pager, it) as T
-        } else {
-            source.value = it
-        }
+): OkFaker.Builder<T> = load(config, onEvent, onError) {
+    if (T::class == PagedList::class && it is List<*>) {
+        source.value = pagedList(config.pager, it) as T
+    } else {
+        source.value = it
     }
 }
 
@@ -358,7 +320,7 @@ fun <T> OkFaker.Builder<T>.load(
     onEvent: ((Event) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null,
     onApply: (T) -> Unit
-) {
+): OkFaker.Builder<T> = apply {
     onStart {
         onEvent?.invoke(progressShow(message))
     }
