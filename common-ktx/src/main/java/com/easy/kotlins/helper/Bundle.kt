@@ -38,16 +38,16 @@ fun Bundle.toMap(): Map<String, Any?> = run {
 }
 
 fun Bundle.putLargeExtra(key: String, value: LargeExtra) {
-    putString(key, LargeExtras.put(value))
+    LargeExtras.add(this, key, value)
 }
 
-fun <T> Bundle.getLargeExtra(key: String): LargeExtra? {
-    return getString(key)?.let { name -> LargeExtras.get(name) }
+fun Bundle.getLargeExtra(key: String): LargeExtra? {
+    return LargeExtras.get(this, key)
 }
 
 fun <T> Bundle.getLargeExtraValue(key: String): T? {
     @Suppress("UNCHECKED_CAST")
-    return getString(key)?.let { name -> LargeExtras.get(name) as T? }
+    return getLargeExtra(key)?.value as T?
 }
 
 fun <T> Bundle.getLargeExtraValue(key: String, defaultValue: T): T {
@@ -59,16 +59,16 @@ fun <T> Bundle.getLargeExtraValue(key: String, defaultValue: () -> T): T {
 }
 
 fun Intent.putLargeExtra(key: String, value: LargeExtra) {
-    putExtra(key, LargeExtras.put(value))
+    LargeExtras.add(this, key, value)
 }
 
-fun <T> Intent.getLargeExtra(key: String): LargeExtra? {
-    return getStringExtra(key)?.let { name -> LargeExtras.get(name) }
+fun Intent.getLargeExtra(key: String): LargeExtra? {
+    return LargeExtras.get(this, key)
 }
 
 fun <T> Intent.getLargeExtraValue(key: String): T? {
     @Suppress("UNCHECKED_CAST")
-    return getStringExtra(key)?.let { name -> LargeExtras.get(name) as T? }
+    return getLargeExtra(key)?.value as T?
 }
 
 fun <T> Intent.getLargeExtraValue(key: String, defaultValue: T): T {
@@ -79,7 +79,7 @@ fun <T> Intent.getLargeExtraValue(key: String, defaultValue: () -> T): T {
     return getLargeExtraValue<T>(key) ?: defaultValue()
 }
 
-fun LargeExtra(value: Any?): LargeExtra = LargeExtraImpl(value)
+fun largeExtraOf(value: Any?): LargeExtra = LargeExtraImpl(value)
 
 interface LargeExtra {
     val name: String
@@ -97,13 +97,25 @@ private object LargeExtras {
 
     private val dataMap: MutableMap<String, LargeExtra> by lazy { mutableMapOf() }
 
-    fun put(extra: LargeExtra): String {
-        return extra.name.also {
-            dataMap[it] = extra
-        }
+    fun add(intent: Intent, key: String, extra: LargeExtra) {
+        val name = extra.name
+        dataMap[name] = extra
+        intent.putExtra(key, name)
     }
 
-    fun get(name: String): LargeExtra? {
+    fun add(bundle: Bundle, key: String, extra: LargeExtra) {
+        val name = extra.name
+        dataMap[name] = extra
+        bundle.putString(key, name)
+    }
+
+    fun get(intent: Intent, key: String): LargeExtra? {
+        val name = intent.getStringExtra(key) ?: return null
+        return dataMap.remove(name)
+    }
+
+    fun get(bundle: Bundle, key: String): LargeExtra? {
+        val name = bundle.getString(key) ?: return null
         return dataMap.remove(name)
     }
 
