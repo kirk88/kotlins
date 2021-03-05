@@ -3,6 +3,7 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import androidx.annotation.MainThread
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -60,23 +61,25 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     private class ProgressHandler : Handler(Looper.getMainLooper()) {
 
         override fun handleMessage(msg: Message) {
-            val mapper = msg.obj as DefaultOkDownloadMapper
-            val readBytes = msg.data.getLong(KEY_READ_BYTES)
-            val totalBytes = msg.data.getLong(KEY_TOTAL_BYTES)
-            mapper.onProgress(readBytes, totalBytes)
+            val performer = msg.obj as ProgressPerformer
+            performer.perform()
         }
 
         fun updateProgress(mapper: DefaultOkDownloadMapper, readBytes: Long, totalBytes: Long) {
-            sendMessage(Message().apply {
-                obj = mapper
-                data.putLong(KEY_READ_BYTES, readBytes)
-                data.putLong(KEY_TOTAL_BYTES, totalBytes)
-            })
+            val message = Message()
+            message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
+            sendMessage(message)
         }
 
-        companion object {
-            private const val KEY_READ_BYTES = "KEY_READ_BYTES"
-            private const val KEY_TOTAL_BYTES = "KEY_TOTAL_BYTES"
+        private class ProgressPerformer(
+            private val mapper: DefaultOkDownloadMapper,
+            private val readBytes: Long,
+            private val totalBytes: Long
+        ) {
+            @MainThread
+            fun perform() {
+                mapper.onProgress(readBytes, totalBytes)
+            }
         }
 
     }
