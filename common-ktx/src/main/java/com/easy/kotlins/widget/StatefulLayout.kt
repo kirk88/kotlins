@@ -25,11 +25,11 @@ import androidx.viewpager.widget.ViewPager
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.weak
 
-class DynamicLayout @JvmOverloads constructor(
+class StatefulLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.dynamicLayoutStyle
-) : FrameLayout(context, attrs, defStyleAttr), LoadingView {
+) : FrameLayout(context, attrs, defStyleAttr), StatefulView {
     @IntDef(TYPE_CONTENT_VIEW, TYPE_EMPTY_VIEW, TYPE_LOADING_VIEW, TYPE_ERROR_VIEW)
     private annotation class ViewType
 
@@ -116,67 +116,67 @@ class DynamicLayout @JvmOverloads constructor(
         show(TYPE_CONTENT_VIEW)
     }
 
-    override fun setContentView(layoutResId: Int): LoadingView {
+    override fun setContentView(layoutResId: Int): StatefulView {
         addView(TYPE_CONTENT_VIEW, layoutResId, viewType == TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setContentView(view: View): LoadingView {
+    override fun setContentView(view: View): StatefulView {
         addView(TYPE_CONTENT_VIEW, view, viewType == TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setLoadingView(@LayoutRes layoutResId: Int): LoadingView {
+    override fun setLoadingView(@LayoutRes layoutResId: Int): StatefulView {
         addView(TYPE_LOADING_VIEW, layoutResId, viewType == TYPE_LOADING_VIEW)
         return this
     }
 
-    override fun setLoadingView(view: View): LoadingView {
+    override fun setLoadingView(view: View): StatefulView {
         addView(TYPE_LOADING_VIEW, view, viewType == TYPE_LOADING_VIEW)
         return this
     }
 
-    override fun setEmptyView(@LayoutRes layoutResId: Int): LoadingView {
+    override fun setEmptyView(@LayoutRes layoutResId: Int): StatefulView {
         addView(TYPE_EMPTY_VIEW, layoutResId, viewType == TYPE_EMPTY_VIEW)
         return this
     }
 
-    override fun setEmptyView(view: View): DynamicLayout {
+    override fun setEmptyView(view: View): StatefulLayout {
         addView(TYPE_EMPTY_VIEW, view, viewType == TYPE_EMPTY_VIEW)
         return this
     }
 
-    override fun setErrorView(@LayoutRes layoutResId: Int): LoadingView {
+    override fun setErrorView(@LayoutRes layoutResId: Int): StatefulView {
         addView(TYPE_ERROR_VIEW, layoutResId, viewType == TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setErrorView(view: View): LoadingView {
+    override fun setErrorView(view: View): StatefulView {
         addView(TYPE_ERROR_VIEW, view, viewType == TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setEmptyImage(drawable: Drawable?): LoadingView {
+    override fun setEmptyImage(drawable: Drawable?): StatefulView {
         emptyImage = drawable
         findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setEmptyImage(@DrawableRes drawableId: Int): LoadingView {
+    override fun setEmptyImage(@DrawableRes drawableId: Int): StatefulView {
         return setEmptyImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setEmptyText(text: CharSequence): LoadingView {
+    override fun setEmptyText(text: CharSequence): StatefulView {
         emptyText = text
         findViewById<TextView>(R.id.empty_text)?.text = text
         return this
     }
 
-    override fun setEmptyText(@StringRes textId: Int): LoadingView {
+    override fun setEmptyText(@StringRes textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setEmptyButtonText(text: CharSequence): LoadingView {
+    override fun setEmptyButtonText(text: CharSequence): StatefulView {
         emptyButtonText = text
         findViewById<TextView>(R.id.empty_button)?.let {
             it.text = text
@@ -185,11 +185,11 @@ class DynamicLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyButtonText(@StringRes textId: Int): LoadingView {
+    override fun setEmptyButtonText(@StringRes textId: Int): StatefulView {
         return setEmptyButtonText(context.getText(textId))
     }
 
-    override fun setEmptyButtonVisible(visible: Boolean): LoadingView {
+    override fun setEmptyButtonVisible(visible: Boolean): StatefulView {
         emptyButtonVisible = visible
         findViewById<TextView>(R.id.empty_button)?.apply {
             visibility = if (visible) VISIBLE else GONE
@@ -197,42 +197,42 @@ class DynamicLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyActionListener(listener: OnActionListener): LoadingView {
+    override fun setEmptyActionListener(listener: OnActionListener): StatefulView {
         emptyActionListener = listener
         return this
     }
 
-    override fun setLoadingText(text: CharSequence): LoadingView {
+    override fun setLoadingText(text: CharSequence): StatefulView {
         loadingText = text
         findViewById<TextView>(R.id.loading_text)?.text = text
         return this
     }
 
-    override fun setLoadingText(@StringRes textId: Int): LoadingView {
+    override fun setLoadingText(@StringRes textId: Int): StatefulView {
         return setLoadingText(context.getText(textId))
     }
 
-    override fun setErrorImage(drawable: Drawable?): LoadingView {
+    override fun setErrorImage(drawable: Drawable?): StatefulView {
         errorImage = drawable
         findViewById<ImageView>(R.id.error_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setErrorImage(@DrawableRes drawableId: Int): LoadingView {
+    override fun setErrorImage(@DrawableRes drawableId: Int): StatefulView {
         return setErrorImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setErrorText(text: CharSequence): LoadingView {
+    override fun setErrorText(text: CharSequence): StatefulView {
         emptyText = text
         findViewById<TextView>(R.id.error_text)?.text = text
         return this
     }
 
-    override fun setErrorText(@StringRes textId: Int): LoadingView {
+    override fun setErrorText(@StringRes textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setErrorButtonText(text: CharSequence): LoadingView {
+    override fun setErrorButtonText(text: CharSequence): StatefulView {
         errorButtonText = text
         findViewById<TextView>(R.id.error_button)?.let {
             it.text = text
@@ -241,11 +241,11 @@ class DynamicLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorButtonText(@StringRes textId: Int): LoadingView {
+    override fun setErrorButtonText(@StringRes textId: Int): StatefulView {
         return setErrorButtonText(context.getText(textId))
     }
 
-    override fun setErrorButtonVisible(visible: Boolean): LoadingView {
+    override fun setErrorButtonVisible(visible: Boolean): StatefulView {
         errorButtonVisible = visible
         findViewById<TextView>(R.id.error_button)?.apply {
             visibility = if (visible) VISIBLE else GONE
@@ -253,12 +253,12 @@ class DynamicLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorActionListener(listener: OnActionListener): LoadingView {
+    override fun setErrorActionListener(listener: OnActionListener): StatefulView {
         errorActionListener = listener
         return this
     }
 
-    override fun attachTo(adapter: RecyclerView.Adapter<*>): LoadingView {
+    override fun attachTo(adapter: RecyclerView.Adapter<*>): StatefulView {
         if (dataObservers == null) {
             dataObservers = mutableMapOf()
         }
@@ -268,7 +268,7 @@ class DynamicLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun detachTo(adapter: RecyclerView.Adapter<*>): LoadingView {
+    override fun detachTo(adapter: RecyclerView.Adapter<*>): StatefulView {
         dataObservers?.get(adapter)?.unregister()
         return this
     }
@@ -414,12 +414,12 @@ class DynamicLayout @JvmOverloads constructor(
 
     private class AdapterDataObserver(
         internal val adapter: RecyclerView.Adapter<*>,
-        dynamicLayout: () -> DynamicLayout
+        statefulLayout: () -> StatefulLayout
     ) : RecyclerView.AdapterDataObserver() {
 
         private var registed: Boolean = false
 
-        private val layout: DynamicLayout? by weak(dynamicLayout)
+        private val layout: StatefulLayout? by weak(statefulLayout)
 
         override fun onChanged() {
             if (adapter.itemCount == 0) {
@@ -461,7 +461,7 @@ class DynamicLayout @JvmOverloads constructor(
     }
 
     companion object {
-        fun wrap(activity: Activity): DynamicLayout {
+        fun wrap(activity: Activity): StatefulLayout {
             return wrap(
                 (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(
                     0
@@ -469,17 +469,17 @@ class DynamicLayout @JvmOverloads constructor(
             )
         }
 
-        fun wrap(fragment: Fragment): DynamicLayout {
+        fun wrap(fragment: Fragment): StatefulLayout {
             return wrap(requireNotNull(fragment.view))
         }
 
-        fun wrap(view: View): DynamicLayout {
+        fun wrap(view: View): StatefulLayout {
             val parent = view.parent as ViewGroup
             check(parent !is ViewPager) { "parent view can not be ViewPager" }
             val lp = view.layoutParams
             val index = parent.indexOfChild(view)
             parent.removeView(view)
-            val layout = DynamicLayout(view.context)
+            val layout = StatefulLayout(view.context)
             layout.setContentView(view)
             parent.addView(layout, index, lp)
             return layout
@@ -497,58 +497,58 @@ class DynamicLayout @JvmOverloads constructor(
     init {
         val a = context.obtainStyledAttributes(
             attrs,
-            R.styleable.DynamicLayout,
+            R.styleable.StatefulLayout,
             defStyleAttr,
-            R.style.DynamicLayout_Style
+            R.style.StatefulLayout_Style
         )
-        emptyLayoutId = a.getResourceId(R.styleable.DynamicLayout_emptyLayout, NO_RESOURCE_ID)
-        loadingLayoutId = a.getResourceId(R.styleable.DynamicLayout_loadingLayout, NO_RESOURCE_ID)
-        errorLayoutId = a.getResourceId(R.styleable.DynamicLayout_errorLayout, NO_RESOURCE_ID)
-        emptyImage = a.getDrawable(R.styleable.DynamicLayout_emptyImage)
-        emptyText = a.getText(R.styleable.DynamicLayout_emptyText)
-        emptyTextColor = a.getColor(R.styleable.DynamicLayout_emptyTextColor, NO_COLOR)
+        emptyLayoutId = a.getResourceId(R.styleable.StatefulLayout_emptyLayout, NO_RESOURCE_ID)
+        loadingLayoutId = a.getResourceId(R.styleable.StatefulLayout_loadingLayout, NO_RESOURCE_ID)
+        errorLayoutId = a.getResourceId(R.styleable.StatefulLayout_errorLayout, NO_RESOURCE_ID)
+        emptyImage = a.getDrawable(R.styleable.StatefulLayout_emptyImage)
+        emptyText = a.getText(R.styleable.StatefulLayout_emptyText)
+        emptyTextColor = a.getColor(R.styleable.StatefulLayout_emptyTextColor, NO_COLOR)
         emptyTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_emptyTextAppearance, NO_RESOURCE_ID)
-        emptyButtonText = a.getText(R.styleable.DynamicLayout_emptyButtonText)
-        emptyButtonTextColor = a.getColor(R.styleable.DynamicLayout_emptyButtonTextColor, NO_COLOR)
+            a.getResourceId(R.styleable.StatefulLayout_emptyTextAppearance, NO_RESOURCE_ID)
+        emptyButtonText = a.getText(R.styleable.StatefulLayout_emptyButtonText)
+        emptyButtonTextColor = a.getColor(R.styleable.StatefulLayout_emptyButtonTextColor, NO_COLOR)
         emptyButtonTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_emptyButtonTextAppearance, NO_RESOURCE_ID)
-        emptyButtonBackground = a.getDrawable(R.styleable.DynamicLayout_emptyButtonBackground)
+            a.getResourceId(R.styleable.StatefulLayout_emptyButtonTextAppearance, NO_RESOURCE_ID)
+        emptyButtonBackground = a.getDrawable(R.styleable.StatefulLayout_emptyButtonBackground)
         if (emptyButtonBackground == null) {
-            val color = a.getColor(R.styleable.DynamicLayout_emptyButtonBackground, NO_COLOR)
+            val color = a.getColor(R.styleable.StatefulLayout_emptyButtonBackground, NO_COLOR)
             if (color != NO_COLOR) {
                 emptyButtonBackground = ColorDrawable(color)
             }
         }
-        emptyButtonVisible = a.getBoolean(R.styleable.DynamicLayout_emptyButtonVisible, true)
+        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, true)
 
-        errorImage = a.getDrawable(R.styleable.DynamicLayout_errorImage)
-        errorText = a.getText(R.styleable.DynamicLayout_errorText)
-        errorTextColor = a.getColor(R.styleable.DynamicLayout_errorTextColor, NO_COLOR)
+        errorImage = a.getDrawable(R.styleable.StatefulLayout_errorImage)
+        errorText = a.getText(R.styleable.StatefulLayout_errorText)
+        errorTextColor = a.getColor(R.styleable.StatefulLayout_errorTextColor, NO_COLOR)
         errorTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_errorTextAppearance, NO_RESOURCE_ID)
-        errorButtonText = a.getText(R.styleable.DynamicLayout_errorButtonText)
-        errorButtonTextColor = a.getColor(R.styleable.DynamicLayout_errorButtonTextColor, NO_COLOR)
+            a.getResourceId(R.styleable.StatefulLayout_errorTextAppearance, NO_RESOURCE_ID)
+        errorButtonText = a.getText(R.styleable.StatefulLayout_errorButtonText)
+        errorButtonTextColor = a.getColor(R.styleable.StatefulLayout_errorButtonTextColor, NO_COLOR)
         errorButtonTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_errorButtonTextAppearance, NO_RESOURCE_ID)
-        errorButtonBackground = a.getDrawable(R.styleable.DynamicLayout_errorButtonBackground)
+            a.getResourceId(R.styleable.StatefulLayout_errorButtonTextAppearance, NO_RESOURCE_ID)
+        errorButtonBackground = a.getDrawable(R.styleable.StatefulLayout_errorButtonBackground)
         if (errorButtonBackground == null) {
-            val color = a.getColor(R.styleable.DynamicLayout_errorButtonBackground, NO_COLOR)
+            val color = a.getColor(R.styleable.StatefulLayout_errorButtonBackground, NO_COLOR)
             if (color != NO_COLOR) {
                 errorButtonBackground = ColorDrawable(color)
             }
         }
-        errorButtonVisible = a.getBoolean(R.styleable.DynamicLayout_errorButtonVisible, true)
+        errorButtonVisible = a.getBoolean(R.styleable.StatefulLayout_errorButtonVisible, true)
 
 
-        loadingProgressColor = a.getColor(R.styleable.DynamicLayout_loadingProgressColor, NO_COLOR)
-        loadingProgressDrawable = a.getDrawable(R.styleable.DynamicLayout_loadingProgressDrawable)
-        loadingText = a.getText(R.styleable.DynamicLayout_loadingText)
-        loadingTextColor = a.getColor(R.styleable.DynamicLayout_loadingTextColor, NO_COLOR)
+        loadingProgressColor = a.getColor(R.styleable.StatefulLayout_loadingProgressColor, NO_COLOR)
+        loadingProgressDrawable = a.getDrawable(R.styleable.StatefulLayout_loadingProgressDrawable)
+        loadingText = a.getText(R.styleable.StatefulLayout_loadingText)
+        loadingTextColor = a.getColor(R.styleable.StatefulLayout_loadingTextColor, NO_COLOR)
         loadingTextAppearance =
-            a.getResourceId(R.styleable.DynamicLayout_loadingTextAppearance, NO_RESOURCE_ID)
+            a.getResourceId(R.styleable.StatefulLayout_loadingTextAppearance, NO_RESOURCE_ID)
 
-        defaultShowType = a.getInt(R.styleable.DynamicLayout_defaultShow, TYPE_LOADING_VIEW)
+        defaultShowType = a.getInt(R.styleable.StatefulLayout_defaultShow, TYPE_LOADING_VIEW)
         a.recycle()
     }
 }
