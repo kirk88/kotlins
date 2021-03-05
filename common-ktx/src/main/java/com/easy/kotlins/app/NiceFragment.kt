@@ -2,6 +2,7 @@ package com.easy.kotlins.app
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 
