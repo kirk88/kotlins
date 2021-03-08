@@ -36,31 +36,31 @@ interface ProgressViewFactory {
 
 }
 
-internal class SimpleProgressViewFactory(private val parent: View) : ProgressViewFactory {
+internal class SimpleProgressViewFactory(private val view: View) : ProgressViewFactory {
 
     override fun create(): ProgressView {
-        return SimpleProgressView(parent)
+        return SimpleProgressView(view)
     }
 
 }
 
-internal class SimpleProgressView(parent: View) : PopupWindow(), ProgressView {
+internal class SimpleProgressView(view: View) : PopupWindow(), ProgressView {
 
-    private val parent: View? by weak { parent }
+    private val view: View? by weak { view }
 
     init {
         isFocusable = true
         isOutsideTouchable = true
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
-        contentView = View.inflate(parent.context, R.layout.layout_progress, null)
+        contentView = View.inflate(view.context, R.layout.layout_progress, null)
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     override fun showProgress(message: CharSequence?) {
         contentView?.findViewById<TextView>(R.id.progress_text)?.text = message
         if (!isShowing) {
-            val view = parent ?: return
+            val view = view ?: return
             view.post { showAtLocation(view, Gravity.CENTER, 0, 0) }
         }
     }
@@ -68,7 +68,7 @@ internal class SimpleProgressView(parent: View) : PopupWindow(), ProgressView {
     override fun showProgress(messageId: Int) {
         contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
         if (!isShowing) {
-            val view = parent ?: return
+            val view = view ?: return
             view.post { showAtLocation(view.rootView, Gravity.CENTER, 0, 0) }
         }
     }
@@ -91,9 +91,9 @@ val Context.progressViewFactory: ProgressViewFactory
 
 val Activity.progressViewFactory: ProgressViewFactory
     get() {
-        val parent = window?.decorView
+        val view = window?.decorView
             ?: throw IllegalStateException("Can not create ProgressView for a activity not attach to window")
-        return parent.progressViewFactory
+        return view.progressViewFactory
     }
 
 val Fragment.progressViewFactory: ProgressViewFactory
