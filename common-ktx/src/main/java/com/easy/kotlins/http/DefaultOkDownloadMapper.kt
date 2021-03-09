@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import androidx.annotation.MainThread
+import androidx.annotation.UiThread
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -50,7 +51,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             while (inputStream.read(buffer).also { len -> length = len } != -1) {
                 readBytes += length.toLong()
                 accessFile.write(buffer, 0, length)
-                HANDLER.updateProgress(this, readBytes, totalBytes)
+                HANDLER.notifyProgressChanged(this, readBytes, totalBytes)
             }
             if (readBytes == totalBytes) {
                 rename(srcFile)
@@ -65,7 +66,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             performer.perform()
         }
 
-        fun updateProgress(mapper: DefaultOkDownloadMapper, readBytes: Long, totalBytes: Long) {
+        fun notifyProgressChanged(mapper: DefaultOkDownloadMapper, readBytes: Long, totalBytes: Long) {
             val message = Message()
             message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
             sendMessage(message)
@@ -76,7 +77,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             private val readBytes: Long,
             private val totalBytes: Long
         ) {
-            @MainThread
+            @UiThread
             fun perform() {
                 mapper.onProgress(readBytes, totalBytes)
             }
@@ -99,6 +100,5 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
                 destFile
             } else throw IOException("Rename file failed")
         }
-
     }
 }
