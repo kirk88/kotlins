@@ -43,11 +43,12 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    testImplementation rootProject.ext.dependencies.test_junit
+    testImplementation rootProject.ext.dependencies.java_test_junit
     androidTestImplementation rootProject.ext.dependencies.android_test_ext
     androidTestImplementation rootProject.ext.dependencies.android_test_espresso
     androidTestImplementation rootProject.ext.dependencies.android_test_rules
 
+    api rootProject.ext.dependencies.multidex
     api rootProject.ext.dependencies.kotlin_stdlib
     api rootProject.ext.dependencies.kotlin_core
     api rootProject.ext.dependencies.coroutines_core

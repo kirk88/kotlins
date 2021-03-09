@@ -83,7 +83,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         mPaint.setColor(color);
 
         c.drawRect(left, top, right, bottom, mPaint);
-
     }
 
     private void drawChildTopHorizontal(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
@@ -112,7 +111,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         mPaint.setColor(color);
 
         c.drawRect(left, top, right, bottom, mPaint);
-
     }
 
     private void drawChildLeftVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
@@ -141,7 +139,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         mPaint.setColor(color);
 
         c.drawRect(left, top, right, bottom, mPaint);
-
     }
 
     private void drawChildRightVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
