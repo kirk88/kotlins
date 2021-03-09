@@ -80,7 +80,12 @@ fun CharSequence.insertImage(
     postfix: String = ""
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
-    else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    else if (drawable.bounds.isEmpty) drawable.setBounds(
+        0,
+        0,
+        drawable.intrinsicWidth,
+        drawable.intrinsicHeight
+    )
     return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
         setSpan(
             CenterAlignImageSpan(drawable),
@@ -99,7 +104,12 @@ fun CharSequence.appendImage(
     postfix: String = ""
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
-    else drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    else if (drawable.bounds.isEmpty) drawable.setBounds(
+        0,
+        0,
+        drawable.intrinsicWidth,
+        drawable.intrinsicHeight
+    )
     return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
         setSpan(
             CenterAlignImageSpan(drawable),

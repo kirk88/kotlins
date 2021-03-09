@@ -53,7 +53,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
 
         var dispatched = false
         for (fragment in childFragmentManager.fragments) {
-            if (fragment !is ViewModelEventDispatcher) continue
+            if (!fragment.isAdded || fragment !is ViewModelEventDispatcher) continue
 
             if (fragment.dispatchViewModelEvent(event)) {
                 dispatched = true
