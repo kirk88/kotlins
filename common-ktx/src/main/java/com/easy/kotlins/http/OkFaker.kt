@@ -546,7 +546,7 @@ class RequestPairs<K, V>(
         pairs.putAll(pairsFrom)
     }
 
-    fun remove(key: String): V? {
+    fun remove(key: K): V? {
         return pairs.remove(key)
     }
 
