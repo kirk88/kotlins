@@ -36,17 +36,21 @@ interface ProgressViewFactory {
 
 }
 
-internal class SimpleProgressViewFactory(private val view: View) : ProgressViewFactory {
+internal class DefaultProgressViewFactory(private val view: View) : ProgressViewFactory {
 
     override fun create(): ProgressView {
-        return SimpleProgressView(view)
+        return DefaultProgressView(view)
     }
 
 }
 
-internal class SimpleProgressView(view: View) : PopupWindow(), ProgressView {
+internal class DefaultProgressView(view: View) : PopupWindow(), ProgressView {
 
     private val view: View? by weak { view }
+
+    private val showRunnable: Runnable = Runnable {
+        this.view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
+    }
 
     init {
         isFocusable = true
@@ -61,16 +65,13 @@ internal class SimpleProgressView(view: View) : PopupWindow(), ProgressView {
         contentView?.findViewById<TextView>(R.id.progress_text)?.text = message
         if (!isShowing) {
             val view = view ?: return
-            view.post { showAtLocation(view, Gravity.CENTER, 0, 0) }
+            view.removeCallbacks(showRunnable)
+            view.post(showRunnable)
         }
     }
 
     override fun showProgress(messageId: Int) {
-        contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
-        if (!isShowing) {
-            val view = view ?: return
-            view.post { showAtLocation(view.rootView, Gravity.CENTER, 0, 0) }
-        }
+        showProgress(contentView?.context?.getText(messageId))
     }
 
     override fun dismissProgress() {
@@ -80,7 +81,7 @@ internal class SimpleProgressView(view: View) : PopupWindow(), ProgressView {
 }
 
 val View.progressViewFactory: ProgressViewFactory
-    get() = SimpleProgressViewFactory(this)
+    get() = DefaultProgressViewFactory(this)
 
 val Context.progressViewFactory: ProgressViewFactory
     get() {

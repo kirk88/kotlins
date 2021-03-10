@@ -1,32 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/progress_layout_background"
-    android:elevation="4dp"
-    android:gravity="center"
-    android:minWidth="128dp"
-    android:minHeight="128dp"
-    android:outlineProvider="background"
-    tools:targetApi="lollipop">
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true">
 
-    <ProgressBar
-        android:id="@id/progress_bar"
-        style="@style/Widget.AppCompat.ProgressBar"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="64dp"
-        android:minHeight="64dp" />
+        android:gravity="center"
+        android:minWidth="128dp"
+        android:minHeight="128dp"
+        android:orientation="vertical">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@id/progress_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/progress_bar"
-        android:paddingTop="8dp"
-        android:text="@string/load_progress_tip"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="16sp" />
+        <ProgressBar
+            android:id="@id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="64dp"
+            android:minHeight="64dp" />
 
-</RelativeLayout>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@id/progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/load_progress_tip"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+
+
