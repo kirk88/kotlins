@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.activity
-import com.easy.kotlins.helper.textResource
 import com.easy.kotlins.helper.weak
 
 class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
