@@ -6,13 +6,13 @@ ext {
             compile_sdk_version: 29,
             build_tools_version: "29.0.3",
             version_code       : 4,
-            version_name       : "1.0.3"
+            version_name       : "1.0.4"
     ]
 
     publisher = [
             group_id   : "com.easy.kotlins",
             artifact_id: "common-ktx",
-            version    : "1.0.3"
+            version    : "1.0.4"
     ]
 
     dependencies = [
