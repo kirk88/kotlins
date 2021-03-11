@@ -61,8 +61,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         final int rightPadding;
 
         if (startPadding <= 0) {
-            //padding<0当作==0处理
-            //上下左右默认分割线的两头都出头一个分割线的宽度，避免十字交叉的时候，交叉点是空白
             leftPadding = -lineSize;
         } else {
             leftPadding = startPadding;
@@ -90,8 +88,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         final int rightPadding;
 
         if (startPadding <= 0) {
-            //padding<0当作==0处理
-            //上下左右默认分割线的两头都出头一个分割线的宽度，避免十字交叉的时候，交叉点是空白
             leftPadding = -lineSize;
         } else {
             leftPadding = startPadding;
@@ -118,8 +114,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         final int bottomPadding;
 
         if (startPadding <= 0) {
-            //padding<0当作==0处理
-            //上下左右默认分割线的两头都出头一个分割线的宽度，避免十字交叉的时候，交叉点是空白
             topPadding = -lineSize;
         } else {
             topPadding = startPadding;
@@ -146,8 +140,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
         final int bottomPadding;
 
         if (startPadding <= 0) {
-            //padding<0当作==0处理
-            //上下左右默认分割线的两头都出头一个分割线的宽度，避免十字交叉的时候，交叉点是空白
             topPadding = -lineSize;
         } else {
             topPadding = startPadding;
@@ -171,10 +163,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View child, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-
-        //outRect 看源码可知这里只是把Rect类型的outRect作为一个封装了left,right,top,bottom的数据结构,
-        //作为传递left,right,top,bottom的偏移值来用的
-
         int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
 
         Divider divider = getDivider(parent, child, itemPosition);
@@ -188,7 +176,6 @@ public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration
 
 
     public abstract Divider getDivider(@NonNull RecyclerView parent, @NonNull View child, int itemPosition);
-
 
 }
 

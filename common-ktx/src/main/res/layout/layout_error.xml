@@ -24,7 +24,7 @@
         android:paddingTop="20dp"
         android:paddingEnd="20dp"
         tools:text="@string/load_error_tip"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.ErrorText" />
+        tools:textAppearance="@style/TextAppearance.StatefulLayout.ErrorText" />
 
     <Button
         android:id="@id/error_button"
@@ -35,7 +35,7 @@
         android:minWidth="220dp"
         tools:background="@drawable/loading_layout_button"
         tools:text="@string/load_retry_tip"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.ButtonText"
+        tools:textAppearance="@style/TextAppearance.StatefulLayout.ButtonText"
         tools:textColor="#ffffff" />
 
 </LinearLayout>

@@ -32,8 +32,7 @@ public class DividerBuilder {
     }
 
     public Divider create() {
-        //提供一个默认不显示的sideline，防止空指针
-        DividerSideLine defaultSideLine = new DividerSideLine(false, 0xff666666, 0, 0, 0);
+        final DividerSideLine defaultSideLine = new DividerSideLine(false, 0xff666666, 0, 0, 0);
 
         leftSideLine = (leftSideLine != null ? leftSideLine : defaultSideLine);
         topSideLine = (topSideLine != null ? topSideLine : defaultSideLine);

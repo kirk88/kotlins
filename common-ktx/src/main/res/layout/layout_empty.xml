@@ -21,7 +21,7 @@
         android:layout_gravity="center"
         android:padding="20dp"
         tools:text="@string/load_empty_tip"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.EmptyText" />
+        tools:textAppearance="@style/TextAppearance.StatefulLayout.EmptyText" />
 
     <Button
         android:id="@id/empty_button"
@@ -32,6 +32,6 @@
         android:minWidth="220dp"
         android:visibility="gone"
         tools:background="@drawable/loading_layout_button"
-        tools:textAppearance="@style/TextAppearance.DynamicLayout.ButtonText"
+        tools:textAppearance="@style/TextAppearance.StatefulLayout.ButtonText"
         tools:textColor="#ffffff" />
 </LinearLayout>
