@@ -51,9 +51,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     private var isPostShow: Boolean = false
     private val showRunnable: Runnable = Runnable {
         isPostShow = false
-        view?.let {
-            showAtLocation(it, Gravity.CENTER, 0, 0)
-        }
+        view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
     }
 
     private var isPostHide: Boolean = false
