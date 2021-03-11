@@ -73,13 +73,11 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
 
     override fun showProgress(message: CharSequence?) {
         contentView?.findViewById<TextView>(R.id.progress_text)?.text = message
-
         view?.let { show(it) }
     }
 
     override fun showProgress(messageId: Int) {
         contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
-
         view?.let { show(it) }
     }
 

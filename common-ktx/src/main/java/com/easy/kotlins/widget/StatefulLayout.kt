@@ -463,9 +463,7 @@ class StatefulLayout @JvmOverloads constructor(
     companion object {
         fun wrap(activity: Activity): StatefulLayout {
             return wrap(
-                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(
-                    0
-                )
+                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
             )
         }
 
@@ -539,7 +537,6 @@ class StatefulLayout @JvmOverloads constructor(
             }
         }
         errorButtonVisible = a.getBoolean(R.styleable.StatefulLayout_errorButtonVisible, true)
-
 
         loadingProgressColor = a.getColor(R.styleable.StatefulLayout_loadingProgressColor, NO_COLOR)
         loadingProgressDrawable = a.getDrawable(R.styleable.StatefulLayout_loadingProgressDrawable)
