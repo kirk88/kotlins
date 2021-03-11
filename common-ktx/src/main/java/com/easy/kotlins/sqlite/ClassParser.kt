@@ -5,7 +5,6 @@ package com.easy.kotlins.sqlite.db
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 import java.util.*
-import kotlin.math.min
 import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CONSTRUCTOR)
@@ -150,10 +149,4 @@ internal object ClassParsers {
         } as ClassParser<T>
     }
 
-}
-
-fun main() {
-    val list = listOf<String>("1", "2", "3")
-
-    println(list.subList(0, min(5, list.size)))
 }

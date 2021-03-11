@@ -1,5 +1,6 @@
 package com.easy.kotlins.sqlite
 
+import java.util.*
 import java.util.regex.Pattern
 
 
@@ -12,6 +13,7 @@ interface SqlWhereCondition {
     infix fun and(condition: SqlWhereCondition): SqlWhereCondition
 
     infix fun or(condition: SqlWhereCondition): SqlWhereCondition
+
 }
 
 private class SqlWhereConditionImpl(override val whereCause: String, args: Array<out Any>? = null) :
@@ -38,15 +40,16 @@ private class SqlWhereConditionImpl(override val whereCause: String, args: Array
     }
 
     override fun toString(): String {
-        return "SqlWhereCondition(whereCause: $whereCause, whereArgs: $whereArgs)"
+        return "SqlWhereCondition(whereCause: $whereCause, whereArgs: ${Arrays.toString(whereArgs)})"
     }
+
 }
 
-fun String.whereArgs(vararg whereArgs: Any): SqlWhereCondition {
+fun String.where(vararg whereArgs: Any): SqlWhereCondition {
     return SqlWhereConditionImpl(this, whereArgs)
 }
 
-fun String.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
+fun String.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
     val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
         map[arg.first] = arg.second
         map
@@ -98,11 +101,11 @@ fun String.isNull(): SqlWhereCondition {
     return SqlWhereConditionImpl("$this IS NULL")
 }
 
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Any): SqlWhereCondition =
-    this.name.whereArgs(*whereArgs)
+fun SqlColumnProperty.where(vararg whereArgs: Any): SqlWhereCondition =
+    this.name.where(*whereArgs)
 
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition =
-    this.name.whereArgs(*whereArgs)
+fun SqlColumnProperty.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondition =
+    this.name.where(*whereArgs)
 
 fun SqlColumnProperty.equal(value: Any): SqlWhereCondition = this.name.equal(value)
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition = this.name.like(value)

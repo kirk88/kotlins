@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.activity
+import com.easy.kotlins.helper.textResource
 import com.easy.kotlins.helper.weak
 
 class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
@@ -35,20 +36,30 @@ interface ProgressViewFactory {
 
 }
 
-internal class DefaultProgressViewFactory(private val view: View) : ProgressViewFactory {
+internal class DefaultProgressViewFactory(private val parent: View) : ProgressViewFactory {
 
     override fun create(): ProgressView {
-        return DefaultProgressView(view)
+        return DefaultProgressView(parent)
     }
 
 }
 
-internal class DefaultProgressView(view: View) : PopupWindow(), ProgressView {
+internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
 
-    private val view: View? by weak { view }
+    private val view: View? by weak { parent.rootView }
 
+    private var isPostShow: Boolean = false
     private val showRunnable: Runnable = Runnable {
-        this.view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
+        isPostShow = false
+        view?.let {
+            showAtLocation(it, Gravity.CENTER, 0, 0)
+        }
+    }
+
+    private var isPostHide: Boolean = false
+    private val hideRunnable: Runnable = Runnable {
+        isPostHide = false
+        dismiss()
     }
 
     init {
@@ -56,25 +67,42 @@ internal class DefaultProgressView(view: View) : PopupWindow(), ProgressView {
         isOutsideTouchable = true
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
-        contentView = View.inflate(view.context, R.layout.layout_progress, null)
+        contentView = View.inflate(parent.context, R.layout.layout_progress, null)
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     override fun showProgress(message: CharSequence?) {
         contentView?.findViewById<TextView>(R.id.progress_text)?.text = message
-        if (!isShowing) {
-            val view = view ?: return
-            view.removeCallbacks(showRunnable)
-            view.post(showRunnable)
-        }
+
+        view?.let { show(it) }
     }
 
     override fun showProgress(messageId: Int) {
-        showProgress(contentView?.context?.getText(messageId))
+        contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
+
+        view?.let { show(it) }
     }
 
     override fun dismissProgress() {
-        dismiss()
+        view?.let { hide(it) }
+    }
+
+    private fun show(view: View) {
+        view.removeCallbacks(hideRunnable)
+        isPostHide = false
+        if (!isPostShow) {
+            view.post(showRunnable)
+            isPostShow = true
+        }
+    }
+
+    private fun hide(view: View) {
+        view.removeCallbacks(showRunnable)
+        isPostShow = false
+        if (!isPostHide) {
+            view.post(hideRunnable)
+            isPostHide = true
+        }
     }
 
 }
