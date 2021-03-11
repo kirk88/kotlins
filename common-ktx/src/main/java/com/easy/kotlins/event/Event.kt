@@ -16,6 +16,7 @@ import java.io.Serializable
  */
 
 open class Event(val what: Int = Status.NONE, val message: String? = null) {
+
     private val extras: Bundle by lazy { Bundle() }
 
     private var intent: Intent? = null

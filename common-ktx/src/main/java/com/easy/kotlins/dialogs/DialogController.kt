@@ -36,6 +36,7 @@ interface DialogController<out D : DialogInterface> {
     fun onKeyPressed(handler: (dialog: DialogInterface, keyCode: Int, e: KeyEvent) -> Boolean)
 
     fun show(): D
+
 }
 
 fun DialogController<*>.contentView(view: () -> View) {

@@ -3,6 +3,7 @@ package com.easy.kotlins.event.livebus
 import androidx.lifecycle.LifecycleOwner
 
 interface SimpleObservable {
+
     fun call()
 
     fun callDelay(delay: Long)
@@ -22,4 +23,5 @@ interface SimpleObservable {
     fun observeStickyForever(observer: SimpleObserver)
 
     fun removeObserver(observer: SimpleObserver)
+
 }

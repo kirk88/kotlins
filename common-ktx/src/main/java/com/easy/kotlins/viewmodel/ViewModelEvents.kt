@@ -35,4 +35,5 @@ object ViewModelEvents {
 
         owner.viewModel.addEventObserver(owner)
     }
+
 }

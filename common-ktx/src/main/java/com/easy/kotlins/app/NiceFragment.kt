@@ -58,4 +58,5 @@ abstract class NiceFragment(@LayoutRes layoutResId: Int = 0) : Fragment(layoutRe
             isLoaded = true
         }
     }
+
 }

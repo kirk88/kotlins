@@ -66,4 +66,5 @@ internal class SimpleLiveEvent : SimpleObservable {
             observer.onChanged()
         }
     }
+
 }

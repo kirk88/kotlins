@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 
 interface Observable<T> {
+
     fun post(value: T?)
 
     fun postDelay(value: T?, delay: Long)

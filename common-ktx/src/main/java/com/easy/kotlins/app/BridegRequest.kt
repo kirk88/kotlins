@@ -44,6 +44,7 @@ class BridegRequest {
     ) {
         bridegFragment.requestPermissions(permissions, requestCode, callback)
     }
+
 }
 
 private const val BRIDEG_TAG = "brideg.ActivityResult.BRIDEG_TAG"

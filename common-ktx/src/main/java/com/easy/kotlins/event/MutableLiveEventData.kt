@@ -14,4 +14,5 @@ open class MutableLiveEventData<T> : LiveEventData<T> {
     public override fun setValue(value: T?) {
         super.setValue(value)
     }
+
 }

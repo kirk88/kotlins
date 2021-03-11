@@ -104,7 +104,4 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
         return true
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        return super.dispatchTouchEvent(ev)
-    }
 }

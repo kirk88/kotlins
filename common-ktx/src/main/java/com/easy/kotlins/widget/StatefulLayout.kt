@@ -413,13 +413,13 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     private class AdapterDataObserver(
-        internal val adapter: RecyclerView.Adapter<*>,
+        val adapter: RecyclerView.Adapter<*>,
         statefulLayout: () -> StatefulLayout
     ) : RecyclerView.AdapterDataObserver() {
 
-        private var registed: Boolean = false
-
         private val layout: StatefulLayout? by weak(statefulLayout)
+
+        private var registed: Boolean = false
 
         override fun onChanged() {
             if (adapter.itemCount == 0) {

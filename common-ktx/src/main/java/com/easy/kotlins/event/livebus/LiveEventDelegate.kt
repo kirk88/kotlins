@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import com.easy.kotlins.event.MutableLiveEventData
 
 internal class LiveEventDelegate<T> {
+
     private val liveData = MutableLiveEventData<T>()
 
     fun post(value: T?) {
@@ -133,4 +134,5 @@ internal class LiveEventDelegate<T> {
         private val isMainThread: Boolean
             get() = Looper.getMainLooper().thread === Thread.currentThread()
     }
+
 }
