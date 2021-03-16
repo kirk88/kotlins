@@ -72,7 +72,3 @@ class Stepper {
 }
 
 fun step(block: Stepper.() -> Unit): Stepper = Stepper().apply(block)
-
-fun step(vararg tasks: Task): Stepper = Stepper().apply {
-    tasks.forEach { add(task = it) }
-}
