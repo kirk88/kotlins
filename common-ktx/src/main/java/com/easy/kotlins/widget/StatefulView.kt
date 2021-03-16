@@ -3,11 +3,20 @@ package com.easy.kotlins.widget
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.annotation.DrawableRes
+import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 
 interface StatefulView {
+
+    @IntDef(
+        TYPE_CONTENT_VIEW,
+        TYPE_EMPTY_VIEW,
+        TYPE_LOADING_VIEW,
+        TYPE_ERROR_VIEW
+    )
+    annotation class ViewType
 
     fun showLoading()
 
@@ -32,6 +41,8 @@ interface StatefulView {
     fun setErrorView(@LayoutRes layoutResId: Int): StatefulView
 
     fun setErrorView(view: View): StatefulView
+
+    fun setDefaultView(@ViewType viewType: Int): StatefulView
 
     fun setEmptyImage(drawable: Drawable?): StatefulView
 
@@ -72,6 +83,13 @@ interface StatefulView {
     fun attachTo(adapter: RecyclerView.Adapter<*>): StatefulView
 
     fun detachTo(adapter: RecyclerView.Adapter<*>): StatefulView
+
+    companion object {
+        const val TYPE_CONTENT_VIEW = 0x001
+        const val TYPE_EMPTY_VIEW = 0x002
+        const val TYPE_LOADING_VIEW = 0x003
+        const val TYPE_ERROR_VIEW = 0x004
+    }
 }
 
 fun interface OnActionListener {

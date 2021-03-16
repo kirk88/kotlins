@@ -13,10 +13,6 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.DrawableRes
-import androidx.annotation.IntDef
-import androidx.annotation.LayoutRes
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
@@ -24,19 +20,20 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.weak
+import com.easy.kotlins.widget.StatefulView.Companion.TYPE_CONTENT_VIEW
+import com.easy.kotlins.widget.StatefulView.Companion.TYPE_EMPTY_VIEW
+import com.easy.kotlins.widget.StatefulView.Companion.TYPE_ERROR_VIEW
+import com.easy.kotlins.widget.StatefulView.Companion.TYPE_LOADING_VIEW
 
 class StatefulLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.dynamicLayoutStyle
 ) : FrameLayout(context, attrs, defStyleAttr), StatefulView {
-    @IntDef(TYPE_CONTENT_VIEW, TYPE_EMPTY_VIEW, TYPE_LOADING_VIEW, TYPE_ERROR_VIEW)
-    private annotation class ViewType
 
     private val views = mutableMapOf<Int, View>()
 
-    @ViewType
-    private var viewType = 0
+    private var viewType: Int = 0
     private var emptyLayoutId: Int
     private var loadingLayoutId: Int
     private var errorLayoutId: Int
@@ -67,7 +64,7 @@ class StatefulLayout @JvmOverloads constructor(
     private var loadingTextColor: Int
     private var loadingTextAppearance: Int
 
-    private val defaultShowType: Int
+    private var defaultShowType: Int
 
     private var errorActionListener: OnActionListener? = null
     private val errorButtonClickListener = OnClickListener { _ ->
@@ -94,6 +91,10 @@ class StatefulLayout @JvmOverloads constructor(
         if (childCount == 1) {
             setView(TYPE_CONTENT_VIEW, getChildAt(0))
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
 
         if (!isInEditMode) {
             show(defaultShowType)
@@ -126,7 +127,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setLoadingView(@LayoutRes layoutResId: Int): StatefulView {
+    override fun setLoadingView(layoutResId: Int): StatefulView {
         setView(TYPE_LOADING_VIEW, layoutResId)
         return this
     }
@@ -136,7 +137,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyView(@LayoutRes layoutResId: Int): StatefulView {
+    override fun setEmptyView(layoutResId: Int): StatefulView {
         setView(TYPE_EMPTY_VIEW, layoutResId)
         return this
     }
@@ -146,7 +147,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorView(@LayoutRes layoutResId: Int): StatefulView {
+    override fun setErrorView(layoutResId: Int): StatefulView {
         setView(TYPE_ERROR_VIEW, layoutResId)
         return this
     }
@@ -156,13 +157,18 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
+    override fun setDefaultView(viewType: Int): StatefulView {
+        defaultShowType = viewType
+        return this
+    }
+
     override fun setEmptyImage(drawable: Drawable?): StatefulView {
         emptyImage = drawable
         findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setEmptyImage(@DrawableRes drawableId: Int): StatefulView {
+    override fun setEmptyImage(drawableId: Int): StatefulView {
         return setEmptyImage(ContextCompat.getDrawable(context, drawableId))
     }
 
@@ -172,7 +178,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyText(@StringRes textId: Int): StatefulView {
+    override fun setEmptyText(textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
@@ -185,7 +191,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyButtonText(@StringRes textId: Int): StatefulView {
+    override fun setEmptyButtonText(textId: Int): StatefulView {
         return setEmptyButtonText(context.getText(textId))
     }
 
@@ -208,7 +214,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setLoadingText(@StringRes textId: Int): StatefulView {
+    override fun setLoadingText(textId: Int): StatefulView {
         return setLoadingText(context.getText(textId))
     }
 
@@ -218,7 +224,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorImage(@DrawableRes drawableId: Int): StatefulView {
+    override fun setErrorImage(drawableId: Int): StatefulView {
         return setErrorImage(ContextCompat.getDrawable(context, drawableId))
     }
 
@@ -228,7 +234,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorText(@StringRes textId: Int): StatefulView {
+    override fun setErrorText(textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
@@ -241,7 +247,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorButtonText(@StringRes textId: Int): StatefulView {
+    override fun setErrorButtonText(textId: Int): StatefulView {
         return setErrorButtonText(context.getText(textId))
     }
 
@@ -280,7 +286,7 @@ class StatefulLayout @JvmOverloads constructor(
         }
     }
 
-    private fun show(@ViewType viewType: Int) {
+    private fun show(viewType: Int) {
         if (this.viewType == viewType) return
 
         this.viewType = viewType
@@ -303,13 +309,13 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     private fun setView(
-        @ViewType viewType: Int,
-        @LayoutRes layoutResId: Int
+        viewType: Int,
+        layoutResId: Int
     ): View {
         return setView(viewType, inflater.inflate(layoutResId, this, false))
     }
 
-    private fun setView(@ViewType viewType: Int, view: View): View {
+    private fun setView(viewType: Int, view: View): View {
         when (viewType) {
             TYPE_EMPTY_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.empty_image)
@@ -489,11 +495,6 @@ class StatefulLayout @JvmOverloads constructor(
             parent.addView(layout, index, lp)
             return layout
         }
-
-        private const val TYPE_CONTENT_VIEW = 0x001
-        private const val TYPE_EMPTY_VIEW = 0x002
-        private const val TYPE_LOADING_VIEW = 0x003
-        private const val TYPE_ERROR_VIEW = 0x004
 
         private const val NO_RESOURCE_ID = -1
         private const val NO_COLOR = -1
