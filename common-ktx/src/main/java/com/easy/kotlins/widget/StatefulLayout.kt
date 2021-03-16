@@ -92,7 +92,7 @@ class StatefulLayout @JvmOverloads constructor(
         check(childCount <= 1) { "DynamicLayout can host only one direct child in layout" }
 
         if (childCount == 1) {
-            addView(TYPE_CONTENT_VIEW, getChildAt(0))
+            setView(TYPE_CONTENT_VIEW, getChildAt(0))
         }
 
         if (!isInEditMode) {
@@ -117,42 +117,42 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     override fun setContentView(layoutResId: Int): StatefulView {
-        addView(TYPE_CONTENT_VIEW, layoutResId, viewType == TYPE_CONTENT_VIEW)
+        setView(TYPE_CONTENT_VIEW, layoutResId)
         return this
     }
 
     override fun setContentView(view: View): StatefulView {
-        addView(TYPE_CONTENT_VIEW, view, viewType == TYPE_CONTENT_VIEW)
+        setView(TYPE_CONTENT_VIEW, view)
         return this
     }
 
     override fun setLoadingView(@LayoutRes layoutResId: Int): StatefulView {
-        addView(TYPE_LOADING_VIEW, layoutResId, viewType == TYPE_LOADING_VIEW)
+        setView(TYPE_LOADING_VIEW, layoutResId)
         return this
     }
 
     override fun setLoadingView(view: View): StatefulView {
-        addView(TYPE_LOADING_VIEW, view, viewType == TYPE_LOADING_VIEW)
+        setView(TYPE_LOADING_VIEW, view)
         return this
     }
 
     override fun setEmptyView(@LayoutRes layoutResId: Int): StatefulView {
-        addView(TYPE_EMPTY_VIEW, layoutResId, viewType == TYPE_EMPTY_VIEW)
+        setView(TYPE_EMPTY_VIEW, layoutResId)
         return this
     }
 
     override fun setEmptyView(view: View): StatefulLayout {
-        addView(TYPE_EMPTY_VIEW, view, viewType == TYPE_EMPTY_VIEW)
+        setView(TYPE_EMPTY_VIEW, view)
         return this
     }
 
     override fun setErrorView(@LayoutRes layoutResId: Int): StatefulView {
-        addView(TYPE_ERROR_VIEW, layoutResId, viewType == TYPE_ERROR_VIEW)
+        setView(TYPE_ERROR_VIEW, layoutResId)
         return this
     }
 
     override fun setErrorView(view: View): StatefulView {
-        addView(TYPE_ERROR_VIEW, view, viewType == TYPE_ERROR_VIEW)
+        setView(TYPE_ERROR_VIEW, view)
         return this
     }
 
@@ -293,27 +293,23 @@ class StatefulLayout @JvmOverloads constructor(
 
         views.getOrElse(viewType) {
             when (viewType) {
-                TYPE_EMPTY_VIEW -> addView(TYPE_EMPTY_VIEW, emptyLayoutId, true)
-                TYPE_LOADING_VIEW -> addView(TYPE_LOADING_VIEW, loadingLayoutId, true)
-                TYPE_ERROR_VIEW -> addView(TYPE_ERROR_VIEW, errorLayoutId, true)
+                TYPE_EMPTY_VIEW -> setView(TYPE_EMPTY_VIEW, emptyLayoutId)
+                TYPE_LOADING_VIEW -> setView(TYPE_LOADING_VIEW, loadingLayoutId)
+                TYPE_ERROR_VIEW -> setView(TYPE_ERROR_VIEW, errorLayoutId)
                 TYPE_CONTENT_VIEW -> error("Content view must not be null")
                 else -> error("Can not find view by key: $viewType")
             }
         }.visibility = VISIBLE
     }
 
-    private fun addView(
+    private fun setView(
         @ViewType viewType: Int,
-        @LayoutRes layoutResId: Int,
-        attachToRoot: Boolean = false
+        @LayoutRes layoutResId: Int
     ): View {
-        return addView(viewType, inflater.inflate(layoutResId, this, false), attachToRoot)
+        return setView(viewType, inflater.inflate(layoutResId, this, false))
     }
 
-    private fun addView(@ViewType viewType: Int, view: View, attachToRoot: Boolean = false): View {
-        views[viewType] = view.also {
-            it.visibility = if (viewType == viewType) VISIBLE else INVISIBLE
-        }
+    private fun setView(@ViewType viewType: Int, view: View): View {
         when (viewType) {
             TYPE_EMPTY_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.empty_image)
@@ -393,20 +389,31 @@ class StatefulLayout @JvmOverloads constructor(
             }
         }
 
-        if (attachToRoot && indexOfChild(view) < 0) {
-            if (viewType == TYPE_CONTENT_VIEW) {
-                val params = if (view.layoutParams is MarginLayoutParams) {
-                    MarginLayoutParams(view.layoutParams as MarginLayoutParams).apply {
-                        width = LayoutParams.MATCH_PARENT
-                        height = LayoutParams.MATCH_PARENT
-                    }
-                } else {
-                    LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        val showView = this.viewType == viewType
+
+        view.visibility = if (showView) VISIBLE else INVISIBLE
+
+        val existingView = views.put(viewType, view)
+        if (indexOfChild(existingView) > -1) {
+            removeView(existingView)
+        }
+
+        if (!showView || indexOfChild(view) > -1) {
+            return view
+        }
+
+        if (viewType == TYPE_CONTENT_VIEW) {
+            val params = view.layoutParams
+            addView(view, 0, if (params is MarginLayoutParams) {
+                MarginLayoutParams(params).apply {
+                    width = LayoutParams.MATCH_PARENT
+                    height = LayoutParams.MATCH_PARENT
                 }
-                addView(view, 0, params)
             } else {
-                addView(view)
-            }
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            })
+        } else {
+            addView(view)
         }
 
         return view
