@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.ViewPager
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.weak
 import com.easy.kotlins.widget.StatefulView.Companion.TYPE_CONTENT_VIEW
@@ -96,9 +95,7 @@ class StatefulLayout @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        if (!isInEditMode) {
-            show(defaultShowType)
-        }
+        show(defaultShowType)
     }
 
     override fun showLoading() {
@@ -395,16 +392,15 @@ class StatefulLayout @JvmOverloads constructor(
             }
         }
 
-        val showView = this.viewType == viewType
-
-        view.visibility = if (showView) VISIBLE else INVISIBLE
-
         val existingView = views.put(viewType, view)
         if (indexOfChild(existingView) > -1) {
             removeView(existingView)
         }
 
-        if (!showView || indexOfChild(view) > -1) {
+        val visible = this.viewType == viewType
+        view.visibility = if (visible) VISIBLE else INVISIBLE
+
+        if (!visible || indexOfChild(view) > -1) {
             return view
         }
 
@@ -486,13 +482,12 @@ class StatefulLayout @JvmOverloads constructor(
 
         fun wrap(view: View): StatefulLayout {
             val parent = view.parent as ViewGroup
-            check(parent !is ViewPager) { "parent view can not be ViewPager" }
-            val lp = view.layoutParams
+            val params = view.layoutParams
             val index = parent.indexOfChild(view)
             parent.removeView(view)
             val layout = StatefulLayout(view.context)
             layout.setContentView(view)
-            parent.addView(layout, index, lp)
+            parent.addView(layout, index, params)
             return layout
         }
 

@@ -10,14 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 
 interface StatefulView {
 
-    @IntDef(
-        TYPE_CONTENT_VIEW,
-        TYPE_EMPTY_VIEW,
-        TYPE_LOADING_VIEW,
-        TYPE_ERROR_VIEW
-    )
-    annotation class ViewType
-
     fun showLoading()
 
     fun showEmpty()
@@ -83,6 +75,14 @@ interface StatefulView {
     fun attachTo(adapter: RecyclerView.Adapter<*>): StatefulView
 
     fun detachTo(adapter: RecyclerView.Adapter<*>): StatefulView
+
+    @IntDef(
+        TYPE_CONTENT_VIEW,
+        TYPE_EMPTY_VIEW,
+        TYPE_LOADING_VIEW,
+        TYPE_ERROR_VIEW
+    )
+    annotation class ViewType
 
     companion object {
         const val TYPE_CONTENT_VIEW = 0x001
