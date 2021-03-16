@@ -16,7 +16,8 @@ annotation class Column(
     val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class
 )
 
-interface DatabaseTable
+@Target(AnnotationTarget.CLASS)
+annotation class DatabaseTable
 
 inline fun <reified T : Any> classParser(): MapRowParser<T> = classParser(T::class.java)
 

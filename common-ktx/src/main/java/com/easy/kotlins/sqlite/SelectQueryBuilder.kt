@@ -4,6 +4,7 @@ package com.easy.kotlins.sqlite.db
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.easy.kotlins.sqlite.SqlColumnProperty
 import com.easy.kotlins.sqlite.SqlWhereCondition
 import com.easy.kotlins.sqlite.applyArguments
 
@@ -31,21 +32,21 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun column(name: String): SelectQueryBuilder {
-        columnsApplied = true
-        columns.add(name)
+    fun column(name: SqlColumnProperty): SelectQueryBuilder {
+        this.columnsApplied = true
+        this.columns.add(name.name)
         return this
     }
 
-    fun columns(vararg names: String): SelectQueryBuilder {
-        columnsApplied = true
-        columns.addAll(names)
+    fun columns(vararg names: SqlColumnProperty): SelectQueryBuilder {
+        this.columnsApplied = true
+        this.columns.addAll(names.map { it.name })
         return this
     }
 
     fun groupBy(value: String): SelectQueryBuilder {
-        groupByApplied = true
-        groupBy.add(value)
+        this.groupByApplied = true
+        this.groupBy.add(value)
         return this
     }
 
@@ -53,80 +54,80 @@ abstract class SelectQueryBuilder(private val table: String) {
         value: String,
         direction: SqlOrderDirection = SqlOrderDirection.ASC
     ): SelectQueryBuilder {
-        orderByApplied = true
-        orderBy.add(if (direction == SqlOrderDirection.DESC) "$value DESC" else value)
+        this.orderByApplied = true
+        this.orderBy.add(if (direction == SqlOrderDirection.DESC) "$value DESC" else value)
         return this
     }
 
     fun limit(count: Int): SelectQueryBuilder {
-        limit = count.toString()
+        this.limit = count.toString()
         return this
     }
 
     fun limit(offset: Int, count: Int): SelectQueryBuilder {
-        limit = "$offset, $count"
+        this.limit = "$offset, $count"
         return this
     }
 
     fun having(having: String): SelectQueryBuilder {
-        if (havingApplied) {
+        if (this.havingApplied) {
             throw IllegalStateException("Query having was already applied.")
         }
 
-        havingApplied = true
+        this.havingApplied = true
         this.having = having
         return this
     }
 
     fun having(having: String, vararg havingArgs: Pair<String, Any>): SelectQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query having was already applied.")
         }
 
-        havingApplied = true
+        this.havingApplied = true
         this.having = applyArguments(having, *havingArgs)
         return this
     }
 
     fun whereArgs(whereCondition: SqlWhereCondition): SelectQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
-        selectWhereCause = whereCondition.whereCause
-        selectWhereArgs = whereCondition.whereArgs
+        this.whereCauseApplied = true
+        this.selectWhereCause = whereCondition.whereCause
+        this.selectWhereArgs = whereCondition.whereArgs
         return this
     }
 
     fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): SelectQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
-        selectWhereCause = applyArguments(whereCause, *whereArgs)
+        this.whereCauseApplied = true
+        this.selectWhereCause = applyArguments(whereCause, *whereArgs)
         return this
     }
 
     fun whereArgs(whereCause: String): SelectQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
-        selectWhereCause = whereCause
+        this.whereCauseApplied = true
+        this.selectWhereCause = whereCause
         return this
     }
 
     fun whereSimple(whereCause: String, vararg whereArgs: Any): SelectQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
-        selectWhereCause = whereCause
-        selectWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
+        this.whereCauseApplied = true
+        this.selectWhereCause = whereCause
+        this.selectWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
@@ -155,11 +156,11 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun <T> execute(action: Cursor.() -> T): T {
-        val finalWhereCause = if (whereCauseApplied) selectWhereCause else null
-        val finalWhereArgs = if (whereCauseApplied) selectWhereArgs else null
-        val finalColumns = if (columnsApplied) columns.toTypedArray() else null
-        val finalGroupBy = if (groupByApplied) groupBy.joinToString(", ") else null
-        val finalOrderBy = if (orderByApplied) orderBy.joinToString(", ") else null
+        val finalWhereCause = if (this.whereCauseApplied) this.selectWhereCause else null
+        val finalWhereArgs = if (this.whereCauseApplied) this.selectWhereArgs else null
+        val finalColumns = if (this.columnsApplied) this.columns.toTypedArray() else null
+        val finalGroupBy = if (this.groupByApplied) this.groupBy.joinToString(", ") else null
+        val finalOrderBy = if (this.orderByApplied) this.orderBy.joinToString(", ") else null
         return query(
             distinct,
             table,
@@ -189,7 +190,7 @@ abstract class SelectQueryBuilder(private val table: String) {
 
 class AndroidDatabaseSelectQueryBuilder(
     private val db: SQLiteDatabase,
-    table: String
+    table: String,
 ) : SelectQueryBuilder(table) {
 
     override fun query(

@@ -426,7 +426,7 @@ class OkFaker<T> internal constructor(
         fun mapResponse(mapper: OkMapper<Response, T>) = apply {
             transformer.mapResponse(mapper)
             if (mapper is OkDownloadMapper) {
-                builder.addRequestInterceptor(mapper)
+                builder.addRequestInterceptor(mapper.requestInterceptor)
             }
         }
 

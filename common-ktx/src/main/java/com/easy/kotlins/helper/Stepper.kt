@@ -27,7 +27,7 @@ class Stepper {
         channel.offer(DelayedTask(delayed, context, task))
     }
 
-    suspend fun launch() {
+    suspend fun run() {
         for (task in channel) {
             task.run()
         }

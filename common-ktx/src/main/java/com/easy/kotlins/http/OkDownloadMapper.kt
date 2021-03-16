@@ -1,3 +1,16 @@
 package com.easy.kotlins.http
 
-interface OkDownloadMapper<T, R> : OkMapper<T, R>, OkRequestInterceptor
+import okhttp3.Request
+
+abstract class OkDownloadMapper<T, R> : OkMapper<T, R> {
+
+    internal val requestInterceptor: OkRequestInterceptor = OkRequestInterceptor {
+        shouldInterceptRequest(it)
+    }
+
+
+    open fun shouldInterceptRequest(request: Request): Request {
+        return request
+    }
+
+}

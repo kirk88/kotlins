@@ -1,49 +1,66 @@
-package com.easy.kotlins.widget.divider;
+package com.easy.kotlins.widget.divider
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Px;
+import android.graphics.Color
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
 
-public class DividerBuilder {
+class DividerBuilder {
+    private var leftSideLine: DividerSideLine? = null
+    private var topSideLine: DividerSideLine? = null
+    private var rightSideLine: DividerSideLine? = null
+    private var bottomSideLine: DividerSideLine? = null
 
-    private DividerSideLine leftSideLine;
-    private DividerSideLine topSideLine;
-    private DividerSideLine rightSideLine;
-    private DividerSideLine bottomSideLine;
-
-
-    public DividerBuilder setLeftSideLine(boolean isVisible, @ColorInt int color, @Px int size, @Px int startPadding, @Px int endPadding) {
-        this.leftSideLine = new DividerSideLine(isVisible, color, size, startPadding, endPadding);
-        return this;
+    fun left(
+        @ColorInt color: Int,
+        @Px size: Int,
+        @Px startPadding: Int = 0,
+        @Px endPadding: Int = 0,
+        visible: Boolean = true,
+    ): DividerBuilder {
+        leftSideLine = DividerSideLine(color, size, startPadding, endPadding, visible)
+        return this
     }
 
-    public DividerBuilder setTopSideLine(boolean isVisible, @ColorInt int color, @Px int size, @Px int startPadding, @Px int endPadding) {
-        this.topSideLine = new DividerSideLine(isVisible, color, size, startPadding, endPadding);
-        return this;
+    fun top(
+        @ColorInt color: Int,
+        @Px size: Int,
+        @Px startPadding: Int = 0,
+        @Px endPadding: Int = 0,
+        visible: Boolean
+    ): DividerBuilder {
+        topSideLine = DividerSideLine(color, size, startPadding, endPadding, visible)
+        return this
     }
 
-    public DividerBuilder setRightSideLine(boolean isVisible, @ColorInt int color, @Px int size, @Px int startPadding, @Px int endPadding) {
-        this.rightSideLine = new DividerSideLine(isVisible, color, size, startPadding, endPadding);
-        return this;
+    fun right(
+        @ColorInt color: Int,
+        @Px size: Int,
+        @Px startPadding: Int = 0,
+        @Px endPadding: Int = 0,
+        visible: Boolean,
+    ): DividerBuilder {
+        rightSideLine = DividerSideLine(color, size, startPadding, endPadding, visible)
+        return this
     }
 
-    public DividerBuilder setBottomSideLine(boolean isVisible, @ColorInt int color, @Px int size, @Px int startPadding, @Px int endPadding) {
-        this.bottomSideLine = new DividerSideLine(isVisible, color, size, startPadding, endPadding);
-        return this;
+    fun bottom(
+        @ColorInt color: Int,
+        @Px size: Int,
+        @Px startPadding: Int = 0,
+        @Px endPadding: Int = 0,
+        visible: Boolean,
+    ): DividerBuilder {
+        bottomSideLine = DividerSideLine(color, size, startPadding, endPadding, visible)
+        return this
     }
 
-    public Divider create() {
-        final DividerSideLine defaultSideLine = new DividerSideLine(false, 0xff666666, 0, 0, 0);
-
-        leftSideLine = (leftSideLine != null ? leftSideLine : defaultSideLine);
-        topSideLine = (topSideLine != null ? topSideLine : defaultSideLine);
-        rightSideLine = (rightSideLine != null ? rightSideLine : defaultSideLine);
-        bottomSideLine = (bottomSideLine != null ? bottomSideLine : defaultSideLine);
-
-        return new Divider(leftSideLine, topSideLine, rightSideLine, bottomSideLine);
+    fun create(): Divider {
+        val defaultSideLine = DividerSideLine(Color.GRAY, 1, 0, 0, true)
+        leftSideLine = if (leftSideLine != null) leftSideLine else defaultSideLine
+        topSideLine = if (topSideLine != null) topSideLine else defaultSideLine
+        rightSideLine = if (rightSideLine != null) rightSideLine else defaultSideLine
+        bottomSideLine = if (bottomSideLine != null) bottomSideLine else defaultSideLine
+        return Divider(leftSideLine!!, topSideLine!!, rightSideLine!!, bottomSideLine!!)
     }
-
 
 }
-
-
-

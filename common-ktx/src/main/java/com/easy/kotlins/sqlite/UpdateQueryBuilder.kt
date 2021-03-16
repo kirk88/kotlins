@@ -8,23 +8,32 @@ import com.easy.kotlins.sqlite.SqlColumnElement
 import com.easy.kotlins.sqlite.SqlWhereCondition
 import com.easy.kotlins.sqlite.applyArguments
 
-abstract class UpdateQueryBuilder(
-    private val table: String,
-    private val values: Array<out SqlColumnElement>
-) {
+abstract class UpdateQueryBuilder(private val table: String) {
+
+    private val values: MutableList<SqlColumnElement> = mutableListOf()
 
     private var whereCauseApplied = false
     private var updateWhereCause: String? = null
     private var updateWhereArgs: Array<out String>? = null
 
-    fun whereArgs(whereCondition: SqlWhereCondition): UpdateQueryBuilder{
-        if (whereCauseApplied) {
+    fun value(value: SqlColumnElement): UpdateQueryBuilder {
+        this.values.add(value)
+        return this
+    }
+
+    fun values(vararg values: SqlColumnElement): UpdateQueryBuilder {
+        this.values.addAll(values)
+        return this
+    }
+
+    fun whereArgs(whereCondition: SqlWhereCondition): UpdateQueryBuilder {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
-        updateWhereCause = whereCondition.whereCause
-        updateWhereArgs = whereCondition.whereArgs
+        this.whereCauseApplied = true
+        this.updateWhereCause = whereCondition.whereCause
+        this.updateWhereArgs = whereCondition.whereArgs
         return this
     }
 
@@ -33,40 +42,44 @@ abstract class UpdateQueryBuilder(
             throw IllegalStateException("Query selection was already applied.")
         }
 
-        whereCauseApplied = true
+        this.whereCauseApplied = true
         val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
             map[arg.first] = arg.second
             map
         }
-        updateWhereCause = applyArguments(whereCause, whereArgsMap)
+        this.updateWhereCause = applyArguments(whereCause, whereArgsMap)
         return this
     }
 
     fun whereArgs(whereCause: String): UpdateQueryBuilder {
-        if (whereCauseApplied)
+        if (this.whereCauseApplied)
             throw IllegalStateException("Query selection was already applied.")
 
-        whereCauseApplied = true
-        updateWhereCause = whereCause
+        this.whereCauseApplied = true
+        this.updateWhereCause = whereCause
         return this
     }
 
     fun whereSimple(whereCause: String, vararg whereArgs: Any): UpdateQueryBuilder {
-        if (whereCauseApplied)
+        if (this.whereCauseApplied)
             throw IllegalStateException("Query selection was already applied.")
 
-        whereCauseApplied = true
-        updateWhereCause = whereCause
-        updateWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
+        this.whereCauseApplied = true
+        this.updateWhereCause = whereCause
+        this.updateWhereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
     fun execute(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
-        val finalSelection = if (whereCauseApplied) updateWhereCause else null
-        val finalSelectionArgs = if (whereCauseApplied) updateWhereArgs else null
+        val values = if (this.values.isNotEmpty())
+            this.values.toContentValues()
+        else
+            throw IllegalArgumentException("Empty values")
+        val finalSelection = if (this.whereCauseApplied) this.updateWhereCause else null
+        val finalSelectionArgs = if (this.whereCauseApplied) this.updateWhereArgs else null
         return update(
             table,
-            values.toContentValues(),
+            values,
             finalSelection,
             finalSelectionArgs,
             conflictAlgorithm
@@ -84,9 +97,8 @@ abstract class UpdateQueryBuilder(
 
 class AndroidDatabaseUpdateQueryBuilder(
     private val db: SQLiteDatabase,
-    table: String,
-    values: Array<out SqlColumnElement>
-) : UpdateQueryBuilder(table, values) {
+    table: String
+) : UpdateQueryBuilder(table) {
 
     override fun update(
         table: String,

@@ -3,7 +3,6 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import okhttp3.Request
 import okhttp3.Response
@@ -14,7 +13,7 @@ import java.io.RandomAccessFile
 import java.text.MessageFormat
 
 open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
-    OkDownloadMapper<Response, File> {
+    OkDownloadMapper<Response, File>() {
 
     private val file: File by lazy { File(path + DOWNLOAD_SUFFIX_TMP) }
 
@@ -25,6 +24,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
         ).build()
     }
+
 
     override fun map(value: Response): File {
         if (file.exists() && !continuing) {
@@ -66,7 +66,11 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             performer.perform()
         }
 
-        fun notifyProgressChanged(mapper: DefaultOkDownloadMapper, readBytes: Long, totalBytes: Long) {
+        fun notifyProgressChanged(
+            mapper: DefaultOkDownloadMapper,
+            readBytes: Long,
+            totalBytes: Long
+        ) {
             val message = Message()
             message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
             sendMessage(message)

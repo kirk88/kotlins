@@ -1,197 +1,205 @@
-package com.easy.kotlins.widget.divider;
+package com.easy.kotlins.widget.divider
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.view.View;
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.view.View
+import androidx.annotation.ColorInt
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+abstract class XDividerItemDecoration : ItemDecoration() {
 
-public abstract class XDividerItemDecoration extends RecyclerView.ItemDecoration {
-
-    private final Paint mPaint;
-
-    public XDividerItemDecoration() {
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setStyle(Paint.Style.FILL);
+    private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
     }
 
-    @Override
-    public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-        //left, top, right, bottom
-        int childCount = parent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = parent.getChildAt(i);
-
-            int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
-
-            Divider divider = getDivider(parent, child, itemPosition);
-
-            if (divider.getLeftSideLine().isVisible()) {
-                int lineSize = divider.getLeftSideLine().getSize();
-                int startPadding = divider.getLeftSideLine().getStartPadding();
-                int endPadding = divider.getLeftSideLine().getEndPadding();
-                drawChildLeftVertical(child, c, divider.getLeftSideLine().getColor(), lineSize, startPadding, endPadding);
+    override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        for (index in 0 until parent.childCount) {
+            val child = parent.getChildAt(index)
+            val itemPosition = (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition
+            val divider = getDivider(parent, child, itemPosition)
+            if (divider.leftSideLine.visible) {
+                val lineSize = divider.leftSideLine.size
+                val startPadding = divider.leftSideLine.startPadding
+                val endPadding = divider.leftSideLine.endPadding
+                drawChildLeftVertical(
+                    child,
+                    c,
+                    divider.leftSideLine.color,
+                    lineSize,
+                    startPadding,
+                    endPadding
+                )
             }
-            if (divider.getTopSideLine().isVisible()) {
-                int lineSize = divider.getTopSideLine().getSize();
-                int startPadding = divider.getTopSideLine().getStartPadding();
-                int endPadding = divider.getTopSideLine().getEndPadding();
-                drawChildTopHorizontal(child, c, divider.topSideLine.getColor(), lineSize, startPadding, endPadding);
+            if (divider.topSideLine.visible) {
+                val lineSize = divider.topSideLine.size
+                val startPadding = divider.topSideLine.startPadding
+                val endPadding = divider.topSideLine.endPadding
+                drawChildTopHorizontal(
+                    child,
+                    c,
+                    divider.topSideLine.color,
+                    lineSize,
+                    startPadding,
+                    endPadding
+                )
             }
-            if (divider.getRightSideLine().isVisible()) {
-                int lineSize = divider.getRightSideLine().getSize();
-                int startPadding = divider.getRightSideLine().getStartPadding();
-                int endPadding = divider.getRightSideLine().getEndPadding();
-                drawChildRightVertical(child, c, divider.getRightSideLine().getColor(), lineSize, startPadding, endPadding);
+            if (divider.rightSideLine.visible) {
+                val lineSize = divider.rightSideLine.size
+                val startPadding = divider.rightSideLine.startPadding
+                val endPadding = divider.rightSideLine.endPadding
+                drawChildRightVertical(
+                    child,
+                    c,
+                    divider.rightSideLine.color,
+                    lineSize,
+                    startPadding,
+                    endPadding
+                )
             }
-            if (divider.getBottomSideLine().isVisible()) {
-                int lineSize = divider.getBottomSideLine().getSize();
-                int startPadding = divider.getBottomSideLine().getStartPadding();
-                int endPadding = divider.getBottomSideLine().getEndPadding();
-                drawChildBottomHorizontal(child, c, divider.getBottomSideLine().getColor(), lineSize, startPadding, endPadding);
+            if (divider.bottomSideLine.visible) {
+                val lineSize = divider.bottomSideLine.size
+                val startPadding = divider.bottomSideLine.startPadding
+                val endPadding = divider.bottomSideLine.endPadding
+                drawChildBottomHorizontal(
+                    child,
+                    c,
+                    divider.bottomSideLine.color,
+                    lineSize,
+                    startPadding,
+                    endPadding
+                )
             }
         }
     }
 
-    private void drawChildBottomHorizontal(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
-        final int leftPadding;
-        final int rightPadding;
-
-        if (startPadding <= 0) {
-            leftPadding = -lineSize;
+    private fun drawChildBottomHorizontal(
+        child: View,
+        c: Canvas,
+        @ColorInt color: Int,
+        lineSize: Int,
+        startPadding: Int,
+        endPadding: Int
+    ) {
+        val leftPadding: Int = if (startPadding <= 0) {
+            -lineSize
         } else {
-            leftPadding = startPadding;
+            startPadding
         }
-
-        if (endPadding <= 0) {
-            rightPadding = lineSize;
+        val rightPadding: Int = if (endPadding <= 0) {
+            lineSize
         } else {
-            rightPadding = -endPadding;
+            -endPadding
         }
-
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                .getLayoutParams();
-        int left = child.getLeft() - params.leftMargin + leftPadding;
-        int right = child.getRight() + params.rightMargin + rightPadding;
-        int top = child.getBottom() + params.bottomMargin;
-        int bottom = top + lineSize;
-        mPaint.setColor(color);
-
-        c.drawRect(left, top, right, bottom, mPaint);
+        val params = child
+            .layoutParams as RecyclerView.LayoutParams
+        val left = child.left - params.leftMargin + leftPadding
+        val right = child.right + params.rightMargin + rightPadding
+        val top = child.bottom + params.bottomMargin
+        val bottom = top + lineSize
+        paint.color = color
+        c.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
     }
 
-    private void drawChildTopHorizontal(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
-        final int leftPadding;
-        final int rightPadding;
-
-        if (startPadding <= 0) {
-            leftPadding = -lineSize;
+    private fun drawChildTopHorizontal(
+        child: View,
+        c: Canvas,
+        @ColorInt color: Int,
+        lineSize: Int,
+        startPadding: Int,
+        endPadding: Int
+    ) {
+        val leftPadding: Int = if (startPadding <= 0) {
+            -lineSize
         } else {
-            leftPadding = startPadding;
+            startPadding
         }
-        if (endPadding <= 0) {
-            rightPadding = lineSize;
+        val rightPadding: Int = if (endPadding <= 0) {
+            lineSize
         } else {
-            rightPadding = -endPadding;
+            -endPadding
         }
-
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                .getLayoutParams();
-        int left = child.getLeft() - params.leftMargin + leftPadding;
-        int right = child.getRight() + params.rightMargin + rightPadding;
-        int bottom = child.getTop() - params.topMargin;
-        int top = bottom - lineSize;
-        mPaint.setColor(color);
-
-        c.drawRect(left, top, right, bottom, mPaint);
+        val params = child
+            .layoutParams as RecyclerView.LayoutParams
+        val left = child.left - params.leftMargin + leftPadding
+        val right = child.right + params.rightMargin + rightPadding
+        val bottom = child.top - params.topMargin
+        val top = bottom - lineSize
+        paint.color = color
+        c.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
     }
 
-    private void drawChildLeftVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
-        final int topPadding;
-        final int bottomPadding;
-
-        if (startPadding <= 0) {
-            topPadding = -lineSize;
+    private fun drawChildLeftVertical(
+        child: View,
+        c: Canvas,
+        @ColorInt color: Int,
+        lineSize: Int,
+        startPadding: Int,
+        endPadding: Int
+    ) {
+        val topPadding: Int = if (startPadding <= 0) {
+            -lineSize
         } else {
-            topPadding = startPadding;
+            startPadding
         }
-        if (endPadding <= 0) {
-            bottomPadding = lineSize;
+        val bottomPadding: Int = if (endPadding <= 0) {
+            lineSize
         } else {
-            bottomPadding = -endPadding;
+            -endPadding
         }
-
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                .getLayoutParams();
-        int top = child.getTop() - params.topMargin + topPadding;
-        int bottom = child.getBottom() + params.bottomMargin + bottomPadding;
-        int right = child.getLeft() - params.leftMargin;
-        int left = right - lineSize;
-        mPaint.setColor(color);
-
-        c.drawRect(left, top, right, bottom, mPaint);
+        val params = child
+            .layoutParams as RecyclerView.LayoutParams
+        val top = child.top - params.topMargin + topPadding
+        val bottom = child.bottom + params.bottomMargin + bottomPadding
+        val right = child.left - params.leftMargin
+        val left = right - lineSize
+        paint.color = color
+        c.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
     }
 
-    private void drawChildRightVertical(View child, Canvas c, @ColorInt int color, int lineSize, int startPadding, int endPadding) {
-        final int topPadding;
-        final int bottomPadding;
-
-        if (startPadding <= 0) {
-            topPadding = -lineSize;
+    private fun drawChildRightVertical(
+        child: View,
+        c: Canvas,
+        @ColorInt color: Int,
+        lineSize: Int,
+        startPadding: Int,
+        endPadding: Int
+    ) {
+        val topPadding: Int = if (startPadding <= 0) {
+            -lineSize
         } else {
-            topPadding = startPadding;
+            startPadding
         }
-        if (endPadding <= 0) {
-            bottomPadding = lineSize;
+        val bottomPadding: Int = if (endPadding <= 0) {
+            lineSize
         } else {
-            bottomPadding = -endPadding;
+            -endPadding
         }
-
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                .getLayoutParams();
-        int top = child.getTop() - params.topMargin + topPadding;
-        int bottom = child.getBottom() + params.bottomMargin + bottomPadding;
-        int left = child.getRight() + params.rightMargin;
-        int right = left + lineSize;
-        mPaint.setColor(color);
-
-        c.drawRect(left, top, right, bottom, mPaint);
+        val params = child
+            .layoutParams as RecyclerView.LayoutParams
+        val top = child.top - params.topMargin + topPadding
+        val bottom = child.bottom + params.bottomMargin + bottomPadding
+        val left = child.right + params.rightMargin
+        val right = left + lineSize
+        paint.color = color
+        c.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
     }
 
-    @Override
-    public void getItemOffsets(@NonNull Rect outRect, @NonNull View child, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-        int itemPosition = ((RecyclerView.LayoutParams) child.getLayoutParams()).getViewLayoutPosition();
-
-        Divider divider = getDivider(parent, child, itemPosition);
-        int left = divider.getLeftSideLine().isVisible() ? divider.getLeftSideLine().getSize() : 0;
-        int top = divider.getTopSideLine().isVisible() ? divider.getTopSideLine().getSize() : 0;
-        int right = divider.getRightSideLine().isVisible() ? divider.getRightSideLine().getSize() : 0;
-        int bottom = divider.getBottomSideLine().isVisible() ? divider.getBottomSideLine().getSize() : 0;
-
-        outRect.set(left, top, right, bottom);
+    override fun getItemOffsets(
+        outRect: Rect,
+        child: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val divider = getDivider(parent, child, (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition)
+        val left = if (divider.leftSideLine.visible) divider.leftSideLine.size else 0
+        val top = if (divider.topSideLine.visible) divider.topSideLine.size else 0
+        val right = if (divider.rightSideLine.visible) divider.rightSideLine.size else 0
+        val bottom = if (divider.bottomSideLine.visible) divider.bottomSideLine.size else 0
+        outRect.set(left, top, right, bottom)
     }
 
-
-    public abstract Divider getDivider(@NonNull RecyclerView parent, @NonNull View child, int itemPosition);
+    abstract fun getDivider(parent: RecyclerView, child: View, position: Int): Divider
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -20,11 +20,15 @@ class EventDelegate {
     }
 
     fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
-        liveEvent.observeActive(owner) { if (it != null) observer.onEventChanged(it) }
+        liveEvent.observeActive(owner) {
+            if (it != null) observer.onEventChanged(it)
+        }
     }
 
     fun addEventObserver(observer: EventLifecycleObserver) {
-        liveEvent.observeActive(observer) { if (it != null) observer.onEventChanged(it) }
+        liveEvent.observeActive(observer) {
+            if (it != null) observer.onEventChanged(it)
+        }
     }
 
     companion object {

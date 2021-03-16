@@ -14,9 +14,9 @@ import com.easy.kotlins.viewmodel.ViewModelController
 import com.easy.kotlins.viewmodel.ViewModelEventDispatcher
 import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.viewmodel.ViewModelOwner
-import com.easy.kotlins.widget.StatefulView
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
+import com.easy.kotlins.widget.StatefulView
 
 /**
  * Create by LiZhanPing on 2020/9/18
@@ -51,17 +51,12 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
             return true
         }
 
-        var dispatched = false
         for (fragment in childFragmentManager.fragments) {
             if (!fragment.isAdded || fragment !is ViewModelEventDispatcher) continue
 
             if (fragment.dispatchViewModelEvent(event)) {
-                dispatched = true
+                return true
             }
-        }
-
-        if (dispatched) {
-            return true
         }
 
         return onViewModelEvent(event)
