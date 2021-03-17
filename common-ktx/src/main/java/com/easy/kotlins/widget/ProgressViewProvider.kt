@@ -65,6 +65,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     private var isPostHide: Boolean = false
     private val hideRunnable: Runnable = Runnable {
         isPostHide = false
+        startTime = -1L
         dismiss()
     }
 
