@@ -26,8 +26,6 @@
 
         <item name="emptyImage">@null</item>
         <item name="emptyText">@string/load_empty_tip</item>
-        <item name="emptyButtonText">@string/load_retry_tip</item>
-        <item name="loadingText">@string/load_progress_tip</item>
         <item name="loadingProgressColor">?attr/colorAccent</item>
         <item name="errorImage">@null</item>
         <item name="errorText">@string/load_error_tip</item>

@@ -520,7 +520,7 @@ class StatefulLayout @JvmOverloads constructor(
                 emptyButtonBackground = ColorDrawable(color)
             }
         }
-        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, true)
+        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, false)
 
         errorImage = a.getDrawable(R.styleable.StatefulLayout_errorImage)
         errorText = a.getText(R.styleable.StatefulLayout_errorText)
