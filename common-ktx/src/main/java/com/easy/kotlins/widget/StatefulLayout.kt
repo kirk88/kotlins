@@ -120,7 +120,7 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     override fun setContentView(view: View): StatefulView {
-        setView(TYPE_CONTENT_VIEW, view)
+        setView(TYPE_CONTENT_VIEW, view, true)
         return this
     }
 
