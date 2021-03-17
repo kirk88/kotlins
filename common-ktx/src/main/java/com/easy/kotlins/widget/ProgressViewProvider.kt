@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.activity
+import com.easy.kotlins.helper.findViewById
 import com.easy.kotlins.helper.textResource
 import com.easy.kotlins.helper.weak
 
@@ -48,10 +49,17 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
 
     private val view: View? by weak { parent.rootView }
 
+    private var startTime: Long = -1L
+
+    private var isDismissed: Boolean = false
+
     private var isPostShow: Boolean = false
     private val showRunnable: Runnable = Runnable {
         isPostShow = false
-        view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
+        if (!isDismissed) {
+            startTime = System.currentTimeMillis()
+            show()
+        }
     }
 
     private var isPostHide: Boolean = false
@@ -70,37 +78,61 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     }
 
     override fun showProgress(message: CharSequence?) {
-        contentView?.findViewById<TextView>(R.id.progress_text)?.text = message
-        view?.let { show(it) }
+        findViewById<TextView>(R.id.progress_text)?.text = message
+        showDelayed()
     }
 
     override fun showProgress(messageId: Int) {
-        contentView?.findViewById<TextView>(R.id.progress_text)?.textResource = messageId
-        view?.let { show(it) }
+        findViewById<TextView>(R.id.progress_text)?.textResource = messageId
+        showDelayed()
     }
 
     override fun dismissProgress() {
-        view?.let { hide(it) }
+        hideDelayed()
     }
 
-    private fun show(view: View) {
-        view.removeCallbacks(hideRunnable)
+    private fun showDelayed() {
+        startTime = -1L
+        isDismissed = false
+        removeCallbacks(hideRunnable)
         isPostHide = false
         if (!isPostShow) {
-            view.post(showRunnable)
+            postDelayed(showRunnable, MIN_DELAY)
             isPostShow = true
         }
     }
 
-    private fun hide(view: View) {
-        view.removeCallbacks(showRunnable)
+    private fun hideDelayed() {
+        isDismissed = true
+        removeCallbacks(showRunnable)
         isPostShow = false
-        if (!isPostHide) {
-            view.post(hideRunnable)
-            isPostHide = true
+        val diff: Long = System.currentTimeMillis() - startTime
+        if (diff >= MIN_SHOW_TIME || startTime == -1L) {
+            dismiss()
+        } else {
+            if (!isPostHide) {
+                postDelayed(hideRunnable, MIN_SHOW_TIME - diff)
+                isPostHide = true
+            }
         }
     }
 
+    private fun show() {
+        view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
+    }
+
+    private fun removeCallbacks(runnable: Runnable) {
+        view?.removeCallbacks(runnable)
+    }
+
+    private fun postDelayed(runnable: Runnable, delayMillis: Long) {
+        view?.postDelayed(runnable, delayMillis)
+    }
+
+    companion object {
+        private const val MIN_SHOW_TIME: Long = 500L
+        private const val MIN_DELAY: Long = 500L
+    }
 }
 
 val View.progressViewFactory: ProgressViewFactory
