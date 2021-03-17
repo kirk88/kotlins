@@ -314,33 +314,6 @@ class StatefulLayout @JvmOverloads constructor(
 
     private fun setView(viewType: Int, view: View, preventAddView: Boolean = false): View {
         when (viewType) {
-            TYPE_EMPTY_VIEW -> {
-                val imageView = view.findViewById<ImageView>(R.id.empty_image)
-                val textView = view.findViewById<TextView>(R.id.empty_text)
-                val emptyButton = view.findViewById<Button>(R.id.empty_button)
-                imageView?.setImageDrawable(this.emptyImage)
-                textView?.let {
-                    it.text = emptyText
-                    if (emptyTextAppearance != NO_RESOURCE_ID) {
-                        TextViewCompat.setTextAppearance(it, emptyTextAppearance)
-                    }
-                    if (emptyTextColor != NO_COLOR) {
-                        it.setTextColor(emptyTextColor)
-                    }
-                }
-                emptyButton?.let {
-                    it.background = emptyButtonBackground
-                    it.text = emptyButtonText
-                    if (emptyButtonTextAppearance != NO_RESOURCE_ID) {
-                        TextViewCompat.setTextAppearance(it, emptyButtonTextAppearance)
-                    }
-                    if (emptyButtonTextColor != NO_COLOR) {
-                        it.setTextColor(emptyButtonTextColor)
-                    }
-                    it.setOnClickListener(emptyButtonClickListener)
-                    it.visibility = if (emptyButtonVisible) VISIBLE else GONE
-                }
-            }
             TYPE_LOADING_VIEW -> {
                 val progressBar = view.findViewById<ProgressBar>(R.id.loading_progress)
                 val textView = view.findViewById<TextView>(R.id.loading_text)
@@ -361,6 +334,34 @@ class StatefulLayout @JvmOverloads constructor(
                     if (loadingTextColor != NO_COLOR) {
                         it.setTextColor(loadingTextColor)
                     }
+                    it.visibility = if (loadingText.isNullOrBlank()) GONE else VISIBLE
+                }
+            }
+            TYPE_EMPTY_VIEW -> {
+                val imageView = view.findViewById<ImageView>(R.id.empty_image)
+                val textView = view.findViewById<TextView>(R.id.empty_text)
+                val emptyButton = view.findViewById<Button>(R.id.empty_button)
+                imageView?.setImageDrawable(this.emptyImage)
+                textView?.let {
+                    it.text = emptyText
+                    if (emptyTextAppearance != NO_RESOURCE_ID) {
+                        TextViewCompat.setTextAppearance(it, emptyTextAppearance)
+                    }
+                    if (emptyTextColor != NO_COLOR) {
+                        it.setTextColor(emptyTextColor)
+                    }
+                }
+                emptyButton?.let {
+                    it.text = emptyButtonText
+                    it.background = emptyButtonBackground
+                    if (emptyButtonTextAppearance != NO_RESOURCE_ID) {
+                        TextViewCompat.setTextAppearance(it, emptyButtonTextAppearance)
+                    }
+                    if (emptyButtonTextColor != NO_COLOR) {
+                        it.setTextColor(emptyButtonTextColor)
+                    }
+                    it.setOnClickListener(emptyButtonClickListener)
+                    it.visibility = if (emptyButtonVisible) VISIBLE else GONE
                 }
             }
             TYPE_ERROR_VIEW -> {
@@ -378,8 +379,8 @@ class StatefulLayout @JvmOverloads constructor(
                     }
                 }
                 errorButton?.let {
-                    it.background = errorButtonBackground
                     it.text = errorButtonText
+                    it.background = errorButtonBackground
                     if (errorButtonTextAppearance != NO_RESOURCE_ID) {
                         TextViewCompat.setTextAppearance(it, errorButtonTextAppearance)
                     }

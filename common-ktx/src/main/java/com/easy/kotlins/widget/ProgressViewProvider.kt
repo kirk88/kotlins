@@ -65,7 +65,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         isOutsideTouchable = true
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
-        contentView = View.inflate(parent.context, R.layout.layout_progress, null)
+        contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
