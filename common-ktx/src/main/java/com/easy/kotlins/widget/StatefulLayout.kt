@@ -88,7 +88,7 @@ class StatefulLayout @JvmOverloads constructor(
         check(childCount <= 1) { "DynamicLayout can host only one direct child in layout" }
 
         if (childCount == 1) {
-            setView(TYPE_CONTENT_VIEW, getChildAt(0))
+            setContentView(getChildAt(0))
         }
     }
 
@@ -115,7 +115,7 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     override fun setContentView(layoutResId: Int): StatefulView {
-        setView(TYPE_CONTENT_VIEW, layoutResId)
+        setView(TYPE_CONTENT_VIEW, layoutResId, true)
         return this
     }
 
@@ -296,23 +296,23 @@ class StatefulLayout @JvmOverloads constructor(
 
         views.getOrElse(viewType) {
             when (viewType) {
-                TYPE_EMPTY_VIEW -> setView(TYPE_EMPTY_VIEW, emptyLayoutId)
-                TYPE_LOADING_VIEW -> setView(TYPE_LOADING_VIEW, loadingLayoutId)
-                TYPE_ERROR_VIEW -> setView(TYPE_ERROR_VIEW, errorLayoutId)
-                TYPE_CONTENT_VIEW -> error("Content view must not be null")
-                else -> error("Can not find view by key: $viewType")
+                TYPE_EMPTY_VIEW -> setView(TYPE_EMPTY_VIEW, emptyLayoutId, true)
+                TYPE_LOADING_VIEW -> setView(TYPE_LOADING_VIEW, loadingLayoutId, true)
+                TYPE_ERROR_VIEW -> setView(TYPE_ERROR_VIEW, errorLayoutId, true)
+                else -> null
             }
-        }.visibility = VISIBLE
+        }?.visibility = VISIBLE
     }
 
     private fun setView(
         viewType: Int,
-        layoutResId: Int
+        layoutResId: Int,
+        preventAddView: Boolean = false
     ): View {
-        return setView(viewType, inflater.inflate(layoutResId, this, false))
+        return setView(viewType, inflater.inflate(layoutResId, this, false), preventAddView)
     }
 
-    private fun setView(viewType: Int, view: View): View {
+    private fun setView(viewType: Int, view: View, preventAddView: Boolean = false): View {
         when (viewType) {
             TYPE_EMPTY_VIEW -> {
                 val imageView = view.findViewById<ImageView>(R.id.empty_image)
@@ -397,10 +397,9 @@ class StatefulLayout @JvmOverloads constructor(
             removeView(existingView)
         }
 
-        val visible = this.viewType == viewType
-        view.visibility = if (visible) VISIBLE else INVISIBLE
+        view.visibility = if (this.viewType == viewType) VISIBLE else INVISIBLE
 
-        if (!visible || indexOfChild(view) > -1) {
+        if (!preventAddView || indexOfChild(view) > -1) {
             return view
         }
 
