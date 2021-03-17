@@ -27,7 +27,7 @@ import com.easy.kotlins.widget.StatefulView.Companion.TYPE_LOADING_VIEW
 class StatefulLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.dynamicLayoutStyle
+    defStyleAttr: Int = R.attr.statefulLayoutStyle
 ) : FrameLayout(context, attrs, defStyleAttr), StatefulView {
 
     private val views = mutableMapOf<Int, View>()
@@ -38,7 +38,7 @@ class StatefulLayout @JvmOverloads constructor(
     private var errorLayoutId: Int
 
     private var emptyImage: Drawable?
-    private var emptyText: CharSequence
+    private var emptyText: CharSequence?
     private var emptyTextColor: Int
     private var emptyTextAppearance: Int
     private var emptyButtonBackground: Drawable?
@@ -48,7 +48,7 @@ class StatefulLayout @JvmOverloads constructor(
     private var emptyButtonVisible: Boolean
 
     private var errorImage: Drawable?
-    private var errorText: CharSequence
+    private var errorText: CharSequence?
     private var errorTextColor: Int
     private var errorTextAppearance: Int
     private var errorButtonBackground: Drawable?
@@ -59,7 +59,7 @@ class StatefulLayout @JvmOverloads constructor(
 
     private var loadingProgressColor: Int
     private var loadingProgressDrawable: Drawable?
-    private var loadingText: CharSequence
+    private var loadingText: CharSequence?
     private var loadingTextColor: Int
     private var loadingTextAppearance: Int
 
