@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
         android:adjustViewBounds="true" />
 
     <TextView
@@ -19,7 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:padding="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         tools:text="@string/load_empty_tip"
         tools:textAppearance="@style/TextAppearance.StatefulLayout.EmptyText" />
 
@@ -30,7 +32,6 @@
         android:layout_margin="20dp"
         android:gravity="center"
         android:minWidth="220dp"
-        android:visibility="gone"
         tools:background="@drawable/loading_layout_button"
         tools:textAppearance="@style/TextAppearance.StatefulLayout.ButtonText"
         tools:textColor="#ffffff" />
