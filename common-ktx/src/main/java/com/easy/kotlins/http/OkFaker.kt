@@ -10,6 +10,7 @@ import com.easy.kotlins.helper.toJSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import java.io.File
@@ -593,17 +594,29 @@ fun requestPairsOf(
     }.also { operation?.invoke(it) }
 }
 
-fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    withContext(Dispatchers.IO) {
-        emit(get())
-    }
+fun <T : Any> OkFaker.Builder<T>.asFlow(): Flow<T> = flow {
+    emit(suspendCancellableCoroutine<T> { con ->
+        onSuccess {
+            if (!con.isCancelled) {
+                con.resumeWith(Result.success(it))
+            }
+        }
+        onError { con.resumeWith(Result.failure(it)) }
+        start()
+    })
 }
 
-fun <T : Any> OkFaker<T>.asLiveData(
+fun <T : Any> OkFaker.Builder<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    withContext(Dispatchers.IO) {
-        emit(get())
-    }
+    emit(suspendCancellableCoroutine<T> { con ->
+        onSuccess {
+            if (!con.isCancelled) {
+                con.resumeWith(Result.success(it))
+            }
+        }
+        onError { con.resumeWith(Result.failure(it)) }
+        start()
+    })
 }
