@@ -10,7 +10,7 @@ import com.easy.kotlins.helper.toJSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import java.io.File
 import kotlin.collections.set
@@ -594,12 +594,16 @@ fun requestPairsOf(
 }
 
 fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    emit(get())
-}.flowOn(Dispatchers.IO)
+    withContext(Dispatchers.IO) {
+        emit(get())
+    }
+}
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    emit(get())
+    withContext(Dispatchers.IO) {
+        emit(get())
+    }
 }
