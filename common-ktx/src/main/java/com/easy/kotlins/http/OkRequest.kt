@@ -158,6 +158,8 @@ internal class OkRequest(
 
     class Builder(private val method: OkRequestMethod, private val config: OkConfig) {
 
+        private var client: OkHttpClient? = config.client
+
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder().also {
             it.username(config.username.orEmpty())
             it.password(config.password.orEmpty())
@@ -206,8 +208,6 @@ internal class OkRequest(
                 formBuilderApplied = false
                 multipartBuilderApplied = false
             }
-
-        private var client: OkHttpClient? = config.client
 
         private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
         private val responseInterceptors = mutableListOf<OkResponseInterceptor>()
