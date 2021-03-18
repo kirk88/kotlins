@@ -83,6 +83,63 @@ class StatefulLayout @JvmOverloads constructor(
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
+    init {
+        val a = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.StatefulLayout,
+            defStyleAttr,
+            R.style.StatefulLayout_Style
+        )
+        emptyLayoutId = a.getResourceId(R.styleable.StatefulLayout_emptyLayout, NO_RESOURCE_ID)
+        loadingLayoutId = a.getResourceId(R.styleable.StatefulLayout_loadingLayout, NO_RESOURCE_ID)
+        errorLayoutId = a.getResourceId(R.styleable.StatefulLayout_errorLayout, NO_RESOURCE_ID)
+        emptyImage = a.getDrawable(R.styleable.StatefulLayout_emptyImage)
+        emptyText = a.getText(R.styleable.StatefulLayout_emptyText)
+        emptyTextColor = a.getColor(R.styleable.StatefulLayout_emptyTextColor, NO_COLOR)
+        emptyTextAppearance =
+            a.getResourceId(R.styleable.StatefulLayout_emptyTextAppearance, NO_RESOURCE_ID)
+        emptyButtonText = a.getText(R.styleable.StatefulLayout_emptyButtonText)
+        emptyButtonTextColor = a.getColor(R.styleable.StatefulLayout_emptyButtonTextColor, NO_COLOR)
+        emptyButtonTextAppearance =
+            a.getResourceId(R.styleable.StatefulLayout_emptyButtonTextAppearance, NO_RESOURCE_ID)
+        emptyButtonBackground = a.getDrawable(R.styleable.StatefulLayout_emptyButtonBackground)
+        if (emptyButtonBackground == null) {
+            val color = a.getColor(R.styleable.StatefulLayout_emptyButtonBackground, NO_COLOR)
+            if (color != NO_COLOR) {
+                emptyButtonBackground = ColorDrawable(color)
+            }
+        }
+        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, false)
+
+        errorImage = a.getDrawable(R.styleable.StatefulLayout_errorImage)
+        errorText = a.getText(R.styleable.StatefulLayout_errorText)
+        errorTextColor = a.getColor(R.styleable.StatefulLayout_errorTextColor, NO_COLOR)
+        errorTextAppearance =
+            a.getResourceId(R.styleable.StatefulLayout_errorTextAppearance, NO_RESOURCE_ID)
+        errorButtonText = a.getText(R.styleable.StatefulLayout_errorButtonText)
+        errorButtonTextColor = a.getColor(R.styleable.StatefulLayout_errorButtonTextColor, NO_COLOR)
+        errorButtonTextAppearance =
+            a.getResourceId(R.styleable.StatefulLayout_errorButtonTextAppearance, NO_RESOURCE_ID)
+        errorButtonBackground = a.getDrawable(R.styleable.StatefulLayout_errorButtonBackground)
+        if (errorButtonBackground == null) {
+            val color = a.getColor(R.styleable.StatefulLayout_errorButtonBackground, NO_COLOR)
+            if (color != NO_COLOR) {
+                errorButtonBackground = ColorDrawable(color)
+            }
+        }
+        errorButtonVisible = a.getBoolean(R.styleable.StatefulLayout_errorButtonVisible, true)
+
+        loadingProgressColor = a.getColor(R.styleable.StatefulLayout_loadingProgressColor, NO_COLOR)
+        loadingProgressDrawable = a.getDrawable(R.styleable.StatefulLayout_loadingProgressDrawable)
+        loadingText = a.getText(R.styleable.StatefulLayout_loadingText)
+        loadingTextColor = a.getColor(R.styleable.StatefulLayout_loadingTextColor, NO_COLOR)
+        loadingTextAppearance =
+            a.getResourceId(R.styleable.StatefulLayout_loadingTextAppearance, NO_RESOURCE_ID)
+
+        defaultShowType = a.getInt(R.styleable.StatefulLayout_defaultShow, TYPE_LOADING_VIEW)
+        a.recycle()
+    }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         check(childCount <= 1) { "DynamicLayout can host only one direct child in layout" }
@@ -495,60 +552,4 @@ class StatefulLayout @JvmOverloads constructor(
         private const val NO_COLOR = -1
     }
 
-    init {
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.StatefulLayout,
-            defStyleAttr,
-            R.style.StatefulLayout_Style
-        )
-        emptyLayoutId = a.getResourceId(R.styleable.StatefulLayout_emptyLayout, NO_RESOURCE_ID)
-        loadingLayoutId = a.getResourceId(R.styleable.StatefulLayout_loadingLayout, NO_RESOURCE_ID)
-        errorLayoutId = a.getResourceId(R.styleable.StatefulLayout_errorLayout, NO_RESOURCE_ID)
-        emptyImage = a.getDrawable(R.styleable.StatefulLayout_emptyImage)
-        emptyText = a.getText(R.styleable.StatefulLayout_emptyText)
-        emptyTextColor = a.getColor(R.styleable.StatefulLayout_emptyTextColor, NO_COLOR)
-        emptyTextAppearance =
-            a.getResourceId(R.styleable.StatefulLayout_emptyTextAppearance, NO_RESOURCE_ID)
-        emptyButtonText = a.getText(R.styleable.StatefulLayout_emptyButtonText)
-        emptyButtonTextColor = a.getColor(R.styleable.StatefulLayout_emptyButtonTextColor, NO_COLOR)
-        emptyButtonTextAppearance =
-            a.getResourceId(R.styleable.StatefulLayout_emptyButtonTextAppearance, NO_RESOURCE_ID)
-        emptyButtonBackground = a.getDrawable(R.styleable.StatefulLayout_emptyButtonBackground)
-        if (emptyButtonBackground == null) {
-            val color = a.getColor(R.styleable.StatefulLayout_emptyButtonBackground, NO_COLOR)
-            if (color != NO_COLOR) {
-                emptyButtonBackground = ColorDrawable(color)
-            }
-        }
-        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, false)
-
-        errorImage = a.getDrawable(R.styleable.StatefulLayout_errorImage)
-        errorText = a.getText(R.styleable.StatefulLayout_errorText)
-        errorTextColor = a.getColor(R.styleable.StatefulLayout_errorTextColor, NO_COLOR)
-        errorTextAppearance =
-            a.getResourceId(R.styleable.StatefulLayout_errorTextAppearance, NO_RESOURCE_ID)
-        errorButtonText = a.getText(R.styleable.StatefulLayout_errorButtonText)
-        errorButtonTextColor = a.getColor(R.styleable.StatefulLayout_errorButtonTextColor, NO_COLOR)
-        errorButtonTextAppearance =
-            a.getResourceId(R.styleable.StatefulLayout_errorButtonTextAppearance, NO_RESOURCE_ID)
-        errorButtonBackground = a.getDrawable(R.styleable.StatefulLayout_errorButtonBackground)
-        if (errorButtonBackground == null) {
-            val color = a.getColor(R.styleable.StatefulLayout_errorButtonBackground, NO_COLOR)
-            if (color != NO_COLOR) {
-                errorButtonBackground = ColorDrawable(color)
-            }
-        }
-        errorButtonVisible = a.getBoolean(R.styleable.StatefulLayout_errorButtonVisible, true)
-
-        loadingProgressColor = a.getColor(R.styleable.StatefulLayout_loadingProgressColor, NO_COLOR)
-        loadingProgressDrawable = a.getDrawable(R.styleable.StatefulLayout_loadingProgressDrawable)
-        loadingText = a.getText(R.styleable.StatefulLayout_loadingText)
-        loadingTextColor = a.getColor(R.styleable.StatefulLayout_loadingTextColor, NO_COLOR)
-        loadingTextAppearance =
-            a.getResourceId(R.styleable.StatefulLayout_loadingTextAppearance, NO_RESOURCE_ID)
-
-        defaultShowType = a.getInt(R.styleable.StatefulLayout_defaultShow, TYPE_LOADING_VIEW)
-        a.recycle()
-    }
 }

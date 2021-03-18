@@ -69,6 +69,15 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         dismiss()
     }
 
+    init {
+        isFocusable = true
+        isOutsideTouchable = true
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
+        contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
+        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
     override fun showProgress(message: CharSequence?) {
         findViewById<TextView>(R.id.progress_text)?.text = message
         showDelayed()
@@ -124,15 +133,6 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     companion object {
         private const val MIN_SHOW_TIME: Long = 500L
         private const val MIN_DELAY: Long = 500L
-    }
-
-    init {
-        isFocusable = true
-        isOutsideTouchable = true
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
-        contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
-        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
 }

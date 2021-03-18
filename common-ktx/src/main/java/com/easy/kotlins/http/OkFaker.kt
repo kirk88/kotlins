@@ -509,6 +509,7 @@ class OkFaker<T> internal constructor(
             Builder<T>(OkRequestMethod.PATCH).apply(block)
 
     }
+
 }
 
 typealias Action<T> = (T) -> Unit

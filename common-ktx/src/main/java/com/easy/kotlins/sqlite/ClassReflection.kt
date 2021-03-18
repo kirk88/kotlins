@@ -1,40 +1,57 @@
 package com.easy.kotlins.sqlite.db
 
-import com.easy.kotlins.helper.opt
+import com.easy.kotlins.helper.ifNullOrEmpty
 import com.easy.kotlins.sqlite.SqlColumnElement
 import java.lang.reflect.Field
 
 internal class FieldWrapper(private val field: Field) {
 
-    private val columnAnnotation = field.getAnnotation(Column::class.java)
-    private val isBooleanType =
-        field.type == java.lang.Boolean.TYPE || field.type == java.lang.Boolean::class.java
+    private val column: Column?
+    private val isBooleanType: Boolean
+
+    val name: String
+
+    init {
+        field.isAccessible = true
+
+        column = field.getAnnotation(Column::class.java)
+        isBooleanType = field.type == java.lang.Boolean.TYPE
+                || field.type == java.lang.Boolean::class.java
+
+        name = column?.name.ifNullOrEmpty { field.name }
+    }
 
     fun read(reader: Any, values: MutableList<SqlColumnElement>) {
         val fieldValue = field.get(reader)
-        values.add(
-            if (columnAnnotation != null) {
-                SqlColumnElement.create(
-                    columnAnnotation.name.ifEmpty { field.name },
-                    if (fieldValue != null) ColumnConverters.get(
-                        columnAnnotation.converter
-                    ).fromValue(fieldValue) else fieldValue
-                )
-            } else {
-                SqlColumnElement.create(
-                    field.name,
-                    if (isBooleanType) (fieldValue as Boolean? ?: false).opt(1, 0) else fieldValue
-                )
-            }
-        )
+        values.add(if (column != null) {
+            SqlColumnElement.create(
+                name,
+                if (fieldValue != null) {
+                    ColumnConverters.get(
+                        column.converter
+                    ).fromValue(fieldValue)
+                } else {
+                    fieldValue
+                }
+            )
+        } else {
+            SqlColumnElement.create(
+                name,
+                if (isBooleanType) {
+                    if (fieldValue as Boolean? == true) 1 else 0
+                } else {
+                    fieldValue
+                }
+            )
+        })
     }
 
     fun write(writer: Any, value: SqlColumnValue) {
-        if (!value.isNull() && columnAnnotation != null) {
+        if (!value.isNull() && column != null) {
             field.set(
                 writer,
                 ColumnConverters.get(
-                    columnAnnotation.converter
+                    column.converter
                 ).toValue(value.value!!)
             )
         } else if (isBooleanType) {
@@ -73,9 +90,8 @@ internal object ClassReflections {
             val fields = mutableMapOf<String, FieldWrapper>()
             for (field in clazz.declaredFields) {
                 if (ignored(field)) continue
-
-                field.isAccessible = true
-                fields[field.name] = FieldWrapper(field)
+                val fieldWrapper = FieldWrapper(field)
+                fields[fieldWrapper.name] = fieldWrapper
             }
             ReflectAdapter(fields)
         }
