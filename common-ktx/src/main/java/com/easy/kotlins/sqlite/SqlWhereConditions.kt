@@ -1,13 +1,12 @@
 package com.easy.kotlins.sqlite
 
-import com.easy.kotlins.sqlite.db.TEXT
 import java.util.*
 import java.util.regex.Pattern
 
 
 interface SqlWhereCondition {
 
-    val whereCause: String
+    val where: String
 
     val whereArgs: Array<out String>?
 
@@ -17,7 +16,7 @@ interface SqlWhereCondition {
 
 }
 
-private class SqlWhereConditionImpl(override val whereCause: String, args: Array<out Any>? = null) :
+private class SqlWhereConditionImpl(override val where: String, args: Array<out Any>? = null) :
     SqlWhereCondition {
 
     override val whereArgs: Array<out String>? = args?.map { it.toString() }?.toTypedArray()
@@ -28,7 +27,7 @@ private class SqlWhereConditionImpl(override val whereCause: String, args: Array
         } else {
             null
         }
-        return SqlWhereConditionImpl("$whereCause AND ${condition.whereCause}", args)
+        return SqlWhereConditionImpl("$where AND ${condition.where}", args)
     }
 
     override fun or(condition: SqlWhereCondition): SqlWhereCondition {
@@ -37,11 +36,11 @@ private class SqlWhereConditionImpl(override val whereCause: String, args: Array
         } else {
             null
         }
-        return SqlWhereConditionImpl("$whereCause OR ${condition.whereCause}", args)
+        return SqlWhereConditionImpl("$where OR ${condition.where}", args)
     }
 
     override fun toString(): String {
-        return "SqlWhereCondition(whereCause: $whereCause, whereArgs: ${Arrays.toString(whereArgs)})"
+        return "SqlWhereCondition(where: $where, whereArgs: ${Arrays.toString(whereArgs)})"
     }
 
 }
@@ -54,7 +53,7 @@ fun SqlColumnProperty.lessThan(value: Int): SqlWhereCondition = SqlWhereConditio
 fun SqlColumnProperty.notNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} NOT NULL")
 fun SqlColumnProperty.isNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NULL")
 
-fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
+fun SqlColumnProperty.all(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
     ",",
     "${this.name} IN (",
     ")"
@@ -80,20 +79,20 @@ fun SqlColumnProperty.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondit
 
 private val ARG_PATTERN: Pattern = Pattern.compile("([^\\\\])\\{([^{}]+)\\}")
 
-internal fun applyArguments(whereClause: String, vararg args: Pair<String, Any>): String {
-    val argsMap = args.fold(hashMapOf<String, Any>()) { map, arg ->
+internal fun applyArguments(where: String, vararg whereArgs: Pair<String, Any>): String {
+    val argsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
         map[arg.first] = arg.second
         map
     }
-    return applyArguments(whereClause, argsMap)
+    return applyArguments(where, argsMap)
 }
 
-internal fun applyArguments(whereClause: String, args: Map<String, Any>): String {
-    val matcher = ARG_PATTERN.matcher(whereClause)
-    val buffer = StringBuffer(whereClause.length)
+internal fun applyArguments(where: String, whereArgs: Map<String, Any>): String {
+    val matcher = ARG_PATTERN.matcher(where)
+    val buffer = StringBuffer(where.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        val value = args[key] ?: throw IllegalStateException("Can't find a value for key $key")
+        val value = whereArgs[key] ?: throw IllegalStateException("Can't find a value for key $key")
 
         matcher.appendReplacement(buffer, "${matcher.group(1)}${value.toEscapedString()}")
     }
