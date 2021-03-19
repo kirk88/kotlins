@@ -3,6 +3,7 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import okhttp3.Request
 import okhttp3.Response
@@ -81,7 +82,6 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             private val readBytes: Long,
             private val totalBytes: Long
         ) {
-            @UiThread
             fun perform() {
                 mapper.onProgress(readBytes, totalBytes)
             }
