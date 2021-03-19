@@ -1,5 +1,6 @@
 package com.easy.kotlins.sqlite
 
+import com.easy.kotlins.sqlite.db.TEXT
 import java.util.*
 import java.util.regex.Pattern
 
@@ -45,77 +46,37 @@ private class SqlWhereConditionImpl(override val whereCause: String, args: Array
 
 }
 
-fun String.where(vararg whereArgs: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl(this, whereArgs)
+fun SqlColumnProperty.equal(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} = ${value.toEscapedString()}")
+fun SqlColumnProperty.like(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} LIKE ${value.toEscapedString()}")
+fun SqlColumnProperty.glob(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} GLOB ${value.toEscapedString()}")
+fun SqlColumnProperty.greaterThan(value: Int): SqlWhereCondition = SqlWhereConditionImpl("${this.name} >= $value")
+fun SqlColumnProperty.lessThan(value: Int): SqlWhereCondition = SqlWhereConditionImpl("${this.name} <= $value")
+fun SqlColumnProperty.notNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} NOT NULL")
+fun SqlColumnProperty.isNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NULL")
+
+fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
+    ",",
+    "${this.name} IN (",
+    ")"
+) { it.toEscapedString() })
+
+fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
+    ",",
+    "${this.name} NOT IN (",
+    ")"
+) { it.toEscapedString() })
+
+fun SqlColumnProperty.where(vararg whereArgs: Any): SqlWhereCondition {
+    return SqlWhereConditionImpl(this.name, whereArgs)
 }
 
-fun String.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
+fun SqlColumnProperty.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
     val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
         map[arg.first] = arg.second
         map
     }
-    return SqlWhereConditionImpl(applyArguments(this, whereArgsMap))
+    return SqlWhereConditionImpl(applyArguments(this.name, whereArgsMap))
 }
-
-fun String.equal(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this = ${value.toEscapedString()}")
-}
-
-fun String.like(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this LIKE ${value.toEscapedString()}")
-}
-
-fun String.glob(value: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this GLOB ${value.toEscapedString()}")
-}
-
-fun String.greaterThan(value: Int): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this >= $value")
-}
-
-fun String.lessThan(value: Int): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this <= $value")
-}
-
-fun String.any(vararg values: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl(values.joinToString(
-        ",",
-        "$this IN (",
-        ")"
-    ) { it.toEscapedString() })
-}
-
-fun String.none(vararg values: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl(values.joinToString(
-        ",",
-        "$this NOT IN (",
-        ")"
-    ) { it.toEscapedString() })
-}
-
-fun String.notNull(): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this NOT NULL")
-}
-
-fun String.isNull(): SqlWhereCondition {
-    return SqlWhereConditionImpl("$this IS NULL")
-}
-
-fun SqlColumnProperty.where(vararg whereArgs: Any): SqlWhereCondition =
-    this.name.where(*whereArgs)
-
-fun SqlColumnProperty.where(vararg whereArgs: Pair<String, Any>): SqlWhereCondition =
-    this.name.where(*whereArgs)
-
-fun SqlColumnProperty.equal(value: Any): SqlWhereCondition = this.name.equal(value)
-fun SqlColumnProperty.like(value: Any): SqlWhereCondition = this.name.like(value)
-fun SqlColumnProperty.glob(value: Any): SqlWhereCondition = this.name.glob(value)
-fun SqlColumnProperty.greaterThan(value: Int): SqlWhereCondition = this.name.greaterThan(value)
-fun SqlColumnProperty.lessThan(value: Int): SqlWhereCondition = this.name.lessThan(value)
-fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition = this.name.any(*values)
-fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition = this.name.none(*values)
-fun SqlColumnProperty.notNull(): SqlWhereCondition = this.name.notNull()
-fun SqlColumnProperty.isNull(): SqlWhereCondition = this.name.isNull()
 
 private val ARG_PATTERN: Pattern = Pattern.compile("([^\\\\])\\{([^{}]+)\\}")
 
