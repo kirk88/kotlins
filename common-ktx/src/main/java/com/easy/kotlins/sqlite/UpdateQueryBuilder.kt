@@ -98,6 +98,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
         whereArgs: Array<out String>?,
         conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE
     ): Int
+
 }
 
 class AndroidDatabaseUpdateQueryBuilder(
