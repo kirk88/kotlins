@@ -13,7 +13,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     private val values: MutableList<SqlColumnElement> = mutableListOf()
 
     private var whereApplied = false
-    private var where: String? = null
+    private var whereClause: String? = null
     private var whereArgs: Array<out String>? = null
 
     fun value(value: SqlColumnElement): UpdateQueryBuilder {
@@ -31,18 +31,18 @@ abstract class UpdateQueryBuilder(private val table: String) {
         return this
     }
 
-    fun whereArgs(whereCondition: SqlWhereCondition): UpdateQueryBuilder {
+    fun where(condition: SqlWhereCondition): UpdateQueryBuilder {
         if (this.whereApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
         this.whereApplied = true
-        this.where = whereCondition.where
-        this.whereArgs = whereCondition.whereArgs
+        this.whereClause = condition.whereClause
+        this.whereArgs = condition.whereArgs
         return this
     }
 
-    fun whereArgs(where: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
+    fun where(whereClause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
         if (this.whereApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
@@ -52,25 +52,25 @@ abstract class UpdateQueryBuilder(private val table: String) {
             map[arg.first] = arg.second
             map
         }
-        this.where = applyArguments(where, whereArgsMap)
+        this.whereClause = applyArguments(whereClause, whereArgsMap)
         return this
     }
 
-    fun whereArgs(where: String): UpdateQueryBuilder {
+    fun where(whereClause: String): UpdateQueryBuilder {
         if (this.whereApplied)
             throw IllegalStateException("Query selection was already applied.")
 
         this.whereApplied = true
-        this.where = where
+        this.whereClause = whereClause
         return this
     }
 
-    fun whereSimple(where: String, vararg whereArgs: Any): UpdateQueryBuilder {
+    fun where(whereClause: String, vararg whereArgs: Any): UpdateQueryBuilder {
         if (this.whereApplied)
             throw IllegalStateException("Query selection was already applied.")
 
         this.whereApplied = true
-        this.where = where
+        this.whereClause = whereClause
         this.whereArgs = whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
@@ -80,13 +80,13 @@ abstract class UpdateQueryBuilder(private val table: String) {
             this.values.toContentValues()
         else
             throw IllegalArgumentException("Empty values")
-        val finalSelection = if (this.whereApplied) this.where else null
-        val finalSelectionArgs = if (this.whereApplied) this.whereArgs else null
+        val finalWhereClause = if (this.whereApplied) this.whereClause else null
+        val finalWhereArgs = if (this.whereApplied) this.whereArgs else null
         return update(
             table,
             values,
-            finalSelection,
-            finalSelectionArgs,
+            finalWhereClause,
+            finalWhereArgs,
             conflictAlgorithm
         )
     }

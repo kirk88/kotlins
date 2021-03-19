@@ -50,18 +50,18 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun groupBy(value: String): SelectQueryBuilder {
+    fun groupBy(groupBy: String): SelectQueryBuilder {
         this.groupByApplied = true
-        this.groupBy.add(value)
+        this.groupBy.add(groupBy)
         return this
     }
 
     fun orderBy(
-        value: String,
+        orderBy: String,
         direction: SqlOrderDirection = SqlOrderDirection.ASC
     ): SelectQueryBuilder {
         this.orderByApplied = true
-        this.orderBy.add(if (direction == SqlOrderDirection.DESC) "$value DESC" else value)
+        this.orderBy.add(if (direction == SqlOrderDirection.DESC) "$orderBy DESC" else orderBy)
         return this
     }
 
@@ -95,45 +95,45 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun whereArgs(whereCondition: SqlWhereCondition): SelectQueryBuilder {
+    fun where(condition: SqlWhereCondition): SelectQueryBuilder {
         if (this.selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
         this.selectionApplied = true
-        this.selection = whereCondition.where
-        this.selectionArgs = whereCondition.whereArgs
+        this.selection = condition.whereClause
+        this.selectionArgs = condition.whereArgs
         return this
     }
 
-    fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): SelectQueryBuilder {
+    fun where(selection: String, vararg selectionArgs: Pair<String, Any>): SelectQueryBuilder {
         if (this.selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
         this.selectionApplied = true
-        this.selection = applyArguments(whereCause, *whereArgs)
+        this.selection = applyArguments(selection, *selectionArgs)
         return this
     }
 
-    fun whereArgs(whereCause: String): SelectQueryBuilder {
+    fun where(selection: String): SelectQueryBuilder {
         if (this.selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
         this.selectionApplied = true
-        this.selection = whereCause
+        this.selection = selection
         return this
     }
 
-    fun whereSimple(whereCause: String, vararg whereArgs: Any): SelectQueryBuilder {
+    fun where(selection: String, vararg selectionArgs: Any): SelectQueryBuilder {
         if (this.selectionApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 
         this.selectionApplied = true
-        this.selection = whereCause
-        this.selectionArgs = whereArgs.map { it.toString() }.toTypedArray()
+        this.selection = selection
+        this.selectionArgs = selectionArgs.map { it.toString() }.toTypedArray()
         return this
     }
 
