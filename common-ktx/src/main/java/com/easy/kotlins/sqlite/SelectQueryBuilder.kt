@@ -44,6 +44,12 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
+    fun columns(names: List<SqlColumnProperty>): SelectQueryBuilder {
+        this.columnsApplied = true
+        this.columns.addAll(names.map { it.name })
+        return this
+    }
+
     fun groupBy(value: String): SelectQueryBuilder {
         this.groupByApplied = true
         this.groupBy.add(value)
@@ -80,7 +86,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun having(having: String, vararg havingArgs: Pair<String, Any>): SelectQueryBuilder {
-        if (this.whereCauseApplied) {
+        if (this.havingApplied) {
             throw IllegalStateException("Query having was already applied.")
         }
 

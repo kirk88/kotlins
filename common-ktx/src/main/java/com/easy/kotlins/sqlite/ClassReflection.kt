@@ -65,12 +65,12 @@ internal class FieldWrapper(private val field: Field) {
 
 internal class ReflectAdapter(private val fields: Map<String, FieldWrapper>) {
 
-    fun read(reader: Any): Array<SqlColumnElement> {
+    fun read(reader: Any): List<SqlColumnElement> {
         val values = mutableListOf<SqlColumnElement>()
         for (field in fields) {
             field.value.read(reader, values)
         }
-        return values.toTypedArray()
+        return values
     }
 
     fun write(writer: Any, values: Map<String, SqlColumnValue>) {

@@ -26,6 +26,11 @@ abstract class UpdateQueryBuilder(private val table: String) {
         return this
     }
 
+    fun values(values: List<SqlColumnElement>): UpdateQueryBuilder {
+        this.values.addAll(values)
+        return this
+    }
+
     fun whereArgs(whereCondition: SqlWhereCondition): UpdateQueryBuilder {
         if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
@@ -38,7 +43,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun whereArgs(whereCause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
-        if (whereCauseApplied) {
+        if (this.whereCauseApplied) {
             throw IllegalStateException("Query selection was already applied.")
         }
 

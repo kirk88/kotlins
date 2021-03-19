@@ -12,6 +12,7 @@ interface SqlColumnElement {
     companion object {
         fun create(name: String, value: Any?): SqlColumnElement = SqlColumnElementImpl(name, value)
     }
+
 }
 
 interface SqlColumnProperty {

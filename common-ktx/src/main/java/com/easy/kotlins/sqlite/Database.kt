@@ -19,7 +19,15 @@ fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnElement): Long 
     return insert(table, null, values.toContentValues())
 }
 
+fun SQLiteDatabase.insert(table: String, values: List<SqlColumnElement>): Long {
+    return insert(table, null, values.toContentValues())
+}
+
 fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnElement): Long {
+    return insertOrThrow(table, null, values.toContentValues())
+}
+
+fun SQLiteDatabase.insertOrThrow(table: String, values: List<SqlColumnElement>): Long {
     return insertOrThrow(table, null, values.toContentValues())
 }
 
@@ -31,11 +39,27 @@ fun SQLiteDatabase.insertWithOnConflict(
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
 
+fun SQLiteDatabase.insertWithOnConflict(
+    table: String,
+    conflictAlgorithm: Int,
+    values: List<SqlColumnElement>
+): Long {
+    return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
+}
+
 fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnElement): Long {
     return replace(table, null, values.toContentValues())
 }
 
+fun SQLiteDatabase.replace(table: String, values: List<SqlColumnElement>): Long {
+    return replace(table, null, values.toContentValues())
+}
+
 fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnElement): Long {
+    return replaceOrThrow(table, null, values.toContentValues())
+}
+
+fun SQLiteDatabase.replaceOrThrow(table: String, values: List<SqlColumnElement>): Long {
     return replaceOrThrow(table, null, values.toContentValues())
 }
 
@@ -54,6 +78,30 @@ fun SQLiteDatabase.delete(
     return delete(table, whereCondition.whereCause, whereCondition.whereArgs)
 }
 
+fun SQLiteDatabase.updateBuilder(
+    table: String,
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, table)
+}
+
+fun SQLiteDatabase.updateBuilder(
+    table: String,
+    vararg values: SqlColumnElement
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, table).also {
+        it.values(*values)
+    }
+}
+
+fun SQLiteDatabase.updateBuilder(
+    table: String,
+    values: List<SqlColumnElement>
+): UpdateQueryBuilder {
+    return AndroidDatabaseUpdateQueryBuilder(this, table).also {
+        it.values(values)
+    }
+}
+
 fun SQLiteDatabase.queryBuilder(table: String): SelectQueryBuilder {
     return AndroidDatabaseSelectQueryBuilder(this, table)
 }
@@ -67,18 +115,12 @@ fun SQLiteDatabase.queryBuilder(
     }
 }
 
-fun SQLiteDatabase.updateBuilder(
+fun SQLiteDatabase.queryBuilder(
     table: String,
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table)
-}
-
-fun SQLiteDatabase.updateBuilder(
-    table: String,
-    vararg values: SqlColumnElement
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table).also {
-        it.values(*values)
+    columns: List<SqlColumnProperty>
+): SelectQueryBuilder {
+    return AndroidDatabaseSelectQueryBuilder(this, table).also {
+        it.columns(columns)
     }
 }
 
@@ -101,39 +143,26 @@ fun SQLiteDatabase.createTable(
 ) {
     val escapedTableName = table.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
-    execSQL(
-        columns.joinToString(
-            ", ",
-            prefix = "CREATE TABLE $ifNotExistsText `$escapedTableName`(",
-            postfix = ");"
-        ) { col -> col.render() }
-    )
+    execSQL(columns.joinToString(
+        ", ",
+        prefix = "CREATE TABLE $ifNotExistsText `$escapedTableName`(",
+        postfix = ");"
+    ) { col -> col.render() })
 }
 
-fun SQLiteDatabase.dropTable(table: String, ifExists: Boolean = false) {
+fun SQLiteDatabase.createTable(
+    table: String,
+    ifNotExists: Boolean = false,
+    columns: List<SqlColumnProperty>
+) = createTable(table, ifNotExists, *columns.toTypedArray())
+
+fun SQLiteDatabase.dropTable(
+    table: String,
+    ifExists: Boolean = false
+) {
     val escapedTableName = table.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
     execSQL("DROP TABLE $ifExistsText `$escapedTableName`;")
-}
-
-fun SQLiteDatabase.createIndex(
-    indexName: String,
-    table: String,
-    unique: Boolean = false,
-    ifNotExists: Boolean = false,
-    vararg columns: String
-) {
-    val escapedIndexName = indexName.replace("`", "``")
-    val escapedTableName = table.replace("`", "``")
-    val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
-    val uniqueText = if (unique) "UNIQUE" else ""
-    execSQL(
-        columns.joinToString(
-            separator = ",",
-            prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
-            postfix = ");"
-        )
-    )
 }
 
 fun SQLiteDatabase.createIndex(
@@ -147,19 +176,30 @@ fun SQLiteDatabase.createIndex(
     val escapedTableName = tableName.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     val uniqueText = if (unique) "UNIQUE" else ""
-    execSQL(
-        columns.joinToString(
-            separator = ",",
-            prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
-            postfix = ");"
-        ) { it.name }
-    )
+    execSQL(columns.joinToString(
+        separator = ",",
+        prefix = "CREATE $uniqueText INDEX $ifNotExistsText `$escapedIndexName` ON `$escapedTableName`(",
+        postfix = ");"
+    ) { it.name })
 }
 
-fun SQLiteDatabase.dropIndex(indexName: String, ifExists: Boolean = false) {
+fun SQLiteDatabase.createIndex(
+    indexName: String,
+    tableName: String,
+    unique: Boolean = false,
+    ifNotExists: Boolean = false,
+    columns: List<SqlColumnProperty>
+) = createIndex(indexName, tableName, unique, ifNotExists, *columns.toTypedArray())
+
+fun SQLiteDatabase.dropIndex(
+    indexName: String,
+    tableName: String,
+    ifExists: Boolean = false
+) {
     val escapedIndexName = indexName.replace("`", "``")
+    val escapedTableName = tableName.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
-    execSQL("DROP INDEX $ifExistsText `$escapedIndexName`;")
+    execSQL("DROP INDEX $ifExistsText `$escapedIndexName` ON `$escapedTableName`;")
 }
 
 fun SQLiteDatabase.createColumn(
@@ -169,28 +209,34 @@ fun SQLiteDatabase.createColumn(
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
-        rawQuery("SELECT * FROM $table LIMIT 0", null).use {
-            it.getColumnIndex(column.name) != -1
+        rawQuery("SELECT * FROM `$escapedTableName` LIMIT 0", null).use {
+            it.getColumnIndex(column.name) > -1
         }
     } else {
         false
     }
     if (!exists) {
-        execSQL("ALTER TABLE $escapedTableName ADD ${column.render()}")
+        execSQL("ALTER TABLE `$escapedTableName` ADD ${column.render()};")
     }
 }
 
 fun SQLiteDatabase.createColumns(
-    table: String,
+    tableName: String,
     ifNotExists: Boolean = false,
     vararg columns: SqlColumnProperty
 ) {
     transaction {
         for (column in columns) {
-            createColumn(table, ifNotExists, column)
+            createColumn(tableName, ifNotExists, column)
         }
     }
 }
+
+fun SQLiteDatabase.createColumns(
+    tableName: String,
+    ifNotExists: Boolean = false,
+    columns: List<SqlColumnProperty>
+) = createColumns(tableName, ifNotExists, *columns.toTypedArray())
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
@@ -213,19 +259,19 @@ fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     return values
 }
 
-fun Iterable<SqlColumnElement>.toContentValues(): ContentValues {
-    return this.toList().toTypedArray().toContentValues()
+fun List<SqlColumnElement>.toContentValues(): ContentValues {
+    return this.toTypedArray().toContentValues()
 }
 
-fun Any.toColumnElements(): Array<SqlColumnElement> {
+fun Any.toColumnElements(): List<SqlColumnElement> {
     check(javaClass.isAnnotationPresent(DatabaseTable::class.java)) { "Class $javaClass must be annotated with DatabaseTable" }
     return ClassReflections.getAdapter(javaClass) {
         Modifier.isTransient(it.modifiers) || Modifier.isStatic(it.modifiers)
     }.read(this)
 }
 
-fun Map<out String, Any?>.toColumnElements(): Array<SqlColumnElement> {
-    return map { SqlColumnElement.create(it.key, it.value) }.toTypedArray()
+fun Map<out String, Any?>.toColumnElements(): List<SqlColumnElement> {
+    return map { SqlColumnElement.create(it.key, it.value) }
 }
 
 abstract class ManagedSQLiteOpenHelper(
@@ -263,4 +309,5 @@ abstract class ManagedSQLiteOpenHelper(
             db?.close()
         }
     }
+
 }
