@@ -52,7 +52,7 @@ fun SqlColumnProperty.greaterThan(value: Int): SqlWhereCondition = SqlWhereCondi
 fun SqlColumnProperty.lessThan(value: Int): SqlWhereCondition = SqlWhereConditionImpl("${this.name} <= $value")
 fun SqlColumnProperty.notNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} NOT NULL")
 fun SqlColumnProperty.isNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NULL")
-fun SqlColumnProperty.all(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
+fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
     ",",
     "${this.name} IN (",
     ")"

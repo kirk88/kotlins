@@ -266,7 +266,9 @@ fun List<SqlColumnElement>.toContentValues(): ContentValues {
 fun Any.toColumnElements(): List<SqlColumnElement> {
     check(javaClass.isAnnotationPresent(DatabaseTable::class.java)) { "Class $javaClass must be annotated with DatabaseTable" }
     return ClassReflections.getAdapter(javaClass) {
-        Modifier.isTransient(it.modifiers) || Modifier.isStatic(it.modifiers)
+        Modifier.isTransient(it.modifiers)
+                || Modifier.isStatic(it.modifiers)
+                || it.isAnnotationPresent(IgnoreOnTable::class.java)
     }.read(this)
 }
 

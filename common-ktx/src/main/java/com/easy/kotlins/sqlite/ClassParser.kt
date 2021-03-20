@@ -19,6 +19,9 @@ annotation class Column(
 @Target(AnnotationTarget.CLASS)
 annotation class DatabaseTable
 
+@Target(AnnotationTarget.FIELD)
+annotation class IgnoreOnTable
+
 inline fun <reified T : Any> classParser(): MapRowParser<T> = classParser(T::class.java)
 
 @PublishedApi
@@ -131,7 +134,9 @@ internal class ClassFieldParser<T>(
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
         val target = converter.newInstance()
         ClassReflections.getAdapter(target.javaClass) {
-            Modifier.isTransient(it.modifiers) || Modifier.isStatic(it.modifiers)
+            Modifier.isTransient(it.modifiers)
+                    || Modifier.isStatic(it.modifiers)
+                    || it.isAnnotationPresent(IgnoreOnTable::class.java)
         }.write(target, row)
         @Suppress("UNCHECKED_CAST")
         return target as T

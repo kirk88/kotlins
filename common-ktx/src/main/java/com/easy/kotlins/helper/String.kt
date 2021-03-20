@@ -217,24 +217,22 @@ fun CharSequence.withSpan(
     }
 }
 
-fun String.justify(ems: Int): SpannableStringBuilder {
-    val builder = SpannableStringBuilder()
-    val chars = this.toCharArray()
-    if (chars.size >= ems || chars.size <= 1) {
-        return builder.append(this)
+fun CharSequence.justify(ems: Int): SpannableStringBuilder {
+    val builder = SpannableStringBuilder(this)
+    val size = length
+    if (size >= ems || size <= 1) {
+        return builder
     }
-    return builder.apply {
-        val size = chars.size
-        val scale = (ems - size).toFloat() / (size - 1)
-        for (index in 0 until size) {
-            append(chars[index])
-            if (index == size - 1) break
-
-            val blank = SpannableString("　")
-            blank.setSpan(ScaleXSpan(scale), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            append(blank)
-        }
+    val scale = (ems - size).toFloat() / (size - 1)
+    val expectSize = size * 2 - 2
+    var index = 0
+    while (index < expectSize) {
+        val blank = SpannableString("　")
+        blank.setSpan(ScaleXSpan(scale), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        builder.insert(index + 1, blank)
+        index += 2
     }
+    return builder
 }
 
 inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R =
