@@ -147,8 +147,12 @@ class StatefulLayout @JvmOverloads constructor(
         if (childCount == 1) {
             setContentView(getChildAt(0))
         }
+    }
 
-        show(defaultShowType)
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        post { show(defaultShowType) }
     }
 
     override fun showLoading() {
