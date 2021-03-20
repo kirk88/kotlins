@@ -219,12 +219,11 @@ fun CharSequence.withSpan(
 
 fun CharSequence.justify(ems: Int): SpannableStringBuilder {
     val builder = SpannableStringBuilder(this)
-    val size = length
-    if (size >= ems || size <= 1) {
+    if (length >= ems || length <= 1) {
         return builder
     }
-    val scale = (ems - size).toFloat() / (size - 1)
-    val expectSize = size * 2 - 2
+    val scale = (ems - length).toFloat() / (length - 1)
+    val expectSize = length * 2 - 2
     var index = 0
     while (index < expectSize) {
         val blank = SpannableString("　")
