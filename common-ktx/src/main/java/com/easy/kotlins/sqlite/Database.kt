@@ -74,13 +74,13 @@ fun SQLiteDatabase.delete(
     return delete(table, whereCondition.whereClause, whereCondition.whereArgs)
 }
 
-fun SQLiteDatabase.updateBuilder(
+fun SQLiteDatabase.update(
     table: String,
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table)
 }
 
-fun SQLiteDatabase.updateBuilder(
+fun SQLiteDatabase.update(
     table: String,
     vararg values: SqlColumnElement
 ): UpdateQueryBuilder {
@@ -89,7 +89,7 @@ fun SQLiteDatabase.updateBuilder(
     }
 }
 
-fun SQLiteDatabase.updateBuilder(
+fun SQLiteDatabase.update(
     table: String,
     values: List<SqlColumnElement>
 ): UpdateQueryBuilder {
@@ -98,11 +98,11 @@ fun SQLiteDatabase.updateBuilder(
     }
 }
 
-fun SQLiteDatabase.queryBuilder(table: String): SelectQueryBuilder {
+fun SQLiteDatabase.query(table: String): SelectQueryBuilder {
     return AndroidDatabaseSelectQueryBuilder(this, table)
 }
 
-fun SQLiteDatabase.queryBuilder(
+fun SQLiteDatabase.query(
     table: String,
     vararg columns: SqlColumnProperty
 ): SelectQueryBuilder {
@@ -111,7 +111,7 @@ fun SQLiteDatabase.queryBuilder(
     }
 }
 
-fun SQLiteDatabase.queryBuilder(
+fun SQLiteDatabase.query(
     table: String,
     columns: List<SqlColumnProperty>
 ): SelectQueryBuilder {
