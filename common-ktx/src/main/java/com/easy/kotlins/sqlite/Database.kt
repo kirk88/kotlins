@@ -237,26 +237,34 @@ fun SQLiteDatabase.createColumns(
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
     for (element in this) {
-        val key = element.name
-        when (val value = element.value) {
-            null -> values.putNull(key)
-            is Boolean -> values.put(key, value)
-            is Byte -> values.put(key, value)
-            is ByteArray -> values.put(key, value)
-            is Double -> values.put(key, value)
-            is Float -> values.put(key, value)
-            is Int -> values.put(key, value)
-            is Long -> values.put(key, value)
-            is Short -> values.put(key, value)
-            is String -> values.put(key, value)
-            else -> throw IllegalArgumentException("Non-supported value type ${value.javaClass.name}")
-        }
+        values.put(element)
     }
     return values
 }
 
 fun List<SqlColumnElement>.toContentValues(): ContentValues {
-    return this.toTypedArray().toContentValues()
+    val values = ContentValues()
+    for (element in this) {
+        values.put(element)
+    }
+    return values
+}
+
+private fun ContentValues.put(element: SqlColumnElement) {
+    val key = element.name
+    when (val value = element.value) {
+        is String -> put(key, value)
+        is Int -> put(key, value)
+        is Long -> put(key, value)
+        is Double -> put(key, value)
+        is Float -> put(key, value)
+        is Short -> put(key, value)
+        is Boolean -> put(key, value)
+        is Byte -> put(key, value)
+        is ByteArray -> put(key, value)
+        null -> putNull(key)
+        else -> throw IllegalArgumentException("Non-supported value type ${value.javaClass.name}")
+    }
 }
 
 fun Any.toColumnElements(): List<SqlColumnElement> {
