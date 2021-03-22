@@ -2,6 +2,7 @@
 
 package com.easy.kotlins.sqlite.db
 
+import com.easy.kotlins.sqlite.db.*
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 import java.util.*

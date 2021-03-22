@@ -1,12 +1,8 @@
 @file:Suppress("unused")
-
 package com.easy.kotlins.sqlite.db
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
-import com.easy.kotlins.sqlite.SqlColumnElement
-import com.easy.kotlins.sqlite.SqlWhereCondition
-import com.easy.kotlins.sqlite.applyArguments
 
 abstract class UpdateQueryBuilder(private val table: String) {
 

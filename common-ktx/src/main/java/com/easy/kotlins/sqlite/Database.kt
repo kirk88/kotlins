@@ -6,10 +6,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.easy.kotlins.sqlite.SqlColumnElement
-import com.easy.kotlins.sqlite.SqlColumnProperty
-import com.easy.kotlins.sqlite.SqlWhereCondition
-import com.easy.kotlins.sqlite.applyArguments
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 

@@ -9,8 +9,6 @@ class JavaSqlitePrimitives {
 
     static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
 
-    static final Class<?> c = Character.class;
-
     static {
         PRIMITIVES_TO_WRAPPERS = new HashMap<>();
         PRIMITIVES_TO_WRAPPERS.put(boolean.class, Boolean.class);

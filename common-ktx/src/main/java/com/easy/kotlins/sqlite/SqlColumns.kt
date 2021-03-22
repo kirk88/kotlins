@@ -1,7 +1,4 @@
-package com.easy.kotlins.sqlite
-
-import com.easy.kotlins.sqlite.db.SqlType
-
+package com.easy.kotlins.sqlite.db
 
 interface SqlColumnElement {
 

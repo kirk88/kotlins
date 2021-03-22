@@ -1,7 +1,6 @@
 package com.easy.kotlins.sqlite.db
 
 import com.easy.kotlins.helper.ifNullOrEmpty
-import com.easy.kotlins.sqlite.SqlColumnElement
 import java.lang.reflect.Field
 
 internal class FieldWrapper(private val field: Field) {

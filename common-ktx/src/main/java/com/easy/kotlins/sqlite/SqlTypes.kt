@@ -1,9 +1,5 @@
 @file:Suppress("unused", "FunctionName")
-
 package com.easy.kotlins.sqlite.db
-
-import com.easy.kotlins.sqlite.SqlColumnProperty
-import com.easy.kotlins.sqlite.and
 
 interface SqlType {
     val name: String

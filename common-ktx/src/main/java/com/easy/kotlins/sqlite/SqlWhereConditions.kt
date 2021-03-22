@@ -1,14 +1,12 @@
-package com.easy.kotlins.sqlite
+package com.easy.kotlins.sqlite.db
 
-import java.util.*
 import java.util.regex.Pattern
-
 
 interface SqlWhereCondition {
 
     val whereClause: String
 
-    val whereArgs: Array<out String>?
+    val whereArgs: Array<out String>
 
     infix fun and(condition: SqlWhereCondition): SqlWhereCondition
 
@@ -16,55 +14,89 @@ interface SqlWhereCondition {
 
 }
 
-private class SqlWhereConditionImpl(override val whereClause: String, args: Array<out Any>? = null) :
+private class SqlWhereConditionImpl(
+    override val whereClause: String,
+    vararg args: Any
+) :
     SqlWhereCondition {
 
-    override val whereArgs: Array<out String>? = args?.map { it.toString() }?.toTypedArray()
+    override val whereArgs: Array<out String> = args.map { it.toEscapedString() }.toTypedArray()
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = if (whereArgs != null || condition.whereArgs != null) {
-            (whereArgs.orEmpty().toList() + condition.whereArgs.orEmpty()).toTypedArray()
-        } else {
-            null
-        }
+        val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
         return SqlWhereConditionImpl("$whereClause AND ${condition.whereClause}", args)
     }
 
     override fun or(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = if (whereArgs != null || condition.whereArgs != null) {
-            (whereArgs.orEmpty().toList() + condition.whereArgs.orEmpty()).toTypedArray()
-        } else {
-            null
-        }
+        val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
         return SqlWhereConditionImpl("$whereClause OR ${condition.whereClause}", args)
     }
 
     override fun toString(): String {
-        return "SqlWhereCondition(where: $whereClause, whereArgs: ${Arrays.toString(whereArgs)})"
+        return "SqlWhereCondition(where: $whereClause, whereArgs: ${whereArgs.contentToString()})"
     }
 
 }
 
-fun SqlColumnProperty.equal(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} = ${value.toEscapedString()}")
-fun SqlColumnProperty.like(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} LIKE ${value.toEscapedString()}")
-fun SqlColumnProperty.glob(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} GLOB ${value.toEscapedString()}")
-fun SqlColumnProperty.greaterThan(value: Int): SqlWhereCondition = SqlWhereConditionImpl("${this.name} >= $value")
-fun SqlColumnProperty.lessThan(value: Int): SqlWhereCondition = SqlWhereConditionImpl("${this.name} <= $value")
-fun SqlColumnProperty.notNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} NOT NULL")
+fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} = ?", value)
+
+fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} <> ?", value)
+
+fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} LIKE ?", value)
+
+fun SqlColumnProperty.glob(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} GLOB ?", value)
+
+fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} > ?", value)
+
+fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} < ?", value)
+
+fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} >= ?", value)
+
+fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} <= ?", value)
+
+fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} BETWEEN ? AND ?", value1, value2)
+
+fun SqlColumnProperty.notNull(): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name} IS NOT NULL")
+
 fun SqlColumnProperty.isNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NULL")
-fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
-    ",",
-    "${this.name} IN (",
-    ")"
-) { it.toEscapedString() })
-fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition = SqlWhereConditionImpl(values.joinToString(
-    ",",
-    "${this.name} NOT IN (",
-    ")"
-) { it.toEscapedString() })
+fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition {
+    val placeholders = arrayOfNulls<String>(values.size)
+    placeholders.fill("?")
+    return SqlWhereConditionImpl(
+        placeholders.joinToString(
+            ",",
+            "${this.name} IN (",
+            ")"
+        ), values
+    )
+}
+
+fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
+    val placeholders = arrayOfNulls<String>(values.size)
+    placeholders.fill("?")
+    return SqlWhereConditionImpl(
+        placeholders.joinToString(
+            ",",
+            "${this.name} NOT IN (",
+            ")"
+        ), values
+    )
+}
+
 fun SqlColumnProperty.whereArgs(vararg whereArgs: Any): SqlWhereCondition {
     return SqlWhereConditionImpl(this.name, whereArgs)
 }
+
 fun SqlColumnProperty.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
     val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
         map[arg.first] = arg.second
@@ -88,9 +120,8 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        val value = whereArgs[key] ?: throw IllegalStateException("Can't find a value for key $key")
-
-        matcher.appendReplacement(buffer, "${matcher.group(1)}${value.toEscapedString()}")
+        val value = whereArgs[key]
+        matcher.appendReplacement(buffer, "${matcher.group(1)}${value}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
