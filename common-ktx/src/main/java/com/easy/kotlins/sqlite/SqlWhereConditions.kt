@@ -17,8 +17,7 @@ interface SqlWhereCondition {
 private class SqlWhereConditionImpl(
     override val whereClause: String,
     vararg args: Any
-) :
-    SqlWhereCondition {
+) : SqlWhereCondition {
 
     override val whereArgs: Array<out String> = args.map { it.toEscapedString() }.toTypedArray()
 
