@@ -76,7 +76,8 @@ fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition {
             ",",
             "${this.name} IN (",
             ")"
-        ), values
+        ),
+        *values
     )
 }
 
@@ -88,7 +89,8 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
             ",",
             "${this.name} NOT IN (",
             ")"
-        ), values
+        ),
+        *values
     )
 }
 
