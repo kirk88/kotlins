@@ -233,18 +233,22 @@ internal class OkRequest(
             urlBuilder.scheme(httpUrl.scheme)
                 .host(httpUrl.host)
                 .port(httpUrl.port)
-                .fragment(httpUrl.encodedFragment)
-
-            val pathSegments = httpUrl.pathSegments
-            for (pathSegment in pathSegments) {
-                urlBuilder.addPathSegment(pathSegment)
-            }
 
             val username = httpUrl.username
             val password = httpUrl.password
             if (username.isNotEmpty() || password.isNotEmpty()) {
                 urlBuilder.username(username)
                 urlBuilder.password(password)
+            }
+
+            val pathSegments = httpUrl.pathSegments
+            for (pathSegment in pathSegments) {
+                urlBuilder.addPathSegment(pathSegment)
+            }
+
+            val fragment = httpUrl.fragment
+            if (!fragment.isNullOrEmpty()) {
+                urlBuilder.fragment(fragment)
             }
 
             val query = httpUrl.query
