@@ -7,6 +7,7 @@ import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.http.HttpMethod
 import java.io.File
 import java.io.IOException
 
@@ -365,6 +366,7 @@ internal class OkRequest(
                 requestBody != null -> requestBody
                 formBuilderApplied -> formBuilder?.build()
                 multipartBuilderApplied -> multipartBuilder?.build()
+                HttpMethod.requiresRequestBody(method.name) -> formBuilder?.build()
                 else -> null
             }
 
