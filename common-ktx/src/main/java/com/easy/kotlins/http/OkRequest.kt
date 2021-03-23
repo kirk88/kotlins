@@ -167,6 +167,7 @@ internal class OkRequest(
                 it.addQueryParameter(name, value)
             }
         }
+
         private val requestBuilder: Request.Builder = Request.Builder().also {
             val cacheControl = config.cacheControl
             if (cacheControl != null) {
@@ -195,7 +196,9 @@ internal class OkRequest(
 
         private var multipartBuilderApplied = false
         private var multipartBuilder: MultipartBody.Builder? = null
-            get() = field ?: MultipartBody.Builder().also { field = it }
+            get() = field ?: MultipartBody.Builder().also {
+                field = it
+            }
             set(value) {
                 field = value
                 formBuilderApplied = false
@@ -223,17 +226,30 @@ internal class OkRequest(
             } else if (baseUrl != null) {
                 (baseUrl.toUrl() + url).toString().toHttpUrl()
             } else {
-                throw IllegalArgumentException("invalid url: $url")
+                throw IllegalArgumentException("Invalid url: $url")
             }
 
             urlBuilder.scheme(httpUrl.scheme)
-                .encodedUsername(httpUrl.encodedUsername)
-                .encodedPassword(httpUrl.encodedPassword)
                 .host(httpUrl.host)
                 .port(httpUrl.port)
-                .encodedPath(httpUrl.encodedPath)
-                .encodedQuery(httpUrl.encodedQuery)
-                .encodedFragment(httpUrl.encodedFragment)
+                .fragment(httpUrl.encodedFragment)
+
+            val pathSegments = httpUrl.pathSegments
+            for (pathSegment in pathSegments) {
+                urlBuilder.addPathSegment(pathSegment)
+            }
+
+            val username = httpUrl.username
+            val password = httpUrl.password
+            if (username.isNotEmpty() || password.isNotEmpty()) {
+                urlBuilder.username(username)
+                urlBuilder.password(password)
+            }
+
+            val query = httpUrl.query
+            if (!query.isNullOrEmpty()) {
+                urlBuilder.query(query)
+            }
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
@@ -355,6 +371,7 @@ internal class OkRequest(
             val request = requestBuilder.url(urlBuilder.build())
                 .method(method.name, body)
                 .build()
+
             return OkRequest(
                 requireNotNull(client) { "OkHttpClient must not be null" },
                 request,

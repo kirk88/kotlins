@@ -21,6 +21,10 @@ class OkConfig internal constructor() {
 
     fun setter(): Setter = Setter(this)
 
+    override fun toString(): String {
+        return "OkConfig(client=$client, baseUrl=$baseUrl, cacheControl=$cacheControl, username=$username, password=$password, headers=$headers, queryParameters=$queryParameters, formParameters=$formParameters)"
+    }
+
     class Setter internal constructor(private val config: OkConfig) {
 
         private var client: OkHttpClient? = null
