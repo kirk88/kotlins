@@ -8,7 +8,7 @@ import java.lang.reflect.Type
 internal val gson = Gson()
 
 @PublishedApi
-internal fun type(parametrized: Class<*>, vararg parameterClasses: Class<*>): Type? {
+internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): Type? {
     return `$Gson$Types`.canonicalize(
         `$Gson$Types`.newParameterizedTypeWithOwner(
             null,
@@ -23,7 +23,7 @@ inline fun <reified T> String.parseJsonObject(): T {
 }
 
 inline fun <reified T> String.parseJsonArray(): List<T> {
-    return gson.fromJson(this, type(ArrayList::class.java, T::class.java))
+    return gson.fromJson(this, typeOf(ArrayList::class.java, T::class.java))
 }
 
 inline fun <reified T> JsonObject.parse(): T {
@@ -31,7 +31,7 @@ inline fun <reified T> JsonObject.parse(): T {
 }
 
 inline fun <reified T> JsonArray.parse(): List<T> {
-    return gson.fromJson(this, type(ArrayList::class.java, T::class.java))
+    return gson.fromJson(this, typeOf(ArrayList::class.java, T::class.java))
 }
 
 fun Any.toJsonObject(): JsonObject = JsonParser.parseString(toJson()).asJsonObject
@@ -47,7 +47,7 @@ val JsonArray.values: List<JsonElement>
         if (size() == 0) {
             return emptyList()
         }
-        return listOf<JsonElement>(*this.toList().toTypedArray())
+        return this.toList()
     }
 
 fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
