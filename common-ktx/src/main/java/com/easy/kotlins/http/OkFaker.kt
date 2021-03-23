@@ -5,8 +5,8 @@ package com.easy.kotlins.http
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.easy.kotlins.helper.forEach
-import com.easy.kotlins.helper.toJSON
-import com.easy.kotlins.helper.toJSONObject
+import com.easy.kotlins.helper.toJson
+import com.easy.kotlins.helper.toJsonObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -549,7 +549,7 @@ class RequestPairs<K, V>(
     }
 
     override fun toString(): String {
-        return pairs.toJSON()
+        return pairs.toJson()
     }
 
     override fun iterator(): Iterator<Map.Entry<K, V>> {
@@ -582,11 +582,17 @@ fun requestPairsOf(
 ): RequestPairs<String, Any?> {
     return RequestPairs<String, Any?>().apply {
         if (copyFrom is RequestPairs<*, *>) {
-            copyFrom.toString().toJSONObject()
+            for ((key, value) in copyFrom) {
+                if (key == null) continue
+                put(key.toString(), value)
+            }
         } else {
-            copyFrom.toJSONObject()
-        }.forEach { key, value ->
-            put(key, value.asString())
+            copyFrom.toJsonObject().forEach { key, value ->
+                when {
+                    value.isJsonPrimitive -> put(key, value.asString)
+                    value.isJsonNull -> put(key, null)
+                }
+            }
         }
     }.also { operation?.invoke(it) }
 }

@@ -17,9 +17,6 @@ annotation class Column(
     val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class
 )
 
-@Target(AnnotationTarget.CLASS)
-annotation class DatabaseTable
-
 @Target(AnnotationTarget.FIELD)
 annotation class IgnoreOnTable
 

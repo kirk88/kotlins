@@ -268,16 +268,11 @@ private fun ContentValues.put(element: SqlColumnElement) {
 }
 
 fun Any.toColumnElements(): List<SqlColumnElement> {
-    check(javaClass.isAnnotationPresent(DatabaseTable::class.java)) { "Class $javaClass must be annotated with DatabaseTable" }
     return ClassReflections.getAdapter(javaClass) {
         Modifier.isTransient(it.modifiers)
                 || Modifier.isStatic(it.modifiers)
                 || it.isAnnotationPresent(IgnoreOnTable::class.java)
     }.read(this)
-}
-
-fun Map<out String, Any?>.toColumnElements(): List<SqlColumnElement> {
-    return map { SqlColumnElement.create(it.key, it.value) }
 }
 
 abstract class ManagedSQLiteOpenHelper(

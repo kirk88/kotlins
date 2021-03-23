@@ -66,7 +66,7 @@ dependencies {
     api rootProject.ext.dependencies.recyclerview
     api rootProject.ext.dependencies.okhttp
     api rootProject.ext.dependencies.okhttp_logging
-    api rootProject.ext.dependencies.jackson
+    api rootProject.ext.dependencies.gson
     api rootProject.ext.dependencies.coil
 }
 
