@@ -85,6 +85,11 @@ class OkConfig internal constructor() {
             this.headers.putAll(headers)
         }
 
+        fun headers(headers: RequestPairs<String, String>.() -> Unit) = apply {
+            headersApplied = true
+            this.headers.putAll(RequestPairs<String, String>().apply(headers).toMap())
+        }
+
         fun queryParameters(vararg parameters: Pair<String, String>) = apply {
             queryParametersApplied = true
             queryParameters.putAll(parameters)
@@ -103,6 +108,11 @@ class OkConfig internal constructor() {
         fun formParameters(parameters: Map<String, String>) = apply {
             formParametersApplied = true
             formParameters.putAll(parameters)
+        }
+
+        fun formParameters(parameters: RequestPairs<String, String>.() -> Unit) = apply {
+            formParametersApplied = true
+            formParameters.putAll(RequestPairs<String, String>().apply(parameters).toMap())
         }
 
         fun apply() {
