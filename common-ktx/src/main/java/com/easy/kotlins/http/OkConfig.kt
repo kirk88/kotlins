@@ -29,11 +29,11 @@ class OkConfig internal constructor() {
         private var username: String? = null
         private var password: String? = null
         private var headersApplied = false
-        private val headers: MutableMap<String, String> by lazy { mutableMapOf() }
+        private val headers: MutableMap<String, Any> by lazy { mutableMapOf() }
         private var queryParametersApplied = false
-        private val queryParameters: MutableMap<String, String> by lazy { mutableMapOf() }
+        private val queryParameters: MutableMap<String, Any> by lazy { mutableMapOf() }
         private var formParametersApplied = false
-        private val formParameters: MutableMap<String, String> by lazy { mutableMapOf() }
+        private val formParameters: MutableMap<String, Any> by lazy { mutableMapOf() }
 
         fun client(client: OkHttpClient) = apply {
             this.client = client
@@ -75,44 +75,44 @@ class OkConfig internal constructor() {
             this.password = password()
         }
 
-        fun headers(vararg headers: Pair<String, String>) = apply {
+        fun headers(vararg headers: Pair<String, Any>) = apply {
             headersApplied = true
             this.headers.putAll(headers)
         }
 
-        fun headers(headers: Map<String, String>) = apply {
+        fun headers(headers: Map<String, Any>) = apply {
             headersApplied = true
             this.headers.putAll(headers)
         }
 
-        fun headers(headers: RequestPairs<String, String>.() -> Unit) = apply {
+        fun headers(headers: RequestPairs<String, Any>.() -> Unit) = apply {
             headersApplied = true
-            this.headers.putAll(RequestPairs<String, String>().apply(headers).toMap())
+            this.headers.putAll(RequestPairs<String, Any>().apply(headers).toMap())
         }
 
-        fun queryParameters(vararg parameters: Pair<String, String>) = apply {
+        fun queryParameters(vararg parameters: Pair<String, Any>) = apply {
             queryParametersApplied = true
             queryParameters.putAll(parameters)
         }
 
-        fun queryParameters(parameters: Map<String, String>) = apply {
+        fun queryParameters(parameters: Map<String, Any>) = apply {
             queryParametersApplied = true
             queryParameters.putAll(parameters)
         }
 
-        fun formParameters(vararg parameters: Pair<String, String>) = apply {
+        fun formParameters(vararg parameters: Pair<String, Any>) = apply {
             formParametersApplied = true
             formParameters.putAll(parameters)
         }
 
-        fun formParameters(parameters: Map<String, String>) = apply {
+        fun formParameters(parameters: Map<String, Any>) = apply {
             formParametersApplied = true
             formParameters.putAll(parameters)
         }
 
-        fun formParameters(parameters: RequestPairs<String, String>.() -> Unit) = apply {
+        fun formParameters(parameters: RequestPairs<String, Any>.() -> Unit) = apply {
             formParametersApplied = true
-            formParameters.putAll(RequestPairs<String, String>().apply(parameters).toMap())
+            formParameters.putAll(RequestPairs<String, Any>().apply(parameters).toMap())
         }
 
         fun apply() {
@@ -121,9 +121,9 @@ class OkConfig internal constructor() {
             if (cacheControl != null) config.cacheControl = cacheControl
             if (username != null) config.username = username
             if (password != null) config.password = password
-            if (headersApplied) config.headers.putAll(headers)
-            if (queryParametersApplied) config.queryParameters.putAll(queryParameters)
-            if (formParametersApplied) config.formParameters.putAll(formParameters)
+            if (headersApplied) config.headers.putAll(headers.mapValues { it.value.toString() })
+            if (queryParametersApplied) config.queryParameters.putAll(queryParameters.mapValues { it.value.toString() })
+            if (formParametersApplied) config.formParameters.putAll(formParameters.mapValues { it.value.toString() })
         }
 
         fun commit() {
@@ -135,9 +135,9 @@ class OkConfig internal constructor() {
             config.headers.clear()
             config.queryParameters.clear()
             config.formParameters.clear()
-            if (headersApplied) config.headers.putAll(headers)
-            if (queryParametersApplied) config.queryParameters.putAll(queryParameters)
-            if (formParametersApplied) config.formParameters.putAll(formParameters)
+            if (headersApplied) config.headers.putAll(headers.mapValues { it.value.toString() })
+            if (queryParametersApplied) config.queryParameters.putAll(queryParameters.mapValues { it.value.toString() })
+            if (formParametersApplied) config.formParameters.putAll(formParameters.mapValues { it.value.toString() })
         }
     }
 
