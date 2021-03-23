@@ -100,6 +100,11 @@ class OkConfig internal constructor() {
             queryParameters.putAll(parameters)
         }
 
+        fun queryParameters(parameters: RequestPairs<String, Any>.() -> Unit) = apply {
+            queryParametersApplied = true
+            queryParameters.putAll(RequestPairs<String, Any>().apply(parameters).toMap())
+        }
+
         fun formParameters(vararg parameters: Pair<String, Any>) = apply {
             formParametersApplied = true
             formParameters.putAll(parameters)
