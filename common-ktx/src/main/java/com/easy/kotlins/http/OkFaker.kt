@@ -4,15 +4,14 @@ package com.easy.kotlins.http
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.easy.kotlins.helper.forEach
-import com.easy.kotlins.helper.toJson
-import com.easy.kotlins.helper.toJsonObject
+import com.easy.kotlins.helper.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import java.io.File
 import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class OkFaker<T> internal constructor(
     private val request: OkRequest,
@@ -597,28 +596,13 @@ fun requestPairsOf(
     }.also { operation?.invoke(it) }
 }
 
-fun <T : Any> OkFaker.Builder<T>.asFlow(): Flow<T> = flow {
-    emit(suspendCancellableCoroutine<T> { con ->
-        onSuccess {
-            if (!con.isCancelled) {
-                con.resumeWith(Result.success(it))
-            }
-        }
-        onError { con.resumeWith(Result.failure(it)) }
-        start()
-    })
+fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
+    emit(execute(CoroutineExecutors.IO) { get() })
 }
 
-fun <T : Any> OkFaker.Builder<T>.asLiveData(
+fun <T : Any> OkFaker<T>.asLiveData(
+    context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
-): LiveData<T> = liveData(timeoutInMs = timeoutInMillis) {
-    emit(suspendCancellableCoroutine<T> { con ->
-        onSuccess {
-            if (!con.isCancelled) {
-                con.resumeWith(Result.success(it))
-            }
-        }
-        onError { con.resumeWith(Result.failure(it)) }
-        start()
-    })
+): LiveData<T> = liveData(context, timeoutInMillis) {
+    emit(execute(CoroutineExecutors.IO) { get() })
 }
