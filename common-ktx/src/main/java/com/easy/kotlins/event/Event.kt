@@ -5,48 +5,31 @@ package com.easy.kotlins.event
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.os.Parcelable
 import com.easy.kotlins.helper.opt
 import com.easy.kotlins.helper.toBundle
-import java.io.Serializable
 
 open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
-    private val extras: Bundle by lazy { Bundle() }
+    private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
     private var intent: Intent? = null
 
-    fun getString(key: String, defaultValue: String? = null): String? =
-        extras.getString(key, defaultValue)
+    operator fun set(key: String, value: Any?) {
+        this.extras[key] = value
+    }
 
-    fun getInt(key: String, defaultValue: Int = 0): Int = extras.getInt(key, defaultValue)
-    fun getLong(key: String, defaultValue: Long = 0.toLong()): Long =
-        extras.getLong(key, defaultValue)
+    operator fun <T : Any> get(key: String): T? {
+        @Suppress("UNCHECKED_CAST")
+        return this.extras[key] as T?
+    }
 
-    fun getFloat(key: String, defaultValue: Float = 0.toFloat()): Float =
-        extras.getFloat(key, defaultValue)
+    fun put(key: String, value: Any?): Any? {
+        return this.extras.put(key, value)
+    }
 
-    fun getDouble(key: String, defaultValue: Double = 0.toDouble()): Double =
-        extras.getDouble(key, defaultValue)
-
-    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean =
-        extras.getBoolean(key, defaultValue)
-
-    fun <T : Parcelable> getParcelable(key: String): T? = extras.getParcelable<T>(key)
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Serializable> getSerializable(key: String): T? = extras.getSerializable(key) as? T
-
-    fun putString(key: String, value: String?) = extras.putString(key, value)
-    fun putInt(key: String, value: Int) = extras.putInt(key, value)
-    fun putLong(key: String, value: Long) = extras.putLong(key, value)
-    fun putFloat(key: String, value: Float) = extras.putFloat(key, value)
-    fun putDouble(key: String, value: Double) = extras.putDouble(key, value)
-    fun putBoolean(key: String, value: Boolean) = extras.putBoolean(key, value)
-    fun putParcelable(key: String, value: Parcelable?) = extras.putParcelable(key, value)
-    fun putSerializable(key: String, value: Serializable?) = extras.putSerializable(key, value)
-    fun putAll(bundle: Bundle) = extras.putAll(bundle)
+    fun putAll(extras: Map<String, Any?>) {
+        this.extras.putAll(extras)
+    }
 
     fun setIntent(intent: Intent) {
         this.intent = intent
@@ -79,7 +62,12 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
 }
 
-internal class EventCollection(val events: List<Event>) : Event()
+fun <T : Any> Event.getValue(key: String): T =
+    get(key) ?: throw NoSuchElementException("Key $key is missing in the extras of event.")
+
+fun Event.putAll(vararg extras: Pair<String, Any?>) = putAll(extras.toMap())
+
+class EventCollection(val events: List<Event>) : Event()
 
 object Status {
 
