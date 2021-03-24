@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.dialogs
 
 import android.content.Context
@@ -7,19 +9,19 @@ import androidx.fragment.app.Fragment
 typealias AlertBuilderFactory<D> = (Context, Int) -> AlertBuilder<D>
 
 fun <D : DialogInterface> Fragment.alertBuilder(
-        factory: AlertBuilderFactory<D>,
-        themeResId: Int = 0,
-        title: CharSequence? = null,
-        message: CharSequence? = null,
-        init: (AlertBuilder<D>.() -> Unit)? = null
+    factory: AlertBuilderFactory<D>,
+    themeResId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<D>.() -> Unit)? = null
 ): AlertBuilder<D> = requireActivity().alertBuilder(factory, themeResId, title, message, init)
 
 fun <D : DialogInterface> Context.alertBuilder(
-        factory: AlertBuilderFactory<D>,
-        themeResId: Int = 0,
-        title: CharSequence? = null,
-        message: CharSequence? = null,
-        init: (AlertBuilder<D>.() -> Unit)? = null
+    factory: AlertBuilderFactory<D>,
+    themeResId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<D>.() -> Unit)? = null
 ): AlertBuilder<D> {
     return factory(this, themeResId).apply {
         if (title != null) {
@@ -33,19 +35,19 @@ fun <D : DialogInterface> Context.alertBuilder(
 }
 
 fun <D : DialogInterface> Fragment.alert(
-        factory: AlertBuilderFactory<D>,
-        themeResId: Int = 0,
-        title: CharSequence? = null,
-        message: CharSequence? = null,
-        init: (AlertBuilder<D>.() -> Unit)? = null
+    factory: AlertBuilderFactory<D>,
+    themeResId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<D>.() -> Unit)? = null
 ): D = requireActivity().alert(factory, themeResId, title, message, init)
 
 fun <D : DialogInterface> Context.alert(
-        factory: AlertBuilderFactory<D>,
-        themeResId: Int = 0,
-        title: CharSequence? = null,
-        message: CharSequence? = null,
-        init: (AlertBuilder<D>.() -> Unit)? = null
+    factory: AlertBuilderFactory<D>,
+    themeResId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<D>.() -> Unit)? = null
 ): D {
     return factory(this, themeResId).apply {
         if (title != null) {

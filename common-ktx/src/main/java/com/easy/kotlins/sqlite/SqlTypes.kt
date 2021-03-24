@@ -1,4 +1,5 @@
 @file:Suppress("unused", "FunctionName")
+
 package com.easy.kotlins.sqlite.db
 
 interface SqlType {

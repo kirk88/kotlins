@@ -13,10 +13,6 @@ import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-/**
- * Create by LiZhanPing on 2020/8/25
- */
-
 inline fun <T> pagedList(page: Int, crossinline dataList: () -> List<T>?): PagedList<T> =
     PagedList.create(page, dataList())
 

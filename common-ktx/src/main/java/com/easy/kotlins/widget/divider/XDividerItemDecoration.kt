@@ -192,7 +192,11 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        val divider = getDivider(parent, child, (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition)
+        val divider = getDivider(
+            parent,
+            child,
+            (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition
+        )
         val left = if (divider.leftSideLine.visible) divider.leftSideLine.size else 0
         val top = if (divider.topSideLine.visible) divider.topSideLine.size else 0
         val right = if (divider.rightSideLine.visible) divider.rightSideLine.size else 0

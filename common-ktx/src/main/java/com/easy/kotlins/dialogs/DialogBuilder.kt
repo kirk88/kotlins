@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.dialogs
 
 import android.content.Context
@@ -7,14 +9,9 @@ import android.view.View
 import android.view.Window
 import androidx.annotation.LayoutRes
 
-/**
- * Create by LiZhanPing on 2020/9/26
- */
-interface DialogController<out D : DialogInterface> {
+interface DialogBuilder<out D : DialogInterface> {
 
     val context: Context
-
-    val dialog: DialogInterface
 
     val window: Window
 
@@ -39,16 +36,13 @@ interface DialogController<out D : DialogInterface> {
 
 }
 
-fun DialogController<*>.contentView(view: () -> View) {
+fun DialogBuilder<*>.contentView(view: () -> View) {
     contentView = view()
 }
 
-fun DialogController<*>.contentView(@LayoutRes layoutResId: Int, action: ((view: View) -> Unit)? = null) {
-    contentView = View.inflate(context, layoutResId, null).apply{
-        action?.invoke(this)
-    }
-}
-
-fun <D: DialogInterface> DialogController<D>.show(onShow: D.() -> Unit): D{
-    return show().apply(onShow)
+fun DialogBuilder<*>.contentView(
+    @LayoutRes layoutResId: Int,
+    action: View.() -> Unit = {}
+) {
+    contentView = View.inflate(context, layoutResId, null).apply(action)
 }

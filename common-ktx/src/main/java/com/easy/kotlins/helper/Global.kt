@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import android.app.Activity
@@ -134,7 +136,8 @@ inline fun <reified A : Activity> Activity.startActivityForResult(
 
 fun Context.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
-fun Context.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(this, resId)
+fun Context.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? =
+    ContextCompat.getColorStateList(this, resId)
 
 fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
     ContextCompat.getDrawable(
@@ -145,19 +148,22 @@ fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNul
 
 fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
 
-fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDimensionPixelOffset(resId)
+fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int =
+    resources.getDimensionPixelOffset(resId)
 
-fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
+fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int =
+    resources.getDimensionPixelSize(resId)
 
 fun Fragment.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(
     requireContext(),
     resId
 )
 
-fun Fragment.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(
-    requireContext(),
-    resId
-)
+fun Fragment.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? =
+    ContextCompat.getColorStateList(
+        requireContext(),
+        resId
+    )
 
 fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
     ContextCompat.getDrawable(
@@ -168,9 +174,11 @@ fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNu
 
 fun Fragment.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
 
-fun Fragment.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDimensionPixelOffset(resId)
+fun Fragment.getDimensionPixelOffset(@DimenRes resId: Int): Int =
+    resources.getDimensionPixelOffset(resId)
 
-fun Fragment.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
+fun Fragment.getDimensionPixelSize(@DimenRes resId: Int): Int =
+    resources.getDimensionPixelSize(resId)
 
 val Context.screenWidthPixels: Int
     get() = resources.displayMetrics.widthPixels

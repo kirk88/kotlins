@@ -3,7 +3,7 @@ package com.easy.kotlins.event.livebus
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 
-internal class LiveEvent<T>: Observable<T> {
+internal class LiveEvent<T> : Observable<T> {
 
     private val delegate = LiveEventDelegate<T>()
 

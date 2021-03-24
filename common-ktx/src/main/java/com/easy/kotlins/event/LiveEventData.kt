@@ -100,7 +100,8 @@ open class LiveEventData<T> {
                 considerNotify(initiator)
             } else {
                 @Suppress("INACCESSIBLE_TYPE")
-                val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> = observers.iteratorWithAdditions()
+                val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> =
+                    observers.iteratorWithAdditions()
                 while (iterator.hasNext()) {
                     considerNotify(iterator.next().value)
                     if (dispatchInvalidated) {

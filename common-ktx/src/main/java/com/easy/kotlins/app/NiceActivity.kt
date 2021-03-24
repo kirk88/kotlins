@@ -6,10 +6,8 @@ import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 
-/**
- * Create by LiZhanPing on 2020/8/24
- */
-abstract class NiceActivity(@LayoutRes layoutResId: Int) : AppCompatActivity(layoutResId), NiceView {
+abstract class NiceActivity(@LayoutRes layoutResId: Int = 0) : AppCompatActivity(layoutResId),
+    NiceView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

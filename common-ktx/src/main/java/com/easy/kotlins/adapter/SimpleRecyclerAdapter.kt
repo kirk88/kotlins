@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+
 package com.easy.kotlins.adapter
 
 import android.content.Context
@@ -22,7 +23,11 @@ abstract class SimpleRecyclerAdapter<ITEM> @JvmOverloads constructor(
     init {
         addItemViewDelegate(0, object : ItemViewDelegate<ITEM>(context, layoutResId) {
 
-            override fun onBindViewHolder(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
+            override fun onBindViewHolder(
+                holder: ItemViewHolder,
+                item: ITEM,
+                payloads: MutableList<Any>
+            ) {
                 this@SimpleRecyclerAdapter.onBindViewHolder(holder, item, payloads)
             }
 

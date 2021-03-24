@@ -77,8 +77,9 @@ class BridegFragment : Fragment() {
         callback?.onRequestPermissionsResult(
             requestCode,
             resultCode,
-            permissions.mapIndexed { index, permission -> permission to grantResults[index] }
-                .toTypedArray()
+            permissions.mapIndexed { index, permission ->
+                permission to grantResults[index]
+            }.toTypedArray()
         )
     }
 

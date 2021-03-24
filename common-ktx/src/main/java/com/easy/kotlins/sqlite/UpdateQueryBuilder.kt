@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+
 package com.easy.kotlins.sqlite.db
 
 import android.content.ContentValues

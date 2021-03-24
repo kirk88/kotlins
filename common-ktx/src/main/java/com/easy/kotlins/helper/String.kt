@@ -8,10 +8,6 @@ import android.text.*
 import android.text.style.*
 import androidx.annotation.ColorInt
 
-/**
- * Create by LiZhanPing on 2020/8/27
- */
-
 fun CharSequence.asEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
 fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import android.content.Intent
@@ -5,10 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import java.io.Serializable
 
-/**
- * Create by LiZhanPing on 2020/9/23
- */
-@Suppress("UNCHECKED_CAST")
 fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
     val bundle = Bundle()
     for ((key, value) in this) {

@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 class JavaSqlitePrimitives {
-    private JavaSqlitePrimitives() {
-    }
-
     static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
 
     static {
@@ -20,6 +17,9 @@ class JavaSqlitePrimitives {
         PRIMITIVES_TO_WRAPPERS.put(long.class, Long.class);
         PRIMITIVES_TO_WRAPPERS.put(short.class, Short.class);
         PRIMITIVES_TO_WRAPPERS.put(void.class, Void.class);
+    }
+
+    private JavaSqlitePrimitives() {
     }
 
 }

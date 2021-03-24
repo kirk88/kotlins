@@ -18,9 +18,6 @@ import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
 import com.easy.kotlins.widget.StatefulView
 
-/**
- * Create by LiZhanPing on 2020/9/18
- */
 abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
     NiceFragment(layoutResId),
     EventLifecycleObserver,

@@ -4,10 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 
-/**
- * Create by LiZhanPing on 2020/4/27
- * desc: 请求回调处理
- */
 internal object OkCallbacks {
     private const val MSG_WHAT_BASE = 1000000000
     private const val MSG_WHAT_ON_START = MSG_WHAT_BASE + 1

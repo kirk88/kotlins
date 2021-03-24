@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import java.text.SimpleDateFormat
@@ -17,5 +19,4 @@ fun Long.toDate(): Date = Date(this)
 
 fun String.toDate(): Date = Date(this.toLong())
 
-fun String.toDateOrNull(): Date? =
-    runCatching { toDate() }.getOrNull()
+fun String.toDateOrNull(): Date? = runCatching { toDate() }.getOrNull()

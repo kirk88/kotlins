@@ -8,31 +8,30 @@ import android.view.View
 import android.view.Window
 import androidx.annotation.StyleRes
 
-/**
- * Create by LiZhanPing on 2020/9/26
- */
-internal class AndroidDialogController(override val context: Context, @StyleRes themeResId: Int = 0) :
-    DialogController<Dialog> {
+internal class AndroidDialogBuilder(
+    override val context: Context,
+    @StyleRes themeResId: Int = 0
+) : DialogBuilder<Dialog> {
 
-    override val dialog = Dialog(context, themeResId)
+    private val dialog = Dialog(context, themeResId)
 
     override val window: Window
-        get() = dialog.window ?: error("dialog is detached from window")
+        get() = dialog.window ?: error("Dialog is not attach to window")
 
     override var contentView: View
-        get() = error("no getter")
+        get() = error("No getter")
         set(value) {
             dialog.setContentView(value)
         }
 
     override var isCancelable: Boolean
-        get() = error("no getter")
+        get() = error("No getter")
         set(value) {
             dialog.setCancelable(value)
         }
 
     override var isCanceledOnTouchOutside: Boolean
-        get() = error("no getter")
+        get() = error("No getter")
         set(value) {
             dialog.setCanceledOnTouchOutside(value)
         }

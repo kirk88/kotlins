@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import android.graphics.Bitmap
@@ -7,42 +9,38 @@ import android.widget.ImageView
 import coil.load
 import java.io.File
 
-/**
- * Create by LiZhanPing on 2020/8/27
- */
-
 var ImageView.imageUrl: String?
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }
 
 var ImageView.imageUri: Uri?
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }
 
 var ImageView.imageResource: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }
 
 var ImageView.imageFile: File?
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }
 
 var ImageView.imageDrawable: Drawable?
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }
 
 var ImageView.imageBitmap: Bitmap?
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
     set(value) {
         load(value)
     }

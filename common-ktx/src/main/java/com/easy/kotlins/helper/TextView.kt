@@ -5,12 +5,7 @@ package com.easy.kotlins.helper
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import java.lang.reflect.TypeVariable
 import kotlin.DeprecationLevel.ERROR
-
-/**
- * Create by LiZhanPing on 2020/8/28
- */
 
 var TextView.string: String?
     get() = text?.toString()
@@ -19,7 +14,7 @@ var TextView.string: String?
     }
 
 var TextView.textResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
     set(value) {
         setText(value)
     }
@@ -31,19 +26,19 @@ var TextView.textColor: Int
     }
 
 var TextView.textColorResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
     set(value) {
         setTextColor(ContextCompat.getColorStateList(context, value))
     }
 
 var TextView.textPixelSize: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
     set(value) {
         setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat())
     }
 
 var TextView.textSizeResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("no getter")
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
     set(value) {
         setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimensionPixelSize(value).toFloat())
     }

@@ -3,8 +3,6 @@ package com.easy.kotlins.http
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import androidx.annotation.MainThread
-import androidx.annotation.UiThread
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.helper
 
 import java.io.ByteArrayInputStream
@@ -5,9 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-/**
- * Create by LiZhanPing on 2020/8/25
- */
 fun <T : Any> Boolean.opt(right: T, wrong: T): T {
     return if (this) right else wrong
 }

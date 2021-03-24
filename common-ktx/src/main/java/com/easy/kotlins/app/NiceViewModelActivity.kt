@@ -17,9 +17,6 @@ import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
 import com.easy.kotlins.widget.StatefulView
 
-/**
- * Create by LiZhanPing on 2020/9/18
- */
 abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
     NiceActivity(layoutResId),
     EventLifecycleObserver,

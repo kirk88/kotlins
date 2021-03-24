@@ -16,9 +16,6 @@ import com.easy.kotlins.http.DefaultOkFakerScope
 import com.easy.kotlins.http.OkFaker
 import com.easy.kotlins.http.OkFakerScope
 
-/**
- * Create by LiZhanPing on 2020/8/24
- */
 interface ViewModelController : OkFakerScope, ViewModelHttpRequester {
 
     var event: Event

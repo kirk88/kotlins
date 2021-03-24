@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+
 package com.easy.kotlins.adapter
 
 import android.content.Context
@@ -25,7 +26,8 @@ open class CommonRecyclerAdapter<ITEM> @JvmOverloads constructor(
     private val headerViews: SparseArray<View> by lazy { SparseArray() }
     private val footerViews: SparseArray<View> by lazy { SparseArray() }
 
-    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> = mutableMapOf(*itemDelegates)
+    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> =
+        mutableMapOf(*itemDelegates)
 
     private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
     private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =

@@ -22,27 +22,29 @@ internal class FieldWrapper(private val field: Field) {
 
     fun read(reader: Any, values: MutableList<SqlColumnElement>) {
         val fieldValue = field.get(reader)
-        values.add(if (column != null) {
-            SqlColumnElement.create(
-                name,
-                if (fieldValue != null) {
-                    ColumnConverters.get(
-                        column.converter
-                    ).fromValue(fieldValue)
-                } else {
-                    fieldValue
-                }
-            )
-        } else {
-            SqlColumnElement.create(
-                name,
-                if (isBooleanType) {
-                    if (fieldValue as Boolean? == true) 1 else 0
-                } else {
-                    fieldValue
-                }
-            )
-        })
+        values.add(
+            if (column != null) {
+                SqlColumnElement.create(
+                    name,
+                    if (fieldValue != null) {
+                        ColumnConverters.get(
+                            column.converter
+                        ).fromValue(fieldValue)
+                    } else {
+                        fieldValue
+                    }
+                )
+            } else {
+                SqlColumnElement.create(
+                    name,
+                    if (isBooleanType) {
+                        if (fieldValue as Boolean? == true) 1 else 0
+                    } else {
+                        fieldValue
+                    }
+                )
+            }
+        )
     }
 
     fun write(writer: Any, value: SqlColumnValue) {

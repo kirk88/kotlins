@@ -11,10 +11,6 @@ import com.easy.kotlins.helper.opt
 import com.easy.kotlins.helper.toBundle
 import java.io.Serializable
 
-/**
- * Create by LiZhanPing on 2020/9/12
- */
-
 open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
     private val extras: Bundle by lazy { Bundle() }
