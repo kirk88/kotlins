@@ -65,6 +65,10 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 fun <T : Any> Event.getValue(key: String): T =
     get(key) ?: throw NoSuchElementException("Key $key is missing in the extras of event.")
 
+fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
+
+fun <T : Any?> Event.getOrElse(key: String, defaultValue: () -> T): T = get(key) ?: defaultValue()
+
 fun Event.putAll(vararg extras: Pair<String, Any?>) = putAll(extras.toMap())
 
 class EventCollection(val events: List<Event>) : Event()
