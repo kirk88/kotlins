@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.*
 import java.io.File
+import java.io.IOException
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -35,7 +36,7 @@ class OkFaker<T> internal constructor(
 
     fun cancel() = request.cancel()
 
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     fun get(): T = transformer.transformResponse(request.execute())
 
     fun getOrNull(): T? = runCatching { get() }.getOrNull()
@@ -453,7 +454,7 @@ class OkFaker<T> internal constructor(
             if (onCancelApplied) onCancelActions else null
         )
 
-        @Throws(Exception::class)
+        @Throws(IOException::class)
         fun get(): T = build().get()
 
         fun getOrNull(): T? = build().getOrNull()

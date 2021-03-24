@@ -47,7 +47,7 @@ internal class OkRequest(
         synchronized(this) { call?.cancel() }
     }
 
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     fun execute(): Response {
         return processResponse(createCall().execute())
     }
@@ -117,7 +117,6 @@ internal class OkRequest(
         return false
     }
 
-    @Throws(Exception::class)
     private fun createCall(): Call {
         var realCall: Call?
         synchronized(this) {
