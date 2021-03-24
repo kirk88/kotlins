@@ -3,6 +3,7 @@ package com.easy.kotlins.helper
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executor
@@ -41,6 +42,11 @@ interface CoroutineExecutor {
 
 }
 
+interface MainExecutor : CoroutineExecutor {
+
+    val immediate: MainExecutor
+
+}
 
 object CoroutineExecutors {
 
@@ -48,7 +54,7 @@ object CoroutineExecutors {
     val Default: CoroutineExecutor = DefaultExecutor
 
     @JvmStatic
-    val Main: CoroutineExecutor = MainExecutor
+    val Main: MainExecutor = MainThreadExecutor
 
     @JvmStatic
     val Unconfined: CoroutineExecutor = UnconfinedExecutor
@@ -90,40 +96,67 @@ internal object DefaultExecutor : CoroutineExecutor {
 
 }
 
-internal object MainExecutor : CoroutineExecutor {
+internal object MainThreadExecutor : MainExecutor {
 
-    private val lock = Any()
+    private val delegate: CoroutineExecutor = MainExecutorDelegate()
 
-    @Volatile
-    private var handler: Handler? = null
+    override val immediate: MainExecutor = object : MainExecutor {
+        override val immediate: MainExecutor get() = this
 
-    override fun execute(command: Runnable) {
-        if (handler == null) {
-            synchronized(lock) {
-                if (handler == null) {
-                    handler = createAsync(Looper.getMainLooper())
-                }
+        override fun execute(command: Runnable) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                command.run()
+            } else {
+                delegate.execute(command)
             }
         }
-        handler!!.post(command)
     }
 
-    private fun createAsync(looper: Looper): Handler {
-        if (Build.VERSION.SDK_INT >= 28) {
-            return Handler.createAsync(looper)
+    override fun execute(command: Runnable) {
+        Dispatchers.Main.immediate.immediate
+        delegate.execute(command)
+    }
+
+    class MainExecutorDelegate : CoroutineExecutor {
+
+        private val lock = Any()
+
+        @Volatile
+        private var handler: Handler? = null
+
+        override fun execute(command: Runnable) {
+            if (handler == null) {
+                synchronized(lock) {
+                    if (handler == null) {
+                        handler = createAsync(Looper.getMainLooper())
+                    }
+                }
+            }
+            handler!!.post(command)
         }
-        try {
-            return Handler::class.java.getDeclaredConstructor(
-                Looper::class.java, Handler.Callback::class.java,
-                Boolean::class.javaPrimitiveType
-            ).newInstance(looper, null, true)
-        } catch (ignored: IllegalAccessException) {
-        } catch (ignored: InstantiationException) {
-        } catch (ignored: NoSuchMethodException) {
-        } catch (e: InvocationTargetException) {
-            return Handler(looper)
+
+        companion object {
+
+            private fun createAsync(looper: Looper): Handler {
+                if (Build.VERSION.SDK_INT >= 28) {
+                    return Handler.createAsync(looper)
+                }
+                try {
+                    return Handler::class.java.getDeclaredConstructor(
+                        Looper::class.java, Handler.Callback::class.java,
+                        Boolean::class.javaPrimitiveType
+                    ).newInstance(looper, null, true)
+                } catch (_: IllegalAccessException) {
+                } catch (_: InstantiationException) {
+                } catch (_: NoSuchMethodException) {
+                } catch (_: InvocationTargetException) {
+                    return Handler(looper)
+                }
+                return Handler(looper)
+            }
+
         }
-        return Handler(looper)
+
     }
 
 }
