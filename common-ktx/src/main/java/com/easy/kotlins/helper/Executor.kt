@@ -50,7 +50,7 @@ interface MainCoroutineExecutor : CoroutineExecutor {
 
 object CoroutineExecutors {
 
-    @JvmStatic
+    @JvmField
     val Default: CoroutineExecutor = DefaultExecutor
 
     @JvmStatic
