@@ -132,7 +132,7 @@ internal class LiveEventDelegate<T> {
     companion object {
         private val HANDLER = Handler(Looper.getMainLooper())
         private val isMainThread: Boolean
-            get() = Looper.getMainLooper().thread === Thread.currentThread()
+            get() = Looper.getMainLooper() === Looper.myLooper()
     }
 
 }

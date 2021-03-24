@@ -4,7 +4,7 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
 
-class SlideInBottomAnimation(
+class SlideInBottomAnimation @JvmOverloads constructor(
     private val from: Float = DEFAULT_TRANSLATION_FROM,
     itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,
 ) : BaseItemViewAnimation(itemAnimationMode) {

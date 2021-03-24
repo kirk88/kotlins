@@ -1,5 +1,4 @@
 @file:Suppress("unused")
-
 package com.easy.kotlins.adapter
 
 import android.content.Context
@@ -14,7 +13,7 @@ import com.easy.kotlins.adapter.anim.BaseItemViewAnimation
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
 import java.util.*
 
-open class CommonRecyclerAdapter<ITEM>(
+open class CommonRecyclerAdapter<ITEM> @JvmOverloads constructor(
     val context: Context,
     vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
     private val itemAnimation: ItemViewAnimation? = null,

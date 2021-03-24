@@ -234,7 +234,7 @@ fun <T> OkFaker.Builder<T>.request(
 
 fun <T> OkFaker.Builder<T>.response(
     precondition: (Response) -> Boolean = { it.isSuccessful },
-    errorMapper: OkMapper<Exception, T>? = null,
+    errorMapper: OkMapper<Throwable, T>? = null,
     resultMapper: OkMapper<String, T>
 ): OkFaker.Builder<T> = apply {
     mapResponse {
@@ -250,7 +250,7 @@ fun <T> OkFaker.Builder<T>.response(
 fun <T> OkFaker.Builder<T>.load(
     config: LoadConfig,
     onEvent: ((Event) -> Unit)? = null,
-    onError: ((Exception) -> Unit)? = null,
+    onError: ((Throwable) -> Unit)? = null,
     onApply: (T) -> Unit
 ): OkFaker.Builder<T> = apply {
 

@@ -18,7 +18,7 @@ class OkFaker<T> internal constructor(
     private val transformer: OkTransformer<T>,
     private val onStartActions: List<SimpleAction>?,
     private val onSuccessActions: List<Action<T>>?,
-    private val onErrorActions: List<Action<Exception>>?,
+    private val onErrorActions: List<Action<Throwable>>?,
     private val onCompletionActions: List<SimpleAction>?,
     private val onCancelActions: List<SimpleAction>?
 ) {
@@ -45,33 +45,23 @@ class OkFaker<T> internal constructor(
     fun start() = apply {
         request.enqueue(ResponseCallback(transformer, object : OkCallback<T> {
             override fun onStart() {
-                if (onStartActions != null) {
-                    for (action in onStartActions) action()
-                }
+                onStartActions?.forEach { action -> action() }
             }
 
             override fun onSuccess(result: T) {
-                if (onSuccessActions != null) {
-                    for (action in onSuccessActions) action(result)
-                }
+                onSuccessActions?.forEach { action -> action(result) }
             }
 
-            override fun onFailure(error: Exception) {
-                if (onErrorActions != null) {
-                    for (action in onErrorActions) action(error)
-                }
+            override fun onFailure(exception: Throwable) {
+                onErrorActions?.forEach { action -> action(exception) }
             }
 
             override fun onCompletion() {
-                if (onCompletionActions != null) {
-                    for (action in onCompletionActions) action()
-                }
+                onCompletionActions?.forEach { action -> action() }
             }
 
             override fun onCancel() {
-                if (onCancelActions != null) {
-                    for (action in onCancelActions) action()
-                }
+                onCancelActions?.forEach { action -> action() }
             }
         }))
     }
@@ -85,17 +75,15 @@ class OkFaker<T> internal constructor(
         }
 
         override fun onSuccess(result: Response) {
-            runCatching {
-                transformer.transformResponse(result)
-            }.onFailure {
-                OkCallbacks.onFailure(callback, Exception(it))
-            }.onSuccess {
-                OkCallbacks.onSuccess(callback, it)
+            try {
+                OkCallbacks.onSuccess(callback, transformer.transformResponse(result))
+            } catch (exception: Throwable) {
+                OkCallbacks.onFailure(callback, exception)
             }
         }
 
-        override fun onFailure(error: Exception) {
-            OkCallbacks.onFailure(callback, error)
+        override fun onFailure(exception: Throwable) {
+            OkCallbacks.onFailure(callback, exception)
         }
 
         override fun onCompletion() {
@@ -117,7 +105,7 @@ class OkFaker<T> internal constructor(
         private val onSuccessActions: MutableList<Action<T>> by lazy { mutableListOf() }
 
         private var onErrorApplied = false
-        private val onErrorActions: MutableList<Action<Exception>> by lazy { mutableListOf() }
+        private val onErrorActions: MutableList<Action<Throwable>> by lazy { mutableListOf() }
 
         private var onCompletionApplied = false
         private val onCompletionActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -426,7 +414,7 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun mapError(mapper: OkMapper<Exception, T>) = apply {
+        fun mapError(mapper: OkMapper<Throwable, T>) = apply {
             transformer.mapError(mapper)
         }
 
@@ -440,7 +428,7 @@ class OkFaker<T> internal constructor(
             onSuccessActions.add(action)
         }
 
-        fun onError(action: Action<Exception>) = apply {
+        fun onError(action: Action<Throwable>) = apply {
             onErrorApplied = true
             onErrorActions.add(action)
         }
@@ -484,26 +472,32 @@ class OkFaker<T> internal constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.setter()
 
         @JvmStatic
+        @JvmOverloads
         fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.GET).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.POST).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.DELETE).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PUT).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.HEAD).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PATCH).apply(block)
 

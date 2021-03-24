@@ -1,3 +1,4 @@
+@file:Suppress("unused")
 package com.easy.kotlins.adapter
 
 import android.util.SparseArray

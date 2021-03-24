@@ -46,9 +46,9 @@ internal object OkCallbacks {
             .sendToTarget()
     }
 
-    fun onFailure(callback: OkCallback<*>?, error: Exception) {
+    fun onFailure(callback: OkCallback<*>?, exception: Throwable) {
         if (callback == null) return
-        HANDLER.obtainMessage(MSG_WHAT_ON_FAILURE, MessageBody(callback, error)).sendToTarget()
+        HANDLER.obtainMessage(MSG_WHAT_ON_FAILURE, MessageBody(callback, exception)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>?) {
@@ -69,35 +69,39 @@ internal object OkCallbacks {
     private fun dispatchOnStart(callback: OkCallback<*>) {
         try {
             callback.onStart()
-        } catch (ignored: Exception) {
+        } catch (exception: Exception) {
+            dispatchOnFailure(callback, exception)
         }
     }
 
     private fun dispatchOnCompletion(callback: OkCallback<*>) {
         try {
             callback.onCompletion()
-        } catch (ignored: Exception) {
+        } catch (exception: Exception) {
+            dispatchOnFailure(callback, exception)
         }
     }
 
     private fun dispatchOnCancel(callback: OkCallback<*>) {
         try {
             callback.onCancel()
-        } catch (ignored: Exception) {
+        } catch (exception: Exception) {
+            dispatchOnFailure(callback, exception)
         }
     }
 
     private fun <T> dispatchOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
-        } catch (ignored: Exception) {
+        } catch (exception: Exception) {
+            dispatchOnFailure(callback, exception)
         }
     }
 
-    private fun dispatchOnFailure(callback: OkCallback<*>, error: Exception) {
+    private fun dispatchOnFailure(callback: OkCallback<*>, exception: Throwable) {
         try {
-            callback.onFailure(error)
-        } catch (ignored: Exception) {
+            callback.onFailure(exception)
+        } catch (_: Exception) {
         }
     }
 

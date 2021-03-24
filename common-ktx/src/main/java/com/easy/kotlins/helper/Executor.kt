@@ -3,7 +3,7 @@ package com.easy.kotlins.helper
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executor
@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger
  *      //run blocking
  *      return T
  * }
- *
  */
 suspend fun <T> execute(
     executor: CoroutineExecutor = CoroutineExecutors.Unconfined,
@@ -42,9 +41,9 @@ interface CoroutineExecutor {
 
 }
 
-interface MainExecutor : CoroutineExecutor {
+interface MainCoroutineExecutor : CoroutineExecutor {
 
-    val immediate: MainExecutor
+    val immediate: MainCoroutineExecutor
 
 }
 
@@ -54,7 +53,7 @@ object CoroutineExecutors {
     val Default: CoroutineExecutor = DefaultExecutor
 
     @JvmStatic
-    val Main: MainExecutor = MainThreadExecutor
+    val Main: MainCoroutineExecutor = MainExecutor
 
     @JvmStatic
     val Unconfined: CoroutineExecutor = UnconfinedExecutor
@@ -96,15 +95,15 @@ internal object DefaultExecutor : CoroutineExecutor {
 
 }
 
-internal object MainThreadExecutor : MainExecutor {
+internal object MainExecutor : MainCoroutineExecutor {
 
-    private val delegate: CoroutineExecutor = MainExecutorDelegate()
+    private val delegate: CoroutineExecutor = MainThreadExecutor()
 
-    override val immediate: MainExecutor = object : MainExecutor {
-        override val immediate: MainExecutor get() = this
+    override val immediate: MainCoroutineExecutor = object : MainCoroutineExecutor {
+        override val immediate: MainCoroutineExecutor get() = this
 
         override fun execute(command: Runnable) {
-            if (Looper.myLooper() == Looper.getMainLooper()) {
+            if (Looper.getMainLooper() === Looper.myLooper()) {
                 command.run()
             } else {
                 delegate.execute(command)
@@ -113,11 +112,10 @@ internal object MainThreadExecutor : MainExecutor {
     }
 
     override fun execute(command: Runnable) {
-        Dispatchers.Main.immediate.immediate
         delegate.execute(command)
     }
 
-    class MainExecutorDelegate : CoroutineExecutor {
+    class MainThreadExecutor : CoroutineExecutor {
 
         private val lock = Any()
 

@@ -5,13 +5,13 @@ import okhttp3.Response
 internal class OkTransformer<T> {
 
     private var responseMapper: OkMapper<Response, T>? = null
-    private var errorMapper: OkMapper<Exception, T>? = null
+    private var errorMapper: OkMapper<Throwable, T>? = null
 
-    fun mapResponse(mapper: OkMapper<Response, T>) = this.apply {
+    fun mapResponse(mapper: OkMapper<Response, T>) = apply {
         responseMapper = mapper
     }
 
-    fun mapError(mapper: OkMapper<Exception, T>) = this.apply {
+    fun mapError(mapper: OkMapper<Throwable, T>) = apply {
         errorMapper = mapper
     }
 
@@ -20,13 +20,13 @@ internal class OkTransformer<T> {
         return try {
             @Suppress("UNCHECKED_CAST")
             mapper.map(response) as T
-        } catch (e: Exception) {
-            transformError(e)
+        } catch (exception: Throwable) {
+            transformError(exception)
         }
     }
 
-    fun transformError(error: Exception): T {
-        return errorMapper?.map(error) ?: throw error
+    fun transformError(exception: Throwable): T {
+        return errorMapper?.map(exception) ?: throw exception
     }
 
     companion object {

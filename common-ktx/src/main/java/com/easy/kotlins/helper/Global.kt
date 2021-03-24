@@ -19,10 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 
-/**
- * Create by LiZhanPing on 2020/8/22
- * desc: 通用
- */
 fun Context.toast(msg: CharSequence) {
     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 }
