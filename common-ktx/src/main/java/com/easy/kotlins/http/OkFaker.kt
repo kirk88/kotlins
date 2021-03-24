@@ -473,31 +473,37 @@ class OkFaker<T> internal constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.setter()
 
         @JvmStatic
+        @JvmName("httpGet")
         @JvmOverloads
         fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.GET).apply(block)
 
         @JvmStatic
+        @JvmName("httpPost")
         @JvmOverloads
         fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.POST).apply(block)
 
         @JvmStatic
+        @JvmName("httpDelete")
         @JvmOverloads
         fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.DELETE).apply(block)
 
         @JvmStatic
+        @JvmName("httpPut")
         @JvmOverloads
         fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PUT).apply(block)
 
         @JvmStatic
+        @JvmName("httpHead")
         @JvmOverloads
         fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.HEAD).apply(block)
 
         @JvmStatic
+        @JvmName("httpPatch")
         @JvmOverloads
         fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PATCH).apply(block)
