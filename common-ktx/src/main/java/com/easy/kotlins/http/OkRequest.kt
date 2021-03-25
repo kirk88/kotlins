@@ -1,5 +1,6 @@
 package com.easy.kotlins.http
 
+import android.util.Log
 import com.easy.kotlins.helper.isNetworkUrl
 import com.easy.kotlins.helper.plus
 import com.easy.kotlins.helper.toUrl
@@ -220,11 +221,12 @@ internal class OkRequest(
         }
 
         fun url(url: String) = apply {
-            val baseUrl = config.baseUrl
-            val httpUrl: HttpUrl = when {
-                url.isNetworkUrl() -> url.toHttpUrl()
-                baseUrl != null -> (baseUrl.toUrl() + url).toString().toHttpUrl()
-                else -> throw IllegalArgumentException("Invalid url: $url")
+            val httpUrl: HttpUrl = config.baseUrl.let {
+                when {
+                    url.isNetworkUrl() -> url.toHttpUrl()
+                    it != null -> (it.toUrl() + url).toString().toHttpUrl()
+                    else -> throw IllegalArgumentException("Invalid url: $url")
+                }
             }
 
             urlBuilder.scheme(httpUrl.scheme)
@@ -370,6 +372,8 @@ internal class OkRequest(
                 HttpMethod.requiresRequestBody(method.name) -> formBuilder?.build()
                 else -> null
             }
+
+            Log.e("TAGTAG", "method: ${method.name}  body: $body")
 
             val request = requestBuilder.url(urlBuilder.build())
                 .method(method.name, body)
