@@ -184,24 +184,18 @@ internal class OkRequest(
         private var formBuilder: FormBody.Builder? = null
             get() = field ?: FormBody.Builder().also {
                 field = it
+                formBuilderApplied = true
+                multipartBuilderApplied = false
 
                 for ((name, value) in config.formParameters) {
                     it.add(name, value)
                 }
-            }
-            set(value) {
-                field = value
-                formBuilderApplied = true
-                multipartBuilderApplied = false
             }
 
         private var multipartBuilderApplied = false
         private var multipartBuilder: MultipartBody.Builder? = null
             get() = field ?: MultipartBody.Builder().also {
                 field = it
-            }
-            set(value) {
-                field = value
                 formBuilderApplied = false
                 multipartBuilderApplied = true
             }
