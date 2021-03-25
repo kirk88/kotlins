@@ -29,9 +29,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun where(condition: SqlWhereCondition): UpdateQueryBuilder {
-        if (this.whereApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.whereApplied) { "Update where was already applied" }
 
         this.whereApplied = true
         this.whereClause = condition.whereClause
@@ -40,9 +38,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun where(whereClause: String, vararg whereArgs: Pair<String, Any>): UpdateQueryBuilder {
-        if (this.whereApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.whereApplied) { "Update where was already applied" }
 
         this.whereApplied = true
         val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
@@ -54,8 +50,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun where(whereClause: String): UpdateQueryBuilder {
-        if (this.whereApplied)
-            throw IllegalStateException("Query selection was already applied.")
+        check(!this.whereApplied) { "Update where was already applied" }
 
         this.whereApplied = true
         this.whereClause = whereClause
@@ -63,8 +58,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun where(whereClause: String, vararg whereArgs: Any): UpdateQueryBuilder {
-        if (this.whereApplied)
-            throw IllegalStateException("Query selection was already applied.")
+        check(!this.whereApplied) { "Update where was already applied" }
 
         this.whereApplied = true
         this.whereClause = whereClause
@@ -73,10 +67,9 @@ abstract class UpdateQueryBuilder(private val table: String) {
     }
 
     fun execute(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
-        val values = if (this.values.isNotEmpty())
-            this.values.toContentValues()
-        else
-            throw IllegalArgumentException("Empty values")
+        check(this.values.isNotEmpty()) { "Update values is empty" }
+
+        val values = this.values.toContentValues()
         val finalWhereClause = if (this.whereApplied) this.whereClause else null
         val finalWhereArgs = if (this.whereApplied) this.whereArgs else null
         return update(

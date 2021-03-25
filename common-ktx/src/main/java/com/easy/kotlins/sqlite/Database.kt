@@ -253,6 +253,7 @@ fun List<SqlColumnElement>.toContentValues(): ContentValues {
 private fun ContentValues.put(element: SqlColumnElement) {
     val key = element.name
     when (val value = element.value) {
+        null -> putNull(key)
         is String -> put(key, value)
         is Int -> put(key, value)
         is Long -> put(key, value)
@@ -262,7 +263,6 @@ private fun ContentValues.put(element: SqlColumnElement) {
         is Boolean -> put(key, value)
         is Byte -> put(key, value)
         is ByteArray -> put(key, value)
-        null -> putNull(key)
         else -> throw IllegalArgumentException("Non-supported value type ${value.javaClass.name}")
     }
 }

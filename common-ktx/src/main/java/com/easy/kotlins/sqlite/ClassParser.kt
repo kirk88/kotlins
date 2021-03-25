@@ -49,8 +49,9 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
         val constructors = clazz.declaredConstructors
 
         if (constructors.none { it.isAnnotationPresent(ClassParserConstructor::class.java) }) {
-            val constructor = constructors.find { it.parameterTypes.isEmpty() }
-                ?: throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
+            val constructor = requireNotNull(constructors.find { it.parameterTypes.isEmpty() }) {
+                "Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found"
+            }
 
             delegate = ClassFieldParser(constructor)
         } else {
@@ -62,13 +63,18 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
                 return@filter types.isNotEmpty() && types.all(::hasApplicableType)
             }
 
-            if (applicableConstructors.isEmpty()) {
-                throw IllegalStateException("Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found")
+            check(applicableConstructors.isNotEmpty()) {
+                "Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found"
             }
 
             val preferredConstructor = if (applicableConstructors.size > 1) {
-                applicableConstructors.singleOrNull { it.isAnnotationPresent(ClassParserConstructor::class.java) }
-                    ?: throw IllegalStateException("Several constructors are annotated with ClassParserConstructor")
+                requireNotNull(applicableConstructors.singleOrNull {
+                    it.isAnnotationPresent(
+                        ClassParserConstructor::class.java
+                    )
+                }) {
+                    "Several constructors are annotated with ClassParserConstructor"
+                }
             } else {
                 applicableConstructors[0]
             }

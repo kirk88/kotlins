@@ -90,7 +90,7 @@ fun Cursor.asMapSequence(): Sequence<Map<String, SqlColumnValue>> {
     return CursorMapSequence(this)
 }
 
-private fun Cursor.getColumnValue(index: Int): SqlColumnValue {
+fun Cursor.getColumnValue(index: Int): SqlColumnValue {
     val value = if (isNull(index)) null
     else when (getType(index)) {
         Cursor.FIELD_TYPE_INTEGER -> getLong(index)

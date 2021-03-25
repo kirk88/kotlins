@@ -73,9 +73,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun having(having: String): SelectQueryBuilder {
-        if (this.havingApplied) {
-            throw IllegalStateException("Query having was already applied.")
-        }
+        check(!this.havingApplied) { "Query having was already applied" }
 
         this.havingApplied = true
         this.having = having
@@ -83,9 +81,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun having(having: String, vararg havingArgs: Pair<String, Any>): SelectQueryBuilder {
-        if (this.havingApplied) {
-            throw IllegalStateException("Query having was already applied.")
-        }
+        check(!this.havingApplied) { "Query having was already applied" }
 
         this.havingApplied = true
         this.having = applyArguments(having, *havingArgs)
@@ -93,9 +89,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun where(condition: SqlWhereCondition): SelectQueryBuilder {
-        if (this.selectionApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.selectionApplied) { "Query selection was already applied" }
 
         this.selectionApplied = true
         this.selection = condition.whereClause
@@ -104,9 +98,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun where(selection: String, vararg selectionArgs: Pair<String, Any>): SelectQueryBuilder {
-        if (this.selectionApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.selectionApplied) { "Query selection was already applied" }
 
         this.selectionApplied = true
         this.selection = applyArguments(selection, *selectionArgs)
@@ -114,9 +106,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun where(selection: String): SelectQueryBuilder {
-        if (this.selectionApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.selectionApplied) { "Query selection was already applied" }
 
         this.selectionApplied = true
         this.selection = selection
@@ -124,9 +114,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     }
 
     fun where(selection: String, vararg selectionArgs: Any): SelectQueryBuilder {
-        if (this.selectionApplied) {
-            throw IllegalStateException("Query selection was already applied.")
-        }
+        check(!this.selectionApplied) { "Query selection was already applied" }
 
         this.selectionApplied = true
         this.selection = selection

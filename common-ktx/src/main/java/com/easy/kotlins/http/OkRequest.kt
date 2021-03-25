@@ -132,9 +132,9 @@ internal class OkRequest(
                 try {
                     this.call = client.newCall(processRequest(request))
                     realCall = this.call
-                } catch (e: Exception) {
-                    creationFailure = e
-                    throw e
+                } catch (exception: Exception) {
+                    creationFailure = exception
+                    throw exception
                 }
             }
         }
@@ -180,31 +180,36 @@ internal class OkRequest(
             }
         }
 
-        private var formBuilderApplied = false
-        private var formBuilder: FormBody.Builder? = null
-            get() = field ?: FormBody.Builder().also {
-                field = it
-                formBuilderApplied = true
-                multipartBuilderApplied = false
+        private var requestBodyApplied: Boolean = false
+
+        private var formBodyBuilder: FormBody.Builder? = null
+        private val formBuilder: FormBody.Builder
+            get() = formBodyBuilder ?: FormBody.Builder().also {
+                check(!requestBodyApplied) { "Can not build FormBody, a request body already existed" }
+
+                requestBodyApplied = true
+                formBodyBuilder = it
 
                 for ((name, value) in config.formParameters) {
                     it.add(name, value)
                 }
             }
 
-        private var multipartBuilderApplied = false
-        private var multipartBuilder: MultipartBody.Builder? = null
-            get() = field ?: MultipartBody.Builder().also {
-                field = it
-                formBuilderApplied = false
-                multipartBuilderApplied = true
+        private var multipartBodyBuilder: MultipartBody.Builder? = null
+        private val multipartBuilder: MultipartBody.Builder
+            get() = multipartBodyBuilder ?: MultipartBody.Builder().also {
+                check(!requestBodyApplied) { "Can not build MultipartBody, a request body already existed" }
+
+                requestBodyApplied = true
+                multipartBodyBuilder = it
             }
 
         private var requestBody: RequestBody? = null
             set(value) {
+                check(!requestBodyApplied) { "Can not build RequestBody, a request body already existed" }
+
+                requestBodyApplied = true
                 field = value
-                formBuilderApplied = false
-                multipartBuilderApplied = false
             }
 
         private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
@@ -299,23 +304,23 @@ internal class OkRequest(
         }
 
         fun addFormParameter(name: String, value: String) = apply {
-            formBuilder?.add(name, value)
+            formBuilder.add(name, value)
         }
 
         fun addEncodedFormParameter(name: String, value: String) = apply {
-            formBuilder?.addEncoded(name, value)
+            formBuilder.addEncoded(name, value)
         }
 
         fun addFormDataPart(name: String, value: String) = apply {
-            multipartBuilder?.addFormDataPart(name, value)
+            multipartBuilder.addFormDataPart(name, value)
         }
 
         fun addFormDataPart(name: String, filename: String?, body: RequestBody) = apply {
-            multipartBuilder?.addFormDataPart(name, filename, body)
+            multipartBuilder.addFormDataPart(name, filename, body)
         }
 
         fun addFormDataPart(name: String, contentType: MediaType?, file: File) = apply {
-            multipartBuilder?.addFormDataPart(
+            multipartBuilder.addFormDataPart(
                 name,
                 file.name,
                 file.asRequestBody(contentType)
@@ -323,11 +328,11 @@ internal class OkRequest(
         }
 
         fun addPart(part: MultipartBody.Part) = apply {
-            multipartBuilder?.addPart(part)
+            multipartBuilder.addPart(part)
         }
 
         fun addPart(body: RequestBody) = apply {
-            multipartBuilder?.addPart(body)
+            multipartBuilder.addPart(body)
         }
 
         fun body(contentType: MediaType?, body: String) = apply {
@@ -361,9 +366,9 @@ internal class OkRequest(
         fun build(): OkRequest {
             val body = when {
                 requestBody != null -> requestBody
-                formBuilderApplied -> formBuilder?.build()
-                multipartBuilderApplied -> multipartBuilder?.build()
-                HttpMethod.requiresRequestBody(method.name) -> formBuilder?.build()
+                formBodyBuilder != null -> formBodyBuilder?.build()
+                multipartBodyBuilder != null -> multipartBodyBuilder?.build()
+                HttpMethod.requiresRequestBody(method.name) -> formBuilder.build()
                 else -> null
             }
 

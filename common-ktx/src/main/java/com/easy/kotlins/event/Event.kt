@@ -62,8 +62,9 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 
 }
 
-fun <T : Any> Event.getValue(key: String): T =
-    get(key) ?: throw NoSuchElementException("Key $key is missing in the extras of event.")
+fun <T : Any> Event.getValue(key: String): T = requireNotNull(get(key)) {
+    "Key $key is missing in the extras of event."
+}
 
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
 
