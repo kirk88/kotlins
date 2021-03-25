@@ -50,7 +50,7 @@ internal object UrlGuess {
 
     private fun isHttpUrl(url: String): Boolean {
         return url.length > 6 &&
-                url.substring(0, 7).equals(HTTPS_BASE, ignoreCase = true)
+                url.substring(0, 7).equals(HTTP_BASE, ignoreCase = true)
     }
 
     private fun isHttpsUrl(url: String): Boolean {

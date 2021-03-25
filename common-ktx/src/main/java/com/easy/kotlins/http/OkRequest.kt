@@ -221,12 +221,10 @@ internal class OkRequest(
 
         fun url(url: String) = apply {
             val baseUrl = config.baseUrl
-            val httpUrl: HttpUrl = if (baseUrl == null && url.isNetworkUrl()) {
-                url.toHttpUrl()
-            } else if (baseUrl != null) {
-                (baseUrl.toUrl() + url).toString().toHttpUrl()
-            } else {
-                throw IllegalArgumentException("Invalid url: $url")
+            val httpUrl: HttpUrl = when {
+                url.isNetworkUrl() -> url.toHttpUrl()
+                baseUrl != null -> (baseUrl.toUrl() + url).toString().toHttpUrl()
+                else -> throw IllegalArgumentException("Invalid url: $url")
             }
 
             urlBuilder.scheme(httpUrl.scheme)
