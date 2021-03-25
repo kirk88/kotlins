@@ -5,7 +5,7 @@ import android.animation.ObjectAnimator
 import android.view.View
 
 
-class SlideInRightAnimation @JvmOverloads constructor(
+class SlideInRightAnimation(
     private val from: Float = DEFAULT_TRANSLATION_FROM,
     itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,
 ) : BaseItemViewAnimation(itemAnimationMode) {

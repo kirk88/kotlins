@@ -41,9 +41,10 @@ abstract class BaseItemViewAnimation(protected open val animationMode: ItemViewA
         animatorSet?.cancel()
     }
 
-    protected abstract fun getAnimators(view: View): Array<Animator>
-
-    fun reset() {
+    override fun reset() {
         lastAnimateIndex = -1
     }
+
+    protected abstract fun getAnimators(view: View): Array<Animator>
+
 }

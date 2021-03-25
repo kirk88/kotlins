@@ -5,7 +5,7 @@ import android.animation.ObjectAnimator
 import android.view.View
 
 
-class AlphaInAnimation @JvmOverloads constructor(
+class AlphaInAnimation(
     private val from: Float = DEFAULT_ALPHA_FROM,
     itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,
 ) : BaseItemViewAnimation(itemAnimationMode) {

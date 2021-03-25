@@ -4,7 +4,7 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
 
-class ScaleInAnimation @JvmOverloads constructor(
+class ScaleInAnimation(
     private val fromX: Float = DEFAULT_SCALE_FROM_X,
     private val fromY: Float = DEFAULT_SCALE_FROM_Y,
     itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,

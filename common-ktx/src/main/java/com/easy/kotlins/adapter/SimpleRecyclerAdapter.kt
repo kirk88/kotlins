@@ -6,8 +6,9 @@ import android.content.Context
 import androidx.annotation.LayoutRes
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
 
-abstract class SimpleRecyclerAdapter<ITEM> @JvmOverloads constructor(
-    context: Context, @LayoutRes private val layoutResId: Int,
+abstract class SimpleRecyclerAdapter<ITEM>(
+    context: Context,
+    @LayoutRes private val layoutResId: Int,
     vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
     itemAnimation: ItemViewAnimation? = null,
     itemClickable: Boolean = false,

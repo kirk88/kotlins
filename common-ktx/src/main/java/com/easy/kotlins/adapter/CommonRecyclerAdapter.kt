@@ -10,11 +10,10 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.easy.kotlins.adapter.anim.BaseItemViewAnimation
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
 import java.util.*
 
-open class CommonRecyclerAdapter<ITEM> @JvmOverloads constructor(
+open class CommonRecyclerAdapter<ITEM>(
     val context: Context,
     vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
     private val itemAnimation: ItemViewAnimation? = null,
@@ -185,10 +184,6 @@ open class CommonRecyclerAdapter<ITEM> @JvmOverloads constructor(
     }
 
     fun setItems(items: List<ITEM>?) {
-        if (itemAnimation is BaseItemViewAnimation) {
-            itemAnimation.reset()
-        }
-
         synchronized(lock) {
             if (this.modifiableItems.isNotEmpty()) {
                 this.modifiableItems.clear()
