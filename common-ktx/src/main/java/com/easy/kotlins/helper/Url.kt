@@ -2,7 +2,6 @@
 
 package com.easy.kotlins.helper
 
-import android.webkit.URLUtil
 import java.net.URL
 
 fun String.toUrl(): URL = URL(this)
@@ -45,7 +44,7 @@ internal object UrlGuess {
     fun isNetworkUrl(url: String): Boolean {
         return if (url.isEmpty()) {
             false
-        } else URLUtil.isHttpUrl(url) || URLUtil.isHttpsUrl(url)
+        } else isHttpUrl(url) || isHttpsUrl(url)
     }
 
 
