@@ -29,12 +29,6 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun column(name: SqlColumnProperty): SelectQueryBuilder {
-        this.columnsApplied = true
-        this.columns.add(name.name)
-        return this
-    }
-
     fun columns(vararg names: SqlColumnProperty): SelectQueryBuilder {
         this.columnsApplied = true
         this.columns.addAll(names.map { it.name })
@@ -47,9 +41,9 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun groupBy(groupBy: String): SelectQueryBuilder {
+    fun groupBy(vararg groupBy: SqlColumnProperty): SelectQueryBuilder{
         this.groupByApplied = true
-        this.groupBy.add(groupBy)
+        this.groupBy.addAll(groupBy.map { it.name })
         return this
     }
 

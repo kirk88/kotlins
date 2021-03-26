@@ -13,11 +13,6 @@ abstract class UpdateQueryBuilder(private val table: String) {
     private var whereClause: String? = null
     private var whereArgs: Array<out String>? = null
 
-    fun value(value: SqlColumnElement): UpdateQueryBuilder {
-        this.values.add(value)
-        return this
-    }
-
     fun values(vararg values: SqlColumnElement): UpdateQueryBuilder {
         this.values.addAll(values)
         return this
