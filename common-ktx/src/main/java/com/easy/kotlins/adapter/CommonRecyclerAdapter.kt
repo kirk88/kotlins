@@ -441,7 +441,7 @@ open class CommonRecyclerAdapter<ITEM>(
         }
     }
 
-    protected open fun getItemViewType(item: ITEM, position: Int): Int {
+    open fun getItemViewType(item: ITEM, position: Int): Int {
         if (itemDelegates.size == 1) return 0
         return if (item is AdapterItem) item.type else 0
     }
@@ -449,23 +449,23 @@ open class CommonRecyclerAdapter<ITEM>(
     /**
      * grid 模式下使用
      */
-    protected open fun getSpanSize(item: ITEM, position: Int): Int {
+    open fun getSpanSize(item: ITEM, position: Int): Int {
         return 1
     }
 
-    protected open fun onItemClick(holder: ItemViewHolder): Boolean {
+    open fun onItemClick(holder: ItemViewHolder): Boolean {
         return false
     }
 
-    protected open fun onItemLongClick(holder: ItemViewHolder): Boolean {
+    open fun onItemLongClick(holder: ItemViewHolder): Boolean {
         return false
     }
 
-    protected open fun onItemChildClick(holder: ItemViewHolder, view: View): Boolean {
+    open fun onItemChildClick(holder: ItemViewHolder, view: View): Boolean {
         return false
     }
 
-    protected open fun onItemChildLongClick(holder: ItemViewHolder, view: View): Boolean {
+    open fun onItemChildLongClick(holder: ItemViewHolder, view: View): Boolean {
         return false
     }
 
@@ -498,18 +498,11 @@ open class CommonRecyclerAdapter<ITEM>(
             }
 
             else -> {
-                val holder = ItemViewHolder(
-                    layoutInflater.inflate(
-                        itemDelegates.getValue(viewType).layoutResId,
-                        parent,
-                        false
-                    )
-                )
-
-                itemDelegates.getValue(viewType)
-                    .onViewHolderCreated(holder)
+                val delegate = itemDelegates.getValue(viewType)
+                val holder = ItemViewHolder(delegate.onCreateItemView(layoutInflater, parent, viewType))
 
                 onViewHolderCreated(holder)
+                delegate.onViewHolderCreated(holder)
 
                 holder.setOnChildClickListener {
                     if (!onItemChildClick(holder, it))
