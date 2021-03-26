@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.easy.kotlins.adapter.anim.ItemViewAnimation
@@ -15,18 +16,17 @@ import java.util.*
 
 open class CommonRecyclerAdapter<ITEM>(
     val context: Context,
-    vararg itemDelegates: Pair<Int, ItemViewDelegate<out ITEM>>,
+    @LayoutRes
+    private val layoutResId: Int = 0,
     private val itemAnimation: ItemViewAnimation? = null,
     private var itemClickable: Boolean = false,
     private var itemLongClickable: Boolean = false
-) :
-    RecyclerView.Adapter<ItemViewHolder>() {
+) : RecyclerView.Adapter<ItemViewHolder>() {
 
     private val headerViews: SparseArray<View> by lazy { SparseArray() }
     private val footerViews: SparseArray<View> by lazy { SparseArray() }
 
-    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> =
-        mutableMapOf(*itemDelegates)
+    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> = mutableMapOf()
 
     private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
     private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =
@@ -40,7 +40,7 @@ open class CommonRecyclerAdapter<ITEM>(
 
     protected val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
-    protected var targetView: RecyclerView? = null
+    protected var parentView: RecyclerView? = null
         private set
 
     protected val modifiableItems: MutableList<ITEM> = mutableListOf()
@@ -498,11 +498,17 @@ open class CommonRecyclerAdapter<ITEM>(
             }
 
             else -> {
-                val delegate = itemDelegates.getValue(viewType)
-                val holder = ItemViewHolder(delegate.onCreateItemView(layoutInflater, parent, viewType))
+                val delegate = itemDelegates[viewType]
+
+                val holder = if (delegate != null) {
+                    ItemViewHolder(delegate.onCreateItemView(layoutInflater, parent)).also {
+                        delegate.onViewHolderCreated(it)
+                    }
+                } else {
+                    ItemViewHolder(onCreateItemView(layoutInflater, parent, viewType))
+                }
 
                 onViewHolderCreated(holder)
-                delegate.onViewHolderCreated(holder)
 
                 holder.setOnChildClickListener {
                     if (!onItemChildClick(holder, it))
@@ -536,7 +542,15 @@ open class CommonRecyclerAdapter<ITEM>(
         }
     }
 
+    open fun onCreateItemView(inflater: LayoutInflater, parent: ViewGroup, viewType: Int): View {
+        return inflater.inflate(layoutResId, parent, false)
+    }
+
     open fun onViewHolderCreated(holder: ItemViewHolder) {
+
+    }
+
+    open fun onBindViewHolder(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
 
     }
 
@@ -550,17 +564,20 @@ open class CommonRecyclerAdapter<ITEM>(
         payloads: MutableList<Any>
     ) {
         if (!isHeader(holder.layoutPosition) && !isFooter(holder.layoutPosition)) {
-            getItemOrNull(holder.layoutPosition)?.let {
-                val delegate = itemDelegates.getValue(getItemViewType(holder.layoutPosition))
-                @Suppress("UNCHECKED_CAST")
-                (delegate as ItemViewDelegate<ITEM>).onBindViewHolder(holder, it, payloads)
-            }
+            val item = getItemOrNull(holder.layoutPosition) ?: return
+
+            @Suppress("UNCHECKED_CAST")
+            val delegate = itemDelegates.getValue(getItemViewType(holder.layoutPosition))
+                    as ItemViewDelegate<ITEM>?
+            delegate?.onBindViewHolder(holder, item, payloads)
+
+            onBindViewHolder(holder, item, payloads)
         }
     }
 
     @CallSuper
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        this.targetView = recyclerView
+        this.parentView = recyclerView
 
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
@@ -580,7 +597,7 @@ open class CommonRecyclerAdapter<ITEM>(
 
     @CallSuper
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        this.targetView = null
+        this.parentView = null
     }
 
     @CallSuper

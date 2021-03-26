@@ -8,10 +8,11 @@ import androidx.annotation.LayoutRes
 
 abstract class ItemViewDelegate<ITEM>(
     val context: Context,
-    @LayoutRes private val layoutResId: Int = 0
+    @LayoutRes
+    private val layoutResId: Int = 0
 ) {
 
-    open fun onCreateItemView(inflater: LayoutInflater, parent: ViewGroup, viewType: Int): View {
+    open fun onCreateItemView(inflater: LayoutInflater, parent: ViewGroup): View {
         return inflater.inflate(layoutResId, parent, false)
     }
 
