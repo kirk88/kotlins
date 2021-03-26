@@ -94,18 +94,6 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
     )
 }
 
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Any): SqlWhereCondition {
-    return SqlWhereConditionImpl(this.name, whereArgs)
-}
-
-fun SqlColumnProperty.whereArgs(vararg whereArgs: Pair<String, Any>): SqlWhereCondition {
-    val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
-        map[arg.first] = arg.second
-        map
-    }
-    return SqlWhereConditionImpl(applyArguments(this.name, whereArgsMap))
-}
-
 private val ARG_PATTERN: Pattern = Pattern.compile("([^\\\\])\\{([^{}]+)\\}")
 
 internal fun applyArguments(whereClause: String, vararg whereArgs: Pair<String, Any>): String {
@@ -121,18 +109,20 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        val value = whereArgs[key]
+        val value = whereArgs[key].toEscapedString()
         matcher.appendReplacement(buffer, "${matcher.group(1)}${value}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
 }
 
-private fun Any.toEscapedString(): String {
+private fun Any?.toEscapedString(): String {
     return if (this is Number) {
         this.toString()
     } else if (this is Boolean) {
         if (this) "1" else "0"
+    } else if (this == null) {
+        ""
     } else {
         '\'' + this.toString().replace("'", "''") + '\''
     }

@@ -26,7 +26,7 @@ open class CommonRecyclerAdapter<ITEM>(
     private val headerViews: SparseArray<View> by lazy { SparseArray() }
     private val footerViews: SparseArray<View> by lazy { SparseArray() }
 
-    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> = mutableMapOf()
+    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> by lazy { mutableMapOf() }
 
     private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
     private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =
@@ -73,22 +73,22 @@ open class CommonRecyclerAdapter<ITEM>(
         itemChildLongClickListener = listener
     }
 
-    fun callOnItemClick(holder: ItemViewHolder) {
+    protected fun callOnItemClick(holder: ItemViewHolder) {
         if (onItemClick(holder)) return
         itemClickListener?.invoke(this, holder)
     }
 
-    fun callOnItemLongClick(holder: ItemViewHolder) {
+    protected fun callOnItemLongClick(holder: ItemViewHolder) {
         if (onItemLongClick(holder)) return
         itemLongClickListener?.invoke(this, holder)
     }
 
-    fun callOnItemChildClick(holder: ItemViewHolder, view: View) {
+    protected fun callOnItemChildClick(holder: ItemViewHolder, view: View) {
         if (onItemChildClick(holder, view)) return
         itemChildClickListener?.invoke(this, holder, view)
     }
 
-    fun callOnItemChildLongClick(holder: ItemViewHolder, view: View) {
+    protected fun callOnItemChildLongClick(holder: ItemViewHolder, view: View) {
         if (onItemChildLongClick(holder, view)) return
         itemChildLongClickListener?.invoke(this, holder, view)
     }

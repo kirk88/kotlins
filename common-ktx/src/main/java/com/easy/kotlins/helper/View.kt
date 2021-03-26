@@ -167,7 +167,7 @@ var View.layoutHeight: Int
         requestLayout()
     }
 
-operator fun <T : View> View.get(@IdRes id: Int): T = findViewById(id)
+fun <T : View> View.getFrom(@IdRes id: Int): T = findViewById(id)
     ?: error("Can not find view by id: $id")
 
 inline fun <T : View> T.onClick(crossinline action: (view: T) -> Unit) {

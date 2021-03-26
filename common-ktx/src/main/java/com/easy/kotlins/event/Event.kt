@@ -39,13 +39,6 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
         return this.intent
     }
 
-    fun copy(what: Int = this.what, message: String? = this.message): Event {
-        return Event(what, message).also {
-            it.putAll(extras)
-            it.setIntent(intent)
-        }
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
