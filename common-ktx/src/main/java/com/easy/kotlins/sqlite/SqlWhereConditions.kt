@@ -23,12 +23,12 @@ private class SqlWhereConditionImpl(
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
         val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
-        return SqlWhereConditionImpl("$whereClause AND ${condition.whereClause}", args)
+        return SqlWhereConditionImpl("$whereClause AND ${condition.whereClause}", *args)
     }
 
     override fun or(condition: SqlWhereCondition): SqlWhereCondition {
         val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
-        return SqlWhereConditionImpl("$whereClause OR ${condition.whereClause}", args)
+        return SqlWhereConditionImpl("$whereClause OR ${condition.whereClause}", *args)
     }
 
     override fun toString(): String {
