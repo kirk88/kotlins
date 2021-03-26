@@ -31,7 +31,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
         this.extras.putAll(extras)
     }
 
-    fun setIntent(intent: Intent) {
+    fun setIntent(intent: Intent?) {
         this.intent = intent
     }
 
@@ -42,6 +42,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
     fun copy(what: Int = this.what, message: String? = this.message): Event {
         return Event(what, message).also {
             it.putAll(extras)
+            it.setIntent(intent)
         }
     }
 
@@ -63,7 +64,7 @@ open class Event(val what: Int = Status.NONE, val message: String? = null) {
 }
 
 fun <T : Any> Event.getValue(key: String): T = requireNotNull(get(key)) {
-    "Key $key is missing in the extras of event."
+    "Key $key is missing in the extras of event"
 }
 
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
