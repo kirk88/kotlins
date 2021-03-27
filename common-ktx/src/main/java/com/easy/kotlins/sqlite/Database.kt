@@ -69,9 +69,9 @@ fun SQLiteDatabase.delete(
 
 fun SQLiteDatabase.delete(
     table: String,
-    whereCondition: SqlWhereCondition
+    condition: SqlWhereCondition
 ): Int {
-    return delete(table, whereCondition.whereClause, whereCondition.whereArgs)
+    return delete(table, condition.whereClause, condition.whereArgs)
 }
 
 fun SQLiteDatabase.update(

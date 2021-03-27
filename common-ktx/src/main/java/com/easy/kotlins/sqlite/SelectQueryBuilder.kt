@@ -66,6 +66,14 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
+    fun having(condition: SqlWhereCondition): SelectQueryBuilder {
+        check(!this.havingApplied) { "Query having was already applied" }
+
+        this.havingApplied = true
+        this.having = condition.render()
+        return this
+    }
+
     fun having(having: String): SelectQueryBuilder {
         check(!this.havingApplied) { "Query having was already applied" }
 
