@@ -151,16 +151,3 @@ private fun Any?.toEscapeString(): String {
         else -> "'${this?.toString()?.replace("'".toRegex(), "''").orEmpty()}'"
     }
 }
-
-val NAME = SqlColumnProperty.create("name", TEXT)
-
-fun main() {
-
-    val start = System.currentTimeMillis()
-
-    println(NAME.any("jack", "tom").render())
-
-    println(System.currentTimeMillis() - start)
-
-
-}
