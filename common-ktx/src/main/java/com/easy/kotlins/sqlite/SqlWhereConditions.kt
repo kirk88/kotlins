@@ -14,21 +14,13 @@ interface SqlWhereCondition {
 
 }
 
-private class SqlWhereConditionImpl : SqlWhereCondition {
+private class SqlWhereConditionImpl(
+    override val whereClause: String,
+    vararg whereArgs: Any
+) : SqlWhereCondition {
 
-    override val whereClause: String
+    override val whereArgs: Array<String> = whereArgs.map { it.toString() }.toTypedArray()
 
-    override val whereArgs: Array<String>
-
-    constructor(whereClause: String, vararg whereArgs: Any) {
-        this.whereClause = whereClause
-        this.whereArgs = whereArgs.map { it.toEscapedString() }.toTypedArray()
-    }
-
-    constructor(whereClause: String, whereArgs: Array<String>) {
-        this.whereClause = whereClause
-        this.whereArgs = whereArgs
-    }
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
         val args = mutableListOf<String>()
@@ -36,7 +28,7 @@ private class SqlWhereConditionImpl : SqlWhereCondition {
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
             "$whereClause AND ${condition.whereClause}",
-            args.toTypedArray()
+            *args.toTypedArray()
         )
     }
 
@@ -46,7 +38,7 @@ private class SqlWhereConditionImpl : SqlWhereCondition {
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
             "$whereClause OR ${condition.whereClause}",
-            args.toTypedArray()
+            *args.toTypedArray()
         )
     }
 
@@ -128,19 +120,15 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        matcher.appendReplacement(buffer, "${matcher.group(1)}${whereArgs[key].toEscapedString()}")
+        val value = whereArgs[key].let {
+            when (it) {
+                is Number -> it.toString()
+                is Boolean -> if (it) "1" else "0"
+                else -> "'${it?.toString()?.replace("'".toRegex(), "''").orEmpty()}'"
+            }
+        }
+        matcher.appendReplacement(buffer, "${matcher.group(1)}${value}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
-}
-
-private fun Any?.toEscapedString(): String {
-    val value = this ?: ""
-    return if (value is Number) {
-        value.toString()
-    } else if (value is Boolean) {
-        if (value) "1" else "0"
-    } else {
-        "'${value.toString().replace("'".toRegex(), "''")}'"
-    }
 }
