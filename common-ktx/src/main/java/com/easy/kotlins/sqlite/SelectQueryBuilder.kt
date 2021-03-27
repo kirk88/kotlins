@@ -95,7 +95,7 @@ abstract class SelectQueryBuilder(private val table: String) {
 
         this.selectionApplied = true
         this.selection = condition.whereClause
-        this.selectionArgs = condition.whereArgs
+        this.selectionArgs = condition.whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 

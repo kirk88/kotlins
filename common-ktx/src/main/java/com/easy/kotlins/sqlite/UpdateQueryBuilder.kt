@@ -28,7 +28,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
 
         this.whereApplied = true
         this.whereClause = condition.whereClause
-        this.whereArgs = condition.whereArgs
+        this.whereArgs = condition.whereArgs.map { it.toString() }.toTypedArray()
         return this
     }
 

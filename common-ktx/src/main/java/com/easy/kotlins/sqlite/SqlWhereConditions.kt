@@ -6,7 +6,7 @@ interface SqlWhereCondition {
 
     val whereClause: String
 
-    val whereArgs: Array<String>
+    val whereArgs: Array<Any>
 
     fun render(): String
 
@@ -18,16 +18,16 @@ interface SqlWhereCondition {
 
 private class SqlWhereConditionImpl(
     override val whereClause: String,
-    vararg whereArgs: String
+    vararg whereArgs: Any
 ) : SqlWhereCondition {
 
-    override val whereArgs: Array<String> = arrayOf(*whereArgs)
+    override val whereArgs: Array<Any> = arrayOf(*whereArgs)
 
     override fun render(): String {
         val builder = StringBuilder(whereClause)
         var offset = builder.indexOf("?")
         for (index in whereArgs.indices) {
-            val value = whereArgs[index]
+            val value = whereArgs[index].toEscapeString()
             builder.replace(offset, offset + 1, value)
             offset = builder.indexOf("?", offset)
         }
@@ -35,7 +35,7 @@ private class SqlWhereConditionImpl(
     }
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = mutableListOf<String>()
+        val args = mutableListOf<Any>()
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
@@ -45,7 +45,7 @@ private class SqlWhereConditionImpl(
     }
 
     override fun or(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = mutableListOf<String>()
+        val args = mutableListOf<Any>()
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
@@ -61,34 +61,34 @@ private class SqlWhereConditionImpl(
 }
 
 fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}=?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}=?", value.toString())
 
 fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<>?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}<>?", value.toString())
 
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} LIKE ?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name} LIKE ?", value.toString())
 
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} GLOB ?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name} GLOB ?", value.toString())
 
 fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}>?", value.toString())
 
 fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}<?", value.toString())
 
 fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>=?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}>=?", value.toString())
 
 fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<=?", value.toEscapeString())
+    SqlWhereConditionImpl("${this.name}<=?", value.toString())
 
 fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition =
     SqlWhereConditionImpl(
         "${this.name} BETWEEN ? AND ?",
-        value1.toEscapeString(),
-        value2.toEscapeString()
+        value1.toString(),
+        value2.toString()
     )
 
 fun SqlColumnProperty.notNull(): SqlWhereCondition =
@@ -105,7 +105,7 @@ fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition {
     builder.append(")")
     return SqlWhereConditionImpl(
         builder.toString(),
-        *values.map { it.toEscapeString() }.toTypedArray()
+        *values
     )
 }
 
@@ -118,7 +118,7 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
     builder.append(")")
     return SqlWhereConditionImpl(
         builder.toString(),
-        *values.map { it.toEscapeString() }.toTypedArray()
+        *values
     )
 }
 
