@@ -71,11 +71,9 @@ fun SQLiteDatabase.delete(
     table: String,
     condition: SqlWhereCondition
 ): Int {
-    return delete(
-        table,
-        condition.whereClause,
-        condition.whereArgs.map { it.toString() }.toTypedArray()
-    )
+    return delete(table, condition.whereClause, condition.whereArgs.map {
+        it.toString()
+    }.toTypedArray())
 }
 
 fun SQLiteDatabase.update(
