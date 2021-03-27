@@ -61,34 +61,34 @@ private class SqlWhereConditionImpl(
 }
 
 fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}=?", value.toString())
+    SqlWhereConditionImpl("${this.name}=?", value)
 
 fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<>?", value.toString())
+    SqlWhereConditionImpl("${this.name}<>?", value)
 
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} LIKE ?", value.toString())
+    SqlWhereConditionImpl("${this.name} LIKE ?", value)
 
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} GLOB ?", value.toString())
+    SqlWhereConditionImpl("${this.name} GLOB ?", value)
 
 fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>?", value.toString())
+    SqlWhereConditionImpl("${this.name}>?", value)
 
 fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<?", value.toString())
+    SqlWhereConditionImpl("${this.name}<?", value)
 
 fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>=?", value.toString())
+    SqlWhereConditionImpl("${this.name}>=?", value)
 
 fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<=?", value.toString())
+    SqlWhereConditionImpl("${this.name}<=?", value)
 
 fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition =
     SqlWhereConditionImpl(
         "${this.name} BETWEEN ? AND ?",
-        value1.toString(),
-        value2.toString()
+        value1,
+        value2
     )
 
 fun SqlColumnProperty.notNull(): SqlWhereCondition =
