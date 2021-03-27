@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.sqlite.db
 
 interface SqlColumnElement {
@@ -18,6 +20,24 @@ interface SqlColumnProperty {
 
     val type: SqlType
 
+    val counter: SqlColumnProperty
+
+    val maximum: SqlColumnProperty
+
+    val minimum: SqlColumnProperty
+
+    val average: SqlColumnProperty
+
+    val summation: SqlColumnProperty
+
+    val absolute: SqlColumnProperty
+
+    val upper: SqlColumnProperty
+
+    val lower: SqlColumnProperty
+
+    val length: SqlColumnProperty
+
     fun render(): String
 
     operator fun plus(value: Any): SqlColumnElement
@@ -37,8 +57,18 @@ private open class SqlColumnElementImpl(override val name: String, override val 
     }
 }
 
-private open class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
+private class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
     SqlColumnProperty {
+
+    override val counter: SqlColumnProperty = SqlColumnPropertyImpl("count(${this.name})", INTEGER)
+    override val maximum: SqlColumnProperty = SqlColumnPropertyImpl("max(${this.name})", INTEGER)
+    override val minimum: SqlColumnProperty = SqlColumnPropertyImpl("min(${this.name})", INTEGER)
+    override val average: SqlColumnProperty = SqlColumnPropertyImpl("avg(${this.name})", INTEGER)
+    override val summation: SqlColumnProperty = SqlColumnPropertyImpl("sum(${this.name})", INTEGER)
+    override val absolute: SqlColumnProperty = SqlColumnPropertyImpl("abs(${this.name})", INTEGER)
+    override val upper: SqlColumnProperty = SqlColumnPropertyImpl("upper(${this.name})", INTEGER)
+    override val lower: SqlColumnProperty = SqlColumnPropertyImpl("lower(${this.name})", INTEGER)
+    override val length: SqlColumnProperty = SqlColumnPropertyImpl("length(${this.name})", INTEGER)
 
     override fun render(): String = "$name ${type.render()}"
 

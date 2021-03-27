@@ -8,6 +8,8 @@ interface SqlWhereCondition {
 
     val whereArgs: Array<String>
 
+    fun render(): String
+
     infix fun and(condition: SqlWhereCondition): SqlWhereCondition
 
     infix fun or(condition: SqlWhereCondition): SqlWhereCondition
@@ -21,6 +23,16 @@ private class SqlWhereConditionImpl(
 
     override val whereArgs: Array<String> = whereArgs.map { it.toString() }.toTypedArray()
 
+    override fun render(): String {
+        val builder = StringBuilder(whereClause)
+        var offset = builder.indexOf("?")
+        for (index in whereArgs.indices) {
+            val value = whereArgs[index].toEscapeString()
+            builder.replace(offset, offset + 1, value)
+            offset = builder.indexOf("?", offset)
+        }
+        return builder.toString()
+    }
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
         val args = mutableListOf<String>()
@@ -120,15 +132,17 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        val value = whereArgs[key].let {
-            when (it) {
-                is Number -> it.toString()
-                is Boolean -> if (it) "1" else "0"
-                else -> "'${it?.toString()?.replace("'".toRegex(), "''").orEmpty()}'"
-            }
-        }
+        val value = whereArgs[key].toEscapeString()
         matcher.appendReplacement(buffer, "${matcher.group(1)}${value}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
+}
+
+private fun Any?.toEscapeString(): String {
+    return when (this) {
+        is Number -> this.toString()
+        is Boolean -> if (this) "1" else "0"
+        else -> "'${this?.toString()?.replace("'".toRegex(), "''").orEmpty()}'"
+    }
 }
