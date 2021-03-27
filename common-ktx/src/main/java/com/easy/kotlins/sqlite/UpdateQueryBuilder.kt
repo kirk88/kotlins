@@ -11,7 +11,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
 
     private var whereApplied = false
     private var whereClause: String? = null
-    private var whereArgs: Array<out String>? = null
+    private var whereArgs: Array<String>? = null
 
     fun values(vararg values: SqlColumnElement): UpdateQueryBuilder {
         this.values.addAll(values)

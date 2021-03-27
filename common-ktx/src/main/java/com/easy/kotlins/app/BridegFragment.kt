@@ -45,7 +45,6 @@ class BridegFragment : Fragment() {
         } else {
             callback.onRequestPermissionsResult(
                 requestCode,
-                PackageManager.PERMISSION_GRANTED,
                 permissions.map { it to PackageManager.PERMISSION_GRANTED }.toTypedArray()
             )
         }
@@ -70,13 +69,8 @@ class BridegFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val callback = permissionsResultCallbacks[requestCode]
         permissionsResultCallbacks.remove(requestCode)
-        val resultCode = if (grantResults.any { it == PackageManager.PERMISSION_DENIED })
-            PackageManager.PERMISSION_DENIED
-        else
-            PackageManager.PERMISSION_GRANTED
         callback?.onRequestPermissionsResult(
             requestCode,
-            resultCode,
             permissions.mapIndexed { index, permission ->
                 permission to grantResults[index]
             }.toTypedArray()
@@ -84,3 +78,5 @@ class BridegFragment : Fragment() {
     }
 
 }
+
+

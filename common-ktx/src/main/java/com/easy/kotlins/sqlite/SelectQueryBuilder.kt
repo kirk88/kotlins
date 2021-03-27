@@ -22,7 +22,7 @@ abstract class SelectQueryBuilder(private val table: String) {
 
     private var selectionApplied = false
     private var selection: String? = null
-    private var selectionArgs: Array<out String>? = null
+    private var selectionArgs: Array<String>? = null
 
     fun distinct(): SelectQueryBuilder {
         this.distinct = true
@@ -41,7 +41,7 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun groupBy(vararg groupBy: SqlColumnProperty): SelectQueryBuilder{
+    fun groupBy(vararg groupBy: SqlColumnProperty): SelectQueryBuilder {
         this.groupByApplied = true
         this.groupBy.addAll(groupBy.map { it.name })
         return this
@@ -162,7 +162,7 @@ abstract class SelectQueryBuilder(private val table: String) {
     protected abstract fun query(
         distinct: Boolean,
         table: String,
-        columns: Array<String>?,
+        columns: Array<out String>?,
         selection: String?,
         selectionArgs: Array<out String>?,
         groupBy: String?,
@@ -181,7 +181,7 @@ class AndroidDatabaseSelectQueryBuilder(
     override fun query(
         distinct: Boolean,
         table: String,
-        columns: Array<String>?,
+        columns: Array<out String>?,
         selection: String?,
         selectionArgs: Array<out String>?,
         groupBy: String?,

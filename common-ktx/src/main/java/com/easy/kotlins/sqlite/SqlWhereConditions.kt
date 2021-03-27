@@ -6,7 +6,7 @@ interface SqlWhereCondition {
 
     val whereClause: String
 
-    val whereArgs: Array<out String>
+    val whereArgs: Array<String>
 
     infix fun and(condition: SqlWhereCondition): SqlWhereCondition
 
@@ -14,21 +14,40 @@ interface SqlWhereCondition {
 
 }
 
-private class SqlWhereConditionImpl(
-    override val whereClause: String,
-    vararg args: Any
-) : SqlWhereCondition {
+private class SqlWhereConditionImpl : SqlWhereCondition {
 
-    override val whereArgs: Array<out String> = args.map { it.toEscapedString() }.toTypedArray()
+    override val whereClause: String
+
+    override val whereArgs: Array<String>
+
+    constructor(whereClause: String, vararg whereArgs: Any) {
+        this.whereClause = whereClause
+        this.whereArgs = whereArgs.map { it.toEscapedString() }.toTypedArray()
+    }
+
+    constructor(whereClause: String, whereArgs: Array<String>) {
+        this.whereClause = whereClause
+        this.whereArgs = whereArgs
+    }
 
     override fun and(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
-        return SqlWhereConditionImpl("$whereClause AND ${condition.whereClause}", *args)
+        val args = mutableListOf<String>()
+        for (arg in whereArgs) args.add(arg)
+        for (arg in condition.whereArgs) args.add(arg)
+        return SqlWhereConditionImpl(
+            "$whereClause AND ${condition.whereClause}",
+            args.toTypedArray()
+        )
     }
 
     override fun or(condition: SqlWhereCondition): SqlWhereCondition {
-        val args = (whereArgs.toList() + condition.whereArgs).toTypedArray()
-        return SqlWhereConditionImpl("$whereClause OR ${condition.whereClause}", *args)
+        val args = mutableListOf<String>()
+        for (arg in whereArgs) args.add(arg)
+        for (arg in condition.whereArgs) args.add(arg)
+        return SqlWhereConditionImpl(
+            "$whereClause OR ${condition.whereClause}",
+            args.toTypedArray()
+        )
     }
 
     override fun toString(): String {
@@ -109,21 +128,19 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
         val key = matcher.group(2) ?: continue
-        val value = whereArgs[key].toEscapedString()
-        matcher.appendReplacement(buffer, "${matcher.group(1)}${value}")
+        matcher.appendReplacement(buffer, "${matcher.group(1)}${whereArgs[key].toEscapedString()}")
     }
     matcher.appendTail(buffer)
     return buffer.toString()
 }
 
 private fun Any?.toEscapedString(): String {
-    return if (this is Number) {
-        this.toString()
-    } else if (this is Boolean) {
-        if (this) "1" else "0"
-    } else if (this == null) {
-        ""
+    val value = this ?: ""
+    return if (value is Number) {
+        value.toString()
+    } else if (value is Boolean) {
+        if (value) "1" else "0"
     } else {
-        '\'' + this.toString().replace("'", "''") + '\''
+        "'${value.toString().replace("'".toRegex(), "''")}'"
     }
 }
