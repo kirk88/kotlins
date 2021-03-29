@@ -74,8 +74,9 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         isOutsideTouchable = true
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
-        contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
     }
 
     override fun showProgress(message: CharSequence?) {
