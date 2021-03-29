@@ -207,9 +207,9 @@ fun SQLiteDatabase.dropIndex(
 }
 
 fun SQLiteDatabase.createColumn(
+    column: SqlColumnProperty,
     table: String,
-    ifNotExists: Boolean = false,
-    column: SqlColumnProperty
+    ifNotExists: Boolean = false
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
@@ -225,22 +225,24 @@ fun SQLiteDatabase.createColumn(
 }
 
 fun SQLiteDatabase.createColumns(
+    vararg columns: SqlColumnProperty,
     table: String,
-    ifNotExists: Boolean = false,
-    vararg columns: SqlColumnProperty
-) {
-    transaction {
-        for (column in columns) {
-            createColumn(table, ifNotExists, column)
-        }
+    ifNotExists: Boolean = false
+) = transaction {
+    for (column in columns) {
+        createColumn(column, table, ifNotExists)
     }
 }
 
 fun SQLiteDatabase.createColumns(
+    columns: List<SqlColumnProperty>,
     table: String,
-    ifNotExists: Boolean = false,
-    columns: List<SqlColumnProperty>
-) = createColumns(table, ifNotExists, *columns.toTypedArray())
+    ifNotExists: Boolean = false
+) = transaction {
+    for (column in columns) {
+        createColumn(column, table, ifNotExists)
+    }
+}
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
