@@ -64,16 +64,22 @@ fun SQLiteDatabase.delete(
     whereClause: String = "",
     vararg whereArgs: Pair<String, Any>
 ): Int {
-    return delete(table, applyArguments(whereClause, *whereArgs), null)
+    return delete(
+        table,
+        applyArguments(whereClause, *whereArgs),
+        null
+    )
 }
 
 fun SQLiteDatabase.delete(
     table: String,
     condition: SqlWhereCondition
 ): Int {
-    return delete(table, condition.whereClause, condition.whereArgs.map {
-        it.toString()
-    }.toTypedArray())
+    return delete(
+        table,
+        condition.whereClause,
+        condition.whereArgs.map { it.toString() }.toTypedArray()
+    )
 }
 
 fun SQLiteDatabase.update(
