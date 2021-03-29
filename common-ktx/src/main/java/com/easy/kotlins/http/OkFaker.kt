@@ -192,6 +192,10 @@ class OkFaker<T> internal constructor(
             }
         }
 
+        fun removeHeaders(name: String) = apply {
+            builder.removeHeaders(name)
+        }
+
         fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
             requestPairsOf(operation).forEach {
                 builder.setQueryParameter(it.key, it.value.toString())
@@ -262,6 +266,14 @@ class OkFaker<T> internal constructor(
             encodedQueryParameters.forEach {
                 builder.addEncodedQueryParameter(it.first, it.second.toString())
             }
+        }
+
+        fun removeQueryParameters(name: String) = apply {
+            builder.removeQueryParameters(name)
+        }
+
+        fun removeEncodedQueryParameters(name: String) = apply {
+            builder.removeEncodedQueryParameters(name)
         }
 
         fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
@@ -384,12 +396,28 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun body(body: RequestBody) = apply {
-            builder.body(body)
+        fun stringBody(contentType: MediaType? = null, body: String) = apply {
+            builder.stringBody(contentType, body)
         }
 
-        fun body(body: () -> RequestBody) = apply {
-            builder.body(body())
+        fun stringBody(contentType: MediaType? = null, body: () -> String) = apply {
+            builder.stringBody(contentType, body())
+        }
+
+        fun fileBody(contentType: MediaType? = null, file: File) = apply {
+            builder.fileBody(contentType, file)
+        }
+
+        fun fileBody(contentType: MediaType? = null, file: () -> File) = apply {
+            builder.fileBody(contentType, file())
+        }
+
+        fun requestBody(body: RequestBody) = apply {
+            builder.requestBody(body)
+        }
+
+        fun requestBody(body: () -> RequestBody) = apply {
+            builder.requestBody(body())
         }
 
         fun tag(tag: Any?) = apply {

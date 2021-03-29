@@ -266,7 +266,7 @@ internal class OkRequest(
             requestBuilder.addHeader(name, value)
         }
 
-        fun removeHeader(name: String) = apply {
+        fun removeHeaders(name: String) = apply {
             requestBuilder.removeHeader(name)
         }
 
@@ -334,15 +334,15 @@ internal class OkRequest(
             multipartBuilder.addPart(body)
         }
 
-        fun body(contentType: MediaType?, body: String) = apply {
+        fun stringBody(contentType: MediaType?, body: String) = apply {
             requestBody = body.toRequestBody(contentType)
         }
 
-        fun body(contentType: MediaType?, file: File) = apply {
+        fun fileBody(contentType: MediaType?, file: File) = apply {
             requestBody = file.asRequestBody(contentType)
         }
 
-        fun body(body: RequestBody) = apply {
+        fun requestBody(body: RequestBody) = apply {
             requestBody = body
         }
 

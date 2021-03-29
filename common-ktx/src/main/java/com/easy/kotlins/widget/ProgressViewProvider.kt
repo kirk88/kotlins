@@ -81,19 +81,19 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
 
     override fun showProgress(message: CharSequence?) {
         findViewById<TextView>(R.id.progress_text)?.text = message
-        showDelayed()
+        delayShow()
     }
 
     override fun showProgress(messageId: Int) {
         findViewById<TextView>(R.id.progress_text)?.textResource = messageId
-        showDelayed()
+        delayShow()
     }
 
     override fun dismissProgress() {
-        hideDelayed()
+        delayHide()
     }
 
-    private fun showDelayed() {
+    private fun delayShow() {
         startTime = -1L
         isDismissed = false
         removeCallbacks(hideRunnable)
@@ -104,7 +104,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         }
     }
 
-    private fun hideDelayed() {
+    private fun delayHide() {
         isDismissed = true
         removeCallbacks(showRunnable)
         isPostShow = false
