@@ -96,8 +96,8 @@ class OkFaker<T> internal constructor(
         }
     }
 
-    class Builder<T>(method: OkRequestMethod) {
-        private val builder = OkRequest.Builder(method, CONFIG)
+    class Builder<T> internal constructor(method: OkRequestMethod, config: OkConfig) {
+        private val builder = OkRequest.Builder(method, config)
 
         private var onStartApplied = false
         private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -501,40 +501,40 @@ class OkFaker<T> internal constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.setter()
 
         @JvmStatic
+        @JvmOverloads
         @JvmName("httpGet")
-        @JvmOverloads
         fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET).apply(block)
+            Builder<T>(OkRequestMethod.GET, CONFIG).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         @JvmName("httpPost")
-        @JvmOverloads
         fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST).apply(block)
+            Builder<T>(OkRequestMethod.POST, CONFIG).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         @JvmName("httpDelete")
-        @JvmOverloads
         fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE).apply(block)
+            Builder<T>(OkRequestMethod.DELETE, CONFIG).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         @JvmName("httpPut")
-        @JvmOverloads
         fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT).apply(block)
+            Builder<T>(OkRequestMethod.PUT, CONFIG).apply(block)
 
         @JvmStatic
+        @JvmOverloads
         @JvmName("httpHead")
-        @JvmOverloads
         fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD).apply(block)
+            Builder<T>(OkRequestMethod.HEAD, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmName("httpPatch")
         @JvmOverloads
+        @JvmName("httpPatch")
         fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH).apply(block)
+            Builder<T>(OkRequestMethod.PATCH, CONFIG).apply(block)
 
     }
 
