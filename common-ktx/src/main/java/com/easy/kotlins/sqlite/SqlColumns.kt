@@ -40,7 +40,7 @@ interface SqlColumnProperty {
 
     fun render(): String
 
-    operator fun plus(value: Any): SqlColumnElement
+    operator fun plus(value: Any?): SqlColumnElement
 
     companion object {
         fun create(name: String, type: SqlType): SqlColumnProperty =
@@ -72,7 +72,7 @@ private class SqlColumnPropertyImpl(override val name: String, override val type
 
     override fun render(): String = "$name ${type.render()}"
 
-    override fun plus(value: Any): SqlColumnElement = SqlColumnElement.create(name, value)
+    override fun plus(value: Any?): SqlColumnElement = SqlColumnElement.create(name, value)
 
     override fun toString(): String {
         return "SqlColumnProperty(name='$name', type=$type)"
@@ -105,10 +105,10 @@ private class SqlFunctionPropertyImpl(override val name: String) :
 
     override fun render(): String = "$name ${type.render()}"
 
-    override fun plus(value: Any): SqlColumnElement = SqlColumnElement.create(name, value)
+    override fun plus(value: Any?): SqlColumnElement = SqlColumnElement.create(name, value)
 
 }
 
 infix fun String.and(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
 infix fun String.and(value: String?): SqlColumnElement = SqlColumnElementImpl(this, value)
-infix fun String.and(value: Number): SqlColumnElement = SqlColumnElementImpl(this, value)
+infix fun String.and(value: Number?): SqlColumnElement = SqlColumnElementImpl(this, value)
