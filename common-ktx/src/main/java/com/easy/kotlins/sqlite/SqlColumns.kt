@@ -55,6 +55,7 @@ private open class SqlColumnElementImpl(override val name: String, override val 
     override fun toString(): String {
         return "SqlColumnElement(name='$name', value=$value)"
     }
+
 }
 
 private class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
@@ -109,6 +110,4 @@ private class SqlFunctionPropertyImpl(override val name: String) :
 
 }
 
-infix fun String.and(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
-infix fun String.and(value: String?): SqlColumnElement = SqlColumnElementImpl(this, value)
-infix fun String.and(value: Number?): SqlColumnElement = SqlColumnElementImpl(this, value)
+infix fun String.of(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)

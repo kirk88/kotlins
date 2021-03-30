@@ -560,16 +560,8 @@ class RequestPairs<K, V>(
         return pairs.put(key, value)
     }
 
-    fun putAll(pairsFrom: Map<out K, V>) {
-        pairs.putAll(pairsFrom)
-    }
-
     fun putAll(pairsForm: RequestPairs<out K, V>) {
         pairs.putAll(pairsForm.pairs)
-    }
-
-    fun putAll(vararg pairsFrom: Pair<K, V>) {
-        pairs.putAll(pairsFrom)
     }
 
     fun remove(key: K): V? {
@@ -586,7 +578,11 @@ class RequestPairs<K, V>(
 
 }
 
-fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = toList().map { it.key to it.value }.toMap()
+fun <K, V> RequestPairs<K, V>.putAll(pairsFrom: Map<out K, V>) = putAll(RequestPairs(pairsFrom))
+
+fun <K, V> RequestPairs<K, V>.putAll(vararg pairsFrom: Pair<K, V>) = putAll(pairsFrom.toMap())
+
+fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = map { it.key to it.value }.toMap()
 
 fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M =
     map { it.key to it.value }.toMap(destination)
@@ -599,7 +595,7 @@ fun requestPairsOf(
     vararg pairs: Pair<String, Any?>,
     operation: (RequestPairs<String, Any?>.() -> Unit)? = null
 ): RequestPairs<String, Any?> {
-    return RequestPairs<String, Any?>().apply { putAll(pairs.toMap()) }.also {
+    return RequestPairs(pairs.toMap()).also {
         operation?.invoke(it)
     }
 }
