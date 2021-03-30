@@ -589,7 +589,7 @@ class RequestPairs<K, V>(
 fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = toList().map { it.key to it.value }.toMap()
 
 fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M =
-    toList().map { it.key to it.value }.toMap(destination)
+    map { it.key to it.value }.toMap(destination)
 
 inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -> Unit): RequestPairs<String, Any?> {
     return RequestPairs<String, Any?>().apply(operation)

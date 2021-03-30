@@ -285,6 +285,11 @@ fun Any.toColumnElements(): List<SqlColumnElement> {
     }.read(this)
 }
 
+fun Any.toColumnElements(destination: MutableList<SqlColumnElement>): List<SqlColumnElement> {
+    destination.addAll(this.toColumnElements())
+    return destination
+}
+
 abstract class ManagedSQLiteOpenHelper(
     context: Context,
     name: String?,
