@@ -142,7 +142,7 @@ fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
 
 fun SQLiteDatabase.createTable(
     table: String,
-    ifNotExists: Boolean = false,
+    ifNotExists: Boolean,
     vararg columns: SqlColumnProperty
 ) {
     val escapedTableName = table.replace("`", "``")
@@ -156,28 +156,43 @@ fun SQLiteDatabase.createTable(
 
 fun SQLiteDatabase.createTable(
     table: String,
-    ifNotExists: Boolean = false,
+    vararg columns: SqlColumnProperty
+) = createTable(table, false, *columns)
+
+fun SQLiteDatabase.createTable(
+    table: String,
+    ifNotExists: Boolean,
     columns: List<SqlColumnProperty>
 ) = createTable(table, ifNotExists, *columns.toTypedArray())
 
+fun SQLiteDatabase.createTable(
+    table: String,
+    columns: List<SqlColumnProperty>
+) = createTable(table, false, columns)
+
+
 fun SQLiteDatabase.dropTable(
     table: String,
-    ifExists: Boolean = false
+    ifExists: Boolean
 ) {
     val escapedTableName = table.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
     execSQL("DROP TABLE $ifExistsText `$escapedTableName`;")
 }
 
+fun SQLiteDatabase.dropTable(
+    table: String
+) = dropTable(table, false)
+
 fun SQLiteDatabase.createIndex(
-    index: String,
     table: String,
-    unique: Boolean = false,
-    ifNotExists: Boolean = false,
+    unique: Boolean,
+    ifNotExists: Boolean,
+    index: String,
     vararg columns: SqlColumnProperty
 ) {
-    val escapedIndexName = index.replace("`", "``")
     val escapedTableName = table.replace("`", "``")
+    val escapedIndexName = index.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
     val uniqueText = if (unique) "UNIQUE" else ""
     execSQL(columns.joinToString(
@@ -188,28 +203,57 @@ fun SQLiteDatabase.createIndex(
 }
 
 fun SQLiteDatabase.createIndex(
-    index: String,
     table: String,
-    unique: Boolean = false,
-    ifNotExists: Boolean = false,
+    index: String,
+    vararg columns: SqlColumnProperty
+) = createIndex(
+    table = table,
+    unique = false,
+    ifNotExists = false,
+    index = index,
+    columns = columns
+)
+
+fun SQLiteDatabase.createIndex(
+    table: String,
+    unique: Boolean,
+    ifNotExists: Boolean,
+    index: String,
     columns: List<SqlColumnProperty>
-) = createIndex(index, table, unique, ifNotExists, *columns.toTypedArray())
+) = createIndex(table, unique, ifNotExists, index, *columns.toTypedArray())
+
+fun SQLiteDatabase.createIndex(
+    table: String,
+    index: String,
+    columns: List<SqlColumnProperty>
+) = createIndex(
+    table = table,
+    unique = false,
+    ifNotExists = false,
+    index = index,
+    columns = columns
+)
 
 fun SQLiteDatabase.dropIndex(
-    index: String,
     table: String,
-    ifExists: Boolean = false
+    ifExists: Boolean,
+    index: String,
 ) {
-    val escapedIndexName = index.replace("`", "``")
     val escapedTableName = table.replace("`", "``")
+    val escapedIndexName = index.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
     execSQL("DROP INDEX $ifExistsText `$escapedIndexName` ON `$escapedTableName`;")
 }
 
-fun SQLiteDatabase.createColumn(
-    column: SqlColumnProperty,
+fun SQLiteDatabase.dropIndex(
     table: String,
-    ifNotExists: Boolean = false
+    index: String,
+) = dropIndex(table, false, index)
+
+fun SQLiteDatabase.createColumn(
+    table: String,
+    ifNotExists: Boolean,
+    column: SqlColumnProperty
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
@@ -224,25 +268,40 @@ fun SQLiteDatabase.createColumn(
     }
 }
 
-fun SQLiteDatabase.createColumns(
-    vararg columns: SqlColumnProperty,
+fun SQLiteDatabase.createColumn(
     table: String,
-    ifNotExists: Boolean = false
+    column: SqlColumnProperty
+) = createColumn(table, false, column)
+
+fun SQLiteDatabase.createColumns(
+    table: String,
+    ifNotExists: Boolean,
+    vararg columns: SqlColumnProperty
 ) = transaction {
     for (column in columns) {
-        createColumn(column, table, ifNotExists)
+        createColumn(table, ifNotExists, column)
     }
 }
 
 fun SQLiteDatabase.createColumns(
-    columns: List<SqlColumnProperty>,
     table: String,
-    ifNotExists: Boolean = false
+    vararg columns: SqlColumnProperty
+) = createColumns(table, false, *columns)
+
+fun SQLiteDatabase.createColumns(
+    table: String,
+    ifNotExists: Boolean = false,
+    columns: List<SqlColumnProperty>
 ) = transaction {
     for (column in columns) {
-        createColumn(column, table, ifNotExists)
+        createColumn(table, ifNotExists, column)
     }
 }
+
+fun SQLiteDatabase.createColumns(
+    table: String,
+    columns: List<SqlColumnProperty>
+) = createColumns(table, false, columns)
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
