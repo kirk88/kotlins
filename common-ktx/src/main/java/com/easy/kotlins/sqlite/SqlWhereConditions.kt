@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.sqlite.db
 
 import java.util.regex.Pattern
@@ -60,29 +62,29 @@ private class SqlWhereConditionImpl(
 
 }
 
-fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.eq(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}=?", value)
 
-fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.ne(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}<>?", value)
+
+fun SqlColumnProperty.gt(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name}>?", value)
+
+fun SqlColumnProperty.lt(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name}<?", value)
+
+fun SqlColumnProperty.ge(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name}>=?", value)
+
+fun SqlColumnProperty.le(value: Any): SqlWhereCondition =
+    SqlWhereConditionImpl("${this.name}<=?", value)
 
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name} LIKE ?", value)
 
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name} GLOB ?", value)
-
-fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>?", value)
-
-fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<?", value)
-
-fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>=?", value)
-
-fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<=?", value)
 
 fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition =
     SqlWhereConditionImpl(
