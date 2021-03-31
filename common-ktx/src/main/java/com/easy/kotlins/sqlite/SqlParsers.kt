@@ -5,11 +5,11 @@ package com.easy.kotlins.sqlite.db
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
 
-interface RowParser<out T> {
+fun interface RowParser<out T> {
     fun parseRow(row: Array<SqlColumnValue>): T
 }
 
-interface MapRowParser<out T> {
+fun interface MapRowParser<out T> {
     fun parseRow(row: Map<String, SqlColumnValue>): T
 }
 
