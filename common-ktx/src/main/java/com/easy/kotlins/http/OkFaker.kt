@@ -384,13 +384,13 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun multiParts(operation: MutableList<MultipartBody.Part>.() -> Unit) = apply {
+        fun multiparts(operation: MutableList<MultipartBody.Part>.() -> Unit) = apply {
             mutableListOf<MultipartBody.Part>().apply(operation).forEach {
                 builder.addPart(it)
             }
         }
 
-        fun multiParts(vararg parts: MultipartBody.Part) = apply {
+        fun multiparts(vararg parts: MultipartBody.Part) = apply {
             parts.forEach {
                 builder.addPart(it)
             }
