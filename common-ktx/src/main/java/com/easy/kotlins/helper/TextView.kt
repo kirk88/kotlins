@@ -43,6 +43,12 @@ var TextView.textSizeResource: Int
         setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimensionPixelSize(value).toFloat())
     }
 
+var TextView.isBoldTextStyle: Boolean
+    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    set(value) {
+        this.paint?.isFakeBoldText = value
+    }
+
 fun TextView.isEmpty(): Boolean = this.text?.isEmpty() ?: true
 
 fun TextView.isBlank(): Boolean = this.text?.isBlank() ?: true
@@ -54,5 +60,3 @@ fun TextView.isNullOrBlank(): Boolean = this.text.isNullOrBlank()
 fun TextView.isNotEmpty(): Boolean = this.text?.isNotEmpty() ?: false
 
 fun TextView.isNotBlank(): Boolean = this.text?.isNotBlank() ?: false
-
-fun TextView.setBoldTextStyle(bold: Boolean = true) = run { this.paint?.isFakeBoldText = bold }
