@@ -62,22 +62,22 @@ private class SqlWhereConditionImpl(
 
 }
 
-fun SqlColumnProperty.eq(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}=?", value)
 
-fun SqlColumnProperty.ne(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}<>?", value)
 
-fun SqlColumnProperty.gt(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}>?", value)
 
-fun SqlColumnProperty.lt(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}<?", value)
 
-fun SqlColumnProperty.ge(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}>=?", value)
 
-fun SqlColumnProperty.le(value: Any): SqlWhereCondition =
+fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
     SqlWhereConditionImpl("${this.name}<=?", value)
 
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
