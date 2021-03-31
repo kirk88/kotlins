@@ -1,12 +1,12 @@
 package com.easy.kotlins.http
 
-interface OkCallback<T> {
+internal interface OkCallback<T> {
 
     fun onStart()
 
     fun onSuccess(result: T)
 
-    fun onFailure(exception: Throwable)
+    fun onFailure(error: Throwable)
 
     fun onCompletion()
 

@@ -46,23 +46,23 @@ class OkFaker<T> internal constructor(
     fun start() = apply {
         request.enqueue(ResponseCallback(transformer, object : OkCallback<T> {
             override fun onStart() {
-                onStartActions?.forEach { action -> action() }
+                onStartActions?.forEach { action -> action.onAction()}
             }
 
             override fun onSuccess(result: T) {
-                onSuccessActions?.forEach { action -> action(result) }
+                onSuccessActions?.forEach { action -> action.onAction(result) }
             }
 
-            override fun onFailure(exception: Throwable) {
-                onErrorActions?.forEach { action -> action(exception) }
+            override fun onFailure(error: Throwable) {
+                onErrorActions?.forEach { action -> action.onAction(error) }
             }
 
             override fun onCompletion() {
-                onCompletionActions?.forEach { action -> action() }
+                onCompletionActions?.forEach { action -> action.onAction() }
             }
 
             override fun onCancel() {
-                onCancelActions?.forEach { action -> action() }
+                onCancelActions?.forEach { action -> action.onAction() }
             }
         }))
     }
@@ -76,15 +76,11 @@ class OkFaker<T> internal constructor(
         }
 
         override fun onSuccess(result: Response) {
-            try {
-                OkCallbacks.onSuccess(callback, transformer.transformResponse(result))
-            } catch (exception: Throwable) {
-                OkCallbacks.onFailure(callback, exception)
-            }
+            OkCallbacks.onSuccess(callback) { transformer.transformResponse(result) }
         }
 
-        override fun onFailure(exception: Throwable) {
-            OkCallbacks.onFailure(callback, exception)
+        override fun onFailure(error: Throwable) {
+            OkCallbacks.onFailure(callback) { error }
         }
 
         override fun onCompletion() {
@@ -540,8 +536,13 @@ class OkFaker<T> internal constructor(
 
 }
 
-typealias Action<T> = (T) -> Unit
-typealias SimpleAction = () -> Unit
+fun interface Action<T> {
+    fun onAction(value: T)
+}
+
+fun interface SimpleAction {
+    fun onAction()
+}
 
 class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
 class FileFormDataPart(val file: File, val contentType: MediaType? = null)
@@ -622,12 +623,12 @@ fun requestPairsOf(
 }
 
 fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    emit(execute(CoroutineExecutors.IO) { get() })
+    emit(suspendExecutor(CoroutineExecutors.IO) { get() })
 }
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    emit(execute(CoroutineExecutors.IO) { get() })
+    emit(suspendExecutor(CoroutineExecutors.IO) { get() })
 }

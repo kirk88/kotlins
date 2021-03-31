@@ -20,13 +20,13 @@ internal class OkTransformer<T> {
         return try {
             @Suppress("UNCHECKED_CAST")
             mapper.map(response) as T
-        } catch (exception: Throwable) {
-            transformError(exception)
+        } catch (error: Throwable) {
+            transformError(error)
         }
     }
 
-    fun transformError(exception: Throwable): T {
-        return errorMapper?.map(exception) ?: throw exception
+    fun transformError(error: Throwable): T {
+        return errorMapper?.map(error) ?: throw error
     }
 
     companion object {

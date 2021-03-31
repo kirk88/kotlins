@@ -7,9 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-typealias Task = suspend CoroutineScope.() -> Unit
-
-interface SuspendedTask {
+internal interface SuspendedTask {
 
     suspend fun run()
 
@@ -18,14 +16,13 @@ interface SuspendedTask {
 class Stepper {
 
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
-    private var runningJob: Job? = null
 
     fun add(
         delayed: Long = 0,
         context: CoroutineContext = EmptyCoroutineContext,
-        task: Task
+        block: suspend CoroutineScope.() -> Unit
     ) {
-        channel.offer(DelayedTask(delayed, context, task))
+        channel.offer(DelayedTask(delayed, context, block))
     }
 
     suspend fun start() {
@@ -44,7 +41,6 @@ class Stepper {
 
     fun cancel() {
         channel.cancel()
-        runningJob?.cancel()
     }
 
     fun close() {
@@ -54,17 +50,17 @@ class Stepper {
     private class DelayedTask(
         private val delayed: Long,
         private val context: CoroutineContext,
-        private val task: Task
+        private val block: suspend CoroutineScope.() -> Unit
     ) : SuspendedTask {
 
         override suspend fun run() = withContext(Dispatchers.Main.immediate + context) {
             delay(delayed)
 
             try {
-                task()
-            } catch (exception: Exception) {
-                val errorHandler = coroutineContext[CoroutineExceptionHandler] ?: throw exception
-                errorHandler.handleException(coroutineContext, exception)
+                block()
+            } catch (error: Throwable) {
+                val errorHandler = coroutineContext[CoroutineExceptionHandler] ?: throw error
+                errorHandler.handleException(coroutineContext, error)
             }
         }
 

@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
  *      return T
  * }
  */
-suspend fun <T> execute(
+suspend fun <T> suspendExecutor(
     executor: CoroutineExecutor = CoroutineExecutors.Unconfined,
     block: () -> T
 ): T = suspendCancellableCoroutine { con ->

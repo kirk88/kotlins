@@ -18,7 +18,7 @@ internal class OkRequest(
 ) {
 
     private var call: Call? = null
-    private var creationFailure: Exception? = null
+    private var creationFailure: Throwable? = null
 
     @Volatile
     private var canceled = false
@@ -82,13 +82,13 @@ internal class OkRequest(
         callback.onStart()
     }
 
-    private fun dispatchOnFailure(callback: OkCallback<Response>, e: Exception) {
+    private fun dispatchOnFailure(callback: OkCallback<Response>, error: Throwable) {
         if (dispatchOnCancel(callback)) {
             return
         }
 
         try {
-            callback.onFailure(e)
+            callback.onFailure(error)
         } finally {
             callback.onCompletion()
         }
@@ -101,8 +101,8 @@ internal class OkRequest(
 
         try {
             callback.onSuccess(processResponse(response))
-        } catch (e: Exception) {
-            callback.onFailure(e)
+        } catch (error: Throwable) {
+            callback.onFailure(error)
         } finally {
             callback.onCompletion()
         }
@@ -130,9 +130,9 @@ internal class OkRequest(
                 try {
                     this.call = client.newCall(processRequest(request))
                     realCall = this.call
-                } catch (exception: Exception) {
-                    creationFailure = exception
-                    throw exception
+                } catch (error: Throwable) {
+                    creationFailure = error
+                    throw error
                 }
             }
         }
