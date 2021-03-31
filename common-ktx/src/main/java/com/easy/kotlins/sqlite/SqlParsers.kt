@@ -105,8 +105,8 @@ fun Cursor.getColumnValue(index: Int): SqlColumnValue {
 private fun readColumnsArray(cursor: Cursor): Array<SqlColumnValue> {
     val count = cursor.columnCount
     val list = ArrayList<SqlColumnValue>(count)
-    for (i in 0 until count) {
-        list.add(cursor.getColumnValue(i))
+    for (index in 0 until count) {
+        list.add(cursor.getColumnValue(index))
     }
     return list.toTypedArray()
 }
@@ -114,8 +114,8 @@ private fun readColumnsArray(cursor: Cursor): Array<SqlColumnValue> {
 private fun readColumnsMap(cursor: Cursor): Map<String, SqlColumnValue> {
     val count = cursor.columnCount
     val map = hashMapOf<String, SqlColumnValue>()
-    for (i in 0 until count) {
-        map[cursor.getColumnName(i)] = cursor.getColumnValue(i)
+    for (index in 0 until count) {
+        map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
     }
     return map
 }
