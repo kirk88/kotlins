@@ -2,7 +2,6 @@ package com.easy.kotlins.app
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Bundle
 import android.util.SparseArray
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -15,8 +14,7 @@ class BridegFragment : Fragment() {
         SparseArray(5)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    init {
         retainInstance = true
     }
 
