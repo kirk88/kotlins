@@ -140,7 +140,6 @@ internal fun applyArguments(whereClause: String, vararg whereArgs: Pair<String, 
 }
 
 internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): String {
-
     val matcher = ARG_PATTERN.matcher(whereClause)
     val buffer = StringBuffer(whereClause.length)
     while (matcher.find()) {
@@ -153,9 +152,10 @@ internal fun applyArguments(whereClause: String, whereArgs: Map<String, Any>): S
 }
 
 private fun Any?.toEscapeString(): String {
-    return when (this) {
-        is Number -> this.toString()
-        is Boolean -> if (this) "1" else "0"
-        else -> "'${this?.toString()?.replace("'".toRegex(), "''").orEmpty()}'"
+    val value = this ?: return ""
+    return when (value) {
+        is Number -> value.toString()
+        is Boolean -> if (value) "1" else "0"
+        else -> "'${value.toString().replace("'".toRegex(), "''")}'"
     }
 }
