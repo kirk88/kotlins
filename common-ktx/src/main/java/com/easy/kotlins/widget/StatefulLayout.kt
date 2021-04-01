@@ -65,14 +65,14 @@ class StatefulLayout @JvmOverloads constructor(
 
     private var defaultShowType: Int
 
-    private var errorActionListener: OnActionListener? = null
+    private var errorActionListener: StatefulView.OnActionListener? = null
     private val errorButtonClickListener = OnClickListener { _ ->
         if (errorActionListener != null) {
             errorActionListener!!.onAction(this)
         }
     }
 
-    private var emptyActionListener: OnActionListener? = null
+    private var emptyActionListener: StatefulView.OnActionListener? = null
     private val emptyButtonClickListener = OnClickListener { _ ->
         if (emptyActionListener != null) {
             emptyActionListener!!.onAction(this)
@@ -257,7 +257,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyActionListener(listener: OnActionListener): StatefulView {
+    override fun setOnEmptyActionListener(listener: StatefulView.OnActionListener): StatefulView {
         emptyActionListener = listener
         return this
     }
@@ -313,7 +313,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setErrorActionListener(listener: OnActionListener): StatefulView {
+    override fun setOnErrorActionListener(listener: StatefulView.OnActionListener): StatefulView {
         errorActionListener = listener
         return this
     }

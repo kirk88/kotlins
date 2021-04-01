@@ -1,19 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="empty_image" type="id" />
-    <item name="empty_text" type="id" />
-    <item name="empty_button" type="id" />
-
-    <item name="error_image" type="id" />
-    <item name="error_text" type="id" />
-    <item name="error_button" type="id" />
-
-    <item name="loading_progress" type="id" />
-    <item name="loading_text" type="id" />
-
-    <item name="progress_panel" type="id" />
-    <item name="progress_bar" type="id" />
-    <item name="progress_text" type="id" />
 
     <attr name="statefulLayoutStyle" format="reference" />
 
@@ -131,4 +117,53 @@
         <!-- 加载中布局文本样式 -->
         <attr name="loadingTextAppearance" format="reference" />
     </declare-styleable>
+
+
+    <declare-styleable name="TitleBar">
+        <attr name="useCustomTitle" format="boolean" />
+        <attr name="titleTextAppearance" />
+        <attr name="titleTextColor" />
+        <attr name="subtitleTextAppearance" />
+        <attr name="subtitleTextColor" />
+        <attr name="navigationIcon" format="reference" />
+        <attr name="navigationContentDescription" format="reference|string" />
+        <attr name="navigationIconTint" format="color|reference" />
+        <attr name="navigationIconTintMode" format="enum">
+            <enum name="clear" value="0" />
+            <enum name="src" value="1" />
+            <enum name="dst" value="2" />
+            <enum name="src_over" value="3" />
+            <enum name="dst_over" value="4" />
+            <enum name="src_in" value="5" />
+            <enum name="dst_in" value="6" />
+            <enum name="src_out" value="7" />
+            <enum name="dst_out" value="8" />
+            <enum name="src_atop" value="9" />
+            <enum name="dst_atop" value="10" />
+            <enum name="xor" value="11" />
+            <enum name="darken" value="16" />
+            <enum name="lighten" value="17" />
+            <enum name="multiply" value="13" />
+            <enum name="screen" value="14" />
+            <enum name="add" value="12" />
+            <enum name="overlay" value="15" />
+        </attr>
+        <attr name="title" />
+        <attr name="subtitle" />
+        <attr name="menu" />
+        <attr name="showHomeEnabled" format="boolean" />
+        <attr name="homeAsUpEnabled" format="boolean" />
+        <attr name="showBottomDivider" format="enum">
+            <enum name="ifNeed" value="0" />
+            <enum name="always" value="1" />
+            <enum name="never" value="2" />
+        </attr>
+        <attr name="bottomDividerHeight" format="dimension|reference" />
+        <attr name="bottomDividerColor" format="color|reference" />
+        <attr name="attachToActivity" format="boolean" />
+    </declare-styleable>
+
+    <attr name="titleBarStyle" format="reference" />
+
+    <attr name="titleBarSize" format="dimension|reference" />
 </resources>

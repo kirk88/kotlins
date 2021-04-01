@@ -50,7 +50,7 @@ interface StatefulView {
 
     fun setEmptyButtonVisible(visible: Boolean): StatefulView
 
-    fun setEmptyActionListener(listener: OnActionListener): StatefulView
+    fun setOnEmptyActionListener(listener: OnActionListener): StatefulView
 
     fun setLoadingText(text: CharSequence): StatefulView
 
@@ -70,7 +70,7 @@ interface StatefulView {
 
     fun setErrorButtonVisible(visible: Boolean): StatefulView
 
-    fun setErrorActionListener(listener: OnActionListener): StatefulView
+    fun setOnErrorActionListener(listener: OnActionListener): StatefulView
 
     fun attachTo(adapter: RecyclerView.Adapter<*>): StatefulView
 
@@ -90,8 +90,8 @@ interface StatefulView {
         const val TYPE_LOADING_VIEW = 0x003
         const val TYPE_ERROR_VIEW = 0x004
     }
-}
 
-fun interface OnActionListener {
-    fun onAction(view: StatefulView)
+    fun interface OnActionListener {
+        fun onAction(view: StatefulView)
+    }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="empty_image" type="id" />
+    <item name="empty_text" type="id" />
+    <item name="empty_button" type="id" />
+
+    <item name="error_image" type="id" />
+    <item name="error_text" type="id" />
+    <item name="error_button" type="id" />
+
+    <item name="loading_progress" type="id" />
+    <item name="loading_text" type="id" />
+
+    <item name="progress_panel" type="id" />
+    <item name="progress_bar" type="id" />
+    <item name="progress_text" type="id" />
+
+</resources>

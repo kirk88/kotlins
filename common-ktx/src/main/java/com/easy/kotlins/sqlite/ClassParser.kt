@@ -50,7 +50,7 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 
         if (constructors.none { it.isAnnotationPresent(ClassParserConstructor::class.java) }) {
             val constructor = requireNotNull(constructors.find { it.parameterTypes.isEmpty() }) {
-                "Can't initialize object parser for ${clazz.canonicalName}, no acceptable constructors found"
+                "Can't initialize object parser for ${clazz.canonicalName}, no empty constructor found"
             }
 
             delegate = ClassFieldParser(constructor)
@@ -69,9 +69,7 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 
             val preferredConstructor = if (applicableConstructors.size > 1) {
                 requireNotNull(applicableConstructors.singleOrNull {
-                    it.isAnnotationPresent(
-                        ClassParserConstructor::class.java
-                    )
+                    it.isAnnotationPresent(ClassParserConstructor::class.java)
                 }) {
                     "Several constructors are annotated with ClassParserConstructor"
                 }
