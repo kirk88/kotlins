@@ -14,8 +14,10 @@ fun <T> LiveData<T>.observeNotNull(owner: LifecycleOwner, observer: (value: T) -
     }
 }
 
-var <T> MutableLiveData<T>.valueOnMain
-    get() = value
-    set(value) {
-        postValue(value)
+operator fun <T> MutableLiveData<T>.plus(value: T?){
+    if(isMainThread){
+        this.value = value
+    }else {
+        this.postValue(value)
     }
+}

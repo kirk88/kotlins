@@ -6,6 +6,7 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.easy.kotlins.event.MutableLiveEventData
+import com.easy.kotlins.helper.isMainThread
 
 internal class LiveEventDelegate<T> {
 
@@ -131,8 +132,6 @@ internal class LiveEventDelegate<T> {
 
     companion object {
         private val HANDLER = Handler(Looper.getMainLooper())
-        private val isMainThread: Boolean
-            get() = Looper.getMainLooper() === Looper.myLooper()
     }
 
 }

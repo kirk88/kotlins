@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Toast
@@ -224,3 +225,6 @@ private tailrec fun scanCompatActivity(context: Context?): AppCompatActivity? {
         else -> null
     }
 }
+
+val isMainThread: Boolean
+    get() = Looper.getMainLooper() == Looper.myLooper()
