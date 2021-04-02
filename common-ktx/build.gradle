@@ -1,16 +1,18 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'maven'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'maven'
+}
 
 android {
-    compileSdkVersion rootProject.ext.android.compile_sdk_version
-    buildToolsVersion rootProject.ext.android.build_tools_version
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
 
     defaultConfig {
-        minSdkVersion rootProject.ext.android.min_sdk_version
-        targetSdkVersion rootProject.ext.android.target_sdk_version
-        versionCode rootProject.ext.android.version_code
-        versionName rootProject.ext.android.version_name
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode versions.versionCode
+        versionName versions.versionName
 
         multiDexEnabled true
 
@@ -25,8 +27,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility versions.sourceCompatibility
+        targetCompatibility versions.targetCompatibility
     }
 
     kotlinOptions {
@@ -38,31 +40,31 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    testImplementation rootProject.ext.dependencies.java_test_junit
-    androidTestImplementation rootProject.ext.dependencies.android_test_ext
-    androidTestImplementation rootProject.ext.dependencies.android_test_espresso
-    androidTestImplementation rootProject.ext.dependencies.android_test_rules
+    api deps.kotlinStdlib
+    api deps.kotlinCore
+    api deps.kotlinCoroutinesCore
+    api deps.kotlinCoroutinesAndroid
+    api deps.kotlinLifecycleViewmodel
+    api deps.kotlinLifecycleViewmodelSavedstate
+    api deps.kotlinLifecycleRuntime
+    api deps.kotlinLifecycleLivedata
+    api deps.kotlinFragment
+    api deps.multidex
+    api deps.datastorePreferences
+    api deps.datastoreCore
+    api deps.appcompat
+    api deps.design
+    api deps.constraintlayout
+    api deps.recyclerview
+    api deps.okhttp
+    api deps.okhttpLogging
+    api deps.gson
+    api deps.coil
 
-    api rootProject.ext.dependencies.multidex
-    api rootProject.ext.dependencies.kotlin_stdlib
-    api rootProject.ext.dependencies.kotlin_core
-    api rootProject.ext.dependencies.coroutines_core
-    api rootProject.ext.dependencies.coroutines_android
-    api rootProject.ext.dependencies.lifecycle_viewmodel_ktx
-    api rootProject.ext.dependencies.lifecycle_viewmodel_savedstate
-    api rootProject.ext.dependencies.lifecycle_runtime_ktx
-    api rootProject.ext.dependencies.lifecycle_livedata_ktx
-    api rootProject.ext.dependencies.datastore_preferences
-    api rootProject.ext.dependencies.datastore_core
-    api rootProject.ext.dependencies.appcompat
-    api rootProject.ext.dependencies.design
-    api rootProject.ext.dependencies.fragment_ktx
-    api rootProject.ext.dependencies.constraintlayout
-    api rootProject.ext.dependencies.recyclerview
-    api rootProject.ext.dependencies.okhttp
-    api rootProject.ext.dependencies.okhttp_logging
-    api rootProject.ext.dependencies.gson
-    api rootProject.ext.dependencies.coil
+    testImplementation deps.testJunit
+    androidTestImplementation deps.testAndroidJunit
+    androidTestImplementation deps.testAndroidEspresso
+    androidTestImplementation deps.testAndroidRules
 }
 
 uploadArchives {
@@ -70,9 +72,9 @@ uploadArchives {
         def deployPath = file(getProperty('aar.deployPath'))
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
-            groupId rootProject.ext.publisher.group_id
-            artifactId rootProject.ext.publisher.artifact_id
-            version rootProject.ext.publisher.version
+            groupId publisher.groupId
+            artifactId publisher.artifactId
+            version publisher.version
 
             licenses {
                 license {

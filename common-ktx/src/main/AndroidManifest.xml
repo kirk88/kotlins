@@ -5,6 +5,11 @@
 
     <application
         android:allowBackup="true"
-        android:supportsRtl="true" />
+        android:supportsRtl="true" >
+        <provider
+            android:name=".app.ContextProvider"
+            android:authorities="${applicationId}.com.easy.kotlins"
+            android:exported="false" />
+    </application>
 
 </manifest>
