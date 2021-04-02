@@ -14,7 +14,7 @@ fun <T> LiveData<T>.observeNotNull(owner: LifecycleOwner, observer: (value: T) -
     }
 }
 
-operator fun <T> MutableLiveData<T>.plus(value: T?){
+operator fun <T> MutableLiveData<T>.plusAssign(value: T?){
     if(isMainThread){
         this.value = value
     }else {
