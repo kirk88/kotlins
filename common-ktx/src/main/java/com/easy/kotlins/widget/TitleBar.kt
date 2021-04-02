@@ -41,10 +41,10 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     private val showHomeEnabled: Boolean
     private val homeAsUpEnabled: Boolean
 
-    private var showBottomDivider: Int
     private val bottomDividerHeight: Int
     private val bottomDividerColor: Int
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
+    private var showBottomDivider: Int
 
     private var titleView: TextView? = null
 
