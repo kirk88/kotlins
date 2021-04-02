@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources >
 
     <attr name="statefulLayoutStyle" format="reference" />
 
@@ -148,11 +148,12 @@
             <enum name="add" value="12" />
             <enum name="overlay" value="15" />
         </attr>
+        <attr name="popupTheme" />
         <attr name="title" />
         <attr name="subtitle" />
         <attr name="menu" />
         <attr name="showHomeEnabled" format="boolean" />
-        <attr name="homeAsUpEnabled" format="boolean" />
+        <attr name="showHomeAsUpEnabled" format="boolean" />
         <attr name="showBottomDivider" format="enum">
             <enum name="ifNeed" value="0" />
             <enum name="always" value="1" />

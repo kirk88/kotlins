@@ -51,7 +51,7 @@ dependencies {
     api deps.datastorePreferences
     api deps.datastoreCore
     api deps.appcompat
-    api deps.design
+    api deps.material
     api deps.constraintlayout
     api deps.recyclerview
     api deps.okhttp

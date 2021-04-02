@@ -35,28 +35,44 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     @Retention(AnnotationRetention.SOURCE)
     annotation class BottomDividerMode
 
-    private val navigationIconTint: ColorStateList?
-    private val navigationIconTintMode: Int
     private val useCustomTitle: Boolean
-    private val showHomeEnabled: Boolean
-    private val homeAsUpEnabled: Boolean
 
+    private var showBottomDivider: Int
     private val bottomDividerHeight: Int
     private val bottomDividerColor: Int
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
-    private var showBottomDivider: Int
 
+    private val toolbar: Toolbar = Toolbar(context)
     private var titleView: TextView? = null
 
     private var actionBar: ActionBar? = null
-    private val toolbar: Toolbar = Toolbar(context)
+
+    var popupTheme: Int
+        get() = toolbar.popupTheme
+        set(theme) {
+            toolbar.popupTheme = theme
+        }
 
     var navigationIcon: Drawable?
         get() = toolbar.navigationIcon
         set(drawable) {
-            if (!showHomeEnabled) return
-            toolbar.navigationIcon =
-                wrapDrawable(drawable, navigationIconTint, navigationIconTintMode)
+            tintDrawable(drawable, navigationIconTint, navigationIconTintMode)
+
+            toolbar.navigationIcon = drawable
+        }
+
+    var navigationIconTint: ColorStateList? = null
+        set(tint) {
+            tintDrawable(toolbar.navigationIcon, tint, navigationIconTintMode)
+
+            field = tint
+        }
+
+    var navigationIconTintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP
+        set(mode) {
+            tintDrawable(toolbar.navigationIcon, navigationIconTint, mode)
+
+            field = mode
         }
 
     var navigationContentDescription: CharSequence?
@@ -67,12 +83,13 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
 
     var title: CharSequence? = null
         set(title) {
-            if (useCustomTitle) {
-                ensureTitleTextView()
-                titleView!!.text = title
-            } else {
-                if (actionBar != null) actionBar!!.title = title
-                else toolbar.title = title
+            when {
+                useCustomTitle -> {
+                    ensureTitleTextView()
+                    titleView!!.text = title
+                }
+                actionBar != null -> actionBar!!.title = title
+                else -> toolbar.title = title
             }
             field = title
         }
@@ -146,15 +163,21 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         return toolbar.menu
     }
 
-    fun addMenu(title: CharSequence?): MenuItem {
-        return toolbar.menu.add(title)
-    }
-
-    fun addMenu(groupId: Int, itemId: Int, order: Int, title: CharSequence?): MenuItem {
+    fun addMenu(
+        groupId: Int = Menu.NONE,
+        itemId: Int = Menu.NONE,
+        order: Int = Menu.NONE,
+        title: CharSequence
+    ): MenuItem {
         return toolbar.menu.add(groupId, itemId, order, title)
     }
 
-    fun addMenu(groupId: Int, itemId: Int, order: Int, @StringRes titleId: Int): MenuItem {
+    fun addMenu(
+        groupId: Int = Menu.NONE,
+        itemId: Int = Menu.NONE,
+        order: Int = Menu.NONE,
+        @StringRes titleId: Int
+    ): MenuItem {
         return toolbar.menu.add(groupId, itemId, order, titleId)
     }
 
@@ -204,21 +227,11 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        if (showBottomDivider(showBottomDivider)) {
+        if (isShowBottomDivider()) {
             bottomDividerDrawable.apply {
                 color = bottomDividerColor
                 setBounds(0, height - bottomDividerHeight, width, height)
             }.draw(canvas)
-        }
-    }
-
-    private fun attachToActivity(activity: AppCompatActivity) {
-        activity.setSupportActionBar(toolbar)
-        actionBar = activity.supportActionBar
-        if (actionBar != null) {
-            actionBar!!.setDisplayShowTitleEnabled(!useCustomTitle)
-            actionBar!!.setDisplayShowHomeEnabled(showHomeEnabled)
-            actionBar!!.setDisplayHomeAsUpEnabled(homeAsUpEnabled)
         }
     }
 
@@ -245,27 +258,41 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         }
     }
 
+    private fun isShowBottomDivider(): Boolean {
+        return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
+                || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
+    }
+
     companion object {
 
         const val SHOW_BOTTOM_DIVIDER_IF_NEED = 0
         const val SHOW_BOTTOM_DIVIDER_ALWAYS = 1
         const val SHOW_BOTTOM_DIVIDER_NEVER = 2
 
-        private fun showBottomDivider(showBottomDivider: Int): Boolean {
-            return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
-                    || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
+        private fun getSupportActionBar(
+            activity: AppCompatActivity,
+            toolbar: Toolbar,
+            showTitle: Boolean,
+            showHome: Boolean,
+            showHomeAsUp: Boolean
+        ): ActionBar {
+            activity.setSupportActionBar(toolbar)
+            val actionBar = activity.supportActionBar!!
+            actionBar.setDisplayShowTitleEnabled(showTitle)
+            actionBar.setDisplayShowHomeEnabled(showHome)
+            actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
+            return actionBar
         }
 
-        private fun wrapDrawable(
+        private fun tintDrawable(
             drawable: Drawable?,
             tint: ColorStateList?,
-            tintMode: Int
-        ): Drawable? {
-            if (drawable == null) return null
-            val wrappedDrawable = DrawableCompat.wrap(drawable.mutate())
-            DrawableCompat.setTintList(wrappedDrawable, tint)
-            DrawableCompat.setTintMode(wrappedDrawable, intToMode(tintMode))
-            return wrappedDrawable
+            tintMode: PorterDuff.Mode
+        ) {
+            if (drawable == null) return
+            DrawableCompat.wrap(drawable.mutate())
+            DrawableCompat.setTintList(drawable, tint)
+            DrawableCompat.setTintMode(drawable, tintMode)
         }
 
         private fun intToMode(value: Int): PorterDuff.Mode {
@@ -291,6 +318,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 else -> PorterDuff.Mode.CLEAR
             }
         }
+
     }
 
     init {
@@ -298,52 +326,57 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             attrs, R.styleable.TitleBar,
             R.attr.titleBarStyle, 0
         )
+
         useCustomTitle = ta.getBoolean(R.styleable.TitleBar_useCustomTitle, false)
-        showHomeEnabled = ta.getBoolean(R.styleable.TitleBar_showHomeEnabled, true)
-        homeAsUpEnabled = ta.getBoolean(R.styleable.TitleBar_homeAsUpEnabled, true)
-        navigationIconTint = ta.getColorStateList(R.styleable.TitleBar_navigationIconTint)
-        navigationIconTintMode = ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
+
+        if (ta.getBoolean(R.styleable.TitleBar_attachToActivity, true)) {
+            val showHome = ta.getBoolean(R.styleable.TitleBar_showHomeEnabled, true)
+            val showHomeAsUp = ta.getBoolean(R.styleable.TitleBar_showHomeAsUpEnabled, true)
+            actionBar = context.appCompatActivity?.let {
+                getSupportActionBar(it, toolbar, !useCustomTitle, showHome, showHomeAsUp)
+            }
+        }
 
         title = ta.getString(R.styleable.TitleBar_title)
         subtitle = ta.getString(R.styleable.TitleBar_subtitle)
-        val resourceId = ta.getResourceId(R.styleable.TitleBar_navigationIcon, -1)
-        if (resourceId > -1) {
-            navigationIcon = AppCompatResources.getDrawable(context, resourceId)
-        }
-        navigationContentDescription = ta.getText(R.styleable.TitleBar_navigationContentDescription)
 
         if (ta.hasValue(R.styleable.TitleBar_titleTextAppearance)) {
             setTitleTextAppearance(ta.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_titleTextColor)) {
-            setTitleTextColor(ta.getColor(R.styleable.TitleBar_titleTextColor, -0x1))
+            setTitleTextColor(ta.getColor(R.styleable.TitleBar_titleTextColor, 0))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_subtitleTextAppearance)) {
             setSubtitleTextAppearance(
-                ta.getResourceId(
-                    R.styleable.TitleBar_subtitleTextAppearance,
-                    0
-                )
+                ta.getResourceId(R.styleable.TitleBar_subtitleTextAppearance, 0)
             )
         }
 
         if (ta.hasValue(R.styleable.TitleBar_subtitleTextColor)) {
-            setSubtitleTextColor(ta.getColor(R.styleable.TitleBar_subtitleTextColor, -0x1))
+            setSubtitleTextColor(ta.getColor(R.styleable.TitleBar_subtitleTextColor, 0))
         }
+
+        navigationIconTint = ta.getColorStateList(R.styleable.TitleBar_navigationIconTint)
+        navigationIconTintMode =
+            intToMode(ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9))
+
+        val resourceId = ta.getResourceId(R.styleable.TitleBar_navigationIcon, 0)
+        if (resourceId != 0) {
+            navigationIcon = AppCompatResources.getDrawable(context, resourceId)
+        }
+        navigationContentDescription = ta.getText(R.styleable.TitleBar_navigationContentDescription)
 
         showBottomDivider =
             ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
         bottomDividerHeight = ta.getDimensionPixelSize(R.styleable.TitleBar_bottomDividerHeight, 1)
         bottomDividerColor = ta.getColor(R.styleable.TitleBar_bottomDividerColor, Color.GRAY)
 
+        popupTheme = ta.getResourceId(R.styleable.TitleBar_popupTheme, 0)
+
         if (ta.hasValue(R.styleable.TitleBar_menu)) {
             inflateMenu(ta.getResourceId(R.styleable.TitleBar_menu, 0))
-        }
-
-        if (ta.getBoolean(R.styleable.TitleBar_attachToActivity, true)) {
-            context.appCompatActivity?.let { attachToActivity(it) }
         }
 
         ta.recycle()
