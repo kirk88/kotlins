@@ -329,9 +329,9 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
 
         useCustomTitle = ta.getBoolean(R.styleable.TitleBar_useCustomTitle, false)
 
-        if (ta.getBoolean(R.styleable.TitleBar_attachToActivity, true)) {
-            val showHome = ta.getBoolean(R.styleable.TitleBar_showHomeEnabled, true)
-            val showHomeAsUp = ta.getBoolean(R.styleable.TitleBar_showHomeAsUpEnabled, true)
+        if (ta.getBoolean(R.styleable.TitleBar_attachToActivity, false)) {
+            val showHome = ta.getBoolean(R.styleable.TitleBar_showHomeEnabled, false)
+            val showHomeAsUp = ta.getBoolean(R.styleable.TitleBar_showHomeAsUpEnabled, false)
             actionBar = context.appCompatActivity?.let {
                 getSupportActionBar(it, toolbar, !useCustomTitle, showHome, showHomeAsUp)
             }
