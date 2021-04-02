@@ -165,5 +165,4 @@
 
     <attr name="titleBarStyle" format="reference" />
 
-    <attr name="titleBarSize" format="dimension|reference" />
 </resources>
