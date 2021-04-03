@@ -73,6 +73,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         inputMethodMode = INPUT_METHOD_NOT_NEEDED
+        animationStyle = R.style.Animation_AppCompat_Dialog
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
@@ -137,8 +138,8 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     }
 
     companion object {
-        private const val MIN_SHOW_TIME: Long = 500L
-        private const val MIN_DELAY: Long = 500L
+        private const val MIN_SHOW_TIME: Long = 400L
+        private const val MIN_DELAY: Long = 400L
     }
 
 }

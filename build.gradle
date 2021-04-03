@@ -15,7 +15,7 @@ buildscript {
     ext.publisher = [
             groupId   : "com.easy.kotlins",
             artifactId: "common-ktx",
-            version   : "1.0.4"
+            version   : "1.0.5"
     ]
 
     ext.deps = [
