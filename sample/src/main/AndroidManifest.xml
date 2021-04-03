@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kotlins">
         <activity android:name=".MainActivity"
+            android:label="MainActivity"
             android:theme="@style/Theme.Kotlins.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -29,6 +29,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.easy.kotlins.R
+import com.easy.kotlins.helper.activity
 import com.easy.kotlins.helper.appCompatActivity
 import com.google.android.material.appbar.AppBarLayout
 
@@ -98,8 +99,8 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 else -> toolbar.title = title
             }
 
-            tryGetTitleTextView(toolbar){
-                if(hasOnClickListeners()) return@tryGetTitleTextView
+            tryGetTitleTextView(toolbar) {
+                if (hasOnClickListeners()) return@tryGetTitleTextView
                 setOnClickListener(titleClickListener)
             }
 
@@ -111,8 +112,8 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             if (actionBar != null) actionBar!!.subtitle = subtitle
             else toolbar.subtitle = subtitle
 
-            tryGetSubtitleTextView(toolbar){
-                if(hasOnClickListeners()) return@tryGetSubtitleTextView
+            tryGetSubtitleTextView(toolbar) {
+                if (hasOnClickListeners()) return@tryGetSubtitleTextView
                 setOnClickListener(subtitleClickListener)
             }
 
@@ -217,24 +218,24 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
 
     fun setOnSubtitleClickListener(listener: OnClickListener?) {
         subtitleClickListener = listener
-        tryGetSubtitleTextView(toolbar){
+        tryGetSubtitleTextView(toolbar) {
             setOnClickListener(listener)
         }
     }
 
 
-    fun setDisplayCustomTitleEnabled(enabled: Boolean){
+    fun setDisplayCustomTitleEnabled(enabled: Boolean) {
         if (!useCustomTitle) {
             return
         }
 
-        if(enabled){
+        if (enabled) {
             ensureTitleTextView()
 
-            if(!isToolbarChild(titleTextView)){
+            if (!isToolbarChild(titleTextView)) {
                 toolbar.addView(titleTextView)
             }
-        }else if(isToolbarChild(titleTextView)){
+        } else if (isToolbarChild(titleTextView)) {
             toolbar.removeView(titleTextView)
         }
     }
@@ -267,9 +268,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 textView,
                 R.style.TextAppearance_Widget_AppCompat_Toolbar_Title
             )
-            textView.gravity = Gravity.CENTER
-            textView.maxEms = 20
-            textView.maxLines = 1
+            textView.setSingleLine()
             textView.ellipsize = TextUtils.TruncateAt.END
             val layoutParams = Toolbar.LayoutParams(
                 Toolbar.LayoutParams.WRAP_CONTENT,
@@ -281,7 +280,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         }
     }
 
-    private fun isToolbarChild(view: TextView?): Boolean{
+    private fun isToolbarChild(view: TextView?): Boolean {
         return view != null && toolbar.contains(view)
     }
 
@@ -308,7 +307,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
 
     private fun tryGetSubtitleTextView(parent: View, block: TextView.() -> Unit) {
         if (subtitleTextView != null) {
-           subtitleTextView!!.block()
+            subtitleTextView!!.block()
             return
         }
 
@@ -339,7 +338,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             val actionBar = activity.supportActionBar!!
             actionBar.setDisplayShowHomeEnabled(showHome)
             actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
-            if(!showTitle) actionBar.title = null
+            if (!showTitle) actionBar.title = null
             return actionBar
         }
 
@@ -396,8 +395,9 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             }
         }
 
-        title = ta.getString(R.styleable.TitleBar_title)
-        subtitle = ta.getString(R.styleable.TitleBar_subtitle)
+        val defaultTitle = { actionBar?.title ?: context.activity?.title }
+        title = ta.getText(R.styleable.TitleBar_title) ?: defaultTitle()
+        subtitle = ta.getText(R.styleable.TitleBar_subtitle)
 
         if (ta.hasValue(R.styleable.TitleBar_titleTextAppearance)) {
             setTitleTextAppearance(ta.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0))
