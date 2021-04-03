@@ -26,6 +26,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.appCompatActivity
@@ -98,6 +99,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             }
 
             tryGetTitleTextView(toolbar){
+                if(hasOnClickListeners()) return@tryGetTitleTextView
                 setOnClickListener(titleClickListener)
             }
 
@@ -110,6 +112,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             else toolbar.subtitle = subtitle
 
             tryGetSubtitleTextView(toolbar){
+                if(hasOnClickListeners()) return@tryGetSubtitleTextView
                 setOnClickListener(subtitleClickListener)
             }
 
@@ -219,24 +222,21 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         }
     }
 
-    fun showCustomTitle() {
+
+    fun setDisplayCustomTitleEnabled(enabled: Boolean){
         if (!useCustomTitle) {
             return
         }
 
-        if (titleTextView != null) {
-            titleTextView!!.visibility = VISIBLE
-        } else {
+        if(enabled){
             ensureTitleTextView()
-        }
-    }
 
-    fun hideCustomTitle() {
-        if (!useCustomTitle) {
-            return
+            if(!isToolbarChild(titleTextView)){
+                toolbar.addView(titleTextView)
+            }
+        }else if(isToolbarChild(titleTextView)){
+            toolbar.removeView(titleTextView)
         }
-
-        titleTextView?.visibility = GONE
     }
 
     fun setShowBottomDivider(@BottomDividerMode showDivider: Int) {
@@ -276,8 +276,13 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 Toolbar.LayoutParams.WRAP_CONTENT
             )
             layoutParams.gravity = Gravity.CENTER
-            toolbar.addView(titleTextView, layoutParams)
+            textView.layoutParams = layoutParams
+            toolbar.addView(titleTextView)
         }
+    }
+
+    private fun isToolbarChild(view: TextView?): Boolean{
+        return view != null && toolbar.contains(view)
     }
 
     private fun isShowBottomDivider(): Boolean {
@@ -332,9 +337,9 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         ): ActionBar {
             activity.setSupportActionBar(toolbar)
             val actionBar = activity.supportActionBar!!
-            actionBar.setDisplayShowTitleEnabled(showTitle)
             actionBar.setDisplayShowHomeEnabled(showHome)
             actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
+            if(!showTitle) actionBar.title = null
             return actionBar
         }
 

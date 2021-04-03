@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         app:title="Title"
+        app:attachToActivity="true"
         app:useCustomTitle="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:layout_scrollFlags="scroll|enterAlways"

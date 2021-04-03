@@ -38,6 +38,7 @@ class MainActivity : NiceActivity(R.layout.activity_main) {
             toast("subtitle")
 
         }
+
     }
 
 }
