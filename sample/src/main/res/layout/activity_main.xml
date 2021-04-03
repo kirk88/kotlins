@@ -11,11 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        app:title="Title"
+        app:useCustomTitle="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:statusBarForeground="@android:color/holo_red_light"
-        app:title="@string/app_name" />
+        app:subtitle="Subtitle" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

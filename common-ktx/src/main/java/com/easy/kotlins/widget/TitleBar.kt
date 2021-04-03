@@ -16,6 +16,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import androidx.annotation.*
 import androidx.appcompat.app.ActionBar
@@ -43,9 +44,13 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
 
     private val toolbar: Toolbar = Toolbar(context)
-    private var titleView: TextView? = null
+    private var titleTextView: TextView? = null
+    private var subtitleTextView: TextView? = null
 
     private var actionBar: ActionBar? = null
+
+    private var titleClickListener: OnClickListener? = null
+    private var subtitleClickListener: OnClickListener? = null
 
     var popupTheme: Int
         get() = toolbar.popupTheme
@@ -86,21 +91,28 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             when {
                 useCustomTitle -> {
                     ensureTitleTextView()
-                    titleView!!.text = title
+                    titleTextView!!.text = title
                 }
                 actionBar != null -> actionBar!!.title = title
                 else -> toolbar.title = title
             }
+
+            tryGetTitleTextView(toolbar){
+                setOnClickListener(titleClickListener)
+            }
+
             field = title
         }
 
     var subtitle: CharSequence? = null
         set(subtitle) {
-            if (useCustomTitle) {
-                return
-            }
             if (actionBar != null) actionBar!!.subtitle = subtitle
             else toolbar.subtitle = subtitle
+
+            tryGetSubtitleTextView(toolbar){
+                setOnClickListener(subtitleClickListener)
+            }
+
             field = subtitle
         }
 
@@ -119,7 +131,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     fun setTitleTextColor(@ColorInt color: Int) {
         if (useCustomTitle) {
             ensureTitleTextView()
-            titleView!!.setTextColor(color)
+            titleTextView!!.setTextColor(color)
         } else {
             toolbar.setTitleTextColor(color)
         }
@@ -128,22 +140,18 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     fun setTitleTextAppearance(@StyleRes id: Int) {
         if (useCustomTitle) {
             ensureTitleTextView()
-            TextViewCompat.setTextAppearance(titleView!!, id)
+            TextViewCompat.setTextAppearance(titleTextView!!, id)
         } else {
             toolbar.setTitleTextAppearance(context, id)
         }
     }
 
     fun setSubtitleTextColor(@ColorInt color: Int) {
-        if (!useCustomTitle) {
-            toolbar.setSubtitleTextColor(color)
-        }
+        toolbar.setSubtitleTextColor(color)
     }
 
     fun setSubtitleTextAppearance(@StyleRes id: Int) {
-        if (!useCustomTitle) {
-            toolbar.setSubtitleTextAppearance(context, id)
-        }
+        toolbar.setSubtitleTextAppearance(context, id)
     }
 
     fun setNavigationIcon(@DrawableRes id: Int) {
@@ -197,13 +205,27 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         toolbar.setOnMenuItemClickListener(listener)
     }
 
+    fun setOnTitleClickListener(listener: OnClickListener?) {
+        titleClickListener = listener
+        tryGetTitleTextView(toolbar) {
+            setOnClickListener(listener)
+        }
+    }
+
+    fun setOnSubtitleClickListener(listener: OnClickListener?) {
+        subtitleClickListener = listener
+        tryGetSubtitleTextView(toolbar){
+            setOnClickListener(listener)
+        }
+    }
+
     fun showCustomTitle() {
         if (!useCustomTitle) {
             return
         }
 
-        if (titleView != null) {
-            titleView!!.visibility = VISIBLE
+        if (titleTextView != null) {
+            titleTextView!!.visibility = VISIBLE
         } else {
             ensureTitleTextView()
         }
@@ -214,7 +236,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             return
         }
 
-        titleView?.visibility = GONE
+        titleTextView?.visibility = GONE
     }
 
     fun setShowBottomDivider(@BottomDividerMode showDivider: Int) {
@@ -237,9 +259,9 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
 
     @SuppressLint("PrivateResource")
     private fun ensureTitleTextView() {
-        if (titleView == null) {
+        if (titleTextView == null) {
             val textView = AppCompatTextView(context).also {
-                titleView = it
+                titleTextView = it
             }
             TextViewCompat.setTextAppearance(
                 textView,
@@ -254,13 +276,45 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 Toolbar.LayoutParams.WRAP_CONTENT
             )
             layoutParams.gravity = Gravity.CENTER
-            toolbar.addView(titleView, layoutParams)
+            toolbar.addView(titleTextView, layoutParams)
         }
     }
 
     private fun isShowBottomDivider(): Boolean {
         return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
                 || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
+    }
+
+    private fun tryGetTitleTextView(parent: View, block: TextView.() -> Unit) {
+        if (titleTextView != null) {
+            titleTextView!!.block()
+            return
+        }
+
+        val field = parent.javaClass.getDeclaredField("mTitleTextView")
+        field.isAccessible = true
+        try {
+            titleTextView = field.get(parent) as TextView?
+            titleTextView?.block()
+        } catch (_: IllegalArgumentException) {
+        } catch (_: IllegalAccessException) {
+        }
+    }
+
+    private fun tryGetSubtitleTextView(parent: View, block: TextView.() -> Unit) {
+        if (subtitleTextView != null) {
+           subtitleTextView!!.block()
+            return
+        }
+
+        val field = parent.javaClass.getDeclaredField("mSubtitleTextView")
+        field.isAccessible = true
+        try {
+            subtitleTextView = field.get(parent) as TextView?
+            subtitleTextView?.block()
+        } catch (_: IllegalArgumentException) {
+        } catch (_: IllegalAccessException) {
+        }
     }
 
     companion object {
