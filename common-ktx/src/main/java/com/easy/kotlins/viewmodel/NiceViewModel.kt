@@ -4,7 +4,6 @@ package com.easy.kotlins.viewmodel
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.annotation.CallSuper
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
@@ -12,11 +11,8 @@ import com.easy.kotlins.event.Event
 import com.easy.kotlins.event.EventDelegate
 import com.easy.kotlins.event.EventLifecycleObserver
 import com.easy.kotlins.event.EventObserver
-import com.easy.kotlins.http.DefaultOkFakerScope
-import com.easy.kotlins.http.OkFaker
-import com.easy.kotlins.http.OkFakerScope
 
-interface ViewModelController : OkFakerScope, ViewModelHttpRequester {
+interface ViewModelController {
 
     var event: Event
 
@@ -26,36 +22,7 @@ interface ViewModelController : OkFakerScope, ViewModelHttpRequester {
 
 }
 
-interface ViewModelHttpRequester : OkFakerScope {
-
-    fun <T> get(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.get(block).build().also { add(it) }
-    }
-
-    fun <T> post(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.post(block).build().also { add(it) }
-    }
-
-    fun <T> delete(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.delete(block).build().also { add(it) }
-    }
-
-    fun <T> put(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.put(block).build().also { add(it) }
-    }
-
-    fun <T> head(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.head(block).build().also { add(it) }
-    }
-
-    fun <T> patch(block: OkFaker.Builder<T>.() -> Unit): OkFaker<T> {
-        return OkFaker.patch(block).build().also { add(it) }
-    }
-
-}
-
-private class DefaultViewModelController : ViewModelController,
-    OkFakerScope by DefaultOkFakerScope() {
+private class DefaultViewModelController : ViewModelController {
 
     private val eventDelegate = EventDelegate()
     override var event: Event by eventDelegate
@@ -70,24 +37,10 @@ private class DefaultViewModelController : ViewModelController,
 
 }
 
-open class NiceViewModel : ViewModel(), ViewModelController by DefaultViewModelController() {
-
-    @CallSuper
-    override fun onCleared() {
-        clear()
-    }
-
-}
+open class NiceViewModel : ViewModel(), ViewModelController by DefaultViewModelController()
 
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
-    ViewModelController by DefaultViewModelController() {
-
-    @CallSuper
-    override fun onCleared() {
-        clear()
-    }
-
-}
+    ViewModelController by DefaultViewModelController()
 
 open class StatefulViewModel(val state: SavedStateHandle) : NiceViewModel()
 
