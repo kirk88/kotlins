@@ -70,17 +70,22 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     }
 
     init {
-        isFocusable = true
-        isOutsideTouchable = true
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
+        inputMethodMode = INPUT_METHOD_NOT_NEEDED
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)
     }
 
     override fun showProgress(message: CharSequence?) {
-        findViewById<TextView>(R.id.progress_text)?.text = message
+        findViewById<TextView>(R.id.progress_text)?.apply {
+            if (message.isNullOrBlank()) {
+                textResource = R.string.load_progress_tip
+            } else {
+                text = message
+            }
+        }
         delayShow()
     }
 
