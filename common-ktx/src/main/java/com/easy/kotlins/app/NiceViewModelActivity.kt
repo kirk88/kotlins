@@ -30,8 +30,8 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
     open val progressView: ProgressView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ViewModelEvents.observeOnActivity(this)
         super.onCreate(savedInstanceState)
+        ViewModelEvents.observeOnActivity(this)
     }
 
     final override fun onEventChanged(event: Event) {

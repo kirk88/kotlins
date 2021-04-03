@@ -31,8 +31,8 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
     open val progressView: ProgressView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ViewModelEvents.observeOnFragment(this)
         super.onCreate(savedInstanceState)
+        ViewModelEvents.observeOnFragment(this)
     }
 
     final override fun onEventChanged(event: Event) {
