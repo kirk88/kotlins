@@ -567,7 +567,7 @@ open class CommonRecyclerAdapter<ITEM>(
             val item = getItemOrNull(holder.layoutPosition) ?: return
 
             @Suppress("UNCHECKED_CAST")
-            val delegate = itemDelegates.getValue(getItemViewType(holder.layoutPosition))
+            val delegate = itemDelegates[getItemViewType(holder.layoutPosition)]
                     as ItemViewDelegate<ITEM>?
             delegate?.onBindViewHolder(holder, item, payloads)
 
