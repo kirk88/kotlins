@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@android:color/white"
+    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+    app:cardBackgroundColor="?attr/colorBackgroundFloating"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
     app:cardUseCompatPadding="true">
@@ -30,8 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
+            android:textAppearance="?textAppearanceBody1"
             tools:text="@string/load_progress_tip" />
 
     </LinearLayout>
