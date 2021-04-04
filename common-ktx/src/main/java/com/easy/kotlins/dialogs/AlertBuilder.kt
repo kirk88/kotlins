@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.dialogs
 
 import android.annotation.SuppressLint
@@ -18,12 +20,14 @@ interface AlertBuilder<out D : DialogInterface> {
     var title: CharSequence
         @Deprecated("NO_GETTER", level = ERROR) get
 
+    @setparam:StringRes
     var titleResource: Int
         @Deprecated("NO_GETTER", level = ERROR) get
 
     var message: CharSequence
         @Deprecated("NO_GETTER", level = ERROR) get
 
+    @setparam:StringRes
     var messageResource: Int
         @Deprecated("NO_GETTER", level = ERROR) get
 

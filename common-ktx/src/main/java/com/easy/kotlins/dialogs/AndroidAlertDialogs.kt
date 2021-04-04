@@ -8,19 +8,19 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
 fun Fragment.alertBuilder(
-    themeResId: Int = 0,
+    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeResId, title, message, init)
+): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeId, title, message, init)
 
 fun Context.alertBuilder(
-    themeResId: Int = 0,
+    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
 ): AlertBuilder<AlertDialog> {
-    return AndroidAlertBuilder(this, themeResId).apply {
+    return AndroidAlertBuilder(this, themeId).apply {
         if (title != null) {
             this.title = title
         }
@@ -31,26 +31,54 @@ fun Context.alertBuilder(
     }
 }
 
-fun Fragment.alert(
-    themeResId: Int = 0,
-    title: CharSequence? = null,
-    message: CharSequence? = null,
+fun Fragment.alertBuilder(
+    themeId: Int = 0,
+    titleId: Int = 0,
+    messageId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog = requireActivity().alert(themeResId, title, message, init)
+): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeId, titleId, messageId, init)
 
-fun Context.alert(
-    themeResId: Int = 0,
-    title: CharSequence? = null,
-    message: CharSequence? = null,
+fun Context.alertBuilder(
+    themeId: Int = 0,
+    titleId: Int = 0,
+    messageId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog {
-    return AndroidAlertBuilder(this, themeResId).apply {
-        if (title != null) {
-            this.title = title
+): AlertBuilder<AlertDialog> {
+    return AndroidAlertBuilder(this, themeId).apply {
+        if (titleId != 0) {
+            this.titleResource = titleId
         }
-        if (message != null) {
-            this.message = message
+        if (messageId != 0) {
+            this.messageResource = messageId
         }
         if (init != null) init()
-    }.show()
+    }
 }
+
+fun Fragment.alert(
+    themeId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+): AlertDialog = requireActivity().alert(themeId, title, message, init)
+
+fun Context.alert(
+    themeId: Int = 0,
+    title: CharSequence? = null,
+    message: CharSequence? = null,
+    init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+): AlertDialog = alertBuilder(themeId, title, message, init).show()
+
+fun Fragment.alert(
+    themeId: Int = 0,
+    titleId: Int = 0,
+    messageId: Int = 0,
+    init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+): AlertDialog = requireActivity().alert(themeId, titleId, messageId, init)
+
+fun Context.alert(
+    themeId: Int = 0,
+    titleId: Int = 0,
+    messageId: Int = 0,
+    init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
+): AlertDialog = alertBuilder(themeId, titleId, messageId, init).show()

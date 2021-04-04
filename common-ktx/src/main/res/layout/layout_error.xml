@@ -7,7 +7,7 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@id/error_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,7 +15,7 @@
         android:layout_marginBottom="10dp"
         android:adjustViewBounds="true" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@id/error_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,9 +23,9 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         tools:text="@string/load_error_tip"
-        tools:textAppearance="@style/TextAppearance.StatefulLayout.ErrorText" />
+        tools:textAppearance="@style/TextAppearance.LoaderLayout.ErrorText" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@id/error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
         android:minWidth="220dp"
         tools:background="@drawable/loading_layout_button"
         tools:text="@string/load_retry_tip"
-        tools:textAppearance="@style/TextAppearance.StatefulLayout.ButtonText"
+        tools:textAppearance="@style/TextAppearance.LoaderLayout.ButtonText"
         tools:textColor="#ffffff" />
 
 </LinearLayout>

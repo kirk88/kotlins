@@ -8,7 +8,10 @@ import android.content.Intent
 import com.easy.kotlins.helper.opt
 import com.easy.kotlins.helper.toBundle
 
-open class Event(val what: Int = Status.NONE, val message: String? = null) {
+open class Event(
+    val what: Int = Status.NONE,
+    val message: CharSequence? = null
+) {
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
@@ -91,7 +94,7 @@ object Status {
 
 }
 
-fun event(what: Int = Status.NONE, message: String? = null): Event = Event(what, message)
+fun event(what: Int = Status.NONE, message: CharSequence? = null): Event = Event(what, message)
 
 fun event(events: List<Event>): Event = EventCollection(events = events)
 
@@ -99,7 +102,7 @@ fun event(vararg events: Event): Event = EventCollection(events = events.toList(
 
 inline fun buildEvent(
     what: Int = Status.NONE,
-    message: String? = null,
+    message: CharSequence? = null,
     crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
@@ -136,7 +139,7 @@ fun activityResults(code: Int, vararg pairs: Pair<String, Any?>) = buildEvent(co
 
 fun activityFinish(): Event = event(Status.FINISH_ACTIVITY)
 
-fun progressShow(message: String? = null): Event = Event(Status.SHOW_PROGRESS, message)
+fun progressShow(message: CharSequence? = null): Event = Event(Status.SHOW_PROGRESS, message)
 
 fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
@@ -149,10 +152,10 @@ fun loadMoreSuccess(hasMore: Boolean = true): Event =
 
 fun loadMoreFailure(): Event = Event(Status.LOADMORE_FAILURE)
 
-fun loadingShow(message: String? = null): Event = Event(Status.SHOW_LOADING, message)
+fun loadingShow(message: CharSequence? = null): Event = Event(Status.SHOW_LOADING, message)
 
-fun emptyShow(message: String? = null): Event = Event(Status.SHOW_EMPTY, message)
+fun emptyShow(message: CharSequence? = null): Event = Event(Status.SHOW_EMPTY, message)
 
-fun errorShow(message: String? = null): Event = Event(Status.SHOW_ERROR, message)
+fun errorShow(message: CharSequence? = null): Event = Event(Status.SHOW_ERROR, message)
 
 fun contentShow(): Event = Event(Status.SHOW_CONTENT)

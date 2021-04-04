@@ -16,7 +16,7 @@ import com.easy.kotlins.viewmodel.ViewModelEvents
 import com.easy.kotlins.viewmodel.ViewModelOwner
 import com.easy.kotlins.widget.ProgressView
 import com.easy.kotlins.widget.RefreshView
-import com.easy.kotlins.widget.StatefulView
+import com.easy.kotlins.widget.LoaderView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
     NiceFragment(layoutResId),
@@ -26,7 +26,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
 
     open val refreshView: RefreshView? = null
 
-    open val statefulView: StatefulView? = null
+    open val loaderView: LoaderView? = null
 
     open val progressView: ProgressView? = null
 
@@ -68,19 +68,19 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes layoutResId: Int = 0) :
             Status.LOADMORE_SUCCESS_NO_MORE -> refreshView?.finishLoadMore(false)
             Status.REFRESH_FAILURE -> refreshView?.refreshFailed()
             Status.LOADMORE_FAILURE -> refreshView?.loadMoreFailed()
-            Status.SHOW_LOADING -> statefulView?.apply {
+            Status.SHOW_LOADING -> loaderView?.apply {
                 if (event.message != null) setLoadingText(event.message)
                 showLoading()
             }
-            Status.SHOW_EMPTY -> statefulView?.apply {
+            Status.SHOW_EMPTY -> loaderView?.apply {
                 if (event.message != null) setEmptyText(event.message)
                 showEmpty()
             }
-            Status.SHOW_ERROR -> statefulView?.apply {
+            Status.SHOW_ERROR -> loaderView?.apply {
                 if (event.message != null) setErrorText(event.message)
                 showError()
             }
-            Status.SHOW_CONTENT -> statefulView?.showContent()
+            Status.SHOW_CONTENT -> loaderView?.showContent()
             else -> event.message?.let { toast(it) }
         }
 

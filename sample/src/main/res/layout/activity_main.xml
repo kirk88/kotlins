@@ -20,22 +20,29 @@
         app:statusBarForeground="@android:color/holo_red_light"
         app:subtitle="Subtitle" />
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+   <com.easy.kotlins.widget.LoaderLayout
+       android:id="@+id/loader_layout"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+       <androidx.core.widget.NestedScrollView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="5000dp"
-                android:text="Hello World!" />
+           <FrameLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
 
-        </FrameLayout>
+               <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="5000dp"
+                   android:text="Hello World!" />
 
-    </androidx.core.widget.NestedScrollView>
+           </FrameLayout>
+
+       </androidx.core.widget.NestedScrollView>
+
+   </com.easy.kotlins.widget.LoaderLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
