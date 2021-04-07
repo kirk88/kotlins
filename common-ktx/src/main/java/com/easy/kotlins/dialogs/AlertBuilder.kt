@@ -11,7 +11,7 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
-import com.easy.kotlins.helper.NO_GETTER_MESSAGE
+import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import kotlin.DeprecationLevel.ERROR
 
 @SuppressLint("SupportAnnotationUsage")

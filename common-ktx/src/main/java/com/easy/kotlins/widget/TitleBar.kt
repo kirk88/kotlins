@@ -28,8 +28,8 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.easy.kotlins.R
-import com.easy.kotlins.helper.NO_GETTER
-import com.easy.kotlins.helper.NO_GETTER_MESSAGE
+import com.easy.kotlins.helper.Internals.NO_GETTER
+import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.easy.kotlins.helper.appCompatActivity
 import com.google.android.material.appbar.AppBarLayout
 

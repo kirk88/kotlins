@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import com.easy.kotlins.helper.NO_GETTER
+import com.easy.kotlins.helper.Internals.NO_GETTER
 
 val Android: AlertBuilderFactory<AlertDialog> = ::AndroidAlertBuilder
 
