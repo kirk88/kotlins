@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import androidx.annotation.LayoutRes
+import com.easy.kotlins.helper.NO_GETTER_MESSAGE
 
 interface DialogBuilder<out D : DialogInterface> {
 
@@ -16,13 +17,13 @@ interface DialogBuilder<out D : DialogInterface> {
     val window: Window
 
     var contentView: View
-        @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get
 
     var isCancelable: Boolean
-        @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get
 
     var isCanceledOnTouchOutside: Boolean
-        @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get
 
     fun onCancelled(handler: (dialog: DialogInterface) -> Unit)
 

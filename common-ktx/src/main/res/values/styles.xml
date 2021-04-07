@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources >
 
-    <attr name="LoaderLayoutStyle" format="reference" />
+    <attr name="loaderLayoutStyle" format="reference" />
 
     <style name="LoaderLayout" />
 
@@ -120,7 +120,7 @@
 
 
     <declare-styleable name="TitleBar">
-        <attr name="useCustomTitle" format="boolean" />
+        <attr name="customLayout" format="reference" />
         <attr name="titleTextAppearance" />
         <attr name="titleTextColor" />
         <attr name="subtitleTextAppearance" />
@@ -152,8 +152,9 @@
         <attr name="title" />
         <attr name="subtitle" />
         <attr name="menu" />
-        <attr name="showHomeEnabled" format="boolean" />
-        <attr name="showHomeAsUpEnabled" format="boolean" />
+        <attr name="displayShowCustomTitleEnabled" format="boolean" />
+        <attr name="displayShowHomeEnabled" format="boolean" />
+        <attr name="displayShowHomeAsUpEnabled" format="boolean" />
         <attr name="showBottomDivider" format="enum">
             <enum name="ifNeed" value="0" />
             <enum name="always" value="1" />
@@ -161,7 +162,7 @@
         </attr>
         <attr name="bottomDividerHeight" format="dimension|reference" />
         <attr name="bottomDividerColor" format="color|reference" />
-        <attr name="attachToActivity" format="boolean" />
+        <attr name="provideSupportActionBar" format="boolean" />
     </declare-styleable>
 
     <attr name="titleBarStyle" format="reference" />

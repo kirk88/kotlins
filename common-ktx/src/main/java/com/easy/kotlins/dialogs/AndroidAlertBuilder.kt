@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import com.easy.kotlins.helper.NO_GETTER
 
 val Android: AlertBuilderFactory<AlertDialog> = ::AndroidAlertBuilder
 
@@ -15,56 +16,47 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     AlertBuilder<AlertDialog> {
     private val builder = AlertDialog.Builder(context, themeResId)
 
-    override var title: CharSequence
-        get() = error("No getter")
+    override var title: CharSequence = NO_GETTER
         set(value) {
             builder.setTitle(value)
         }
 
-    override var titleResource: Int
-        get() = error("No getter")
+    override var titleResource: Int = NO_GETTER
         set(value) {
             builder.setTitle(value)
         }
 
-    override var message: CharSequence
-        get() = error("No getter")
+    override var message: CharSequence = NO_GETTER
         set(value) {
             builder.setMessage(value)
         }
 
-    override var messageResource: Int
-        get() = error("No getter")
+    override var messageResource: Int = NO_GETTER
         set(value) {
             builder.setMessage(value)
         }
 
-    override var icon: Drawable
-        get() = error("No getter")
+    override var icon: Drawable = NO_GETTER
         set(value) {
             builder.setIcon(value)
         }
 
-    override var iconResource: Int
-        get() = error("No getter")
+    override var iconResource: Int = NO_GETTER
         set(value) {
             builder.setIcon(value)
         }
 
-    override var customTitle: View
-        get() = error("No getter")
+    override var customTitle: View = NO_GETTER
         set(value) {
             builder.setCustomTitle(value)
         }
 
-    override var customView: View
-        get() = error("No getter")
+    override var customView: View = NO_GETTER
         set(value) {
             builder.setView(value)
         }
 
-    override var isCancelable: Boolean
-        get() = error("No getter")
+    override var isCancelable: Boolean = NO_GETTER
         set(value) {
             builder.setCancelable(value)
         }

@@ -11,6 +11,7 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
+import com.easy.kotlins.helper.NO_GETTER_MESSAGE
 import kotlin.DeprecationLevel.ERROR
 
 @SuppressLint("SupportAnnotationUsage")
@@ -18,34 +19,34 @@ interface AlertBuilder<out D : DialogInterface> {
     val context: Context
 
     var title: CharSequence
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     @setparam:StringRes
     var titleResource: Int
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     var message: CharSequence
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     @setparam:StringRes
     var messageResource: Int
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     var icon: Drawable
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     @setparam:DrawableRes
     var iconResource: Int
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     var customTitle: View
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     var customView: View
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     var isCancelable: Boolean
-        @Deprecated("NO_GETTER", level = ERROR) get
+        @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get
 
     fun positiveButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
     fun positiveButton(

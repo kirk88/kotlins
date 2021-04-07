@@ -2,7 +2,6 @@
 
 package com.easy.kotlins.widget
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
@@ -13,11 +12,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
-import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.easy.kotlins.R
 import com.easy.kotlins.helper.weak
@@ -29,7 +26,7 @@ import com.easy.kotlins.widget.LoaderView.Companion.TYPE_LOADING_VIEW
 class LoaderLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.LoaderLayoutStyle
+    defStyleAttr: Int = R.attr.loaderLayoutStyle
 ) : FrameLayout(context, attrs, defStyleAttr), LoaderView {
 
     private var emptyLayoutId: Int
@@ -388,12 +385,12 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private fun show(viewType: Int) {
-        var postTask: Boolean
+        val postShow: Boolean
         synchronized(viewTypeLock) {
-            postTask = viewType == NO_TYPE
+            postShow = viewType != NO_TYPE
             pendingViewType = viewType
         }
-        if (!postTask) {
+        if (!postShow) {
             return
         }
         post(showRunnable)
@@ -565,27 +562,6 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     companion object {
-        fun wrap(activity: Activity): LoaderLayout {
-            return wrap(
-                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
-            )
-        }
-
-        fun wrap(fragment: Fragment): LoaderLayout {
-            return wrap(requireNotNull(fragment.view))
-        }
-
-        fun wrap(view: View): LoaderLayout {
-            val parent = view.parent as ViewGroup
-            val params = view.layoutParams
-            val index = parent.indexOfChild(view)
-            parent.removeView(view)
-            val layout = LoaderLayout(view.context)
-            layout.setContentView(view)
-            parent.addView(layout, index, params)
-            return layout
-        }
-
         private const val NO_VALUE = -1
         private const val NO_TYPE = 0
     }

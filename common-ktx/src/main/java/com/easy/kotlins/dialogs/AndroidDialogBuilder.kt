@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import androidx.annotation.StyleRes
+import com.easy.kotlins.helper.NO_GETTER
 
 internal class AndroidDialogBuilder(
     override val context: Context,
@@ -18,20 +19,17 @@ internal class AndroidDialogBuilder(
     override val window: Window
         get() = dialog.window ?: error("Dialog is not attach to window")
 
-    override var contentView: View
-        get() = error("No getter")
+    override var contentView: View = NO_GETTER
         set(value) {
             dialog.setContentView(value)
         }
 
-    override var isCancelable: Boolean
-        get() = error("No getter")
+    override var isCancelable: Boolean = NO_GETTER
         set(value) {
             dialog.setCancelable(value)
         }
 
-    override var isCanceledOnTouchOutside: Boolean
-        get() = error("No getter")
+    override var isCanceledOnTouchOutside: Boolean = NO_GETTER
         set(value) {
             dialog.setCanceledOnTouchOutside(value)
         }

@@ -14,7 +14,7 @@ var TextView.string: String?
     }
 
 var TextView.textResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get() = NO_GETTER
     set(value) {
         setText(value)
     }
@@ -26,25 +26,25 @@ var TextView.textColor: Int
     }
 
 var TextView.textColorResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get() = NO_GETTER
     set(value) {
         setTextColor(ContextCompat.getColorStateList(context, value))
     }
 
 var TextView.textPixelSize: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get() = NO_GETTER
     set(value) {
         setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat())
     }
 
 var TextView.textSizeResource: Int
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get() = NO_GETTER
     set(value) {
         setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimensionPixelSize(value).toFloat())
     }
 
 var TextView.isBoldTextStyle: Boolean
-    @Deprecated("NO_GETTER", level = ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = ERROR) get() = NO_GETTER
     set(value) {
         this.paint?.isFakeBoldText = value
     }

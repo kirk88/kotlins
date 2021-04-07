@@ -38,7 +38,7 @@ var View.backgroundColor: Int
     }
 
 var View.backgroundResource: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         setBackgroundResource(value)
     }
@@ -56,7 +56,7 @@ var View.endPadding: Int
     }
 
 var View.horizontalPadding: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         setPaddingRelative(value, paddingTop, value, paddingBottom)
     }
@@ -74,13 +74,13 @@ var View.bottomPadding: Int
     }
 
 var View.verticalPadding: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         setPaddingRelative(paddingStart, value, paddingEnd, value)
     }
 
 var View.padding: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         setPaddingRelative(value, value, value, value)
     }
@@ -104,7 +104,7 @@ var View.endMargin: Int
     }
 
 var View.horizontalMargin: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
             leftMargin = value
@@ -132,7 +132,7 @@ var View.bottomMargin: Int
     }
 
 var View.verticalMargin: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
             topMargin = value
@@ -142,7 +142,7 @@ var View.verticalMargin: Int
     }
 
 var View.margin: Int
-    @Deprecated("NO_GETTER", level = DeprecationLevel.ERROR) get() = error("No getter")
+    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
             leftMargin = value

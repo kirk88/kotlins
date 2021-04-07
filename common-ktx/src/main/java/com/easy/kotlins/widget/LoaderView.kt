@@ -1,11 +1,16 @@
+@file:Suppress("unused")
+
 package com.easy.kotlins.widget
 
+import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 
 interface LoaderView {
@@ -89,6 +94,27 @@ interface LoaderView {
         const val TYPE_EMPTY_VIEW = 0x002
         const val TYPE_LOADING_VIEW = 0x003
         const val TYPE_ERROR_VIEW = 0x004
+
+        fun wrap(activity: Activity): LoaderView {
+            return wrap(
+                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
+            )
+        }
+
+        fun wrap(fragment: Fragment): LoaderView {
+            return wrap(requireNotNull(fragment.view))
+        }
+
+        fun wrap(view: View): LoaderView {
+            val parent = view.parent as ViewGroup
+            val params = view.layoutParams
+            val index = parent.indexOfChild(view)
+            parent.removeView(view)
+            val layout = LoaderLayout(view.context)
+            layout.setContentView(view)
+            parent.addView(layout, index, params)
+            return layout
+        }
     }
 
     fun interface OnActionListener {

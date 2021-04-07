@@ -16,4 +16,8 @@
     <item name="progress_bar" type="id" />
     <item name="progress_text" type="id" />
 
+
+    <item name="custom_title" type="id" />
+    <item name="custom_toolbar" type="id" />
+
 </resources>

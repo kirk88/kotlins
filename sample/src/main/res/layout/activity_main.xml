@@ -11,38 +11,83 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        app:attachToActivity="true"
-        app:useCustomTitle="true"
-        app:title="Title"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
+        app:customLayout="@layout/layout_custom_title_view"
+        app:displayShowCustomTitleEnabled="true"
+        app:displayShowHomeAsUpEnabled="true"
+        app:displayShowHomeEnabled="true"
+        app:provideSupportActionBar="true"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:statusBarForeground="@android:color/holo_red_light"
-        app:subtitle="Subtitle" />
+        app:subtitle="Subtitle"
+        app:title="Title" />
 
-   <com.easy.kotlins.widget.LoaderLayout
-       android:id="@+id/loader_layout"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
 
-       <androidx.core.widget.NestedScrollView
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           app:layout_behavior="@string/appbar_scrolling_view_behavior">
+<!--    <androidx.core.widget.NestedScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:overScrollMode="always"-->
+<!--        android:scrollbarStyle="outsideOverlay"-->
+<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
 
-           <FrameLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content">
+<!--        <com.easy.kotlins.widget.LoaderLayout-->
+<!--            android:id="@+id/loader_layout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent" -->
+<!--            app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
 
-               <TextView
-                   android:layout_width="wrap_content"
-                   android:layout_height="5000dp"
-                   android:text="Hello World!" />
+<!--            <FrameLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content">-->
 
-           </FrameLayout>
+<!--                <TextView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="1200dp"-->
+<!--                    android:text="Hello World!"-->
+<!--                    android:textColor="@android:color/holo_red_dark"-->
+<!--                    android:textSize="50sp"-->
+<!--                    android:textStyle="bold" />-->
 
-       </androidx.core.widget.NestedScrollView>
+<!--                <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_margin="16dp"-->
+<!--                    android:layout_gravity="bottom|end" />-->
 
-   </com.easy.kotlins.widget.LoaderLayout>
+<!--            </FrameLayout>-->
+
+<!--        </com.easy.kotlins.widget.LoaderLayout>-->
+
+<!--    </androidx.core.widget.NestedScrollView>-->
+
+    <com.easy.kotlins.widget.LoaderLayout
+        android:id="@+id/loader_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1200dp"
+                android:text="Hello World!"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="50sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_gravity="bottom|end" />
+
+        </FrameLayout>
+
+    </com.easy.kotlins.widget.LoaderLayout>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
