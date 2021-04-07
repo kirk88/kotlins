@@ -11,6 +11,8 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.viewpager.widget.ViewPager
+import com.easy.kotlins.helper.Internals.NO_GETTER
+import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.google.android.material.tabs.TabLayout
 
 var View.isVisible: Boolean

@@ -5,6 +5,8 @@ package com.easy.kotlins.helper
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.easy.kotlins.helper.Internals.NO_GETTER
+import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import kotlin.DeprecationLevel.ERROR
 
 var TextView.string: String?

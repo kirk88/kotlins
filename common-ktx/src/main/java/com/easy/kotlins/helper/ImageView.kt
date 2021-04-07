@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import coil.load
+import com.easy.kotlins.helper.Internals.NO_GETTER
+import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import java.io.File
 
 var ImageView.imageUrl: String?
