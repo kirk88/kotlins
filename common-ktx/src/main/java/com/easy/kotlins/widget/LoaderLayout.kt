@@ -275,8 +275,8 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setEmptyButtonVisible(visible: Boolean): LoaderView {
         emptyButtonVisible = visible
-        findViewById<TextView>(R.id.empty_button)?.apply {
-            visibility = if (visible) VISIBLE else GONE
+        findViewById<TextView>(R.id.empty_button)?.let {
+            it.visibility = if (visible) VISIBLE else GONE
         }
         return this
     }
@@ -331,8 +331,8 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setErrorButtonVisible(visible: Boolean): LoaderView {
         errorButtonVisible = visible
-        findViewById<TextView>(R.id.error_button)?.apply {
-            visibility = if (visible) VISIBLE else GONE
+        findViewById<TextView>(R.id.error_button)?.let {
+            it.visibility = if (visible) VISIBLE else GONE
         }
         return this
     }
