@@ -2,7 +2,6 @@
 
 package com.easy.kotlins.widget
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Canvas
@@ -230,10 +229,6 @@ class TitleBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         }
     }
 
-    private fun isToolbarChild(view: TextView?): Boolean {
-        return view != null && toolbar.contains(view)
-    }
-
     private fun isShowBottomDivider(): Boolean {
         return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
                 || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
@@ -425,8 +420,41 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     override fun setTitle(title: CharSequence?) {
         if (displayShowCustomTitleEnabled) {
-            ensureCustomTitleTextView()
-            titleTextView!!.text = title
+            if (!title.isNullOrEmpty()) {
+                if (titleTextView == null) {
+                    titleTextView = findViewById(R.id.custom_title)
+                }
+
+                if (titleTextView == null) {
+                    val textView = AppCompatTextView(context)
+                    textView.setSingleLine()
+                    textView.ellipsize = TextUtils.TruncateAt.END
+                    if (titleTextAppearance != 0) {
+                        TextViewCompat.setTextAppearance(
+                            textView,
+                            titleTextAppearance
+                        )
+                    }
+
+                    if (titleTextColor != null) {
+                        textView.setTextColor(titleTextColor!!)
+                    }
+
+                    textView.layoutParams = LayoutParams(-2, -2).apply {
+                        gravity = Gravity.CENTER
+                    }
+
+                    titleTextView = textView
+                }
+
+                if (!isToolbarChild(titleTextView)) {
+                    addView(titleTextView)
+                }
+            } else if (isToolbarChild(titleTextView)) {
+                removeView(titleTextView)
+            }
+
+            titleTextView?.text = title
         } else {
             super.setTitle(title)
         }
@@ -446,8 +474,7 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun setTitleTextAppearance(context: Context?, resId: Int) {
         titleTextAppearance = resId
         if (displayShowCustomTitleEnabled) {
-            ensureCustomTitleTextView()
-            TextViewCompat.setTextAppearance(titleTextView!!, resId)
+            titleTextView?.let { TextViewCompat.setTextAppearance(it, resId) }
         } else {
             super.setTitleTextAppearance(context, resId)
         }
@@ -456,8 +483,7 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun setTitleTextColor(color: ColorStateList) {
         titleTextColor = color
         if (displayShowCustomTitleEnabled) {
-            ensureCustomTitleTextView()
-            titleTextView!!.setTextColor(color)
+            titleTextView?.setTextColor(color)
         } else {
             super.setTitleTextColor(color)
         }
@@ -480,32 +506,8 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
-    @SuppressLint("PrivateResource")
-    private fun ensureCustomTitleTextView() {
-        if (titleTextView == null) {
-            titleTextView = findViewById(R.id.custom_title)
-        }
-
-        if (titleTextView == null) {
-            val textView = AppCompatTextView(context)
-            textView.setSingleLine()
-            textView.ellipsize = TextUtils.TruncateAt.END
-            if (titleTextAppearance != 0) {
-                TextViewCompat.setTextAppearance(
-                    textView,
-                    titleTextAppearance
-                )
-            }
-
-            if (titleTextColor != null) {
-                textView.setTextColor(titleTextColor!!)
-            }
-
-            addView(textView, LayoutParams(-2, -2).apply {
-                gravity = Gravity.CENTER
-            })
-            titleTextView = textView
-        }
+    private fun isToolbarChild(view: TextView?): Boolean {
+        return view != null && contains(view)
     }
 
     private fun tryGetTitleTextView(block: TextView.() -> Unit) {
