@@ -397,6 +397,8 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var titleTextView: TextView? = null
     private var subtitleTextView: TextView? = null
 
+    private var isCustomTitleStyle: Boolean = false
+
     private var displayShowCustomTitleEnabled: Boolean = false
 
     fun setDisplayShowCustomTitleEnabled(showCustomTitle: Boolean) {
@@ -422,6 +424,7 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (displayShowCustomTitleEnabled) {
             if (!title.isNullOrEmpty()) {
                 if (titleTextView == null) {
+                    isCustomTitleStyle = true
                     titleTextView = findViewById(R.id.custom_title)
                 }
 
@@ -474,7 +477,9 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun setTitleTextAppearance(context: Context?, resId: Int) {
         titleTextAppearance = resId
         if (displayShowCustomTitleEnabled) {
-            titleTextView?.let { TextViewCompat.setTextAppearance(it, resId) }
+            if (titleTextView != null && !isCustomTitleStyle) {
+                TextViewCompat.setTextAppearance(titleTextView!!, resId)
+            }
         } else {
             super.setTitleTextAppearance(context, resId)
         }
@@ -483,7 +488,9 @@ class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun setTitleTextColor(color: ColorStateList) {
         titleTextColor = color
         if (displayShowCustomTitleEnabled) {
-            titleTextView?.setTextColor(color)
+            if (titleTextView != null && !isCustomTitleStyle) {
+                titleTextView!!.setTextColor(color)
+            }
         } else {
             super.setTitleTextColor(color)
         }
