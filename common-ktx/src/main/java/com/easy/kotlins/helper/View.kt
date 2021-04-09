@@ -2,6 +2,8 @@
 
 package com.easy.kotlins.helper
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.graphics.drawable.ColorDrawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,7 +11,6 @@ import android.view.*
 import android.widget.CompoundButton
 import android.widget.RadioGroup
 import android.widget.TextView
-import androidx.annotation.IdRes
 import androidx.viewpager.widget.ViewPager
 import com.easy.kotlins.helper.Internals.NO_GETTER
 import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
@@ -169,9 +170,6 @@ var View.layoutHeight: Int
         requestLayout()
     }
 
-fun <T : View> View.getFrom(@IdRes id: Int): T = findViewById(id)
-    ?: error("Can not find view by id: $id")
-
 inline fun <T : View> T.onClick(crossinline action: (view: T) -> Unit) {
     @Suppress("UNCHECKED_CAST")
     setOnClickListener { v -> action(v as T) }
@@ -217,10 +215,9 @@ inline fun TextView.afterTextChanged(crossinline action: (text: Editable?) -> Un
     })
 }
 
-inline fun TextView.onEditorActionEvent(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Unit) {
+inline fun TextView.onEditorActionEvent(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Boolean) {
     setOnEditorActionListener { v, actionId, event ->
         action(v, actionId, event)
-        true
     }
 }
 
@@ -233,10 +230,9 @@ inline fun RadioGroup.onCheckedChanged(crossinline action: (group: RadioGroup, c
 }
 
 
-inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Unit) {
+inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Boolean) {
     setOnMenuItemClickListener { item ->
         action(item)
-        true
     }
 }
 
@@ -284,4 +280,53 @@ inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Ta
         override fun onTabReselected(tab: TabLayout.Tab?) {
         }
     })
+}
+
+fun View.visible(anim: Boolean = true) {
+    visibility = View.VISIBLE
+    if (anim) {
+        alpha = 0.0f
+        animate().apply {
+            cancel()
+            alpha(1.0f)
+            setListener(null)
+            start()
+        }
+    }
+}
+
+fun View.invisible(anim: Boolean = true) {
+    alpha = 1.0f
+    if (anim) {
+        animate().apply {
+            cancel()
+            alpha(0.0f)
+            setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    visibility = View.INVISIBLE
+                }
+            })
+            start()
+        }
+    } else {
+        visibility = View.INVISIBLE
+    }
+}
+
+fun View.gone(anim: Boolean = true) {
+    alpha = 1.0f
+    if (anim) {
+        animate().apply {
+            cancel()
+            alpha(0.0f)
+            setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    visibility = View.GONE
+                }
+            })
+            start()
+        }
+    } else {
+        visibility = View.GONE
+    }
 }

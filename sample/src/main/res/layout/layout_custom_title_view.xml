@@ -6,7 +6,7 @@
     tools:parentTag="com.google.android.material.appbar.AppBarLayout"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.easy.kotlins.widget.TitleToolbar
         android:id="@id/custom_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -20,7 +20,7 @@
             android:gravity="center"
             android:textColor="@android:color/holo_red_dark"
             android:text="标题"/>
-    </androidx.appcompat.widget.Toolbar>
+    </com.easy.kotlins.widget.TitleToolbar>
 
 
 

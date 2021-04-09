@@ -20,8 +20,7 @@
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:statusBarForeground="@android:color/holo_red_light"
-        app:subtitle="Subtitle"
-        app:title="Title" />
+         />
 
 
 <!--    <androidx.core.widget.NestedScrollView-->

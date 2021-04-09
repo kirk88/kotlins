@@ -37,7 +37,7 @@ abstract class BaseItemViewAnimation(protected open val animationMode: ItemViewA
         }
     }
 
-    override fun stop() {
+    override fun cancel() {
         animatorSet?.cancel()
     }
 

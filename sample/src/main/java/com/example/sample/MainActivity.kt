@@ -1,55 +1,73 @@
 package com.example.sample
 
 import android.os.Bundle
-import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.easy.kotlins.app.NiceActivity
-import com.easy.kotlins.helper.toast
+import com.easy.kotlins.helper.installTo
+import com.easy.kotlins.helper.startActivity
+import com.easy.kotlins.helper.viewBindings
 import com.easy.kotlins.widget.*
+import com.example.sample.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MainActivity : NiceActivity(R.layout.activity_main) {
+class MainActivity : NiceActivity() {
 
     private val progressView: ProgressView by progressViews()
 
+    private val binding: ActivityMainBinding by viewBindings()
 
-    override fun onBindView(savedInstanceState: Bundle?) {
-        val titleBar = findViewById<TitleBar>(R.id.titleBar)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding.installTo(this)
 
-
-        titleBar?.setOnTitleClickListener {
-            toast("title")
-        }
-
-        titleBar?.setOnSubtitleClickListener {
-            toast("subtitle")
-
-        }
-
-
-        val loader = findViewById<LoaderLayout>(R.id.loader_layout)
+        val loader = binding.loaderLayout
+        val titleBar = binding.titleBar
 
         loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
+        titleBar.setOnTitleClickListener {
+            startActivity<SecondActivity>()
+        }
+
 //        lifecycleScope.launch {
-//           delay(1000)
-//
-//
-//            loader.showLoading()
+//            progressView.showProgress()
 //
 //            delay(1000)
 //
-//            loader.showEmpty()
+//            progressView.dismissProgress()
 //
 //
-//            delay(1000)
+//            delay(200)
 //
-//            loader.showError()
+//            progressView.showProgress()
 //
 //
-//            delay(50)
-//
-//            loader.showContent()
+//            delay(2000)
+//            progressView.dismissProgress()
 //        }
 
+        lifecycleScope.launch {
+            delay(1000)
+
+
+            loader.showLoading()
+
+            delay(1000)
+
+            loader.showEmpty()
+
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            loader.showError()
+
+
+            delay(3000)
+
+            loader.showContent()
+        }
     }
 
 }

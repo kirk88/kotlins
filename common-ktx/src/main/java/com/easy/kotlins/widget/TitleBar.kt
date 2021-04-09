@@ -33,23 +33,20 @@ import com.easy.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.easy.kotlins.helper.appCompatActivity
 import com.google.android.material.appbar.AppBarLayout
 
-class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, attrs) {
+class TitleBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    AppBarLayout(context, attrs) {
     @IntDef(value = [SHOW_BOTTOM_DIVIDER_IF_NEED, SHOW_BOTTOM_DIVIDER_ALWAYS, SHOW_BOTTOM_DIVIDER_NEVER])
     @Retention(AnnotationRetention.SOURCE)
     annotation class BottomDividerMode
 
-    private val displayShowCustomTitleEnabled: Boolean
+    private val toolbar: TitleToolbar
+    private var actionBar: ActionBar? = null
 
     private var showBottomDivider: Int
     private val bottomDividerHeight: Int
     private val bottomDividerColor: Int
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
 
-    private val toolbar: Toolbar
-    private var titleTextView: TextView? = null
-    private var subtitleTextView: TextView? = null
-
-    private var actionBar: ActionBar? = null
 
     var popupTheme: Int
         get() = toolbar.popupTheme
@@ -87,14 +84,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     var title: CharSequence? = null
         set(title) {
             when {
-                displayShowCustomTitleEnabled -> {
-                    if (!title.isNullOrEmpty()) {
-                        ensureCustomTitleTextView()
-                    } else if (isToolbarChild(titleTextView)) {
-                        toolbar.removeView(titleTextView)
-                    }
-                    titleTextView?.text = title
-                }
                 actionBar != null -> actionBar!!.title = title
                 else -> toolbar.title = title
             }
@@ -108,11 +97,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 return
             }
 
-            if (displayShowCustomTitleEnabled) {
-                titleTextView?.setTextColor(color)
-            } else {
-                toolbar.setTitleTextColor(color)
-            }
+            toolbar.setTitleTextColor(color)
 
             field = color
         }
@@ -120,11 +105,7 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     var titleTextAppearance: Int
         @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
         set(id) {
-            if (displayShowCustomTitleEnabled) {
-                titleTextView?.let { TextViewCompat.setTextAppearance(it, id) }
-            } else {
-                toolbar.setTitleTextAppearance(context, id)
-            }
+            toolbar.setTitleTextAppearance(context, id)
         }
 
     var subtitle: CharSequence? = null
@@ -152,12 +133,12 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             toolbar.setSubtitleTextAppearance(context, id)
         }
 
-    fun setTitle(@StringRes id: Int) {
-        title = context.getText(id)
+    fun setTitle(@StringRes resId: Int) {
+        title = context.getText(resId)
     }
 
-    fun setSubtitle(@StringRes id: Int) {
-        subtitle = context.getText(id)
+    fun setSubtitle(@StringRes resId: Int) {
+        subtitle = context.getText(resId)
     }
 
     fun setTitleTextColor(@ColorInt color: Int) {
@@ -168,16 +149,16 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         subtitleTextColor = ColorStateList.valueOf(color)
     }
 
-    fun setNavigationIcon(@DrawableRes id: Int) {
-        navigationIcon = ContextCompat.getDrawable(context, id)
+    fun setNavigationIcon(@DrawableRes resId: Int) {
+        navigationIcon = ContextCompat.getDrawable(context, resId)
     }
 
     fun setNavigationIconTint(@ColorInt color: Int) {
         navigationIconTint = ColorStateList.valueOf(color)
     }
 
-    fun setNavigationContentDescription(@StringRes id: Int) {
-        navigationContentDescription = context.getText(id)
+    fun setNavigationContentDescription(@StringRes resId: Int) {
+        navigationContentDescription = context.getText(resId)
     }
 
     fun setNavigationOnClickListener(clickListener: OnClickListener?) {
@@ -224,15 +205,11 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     }
 
     fun setOnTitleClickListener(listener: OnClickListener?) {
-        tryGetTitleTextView {
-            setOnClickListener(listener)
-        }
+        toolbar.setOnTitleClickListener(listener)
     }
 
     fun setOnSubtitleClickListener(listener: OnClickListener?) {
-        tryGetSubtitleTextView {
-            setOnClickListener(listener)
-        }
+        toolbar.setOnSubtitleClickListener(listener)
     }
 
     fun setShowBottomDivider(@BottomDividerMode showDivider: Int) {
@@ -253,32 +230,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         }
     }
 
-    @SuppressLint("PrivateResource")
-    private fun ensureCustomTitleTextView() {
-        if (titleTextView == null) {
-            titleTextView = findViewById(R.id.custom_title)
-        }
-
-        if (titleTextView == null) {
-            val textView = AppCompatTextView(context)
-            textView.id = R.id.custom_title
-            textView.setSingleLine()
-            textView.ellipsize = TextUtils.TruncateAt.END
-            TextViewCompat.setTextAppearance(
-                textView,
-                R.style.TextAppearance_Widget_AppCompat_Toolbar_Title
-            )
-            textView.layoutParams = Toolbar.LayoutParams(
-                Toolbar.LayoutParams.WRAP_CONTENT,
-                Toolbar.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.CENTER
-            }
-            toolbar.addView(textView)
-            titleTextView = textView
-        }
-    }
-
     private fun isToolbarChild(view: TextView?): Boolean {
         return view != null && toolbar.contains(view)
     }
@@ -286,38 +237,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
     private fun isShowBottomDivider(): Boolean {
         return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
                 || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
-    }
-
-    private fun tryGetTitleTextView(block: TextView.() -> Unit) {
-        if (titleTextView != null) {
-            titleTextView!!.block()
-            return
-        }
-
-        val field = toolbar.javaClass.getDeclaredField("mTitleTextView")
-        field.isAccessible = true
-        try {
-            titleTextView = field.get(toolbar) as TextView?
-            titleTextView?.block()
-        } catch (_: IllegalArgumentException) {
-        } catch (_: IllegalAccessException) {
-        }
-    }
-
-    private fun tryGetSubtitleTextView(block: TextView.() -> Unit) {
-        if (subtitleTextView != null) {
-            subtitleTextView!!.block()
-            return
-        }
-
-        val field = toolbar.javaClass.getDeclaredField("mSubtitleTextView")
-        field.isAccessible = true
-        try {
-            subtitleTextView = field.get(toolbar) as TextView?
-            subtitleTextView?.block()
-        } catch (_: IllegalArgumentException) {
-        } catch (_: IllegalAccessException) {
-        }
     }
 
     companion object {
@@ -329,7 +248,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         private fun getSupportActionBar(
             activity: AppCompatActivity,
             toolbar: Toolbar,
-            showTitle: Boolean,
             showHome: Boolean,
             showHomeAsUp: Boolean
         ): ActionBar {
@@ -337,7 +255,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
             val actionBar = activity.supportActionBar!!
             actionBar.setDisplayShowHomeEnabled(showHome)
             actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
-            if (!showTitle) actionBar.title = null
             return actionBar
         }
 
@@ -391,16 +308,17 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         toolbar = if (ta.hasValue(R.styleable.TitleBar_customLayout)) {
             inflate(context, ta.getResourceId(R.styleable.TitleBar_customLayout, 0), this)
             requireNotNull(findViewById(R.id.custom_toolbar)) {
-                "CustomLayout must have a Toolbar"
+                "CustomLayout must have a TitleToolbar"
             }
         } else {
-            Toolbar(context).also {
+            TitleToolbar(context).also {
                 addView(it, -1, -2)
             }
         }
 
-        displayShowCustomTitleEnabled =
+        toolbar.setDisplayShowCustomTitleEnabled(
             ta.getBoolean(R.styleable.TitleBar_displayShowCustomTitleEnabled, false)
+        )
 
         if (ta.getBoolean(R.styleable.TitleBar_provideSupportActionBar, false)) {
             val showHome = ta.getBoolean(R.styleable.TitleBar_displayShowHomeEnabled, false)
@@ -409,7 +327,6 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
                 getSupportActionBar(
                     it,
                     toolbar,
-                    !displayShowCustomTitleEnabled,
                     showHome,
                     showHomeAsUp
                 )
@@ -471,6 +388,156 @@ class TitleBar(context: Context, attrs: AttributeSet?) : AppBarLayout(context, a
         }
 
         ta.recycle()
+    }
+
+}
+
+class TitleToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    Toolbar(context, attrs) {
+
+    private var titleText: CharSequence? = null
+    private var titleTextAppearance: Int = 0
+    private var titleTextColor: ColorStateList? = null
+
+    private var titleTextView: TextView? = null
+    private var subtitleTextView: TextView? = null
+
+    private var displayShowCustomTitleEnabled: Boolean = false
+
+    fun setDisplayShowCustomTitleEnabled(showCustomTitle: Boolean) {
+        if (displayShowCustomTitleEnabled == showCustomTitle) {
+            return
+        }
+        displayShowCustomTitleEnabled = showCustomTitle
+
+        if (!titleText.isNullOrEmpty()) {
+            title = titleText
+        }
+
+        if (titleTextAppearance != 0) {
+            setTitleTextAppearance(context, titleTextAppearance)
+        }
+
+        if (titleTextColor != null) {
+            setTitleTextColor(titleTextColor!!)
+        }
+    }
+
+    override fun setTitle(title: CharSequence?) {
+        if (displayShowCustomTitleEnabled) {
+            ensureCustomTitleTextView()
+            titleTextView!!.text = title
+        } else {
+            super.setTitle(title)
+        }
+
+        titleText = title
+    }
+
+    override fun setTitle(resId: Int) {
+        val title = context.getText(resId)
+        setTitle(title)
+    }
+
+    override fun getTitle(): CharSequence? {
+        return titleText
+    }
+
+    override fun setTitleTextAppearance(context: Context?, resId: Int) {
+        titleTextAppearance = resId
+        if (displayShowCustomTitleEnabled) {
+            ensureCustomTitleTextView()
+            TextViewCompat.setTextAppearance(titleTextView!!, resId)
+        } else {
+            super.setTitleTextAppearance(context, resId)
+        }
+    }
+
+    override fun setTitleTextColor(color: ColorStateList) {
+        titleTextColor = color
+        if (displayShowCustomTitleEnabled) {
+            ensureCustomTitleTextView()
+            titleTextView!!.setTextColor(color)
+        } else {
+            super.setTitleTextColor(color)
+        }
+    }
+
+    override fun setTitleTextColor(color: Int) {
+        val colors = ColorStateList.valueOf(color)
+        setTitleTextColor(colors)
+    }
+
+    fun setOnTitleClickListener(listener: OnClickListener?) {
+        tryGetTitleTextView {
+            setOnClickListener(listener)
+        }
+    }
+
+    fun setOnSubtitleClickListener(listener: OnClickListener?) {
+        tryGetSubtitleTextView {
+            setOnClickListener(listener)
+        }
+    }
+
+    @SuppressLint("PrivateResource")
+    private fun ensureCustomTitleTextView() {
+        if (titleTextView == null) {
+            titleTextView = findViewById(R.id.custom_title)
+        }
+
+        if (titleTextView == null) {
+            val textView = AppCompatTextView(context)
+            textView.setSingleLine()
+            textView.ellipsize = TextUtils.TruncateAt.END
+            if (titleTextAppearance != 0) {
+                TextViewCompat.setTextAppearance(
+                    textView,
+                    titleTextAppearance
+                )
+            }
+
+            if (titleTextColor != null) {
+                textView.setTextColor(titleTextColor!!)
+            }
+
+            addView(textView, LayoutParams(-2, -2).apply {
+                gravity = Gravity.CENTER
+            })
+            titleTextView = textView
+        }
+    }
+
+    private fun tryGetTitleTextView(block: TextView.() -> Unit) {
+        if (titleTextView != null) {
+            titleTextView!!.block()
+            return
+        }
+
+        val field = javaClass.getDeclaredField("mTitleTextView")
+        field.isAccessible = true
+        try {
+            titleTextView = field.get(this) as TextView?
+            titleTextView?.block()
+        } catch (_: IllegalArgumentException) {
+        } catch (_: IllegalAccessException) {
+        }
+    }
+
+    private fun tryGetSubtitleTextView(block: TextView.() -> Unit) {
+        if (subtitleTextView != null) {
+            subtitleTextView!!.block()
+            return
+        }
+
+        val field = javaClass.getDeclaredField("mSubtitleTextView")
+        field.isAccessible = true
+        try {
+            subtitleTextView = field.get(this) as TextView?
+            subtitleTextView?.block()
+        } catch (_: IllegalArgumentException) {
+        } catch (_: IllegalAccessException) {
+        }
     }
 
 }

@@ -3,232 +3,65 @@
 package com.easy.kotlins.adapter
 
 import android.content.Context
-import android.util.SparseArray
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.CallSuper
-import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.easy.kotlins.adapter.anim.ItemViewAnimation
+import okhttp3.internal.toImmutableList
 import java.util.*
 
-open class CommonRecyclerAdapter<ITEM>(
-    val context: Context,
-    @LayoutRes
-    private val layoutResId: Int = 0,
-    private val itemAnimation: ItemViewAnimation? = null,
-    private var itemClickable: Boolean = false,
-    private var itemLongClickable: Boolean = false
-) : RecyclerView.Adapter<ItemViewHolder>() {
+abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
+    BaseRecyclerAdapter<T, VH>(context) {
 
-    private val headerViews: SparseArray<View> by lazy { SparseArray() }
-    private val footerViews: SparseArray<View> by lazy { SparseArray() }
+    override val items: List<T>
+        get() = modifiableItems.toImmutableList()
 
-    private val itemDelegates: MutableMap<Int, ItemViewDelegate<out ITEM>> by lazy { mutableMapOf() }
-
-    private var itemClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Unit)? = null
-    private var itemLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder) -> Boolean)? =
-        null
-    private var itemChildClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Unit)? =
-        null
-    private var itemChildLongClickListener: ((CommonRecyclerAdapter<ITEM>, ItemViewHolder, View) -> Boolean)? =
-        null
+    protected val modifiableItems: MutableList<T> = mutableListOf()
 
     private val lock: Any = Any()
 
-    protected val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-
-    protected var parentView: RecyclerView? = null
-        private set
-
-    protected val modifiableItems: MutableList<ITEM> = mutableListOf()
-
-    val items: List<ITEM>
-        get() = Collections.unmodifiableList(modifiableItems)
-
-    val actualItemCount: Int
-        get() = modifiableItems.size
-
-    val headerCount: Int
-        get() = headerViews.size()
-
-    val footerCount: Int
-        get() = footerViews.size()
-
-    fun onItemClick(listener: (adapter: CommonRecyclerAdapter<ITEM>, holder: ItemViewHolder) -> Unit) {
-        itemClickListener = listener
-    }
-
-    fun onItemLongClick(listener: (adapter: CommonRecyclerAdapter<ITEM>, holder: ItemViewHolder) -> Boolean) {
-        itemLongClickListener = listener
-    }
-
-    fun onItemChildClick(listener: (adapter: CommonRecyclerAdapter<ITEM>, holder: ItemViewHolder, view: View) -> Unit) {
-        itemChildClickListener = listener
-    }
-
-    fun onItemChildLongClick(listener: (adapter: CommonRecyclerAdapter<ITEM>, holder: ItemViewHolder, view: View) -> Boolean) {
-        itemChildLongClickListener = listener
-    }
-
-    protected fun callOnItemClick(holder: ItemViewHolder) {
-        if (onItemClick(holder)) return
-        itemClickListener?.invoke(this, holder)
-    }
-
-    protected fun callOnItemLongClick(holder: ItemViewHolder) {
-        if (onItemLongClick(holder)) return
-        itemLongClickListener?.invoke(this, holder)
-    }
-
-    protected fun callOnItemChildClick(holder: ItemViewHolder, view: View) {
-        if (onItemChildClick(holder, view)) return
-        itemChildClickListener?.invoke(this, holder, view)
-    }
-
-    protected fun callOnItemChildLongClick(holder: ItemViewHolder, view: View) {
-        if (onItemChildLongClick(holder, view)) return
-        itemChildLongClickListener?.invoke(this, holder, view)
-    }
-
-    fun setItemClickable(itemClickable: Boolean) {
-        this.itemClickable = itemClickable
-        notifyDataSetChanged()
-    }
-
-    fun setItemLongClickable(itemLongClickable: Boolean) {
-        this.itemLongClickable = itemLongClickable
-        notifyDataSetChanged()
-    }
-
-    fun <DELEGATE : ItemViewDelegate<out ITEM>> addItemViewDelegate(
-        viewType: Int,
-        delegate: DELEGATE
-    ) {
-        itemDelegates[viewType] = delegate
-        notifyDataSetChanged()
-    }
-
-    fun <DELEGATE : ItemViewDelegate<out ITEM>> addItemViewDelegates(vararg delegates: Pair<Int, DELEGATE>) {
-        delegates.forEach {
-            addItemViewDelegate(it.first, it.second)
-        }
-        notifyDataSetChanged()
-    }
-
-    fun addHeaderView(header: View) {
+    fun setItems(items: List<T>?) {
         synchronized(lock) {
-            val position = headerViews.size()
-            headerViews.put(TYPE_HEADER_VIEW + headerViews.size(), header)
-            notifyItemInserted(position)
-        }
-    }
-
-    fun addFooterView(footer: View) {
-        synchronized(lock) {
-            val position = actualItemCount + footerViews.size()
-            footerViews.put(TYPE_FOOTER_VIEW + footerViews.size(), footer)
-            notifyItemInserted(position)
-        }
-    }
-
-    fun removeHeaderView(header: View) {
-        synchronized(lock) {
-            val position = headerViews.indexOfValue(header)
-            if (position >= 0) {
-                headerViews.remove(position)
-                notifyItemRemoved(position)
-            }
-        }
-    }
-
-    fun removeHeaderView(headerPosition: Int) {
-        if (headerPosition !in 0 until headerCount) return
-        synchronized(lock) {
-            headerViews.removeAt(headerPosition)
-            notifyItemRemoved(headerPosition)
-        }
-    }
-
-    fun removeFooterView(footer: View) {
-        synchronized(lock) {
-            val position = footerViews.indexOfValue(footer)
-            if (position >= 0) {
-                footerViews.remove(position)
-                notifyItemRemoved(actualItemCount + position - 2)
-            }
-        }
-    }
-
-    fun removeFooterView(footerPosition: Int) {
-        if (footerPosition !in 0 until footerCount) return
-        synchronized(lock) {
-            val position = actualItemCount + footerPosition
-            footerViews.removeAt(footerPosition)
-            notifyItemRemoved(position)
-        }
-    }
-
-    fun containsHeaderView(header: View): Boolean {
-        synchronized(lock) {
-            return headerViews.indexOfValue(header) >= 0
-        }
-    }
-
-    fun containsFooterView(footer: View): Boolean {
-        synchronized(lock) {
-            return footerViews.indexOfValue(footer) >= 0
-        }
-    }
-
-    fun setItems(items: List<ITEM>?) {
-        synchronized(lock) {
-            if (this.modifiableItems.isNotEmpty()) {
-                this.modifiableItems.clear()
+            if (modifiableItems.isNotEmpty()) {
+                modifiableItems.clear()
             }
             if (items != null) {
-                this.modifiableItems.addAll(items)
+                modifiableItems.addAll(items)
             }
             notifyDataSetChanged()
         }
     }
 
-    fun addItem(item: ITEM) {
+    fun addItem(item: T) {
         synchronized(lock) {
-            val oldSize = actualItemCount
-            if (this.modifiableItems.add(item)) {
-                notifyItemInserted(oldSize + headerCount)
+            val oldSize = modifiableItems.size
+            if (modifiableItems.add(item)) {
+                notifyItemInserted(oldSize)
             }
         }
     }
 
-    fun addItem(position: Int, item: ITEM) {
+    fun addItem(position: Int, item: T) {
         synchronized(lock) {
             if (position >= 0) {
-                this.modifiableItems.add(position, item)
-                notifyItemInserted(position + headerCount)
+                modifiableItems.add(position, item)
+                notifyItemInserted(position)
             }
         }
     }
 
-    fun addItems(position: Int, newItems: List<ITEM>) {
+    fun addItems(position: Int, items: List<T>) {
         synchronized(lock) {
-            if (this.modifiableItems.addAll(position, newItems)) {
-                notifyItemRangeInserted(position + headerCount, newItems.size)
+            if (modifiableItems.addAll(position, items)) {
+                notifyItemRangeInserted(position, items.size)
             }
         }
     }
 
-    fun addItems(newItems: List<ITEM>) {
+    fun addItems(items: List<T>) {
         synchronized(lock) {
-            val oldSize = actualItemCount
-            if (this.modifiableItems.addAll(newItems)) {
-                if (oldSize == 0 && headerCount == 0) {
+            val oldSize = modifiableItems.size
+            if (modifiableItems.addAll(items)) {
+                if (oldSize == 0) {
                     notifyDataSetChanged()
                 } else {
-                    notifyItemRangeInserted(oldSize + headerCount, newItems.size)
+                    notifyItemRangeInserted(oldSize, items.size)
                 }
             }
         }
@@ -236,401 +69,140 @@ open class CommonRecyclerAdapter<ITEM>(
 
     fun removeItem(position: Int) {
         synchronized(lock) {
-            if (this.modifiableItems.removeAt(position) != null) {
-                notifyItemRemoved(position + headerCount)
+            if (modifiableItems.removeAt(position) != null) {
+                notifyItemRemoved(position)
             }
         }
     }
 
-    fun removeItem(item: ITEM) {
+    fun removeItem(item: T) {
         synchronized(lock) {
-            val position = this.modifiableItems.indexOf(item)
+            val position = modifiableItems.indexOf(item)
             if (position >= 0) {
-                this.modifiableItems.removeAt(position)
-                notifyItemRemoved(position + headerCount)
+                modifiableItems.removeAt(position)
+                notifyItemRemoved(position)
             }
         }
     }
 
-    fun removeItem(predicate: (ITEM) -> Boolean) {
+    fun removeItems(items: List<T>) {
         synchronized(lock) {
-            val iterator = this.modifiableItems.listIterator()
-            while (iterator.hasNext()) {
-                val position = iterator.nextIndex()
-                val item = iterator.next()
-                if (predicate(item)) {
-                    iterator.remove()
-                    notifyItemRemoved(position + headerCount)
-                    break
-                }
-            }
-        }
-    }
-
-    fun removeItems(predicate: (ITEM) -> Boolean) {
-        synchronized(lock) {
-            val iterator = this.modifiableItems.listIterator()
-            while (iterator.hasNext()) {
-                val position = iterator.nextIndex()
-                val item = iterator.next()
-                if (predicate(item)) {
-                    iterator.remove()
-                    notifyItemRemoved(position + headerCount)
-                }
-            }
-        }
-    }
-
-    fun removeItems(items: List<ITEM>) {
-        synchronized(lock) {
-            if (this.modifiableItems.removeAll(items)) {
+            if (modifiableItems.removeAll(items)) {
                 notifyDataSetChanged()
             }
         }
     }
 
-    fun swapItem(oldPosition: Int, newPosition: Int) {
+    fun updateItem(item: T, payload: Any? = null) {
         synchronized(lock) {
-            if (oldPosition in 0 until actualItemCount && newPosition in 0 until actualItemCount) {
-                val srcPosition = oldPosition + headerCount
-                val targetPosition = newPosition + headerCount
-                Collections.swap(this.modifiableItems, srcPosition, targetPosition)
-                notifyItemChanged(srcPosition)
-                notifyItemChanged(targetPosition)
-            }
-        }
-    }
-
-    fun updateItems(fromPosition: Int, toPosition: Int, payloads: Any? = null) {
-        synchronized(lock) {
-            if (fromPosition in 0 until actualItemCount && toPosition in 0 until actualItemCount) {
-                notifyItemRangeChanged(
-                    fromPosition + headerCount,
-                    toPosition - fromPosition + 1,
-                    payloads
-                )
-            }
-        }
-    }
-
-    fun updateItems(payload: Any? = null, predicate: (ITEM) -> Boolean) {
-        synchronized(lock) {
-            for (position in 0 until actualItemCount) {
-                if (predicate(modifiableItems[position])) {
-                    notifyItemChanged(position + headerCount, payload)
-                }
-            }
-        }
-    }
-
-    fun updateItem(item: ITEM, payload: Any? = null) {
-        synchronized(lock) {
-            val position = this.modifiableItems.indexOf(item)
+            val position = modifiableItems.indexOf(item)
             if (position >= 0) {
-                this.modifiableItems[position] = item
-                notifyItemChanged(position + headerCount, payload)
-            }
-        }
-    }
-
-    fun updateItem(position: Int, payload: Any? = null) {
-        synchronized(lock) {
-            if (position in 0 until actualItemCount) {
-                notifyItemChanged(position + headerCount, payload)
-            }
-        }
-    }
-
-    fun updateItem(payload: Any? = null, predicate: (ITEM) -> Boolean) {
-        synchronized(lock) {
-            for (position in 0 until actualItemCount) {
-                if (predicate(modifiableItems[position])) {
-                    notifyItemChanged(position + headerCount, payload)
-                    break
-                }
-            }
-        }
-    }
-
-    fun replaceItems(position: Int, item: ITEM, payload: Any? = null) {
-        synchronized(lock) {
-            if (position in 0 until actualItemCount) {
-                this.modifiableItems[position] = item
-                notifyItemChanged(position + headerCount, payload)
-            }
-        }
-    }
-
-    fun replaceItems(items: List<ITEM>, payload: Any? = null) {
-        synchronized(lock) {
-            for (item in items) {
-                val position = modifiableItems.indexOf(item)
-                if (position < 0) continue
                 modifiableItems[position] = item
                 notifyItemChanged(position, payload)
             }
         }
     }
 
-    fun replaceItem(item: ITEM, payload: Any? = null, predicate: (ITEM) -> Boolean) {
+    fun updateItems(items: List<T>, payload: Any? = null) {
         synchronized(lock) {
-            for (position in 0 until actualItemCount) {
-                if (predicate(modifiableItems[position])) {
+            for (item in items) {
+                val position = modifiableItems.indexOf(item)
+                if (position >= 0) {
                     modifiableItems[position] = item
-                    notifyItemChanged(position + headerCount, payload)
-                    break
+                    notifyItemChanged(position, payload)
                 }
+            }
+        }
+    }
+
+    fun swapItem(oldPosition: Int, newPosition: Int) {
+        synchronized(lock) {
+            if (oldPosition in 0 until modifiableItems.size && newPosition in 0 until modifiableItems.size) {
+                Collections.swap(modifiableItems, oldPosition, newPosition)
+                notifyItemChanged(oldPosition)
+                notifyItemChanged(newPosition)
+            }
+        }
+    }
+
+    fun sortItems(comparator: Comparator<T>) {
+        synchronized(lock) {
+            if (modifiableItems.isNotEmpty()) {
+                modifiableItems.sortWith(comparator)
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    fun <R : Comparable<R>> sortItems(selector: (T) -> R?) {
+        synchronized(lock) {
+            if (modifiableItems.isNotEmpty()) {
+                modifiableItems.sortBy(selector)
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    fun reverseItems() {
+        synchronized(lock) {
+            if (modifiableItems.isNotEmpty()) {
+                modifiableItems.reverse()
+                notifyDataSetChanged()
             }
         }
     }
 
     fun refreshItems(payload: Any? = null) {
-        notifyItemRangeChanged(headerCount, actualItemCount, payload)
-    }
-
-    fun containsItem(item: ITEM): Boolean {
-        synchronized(lock) {
-            return modifiableItems.contains(item)
-        }
-    }
-
-    fun indexOfItem(item: ITEM): Int {
-        synchronized(lock) {
-            return modifiableItems.indexOf(item)
-        }
-    }
-
-    fun sortItems() {
-        synchronized(lock) {
-            if (modifiableItems.isNotEmpty()) {
-                Collections.sort(modifiableItems, null)
-                notifyDataSetChanged()
-            }
-        }
-    }
-
-    fun sortItems(comparator: Comparator<ITEM>) {
-        synchronized(lock) {
-            if (modifiableItems.isNotEmpty()) {
-                Collections.sort(modifiableItems, comparator)
-                notifyDataSetChanged()
-            }
-        }
+        notifyItemRangeChanged(0, modifiableItems.size, payload)
     }
 
     fun clearItems() {
         synchronized(lock) {
-            this.modifiableItems.clear()
+            modifiableItems.clear()
             notifyDataSetChanged()
         }
     }
 
-    fun isEmpty(): Boolean = modifiableItems.isEmpty()
-
-    fun isNotEmpty(): Boolean = modifiableItems.isNotEmpty()
-
-    fun getActualPosition(position: Int): Int = position - headerCount
-
-    fun getItem(position: Int): ITEM = modifiableItems[position - headerCount]
-
-    fun getItemOrNull(position: Int): ITEM? = modifiableItems.getOrNull(position - headerCount)
-
-    fun findItem(predicate: (ITEM) -> Boolean): ITEM? {
-        synchronized(lock) {
-            return modifiableItems.find(predicate)
-        }
-    }
-
-    open fun getItemViewType(item: ITEM, position: Int): Int {
-        if (itemDelegates.size == 1) return 0
-        return if (item is AdapterItem) item.type else 0
-    }
-
-    /**
-     * grid 模式下使用
-     */
-    open fun getSpanSize(item: ITEM, position: Int): Int {
-        return 1
-    }
-
-    open fun onItemClick(holder: ItemViewHolder): Boolean {
-        return false
-    }
-
-    open fun onItemLongClick(holder: ItemViewHolder): Boolean {
-        return false
-    }
-
-    open fun onItemChildClick(holder: ItemViewHolder, view: View): Boolean {
-        return false
-    }
-
-    open fun onItemChildLongClick(holder: ItemViewHolder, view: View): Boolean {
-        return false
-    }
-
-    final override fun getItemCount(): Int {
-        return actualItemCount + headerCount + footerCount
-    }
-
-    final override fun getItemViewType(position: Int): Int {
-        return when {
-            isHeader(position) -> TYPE_HEADER_VIEW + position
-            isFooter(position) -> TYPE_FOOTER_VIEW + position
-            else -> getItemOrNull(position)?.let {
-                getItemViewType(it, getActualPosition(position))
-            } ?: 0
-        }
-    }
-
-    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        return when {
-            viewType < TYPE_HEADER_VIEW + headerCount -> {
-                ItemViewHolder(headerViews.get(viewType).also { view ->
-                    (view.parent as? ViewGroup)?.removeView(view)
-                })
-            }
-
-            viewType > TYPE_FOOTER_VIEW -> {
-                ItemViewHolder(footerViews.get(viewType).also { view ->
-                    (view.parent as? ViewGroup)?.removeView(view)
-                })
-            }
-
-            else -> {
-                val delegate = itemDelegates[viewType]
-
-                val holder = if (delegate != null) {
-                    ItemViewHolder(delegate.onCreateItemView(layoutInflater, parent)).also {
-                        delegate.onViewHolderCreated(it)
-                    }
-                } else {
-                    ItemViewHolder(onCreateItemView(layoutInflater, parent, viewType))
-                }
-
-                onViewHolderCreated(holder)
-
-                holder.setOnChildClickListener {
-                    if (!onItemChildClick(holder, it))
-                        itemChildClickListener?.invoke(this, holder, it)
-                }
-
-                holder.setOnChildLongClickListener {
-                    if (!onItemChildLongClick(holder, it))
-                        itemChildLongClickListener?.invoke(this, holder, it) ?: false
-                    else true
-                }
-
-                if (itemClickListener != null || itemClickable) {
-                    holder.setOnClickListener {
-                        if (!onItemClick(holder)) {
-                            itemClickListener?.invoke(this, holder)
-                        }
-                    }
-                }
-
-                if (itemLongClickListener != null || itemLongClickable) {
-                    holder.setOnLongClickListener {
-                        if (!onItemLongClick(holder))
-                            itemLongClickListener?.invoke(this, holder) ?: false
-                        else true
-                    }
-                }
-
-                holder
-            }
-        }
-    }
-
-    open fun onCreateItemView(inflater: LayoutInflater, parent: ViewGroup, viewType: Int): View {
-        return inflater.inflate(layoutResId, parent, false)
-    }
-
-    open fun onViewHolderCreated(holder: ItemViewHolder) {
-
-    }
-
-    open fun onBindViewHolder(holder: ItemViewHolder, item: ITEM, payloads: MutableList<Any>) {
-
-    }
-
-    final override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-
-    }
-
-    final override fun onBindViewHolder(
-        holder: ItemViewHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-        if (!isHeader(holder.layoutPosition) && !isFooter(holder.layoutPosition)) {
-            val item = getItemOrNull(holder.layoutPosition) ?: return
-
-            @Suppress("UNCHECKED_CAST")
-            val delegate = itemDelegates[getItemViewType(holder.layoutPosition)]
-                    as ItemViewDelegate<ITEM>?
-            delegate?.onBindViewHolder(holder, item, payloads)
-
-            onBindViewHolder(holder, item, payloads)
-        }
-    }
-
-    @CallSuper
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        this.parentView = recyclerView
-
-        val manager = recyclerView.layoutManager
-        if (manager is GridLayoutManager) {
-            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return if (isHeader(position) || isFooter(position)) {
-                        manager.spanCount
-                    } else {
-                        getItemOrNull(position)?.let {
-                            getSpanSize(it, position)
-                        } ?: manager.spanCount
-                    }
-                }
-            }
-        }
-    }
-
-    @CallSuper
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        this.parentView = null
-    }
-
-    @CallSuper
-    override fun onViewAttachedToWindow(holder: ItemViewHolder) {
-        itemAnimation?.start(holder)
-    }
-
-    @CallSuper
-    override fun onViewDetachedFromWindow(holder: ItemViewHolder) {
-        itemAnimation?.stop()
-    }
-
-    private fun isHeader(position: Int): Boolean = position < headerCount
-
-    private fun isFooter(position: Int): Boolean = position >= actualItemCount + headerCount
-
-    companion object {
-        private const val TYPE_HEADER_VIEW = Int.MIN_VALUE
-        private const val TYPE_FOOTER_VIEW = Int.MAX_VALUE / 2
-    }
-
 }
 
-operator fun <T> CommonRecyclerAdapter<T>.get(position: Int): T = getItem(position)
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Iterable<T>) {
+    if (items is List<*>) {
+        setItems(items as List<T>)
+    } else {
+        setItems(items.toList())
+    }
+}
 
-operator fun <T, A : CommonRecyclerAdapter<T>> A.plus(item: T): A = this.apply { addItem(item) }
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) {
+    setItems(items.toList())
+}
 
-operator fun <T, A : CommonRecyclerAdapter<T>> A.plus(items: List<T>): A =
-    this.apply { addItems(items) }
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(item: T): A =
+    this.apply { addItem(item) }
 
-operator fun <T, A : CommonRecyclerAdapter<T>> A.minus(item: T): A = this.apply { removeItem(item) }
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(items: Iterable<T>): A {
+    if (items is List<*>) {
+        addItems(items as List<T>)
+    } else {
+        addItems(items.toList())
+    }
+    return this
+}
 
-operator fun <T, A : CommonRecyclerAdapter<T>> A.minus(items: List<T>): A =
-    this.apply { removeItems(items) }
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(items: Array<T>): A =
+    this.apply { addItems(items.toList()) }
 
-operator fun <T> CommonRecyclerAdapter<T>.plusAssign(items: List<T>) = setItems(items)
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(item: T): A =
+    this.apply { removeItem(item) }
+
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(items: Iterable<T>): A {
+    if (items is List<*>) {
+        removeItems(items as List<T>)
+    } else {
+        removeItems(items.toList())
+    }
+    return this
+}
+
+operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(items: Array<T>): A =
+    this.apply { removeItems(items.toList()) }

@@ -34,7 +34,7 @@ inline fun FragmentManager.commitNow(
     }
 }
 
-inline fun <reified T : Fragment> FragmentManager.addTo(
+inline fun <reified T : Fragment> FragmentManager.add(
     @IdRes id: Int,
     vararg args: Pair<String, Any?>,
     tag: String? = null,

@@ -7,50 +7,44 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val clickViews: MutableSet<View> = mutableSetOf()
-    private val longClickViews: MutableSet<View> = mutableSetOf()
+    private val views: SparseArray<View> by lazy { SparseArray() }
 
-    fun addOnClickListener(@IdRes vararg ids: Int) {
-        for (id in ids) {
-            val view = getViewOrNull<View>(id) ?: continue
-            clickViews.add(view)
+    private val clickViews: MutableSet<Int> = mutableSetOf()
+    private val longClickViews: MutableSet<Int> = mutableSetOf()
+
+    fun addOnClickListener(@IdRes vararg viewIds: Int) {
+        clickViews.addAll(viewIds.toList())
+    }
+
+    fun addOnLongClickListener(@IdRes vararg viewIds: Int) {
+        longClickViews.addAll(viewIds.toList())
+    }
+
+    fun removeOnClickListener(@IdRes vararg viewIds: Int) {
+        for (id in viewIds) {
+            clickViews.remove(id)
+            findViewById<View>(id)?.setOnClickListener(null)
         }
     }
 
-    fun addOnLongClickListener(@IdRes vararg ids: Int) {
-        for (id in ids) {
-            val view = getViewOrNull<View>(id) ?: continue
-            longClickViews.add(view)
-        }
-    }
-
-    fun removeOnClickListener(@IdRes vararg ids: Int) {
-        for (id in ids) {
-            val view = getViewOrNull<View>(id) ?: continue
-            clickViews.remove(view)
-            view.setOnClickListener(null)
-        }
-    }
-
-    fun removeOnLongClickListener(@IdRes vararg ids: Int) {
-        for (id in ids) {
-            val view = getViewOrNull<View>(id) ?: continue
-            longClickViews.remove(view)
-            view.setOnLongClickListener(null)
+    fun removeOnLongClickListener(@IdRes vararg viewIds: Int) {
+        for (id in viewIds) {
+            longClickViews.remove(id)
+            findViewById<View>(id)?.setOnLongClickListener(null)
         }
     }
 
     fun setOnChildClickListener(clickListener: View.OnClickListener) {
-        for (view in clickViews) {
-            view.setOnClickListener(clickListener)
+        clickViews.map { id -> findViewById<View>(id) }.forEach {
+            it?.setOnClickListener(clickListener)
         }
     }
 
     fun setOnChildLongClickListener(longClickListener: View.OnLongClickListener) {
-        for (view in longClickViews) {
-            view.setOnLongClickListener(longClickListener)
+        longClickViews.map { id -> findViewById<View>(id) }.forEach {
+            it?.setOnLongClickListener(longClickListener)
         }
     }
 
@@ -62,16 +56,7 @@ class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         itemView.setOnLongClickListener(longClickListener)
     }
 
-    fun <T : View> getView(@IdRes id: Int): T {
-        return requireNotNull(getViewOrNull(id)) {
-            "Can not find view by id: $id"
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : View> getViewOrNull(@IdRes id: Int): T? {
-        val views: SparseArray<View> = (itemView.tag as? SparseArray<View>)
-            ?: SparseArray<View>().also { itemView.tag = it }
+    fun <T : View> findViewById(@IdRes id: Int): T? {
         var childView: View? = views.get(id)
         if (null == childView) {
             childView = itemView.findViewById(id)
@@ -80,10 +65,12 @@ class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             }
             views.put(id, childView)
         }
+        @Suppress("UNCHECKED_CAST")
         return childView as T
     }
+
 }
 
-operator fun <T : View> ItemViewHolder.get(@IdRes id: Int): T = getView(id)
-
-inline fun ItemViewHolder.use(crossinline block: View.() -> Unit) = this.itemView.run(block)
+operator fun <T : View> ItemViewHolder.get(@IdRes id: Int): T = requireNotNull(findViewById(id)) {
+    "Can not find view by id: $id"
+}

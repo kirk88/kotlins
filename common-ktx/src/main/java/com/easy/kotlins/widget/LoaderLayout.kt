@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.easy.kotlins.R
+import com.easy.kotlins.helper.invisible
+import com.easy.kotlins.helper.visible
 import com.easy.kotlins.helper.weak
 import com.easy.kotlins.widget.LoaderView.Companion.TYPE_CONTENT_VIEW
 import com.easy.kotlins.widget.LoaderView.Companion.TYPE_EMPTY_VIEW
@@ -259,10 +261,7 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setEmptyButtonText(text: CharSequence): LoaderView {
         emptyButtonText = text
-        findViewById<TextView>(R.id.empty_button)?.let {
-            it.text = text
-            it.visibility = if (text.isBlank()) GONE else VISIBLE
-        }
+        findViewById<TextView>(R.id.empty_button)?.text = text
         return this
     }
 
@@ -315,10 +314,7 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setErrorButtonText(text: CharSequence): LoaderView {
         errorButtonText = text
-        findViewById<TextView>(R.id.error_button)?.let {
-            it.text = text
-            it.visibility = if (text.isBlank()) GONE else VISIBLE
-        }
+        findViewById<TextView>(R.id.error_button)?.text = text
         return this
     }
 
@@ -371,7 +367,7 @@ class LoaderLayout @JvmOverloads constructor(
         for ((type, view) in views) {
             if (type == viewType) continue
 
-            view.visibility = INVISIBLE
+            view.invisible()
         }
 
         views.getOrElse(viewType) {
@@ -381,7 +377,7 @@ class LoaderLayout @JvmOverloads constructor(
                 TYPE_ERROR_VIEW -> setView(TYPE_ERROR_VIEW, errorLayoutId, true)
                 else -> null
             }
-        }?.visibility = VISIBLE
+        }?.visible()
     }
 
     private fun show(viewType: Int) {
@@ -559,6 +555,7 @@ class LoaderLayout @JvmOverloads constructor(
             adapter.unregisterAdapterDataObserver(this)
             registed = false
         }
+
     }
 
     companion object {

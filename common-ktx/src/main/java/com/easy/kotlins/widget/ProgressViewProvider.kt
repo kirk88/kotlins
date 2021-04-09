@@ -73,7 +73,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         inputMethodMode = INPUT_METHOD_NOT_NEEDED
-        animationStyle = R.style.Animation_AppCompat_Dialog
+        animationStyle = R.style.Animation_Progress_Popup
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         contentView = View.inflate(parent.context, R.layout.dialog_progress_view, null)

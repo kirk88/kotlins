@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kotlins">
         <activity android:name=".MainActivity"
-            android:label="MainActivity"
+            android:label="Sample"
             android:theme="@style/Theme.Kotlins.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,6 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SecondActivity"
+            android:theme="@style/Theme.Kotlins.NoActionBar"/>
     </application>
 
 </manifest>
