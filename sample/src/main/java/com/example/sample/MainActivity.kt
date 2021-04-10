@@ -1,14 +1,17 @@
 package com.example.sample
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
-import com.easy.kotlins.app.NiceActivity
-import com.easy.kotlins.helper.installTo
-import com.easy.kotlins.helper.startActivity
-import com.easy.kotlins.helper.viewBindings
-import com.easy.kotlins.widget.*
 import com.example.sample.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
+import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.helper.attach
+import com.nice.kotlins.helper.onClick
+import com.nice.kotlins.helper.startActivity
+import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.widget.LoaderView
+import com.nice.kotlins.widget.ProgressView
+import com.nice.kotlins.widget.progressViews
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -20,19 +23,18 @@ class MainActivity : NiceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.installTo(this)
+        binding.attach(this)
 
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
+        val fab = binding.fab
 
-        loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
-
-        titleBar.setOnTitleClickListener {
+        fab.onClick {
             startActivity<SecondActivity>()
         }
 
-//        lifecycleScope.launch {
-//            progressView.showProgress()
+//        lifecycleScope.launch(Dispatchers.Default) {
+//            progressView.showProgress("你好啊")
 //
 //            delay(1000)
 //
@@ -41,33 +43,37 @@ class MainActivity : NiceActivity() {
 //
 //            delay(200)
 //
-//            progressView.showProgress()
+//            progressView.showProgress("还好吧")
 //
 //
 //            delay(2000)
 //            progressView.dismissProgress()
 //        }
 
+        if(savedInstanceState != null){
+            return
+        }
+
         lifecycleScope.launch {
+            loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
+
             delay(1000)
 
-
-            loader.showLoading()
+            loader.showContent()
 
             delay(1000)
 
             loader.showEmpty()
 
-        }
+            delay(1000)
 
-        lifecycleScope.launch(Dispatchers.IO) {
             loader.showError()
 
 
-            delay(3000)
-
-            loader.showContent()
+//            loader.showContent()
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
+
     }
 
 }

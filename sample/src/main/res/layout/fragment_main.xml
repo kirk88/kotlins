@@ -4,13 +4,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.easy.kotlins.widget.TitleBar
+    <com.nice.kotlins.widget.TitleBar
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:provideSupportActionBar="true"
         app:displayShowHomeEnabled="true"
         app:displayShowHomeAsUpEnabled="true"
+        app:displayShowCustomTitleEnabled="true"
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"/>
 

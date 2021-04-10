@@ -6,21 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.easy.kotlins.widget.TitleBar
+    <com.nice.kotlins.widget.TitleBar
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
-        app:customLayout="@layout/layout_custom_title_view"
         app:displayShowCustomTitleEnabled="true"
-        app:displayShowHomeAsUpEnabled="true"
-        app:displayShowHomeEnabled="true"
         app:provideSupportActionBar="true"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:statusBarForeground="@android:color/holo_red_light"
-         />
+        app:title="Hello World" />
 
 
 <!--    <androidx.core.widget.NestedScrollView-->
@@ -30,7 +27,7 @@
 <!--        android:scrollbarStyle="outsideOverlay"-->
 <!--        app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
 
-<!--        <com.easy.kotlins.widget.LoaderLayout-->
+<!--        <com.nice.kotlins.widget.LoaderLayout-->
 <!--            android:id="@+id/loader_layout"-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="match_parent" -->
@@ -56,11 +53,11 @@
 
 <!--            </FrameLayout>-->
 
-<!--        </com.easy.kotlins.widget.LoaderLayout>-->
+<!--        </com.nice.kotlins.widget.LoaderLayout>-->
 
 <!--    </androidx.core.widget.NestedScrollView>-->
 
-    <com.easy.kotlins.widget.LoaderLayout
+    <com.nice.kotlins.widget.LoaderLayout
         android:id="@+id/loader_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -79,6 +76,7 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -86,7 +84,7 @@
 
         </FrameLayout>
 
-    </com.easy.kotlins.widget.LoaderLayout>
+    </com.nice.kotlins.widget.LoaderLayout>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

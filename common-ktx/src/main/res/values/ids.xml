@@ -12,12 +12,7 @@
     <item name="loading_progress" type="id" />
     <item name="loading_text" type="id" />
 
-    <item name="progress_panel" type="id" />
-    <item name="progress_bar" type="id" />
-    <item name="progress_text" type="id" />
-
-
-    <item name="custom_title" type="id" />
-    <item name="custom_toolbar" type="id" />
+    <item name="title" type="id" />
+    <item name="toolbar" type="id" />
 
 </resources>

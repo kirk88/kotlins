@@ -19,7 +19,6 @@
         android:orientation="vertical">
 
         <ProgressBar
-            android:id="@id/progress_bar"
             style="@style/Widget.AppCompat.ProgressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -27,12 +26,12 @@
             android:minHeight="64dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@id/progress_text"
+            android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
             android:textAppearance="?textAppearanceBody1"
-            tools:text="@string/load_progress_tip" />
+            tools:text="@string/loader_progress_tip" />
 
     </LinearLayout>
 

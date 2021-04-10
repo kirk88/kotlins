@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.easy.kotlins">
+    package="com.nice.kotlins">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -8,7 +8,7 @@
         android:supportsRtl="true" >
         <provider
             android:name=".app.ContextProvider"
-            android:authorities="${applicationId}.com.easy.kotlins"
+            android:authorities="${applicationId}.com.nice.kotlins"
             android:exported="false" />
     </application>
 

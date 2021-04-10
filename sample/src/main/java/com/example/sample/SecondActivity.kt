@@ -1,8 +1,8 @@
 package com.example.sample
 
 import android.os.Bundle
-import com.easy.kotlins.app.NiceActivity
-import com.easy.kotlins.helper.add
+import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.helper.add
 
 class SecondActivity: NiceActivity(R.layout.activity_second) {
 

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="LoaderLayout">
+        <!-- 空布局资源id -->
+        <attr name="emptyLayout" format="reference" />
+        <!-- 加载中布局资源id -->
+        <attr name="loadingLayout" format="reference" />
+        <!-- 错误布局资源id -->
+        <attr name="errorLayout" format="reference" />
+        <!-- 默认显示布局  -->
+        <attr name="defaultShow" format="enum">
+            <enum name="content" value="0x001" />
+            <enum name="empty" value="0x002" />
+            <enum name="loading" value="0x003" />
+            <enum name="error" value="0x004" />
+        </attr>
+
+        <!-- 空布局图片 -->
+        <attr name="emptyImage" format="reference" />
+        <!-- 空布局文本 -->
+        <attr name="emptyText" format="string" />
+        <!-- 空布局文本颜色 -->
+        <attr name="emptyTextColor" format="color" />
+        <!-- 空布局文本样式 -->
+        <attr name="emptyTextAppearance" format="reference" />
+        <!-- 空布局按钮文本 -->
+        <attr name="emptyButtonText" format="string" />
+        <!-- 空布局按钮文本颜色 -->
+        <attr name="emptyButtonTextColor" format="color" />
+        <!-- 空布局按钮文本样式 -->
+        <attr name="emptyButtonTextAppearance" format="reference" />
+        <!-- 空布局按钮背景 -->
+        <attr name="emptyButtonBackground" format="reference" />
+        <!-- 空布局按钮显示与否 -->
+        <attr name="emptyButtonVisible" format="boolean" />
+
+        <!-- 错误布局图片 -->
+        <attr name="errorImage" format="reference" />
+        <!-- 错误布局文本 -->
+        <attr name="errorText" format="string" />
+        <!-- 错误布局文本颜色 -->
+        <attr name="errorTextColor" format="color" />
+        <!-- 错误布局文本样式 -->
+        <attr name="errorTextAppearance" format="reference" />
+        <!-- 错误布局重试按钮文本 -->
+        <attr name="errorButtonText" format="string" />
+        <!-- 错误布局重试按钮文本颜色 -->
+        <attr name="errorButtonTextColor" format="color" />
+        <!-- 错误布局重试按钮文本样式 -->
+        <attr name="errorButtonTextAppearance" format="reference" />
+        <!-- 错误布局重试按钮背景 -->
+        <attr name="errorButtonBackground" format="reference" />
+        <!-- 错误布局按钮显示与否 -->
+        <attr name="errorButtonVisible" format="boolean" />
+
+        <!-- 加载中布局进度条颜色 -->
+        <attr name="loadingProgressColor" />
+        <!-- 加载中布局进度条图片-->
+        <attr name="loadingProgressDrawable" format="reference" />
+        <!-- 加载中布局文本 -->
+        <attr name="loadingText" format="string" />
+        <!-- 加载中布局文本颜色 -->
+        <attr name="loadingTextColor" format="color" />
+        <!-- 加载中布局文本样式 -->
+        <attr name="loadingTextAppearance" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TitleBar">
+        <attr name="customLayout" format="reference" />
+        <attr name="titleTextAppearance" />
+        <attr name="titleTextColor" />
+        <attr name="subtitleTextAppearance" />
+        <attr name="subtitleTextColor" />
+        <attr name="navigationIcon" format="reference" />
+        <attr name="navigationContentDescription" format="reference|string" />
+        <attr name="navigationIconTint" format="color|reference" />
+        <attr name="navigationIconTintMode" format="enum">
+            <enum name="clear" value="0" />
+            <enum name="src" value="1" />
+            <enum name="dst" value="2" />
+            <enum name="src_over" value="3" />
+            <enum name="dst_over" value="4" />
+            <enum name="src_in" value="5" />
+            <enum name="dst_in" value="6" />
+            <enum name="src_out" value="7" />
+            <enum name="dst_out" value="8" />
+            <enum name="src_atop" value="9" />
+            <enum name="dst_atop" value="10" />
+            <enum name="xor" value="11" />
+            <enum name="darken" value="16" />
+            <enum name="lighten" value="17" />
+            <enum name="multiply" value="13" />
+            <enum name="screen" value="14" />
+            <enum name="add" value="12" />
+            <enum name="overlay" value="15" />
+        </attr>
+        <attr name="popupTheme" />
+        <attr name="title" />
+        <attr name="subtitle" />
+        <attr name="menu" />
+        <attr name="displayShowCustomTitleEnabled" format="boolean" />
+        <attr name="displayShowHomeEnabled" format="boolean" />
+        <attr name="displayShowHomeAsUpEnabled" format="boolean" />
+        <attr name="showBottomDivider" format="enum">
+            <enum name="ifNeed" value="0" />
+            <enum name="always" value="1" />
+            <enum name="never" value="2" />
+        </attr>
+        <attr name="bottomDividerHeight" format="dimension|reference" />
+        <attr name="bottomDividerColor" format="color|reference" />
+        <attr name="provideSupportActionBar" format="boolean" />
+    </declare-styleable>
+
+    <attr name="titleBarStyle" format="reference" />
+
+    <style name="Animation.Progress.Popup" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/anim_popup_exit</item>
+    </style>
+
+    <declare-styleable name="TitleToolbar">
+        <attr name="title" />
+        <attr name="titleTextAppearance" />
+        <attr name="titleTextColor" />
+    </declare-styleable>
+
+    <attr name="titleToolbarStyle" format="reference" />
+
+</resources>
