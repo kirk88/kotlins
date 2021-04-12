@@ -2,6 +2,7 @@
 
 package com.nice.kotlins.widget
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
@@ -14,9 +15,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.R
 import com.nice.kotlins.helper.invisible
@@ -608,6 +611,28 @@ class LoaderLayout @JvmOverloads constructor(
     companion object {
         private const val NO_VALUE = -1
         private const val NO_TYPE = 0
+
+        fun wrap(activity: Activity): LoaderView {
+            return wrap(
+                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
+            )
+        }
+
+        fun wrap(fragment: Fragment): LoaderView {
+            return wrap(requireNotNull(fragment.view))
+        }
+
+        fun wrap(view: View): LoaderView {
+            val parent = view.parent as ViewGroup
+            val params = view.layoutParams
+            val index = parent.indexOfChild(view)
+            parent.removeView(view)
+            val layout = LoaderLayout(view.context)
+            layout.setContentView(view)
+            parent.addView(layout, index, params)
+            return layout
+        }
+
     }
 
 }
