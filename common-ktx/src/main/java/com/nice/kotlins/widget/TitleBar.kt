@@ -325,7 +325,10 @@ class TitleBar @JvmOverloads constructor(
                 ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
             )
         )
-        setNavigationIcon(ta.getDrawable(R.styleable.TitleBar_navigationIcon))
+        val navIcon = ta.getDrawable(R.styleable.TitleBar_navigationIcon)
+        if (navIcon != null) {
+            setNavigationIcon(navIcon)
+        }
         setNavigationContentDescription(ta.getText(R.styleable.TitleBar_navigationContentDescription))
 
         if (ta.hasValue(R.styleable.TitleBar_popupTheme)) {
@@ -430,7 +433,6 @@ class TitleToolbar @JvmOverloads constructor(
     private var navigationWidth: Int = 0
 
     private var isDefaultTitle: Boolean = true
-    private var isDefaultNavigation: Boolean = true
 
     private var displayShowCustomTitleEnabled: Boolean = false
 
@@ -669,7 +671,6 @@ class TitleToolbar @JvmOverloads constructor(
             "Navigation View must be a ImageButton"
         }
 
-        isDefaultNavigation = false
         navigationButtonView = buttonView
     }
 
@@ -713,12 +714,13 @@ class TitleToolbar @JvmOverloads constructor(
         navigationDrawableTintMode = intToTintMode(
             ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 9)
         )
-        val drawable = ta.getDrawable(R.styleable.TitleToolbar_navigationIcon)
-        if (drawable != null) {
-            navigationIcon = drawable
+        val navIcon = ta.getDrawable(R.styleable.TitleToolbar_navigationIcon)
+        if (navIcon != null) {
+            navigationIcon = navIcon
         }
 
-        navigationContentDescription = ta.getText(R.styleable.TitleToolbar_navigationContentDescription)
+        navigationContentDescription =
+            ta.getText(R.styleable.TitleToolbar_navigationContentDescription)
 
         ta.recycle()
     }
