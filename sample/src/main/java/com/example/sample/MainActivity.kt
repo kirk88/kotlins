@@ -1,6 +1,5 @@
 package com.example.sample
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
