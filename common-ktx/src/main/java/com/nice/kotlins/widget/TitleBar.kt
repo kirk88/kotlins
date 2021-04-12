@@ -72,7 +72,7 @@ class TitleBar @JvmOverloads constructor(
     }
 
     fun getTitle(): CharSequence? {
-        return actionBar?.title ?: toolbar.title
+        return toolbar.title
     }
 
     fun setTitleTextColor(color: ColorStateList?) {
@@ -100,7 +100,7 @@ class TitleBar @JvmOverloads constructor(
     }
 
     fun getSubtitle(): CharSequence? {
-        return actionBar?.subtitle ?: toolbar.subtitle
+        return toolbar.subtitle
     }
 
     fun setSubtitle(@StringRes resId: Int) {

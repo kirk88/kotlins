@@ -89,10 +89,4 @@
         </FrameLayout>
 
     </com.nice.kotlins.widget.LoaderLayout>
-
-    <androidx.appcompat.widget.AppCompatCheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:id="@+id/checker"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

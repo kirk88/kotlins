@@ -1,6 +1,7 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
@@ -11,6 +12,7 @@ import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
+import com.nice.kotlins.widget.title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -29,7 +31,8 @@ class MainActivity : NiceActivity() {
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
-        val checker = binding.checker
+
+        Log.e("TAGTAG", "title: ${titleBar.title}")
 
         fab.onClick {
             startActivity<SecondActivity>()
@@ -53,8 +56,6 @@ class MainActivity : NiceActivity() {
 //        }
 
         lifecycleScope.launch {
-
-            checker.isChecked = true
 
             loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
