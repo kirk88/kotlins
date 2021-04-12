@@ -9,8 +9,7 @@
     <com.nice.kotlins.widget.TitleToolbar
         android:id="@id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:navigationIconTint="@color/white">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@id/navigation"

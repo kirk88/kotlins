@@ -318,7 +318,6 @@ class TitleBar @JvmOverloads constructor(
             setSubtitleTextColor(ta.getColorStateList(R.styleable.TitleBar_subtitleTextColor))
         }
 
-
         setNavigationIconTint(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
         setNavigationIconTintMode(
             intToTintMode(
@@ -329,7 +328,11 @@ class TitleBar @JvmOverloads constructor(
         if (navIcon != null) {
             setNavigationIcon(navIcon)
         }
-        setNavigationContentDescription(ta.getText(R.styleable.TitleBar_navigationContentDescription))
+
+        val navDesc = ta.getText(R.styleable.TitleBar_navigationContentDescription)
+        if(!navDesc.isNullOrEmpty()){
+            setNavigationContentDescription(navDesc)
+        }
 
         if (ta.hasValue(R.styleable.TitleBar_popupTheme)) {
             setPopupTheme(ta.getResourceId(R.styleable.TitleBar_popupTheme, 0))
@@ -719,8 +722,10 @@ class TitleToolbar @JvmOverloads constructor(
             navigationIcon = navIcon
         }
 
-        navigationContentDescription =
-            ta.getText(R.styleable.TitleToolbar_navigationContentDescription)
+        val navDesc = ta.getText(R.styleable.TitleToolbar_navigationContentDescription)
+        if(!navDesc.isNullOrEmpty()) {
+            navigationContentDescription = navDesc
+        }
 
         ta.recycle()
     }
