@@ -72,33 +72,14 @@
         <attr name="titleTextColor" />
         <attr name="subtitleTextAppearance" />
         <attr name="subtitleTextColor" />
-        <attr name="navigationIcon" format="reference" />
-        <attr name="navigationContentDescription" format="reference|string" />
-        <attr name="navigationIconTint" format="color|reference" />
-        <attr name="navigationIconTintMode" format="enum">
-            <enum name="clear" value="0" />
-            <enum name="src" value="1" />
-            <enum name="dst" value="2" />
-            <enum name="src_over" value="3" />
-            <enum name="dst_over" value="4" />
-            <enum name="src_in" value="5" />
-            <enum name="dst_in" value="6" />
-            <enum name="src_out" value="7" />
-            <enum name="dst_out" value="8" />
-            <enum name="src_atop" value="9" />
-            <enum name="dst_atop" value="10" />
-            <enum name="xor" value="11" />
-            <enum name="darken" value="16" />
-            <enum name="lighten" value="17" />
-            <enum name="multiply" value="13" />
-            <enum name="screen" value="14" />
-            <enum name="add" value="12" />
-            <enum name="overlay" value="15" />
-        </attr>
         <attr name="popupTheme" />
         <attr name="title" />
         <attr name="subtitle" />
         <attr name="menu" />
+        <attr name="navigationIcon" />
+        <attr name="navigationContentDescription" />
+        <attr name="navigationIconTint" />
+        <attr name="navigationIconTintMode" />
         <attr name="displayShowCustomTitleEnabled" format="boolean" />
         <attr name="displayShowHomeEnabled" format="boolean" />
         <attr name="displayShowHomeAsUpEnabled" format="boolean" />
@@ -112,6 +93,18 @@
         <attr name="provideSupportActionBar" format="boolean" />
     </declare-styleable>
 
+    <attr name="navigationIcon" format="reference" />
+    <attr name="navigationContentDescription" format="reference|string" />
+    <attr name="navigationIconTint" format="color|reference" />
+    <attr name="navigationIconTintMode" format="enum">
+        <enum name="src_over" value="3" />
+        <enum name="src_in" value="5" />
+        <enum name="src_atop" value="9" />
+        <enum name="multiply" value="14" />
+        <enum name="screen" value="15" />
+        <enum name="add" value="16" />
+    </attr>
+
     <attr name="titleBarStyle" format="reference" />
 
     <style name="Animation.Progress.Popup" parent="android:Animation">
@@ -123,6 +116,10 @@
         <attr name="title" />
         <attr name="titleTextAppearance" />
         <attr name="titleTextColor" />
+        <attr name="navigationIcon" />
+        <attr name="navigationContentDescription" />
+        <attr name="navigationIconTint" />
+        <attr name="navigationIconTintMode" />
     </declare-styleable>
 
     <attr name="titleToolbarStyle" format="reference" />

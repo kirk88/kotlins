@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
-import com.nice.kotlins.helper.attach
+import com.nice.kotlins.helper.installTo
 import com.nice.kotlins.helper.onClick
 import com.nice.kotlins.helper.startActivity
 import com.nice.kotlins.helper.viewBindings
@@ -23,11 +23,14 @@ class MainActivity : NiceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.attach(this)
+        binding.installTo(this)
+
+        title = "我是谁"
 
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
+        val checker = binding.checker
 
         fab.onClick {
             startActivity<SecondActivity>()
@@ -50,11 +53,10 @@ class MainActivity : NiceActivity() {
 //            progressView.dismissProgress()
 //        }
 
-        if(savedInstanceState != null){
-            return
-        }
-
         lifecycleScope.launch {
+
+            checker.isChecked = true
+
             loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
             delay(1000)
@@ -68,10 +70,6 @@ class MainActivity : NiceActivity() {
             delay(1000)
 
             loader.showError()
-
-
-//            loader.showContent()
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
 
     }

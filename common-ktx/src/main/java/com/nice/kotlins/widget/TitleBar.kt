@@ -15,15 +15,17 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
@@ -49,117 +51,112 @@ class TitleBar @JvmOverloads constructor(
     private var bottomDividerColor: Int = 0
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
 
-    var popupTheme: Int
-        get() = toolbar.popupTheme
-        set(theme) {
-            toolbar.popupTheme = theme
-        }
-
-    var navigationIcon: Drawable?
-        get() = toolbar.navigationIcon
-        set(drawable) {
-            toolbar.navigationIcon =
-                maybeTintDrawable(drawable, navigationIconTint, navigationIconTintMode)
-        }
-
-    var navigationIconTint: ColorStateList? = null
-        set(tint) {
-            maybeTintDrawable(toolbar.navigationIcon, tint, navigationIconTintMode)
-
-            field = tint
-        }
-
-    var navigationIconTintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP
-        set(mode) {
-            maybeTintDrawable(toolbar.navigationIcon, navigationIconTint, mode)
-
-            field = mode
-        }
-
-    var navigationContentDescription: CharSequence?
-        get() = toolbar.navigationContentDescription
-        set(navigationContentDescription) {
-            toolbar.navigationContentDescription = navigationContentDescription
-        }
-
-    var title: CharSequence? = null
-        set(title) {
-            when {
-                actionBar != null -> actionBar!!.title = title
-                else -> toolbar.title = title
-            }
-
-            field = title
-        }
-
-    var titleTextColor: ColorStateList? = null
-        set(color) {
-            if (color == null) {
-                return
-            }
-
-            toolbar.setTitleTextColor(color)
-
-            field = color
-        }
-
-    var titleTextAppearance: Int
-        @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-        set(id) {
-            toolbar.setTitleTextAppearance(context, id)
-        }
-
-    var subtitle: CharSequence? = null
-        set(subtitle) {
-            if (actionBar != null) actionBar!!.subtitle = subtitle
-            else toolbar.subtitle = subtitle
-
-            field = subtitle
-        }
-
-    var subtitleTextColor: ColorStateList? = null
-        set(color) {
-            if (color == null) {
-                return
-            }
-
-            toolbar.setSubtitleTextColor(color)
-
-            field = color
-        }
-
-    var subtitleTextAppearance: Int
-        @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-        set(id) {
-            toolbar.setSubtitleTextAppearance(context, id)
-        }
-
-    fun setTitle(@StringRes resId: Int) {
-        title = context.getText(resId)
+    fun setPopupTheme(@StyleRes theme: Int) {
+        toolbar.popupTheme = theme
     }
 
-    fun setSubtitle(@StringRes resId: Int) {
-        subtitle = context.getText(resId)
+    fun getPopupTheme(): Int {
+        return toolbar.popupTheme
+    }
+
+    fun setTitle(title: CharSequence?) {
+        if (actionBar != null) {
+            actionBar!!.title = title
+        } else {
+            toolbar.title = title
+        }
+    }
+
+    fun setTitle(@StringRes resId: Int) {
+        setTitle(context.getText(resId))
+    }
+
+    fun getTitle(): CharSequence? {
+        return actionBar?.title ?: toolbar.title
+    }
+
+    fun setTitleTextColor(color: ColorStateList?) {
+        if (color == null) {
+            return
+        }
+
+        toolbar.setTitleTextColor(color)
     }
 
     fun setTitleTextColor(@ColorInt color: Int) {
-        titleTextColor = ColorStateList.valueOf(color)
+        setTitleTextColor(ColorStateList.valueOf(color))
+    }
+
+    fun setTitleTextAppearance(@StyleRes resId: Int) {
+        toolbar.setTitleTextAppearance(context, resId)
+    }
+
+    fun setSubtitle(subtitle: CharSequence?) {
+        if (actionBar != null) {
+            actionBar!!.subtitle = subtitle
+        } else {
+            toolbar.subtitle = subtitle
+        }
+    }
+
+    fun getSubtitle(): CharSequence? {
+        return actionBar?.subtitle ?: toolbar.subtitle
+    }
+
+    fun setSubtitle(@StringRes resId: Int) {
+        setSubtitle(context.getText(resId))
+    }
+
+    fun setSubtitleTextColor(color: ColorStateList?) {
+        if (color == null) {
+            return
+        }
+
+        toolbar.setSubtitleTextColor(color)
     }
 
     fun setSubtitleTextColor(@ColorInt color: Int) {
-        subtitleTextColor = ColorStateList.valueOf(color)
+        setSubtitleTextColor(ColorStateList.valueOf(color))
+    }
+
+    fun setSubtitleTextAppearance(@StyleRes resId: Int) {
+        toolbar.setSubtitleTextAppearance(context, resId)
+    }
+
+    fun setNavigationIcon(icon: Drawable?) {
+        toolbar.navigationIcon = icon
+    }
+
+    fun getNavigationIcon(): Drawable? {
+        return toolbar.navigationIcon
     }
 
     fun setNavigationIcon(@DrawableRes resId: Int) {
-        navigationIcon = ContextCompat.getDrawable(context, resId)
+        setNavigationIcon(ContextCompat.getDrawable(context, resId))
+    }
+
+    fun setNavigationIconTint(color: ColorStateList?) {
+        toolbar.setNavigationIconTint(color)
     }
 
     fun setNavigationIconTint(@ColorInt color: Int) {
-        navigationIconTint = ColorStateList.valueOf(color)
+        setNavigationIconTint(ColorStateList.valueOf(color))
+    }
+
+    fun setNavigationIconTintMode(mode: PorterDuff.Mode) {
+        toolbar.setNavigationIconTintMode(mode)
+    }
+
+    fun setNavigationContentDescription(description: CharSequence?) {
+        toolbar.navigationContentDescription = description
     }
 
     fun setNavigationContentDescription(@StringRes resId: Int) {
-        navigationContentDescription = context.getText(resId)
+        setNavigationContentDescription(context.getText(resId))
+    }
+
+    fun getNavigationContentDescription(): CharSequence? {
+        return toolbar.navigationContentDescription
     }
 
     fun setNavigationOnClickListener(clickListener: OnClickListener?) {
@@ -255,45 +252,6 @@ class TitleBar @JvmOverloads constructor(
             return actionBar
         }
 
-        private fun maybeTintDrawable(
-            drawable: Drawable?,
-            tint: ColorStateList?,
-            tintMode: PorterDuff.Mode
-        ): Drawable? {
-            return if (drawable != null) {
-                DrawableCompat.wrap(drawable.mutate()).also {
-                    DrawableCompat.setTintList(it, tint)
-                    DrawableCompat.setTintMode(it, tintMode)
-                }
-            } else {
-                drawable
-            }
-        }
-
-        private fun intToMode(value: Int): PorterDuff.Mode {
-            return when (value) {
-                0 -> PorterDuff.Mode.CLEAR
-                1 -> PorterDuff.Mode.SRC
-                2 -> PorterDuff.Mode.DST
-                3 -> PorterDuff.Mode.SRC_OVER
-                4 -> PorterDuff.Mode.DST_OVER
-                5 -> PorterDuff.Mode.SRC_IN
-                6 -> PorterDuff.Mode.DST_IN
-                7 -> PorterDuff.Mode.SRC_OUT
-                8 -> PorterDuff.Mode.DST_OUT
-                9 -> PorterDuff.Mode.SRC_ATOP
-                10 -> PorterDuff.Mode.DST_ATOP
-                11 -> PorterDuff.Mode.XOR
-                16 -> PorterDuff.Mode.DARKEN
-                17 -> PorterDuff.Mode.LIGHTEN
-                13 -> PorterDuff.Mode.MULTIPLY
-                14 -> PorterDuff.Mode.SCREEN
-                12 -> PorterDuff.Mode.ADD
-                15 -> PorterDuff.Mode.OVERLAY
-                else -> PorterDuff.Mode.CLEAR
-            }
-        }
-
     }
 
     init {
@@ -331,65 +289,125 @@ class TitleBar @JvmOverloads constructor(
 
         val titleText = ta.getText(R.styleable.TitleBar_title)
         if (!titleText.isNullOrEmpty()) {
-            title = titleText
+            setTitle(titleText)
         }
 
         val subtitleText = ta.getText(R.styleable.TitleBar_subtitle)
         if (!subtitleText.isNullOrEmpty()) {
-            subtitle = subtitleText
+            setSubtitle(subtitleText)
         }
 
         if (ta.hasValue(R.styleable.TitleBar_titleTextAppearance)) {
-            titleTextAppearance = ta.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0)
+            setTitleTextAppearance(ta.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_subtitleTextAppearance)) {
-            subtitleTextAppearance =
-                ta.getResourceId(R.styleable.TitleBar_subtitleTextAppearance, 0)
+            setSubtitleTextAppearance(
+                ta.getResourceId(
+                    R.styleable.TitleBar_subtitleTextAppearance,
+                    0
+                )
+            )
         }
 
         if (ta.hasValue(R.styleable.TitleBar_titleTextColor)) {
-            titleTextColor = ta.getColorStateList(R.styleable.TitleBar_titleTextColor)
+            setTitleTextColor(ta.getColorStateList(R.styleable.TitleBar_titleTextColor))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_subtitleTextColor)) {
-            subtitleTextColor = ta.getColorStateList(R.styleable.TitleBar_subtitleTextColor)
+            setSubtitleTextColor(ta.getColorStateList(R.styleable.TitleBar_subtitleTextColor))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_navigationIcon)) {
-            navigationIcon = AppCompatResources.getDrawable(
-                context,
-                ta.getResourceId(R.styleable.TitleBar_navigationIcon, 0)
-            )
-            navigationIconTint = ta.getColorStateList(R.styleable.TitleBar_navigationIconTint)
-            navigationIconTintMode = intToMode(
+
+        setNavigationIconTint(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
+        setNavigationIconTintMode(
+            intToTintMode(
                 ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
             )
-
-            navigationContentDescription =
-                ta.getText(R.styleable.TitleBar_navigationContentDescription)
-        }
-
-        if (ta.hasValue(R.styleable.TitleBar_showBottomDivider)) {
-            showBottomDivider =
-                ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
-            bottomDividerHeight =
-                ta.getDimensionPixelSize(R.styleable.TitleBar_bottomDividerHeight, 1)
-            bottomDividerColor = ta.getColor(R.styleable.TitleBar_bottomDividerColor, Color.GRAY)
-        }
+        )
+        setNavigationIcon(ta.getDrawable(R.styleable.TitleBar_navigationIcon))
+        setNavigationContentDescription(ta.getText(R.styleable.TitleBar_navigationContentDescription))
 
         if (ta.hasValue(R.styleable.TitleBar_popupTheme)) {
-            popupTheme = ta.getResourceId(R.styleable.TitleBar_popupTheme, 0)
+            setPopupTheme(ta.getResourceId(R.styleable.TitleBar_popupTheme, 0))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_menu)) {
             inflateMenu(ta.getResourceId(R.styleable.TitleBar_menu, 0))
         }
 
+        bottomDividerHeight =
+            ta.getDimensionPixelSize(R.styleable.TitleBar_bottomDividerHeight, 1)
+        bottomDividerColor = ta.getColor(R.styleable.TitleBar_bottomDividerColor, Color.GRAY)
+        if (ta.hasValue(R.styleable.TitleBar_showBottomDivider)) {
+            showBottomDivider =
+                ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
+        }
+
         ta.recycle()
     }
 
 }
+
+var TitleBar.title: CharSequence?
+    get() = getTitle()
+    set(value) {
+        setTitle(value)
+    }
+
+var TitleBar.subtitle: CharSequence?
+    get() = getSubtitle()
+    set(value) {
+        setSubtitle(value)
+    }
+
+var TitleBar.titleTextColor: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setTitleTextColor(value)
+    }
+
+var TitleBar.subtitleTextColor: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setSubtitleTextColor(value)
+    }
+
+var TitleBar.titleTextAppearance: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setTitleTextAppearance(value)
+    }
+
+var TitleBar.subtitleTextAppearance: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setSubtitleTextAppearance(value)
+    }
+
+var TitleBar.navigationIcon: Drawable?
+    get() = getNavigationIcon()
+    set(value) {
+        setNavigationIcon(value)
+    }
+
+var TitleBar.navigationIconTint: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setNavigationIconTint(value)
+    }
+
+var TitleBar.navigationIconTintMode: PorterDuff.Mode
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setNavigationIconTintMode(value)
+    }
+
+var TitleBar.navigationContentDescription: CharSequence?
+    get() = getNavigationContentDescription()
+    set(value) {
+        setNavigationContentDescription(value)
+    }
 
 class TitleToolbar @JvmOverloads constructor(
     context: Context,
@@ -404,7 +422,15 @@ class TitleToolbar @JvmOverloads constructor(
     private var titleTextView: TextView? = null
     private var subtitleTextView: TextView? = null
 
-    private var isCustomTitleStyle: Boolean = false
+    private var navigationDrawableTint: ColorStateList? = null
+    private var navigationDrawableTintMode: PorterDuff.Mode? = null
+    private var navigationContentDescriptionText: CharSequence? = null
+
+    private var navigationButtonView: ImageButton? = null
+    private var navigationWidth: Int = 0
+
+    private var isDefaultTitle: Boolean = true
+    private var isDefaultNavigation: Boolean = true
 
     private var displayShowCustomTitleEnabled: Boolean = false
 
@@ -427,35 +453,91 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
+    override fun setNavigationIcon(icon: Drawable?) {
+        ensureNavigationButtonView()
+
+        if (navigationButtonView != null) {
+            navigationButtonView!!.setImageDrawable(maybeTintNavigationIcon(icon))
+        } else {
+            super.setNavigationIcon(maybeTintNavigationIcon(icon))
+        }
+    }
+
+    override fun getNavigationIcon(): Drawable? {
+        return navigationButtonView?.drawable ?: super.getNavigationIcon()
+    }
+
+    override fun setNavigationOnClickListener(listener: OnClickListener?) {
+        ensureNavigationButtonView()
+
+        if (navigationButtonView != null) {
+            navigationButtonView!!.setOnClickListener(listener)
+        } else {
+            super.setNavigationOnClickListener(listener)
+        }
+    }
+
+    fun setNavigationIconTint(color: ColorStateList?) {
+        navigationDrawableTint = color
+
+        val drawable = navigationIcon
+        if (drawable != null) {
+            navigationIcon = drawable
+        }
+    }
+
+    fun setNavigationIconTint(@ColorInt color: Int) {
+        setNavigationIconTint(ColorStateList.valueOf(color))
+    }
+
+    fun setNavigationIconTintMode(mode: PorterDuff.Mode) {
+        navigationDrawableTintMode = mode
+
+        val drawable = navigationIcon
+        if (drawable != null) {
+            navigationIcon = drawable
+        }
+    }
+
+    override fun setNavigationContentDescription(description: CharSequence?) {
+        if (description.isNullOrEmpty()) {
+            return
+        }
+
+        ensureNavigationButtonView()
+
+        if (navigationButtonView != null) {
+            navigationButtonView!!.contentDescription = description
+        } else {
+            super.setNavigationContentDescription(description)
+        }
+    }
+
+    override fun getNavigationContentDescription(): CharSequence? {
+        return navigationButtonView?.contentDescription ?: super.getNavigationContentDescription()
+    }
+
+    override fun getCurrentContentInsetStart(): Int {
+        return super.getCurrentContentInsetStart() - navigationWidth
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val navButtonView = navigationButtonView
+        if (navButtonView != null) {
+            measureChildWithMargins(navButtonView, widthMeasureSpec, 0, heightMeasureSpec, 0)
+            val lp = navButtonView.layoutParams as MarginLayoutParams
+            val hMargins =
+                MarginLayoutParamsCompat.getMarginStart(lp) + MarginLayoutParamsCompat.getMarginEnd(lp)
+            navigationWidth = navButtonView.measuredWidth + hMargins
+        }
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
     override fun setTitle(title: CharSequence?) {
         if (displayShowCustomTitleEnabled) {
             if (!title.isNullOrEmpty()) {
-                if (titleTextView == null) {
-                    isCustomTitleStyle = true
-                    titleTextView = findViewById(R.id.title)
-                }
-
-                if (titleTextView == null) {
-                    val textView = AppCompatTextView(context)
-                    textView.setSingleLine()
-                    textView.ellipsize = TextUtils.TruncateAt.END
-                    if (titleTextAppearance != 0) {
-                        TextViewCompat.setTextAppearance(
-                            textView,
-                            titleTextAppearance
-                        )
-                    }
-
-                    if (titleTextColor != null) {
-                        textView.setTextColor(titleTextColor!!)
-                    }
-
-                    textView.layoutParams = LayoutParams(-2, -2).apply {
-                        gravity = Gravity.CENTER
-                    }
-
-                    titleTextView = textView
-                }
+                ensureTitleTextView()
 
                 if (!isToolbarChild(titleTextView)) {
                     addView(titleTextView)
@@ -484,7 +566,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextAppearance(context: Context?, resId: Int) {
         titleTextAppearance = resId
         if (displayShowCustomTitleEnabled) {
-            if (titleTextView != null && !isCustomTitleStyle) {
+            if (titleTextView != null && isDefaultTitle) {
                 TextViewCompat.setTextAppearance(titleTextView!!, resId)
             }
         } else {
@@ -495,7 +577,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextColor(color: ColorStateList) {
         titleTextColor = color
         if (displayShowCustomTitleEnabled) {
-            if (titleTextView != null && !isCustomTitleStyle) {
+            if (titleTextView != null && isDefaultTitle) {
                 titleTextView!!.setTextColor(color)
             }
         } else {
@@ -508,41 +590,61 @@ class TitleToolbar @JvmOverloads constructor(
     }
 
     fun setOnTitleClickListener(listener: OnClickListener?) {
-        tryGetTitleTextView {
-            setOnClickListener(listener)
-        }
+        ensureTitleTextView()
+        titleTextView?.setOnClickListener(listener)
     }
 
     fun setOnSubtitleClickListener(listener: OnClickListener?) {
-        tryGetSubtitleTextView {
-            setOnClickListener(listener)
-        }
+        ensureSubtitleTextView()
+        subtitleTextView?.setOnClickListener(listener)
     }
 
     private fun isToolbarChild(view: TextView?): Boolean {
         return view != null && contains(view)
     }
 
-    private fun tryGetTitleTextView(block: TextView.() -> Unit) {
-        if (titleTextView != null) {
-            titleTextView!!.block()
-            return
-        }
+    private fun ensureTitleTextView() {
+        if (displayShowCustomTitleEnabled) {
+            if (titleTextView == null) {
+                isDefaultTitle = false
+                titleTextView = findViewById(R.id.title)
+            }
 
-        try {
-            val field = Toolbar::class.java.getDeclaredField("mTitleTextView")
-            field.isAccessible = true
-            titleTextView = field.get(this) as TextView?
-            titleTextView?.block()
-        } catch (_: NoSuchFieldException) {
-        } catch (_: IllegalArgumentException) {
-        } catch (_: IllegalAccessException) {
+            if (titleTextView == null) {
+                val textView = AppCompatTextView(context)
+                textView.setSingleLine()
+                textView.ellipsize = TextUtils.TruncateAt.END
+                if (titleTextAppearance != 0) {
+                    TextViewCompat.setTextAppearance(
+                        textView,
+                        titleTextAppearance
+                    )
+                }
+
+                if (titleTextColor != null) {
+                    textView.setTextColor(titleTextColor!!)
+                }
+
+                textView.layoutParams = LayoutParams(-2, -2).apply {
+                    gravity = Gravity.CENTER
+                }
+
+                titleTextView = textView
+            }
+        } else if (titleTextView == null) {
+            try {
+                val field = Toolbar::class.java.getDeclaredField("mTitleTextView")
+                field.isAccessible = true
+                titleTextView = field.get(this) as TextView?
+            } catch (_: NoSuchFieldException) {
+            } catch (_: IllegalArgumentException) {
+            } catch (_: IllegalAccessException) {
+            }
         }
     }
 
-    private fun tryGetSubtitleTextView(block: TextView.() -> Unit) {
+    private fun ensureSubtitleTextView() {
         if (subtitleTextView != null) {
-            subtitleTextView!!.block()
             return
         }
 
@@ -550,11 +652,43 @@ class TitleToolbar @JvmOverloads constructor(
             val field = Toolbar::class.java.getDeclaredField("mSubtitleTextView")
             field.isAccessible = true
             subtitleTextView = field.get(this) as TextView?
-            subtitleTextView?.block()
         } catch (_: NoSuchFieldException) {
         } catch (_: IllegalArgumentException) {
         } catch (_: IllegalAccessException) {
         }
+    }
+
+    private fun ensureNavigationButtonView() {
+        if (navigationButtonView != null) {
+            return
+        }
+
+        val buttonView = findViewById<View>(R.id.navigation) ?: return
+
+        check(buttonView is ImageButton) {
+            "Navigation View must be a ImageButton"
+        }
+
+        isDefaultNavigation = false
+        navigationButtonView = buttonView
+    }
+
+    private fun maybeTintNavigationIcon(drawable: Drawable?): Drawable? {
+        return if (drawable != null) {
+            DrawableCompat.wrap(drawable.mutate()).also {
+                DrawableCompat.setTintList(it, navigationDrawableTint)
+                val tintMode = navigationDrawableTintMode
+                if (tintMode != null) {
+                    DrawableCompat.setTintMode(it, tintMode)
+                }
+            }
+        } else {
+            drawable
+        }
+    }
+
+    companion object {
+        private const val UNDEFINED = Int.MIN_VALUE
     }
 
     init {
@@ -575,7 +709,54 @@ class TitleToolbar @JvmOverloads constructor(
             setTitleTextColor(color)
         }
 
+        navigationDrawableTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
+        navigationDrawableTintMode = intToTintMode(
+            ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 9)
+        )
+        val drawable = ta.getDrawable(R.styleable.TitleToolbar_navigationIcon)
+        if (drawable != null) {
+            navigationIcon = drawable
+        }
+
+        navigationContentDescription = ta.getText(R.styleable.TitleToolbar_navigationContentDescription)
+
         ta.recycle()
     }
 
+}
+
+var TitleToolbar.navigationIconTint: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setNavigationIconTint(value)
+    }
+
+var TitleToolbar.navigationIconTintMode: PorterDuff.Mode
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setNavigationIconTintMode(value)
+    }
+
+private fun intToTintMode(value: Int): PorterDuff.Mode {
+    return when (value) {
+        0 -> PorterDuff.Mode.CLEAR
+        1 -> PorterDuff.Mode.SRC
+        2 -> PorterDuff.Mode.DST
+        3 -> PorterDuff.Mode.SRC_OVER
+        4 -> PorterDuff.Mode.DST_OVER
+        5 -> PorterDuff.Mode.SRC_IN
+        6 -> PorterDuff.Mode.DST_IN
+        7 -> PorterDuff.Mode.SRC_OUT
+        8 -> PorterDuff.Mode.DST_OUT
+        9 -> PorterDuff.Mode.SRC_ATOP
+        10 -> PorterDuff.Mode.DST_ATOP
+        11 -> PorterDuff.Mode.XOR
+        16 -> PorterDuff.Mode.DARKEN
+        17 -> PorterDuff.Mode.LIGHTEN
+        13 -> PorterDuff.Mode.MULTIPLY
+        14 -> PorterDuff.Mode.SCREEN
+        12 -> PorterDuff.Mode.ADD
+        15 -> PorterDuff.Mode.OVERLAY
+        else -> PorterDuff.Mode.CLEAR
+    }
 }

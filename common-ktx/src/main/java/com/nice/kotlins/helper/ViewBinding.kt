@@ -26,12 +26,7 @@ inline fun <reified VB : ViewBinding> Dialog.viewBindings() =
     lazy { viewBinding<VB>(layoutInflater) }
 
 inline fun <reified VB : ViewBinding> ViewGroup.viewBindings(attachToParent: Boolean = true) =
-    lazy { viewBinding<VB>(LayoutInflater.from(context), this, attachToParent) }
-
-inline fun <reified VB : ViewBinding> viewBinding(
-    parent: ViewGroup,
-    attachToParent: Boolean = false
-) = viewBinding<VB>(LayoutInflater.from(parent.context), parent, attachToParent)
+    lazy { viewBinding<VB>(this, attachToParent) }
 
 inline fun <reified VB : ViewBinding> viewBinding(
     inflater: LayoutInflater,
@@ -39,18 +34,23 @@ inline fun <reified VB : ViewBinding> viewBinding(
     attachToParent: Boolean = false
 ) = viewBinding(VB::class.java, inflater, parent, attachToParent)
 
+inline fun <reified VB : ViewBinding> viewBinding(
+    parent: ViewGroup,
+    attachToParent: Boolean = false
+) = viewBinding<VB>(LayoutInflater.from(parent.context), parent, attachToParent)
+
 inline fun <reified VB : ViewBinding> viewBinding(view: View) =
     viewBinding(VB::class.java, view)
 
-fun ViewBinding.attach(activity: Activity) = activity.setContentView(root)
+fun ViewBinding.installTo(activity: Activity) = activity.setContentView(root)
 
-fun ViewBinding.attach(fragment: NiceFragment) = fragment.setContentView(root)
+fun ViewBinding.installTo(fragment: NiceFragment) = fragment.setContentView(root)
 
-fun ViewBinding.attach(parent: ViewGroup) = parent.addView(root)
+fun ViewBinding.installTo(parent: ViewGroup) = parent.addView(root)
 
-fun ViewBinding.attach(dialog: Dialog) = dialog.setContentView(root)
+fun ViewBinding.installTo(dialog: Dialog) = dialog.setContentView(root)
 
-fun ViewBinding.attach(popupWindow: PopupWindow) {
+fun ViewBinding.installTo(popupWindow: PopupWindow) {
     popupWindow.contentView = root
 }
 
@@ -74,23 +74,23 @@ internal fun <VB : ViewBinding> viewBinding(clazz: Class<VB>, view: View) =
     clazz.getMethod("bind", View::class.java)
         .invoke(null, view) as VB
 
-inline fun <reified VB : ViewBinding> withViewBinding(
+inline fun <reified VB : ViewBinding> bindingView(
     inflater: LayoutInflater,
     block: VB.() -> Unit
 ): View = viewBinding<VB>(inflater).apply(block).root
 
-inline fun <reified VB : ViewBinding> withViewBinding(
-    parent: ViewGroup,
-    attachToParent: Boolean = false,
-    block: VB.() -> Unit
-): View = viewBinding<VB>(parent, attachToParent).apply(block).root
-
-inline fun <reified VB : ViewBinding> withViewBinding(
+inline fun <reified VB : ViewBinding> bindingView(
     inflater: LayoutInflater,
     parent: ViewGroup?,
     attachToParent: Boolean,
     block: VB.() -> Unit
 ): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(
+    parent: ViewGroup,
+    attachToParent: Boolean = false,
+    block: VB.() -> Unit
+): View = viewBinding<VB>(parent, attachToParent).apply(block).root
 
 class FragmentViewBindingLazy<VB : ViewBinding>(
     private val fragment: Fragment,

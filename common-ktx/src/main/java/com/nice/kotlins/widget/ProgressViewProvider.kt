@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import com.nice.kotlins.R
 import com.nice.kotlins.databinding.DialogProgressViewBinding
 import com.nice.kotlins.helper.activity
-import com.nice.kotlins.helper.attach
+import com.nice.kotlins.helper.installTo
 import com.nice.kotlins.helper.viewBinding
 import com.nice.kotlins.helper.weak
 
@@ -79,7 +79,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         animationStyle = R.style.Animation_Progress_Popup
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        binding.attach(this)
+        binding.installTo(this)
     }
 
     override fun showProgress(message: CharSequence?) {

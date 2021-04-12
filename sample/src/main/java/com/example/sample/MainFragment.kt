@@ -9,7 +9,7 @@ import com.nice.kotlins.adapter.plusAssign
 import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.app.subtitle
 import com.nice.kotlins.app.title
-import com.nice.kotlins.helper.attach
+import com.nice.kotlins.helper.installTo
 import com.nice.kotlins.helper.toast
 import com.nice.kotlins.helper.viewBindings
 
@@ -23,7 +23,7 @@ class MainFragment : NiceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.attach(this)
+        binding.installTo(this)
 
         title = "Hello World"
         subtitle = "Bye World"

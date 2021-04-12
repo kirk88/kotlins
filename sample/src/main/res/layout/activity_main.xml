@@ -12,8 +12,11 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
+        app:customLayout="@layout/layout_custom_title_view"
         app:displayShowCustomTitleEnabled="true"
         app:provideSupportActionBar="true"
+        app:displayShowHomeAsUpEnabled="true"
+        app:displayShowHomeEnabled="true"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:statusBarForeground="@android:color/holo_red_light"
@@ -75,6 +78,7 @@
                 android:textSize="50sp"
                 android:textStyle="bold" />
 
+
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
@@ -86,5 +90,9 @@
 
     </com.nice.kotlins.widget.LoaderLayout>
 
-
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:id="@+id/checker"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

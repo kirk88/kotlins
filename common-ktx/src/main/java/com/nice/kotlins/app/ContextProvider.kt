@@ -9,7 +9,7 @@ import android.net.Uri
 class ContextProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        applicationContext = context!!
+        ContextHolder.initContext(context!!)
         return true
     }
 
@@ -36,7 +36,16 @@ class ContextProvider : ContentProvider() {
 
 }
 
-private lateinit var applicationContext: Context
+internal object ContextHolder {
+
+    lateinit var applicationContext: Context
+
+    fun initContext(context: Context) {
+        applicationContext = context.applicationContext
+    }
+
+}
+
 
 val appContext: Context
-    get() = applicationContext
+    get() = ContextHolder.applicationContext
