@@ -61,15 +61,15 @@ private open class SqlColumnElementImpl(override val name: String, override val 
 private class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
     SqlColumnProperty {
 
-    override val counter: SqlColumnProperty = SqlFunctionPropertyImpl("count(${this.name})")
-    override val maximum: SqlColumnProperty = SqlFunctionPropertyImpl("max(${this.name})")
-    override val minimum: SqlColumnProperty = SqlFunctionPropertyImpl("min(${this.name})")
-    override val average: SqlColumnProperty = SqlFunctionPropertyImpl("avg(${this.name})")
-    override val summation: SqlColumnProperty = SqlFunctionPropertyImpl("sum(${this.name})")
-    override val absolute: SqlColumnProperty = SqlFunctionPropertyImpl("abs(${this.name})")
-    override val upper: SqlColumnProperty = SqlFunctionPropertyImpl("upper(${this.name})")
-    override val lower: SqlColumnProperty = SqlFunctionPropertyImpl("lower(${this.name})")
-    override val length: SqlColumnProperty = SqlFunctionPropertyImpl("length(${this.name})")
+    override val counter: SqlColumnProperty = SqlFunctionPropertyImpl("count(${name})")
+    override val maximum: SqlColumnProperty = SqlFunctionPropertyImpl("max(${name})")
+    override val minimum: SqlColumnProperty = SqlFunctionPropertyImpl("min(${name})")
+    override val average: SqlColumnProperty = SqlFunctionPropertyImpl("avg(${name})")
+    override val summation: SqlColumnProperty = SqlFunctionPropertyImpl("sum(${name})")
+    override val absolute: SqlColumnProperty = SqlFunctionPropertyImpl("abs(${name})")
+    override val upper: SqlColumnProperty = SqlFunctionPropertyImpl("upper(${name})")
+    override val lower: SqlColumnProperty = SqlFunctionPropertyImpl("lower(${name})")
+    override val length: SqlColumnProperty = SqlFunctionPropertyImpl("length(${name})")
 
     override fun render(): String = "$name ${type.render()}"
 
@@ -110,4 +110,4 @@ private class SqlFunctionPropertyImpl(override val name: String) :
 
 }
 
-infix fun String.of(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
+infix fun String.with(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)

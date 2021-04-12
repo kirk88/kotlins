@@ -608,7 +608,6 @@ fun requestPairsOf(
     return RequestPairs<String, Any?>().apply {
         if (copyFrom is RequestPairs<*, *>) {
             for ((key, value) in copyFrom) {
-                if (key == null) continue
                 put(key.toString(), value)
             }
         } else {

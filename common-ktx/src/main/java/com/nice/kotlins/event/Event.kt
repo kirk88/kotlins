@@ -60,7 +60,7 @@ open class Event(
 }
 
 fun <T : Any> Event.getValue(key: String): T = requireNotNull(get(key)) {
-    "Key $key is missing in the extras of event"
+    "Key $key is missing in the event"
 }
 
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue

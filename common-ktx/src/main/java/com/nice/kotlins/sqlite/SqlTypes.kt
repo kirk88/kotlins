@@ -53,7 +53,7 @@ fun FOREIGN_KEY(
     referenceColumn: String,
     vararg actions: SqlTypeModifier
 ): SqlColumnProperty {
-    return "" of SqlTypeImpl(
+    return "" with SqlTypeImpl(
         "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${
             actions.map { it.modifier }.joinToString("") { " $it" }
         }"
