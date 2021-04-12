@@ -459,7 +459,7 @@ class TitleToolbar @JvmOverloads constructor(
         ensureNavigationButtonView()
 
         if (navigationButtonView != null) {
-            navigationButtonView!!.setImageDrawable(maybeTintNavigationIcon(icon))
+            navigationButtonView!!.setImageDrawable(icon)
         } else {
             super.setNavigationIcon(maybeTintNavigationIcon(icon))
         }
