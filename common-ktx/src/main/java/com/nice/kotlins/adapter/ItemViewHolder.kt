@@ -69,11 +69,6 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         return childView as T
     }
 
-    fun <T : View> requireViewById(@IdRes id: Int): T {
-        return findViewById(id)
-            ?: throw IllegalArgumentException("ID does not reference a View inside this ViewHolder")
-    }
-
 }
 
 operator fun <T : View> ItemViewHolder.get(@IdRes id: Int): T = requireNotNull(findViewById(id)) {
