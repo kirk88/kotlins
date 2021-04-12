@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.event.livebus
 
 @PublishedApi
