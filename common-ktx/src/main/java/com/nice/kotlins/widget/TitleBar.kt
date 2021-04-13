@@ -427,7 +427,8 @@ class TitleToolbar @JvmOverloads constructor(
     defStyleAttr: Int = R.attr.titleToolbarStyle
 ) : Toolbar(
     context,
-    attrs
+    attrs,
+    defStyleAttr
 ) {
 
     private var titleText: CharSequence? = null
