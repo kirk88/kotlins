@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MaterialComponents.DayNight.DarkActionBar.Overlay">
+    <style name="Theme.MaterialComponents.Light.DarkActionBar.Overlay">
         <item name="titleBarStyle">@style/Widget.Design.TitleBar</item>
         <item name="titleToolbarStyle">@style/Widget.AppCompat.TitleToolbar</item>
     </style>
+    
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar.Overlay" parent="Theme.MaterialComponents.Light.DarkActionBar.Overlay"/>
 
     <style name="Widget.Design.TitleBar" parent="Widget.Design.AppBarLayout" />
 
