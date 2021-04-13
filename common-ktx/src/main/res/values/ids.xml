@@ -13,6 +13,7 @@
     <item name="loading_text" type="id" />
 
     <item name="title" type="id" />
+    <item name="subtitle" type="id" />
     <item name="navigation" type="id" />
     <item name="toolbar" type="id" />
 

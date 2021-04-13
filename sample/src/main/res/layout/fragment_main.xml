@@ -11,7 +11,6 @@
         app:provideSupportActionBar="true"
         app:displayShowHomeEnabled="true"
         app:displayShowHomeAsUpEnabled="true"
-        app:displayShowCustomTitleEnabled="true"
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"/>
 

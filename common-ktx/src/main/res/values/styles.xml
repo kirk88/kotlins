@@ -6,9 +6,9 @@
     <style name="LoaderLayout" />
 
     <style name="LoaderLayout.Style">
-        <item name="emptyLayout">@layout/loader_layout_empty</item>
-        <item name="loadingLayout">@layout/loader_layout_loading</item>
-        <item name="errorLayout">@layout/loader_layout_error</item>
+        <item name="emptyLayout">@layout/abc_loader_layout_empty</item>
+        <item name="loadingLayout">@layout/abc_loader_layout_loading</item>
+        <item name="errorLayout">@layout/abc_loader_layout_error</item>
 
         <item name="emptyImage">@null</item>
         <item name="emptyText">@string/loader_empty_tip</item>
@@ -52,9 +52,5 @@
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">16sp</item>
     </style>
-
-    <style name="Widget.Design.TitleBar" parent="Widget.Design.AppBarLayout" />
-
-    <style name="Widget.AppCompat.TitleToolbar" parent="Widget.AppCompat.Toolbar"/>
 
 </resources>

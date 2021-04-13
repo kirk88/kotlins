@@ -5,16 +5,15 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.nice.kotlins.R
-import com.nice.kotlins.databinding.DialogProgressViewBinding
 import com.nice.kotlins.helper.activity
-import com.nice.kotlins.helper.installTo
-import com.nice.kotlins.helper.viewBinding
+import com.nice.kotlins.helper.findViewById
+import com.nice.kotlins.helper.ifNullOrEmpty
 import com.nice.kotlins.helper.weak
 
 class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
@@ -50,8 +49,6 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
 
     private val view: View? by weak { parent.rootView }
 
-    private val binding: DialogProgressViewBinding = viewBinding(LayoutInflater.from(parent.context))
-
     private var messageText: CharSequence? = null
 
     private var startTime: Long = -1L
@@ -79,24 +76,24 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         animationStyle = R.style.Animation_Progress_Popup
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        binding.installTo(this)
+        contentView = View.inflate(parent.context, R.layout.abc_dialog_progress_view, null)
     }
 
     override fun showProgress(message: CharSequence?) {
-        messageText = message
-        delayShow()
+        delayShow(message)
     }
 
     override fun showProgress(messageId: Int) {
-        messageText = view?.context?.getText(messageId)
-        delayShow()
+        delayShow(view?.context?.getText(messageId))
     }
 
     override fun dismissProgress() {
         delayHide()
     }
 
-    private fun delayShow() {
+    private fun delayShow(message: CharSequence?) {
+        messageText = message
+
         startTime = -1L
         isDismissed = false
         removeCallbacks(hideRunnable)
@@ -123,8 +120,10 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     }
 
     private fun show() {
-        binding.message.apply {
-            text = messageText ?: context.getText(R.string.loader_progress_tip)
+        findViewById<TextView>(R.id.message)?.apply {
+            text = messageText.ifNullOrEmpty {
+                context.getText(R.string.loader_progress_tip)
+            }
         }
         view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
     }

@@ -4,11 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
+import com.example.sample.databinding.LayoutCustomTitleViewBinding
 import com.nice.kotlins.app.NiceActivity
-import com.nice.kotlins.helper.installTo
-import com.nice.kotlins.helper.onClick
-import com.nice.kotlins.helper.startActivity
-import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
@@ -26,13 +24,10 @@ class MainActivity : NiceActivity() {
         super.onCreate(savedInstanceState)
         binding.installTo(this)
 
-        title = "我是谁"
-
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
 
-        Log.e("TAGTAG", "title: ${titleBar.title}")
 
         fab.onClick {
             startActivity<SecondActivity>()
@@ -70,6 +65,10 @@ class MainActivity : NiceActivity() {
             delay(1000)
 
             loader.showError()
+
+            delay(1000)
+
+            loader.showContent()
         }
 
     }

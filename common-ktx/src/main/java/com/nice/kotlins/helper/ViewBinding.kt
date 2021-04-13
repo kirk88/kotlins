@@ -42,6 +42,9 @@ inline fun <reified VB : ViewBinding> viewBinding(
 inline fun <reified VB : ViewBinding> viewBinding(view: View) =
     viewBinding(VB::class.java, view)
 
+inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
+    viewBinding(VB::class.java, binding.root)
+
 fun ViewBinding.installTo(activity: Activity) = activity.setContentView(root)
 
 fun ViewBinding.installTo(fragment: NiceFragment) = fragment.setContentView(root)

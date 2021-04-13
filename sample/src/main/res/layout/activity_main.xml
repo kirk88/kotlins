@@ -13,14 +13,13 @@
         android:fitsSystemWindows="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:customLayout="@layout/layout_custom_title_view"
-        app:displayShowCustomTitleEnabled="true"
         app:provideSupportActionBar="true"
         app:displayShowHomeAsUpEnabled="true"
         app:displayShowHomeEnabled="true"
+        app:title="Title"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
-        app:statusBarForeground="@android:color/holo_red_light"
-        app:title="Hello World" />
+        app:statusBarForeground="@android:color/holo_red_light" />
 
 
 <!--    <androidx.core.widget.NestedScrollView-->

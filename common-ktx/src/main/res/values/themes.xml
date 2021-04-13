@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar.Overlay">
+        <item name="titleBarStyle">@style/Widget.Design.TitleBar</item>
+        <item name="titleToolbarStyle">@style/Widget.AppCompat.TitleToolbar</item>
+    </style>
+
+    <style name="Widget.Design.TitleBar" parent="Widget.Design.AppBarLayout" />
+
+    <style name="Widget.MaterialComponents.TitleBar.Primary" parent="Widget.MaterialComponents.AppBarLayout.Primary" />
+
+    <style name="Widget.MaterialComponents.TitleBar.PrimarySurface" parent="Widget.MaterialComponents.AppBarLayout.PrimarySurface" />
+
+    <style name="Widget.MaterialComponents.TitleBar.Surface" parent="Widget.MaterialComponents.AppBarLayout.Surface" />
+
+    <style name="Widget.AppCompat.TitleToolbar" parent="Widget.AppCompat.Toolbar" />
+
+    <style name="Widget.MaterialComponents.TitleToolbar" parent="Widget.MaterialComponents.Toolbar" />
+
+    <style name="Widget.MaterialComponents.TitleToolbar.Primary" parent="Widget.MaterialComponents.Toolbar.Primary" />
+
+    <style name="Widget.MaterialComponents.TitleToolbar.PrimarySurface" parent="Widget.MaterialComponents.Toolbar.PrimarySurface" />
+
+    <style name="Widget.MaterialComponents.TitleToolbar.Surface" parent="Widget.MaterialComponents.Toolbar.Surface" />
+
+</resources>

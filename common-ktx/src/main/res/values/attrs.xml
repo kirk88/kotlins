@@ -68,19 +68,19 @@
 
     <declare-styleable name="TitleBar">
         <attr name="customLayout" format="reference" />
+        <attr name="title" />
         <attr name="titleTextAppearance" />
         <attr name="titleTextColor" />
+        <attr name="subtitle" />
         <attr name="subtitleTextAppearance" />
         <attr name="subtitleTextColor" />
         <attr name="popupTheme" />
-        <attr name="title" />
-        <attr name="subtitle" />
         <attr name="menu" />
         <attr name="navigationIcon" />
         <attr name="navigationContentDescription" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />
-        <attr name="displayShowCustomTitleEnabled" format="boolean" />
+        <attr name="displayShowTitleEnabled" format="boolean" />
         <attr name="displayShowHomeEnabled" format="boolean" />
         <attr name="displayShowHomeAsUpEnabled" format="boolean" />
         <attr name="showBottomDivider" format="enum">
@@ -93,8 +93,6 @@
         <attr name="provideSupportActionBar" format="boolean" />
     </declare-styleable>
 
-    <attr name="navigationIcon" format="reference" />
-    <attr name="navigationContentDescription" format="reference|string" />
     <attr name="navigationIconTint" format="color|reference" />
     <attr name="navigationIconTintMode" format="enum">
         <enum name="src_over" value="3" />
@@ -113,11 +111,6 @@
     </style>
 
     <declare-styleable name="TitleToolbar">
-        <attr name="title" />
-        <attr name="titleTextAppearance" />
-        <attr name="titleTextColor" />
-        <attr name="navigationIcon" />
-        <attr name="navigationContentDescription" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />
     </declare-styleable>
