@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.MaterialComponents.Overlay">
-        <item name="titleBarStyle">@style/Widget.MaterialComponents.TitleBar.Primary</item>
+        <item name="titleBarStyle">@style/Widget.MaterialComponents.TitleBar.Surface</item>
         <item name="titleToolbarStyle">@style/Widget.MaterialComponents.TitleToolbar</item>
     </style>
 

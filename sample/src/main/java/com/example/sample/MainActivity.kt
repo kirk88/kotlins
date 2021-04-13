@@ -28,6 +28,9 @@ class MainActivity : NiceActivity() {
         val titleBar = binding.titleBar
         val fab = binding.fab
 
+        titleBar.setOnTitleClickListener{
+            toast("click title")
+        }
 
         fab.onClick {
             startActivity<SecondActivity>()

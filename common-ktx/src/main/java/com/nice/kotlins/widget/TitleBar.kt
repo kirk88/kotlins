@@ -25,12 +25,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.MarginLayoutParamsCompat
+import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
 import com.nice.kotlins.R
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.nice.kotlins.helper.appCompatActivity
+import com.nice.kotlins.helper.isGone
 
 class TitleBar @JvmOverloads constructor(
     context: Context,
@@ -243,14 +245,13 @@ class TitleBar @JvmOverloads constructor(
 
         private fun getSupportActionBar(
             activity: AppCompatActivity,
-            toolbar: Toolbar,
-            showTitle: Boolean,
+            toolbar: TitleToolbar,
             showHome: Boolean,
             showHomeAsUp: Boolean
         ): ActionBar {
             activity.setSupportActionBar(toolbar)
             val actionBar = activity.supportActionBar!!
-            actionBar.setDisplayShowTitleEnabled(showTitle)
+            actionBar.setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
             actionBar.setDisplayShowHomeEnabled(showHome)
             actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
             return actionBar
@@ -272,21 +273,27 @@ class TitleBar @JvmOverloads constructor(
         }
 
         toolbar = findViewById<View>(R.id.toolbar).let {
-            check(it is TitleToolbar){
+            check(it is TitleToolbar) {
                 "The Toolbar not a TitleToolbar"
             }
             it
         }
 
+
+        toolbar.setDisplayShowTitleEnabled(
+            ta.getBoolean(
+                R.styleable.TitleBar_displayShowTitleEnabled,
+                true
+            )
+        )
+
         if (ta.getBoolean(R.styleable.TitleBar_provideSupportActionBar, false)) {
-            val showTitle = ta.getBoolean(R.styleable.TitleBar_displayShowTitleEnabled, true)
             val showHome = ta.getBoolean(R.styleable.TitleBar_displayShowHomeEnabled, false)
             val showHomeAsUp = ta.getBoolean(R.styleable.TitleBar_displayShowHomeAsUpEnabled, false)
             actionBar = context.appCompatActivity?.let {
                 getSupportActionBar(
                     it,
                     toolbar,
-                    showTitle,
                     showHome,
                     showHomeAsUp
                 )
@@ -324,12 +331,18 @@ class TitleBar @JvmOverloads constructor(
             setSubtitleTextColor(ta.getColorStateList(R.styleable.TitleBar_subtitleTextColor))
         }
 
-        setNavigationIconTint(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
-        setNavigationIconTintMode(
-            initTintMode(
-                ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
+        if (ta.hasValue(R.styleable.TitleBar_navigationIconTint)) {
+            setNavigationIconTint(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
+        }
+
+        if (ta.hasValue(R.styleable.TitleBar_navigationIconTintMode)) {
+            setNavigationIconTintMode(
+                initTintMode(
+                    ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
+                )
             )
-        )
+        }
+
         val navIcon = ta.getDrawable(R.styleable.TitleBar_navigationIcon)
         if (navIcon != null) {
             setNavigationIcon(navIcon)
@@ -450,15 +463,25 @@ class TitleToolbar @JvmOverloads constructor(
     private var navigationButtonView: ImageButton? = null
     private var navigationWidth: Int = 0
 
+    private var displayShowTitleEnabled: Boolean = true
+
     private var isInflateFinished: Boolean = false
 
     private fun initAfterInflate() {
+        ensureTitleTextView()
+        ensureSubtitleTextView()
+        ensureNavigationButtonView()
+
         if (!titleText.isNullOrEmpty()) {
             title = titleText
+        } else {
+            titleTextView?.isGone = true
         }
 
         if (!subtitleText.isNullOrEmpty()) {
             subtitle = subtitleText
+        } else {
+            subtitleTextView?.isGone = true
         }
 
         if (titleTextAppearance != 0) {
@@ -477,16 +500,10 @@ class TitleToolbar @JvmOverloads constructor(
             setSubtitleTextColor(subtitleTextColor!!)
         }
 
-        if (navigationIconTint != null) {
-            setNavigationIconTint(navigationIconTint)
-        }
-
-        if (navigationIconTintMode != null) {
-            setNavigationIconTintMode(navigationIconTintMode!!)
-        }
-
         if (navigationIcon != null) {
             setNavigationIcon(navigationIcon)
+        } else {
+            navigationButtonView?.isGone = true
         }
 
         if (!navigationContentDescription.isNullOrEmpty()) {
@@ -504,16 +521,14 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitle(title: CharSequence?) {
         titleText = title
 
-        if (!isInflateFinished) {
+        if (!isInflateFinished || !displayShowTitleEnabled) {
             return
         }
 
-        if (!title.isNullOrEmpty()) {
-            ensureTitleTextView()
-        }
-
-        if (titleTextView != null) {
-            titleTextView!!.text = title
+        val titleView = titleTextView
+        if (titleView != null) {
+            titleView.isGone = title.isNullOrEmpty()
+            titleView.text = title
         } else {
             super.setTitle(title)
         }
@@ -530,8 +545,11 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (titleTextView != null) {
-            TextViewCompat.setTextAppearance(titleTextView!!, resId)
+        val titleView = titleTextView
+        if (titleView != null) {
+            if (!isCustomView(titleView)) {
+                TextViewCompat.setTextAppearance(titleView, resId)
+            }
         } else {
             super.setTitleTextAppearance(context, resId)
         }
@@ -544,8 +562,11 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (titleTextView != null) {
-            titleTextView!!.setTextColor(color)
+        val titleView = titleTextView
+        if (titleView != null) {
+            if (!isCustomView(titleView)) {
+                titleView.setTextColor(color)
+            }
         } else {
             super.setTitleTextColor(color)
         }
@@ -554,15 +575,14 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitle(subtitle: CharSequence?) {
         subtitleText = subtitle
 
-        if (!isInflateFinished) {
+        if (!isInflateFinished || !displayShowTitleEnabled) {
             return
         }
 
-        if (!subtitle.isNullOrEmpty()) {
-            ensureSubtitleTextView()
-        }
-        if (subtitleTextView != null) {
-            subtitleTextView!!.text = subtitle
+        val subtitleView = subtitleTextView
+        if (subtitleView != null) {
+            subtitleView.isGone = subtitle.isNullOrEmpty()
+            subtitleView.text = subtitle
         } else {
             super.setSubtitle(subtitle)
         }
@@ -575,8 +595,11 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (subtitleTextView != null) {
-            TextViewCompat.setTextAppearance(subtitleTextView!!, resId)
+        val subtitleView = subtitleTextView
+        if (subtitleView != null) {
+            if (!isCustomView(subtitleView)) {
+                TextViewCompat.setTextAppearance(subtitleView, resId)
+            }
         } else {
             super.setSubtitleTextAppearance(context, resId)
         }
@@ -589,11 +612,34 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (subtitleTextView != null) {
-            subtitleTextView!!.setTextColor(color)
+        val subtitleView = subtitleTextView
+        if (subtitleView != null) {
+            if (!isCustomView(subtitleView)) {
+                subtitleView.setTextColor(color)
+            }
         } else {
             super.setSubtitleTextColor(color)
         }
+    }
+
+    fun setDisplayShowTitleEnabled(enabled: Boolean) {
+        if (displayShowTitleEnabled == enabled) {
+            return
+        }
+
+        displayShowTitleEnabled = enabled
+
+        if (enabled) {
+            title = titleText
+            subtitle = subtitleText
+        } else {
+            title = null
+            subtitle = null
+        }
+    }
+
+    fun isDisplayShowTitleEnabled(): Boolean {
+        return displayShowTitleEnabled
     }
 
     override fun setNavigationIcon(icon: Drawable?) {
@@ -603,10 +649,13 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        ensureNavigationButtonView()
-
-        if (navigationButtonView != null) {
-            navigationButtonView!!.setImageDrawable(icon)
+        val navButtonView = navigationButtonView
+        if (navButtonView != null) {
+            navButtonView.isGone = icon == null
+            navButtonView.setImageDrawable(
+                if (isCustomView(navButtonView)) icon
+                else maybeTintNavigationIcon(icon)
+            )
         } else {
             super.setNavigationIcon(maybeTintNavigationIcon(icon))
         }
@@ -619,9 +668,11 @@ class TitleToolbar @JvmOverloads constructor(
     fun setNavigationIconTint(color: ColorStateList?) {
         navigationIconTint = color
 
-        val drawable = navigationIcon
-        if (drawable != null) {
-            navigationIcon = drawable
+        if (!isCustomView(navigationButtonView)) {
+            val navIcon = getNavigationIcon()
+            if (navIcon != null) {
+                setNavigationIcon(navIcon)
+            }
         }
     }
 
@@ -632,9 +683,11 @@ class TitleToolbar @JvmOverloads constructor(
     fun setNavigationIconTintMode(mode: PorterDuff.Mode) {
         navigationIconTintMode = mode
 
-        val drawable = navigationIcon
-        if (drawable != null) {
-            navigationIcon = drawable
+        if (!isCustomView(navigationButtonView)) {
+            val navIcon = getNavigationIcon()
+            if (navIcon != null) {
+                setNavigationIcon(navIcon)
+            }
         }
     }
 
@@ -645,20 +698,17 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (!description.isNullOrEmpty()) {
-            ensureNavigationButtonView()
-        }
-
-        if (navigationButtonView != null) {
-            navigationButtonView!!.contentDescription = description
+        val navButtonView = navigationButtonView
+        if (navButtonView != null) {
+            if (!isCustomView(navButtonView)) {
+                navButtonView.contentDescription = description
+            }
         } else {
             super.setNavigationContentDescription(description)
         }
     }
 
     override fun setNavigationOnClickListener(listener: OnClickListener?) {
-        ensureNavigationButtonView()
-
         if (navigationButtonView != null) {
             navigationButtonView!!.setOnClickListener(listener)
         } else {
@@ -674,11 +724,29 @@ class TitleToolbar @JvmOverloads constructor(
         return super.getCurrentContentInsetStart() - navigationWidth
     }
 
+    override fun checkLayoutParams(p: ViewGroup.LayoutParams?): Boolean {
+        return super.checkLayoutParams(p) && p is LayoutParams
+    }
+
+    override fun generateLayoutParams(attrs: AttributeSet?): Toolbar.LayoutParams {
+        return LayoutParams(context, attrs)
+    }
+
+    override fun generateLayoutParams(p: ViewGroup.LayoutParams): Toolbar.LayoutParams {
+        return when (p) {
+            is LayoutParams -> LayoutParams(p)
+            is Toolbar.LayoutParams -> LayoutParams(p)
+            is ActionBar.LayoutParams -> LayoutParams(p)
+            is MarginLayoutParams -> LayoutParams(p)
+            else -> LayoutParams(p)
+        }
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val navButtonView = navigationButtonView
         if (navButtonView != null) {
             measureChildWithMargins(navButtonView, widthMeasureSpec, 0, heightMeasureSpec, 0)
-            val lp = navButtonView.layoutParams as ViewGroup.MarginLayoutParams
+            val lp = navButtonView.layoutParams as MarginLayoutParams
             val leftMargin = MarginLayoutParamsCompat.getMarginStart(lp)
             val rightMargin = MarginLayoutParamsCompat.getMarginEnd(lp)
             navigationWidth = navButtonView.measuredWidth + leftMargin + rightMargin
@@ -688,15 +756,11 @@ class TitleToolbar @JvmOverloads constructor(
     }
 
     fun setOnTitleClickListener(listener: OnClickListener?) {
-        ensureTitleTextView()
-
         val titleView = titleTextView ?: tryGetSystemTitleView("mTitleTextView")
         titleView?.setOnClickListener(listener)
     }
 
     fun setOnSubtitleClickListener(listener: OnClickListener?) {
-        ensureSubtitleTextView()
-
         val subtitleView = subtitleTextView ?: tryGetSystemTitleView("mSubtitleTextView")
         subtitleView?.setOnClickListener(listener)
     }
@@ -766,6 +830,40 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
+    private fun isCustomView(view: View?): Boolean {
+        if (view == null || !contains(view)) {
+            return false
+        }
+
+        val lp = view.layoutParams ?: return false
+
+        return lp is LayoutParams && lp.isCustom
+    }
+
+    class LayoutParams : Toolbar.LayoutParams {
+
+        internal var isCustom: Boolean = false
+
+        constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+            val ta = context.obtainStyledAttributes(attrs, R.styleable.TitleToolbar_Layout)
+            isCustom =
+                ta.getBoolean(R.styleable.TitleToolbar_Layout_layout_custom, false)
+            ta.recycle()
+        }
+
+        constructor(width: Int, height: Int) : super(width, height)
+        constructor(width: Int, height: Int, gravity: Int) : super(width, height, gravity)
+        constructor(gravity: Int) : super(gravity)
+        constructor(source: Toolbar.LayoutParams) : super(source)
+        constructor(source: ActionBar.LayoutParams) : super(source)
+        constructor(source: MarginLayoutParams) : super(source)
+        constructor(source: ViewGroup.LayoutParams) : super(source)
+        constructor(source: LayoutParams) : super(source) {
+            isCustom = source.isCustom
+        }
+
+    }
+
     init {
         val ta = TintTypedArray.obtainStyledAttributes(
             getContext(),
@@ -773,17 +871,12 @@ class TitleToolbar @JvmOverloads constructor(
             defStyleAttr, R.style.Widget_AppCompat_TitleToolbar
         )
 
-        if (ta.hasValue(R.styleable.TitleToolbar_navigationIconTint)) {
-            setNavigationIconTint(ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint))
-        }
-
-        if (ta.hasValue(R.styleable.TitleToolbar_navigationIconTintMode)) {
-            setNavigationIconTintMode(
-                initTintMode(
-                    ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 9)
-                )
-            )
-        }
+        displayShowTitleEnabled =
+            ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
+        navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
+        navigationIconTintMode = initTintMode(
+            ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 9)
+        )
 
         ta.recycle()
     }
@@ -824,6 +917,12 @@ var TitleToolbar.navigationIconTintMode: PorterDuff.Mode
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setNavigationIconTintMode(value)
+    }
+
+var TitleToolbar.displayShowTitleEnabled: Boolean
+    get() = isDisplayShowTitleEnabled()
+    set(value) {
+        setDisplayShowTitleEnabled(value)
     }
 
 private fun initTintMode(value: Int): PorterDuff.Mode {

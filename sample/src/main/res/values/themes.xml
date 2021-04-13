@@ -12,7 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-<!--        <item name="titleToolbarStyle">@style/Style.TitleToolbar</item>-->
+        <item name="titleToolbarStyle">@style/Style.TitleToolbar</item>
     </style>
 
     <style name="Theme.Kotlins.NoActionBar">
@@ -29,7 +29,7 @@
 
     <style name="Theme.Kotlins.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Style.TitleToolbar" parent="Widget.AppCompat.TitleToolbar">
+    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.TitleToolbar">
         <item name="contentInsetStartWithNavigation">64dp</item>
     </style>
 </resources>

@@ -10,7 +10,8 @@
         android:id="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:title="@string/app_name">
+        app:navigationIcon="@drawable/abc_vector_test"
+        app:navigationIconTint="@android:color/holo_red_light">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@id/navigation"
@@ -24,9 +25,9 @@
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:text="234"
+            app:layout_custom="true"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/holo_red_light"/>
 
 <!--        <TextView-->
 <!--            android:id="@id/subtitle"-->
