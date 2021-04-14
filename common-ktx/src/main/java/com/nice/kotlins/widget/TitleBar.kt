@@ -286,7 +286,7 @@ class TitleBar @JvmOverloads constructor(
 
     init {
         val ta = TintTypedArray.obtainStyledAttributes(
-            context,
+            getContext(),
             attrs, R.styleable.TitleBar,
             defStyleAttr, R.style.Widget_Design_TitleBar
         )
@@ -499,7 +499,7 @@ class TitleToolbar @JvmOverloads constructor(
     private var navigationWidth: Int = 0
 
     private var isLayoutInflated: Boolean = false
-    
+
     private var displayShowTitleEnabled: Boolean = true
 
     private var toolbarLayout: CollapsingToolbarLayout? = null
@@ -511,8 +511,9 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        if (toolbarLayout != null) {
+        if (isToolbarLayoutChild()) {
             toolbarLayout!!.title = title
+            titleTextView?.isGone = true
         } else {
             val titleView = titleTextView
             if (titleView != null) {
@@ -569,12 +570,16 @@ class TitleToolbar @JvmOverloads constructor(
             return
         }
 
-        val subtitleView = subtitleTextView
-        if (subtitleView != null) {
-            subtitleView.isGone = subtitle.isNullOrEmpty()
-            subtitleView.text = subtitle
+        if (isToolbarLayoutChild()) {
+            subtitleTextView?.isGone = true
         } else {
-            super.setSubtitle(subtitle)
+            val subtitleView = subtitleTextView
+            if (subtitleView != null) {
+                subtitleView.isGone = subtitle.isNullOrEmpty()
+                subtitleView.text = subtitle
+            } else {
+                super.setSubtitle(subtitle)
+            }
         }
     }
 
@@ -803,7 +808,16 @@ class TitleToolbar @JvmOverloads constructor(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
 
-        ensureToolbarLayout()
+        if (isToolbarLayoutChild()) {
+            if (!titleText.isNullOrEmpty()) {
+                toolbarLayout!!.title = titleText
+                titleTextView?.isGone = true
+            }
+
+            if (!subtitleText.isNullOrEmpty()) {
+                subtitleTextView?.isGone = true
+            }
+        }
     }
 
     fun setOnTitleClickListener(listener: OnClickListener?) {
@@ -816,16 +830,14 @@ class TitleToolbar @JvmOverloads constructor(
         subtitleView?.setOnClickListener(listener)
     }
 
-    private fun ensureToolbarLayout() {
+    private fun isToolbarLayoutChild(): Boolean {
         if (toolbarLayout != null) {
-            return
+            return true
         }
 
         toolbarLayout = parent as? CollapsingToolbarLayout
 
-        if (!titleText.isNullOrEmpty()) {
-            toolbarLayout?.title = titleText
-        }
+        return toolbarLayout != null
     }
 
     private fun ensureTitleTextView() {

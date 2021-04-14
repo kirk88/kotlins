@@ -22,37 +22,14 @@
         android:layout_height="?attr/actionBarSize"
         app:layout_collapseMode="pin"
         app:navigationIcon="@drawable/abc_vector_test"
-        app:navigationIconTint="@android:color/holo_red_light"
-        app:subtitle="@string/app_name"
-        app:title="@string/app_name">
+        app:navigationIconTint="@android:color/holo_red_light">
 
-        <!--            <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-        <!--                android:id="@id/navigation"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                app:tint="@null"-->
-        <!--                app:fabSize="mini"/>-->
-
-        <!--            <TextView-->
-        <!--                android:id="@id/title"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:textSize="22sp"-->
-        <!--                android:textStyle="bold"-->
-        <!--                app:layout_custom="true"-->
-        <!--                android:layout_gravity="center"-->
-        <!--                android:textColor="@android:color/holo_red_light"/>-->
-
-        <!--            <TextView-->
-        <!--                android:id="@id/subtitle"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:layout_marginStart="16dp"-->
-        <!--                android:textSize="18sp"-->
-        <!--                android:textStyle="bold"-->
-        <!--                android:text="@string/app_name"-->
-        <!--                app:layout_custom="true"-->
-        <!--                android:textColor="@android:color/white"/>-->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@id/navigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            app:tint="@null" />
 
     </com.nice.kotlins.widget.TitleToolbar>
 
