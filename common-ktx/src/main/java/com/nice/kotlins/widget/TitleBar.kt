@@ -11,7 +11,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -499,6 +498,8 @@ class TitleToolbar @JvmOverloads constructor(
     private var navigationButtonView: ImageButton? = null
     private var navigationWidth: Int = 0
 
+    private var isLayoutInflated: Boolean = false
+    
     private var displayShowTitleEnabled: Boolean = true
 
     private var toolbarLayout: CollapsingToolbarLayout? = null
@@ -506,13 +507,12 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitle(title: CharSequence?) {
         titleText = title
 
-        if (!isInLayout || !displayShowTitleEnabled) {
+        if (!isLayoutInflated || !displayShowTitleEnabled) {
             return
         }
 
         if (toolbarLayout != null) {
             toolbarLayout!!.title = title
-            Log.e("TAGTAG", "title: $title")
         } else {
             val titleView = titleTextView
             if (titleView != null) {
@@ -531,7 +531,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextAppearance(context: Context, resId: Int) {
         titleTextAppearance = resId
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -548,7 +548,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextColor(color: ColorStateList) {
         titleTextColor = color
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -565,7 +565,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitle(subtitle: CharSequence?) {
         subtitleText = subtitle
 
-        if (!isInLayout || !displayShowTitleEnabled) {
+        if (!isLayoutInflated || !displayShowTitleEnabled) {
             return
         }
 
@@ -581,7 +581,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitleTextAppearance(context: Context, resId: Int) {
         subtitleTextAppearance = resId
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -598,7 +598,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitleTextColor(color: ColorStateList) {
         subtitleTextColor = color
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -635,7 +635,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setNavigationIcon(icon: Drawable?) {
         navigationIcon = icon
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -692,7 +692,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setNavigationContentDescription(description: CharSequence?) {
         navigationContentDescription = description
 
-        if (!isInLayout) {
+        if (!isLayoutInflated) {
             return
         }
 
@@ -742,6 +742,7 @@ class TitleToolbar @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
+        isLayoutInflated = true
 
         ensureTitleTextView()
         ensureSubtitleTextView()
