@@ -802,15 +802,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
 
-        if (!changed) {
-            return
-        }
-
         ensureToolbarLayout()
-
-        if(toolbarLayout != null && !titleText.isNullOrEmpty()){
-            toolbarLayout!!.title = titleText
-        }
     }
 
     fun setOnTitleClickListener(listener: OnClickListener?) {
@@ -829,6 +821,10 @@ class TitleToolbar @JvmOverloads constructor(
         }
 
         toolbarLayout = parent as? CollapsingToolbarLayout
+
+        if (!titleText.isNullOrEmpty()) {
+            toolbarLayout?.title = titleText
+        }
     }
 
     private fun ensureTitleTextView() {
