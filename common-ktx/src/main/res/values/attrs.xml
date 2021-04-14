@@ -32,14 +32,14 @@
         <attr name="errorButtonBackground" format="reference" />
         <attr name="errorButtonVisible" format="boolean" />
 
-        <attr name="loadingProgressColor" />
+        <attr name="loadingProgressColor" format="color"/>
         <attr name="loadingProgressDrawable" format="reference" />
         <attr name="loadingText" format="string" />
         <attr name="loadingTextColor" format="color" />
         <attr name="loadingTextAppearance" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="TitleBar">
+    <declare-styleable name="TitleAppBar">
         <attr name="customLayout" format="reference" />
         <attr name="title" />
         <attr name="titleTextAppearance" />

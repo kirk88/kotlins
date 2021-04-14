@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.nice.kotlins.widget.TitleBar
+    <com.nice.kotlins.widget.TitleAppBar
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="180dp"
@@ -25,8 +25,7 @@
        <com.nice.kotlins.widget.LoaderLayout
            android:id="@+id/loader_layout"
            android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           >
+           android:layout_height="match_parent">
 
            <FrameLayout
                android:layout_width="match_parent"

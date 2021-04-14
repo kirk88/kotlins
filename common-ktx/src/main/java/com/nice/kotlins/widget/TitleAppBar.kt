@@ -38,10 +38,10 @@ import com.nice.kotlins.helper.appCompatActivity
 import com.nice.kotlins.helper.isGone
 import java.util.*
 
-class TitleBar @JvmOverloads constructor(
+class TitleAppBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.titleBarStyle
+    defStyleAttr: Int = R.attr.appBarLayoutStyle
 ) : AppBarLayout(
     context,
     attrs,
@@ -314,12 +314,12 @@ class TitleBar @JvmOverloads constructor(
     init {
         val ta = TintTypedArray.obtainStyledAttributes(
             getContext(),
-            attrs, R.styleable.TitleBar,
-            defStyleAttr, R.style.Widget_Design_TitleBar
+            attrs, R.styleable.TitleAppBar,
+            defStyleAttr, R.style.Widget_Design_AppBarLayout
         )
 
-        if (ta.hasValue(R.styleable.TitleBar_customLayout)) {
-            inflate(context, ta.getResourceId(R.styleable.TitleBar_customLayout, 0), this)
+        if (ta.hasValue(R.styleable.TitleAppBar_customLayout)) {
+            inflate(context, ta.getResourceId(R.styleable.TitleAppBar_customLayout, 0), this)
         } else {
             inflate(context, R.layout.abc_title_toolbar, this)
         }
@@ -328,14 +328,14 @@ class TitleBar @JvmOverloads constructor(
 
         toolbar.setDisplayShowTitleEnabled(
             ta.getBoolean(
-                R.styleable.TitleBar_displayShowTitleEnabled,
+                R.styleable.TitleAppBar_displayShowTitleEnabled,
                 true
             )
         )
 
-        if (ta.getBoolean(R.styleable.TitleBar_provideSupportActionBar, false)) {
-            val showHome = ta.getBoolean(R.styleable.TitleBar_displayShowHomeEnabled, false)
-            val showHomeAsUp = ta.getBoolean(R.styleable.TitleBar_displayShowHomeAsUpEnabled, false)
+        if (ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar, false)) {
+            val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
+            val showHomeAsUp = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
             actionBar = context.appCompatActivity?.let {
                 getSupportActionBar(
                     it,
@@ -346,42 +346,42 @@ class TitleBar @JvmOverloads constructor(
             }
         }
 
-        val titleText = ta.getText(R.styleable.TitleBar_title)
+        val titleText = ta.getText(R.styleable.TitleAppBar_title)
         if (!titleText.isNullOrEmpty()) {
             setTitle(titleText)
         }
 
-        val subtitleText = ta.getText(R.styleable.TitleBar_subtitle)
+        val subtitleText = ta.getText(R.styleable.TitleAppBar_subtitle)
         if (!subtitleText.isNullOrEmpty()) {
             setSubtitle(subtitleText)
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_titleTextAppearance)) {
-            setTitleTextAppearance(ta.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0))
+        if (ta.hasValue(R.styleable.TitleAppBar_titleTextAppearance)) {
+            setTitleTextAppearance(ta.getResourceId(R.styleable.TitleAppBar_titleTextAppearance, 0))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_subtitleTextAppearance)) {
+        if (ta.hasValue(R.styleable.TitleAppBar_subtitleTextAppearance)) {
             setSubtitleTextAppearance(
                 ta.getResourceId(
-                    R.styleable.TitleBar_subtitleTextAppearance,
+                    R.styleable.TitleAppBar_subtitleTextAppearance,
                     0
                 )
             )
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_titleTextColor)) {
-            setTitleTextColor(ta.getColorStateList(R.styleable.TitleBar_titleTextColor))
+        if (ta.hasValue(R.styleable.TitleAppBar_titleTextColor)) {
+            setTitleTextColor(ta.getColorStateList(R.styleable.TitleAppBar_titleTextColor))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_subtitleTextColor)) {
-            setSubtitleTextColor(ta.getColorStateList(R.styleable.TitleBar_subtitleTextColor))
+        if (ta.hasValue(R.styleable.TitleAppBar_subtitleTextColor)) {
+            setSubtitleTextColor(ta.getColorStateList(R.styleable.TitleAppBar_subtitleTextColor))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_navigationIconTint)) {
-            setNavigationIconTintList(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
+        if (ta.hasValue(R.styleable.TitleAppBar_navigationIconTint)) {
+            setNavigationIconTintList(ta.getColorStateList(R.styleable.TitleAppBar_navigationIconTint))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_navigationIconTintMode)) {
+        if (ta.hasValue(R.styleable.TitleAppBar_navigationIconTintMode)) {
             setNavigationIconTintMode(
                 DrawableUtils.parseTintMode(
                     ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
@@ -390,102 +390,102 @@ class TitleBar @JvmOverloads constructor(
             )
         }
 
-        val navIcon = ta.getDrawable(R.styleable.TitleBar_navigationIcon)
+        val navIcon = ta.getDrawable(R.styleable.TitleAppBar_navigationIcon)
         if (navIcon != null) {
             setNavigationIcon(navIcon)
         }
 
-        val navDesc = ta.getText(R.styleable.TitleBar_navigationContentDescription)
+        val navDesc = ta.getText(R.styleable.TitleAppBar_navigationContentDescription)
         if (!navDesc.isNullOrEmpty()) {
             setNavigationContentDescription(navDesc)
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_popupTheme)) {
-            setPopupTheme(ta.getResourceId(R.styleable.TitleBar_popupTheme, 0))
+        if (ta.hasValue(R.styleable.TitleAppBar_popupTheme)) {
+            setPopupTheme(ta.getResourceId(R.styleable.TitleAppBar_popupTheme, 0))
         }
 
-        if (ta.hasValue(R.styleable.TitleBar_menu)) {
-            inflateMenu(ta.getResourceId(R.styleable.TitleBar_menu, 0))
+        if (ta.hasValue(R.styleable.TitleAppBar_menu)) {
+            inflateMenu(ta.getResourceId(R.styleable.TitleAppBar_menu, 0))
         }
 
         bottomDividerHeight =
-            ta.getDimensionPixelSize(R.styleable.TitleBar_bottomDividerHeight, 1)
-        bottomDividerColor = ta.getColor(R.styleable.TitleBar_bottomDividerColor, Color.GRAY)
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_bottomDividerHeight, 1)
+        bottomDividerColor = ta.getColor(R.styleable.TitleAppBar_bottomDividerColor, Color.GRAY)
         showBottomDivider =
-            ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
+            ta.getInt(R.styleable.TitleAppBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
 
         ta.recycle()
     }
 
 }
 
-var TitleBar.title: CharSequence?
+var TitleAppBar.title: CharSequence?
     get() = getTitle()
     set(value) {
         setTitle(value)
     }
 
-var TitleBar.subtitle: CharSequence?
+var TitleAppBar.subtitle: CharSequence?
     get() = getSubtitle()
     set(value) {
         setSubtitle(value)
     }
 
-var TitleBar.titleTextColor: Int
+var TitleAppBar.titleTextColor: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setTitleTextColor(value)
     }
 
-var TitleBar.subtitleTextColor: Int
+var TitleAppBar.subtitleTextColor: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setSubtitleTextColor(value)
     }
 
-var TitleBar.titleTextAppearance: Int
+var TitleAppBar.titleTextAppearance: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setTitleTextAppearance(value)
     }
 
-var TitleBar.subtitleTextAppearance: Int
+var TitleAppBar.subtitleTextAppearance: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setSubtitleTextAppearance(value)
     }
 
-var TitleBar.navigationIcon: Drawable?
+var TitleAppBar.navigationIcon: Drawable?
     get() = getNavigationIcon()
     set(value) {
         setNavigationIcon(value)
     }
 
-var TitleBar.navigationIconTint: Int
+var TitleAppBar.navigationIconTint: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setNavigationIconTint(value)
     }
 
-var TitleBar.navigationIconTintList: ColorStateList?
+var TitleAppBar.navigationIconTintList: ColorStateList?
     get() = getNavigationIconTintList()
     set(value) {
         setNavigationIconTintList(value)
     }
 
-var TitleBar.navigationIconTintMode: PorterDuff.Mode?
+var TitleAppBar.navigationIconTintMode: PorterDuff.Mode?
     get() = getNavigationIconTintMode()
     set(value) {
         setNavigationIconTintMode(value)
     }
 
-var TitleBar.navigationContentDescription: CharSequence?
+var TitleAppBar.navigationContentDescription: CharSequence?
     get() = getNavigationContentDescription()
     set(value) {
         setNavigationContentDescription(value)
     }
 
-var TitleBar.isDisplayShowTitleEnabled: Boolean
+var TitleAppBar.isDisplayShowTitleEnabled: Boolean
     get() = isDisplayShowTitleEnabled()
     set(value) {
         setDisplayShowTitleEnabled(value)
@@ -494,7 +494,7 @@ var TitleBar.isDisplayShowTitleEnabled: Boolean
 class TitleToolbar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.titleToolbarStyle
+    defStyleAttr: Int = R.attr.toolbarStyle
 ) : Toolbar(
     context,
     attrs,
@@ -962,7 +962,7 @@ class TitleToolbar @JvmOverloads constructor(
         val ta = TintTypedArray.obtainStyledAttributes(
             getContext(),
             attrs, R.styleable.TitleToolbar,
-            defStyleAttr, R.style.Widget_AppCompat_TitleToolbar
+            defStyleAttr, R.style.Widget_AppCompat_Toolbar
         )
 
         displayShowTitleEnabled =
