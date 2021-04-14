@@ -13,6 +13,7 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
@@ -237,6 +238,31 @@ inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Bool
     }
 }
 
+inline fun ViewPager.onPageScrolled(
+    crossinline action: (
+        position: Int,
+        positionOffset: Float,
+        positionOffsetPixels: Int
+    ) -> Unit
+) {
+    addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
+            action(position, positionOffset, positionOffsetPixels)
+        }
+
+        override fun onPageSelected(position: Int) {
+        }
+
+        override fun onPageScrollStateChanged(position: Int) {
+        }
+
+    })
+}
+
 inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit) {
     addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
         override fun onPageScrolled(
@@ -248,6 +274,50 @@ inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit)
 
         override fun onPageSelected(position: Int) {
             action(position)
+        }
+
+        override fun onPageScrollStateChanged(position: Int) {
+        }
+
+    })
+}
+
+inline fun ViewPager.onPageScrollStateChanged(crossinline action: (position: Int) -> Unit) {
+    addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
+        }
+
+        override fun onPageSelected(position: Int) {
+        }
+
+        override fun onPageScrollStateChanged(position: Int) {
+            action(position)
+        }
+
+    })
+}
+
+inline fun ViewPager2.onPageScrolled(
+    crossinline action: (
+        position: Int,
+        positionOffset: Float,
+        positionOffsetPixels: Int
+    ) -> Unit
+) {
+    registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
+            action(position, positionOffset, positionOffsetPixels)
+        }
+
+        override fun onPageSelected(position: Int) {
         }
 
         override fun onPageScrollStateChanged(position: Int) {
@@ -275,6 +345,26 @@ inline fun ViewPager2.onPageSelected(crossinline action: (position: Int) -> Unit
     })
 }
 
+inline fun ViewPager2.onPageScrollStateChanged(crossinline action: (position: Int) -> Unit) {
+    registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
+        }
+
+        override fun onPageSelected(position: Int) {
+        }
+
+        override fun onPageScrollStateChanged(position: Int) {
+            action(position)
+        }
+
+    })
+}
+
+
 inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Tab) -> Unit) {
     addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -289,6 +379,19 @@ inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Ta
         }
     })
 }
+
+inline fun BottomNavigationView.onItemSelected(crossinline action: (item: MenuItem) -> Boolean) {
+    setOnNavigationItemSelectedListener {
+        action(it)
+    }
+}
+
+inline fun BottomNavigationView.onItemReselected(crossinline action: (item: MenuItem) -> Unit) {
+    setOnNavigationItemReselectedListener {
+        action(it)
+    }
+}
+
 
 fun View.visible(anim: Boolean = true) {
     visibility = View.VISIBLE
