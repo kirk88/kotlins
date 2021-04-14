@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.MarginLayoutParamsCompat
+import androidx.core.view.children
 import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
@@ -35,6 +36,7 @@ import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.nice.kotlins.helper.appCompatActivity
 import com.nice.kotlins.helper.isGone
+import java.util.*
 
 class TitleBar @JvmOverloads constructor(
     context: Context,
@@ -262,6 +264,31 @@ class TitleBar @JvmOverloads constructor(
                 || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
     }
 
+    private fun findSuitableTitleToolbar(): TitleToolbar {
+        val toolbarView = findViewById<View>(R.id.toolbar)
+        if (toolbarView != null) {
+            check(toolbarView is TitleToolbar) {
+                "The View with ID ${toolbarView.id} not a TitleToolbar"
+            }
+            return toolbarView
+        }
+
+        val queue = LinkedList<View>()
+        queue.add(this)
+        while (!queue.isEmpty()) {
+            val view = queue.removeFirst()
+            if (view is TitleToolbar) {
+                return view
+            }
+
+            if (view is ViewGroup) {
+                queue.addAll(view.children)
+            }
+        }
+
+        throw IllegalStateException("Can not find a suitable TitleToolbar")
+    }
+
     companion object {
 
         const val SHOW_BOTTOM_DIVIDER_IF_NEED = 1
@@ -297,12 +324,7 @@ class TitleBar @JvmOverloads constructor(
             inflate(context, R.layout.abc_title_toolbar, this)
         }
 
-        toolbar = findViewById<View>(R.id.toolbar).let {
-            check(it is TitleToolbar) {
-                "The Toolbar not a TitleToolbar"
-            }
-            it
-        }
+        toolbar = findSuitableTitleToolbar()
 
         toolbar.setDisplayShowTitleEnabled(
             ta.getBoolean(
@@ -846,7 +868,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val titleView = findViewById<View>(R.id.title) ?: return
         check(titleView is TextView) {
-            "The Title View not a TextView"
+            "The Title View with ID ${titleView.id} not a TextView"
         }
 
         titleTextView = titleView
@@ -859,7 +881,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val subtitleView = findViewById<View>(R.id.subtitle) ?: return
         check(subtitleView is TextView) {
-            "The Subtitle View not a TextView"
+            "The Subtitle View with ID ${subtitleView.id}  not a TextView"
         }
 
         subtitleTextView = subtitleView
@@ -884,7 +906,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val buttonView = findViewById<View>(R.id.navigation) ?: return
         check(buttonView is ImageButton) {
-            "The Navigation View not a ImageButton"
+            "The Navigation View with ID ${buttonView.id}  not a ImageButton"
         }
 
         navigationButtonView = buttonView
