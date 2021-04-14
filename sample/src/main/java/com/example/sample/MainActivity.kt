@@ -22,7 +22,7 @@ class MainActivity : NiceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.installTo(this)
+        binding.attachTo(this)
 
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar

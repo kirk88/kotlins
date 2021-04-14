@@ -45,15 +45,15 @@ inline fun <reified VB : ViewBinding> viewBinding(view: View) =
 inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
     viewBinding(VB::class.java, binding.root)
 
-fun ViewBinding.installTo(activity: Activity) = activity.setContentView(root)
+fun ViewBinding.attachTo(activity: Activity) = activity.setContentView(root)
 
-fun ViewBinding.installTo(fragment: NiceFragment) = fragment.setContentView(root)
+fun ViewBinding.attachTo(fragment: NiceFragment) = fragment.setContentView(root)
 
-fun ViewBinding.installTo(parent: ViewGroup) = parent.addView(root)
+fun ViewBinding.attachTo(parent: ViewGroup) = parent.addView(root)
 
-fun ViewBinding.installTo(dialog: Dialog) = dialog.setContentView(root)
+fun ViewBinding.attachTo(dialog: Dialog) = dialog.setContentView(root)
 
-fun ViewBinding.installTo(popupWindow: PopupWindow) {
+fun ViewBinding.attachTo(popupWindow: PopupWindow) {
     popupWindow.contentView = root
 }
 
