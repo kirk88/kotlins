@@ -1,3 +1,5 @@
+@file:Suppress("OverridingDeprecatedMember")
+
 package com.nice.kotlins.dialogs
 
 import android.app.Dialog
@@ -19,17 +21,20 @@ internal class AndroidDialogBuilder(
     override val window: Window
         get() = dialog.window ?: error("Dialog is not attach to window")
 
-    override var contentView: View = NO_GETTER
+    override var contentView: View
+        get() = NO_GETTER
         set(value) {
             dialog.setContentView(value)
         }
 
-    override var isCancelable: Boolean = NO_GETTER
+    override var isCancelable: Boolean
+        get() = NO_GETTER
         set(value) {
             dialog.setCancelable(value)
         }
 
-    override var isCanceledOnTouchOutside: Boolean = NO_GETTER
+    override var isCanceledOnTouchOutside: Boolean
+        get() = NO_GETTER
         set(value) {
             dialog.setCanceledOnTouchOutside(value)
         }

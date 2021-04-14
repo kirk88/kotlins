@@ -810,12 +810,11 @@ class TitleToolbar @JvmOverloads constructor(
 
         if (isToolbarLayoutChild()) {
             if (!titleText.isNullOrEmpty()) {
-                toolbarLayout!!.title = titleText
-                titleTextView?.isGone = true
+                title = titleText
             }
 
             if (!subtitleText.isNullOrEmpty()) {
-                subtitleTextView?.isGone = true
+                subtitle = null
             }
         }
     }

@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.dialogs.alert
+import com.nice.kotlins.dialogs.noButton
+import com.nice.kotlins.dialogs.okButton
 import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
@@ -70,6 +73,11 @@ class MainActivity : NiceActivity() {
             delay(1000)
 
             loader.showContent()
+
+            alert("提示", "你好吗？") {
+                okButton()
+                noButton()
+            }
         }
 
     }

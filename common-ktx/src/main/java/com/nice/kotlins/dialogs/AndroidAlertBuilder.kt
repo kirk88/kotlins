@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "OverridingDeprecatedMember")
 
 package com.nice.kotlins.dialogs
 
@@ -17,47 +17,56 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     AlertBuilder<AlertDialog> {
     private val builder = MaterialAlertDialogBuilder(context, themeResId)
 
-    override var title: CharSequence = NO_GETTER
+    override var title: CharSequence
+        get() = NO_GETTER
         set(value) {
             builder.setTitle(value)
         }
 
-    override var titleResource: Int = NO_GETTER
+    override var titleResource: Int
+        get() = NO_GETTER
         set(value) {
             builder.setTitle(value)
         }
 
-    override var message: CharSequence = NO_GETTER
+    override var message: CharSequence
+        get() = NO_GETTER
         set(value) {
             builder.setMessage(value)
         }
 
-    override var messageResource: Int = NO_GETTER
+    override var messageResource: Int
+        get() = NO_GETTER
         set(value) {
             builder.setMessage(value)
         }
 
-    override var icon: Drawable = NO_GETTER
+    override var icon: Drawable
+        get() = NO_GETTER
         set(value) {
             builder.setIcon(value)
         }
 
-    override var iconResource: Int = NO_GETTER
+    override var iconResource: Int
+        get() = NO_GETTER
         set(value) {
             builder.setIcon(value)
         }
 
-    override var customTitle: View = NO_GETTER
+    override var customTitle: View
+        get() = NO_GETTER
         set(value) {
             builder.setCustomTitle(value)
         }
 
-    override var customView: View = NO_GETTER
+    override var customView: View
+        get() = NO_GETTER
         set(value) {
             builder.setView(value)
         }
 
-    override var isCancelable: Boolean = NO_GETTER
+    override var isCancelable: Boolean
+        get() = NO_GETTER
         set(value) {
             builder.setCancelable(value)
         }

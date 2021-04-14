@@ -4,20 +4,22 @@ package com.nice.kotlins.dialogs
 
 import android.content.Context
 import android.content.DialogInterface
+import androidx.annotation.StringRes
+import androidx.annotation.StyleRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
 fun Fragment.alertBuilder(
-    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeId, title, message, init)
+): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(title, message, themeId, init)
 
 fun Context.alertBuilder(
-    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
 ): AlertBuilder<AlertDialog> {
     return AndroidAlertBuilder(this, themeId).apply {
@@ -32,16 +34,16 @@ fun Context.alertBuilder(
 }
 
 fun Fragment.alertBuilder(
-    themeId: Int = 0,
-    titleId: Int = 0,
-    messageId: Int = 0,
+    @StringRes titleId: Int,
+    @StringRes messageId: Int,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(themeId, titleId, messageId, init)
+): AlertBuilder<AlertDialog> = requireActivity().alertBuilder(titleId, messageId, themeId, init)
 
 fun Context.alertBuilder(
-    themeId: Int = 0,
-    titleId: Int = 0,
-    messageId: Int = 0,
+    @StringRes titleId: Int,
+    @StringRes messageId: Int,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
 ): AlertBuilder<AlertDialog> {
     return AndroidAlertBuilder(this, themeId).apply {
@@ -56,29 +58,29 @@ fun Context.alertBuilder(
 }
 
 fun Fragment.alert(
-    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog = requireActivity().alert(themeId, title, message, init)
+): AlertDialog = requireActivity().alert(title, message, themeId, init)
 
 fun Context.alert(
-    themeId: Int = 0,
     title: CharSequence? = null,
     message: CharSequence? = null,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog = alertBuilder(themeId, title, message, init).show()
+): AlertDialog = alertBuilder(title, message, themeId, init).show()
 
 fun Fragment.alert(
-    themeId: Int = 0,
-    titleId: Int = 0,
-    messageId: Int = 0,
+    @StringRes titleId: Int,
+    @StringRes messageId: Int,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog = requireActivity().alert(themeId, titleId, messageId, init)
+): AlertDialog = requireActivity().alert(titleId, messageId, themeId, init)
 
 fun Context.alert(
-    themeId: Int = 0,
-    titleId: Int = 0,
-    messageId: Int = 0,
+    @StringRes titleId: Int,
+    @StringRes messageId: Int,
+    @StyleRes themeId: Int = 0,
     init: (AlertBuilder<DialogInterface>.() -> Unit)? = null
-): AlertDialog = alertBuilder(themeId, titleId, messageId, init).show()
+): AlertDialog = alertBuilder(titleId, messageId, themeId, init).show()
