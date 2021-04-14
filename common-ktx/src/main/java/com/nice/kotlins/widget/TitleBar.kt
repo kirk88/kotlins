@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,6 +21,7 @@ import android.widget.TextView
 import androidx.annotation.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.DrawableUtils
 import androidx.appcompat.widget.TintTypedArray
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -28,6 +30,7 @@ import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.nice.kotlins.R
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
@@ -139,16 +142,24 @@ class TitleBar @JvmOverloads constructor(
         setNavigationIcon(ContextCompat.getDrawable(context, resId))
     }
 
-    fun setNavigationIconTint(color: ColorStateList?) {
-        toolbar.setNavigationIconTint(color)
+    fun setNavigationIconTintList(color: ColorStateList?) {
+        toolbar.setNavigationIconTintList(color)
     }
 
     fun setNavigationIconTint(@ColorInt color: Int) {
-        setNavigationIconTint(ColorStateList.valueOf(color))
+        setNavigationIconTintList(ColorStateList.valueOf(color))
     }
 
-    fun setNavigationIconTintMode(mode: PorterDuff.Mode) {
+    fun getNavigationIconTintList(): ColorStateList? {
+        return toolbar.getNavigationIconTintList()
+    }
+
+    fun setNavigationIconTintMode(mode: PorterDuff.Mode?) {
         toolbar.setNavigationIconTintMode(mode)
+    }
+
+    fun getNavigationIconTintMode(): PorterDuff.Mode? {
+        return toolbar.getNavigationIconTintMode()
     }
 
     fun setNavigationContentDescription(description: CharSequence?) {
@@ -165,6 +176,21 @@ class TitleBar @JvmOverloads constructor(
 
     fun setNavigationOnClickListener(clickListener: OnClickListener?) {
         toolbar.setNavigationOnClickListener(clickListener)
+    }
+
+    fun setDisplayShowTitleEnabled(enabled: Boolean) {
+        if (actionBar != null) {
+            actionBar!!.setDisplayShowTitleEnabled(enabled)
+        } else {
+            toolbar.setDisplayShowTitleEnabled(enabled)
+        }
+    }
+
+    fun isDisplayShowTitleEnabled(): Boolean {
+        if (actionBar != null) {
+            return (actionBar!!.displayOptions and ActionBar.DISPLAY_SHOW_TITLE) != 0
+        }
+        return toolbar.isDisplayShowTitleEnabled()
     }
 
     fun inflateMenu(@MenuRes id: Int): Menu {
@@ -261,7 +287,7 @@ class TitleBar @JvmOverloads constructor(
 
     init {
         val ta = TintTypedArray.obtainStyledAttributes(
-            getContext(),
+            context,
             attrs, R.styleable.TitleBar,
             defStyleAttr, R.style.Widget_Design_TitleBar
         )
@@ -278,7 +304,6 @@ class TitleBar @JvmOverloads constructor(
             }
             it
         }
-
 
         toolbar.setDisplayShowTitleEnabled(
             ta.getBoolean(
@@ -332,13 +357,14 @@ class TitleBar @JvmOverloads constructor(
         }
 
         if (ta.hasValue(R.styleable.TitleBar_navigationIconTint)) {
-            setNavigationIconTint(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
+            setNavigationIconTintList(ta.getColorStateList(R.styleable.TitleBar_navigationIconTint))
         }
 
         if (ta.hasValue(R.styleable.TitleBar_navigationIconTintMode)) {
             setNavigationIconTintMode(
-                initTintMode(
-                    ta.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
+                DrawableUtils.parseTintMode(
+                    ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
+                    PorterDuff.Mode.SRC_ATOP
                 )
             )
         }
@@ -364,10 +390,8 @@ class TitleBar @JvmOverloads constructor(
         bottomDividerHeight =
             ta.getDimensionPixelSize(R.styleable.TitleBar_bottomDividerHeight, 1)
         bottomDividerColor = ta.getColor(R.styleable.TitleBar_bottomDividerColor, Color.GRAY)
-        if (ta.hasValue(R.styleable.TitleBar_showBottomDivider)) {
-            showBottomDivider =
-                ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
-        }
+        showBottomDivider =
+            ta.getInt(R.styleable.TitleBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
 
         ta.recycle()
     }
@@ -422,8 +446,14 @@ var TitleBar.navigationIconTint: Int
         setNavigationIconTint(value)
     }
 
-var TitleBar.navigationIconTintMode: PorterDuff.Mode
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+var TitleBar.navigationIconTintList: ColorStateList?
+    get() = getNavigationIconTintList()
+    set(value) {
+        setNavigationIconTintList(value)
+    }
+
+var TitleBar.navigationIconTintMode: PorterDuff.Mode?
+    get() = getNavigationIconTintMode()
     set(value) {
         setNavigationIconTintMode(value)
     }
@@ -432,6 +462,12 @@ var TitleBar.navigationContentDescription: CharSequence?
     get() = getNavigationContentDescription()
     set(value) {
         setNavigationContentDescription(value)
+    }
+
+var TitleBar.isDisplayShowTitleEnabled: Boolean
+    get() = isDisplayShowTitleEnabled()
+    set(value) {
+        setDisplayShowTitleEnabled(value)
     }
 
 class TitleToolbar @JvmOverloads constructor(
@@ -465,72 +501,26 @@ class TitleToolbar @JvmOverloads constructor(
 
     private var displayShowTitleEnabled: Boolean = true
 
-    private var isInflateFinished: Boolean = false
-
-    private fun initAfterInflate() {
-        ensureTitleTextView()
-        ensureSubtitleTextView()
-        ensureNavigationButtonView()
-
-        if (!titleText.isNullOrEmpty()) {
-            title = titleText
-        } else {
-            titleTextView?.isGone = true
-        }
-
-        if (!subtitleText.isNullOrEmpty()) {
-            subtitle = subtitleText
-        } else {
-            subtitleTextView?.isGone = true
-        }
-
-        if (titleTextAppearance != 0) {
-            setTitleTextAppearance(context, titleTextAppearance)
-        }
-
-        if (subtitleTextAppearance != 0) {
-            setSubtitleTextAppearance(context, subtitleTextAppearance)
-        }
-
-        if (titleTextColor != null) {
-            setTitleTextColor(titleTextColor!!)
-        }
-
-        if (subtitleTextColor != null) {
-            setSubtitleTextColor(subtitleTextColor!!)
-        }
-
-        if (navigationIcon != null) {
-            setNavigationIcon(navigationIcon)
-        } else {
-            navigationButtonView?.isGone = true
-        }
-
-        if (!navigationContentDescription.isNullOrEmpty()) {
-            setNavigationContentDescription(navigationContentDescription)
-        }
-    }
-
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        isInflateFinished = true
-
-        initAfterInflate()
-    }
+    private var toolbarLayout: CollapsingToolbarLayout? = null
 
     override fun setTitle(title: CharSequence?) {
         titleText = title
 
-        if (!isInflateFinished || !displayShowTitleEnabled) {
+        if (!isInLayout || !displayShowTitleEnabled) {
             return
         }
 
-        val titleView = titleTextView
-        if (titleView != null) {
-            titleView.isGone = title.isNullOrEmpty()
-            titleView.text = title
+        if (toolbarLayout != null) {
+            toolbarLayout!!.title = title
+            Log.e("TAGTAG", "title: $title")
         } else {
-            super.setTitle(title)
+            val titleView = titleTextView
+            if (titleView != null) {
+                titleView.isGone = title.isNullOrEmpty()
+                titleView.text = title
+            } else {
+                super.setTitle(title)
+            }
         }
     }
 
@@ -541,7 +531,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextAppearance(context: Context, resId: Int) {
         titleTextAppearance = resId
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -558,7 +548,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setTitleTextColor(color: ColorStateList) {
         titleTextColor = color
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -575,7 +565,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitle(subtitle: CharSequence?) {
         subtitleText = subtitle
 
-        if (!isInflateFinished || !displayShowTitleEnabled) {
+        if (!isInLayout || !displayShowTitleEnabled) {
             return
         }
 
@@ -591,7 +581,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitleTextAppearance(context: Context, resId: Int) {
         subtitleTextAppearance = resId
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -608,7 +598,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitleTextColor(color: ColorStateList) {
         subtitleTextColor = color
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -645,7 +635,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setNavigationIcon(icon: Drawable?) {
         navigationIcon = icon
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -665,7 +655,7 @@ class TitleToolbar @JvmOverloads constructor(
         return navigationButtonView?.drawable ?: super.getNavigationIcon()
     }
 
-    fun setNavigationIconTint(color: ColorStateList?) {
+    fun setNavigationIconTintList(color: ColorStateList?) {
         navigationIconTint = color
 
         if (!isCustomView(navigationButtonView)) {
@@ -677,10 +667,14 @@ class TitleToolbar @JvmOverloads constructor(
     }
 
     fun setNavigationIconTint(@ColorInt color: Int) {
-        setNavigationIconTint(ColorStateList.valueOf(color))
+        setNavigationIconTintList(ColorStateList.valueOf(color))
     }
 
-    fun setNavigationIconTintMode(mode: PorterDuff.Mode) {
+    fun getNavigationIconTintList(): ColorStateList? {
+        return navigationIconTint
+    }
+
+    fun setNavigationIconTintMode(mode: PorterDuff.Mode?) {
         navigationIconTintMode = mode
 
         if (!isCustomView(navigationButtonView)) {
@@ -691,10 +685,14 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
+    fun getNavigationIconTintMode(): PorterDuff.Mode? {
+        return navigationIconTintMode
+    }
+
     override fun setNavigationContentDescription(description: CharSequence?) {
         navigationContentDescription = description
 
-        if (!isInflateFinished) {
+        if (!isInLayout) {
             return
         }
 
@@ -742,6 +740,52 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+
+        ensureTitleTextView()
+        ensureSubtitleTextView()
+        ensureNavigationButtonView()
+
+        if (!titleText.isNullOrEmpty()) {
+            title = titleText
+        } else {
+            titleTextView?.isGone = true
+        }
+
+        if (!subtitleText.isNullOrEmpty()) {
+            subtitle = subtitleText
+        } else {
+            subtitleTextView?.isGone = true
+        }
+
+        if (titleTextAppearance != 0) {
+            setTitleTextAppearance(context, titleTextAppearance)
+        }
+
+        if (subtitleTextAppearance != 0) {
+            setSubtitleTextAppearance(context, subtitleTextAppearance)
+        }
+
+        if (titleTextColor != null) {
+            setTitleTextColor(titleTextColor!!)
+        }
+
+        if (subtitleTextColor != null) {
+            setSubtitleTextColor(subtitleTextColor!!)
+        }
+
+        if (navigationIcon != null) {
+            setNavigationIcon(navigationIcon)
+        } else {
+            navigationButtonView?.isGone = true
+        }
+
+        if (!navigationContentDescription.isNullOrEmpty()) {
+            setNavigationContentDescription(navigationContentDescription)
+        }
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val navButtonView = navigationButtonView
         if (navButtonView != null) {
@@ -755,6 +799,20 @@ class TitleToolbar @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+
+        if (!changed) {
+            return
+        }
+
+        ensureToolbarLayout()
+
+        if(toolbarLayout != null && !titleText.isNullOrEmpty()){
+            toolbarLayout!!.title = titleText
+        }
+    }
+
     fun setOnTitleClickListener(listener: OnClickListener?) {
         val titleView = titleTextView ?: tryGetSystemTitleView("mTitleTextView")
         titleView?.setOnClickListener(listener)
@@ -763,6 +821,14 @@ class TitleToolbar @JvmOverloads constructor(
     fun setOnSubtitleClickListener(listener: OnClickListener?) {
         val subtitleView = subtitleTextView ?: tryGetSystemTitleView("mSubtitleTextView")
         subtitleView?.setOnClickListener(listener)
+    }
+
+    private fun ensureToolbarLayout() {
+        if (toolbarLayout != null) {
+            return
+        }
+
+        toolbarLayout = parent as? CollapsingToolbarLayout
     }
 
     private fun ensureTitleTextView() {
@@ -817,7 +883,7 @@ class TitleToolbar @JvmOverloads constructor(
     }
 
     private fun maybeTintNavigationIcon(drawable: Drawable?): Drawable? {
-        return if (drawable != null) {
+        return if (drawable == null) drawable else {
             DrawableCompat.wrap(drawable.mutate()).also {
                 DrawableCompat.setTintList(it, navigationIconTint)
                 val tintMode = navigationIconTintMode
@@ -825,8 +891,6 @@ class TitleToolbar @JvmOverloads constructor(
                     DrawableCompat.setTintMode(it, tintMode)
                 }
             }
-        } else {
-            drawable
         }
     }
 
@@ -874,8 +938,9 @@ class TitleToolbar @JvmOverloads constructor(
         displayShowTitleEnabled =
             ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
         navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
-        navigationIconTintMode = initTintMode(
-            ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 9)
+        navigationIconTintMode = DrawableUtils.parseTintMode(
+            ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
+            PorterDuff.Mode.SRC_ATOP
         )
 
         ta.recycle()
@@ -913,8 +978,14 @@ var TitleToolbar.navigationIconTint: Int
         setNavigationIconTint(value)
     }
 
-var TitleToolbar.navigationIconTintMode: PorterDuff.Mode
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+var TitleToolbar.navigationIconTintList: ColorStateList?
+    get() = getNavigationIconTintList()
+    set(value) {
+        setNavigationIconTintList(value)
+    }
+
+var TitleToolbar.navigationIconTintMode: PorterDuff.Mode?
+    get() = getNavigationIconTintMode()
     set(value) {
         setNavigationIconTintMode(value)
     }
@@ -924,27 +995,3 @@ var TitleToolbar.displayShowTitleEnabled: Boolean
     set(value) {
         setDisplayShowTitleEnabled(value)
     }
-
-private fun initTintMode(value: Int): PorterDuff.Mode {
-    return when (value) {
-        0 -> PorterDuff.Mode.CLEAR
-        1 -> PorterDuff.Mode.SRC
-        2 -> PorterDuff.Mode.DST
-        3 -> PorterDuff.Mode.SRC_OVER
-        4 -> PorterDuff.Mode.DST_OVER
-        5 -> PorterDuff.Mode.SRC_IN
-        6 -> PorterDuff.Mode.DST_IN
-        7 -> PorterDuff.Mode.SRC_OUT
-        8 -> PorterDuff.Mode.DST_OUT
-        9 -> PorterDuff.Mode.SRC_ATOP
-        10 -> PorterDuff.Mode.DST_ATOP
-        11 -> PorterDuff.Mode.XOR
-        16 -> PorterDuff.Mode.DARKEN
-        17 -> PorterDuff.Mode.LIGHTEN
-        13 -> PorterDuff.Mode.MULTIPLY
-        14 -> PorterDuff.Mode.SCREEN
-        12 -> PorterDuff.Mode.ADD
-        15 -> PorterDuff.Mode.OVERLAY
-        else -> PorterDuff.Mode.CLEAR
-    }
-}

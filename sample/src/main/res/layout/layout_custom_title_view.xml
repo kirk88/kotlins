@@ -1,50 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<com.google.android.material.appbar.CollapsingToolbarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:parentTag="com.google.android.material.appbar.AppBarLayout">
+    app:contentScrim="?attr/colorPrimary"
+    app:layout_scrollFlags="scroll|exitUntilCollapsed"
+    app:toolbarId="@id/toolbar">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_launcher_background"
+        app:layout_collapseMode="pin"
+        app:layout_collapseParallaxMultiplier="0.5" />
 
     <com.nice.kotlins.widget.TitleToolbar
         android:id="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_collapseMode="pin"
         app:navigationIcon="@drawable/abc_vector_test"
-        app:navigationIconTint="@android:color/holo_red_light">
+        app:navigationIconTint="@android:color/holo_red_light"
+        app:subtitle="@string/app_name"
+        app:title="@string/app_name">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@id/navigation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabSize="mini"/>
+        <!--            <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+        <!--                android:id="@id/navigation"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                app:tint="@null"-->
+        <!--                app:fabSize="mini"/>-->
 
-        <TextView
-            android:id="@id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:layout_custom="true"
-            android:layout_gravity="center"
-            android:textColor="@android:color/holo_red_light"/>
+        <!--            <TextView-->
+        <!--                android:id="@id/title"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:textSize="22sp"-->
+        <!--                android:textStyle="bold"-->
+        <!--                app:layout_custom="true"-->
+        <!--                android:layout_gravity="center"-->
+        <!--                android:textColor="@android:color/holo_red_light"/>-->
 
-<!--        <TextView-->
-<!--            android:id="@id/subtitle"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:textSize="22sp"-->
-<!--            android:textStyle="bold"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:gravity="center"-->
-<!--            android:textColor="@android:color/white"/>-->
+        <!--            <TextView-->
+        <!--                android:id="@id/subtitle"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:layout_marginStart="16dp"-->
+        <!--                android:textSize="18sp"-->
+        <!--                android:textStyle="bold"-->
+        <!--                android:text="@string/app_name"-->
+        <!--                app:layout_custom="true"-->
+        <!--                android:textColor="@android:color/white"/>-->
+
     </com.nice.kotlins.widget.TitleToolbar>
 
-
-
-    <com.google.android.material.tabs.TabLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-
-</merge>
+</com.google.android.material.appbar.CollapsingToolbarLayout>

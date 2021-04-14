@@ -8,13 +8,14 @@ import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nice.kotlins.helper.Internals.NO_GETTER
 
 val Android: AlertBuilderFactory<AlertDialog> = ::AndroidAlertBuilder
 
 internal class AndroidAlertBuilder(override val context: Context, themeResId: Int = 0) :
     AlertBuilder<AlertDialog> {
-    private val builder = AlertDialog.Builder(context, themeResId)
+    private val builder = MaterialAlertDialogBuilder(context, themeResId)
 
     override var title: CharSequence = NO_GETTER
         set(value) {

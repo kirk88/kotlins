@@ -30,6 +30,6 @@
     <style name="Theme.Kotlins.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.TitleToolbar">
-        <item name="contentInsetStartWithNavigation">64dp</item>
+        <item name="contentInsetStartWithNavigation">56dp</item>
     </style>
 </resources>

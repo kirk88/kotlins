@@ -1,16 +1,17 @@
 package com.example.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.databinding.LayoutCustomTitleViewBinding
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
+import com.nice.kotlins.widget.navigationIconTint
 import com.nice.kotlins.widget.progressViews
-import com.nice.kotlins.widget.title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -27,6 +28,7 @@ class MainActivity : NiceActivity() {
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
+
 
         titleBar.setOnTitleClickListener{
             toast("click title")
@@ -58,6 +60,15 @@ class MainActivity : NiceActivity() {
             loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
             delay(1000)
+
+            findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout)?.apply {
+                setExpandedTitleColor(Color.WHITE)
+
+                setCollapsedTitleTextColor(Color.WHITE)
+
+                Log.e("TAGTAG", "title: $title")
+            }
+
 
             loader.showContent()
 
