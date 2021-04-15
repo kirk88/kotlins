@@ -11,8 +11,6 @@ buildscript {
 
             kotlin             : "1.4.32",
 
-            versionsChecker    : "0.38.0",
-
             kotlinCoroutines   : "1.4.3",
             kotlinLifecycle    : "2.2.0",
             datastore          : "1.0.0-alpha08",
@@ -82,7 +80,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.ben-manes.versions" version "${versions.versionsChecker}"
+    id "com.github.ben-manes.versions" version "0.38.0"
 }
 
 allprojects {
