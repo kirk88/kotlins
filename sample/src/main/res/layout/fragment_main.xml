@@ -4,77 +4,16 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<!--    <com.nice.kotlins.widget.TitleBar-->
-<!--        android:id="@+id/title_bar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:provideSupportActionBar="true"-->
-<!--        app:displayShowHomeEnabled="true"-->
-<!--        app:displayShowHomeAsUpEnabled="true"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        android:theme="@style/Theme.Kotlins.AppBarOverlay"/>-->
-
-    <com.google.android.material.appbar.AppBarLayout
+    <com.nice.kotlins.widget.TitleAppBar
+        android:id="@+id/title_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/toolbar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:toolbarId="@id/toolbar"
-            app:title="@string/app_name"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/ic_launcher_background"
-                app:layout_collapseMode="pin"
-                app:layout_collapseParallaxMultiplier="0.5" />
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="pin"
-               >
-
-                <!--            <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-                <!--                android:id="@id/navigation"-->
-                <!--                android:layout_width="wrap_content"-->
-                <!--                android:layout_height="wrap_content"-->
-                <!--                app:tint="@null"-->
-                <!--                app:fabSize="mini"/>-->
-
-                <!--            <TextView-->
-                <!--                android:id="@id/title"-->
-                <!--                android:layout_width="wrap_content"-->
-                <!--                android:layout_height="wrap_content"-->
-                <!--                android:textSize="22sp"-->
-                <!--                android:textStyle="bold"-->
-                <!--                app:layout_custom="true"-->
-                <!--                android:layout_gravity="center"-->
-                <!--                android:textColor="@android:color/holo_red_light"/>-->
-
-                <!--            <TextView-->
-                <!--                android:id="@id/subtitle"-->
-                <!--                android:layout_width="wrap_content"-->
-                <!--                android:layout_height="wrap_content"-->
-                <!--                android:layout_marginStart="16dp"-->
-                <!--                android:textSize="18sp"-->
-                <!--                android:textStyle="bold"-->
-                <!--                android:text="@string/app_name"-->
-                <!--                app:layout_custom="true"-->
-                <!--                android:textColor="@android:color/white"/>-->
-
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="wrap_content"
+        app:title="@string/app_name"
+        app:provideSupportActionBar="true"
+        app:displayShowHomeEnabled="true"
+        app:displayShowHomeAsUpEnabled="true"
+        app:layout_constraintTop_toTopOf="parent"
+        android:theme="@style/Theme.Kotlins.AppBarOverlay"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

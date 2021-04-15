@@ -131,6 +131,82 @@ class TitleAppBar @JvmOverloads constructor(
         toolbar.setSubtitleTextAppearance(context, resId)
     }
 
+    fun setTitleMargin(start: Int, top: Int, end: Int, bottom: Int) {
+        toolbar.setTitleMargin(start, top, end, bottom)
+    }
+
+    fun getTitleMarginStart(): Int {
+        return toolbar.titleMarginStart
+    }
+
+    fun setTitleMarginStart(margin: Int) {
+        toolbar.titleMarginStart = margin
+    }
+
+    fun getTitleMarginTop(): Int {
+        return toolbar.titleMarginTop
+    }
+
+    fun setTitleMarginTop(margin: Int) {
+        toolbar.titleMarginTop = margin
+    }
+
+    fun getTitleMarginEnd(): Int {
+        return toolbar.titleMarginEnd
+    }
+
+    fun setTitleMarginEnd(margin: Int) {
+        toolbar.titleMarginEnd = margin
+    }
+
+    fun getTitleMarginBottom(): Int {
+        return toolbar.titleMarginBottom
+    }
+
+    fun setTitleMarginBottom(margin: Int) {
+        toolbar.titleMarginBottom = margin
+    }
+
+    fun setContentInsetsRelative(contentInsetStart: Int, contentInsetEnd: Int) {
+        toolbar.setContentInsetsRelative(contentInsetStart, contentInsetEnd)
+    }
+
+    fun getContentInsetStart(): Int {
+        return toolbar.contentInsetStart
+    }
+
+    fun getContentInsetEnd(): Int {
+        return toolbar.contentInsetEnd
+    }
+
+    fun setContentInsetsAbsolute(contentInsetLeft: Int, contentInsetRight: Int) {
+        toolbar.setContentInsetsAbsolute(contentInsetLeft, contentInsetRight)
+    }
+
+    fun getContentInsetLeft(): Int {
+        return toolbar.contentInsetLeft
+    }
+
+    fun getContentInsetRight(): Int {
+        return toolbar.contentInsetRight
+    }
+
+    fun getContentInsetStartWithNavigation(): Int {
+        return toolbar.contentInsetStartWithNavigation
+    }
+
+    fun setContentInsetStartWithNavigation(insetStartWithNavigation: Int) {
+        toolbar.contentInsetStartWithNavigation = insetStartWithNavigation
+    }
+
+    fun getContentInsetEndWithActions(): Int {
+        return toolbar.contentInsetEndWithActions
+    }
+
+    fun setContentInsetEndWithActions(insetEndWithActions: Int) {
+        toolbar.contentInsetEndWithActions = insetEndWithActions
+    }
+
     fun setNavigationIcon(icon: Drawable?) {
         toolbar.navigationIcon = icon
     }
@@ -295,6 +371,8 @@ class TitleAppBar @JvmOverloads constructor(
         const val SHOW_BOTTOM_DIVIDER_ALWAYS = 2
         const val SHOW_BOTTOM_DIVIDER_NEVER = 3
 
+        private const val NO_DIMEN = Int.MIN_VALUE
+
         private fun getSupportActionBar(
             activity: AppCompatActivity,
             toolbar: TitleToolbar,
@@ -326,16 +404,71 @@ class TitleAppBar @JvmOverloads constructor(
 
         toolbar = findSuitableTitleToolbar()
 
-        toolbar.setDisplayShowTitleEnabled(
+        val titleMargin: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMargin, 0)
+        val marginStart: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginStart, titleMargin)
+        val marginEnd: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginEnd, titleMargin)
+        val marginTop: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginTop, titleMargin)
+        val marginBottom: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginBottom, titleMargin)
+        if (marginStart != NO_DIMEN || marginEnd != NO_DIMEN
+            || marginTop != NO_DIMEN || marginBottom != NO_DIMEN
+        ) {
+            setTitleMargin(
+                if (marginStart == NO_DIMEN) 0 else marginStart,
+                if (marginTop == NO_DIMEN) 0 else marginTop,
+                if (marginEnd == NO_DIMEN) 0 else marginEnd,
+                if (marginBottom == NO_DIMEN) 0 else marginBottom
+            )
+        }
+
+        val contentInsetLeft: Int =
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetLeft, NO_DIMEN)
+        val contentInsetRight: Int =
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetRight, NO_DIMEN)
+
+        if (contentInsetLeft != NO_DIMEN
+            || contentInsetRight != NO_DIMEN
+        ) {
+            setContentInsetsAbsolute(contentInsetLeft, contentInsetRight)
+        }
+
+        val contentInsetStart: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetStart, NO_DIMEN)
+        val contentInsetEnd: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetEnd, NO_DIMEN)
+        if (contentInsetStart != NO_DIMEN ||
+            contentInsetEnd != NO_DIMEN
+        ) {
+            setContentInsetsRelative(contentInsetStart, contentInsetEnd)
+        }
+
+        val contentInsetStartWithNavigation = ta.getDimensionPixelOffset(
+            R.styleable.TitleAppBar_contentInsetStartWithNavigation, NO_DIMEN
+        )
+        if (contentInsetStartWithNavigation != NO_DIMEN) {
+            setContentInsetStartWithNavigation(contentInsetStartWithNavigation)
+        }
+        val contentInsetEndWithActions = ta.getDimensionPixelOffset(
+            R.styleable.TitleAppBar_contentInsetEndWithActions, NO_DIMEN
+        )
+        if (contentInsetEndWithActions != NO_DIMEN) {
+            setContentInsetEndWithActions(contentInsetEndWithActions)
+        }
+
+        setDisplayShowTitleEnabled(
             ta.getBoolean(
-                R.styleable.TitleAppBar_displayShowTitleEnabled,
-                true
+                R.styleable.TitleAppBar_displayShowTitleEnabled, true
             )
         )
 
         if (ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar, false)) {
             val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
-            val showHomeAsUp = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
+            val showHomeAsUp =
+                ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
             actionBar = context.appCompatActivity?.let {
                 getSupportActionBar(
                     it,
@@ -453,6 +586,60 @@ var TitleAppBar.subtitleTextAppearance: Int
     @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
     set(value) {
         setSubtitleTextAppearance(value)
+    }
+
+var TitleAppBar.titleMargin: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setTitleMargin(value, value, value, value)
+    }
+
+var TitleAppBar.titleMarginStart: Int
+    get() = getTitleMarginStart()
+    set(value) {
+        setTitleMarginStart(value)
+    }
+
+var TitleAppBar.titleMarginEnd: Int
+    get() = getTitleMarginEnd()
+    set(value) {
+        setTitleMarginEnd(value)
+    }
+
+var TitleAppBar.titleMarginTop: Int
+    get() = getTitleMarginTop()
+    set(value) {
+        setTitleMarginTop(value)
+    }
+
+var TitleAppBar.titleMarginBottom: Int
+    get() = getTitleMarginBottom()
+    set(value) {
+        setTitleMarginBottom(value)
+    }
+
+var TitleAppBar.horizontalContentInsetRelative: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setContentInsetsRelative(value, value)
+    }
+
+var TitleAppBar.horizontalContentInsetAbsolute: Int
+    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+    set(value) {
+        setContentInsetsAbsolute(value, value)
+    }
+
+var TitleAppBar.contentInsetStartWithNavigation: Int
+    get() = getContentInsetStartWithNavigation()
+    set(value) {
+        setContentInsetStartWithNavigation(value)
+    }
+
+var TitleAppBar.contentInsetEndWithActions: Int
+    get() = getContentInsetEndWithActions()
+    set(value) {
+        setContentInsetEndWithActions(value)
     }
 
 var TitleAppBar.navigationIcon: Drawable?
