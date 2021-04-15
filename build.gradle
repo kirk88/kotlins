@@ -81,6 +81,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.github.ben-manes.versions" version "${versions.versionsChecker}"
+}
+
 allprojects {
     repositories {
         google()
