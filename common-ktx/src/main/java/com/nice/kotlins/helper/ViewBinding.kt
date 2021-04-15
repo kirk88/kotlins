@@ -39,8 +39,8 @@ inline fun <reified VB : ViewBinding> viewBinding(
     attachToParent: Boolean = false
 ) = viewBinding<VB>(LayoutInflater.from(parent.context), parent, attachToParent)
 
-inline fun <reified VB : ViewBinding> viewBinding(view: View) =
-    viewBinding(VB::class.java, view)
+inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
+    viewBinding(VB::class.java, rootView)
 
 inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
     viewBinding(VB::class.java, binding.root)
@@ -94,6 +94,13 @@ inline fun <reified VB : ViewBinding> bindingView(
     attachToParent: Boolean = false,
     block: VB.() -> Unit
 ): View = viewBinding<VB>(parent, attachToParent).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
+    viewBinding(VB::class.java, rootView).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
+    viewBinding(VB::class.java, binding.root).apply(block).root
+
 
 class FragmentViewBindingLazy<VB : ViewBinding>(
     private val fragment: Fragment,
