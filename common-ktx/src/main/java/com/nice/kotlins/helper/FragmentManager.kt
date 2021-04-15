@@ -112,14 +112,15 @@ inline fun <reified T : Fragment> FragmentManager.show(
     tag: String? = null,
     allowingStateLoss: Boolean = false,
     args: Bundle.() -> Unit = { }
-): Fragment {
-    val javaClass = T::class.java
-    val fragmentTag = tag ?: javaClass.canonicalName
-
-    val fragment = findFragmentByTag(fragmentTag) ?: javaClass.newInstance().apply {
-        arguments = Bundle().apply(args)
-    }
+): Int {
     return beginTransaction().let {
+        val fragmentClass = T::class.java
+        val fragmentTag = tag ?: fragmentClass.canonicalName
+
+        val fragment = findFragmentByTag(fragmentTag) ?: fragmentClass.newInstance().apply {
+            arguments = Bundle().apply(args)
+        }
+
         for (existedFragment in fragments) {
             if (existedFragment == fragment) continue
 
@@ -137,28 +138,57 @@ inline fun <reified T : Fragment> FragmentManager.show(
         } else {
             it.commit()
         }
-        fragment
     }
 }
 
-/**
- * hide fragment which showed by @see [show]
- */
+fun FragmentManager.show(
+    fragment: Fragment,
+    @IdRes id: Int,
+    tag: String? = null,
+    allowingStateLoss: Boolean = false
+): Int {
+    if (fragment.isAdded && fragment.id != id) {
+        return -1
+    }
+
+    return beginTransaction().let {
+        val fragmentTag = tag ?: fragment.javaClass.canonicalName
+
+        for (existedFragment in fragments) {
+            if (existedFragment == fragment) continue
+
+            it.hide(existedFragment)
+        }
+
+        if (fragment.isAdded) {
+            it.show(fragment)
+        } else {
+            it.add(id, fragment, fragmentTag)
+        }
+
+        if (allowingStateLoss) {
+            it.commitAllowingStateLoss()
+        } else {
+            it.commit()
+        }
+    }
+}
+
 inline fun <reified T : Fragment> FragmentManager.hide(
     @IdRes id: Int,
     tag: String? = null,
     allowingStateLoss: Boolean = false
-): Fragment? {
-    val javaClass = T::class.java
-    val fragmentTag = tag ?: javaClass.canonicalName
+): Int {
+    val fragmentClass = T::class.java
+    val fragmentTag = tag ?: fragmentClass.canonicalName
 
-    val fragment = findFragmentByTag(tag ?: fragmentTag) ?: javaClass.newInstance()
+    val fragment = findFragmentByTag(fragmentTag) ?: fragmentClass.newInstance()
+
+    if (!fragment.isAdded || fragment.id != id) {
+        return -1
+    }
+
     return beginTransaction().let {
-
-        if (!fragment.isAdded) {
-            it.add(id, fragment, fragmentTag)
-        }
-
         it.hide(fragment)
 
         if (allowingStateLoss) {
@@ -166,7 +196,25 @@ inline fun <reified T : Fragment> FragmentManager.hide(
         } else {
             it.commit()
         }
+    }
+}
 
-        fragment
+fun FragmentManager.hide(
+    fragment: Fragment,
+    @IdRes id: Int,
+    allowingStateLoss: Boolean = false
+): Int {
+    if (!fragment.isAdded || fragment.id != id) {
+        return -1
+    }
+
+    return beginTransaction().let {
+        it.hide(fragment)
+
+        if (allowingStateLoss) {
+            it.commitAllowingStateLoss()
+        } else {
+            it.commit()
+        }
     }
 }

@@ -494,7 +494,7 @@ class OkFaker<T> internal constructor(
         private val CONFIG = OkConfig()
 
         @JvmStatic
-        fun configSetter(): OkConfig.Setter = CONFIG.setter()
+        fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
         @JvmOverloads
@@ -622,12 +622,12 @@ fun requestPairsOf(
 }
 
 fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    emit(suspendExecutor(CoroutineExecutors.IO) { get() })
+    emit(suspendBlocking(CoroutineExecutors.IO) { get() })
 }
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    emit(suspendExecutor(CoroutineExecutors.IO) { get() })
+    emit(suspendBlocking(CoroutineExecutors.IO) { get() })
 }

@@ -1,6 +1,8 @@
 package com.example.sample
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
@@ -34,7 +36,7 @@ class MainActivity : NiceActivity() {
         }
 
         fab.onClick {
-            startActivity<SecondActivity>()
+           delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
         }
 
 //        lifecycleScope.launch(Dispatchers.Default) {

@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven'
+    id "com.github.ben-manes.versions" version "0.38.0"
 }
 
 android {
@@ -43,23 +44,23 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     api deps.kotlinStdlib
-    api deps.kotlinCore
     api deps.kotlinCoroutinesCore
     api deps.kotlinCoroutinesAndroid
     api deps.kotlinLifecycleViewmodel
     api deps.kotlinLifecycleViewmodelSavedstate
     api deps.kotlinLifecycleRuntime
     api deps.kotlinLifecycleLivedata
-    api deps.kotlinFragment
-    api deps.multidex
-    api deps.datastorePreferences
-    api deps.datastoreCore
-    api deps.appcompat
+    api deps.androidxCoreKtx
+    api deps.androidxFragmentKtx
+    api deps.androidxAppcompat
+    api deps.androidxConstraintlayout
+    api deps.androidxRecyclerview
+    api deps.androidxDatastorePreferences
+    api deps.androidxDatastoreCore
+    api deps.androidxMultidex
     api deps.material
-    api deps.constraintlayout
-    api deps.recyclerview
-    api deps.okhttp
-    api deps.okhttpLogging
+    api deps.okhttp3
+    api deps.okhttp3Logging
     api deps.gson
     api deps.coil
 

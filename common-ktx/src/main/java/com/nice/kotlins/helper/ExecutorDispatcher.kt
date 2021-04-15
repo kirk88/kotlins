@@ -6,8 +6,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.Closeable
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
@@ -22,11 +24,11 @@ import java.util.concurrent.atomic.AtomicInteger
  *      return T
  * }
  */
-suspend fun <T> suspendExecutor(
-    executor: CoroutineExecutor = CoroutineExecutors.Unconfined,
+suspend fun <T> suspendBlocking(
+    dispatcher: ExecutorDispatcher = CoroutineExecutors.UNCONFINED,
     block: () -> T
 ): T = suspendCancellableCoroutine { con ->
-    executor.execute {
+    dispatcher.dispatch {
         runCatching(block).onSuccess {
             if (!con.isCancelled) con.resumeWith(Result.success(it))
         }.onFailure {
@@ -35,41 +37,50 @@ suspend fun <T> suspendExecutor(
     }
 }
 
+interface ExecutorDispatcher {
 
-interface CoroutineExecutor {
-
-    fun execute(command: Runnable)
+    fun dispatch(command: Runnable)
 
 }
 
-interface MainCoroutineExecutor : CoroutineExecutor {
+interface SimpleExecutorDispatcher : ExecutorDispatcher, Closeable {
 
-    val immediate: MainCoroutineExecutor
+    val executor: Executor
+
+    override fun close() {
+        (executor as? ExecutorService)?.shutdown()
+    }
+
+}
+
+interface MainExecutorDispatcher : ExecutorDispatcher {
+
+    val immediate: MainExecutorDispatcher
 
 }
 
 object CoroutineExecutors {
 
     @JvmField
-    val Default: CoroutineExecutor = DefaultExecutor
+    val DEFAULT: ExecutorDispatcher = DefaultExecutorDispatcher
 
     @JvmStatic
-    val Main: MainCoroutineExecutor = MainExecutor
+    val Main: MainExecutorDispatcher = MainThreadExecutorDispatcher
 
     @JvmStatic
-    val Unconfined: CoroutineExecutor = UnconfinedExecutor
+    val UNCONFINED: ExecutorDispatcher = UnconfinedExecutorDispatcher
 
     @JvmStatic
-    val IO: CoroutineExecutor = IOExecutor
+    val IO: ExecutorDispatcher = IOExecutorDispatcher
 
 }
 
-internal object IOExecutor : CoroutineExecutor {
+internal object IOExecutorDispatcher : SimpleExecutorDispatcher {
 
-    private val delegate: Executor = Executors.newCachedThreadPool(WorkThreadFactory())
+    override val executor: Executor = Executors.newCachedThreadPool(WorkThreadFactory())
 
-    override fun execute(command: Runnable) {
-        delegate.execute(command)
+    override fun dispatch(command: Runnable) {
+        executor.execute(command)
     }
 
     class WorkThreadFactory : ThreadFactory {
@@ -84,46 +95,47 @@ internal object IOExecutor : CoroutineExecutor {
 
 }
 
-internal object DefaultExecutor : CoroutineExecutor {
+internal object DefaultExecutorDispatcher : SimpleExecutorDispatcher {
 
-    private val delegate: Executor = Executors.newSingleThreadExecutor {
+    override val executor: Executor = Executors.newSingleThreadExecutor {
         Thread(it, "CoroutineExecutors.Default")
     }
 
-    override fun execute(command: Runnable) {
-        delegate.execute(command)
+    override fun dispatch(command: Runnable) {
+        executor.execute(command)
     }
 
 }
 
-internal object MainExecutor : MainCoroutineExecutor {
+internal object MainThreadExecutorDispatcher : MainExecutorDispatcher {
 
-    private val delegate: CoroutineExecutor = MainThreadExecutor()
+    private val delegate: ExecutorDispatcher = HandlerDispatcher()
 
-    override val immediate: MainCoroutineExecutor = object : MainCoroutineExecutor {
-        override val immediate: MainCoroutineExecutor get() = this
+    override val immediate: MainExecutorDispatcher = object : MainExecutorDispatcher {
+        override val immediate: MainExecutorDispatcher get() = this
 
-        override fun execute(command: Runnable) {
-            if (Looper.getMainLooper() === Looper.myLooper()) {
+        override fun dispatch(command: Runnable) {
+            if (isMainThread) {
                 command.run()
             } else {
-                delegate.execute(command)
+                delegate.dispatch(command)
             }
         }
+
     }
 
-    override fun execute(command: Runnable) {
-        delegate.execute(command)
+    override fun dispatch(command: Runnable) {
+        delegate.dispatch(command)
     }
 
-    class MainThreadExecutor : CoroutineExecutor {
+    class HandlerDispatcher : ExecutorDispatcher {
 
         private val lock = Any()
 
         @Volatile
         private var handler: Handler? = null
 
-        override fun execute(command: Runnable) {
+        override fun dispatch(command: Runnable) {
             if (handler == null) {
                 synchronized(lock) {
                     if (handler == null) {
@@ -160,9 +172,9 @@ internal object MainExecutor : MainCoroutineExecutor {
 
 }
 
-internal object UnconfinedExecutor : CoroutineExecutor {
+internal object UnconfinedExecutorDispatcher : ExecutorDispatcher {
 
-    override fun execute(command: Runnable) {
+    override fun dispatch(command: Runnable) {
         command.run()
     }
 

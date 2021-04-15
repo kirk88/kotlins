@@ -90,21 +90,14 @@
 
     <attr name="titleBarStyle" format="reference" />
 
-    <style name="Animation.Progress.Popup" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/anim_popup_enter</item>
-        <item name="android:windowExitAnimation">@anim/anim_popup_exit</item>
-    </style>
-
     <declare-styleable name="TitleToolbar">
         <attr name="displayShowTitleEnabled" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />
     </declare-styleable>
 
-    <attr name="titleToolbarStyle" format="reference" />
-
     <declare-styleable name="TitleToolbar_Layout">
-        <attr name="layout_custom" format="boolean" />
+        <attr name="layout_attributesOverlay" format="boolean" />
     </declare-styleable>
 
 </resources>

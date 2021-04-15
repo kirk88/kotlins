@@ -53,4 +53,9 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="Animation.Progress.Popup" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/anim_popup_exit</item>
+    </style>
+
 </resources>

@@ -12,48 +12,48 @@
         android:layout_height="180dp"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:customLayout="@layout/layout_custom_title_view"
-        app:provideSupportActionBar="true"
         app:displayShowHomeAsUpEnabled="true"
         app:displayShowHomeEnabled="true"
-        app:popupTheme="@style/Theme.Kotlins.PopupOverlay" />
+        app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
+        app:provideSupportActionBar="true" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.nice.kotlins.widget.LoaderLayout
+            android:id="@+id/loader_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="1200dp"
+                    android:text="Hello World!"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="50sp"
+                    android:textStyle="bold" />
 
 
-   <androidx.core.widget.NestedScrollView
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       app:layout_behavior="@string/appbar_scrolling_view_behavior">
-       <com.nice.kotlins.widget.LoaderLayout
-           android:id="@+id/loader_layout"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent">
+            </FrameLayout>
 
-           <FrameLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content">
+        </com.nice.kotlins.widget.LoaderLayout>
 
-               <TextView
-                   android:layout_width="match_parent"
-                   android:layout_height="1200dp"
-                   android:text="Hello World!"
-                   android:textColor="@android:color/holo_red_dark"
-                   android:textSize="50sp"
-                   android:textStyle="bold" />
-
-
-           </FrameLayout>
-
-       </com.nice.kotlins.widget.LoaderLayout>
-
-   </androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:elevation="10dp"
         android:layout_margin="16dp"
+        android:src="@drawable/abc_vector_test"
+        app:elevation="10dp"
         app:layout_anchor="@id/titleBar"
-        app:layout_anchorGravity="bottom|end"
-        android:src="@drawable/abc_vector_test" />
+        app:layout_anchorGravity="bottom|end" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

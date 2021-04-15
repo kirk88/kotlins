@@ -17,7 +17,7 @@ class OkConfig internal constructor() {
         private set
     internal var password: String? = null
 
-    fun setter(): Setter = Setter(this)
+    fun newSetter() = Setter(this)
 
     override fun toString(): String {
         return "OkConfig(client=$client, baseUrl=$baseUrl, cacheControl=$cacheControl, username=$username, password=$password)"
