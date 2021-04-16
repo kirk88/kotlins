@@ -13,8 +13,6 @@ android {
         targetSdkVersion versions.targetSdk
 
         multiDexEnabled true
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -50,10 +48,11 @@ dependencies {
     api deps.kotlinLifecycleRuntime
     api deps.kotlinLifecycleLivedata
     api deps.androidxCoreKtx
+    api deps.androidxActivityKtx
     api deps.androidxFragmentKtx
     api deps.androidxAppcompat
-    api deps.androidxConstraintlayout
     api deps.androidxRecyclerview
+    api deps.androidxConstraintlayout
     api deps.androidxDatastorePreferences
     api deps.androidxDatastoreCore
     api deps.androidxMultidex
@@ -62,11 +61,6 @@ dependencies {
     api deps.okhttp3Logging
     api deps.gson
     api deps.coil
-
-    testImplementation deps.testJunit
-    androidTestImplementation deps.testAndroidJunit
-    androidTestImplementation deps.testAndroidEspresso
-    androidTestImplementation deps.testAndroidRules
 }
 
 uploadArchives {

@@ -7,10 +7,8 @@
     <com.nice.kotlins.widget.TitleAppBar
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="wrap_content"
         app:title="@string/app_name"
-
-        app:customLayout="@layout/layout_custom_title_view"
         app:provideSupportActionBar="true"
         app:displayShowHomeEnabled="true"
         app:displayShowHomeAsUpEnabled="true"
@@ -18,20 +16,6 @@
         android:theme="@style/Theme.Kotlins.AppBarOverlay">
 
     </com.nice.kotlins.widget.TitleAppBar>
-
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/Theme.Kotlins.AppBarOverlay">
-
-
-
-    </com.google.android.material.appbar.AppBarLayout>
-    <com.google.android.material.tabs.TabLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

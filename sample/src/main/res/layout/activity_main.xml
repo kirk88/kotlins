@@ -4,12 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
     <com.nice.kotlins.widget.TitleAppBar
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="180dp"
+        android:fitsSystemWindows="true"
+        app:statusBarForeground="?colorPrimaryVariant"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:customLayout="@layout/layout_custom_title_view"
         app:displayShowHomeAsUpEnabled="true"
@@ -20,6 +23,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.nice.kotlins.widget.LoaderLayout
@@ -29,11 +33,11 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="1200dp"
+                    android:layout_height="match_parent"
                     android:text="Hello World!"
                     android:textColor="@android:color/holo_red_dark"
                     android:textSize="50sp"

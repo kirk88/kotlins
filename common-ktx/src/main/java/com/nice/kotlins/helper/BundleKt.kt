@@ -19,7 +19,7 @@ fun Array<out Pair<String, Any?>>.toBundle(): Bundle = run {
             is Short -> bundle.putShort(key, value)
             is String -> bundle.putString(key, value)
             is CharSequence -> bundle.putCharSequence(key, value)
-            is Reachable -> bundle.putReachable(key, value)
+            is Stable -> bundle.putStable(key, value)
             is Parcelable -> bundle.putParcelable(key, value)
             is Serializable -> bundle.putSerializable(key, value)
         }
@@ -35,66 +35,71 @@ fun Bundle.putAll(vararg values: Pair<String, Any?>) {
 
 fun Bundle.toMap(): Map<String, Any?> = run {
     val map = mutableMapOf<String, Any?>()
-    for (key in this.keySet()) {
-        map[key] = this.get(key)
+    for (key in keySet()) {
+        map[key] = get(key)
     }
     map
 }
 
-fun Bundle.putReachable(key: String, value: Reachable) {
-    ReachableManager.addTo(this, key, value)
+fun Bundle.toMap(destination: MutableMap<String, Any?>): Map<String, Any?> = run {
+    for (key in keySet()) {
+        destination[key] = get(key)
+    }
+    destination
 }
 
-fun <T : Reachable> Bundle.getReachable(key: String): T? {
-    return ReachableManager.getFrom(this, key)
+fun Bundle.putStable(key: String, value: Stable) {
+    StableManager.addTo(this, key, value)
 }
 
-fun <T : Reachable> Bundle.getReachable(key: String, defaultValue: () -> T): T {
-    return getReachable(key) ?: defaultValue()
+fun <T : Stable> Bundle.getStable(key: String): T? {
+    return StableManager.getFrom(this, key)
 }
 
-fun Intent.putReachable(key: String, value: Reachable) {
-    ReachableManager.addTo(this, key, value)
+fun <T : Stable> Bundle.getStable(key: String, defaultValue: () -> T): T {
+    return getStable(key) ?: defaultValue()
 }
 
-fun <T : Reachable> Intent.getReachable(key: String): T? {
-    return ReachableManager.getFrom(this, key)
+fun Intent.putStable(key: String, value: Stable) {
+    StableManager.addTo(this, key, value)
 }
 
-fun <T : Reachable> Intent.getReachable(key: String, defaultValue: () -> T): T {
-    return getReachable(key) ?: defaultValue()
+fun <T : Stable> Intent.getStable(key: String): T? {
+    return StableManager.getFrom(this, key)
 }
 
+fun <T : Stable> Intent.getStable(key: String, defaultValue: () -> T): T {
+    return getStable(key) ?: defaultValue()
+}
 
-interface Reachable
+interface Stable
 
+private object StableManager {
 
-private object ReachableManager {
+    private val DATA_MAP: MutableMap<String, Stable> by lazy { mutableMapOf() }
 
-    private val dataMap: MutableMap<String, Reachable> by lazy { mutableMapOf() }
-
-    fun addTo(intent: Intent, key: String, reachable: Reachable) {
+    fun addTo(intent: Intent, key: String, stable: Stable) {
         val name = System.nanoTime().toString()
-        dataMap[name] = reachable
+        DATA_MAP[name] = stable
         intent.putExtra(key, name)
     }
 
-    fun addTo(bundle: Bundle, key: String, reachable: Reachable) {
+    fun addTo(bundle: Bundle, key: String, stable: Stable) {
         val name = System.nanoTime().toString()
-        dataMap[name] = reachable
+        DATA_MAP[name] = stable
         bundle.putString(key, name)
     }
 
-    fun <T : Reachable> getFrom(intent: Intent, key: String): T? {
+    fun <T : Stable> getFrom(intent: Intent, key: String): T? {
         val name = intent.getStringExtra(key) ?: return null
         @Suppress("UNCHECKED_CAST")
-        return dataMap.remove(name) as T?
+        return DATA_MAP.remove(name) as T?
     }
 
-    fun <T : Reachable> getFrom(bundle: Bundle, key: String): T? {
+    fun <T : Stable> getFrom(bundle: Bundle, key: String): T? {
         val name = bundle.getString(key) ?: return null
         @Suppress("UNCHECKED_CAST")
-        return dataMap.remove(name) as T?
+        return DATA_MAP.remove(name) as T?
     }
 
 }

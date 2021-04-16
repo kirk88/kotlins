@@ -2,7 +2,7 @@ package com.example.sample
 
 import android.os.Bundle
 import android.view.*
-import com.example.sample.databinding.FragmentMainBinding
+import com.example.sample.databinding.FragmentSecondBinding
 import com.example.sample.databinding.ItemRecyclerViewBinding
 import com.nice.kotlins.adapter.ViewBindingRecyclerAdapter
 import com.nice.kotlins.adapter.plusAssign
@@ -13,13 +13,13 @@ import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.toast
 import com.nice.kotlins.helper.viewBindings
 
-class MainFragment : NiceFragment() {
+class SecondFragment : NiceFragment() {
 
     init {
         setHasOptionsMenu(true)
     }
 
-    private val binding: FragmentMainBinding by viewBindings()
+    private val binding: FragmentSecondBinding by viewBindings()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +27,6 @@ class MainFragment : NiceFragment() {
 
         title = "Hello World"
         subtitle = "Bye World"
-
-        binding.textView.text = "Hello World"
 
         val adapter =
             object : ViewBindingRecyclerAdapter<String, ItemRecyclerViewBinding>(requireContext()) {

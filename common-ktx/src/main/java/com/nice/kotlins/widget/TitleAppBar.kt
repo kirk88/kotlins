@@ -37,7 +37,6 @@ import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.nice.kotlins.helper.appCompatActivity
 import com.nice.kotlins.helper.isGone
 import java.util.*
-import kotlin.math.max
 
 class TitleAppBar @JvmOverloads constructor(
     context: Context,

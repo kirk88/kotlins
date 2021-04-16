@@ -7,22 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-fun <T : Any> Boolean.opt(right: T, wrong: T): T {
-    return if (this) right else wrong
-}
-
-fun <T : Any> Boolean.opt(right: () -> T, wrong: () -> T): T {
-    return if (this) right() else wrong()
-}
-
-fun <T : Any?> Boolean.optNulls(right: T?, wrong: T?): T? {
-    return if (this) right else wrong
-}
-
-fun <T : Any?> Boolean.optNulls(right: () -> T?, wrong: () -> T?): T? {
-    return if (this) right() else wrong()
-}
-
 fun Any.serialize(): String? = runCatching {
     ByteArrayOutputStream().use { byteArrayOutputStream ->
         ObjectOutputStream(byteArrayOutputStream).use { objectOutputStream ->

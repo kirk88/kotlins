@@ -18,6 +18,7 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.view.contains
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -428,19 +429,24 @@ class LoaderLayout @JvmOverloads constructor(
         updateView(view, viewType)
 
         val existingView = views.put(viewType, view)
-        if (indexOfChild(existingView) > -1) {
+        if (existingView != null) {
             removeView(existingView)
         }
 
         view.visibility = if (this.viewType == viewType) VISIBLE else INVISIBLE
 
-        if (!preventAddView || indexOfChild(view) > -1) {
+        if (!preventAddView || contains(view)) {
             return
         }
 
+        val parent = view.parent
+        if (parent is ViewGroup) {
+            parent.removeView(view)
+        }
+
         if (viewType == TYPE_CONTENT_VIEW) {
-            val params = view.layoutParams
-            addView(view, 0, generateLayoutParams(params))
+            val lp = view.layoutParams ?: LayoutParams(-1, -1)
+            addView(view, 0, generateLayoutParams(lp))
         } else {
             addView(view)
         }
@@ -619,7 +625,7 @@ class LoaderLayout @JvmOverloads constructor(
         }
 
         fun wrap(fragment: Fragment): LoaderView {
-            return wrap(requireNotNull(fragment.view))
+            return wrap(fragment.requireView())
         }
 
         fun wrap(view: View): LoaderView {

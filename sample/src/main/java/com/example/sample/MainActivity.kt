@@ -1,18 +1,17 @@
 package com.example.sample
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
-import com.nice.kotlins.dialogs.alert
-import com.nice.kotlins.dialogs.noButton
-import com.nice.kotlins.dialogs.okButton
-import com.nice.kotlins.helper.*
+import com.nice.kotlins.helper.attachTo
+import com.nice.kotlins.helper.onClick
+import com.nice.kotlins.helper.startActivity
+import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -26,60 +25,34 @@ class MainActivity : NiceActivity() {
         super.onCreate(savedInstanceState)
         binding.attachTo(this)
 
+        title = "Home"
+
         val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
 
 
-        titleBar.setOnTitleClickListener {
-            toast("click title")
-        }
+        loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
         fab.onClick {
-           delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
+            startActivity<SecondActivity>()
         }
 
-//        lifecycleScope.launch(Dispatchers.Default) {
-//            progressView.showProgress("你好啊")
-//
-//            delay(1000)
-//
-//            progressView.dismissProgress()
-//
-//
-//            delay(200)
-//
-//            progressView.showProgress("还好吧")
-//
-//
-//            delay(2000)
-//            progressView.dismissProgress()
-//        }
-
-        lifecycleScope.launch {
-
-            loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
+        lifecycleScope.launch(Dispatchers.Default) {
+            progressView.showProgress("你好啊")
 
             delay(1000)
 
-            loader.showContent()
+            progressView.dismissProgress()
 
-            delay(1000)
 
-            loader.showEmpty()
+            delay(200)
 
-            delay(1000)
+            progressView.showProgress("还好吧")
 
-            loader.showError()
 
-            delay(1000)
-
-            loader.showContent()
-
-            alert("提示", "你好吗？") {
-                okButton()
-                noButton()
-            }
+            delay(2000)
+            progressView.dismissProgress()
         }
 
     }
