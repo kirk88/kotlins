@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.core.database.sqlite.transaction
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -126,18 +127,6 @@ fun SQLiteDatabase.query(
     return AndroidDatabaseSelectQueryBuilder(this, table).also {
         it.columns(columns)
     }
-}
-
-fun <T> SQLiteDatabase.transaction(action: SQLiteDatabase.() -> T): T {
-    val result: T
-    try {
-        beginTransaction()
-        result = action()
-        setTransactionSuccessful()
-    } finally {
-        endTransaction()
-    }
-    return result
 }
 
 fun SQLiteDatabase.createTable(
@@ -362,7 +351,7 @@ abstract class ManagedSQLiteOpenHelper(
     fun <T> use(inTransaction: Boolean = false, action: SQLiteDatabase.() -> T): T {
         try {
             return openDatabase().let {
-                if (inTransaction) it.transaction(action)
+                if (inTransaction) it.transaction { action() }
                 else it.action()
             }
         } finally {

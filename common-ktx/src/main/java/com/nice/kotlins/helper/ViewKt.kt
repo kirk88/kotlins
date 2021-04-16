@@ -5,8 +5,6 @@ package com.nice.kotlins.helper
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.graphics.drawable.ColorDrawable
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.*
 import android.widget.CompoundButton
 import android.widget.RadioGroup
@@ -17,24 +15,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
-
-var View.isVisible: Boolean
-    get() = visibility == View.VISIBLE
-    set(value) {
-        visibility = if (value) View.VISIBLE else View.INVISIBLE
-    }
-
-var View.isInvisible
-    get() = visibility == View.INVISIBLE
-    set(value) {
-        visibility = if (value) View.INVISIBLE else View.VISIBLE
-    }
-
-var View.isGone
-    get() = visibility == View.GONE
-    set(value) {
-        visibility = if (value) View.GONE else View.VISIBLE
-    }
 
 var View.backgroundColor: Int
     get() = if (background is ColorDrawable) (background as ColorDrawable).color else 0
@@ -185,36 +165,6 @@ inline fun <T : View> T.onLongClick(crossinline action: (view: T) -> Boolean) {
 inline fun <T : View> View.onTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
     @Suppress("ClickableViewAccessibility", "UNCHECKED_CAST")
     setOnTouchListener { v, event -> action(v as T, event) }
-}
-
-inline fun TextView.onTextChanged(crossinline action: (text: CharSequence?) -> Unit) {
-    addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        }
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            action(s)
-        }
-
-        override fun afterTextChanged(s: Editable?) {
-        }
-
-    })
-}
-
-inline fun TextView.afterTextChanged(crossinline action: (text: Editable?) -> Unit) {
-    addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        }
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        }
-
-        override fun afterTextChanged(s: Editable?) {
-            action(s)
-        }
-
-    })
 }
 
 inline fun TextView.onEditorActionEvent(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Boolean) {
