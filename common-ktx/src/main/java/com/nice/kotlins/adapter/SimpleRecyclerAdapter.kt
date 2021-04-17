@@ -29,4 +29,9 @@ abstract class SimpleRecyclerAdapter<T>(
         return inflater.inflate(itemLayoutId, parent, false)
     }
 
+
+    override fun onBindItemViewHolder(holder: ItemViewHolder, item: T, payloads: MutableList<Any>) {
+
+    }
+
 }
