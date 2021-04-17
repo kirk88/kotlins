@@ -91,6 +91,8 @@
     <attr name="titleBarStyle" format="reference" />
 
     <declare-styleable name="TitleToolbar">
+        <attr name="titleTextAppearance" />
+        <attr name="subtitleTextAppearance" />
         <attr name="displayShowTitleEnabled" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />

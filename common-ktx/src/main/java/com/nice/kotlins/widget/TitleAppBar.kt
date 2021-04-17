@@ -326,9 +326,9 @@ class TitleAppBar @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        if(heightMode == MeasureSpec.EXACTLY && isDirectToolbar()){
+        if (heightMode == MeasureSpec.EXACTLY && isDirectToolbar()) {
             val lp = toolbar.layoutParams
-            if(lp != null){
+            if (lp != null) {
                 lp.height = MeasureSpec.getSize(heightMeasureSpec)
             }
         }
@@ -352,7 +352,7 @@ class TitleAppBar @JvmOverloads constructor(
                 || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
     }
 
-    private fun isDirectToolbar(): Boolean{
+    private fun isDirectToolbar(): Boolean {
         return toolbar.parent == this && childCount == 1
     }
 
@@ -1175,6 +1175,9 @@ class TitleToolbar @JvmOverloads constructor(
 
         displayShowTitleEnabled =
             ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
+        titleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_titleTextAppearance, 0)
+        subtitleTextAppearance =
+            ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
         navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
         navigationIconTintMode = DrawableUtils.parseTintMode(
             ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
