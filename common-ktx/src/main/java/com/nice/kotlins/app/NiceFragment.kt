@@ -28,18 +28,18 @@ abstract class NiceFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return delegate.onCreateView()
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        requireView().post {
+        val view = delegate.onCreateView()
+        view.post {
             onPostCreate(savedInstanceState)
         }
+        return view
     }
 
     open fun onPostCreate(savedInstanceState: Bundle?) {
+    }
+
+    override fun getView(): View? {
+        return delegate.getView()
     }
 
     fun <T : View> findViewById(@IdRes id: Int): T? {

@@ -5,8 +5,11 @@ package com.nice.kotlins.event
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import com.nice.kotlins.helper.intent
+import com.nice.kotlins.helper.intentOf
 import com.nice.kotlins.helper.opt
-import com.nice.kotlins.helper.toBundle
 
 open class Event(
     val what: Int = Status.NONE,
@@ -15,7 +18,12 @@ open class Event(
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
-    private var intent: Intent? = null
+    var intent: Intent? = null
+        private set
+    var resultCode: Int = Activity.RESULT_OK
+        private set
+    var resultCallback: ActivityResultCallback<ActivityResult>? = null
+        private set
 
     operator fun set(key: String, value: Any?) {
         this.extras[key] = value
@@ -34,12 +42,14 @@ open class Event(
         this.extras.putAll(extras)
     }
 
-    fun setIntent(intent: Intent?) {
+    fun setIntent(intent: Intent?, callback: ActivityResultCallback<ActivityResult>? = null) {
         this.intent = intent
+        resultCallback = callback
     }
 
-    fun getIntent(): Intent? {
-        return this.intent
+    fun setResult(resultCode: Int, data: Intent? = null) {
+        this.resultCode = resultCode
+        intent = data
     }
 
     override fun equals(other: Any?): Boolean {
@@ -90,7 +100,9 @@ object Status {
     const val SHOW_ERROR = STATUS_BASE + 10
     const val SHOW_CONTENT = STATUS_BASE + 11
 
-    const val FINISH_ACTIVITY = STATUS_BASE + 12
+    const val ACTIVITY_FINISH = STATUS_BASE + 12
+    const val ACTIVITY_START = STATUS_BASE + 13
+    const val ACTIVITY_RESULT = STATUS_BASE + 14
 
 }
 
@@ -106,38 +118,31 @@ inline fun buildEvent(
     crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
-inline fun <reified T : Activity> activityStart(
+inline fun <reified A : Activity> activityStart(
     context: Context,
     vararg pairs: Pair<String, Any?>
-) = buildEvent {
-    setIntent(Intent(context, T::class.java).apply {
-        putExtras(pairs.toBundle())
-    })
+) = buildEvent(Status.ACTIVITY_START) {
+    setIntent(context.intent<A>(*pairs))
 }
 
-inline fun <reified T : Activity> activityStartForResult(
+inline fun <reified A : Activity> activityStartForResult(
     context: Context,
-    requestCode: Int,
-    vararg pairs: Pair<String, Any?>
-) = buildEvent(requestCode) {
-    setIntent(Intent(context, T::class.java).apply {
-        putExtras(pairs.toBundle())
-    })
+    vararg pairs: Pair<String, Any?>,
+    callback: ActivityResultCallback<ActivityResult>
+) = buildEvent((Status.ACTIVITY_START)) {
+    setIntent(context.intent<A>(*pairs), callback)
 }
 
-fun activityResults(vararg pairs: Pair<String, Any?>) = buildEvent {
-    setIntent(Intent().apply {
-        putExtras(pairs.toBundle())
-    })
+fun activityReturnResult(resultCode: Int) = buildEvent(Status.ACTIVITY_RESULT) {
+    setResult(resultCode)
 }
 
-fun activityResults(code: Int, vararg pairs: Pair<String, Any?>) = buildEvent(code) {
-    setIntent(Intent().apply {
-        putExtras(pairs.toBundle())
-    })
-}
+fun activityReturnResult(resultCode: Int, vararg pairs: Pair<String, Any?>) =
+    buildEvent(Status.ACTIVITY_RESULT) {
+        setResult(resultCode, intentOf(*pairs))
+    }
 
-fun activityFinish(): Event = event(Status.FINISH_ACTIVITY)
+fun activityFinish(): Event = event(Status.ACTIVITY_FINISH)
 
 fun progressShow(message: CharSequence? = null): Event = Event(Status.SHOW_PROGRESS, message)
 

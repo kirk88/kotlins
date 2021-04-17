@@ -3,6 +3,7 @@
 package com.nice.kotlins.app
 
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
@@ -80,17 +81,24 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
                 showError()
             }
             Status.SHOW_CONTENT -> loaderView?.showContent()
-            else -> event.message?.let { toast(it) }
-        }
-
-        val intent = event.getIntent() ?: return false
-        when {
-            intent.component == null -> {
-                setResult(RESULT_OK, intent)
+            Status.ACTIVITY_FINISH -> finish()
+            Status.ACTIVITY_START -> {
+                val intent = event.intent ?: return false
+                val callback = event.resultCallback
+                if (callback == null) {
+                    startActivity(intent)
+                } else {
+                    registerForActivityResult(
+                        ActivityResultContracts.StartActivityForResult(),
+                        callback
+                    ).launch(intent)
+                }
+            }
+            Status.ACTIVITY_RESULT -> {
+                setResult(event.resultCode, event.intent)
                 finish()
             }
-            event.what == Status.NONE -> startActivity(intent)
-            else -> startActivityForResult(intent, event.what)
+            else -> event.message?.let { toast(it) }
         }
         return true
     }

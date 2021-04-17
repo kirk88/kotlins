@@ -3,14 +3,14 @@ import com.github.benmanes.gradle.versions.VersionsPlugin
 buildscript {
     ext.versions = [
             minSdk             : 19,
-            targetSdk          : 29,
-            compileSdk         : 29,
-            buildTools         : "29.0.3",
+            targetSdk          : 30,
+            compileSdk         : 30,
+            buildTools         : "30.0.3",
 
             sourceCompatibility: JavaVersion.VERSION_1_8,
             targetCompatibility: JavaVersion.VERSION_1_8,
 
-            pluginAndroid      : "4.1.3",
+            pluginAndroid      : '4.2.0-rc01',
             pluginKotlin       : "1.4.32",
             pluginVersions     : "0.38.0",
 

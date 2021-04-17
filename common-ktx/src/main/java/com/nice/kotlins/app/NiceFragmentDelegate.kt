@@ -71,6 +71,10 @@ internal class NiceFragmentDelegate(
         callback.onContentChanged()
     }
 
+    fun getView(): View?{
+        return subDecor
+    }
+
     private fun ensureSubDecor() {
         if (subDecor != null) {
             return

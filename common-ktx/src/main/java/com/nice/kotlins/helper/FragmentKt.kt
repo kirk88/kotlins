@@ -16,7 +16,7 @@ inline fun <T : Fragment> T.withBundle(crossinline block: Bundle.() -> Unit): T 
 
 fun <T : Fragment> T.withBundle(vararg args: Pair<String, Any?>): T = apply {
     val bundle = arguments ?: Bundle().also { arguments = it }
-    bundle.putAll(args.toBundle())
+    bundle.putAll(*args)
 }
 
 

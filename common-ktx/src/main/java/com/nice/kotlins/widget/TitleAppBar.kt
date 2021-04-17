@@ -28,6 +28,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.children
 import androidx.core.view.contains
+import androidx.core.view.isGone
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -35,7 +36,6 @@ import com.nice.kotlins.R
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
 import com.nice.kotlins.helper.appCompatActivity
-import com.nice.kotlins.helper.isGone
 import java.util.*
 
 class TitleAppBar @JvmOverloads constructor(

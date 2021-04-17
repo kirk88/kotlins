@@ -1,6 +1,7 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import com.example.sample.databinding.FragmentSecondBinding
 import com.example.sample.databinding.ItemRecyclerViewBinding
@@ -53,6 +54,8 @@ class SecondFragment : NiceFragment() {
         binding.recyclerView.adapter = adapter
 
         adapter += listOf("abcd", "abcde", "abcdef")
+
+        Log.e("TAGTAG", "onCreate")
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -68,5 +71,20 @@ class SecondFragment : NiceFragment() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        Log.e("TAGTAG", "onPostCreate")
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.e("TAGTAG", "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("TAGTAG", "onResume")
+    }
 
 }

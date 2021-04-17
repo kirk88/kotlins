@@ -125,9 +125,3 @@ fun AlertBuilder<*>.okButton(handler: ((dialog: DialogInterface) -> Unit)? = nul
 
 fun AlertBuilder<*>.cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
     negativeButton(android.R.string.cancel, handler)
-
-fun AlertBuilder<*>.yesButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-    positiveButton(android.R.string.yes, handler)
-
-fun AlertBuilder<*>.noButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-    negativeButton(android.R.string.no, handler)
