@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -336,9 +337,9 @@ class TitleAppBar @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
         if (isShowBottomDivider()) {
             bottomDividerDrawable.apply {
                 color = bottomDividerColor
@@ -348,8 +349,8 @@ class TitleAppBar @JvmOverloads constructor(
     }
 
     private fun isShowBottomDivider(): Boolean {
-        return (showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
-                || showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
+        return showBottomDivider == SHOW_BOTTOM_DIVIDER_ALWAYS
+                || (showBottomDivider == SHOW_BOTTOM_DIVIDER_IF_NEED && Build.VERSION.SDK_INT < 21)
     }
 
     private fun isDirectToolbar(): Boolean {
@@ -383,9 +384,9 @@ class TitleAppBar @JvmOverloads constructor(
 
     companion object {
 
-        const val SHOW_BOTTOM_DIVIDER_IF_NEED = 1
-        const val SHOW_BOTTOM_DIVIDER_ALWAYS = 2
-        const val SHOW_BOTTOM_DIVIDER_NEVER = 3
+        const val SHOW_BOTTOM_DIVIDER_IF_NEED = 0
+        const val SHOW_BOTTOM_DIVIDER_ALWAYS = 1
+        const val SHOW_BOTTOM_DIVIDER_NEVER = 2
 
         private const val NO_DIMEN = Int.MIN_VALUE
 
