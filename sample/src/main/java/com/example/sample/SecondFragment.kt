@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.*
 import com.example.sample.databinding.FragmentSecondBinding
 import com.example.sample.databinding.ItemRecyclerViewBinding
+import com.nice.kotlins.adapter.ViewBindingHolder
 import com.nice.kotlins.adapter.ViewBindingRecyclerAdapter
 import com.nice.kotlins.adapter.plusAssign
 import com.nice.kotlins.app.NiceFragment
@@ -40,14 +41,14 @@ class SecondFragment : NiceFragment() {
                     return ItemRecyclerViewBinding.inflate(inflater, parent, false)
                 }
 
-                override fun onBindItemView(
-                    binding: ItemRecyclerViewBinding,
+
+                override fun onBindItemViewHolder(
+                    holder: ViewBindingHolder<ItemRecyclerViewBinding>,
                     item: String,
                     payloads: MutableList<Any>
                 ) {
-                    binding.title.text = item
-                }
 
+                }
 
             }
 

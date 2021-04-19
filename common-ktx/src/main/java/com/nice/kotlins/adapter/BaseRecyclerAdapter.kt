@@ -234,6 +234,14 @@ fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: () 
     return items.getOrNull(position) ?: defaultValue()
 }
 
+fun <T> BaseRecyclerAdapter<T, *>.containsItem(item: T): Boolean {
+    return items.contains(item)
+}
+
+fun <T> BaseRecyclerAdapter<T, *>.indexOfItem(item: T): Int {
+    return items.indexOf(item)
+}
+
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
 
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
