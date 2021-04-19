@@ -33,6 +33,10 @@ class SecondFragment : NiceFragment() {
         val adapter =
             object : ViewBindingRecyclerAdapter<String, ItemRecyclerViewBinding>(requireContext()) {
 
+                init {
+                    setItemClickable(true)
+                }
+
                 override fun onCreateItemView(
                     inflater: LayoutInflater,
                     parent: ViewGroup,
@@ -47,7 +51,12 @@ class SecondFragment : NiceFragment() {
                     item: String,
                     payloads: MutableList<Any>
                 ) {
+                    holder.binding.title.text = item
+                }
 
+                override fun onItemClick(holder: ViewBindingHolder<ItemRecyclerViewBinding>): Boolean {
+                    Log.e("TAGTAG", "onItemCLick")
+                    return super.onItemClick(holder)
                 }
 
             }

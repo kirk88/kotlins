@@ -11,8 +11,7 @@ import androidx.fragment.app.Fragment
 
 internal class NiceFragmentDelegate(
     private val fragment: Fragment,
-    private val callback: Callback,
-    @LayoutRes private val contentLayoutId: Int
+    private val callback: Callback
 ) {
 
     private val context: Context
@@ -24,9 +23,7 @@ internal class NiceFragmentDelegate(
     private var subDecor: ViewGroup? = null
 
     fun onCreate(){
-        if(contentLayoutId != 0){
-            setContentView(contentLayoutId)
-        }
+        ensureSubDecor()
     }
 
     fun getSubDecor(): ViewGroup {

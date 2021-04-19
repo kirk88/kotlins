@@ -11,11 +11,11 @@ import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.DialogFragment
 
-abstract class NiceDialogFragment(@LayoutRes contentLayoutId: Int = 0) : DialogFragment(),
+abstract class NiceDialogFragment : DialogFragment(),
     NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
-        NiceFragmentDelegate(this, this, contentLayoutId)
+        NiceFragmentDelegate(this, this)
     }
 
     val activityForResultLauncher =

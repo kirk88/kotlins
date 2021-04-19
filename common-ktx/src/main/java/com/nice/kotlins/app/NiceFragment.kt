@@ -12,11 +12,11 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
-abstract class NiceFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId),
+abstract class NiceFragment : Fragment(),
     NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
-        NiceFragmentDelegate(this, this, contentLayoutId)
+        NiceFragmentDelegate(this, this)
     }
 
     val activityForResultLauncher =

@@ -16,27 +16,14 @@
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"/>
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-    <TextView
-        android:id="@+id/text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="1000dp"
-        app:layout_constraintStart_toStartOf="parent"
-        android:textSize="60sp"
-        android:textColor="@android:color/holo_red_dark"/>
-    </androidx.core.widget.NestedScrollView>
 
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/text_view"
         />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

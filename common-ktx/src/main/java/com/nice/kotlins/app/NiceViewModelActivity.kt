@@ -3,7 +3,6 @@
 package com.nice.kotlins.app
 
 import android.os.Bundle
-import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.EventLifecycleObserver
@@ -17,8 +16,8 @@ import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.RefreshView
 
-abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
-    NiceActivity(layoutResId),
+abstract class NiceViewModelActivity<VM> :
+    NiceActivity(),
     EventLifecycleObserver,
     ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
