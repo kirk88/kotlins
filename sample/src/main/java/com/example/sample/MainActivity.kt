@@ -1,12 +1,16 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.component1
+import androidx.activity.result.component2
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.app.launch
 import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.onClick
-import com.nice.kotlins.helper.startActivity
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
@@ -35,7 +39,10 @@ class MainActivity : NiceActivity() {
         loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
         fab.onClick {
-            startActivity<SecondActivity>()
+//            startActivity<SecondActivity>()
+            activityForResultLauncher.launch<SecondActivity, ActivityResult>(this, "key" to "ppppppp") {
+                Log.e("TAGTAG", "" +it.component1() + " " + it.component2())
+            }
         }
 
         lifecycleScope.launch(Dispatchers.Default) {

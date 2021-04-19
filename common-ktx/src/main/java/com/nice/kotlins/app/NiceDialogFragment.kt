@@ -9,10 +9,9 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
 
-abstract class NiceFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId),
+abstract class NiceDialogFragment(@LayoutRes contentLayoutId: Int = 0) : DialogFragment(),
     NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
@@ -33,11 +32,11 @@ abstract class NiceFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val subDecor = delegate.getSubDecor()
-        subDecor.post {
+        val decor = delegate.getSubDecor()
+        decor.post {
             onPostCreate(savedInstanceState)
         }
-        return subDecor
+        return decor
     }
 
     open fun onPostCreate(savedInstanceState: Bundle?) {
@@ -72,56 +71,8 @@ abstract class NiceFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
         delegate.addContentView(view, params)
     }
 
-    fun setTitle(title: CharSequence?) {
-        activity?.title = title
-    }
-
-    fun setTitle(titleId: Int) {
-        setTitle(getText(titleId))
-    }
-
-    fun getTitle(): CharSequence? {
-        return activity?.title
-    }
-
-    fun setSubtitle(subtitle: CharSequence?) {
-        activity?.let {
-            if (it is NiceActivity) {
-                it.subtitle = subtitle
-            } else if (it is AppCompatActivity) {
-                it.supportActionBar?.subtitle = subtitle
-            }
-        }
-    }
-
-    fun setSubtitle(subtitleId: Int) {
-        setSubtitle(getText(subtitleId))
-    }
-
-    fun getSubtitle(): CharSequence? {
-        return activity?.let {
-            when (it) {
-                is NiceActivity -> it.subtitle
-                is AppCompatActivity -> it.supportActionBar?.subtitle
-                else -> null
-            }
-        }
-    }
-
     override fun onContentChanged() {
 
     }
 
 }
-
-var NiceFragment.title: CharSequence?
-    get() = getTitle()
-    set(title) {
-        setTitle(title)
-    }
-
-var NiceFragment.subtitle: CharSequence?
-    get() = getSubtitle()
-    set(subtitle) {
-        setSubtitle(subtitle)
-    }

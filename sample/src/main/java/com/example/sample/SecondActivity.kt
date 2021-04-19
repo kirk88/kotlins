@@ -5,7 +5,7 @@ import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.nice.kotlins.app.NiceActivity
 
-class SecondActivity: NiceActivity(R.layout.activity_second) {
+class SecondActivity : NiceActivity(R.layout.activity_second) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

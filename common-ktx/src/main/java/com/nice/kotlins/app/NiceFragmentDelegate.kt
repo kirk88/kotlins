@@ -23,13 +23,13 @@ internal class NiceFragmentDelegate(
 
     private var subDecor: ViewGroup? = null
 
-    fun onCreate() {
-        if (contentLayoutId != 0) {
+    fun onCreate(){
+        if(contentLayoutId != 0){
             setContentView(contentLayoutId)
         }
     }
 
-    fun onCreateView(): View {
+    fun getSubDecor(): ViewGroup {
         ensureSubDecor()
         return subDecor!!
     }

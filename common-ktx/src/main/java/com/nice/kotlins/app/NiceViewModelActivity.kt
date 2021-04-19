@@ -3,7 +3,6 @@
 package com.nice.kotlins.app
 
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
@@ -88,10 +87,7 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes layoutResId: Int = 0) :
                 if (callback == null) {
                     startActivity(intent)
                 } else {
-                    registerForActivityResult(
-                        ActivityResultContracts.StartActivityForResult(),
-                        callback
-                    ).launch(intent)
+                    activityForResultLauncher.launch(intent, callback)
                 }
             }
             Status.ACTIVITY_RESULT -> {

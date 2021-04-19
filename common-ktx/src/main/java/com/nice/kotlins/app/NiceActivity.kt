@@ -2,7 +2,9 @@
 
 package com.nice.kotlins.app
 
+import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +13,19 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
     AppCompatActivity(contentLayoutId) {
 
     private var subtitle: CharSequence? = null
+
+    val activityForResultLauncher =
+        PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activityForResultLauncher.register(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityForResultLauncher.unregister()
+    }
 
     @CallSuper
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
