@@ -36,7 +36,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
         check(!this.whereApplied) { "Update where was already applied" }
 
         this.whereApplied = true
-        val whereArgsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
+        val whereArgsMap = whereArgs.fold(mutableMapOf<String, Any>()) { map, arg ->
             map[arg.first] = arg.second
             map
         }

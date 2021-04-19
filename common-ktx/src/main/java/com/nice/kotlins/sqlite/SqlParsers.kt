@@ -113,7 +113,7 @@ private fun readColumnsArray(cursor: Cursor): Array<SqlColumnValue> {
 
 private fun readColumnsMap(cursor: Cursor): Map<String, SqlColumnValue> {
     val count = cursor.columnCount
-    val map = hashMapOf<String, SqlColumnValue>()
+    val map = mutableMapOf<String, SqlColumnValue>()
     for (index in 0 until count) {
         map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
     }

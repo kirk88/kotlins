@@ -134,7 +134,7 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
 private val ARG_PATTERN: Pattern = Pattern.compile("([^\\\\])\\{([^{}]+)\\}")
 
 internal fun applyArguments(whereClause: String, vararg whereArgs: Pair<String, Any>): String {
-    val argsMap = whereArgs.fold(hashMapOf<String, Any>()) { map, arg ->
+    val argsMap = whereArgs.fold(mutableMapOf<String, Any>()) { map, arg ->
         map[arg.first] = arg.second
         map
     }
