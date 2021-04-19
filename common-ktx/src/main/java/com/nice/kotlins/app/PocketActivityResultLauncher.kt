@@ -63,6 +63,7 @@ class PocketActivityResultLauncher<I, O>(
     }
 
     fun launch(input: I, callback: ActivityResultCallback<O>) {
+        check(isRegistered) { "Not registered yet" }
         oneShotCallbacks.add(callback)
         delegate.launch(input)
     }
@@ -72,15 +73,18 @@ class PocketActivityResultLauncher<I, O>(
         options: ActivityOptionsCompat?,
         callback: ActivityResultCallback<O>
     ) {
+        check(isRegistered) { "Not registered yet" }
         oneShotCallbacks.add(callback)
         delegate.launch(input, options)
     }
 
     override fun launch(input: I) {
+        check(isRegistered) { "Not registered yet" }
         delegate.launch(input)
     }
 
     override fun launch(input: I, options: ActivityOptionsCompat?) {
+        check(isRegistered) { "Not registered yet" }
         delegate.launch(input, options)
     }
 
