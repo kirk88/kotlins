@@ -98,6 +98,14 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         return items[position]
     }
 
+    fun containsItem(item: T): Boolean {
+        return items.contains(item)
+    }
+
+    fun indexOfItem(item: T): Int {
+        return items.indexOf(item)
+    }
+
     fun isEmpty(): Boolean = items.isEmpty()
 
     open fun getSpanSize(item: T, position: Int): Int {
@@ -232,14 +240,6 @@ fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: 
 
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: () -> T): T {
     return items.getOrNull(position) ?: defaultValue()
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.containsItem(item: T): Boolean {
-    return items.contains(item)
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.indexOfItem(item: T): Int {
-    return items.indexOf(item)
 }
 
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
