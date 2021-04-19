@@ -15,26 +15,12 @@ abstract class ViewBindingRecyclerAdapter<T, VB : ViewBinding>(
         viewType: Int
     ): VB
 
-    abstract fun onBindItemView(
-        binding: VB,
-        item: T,
-        payloads: MutableList<Any>
-    )
-
     final override fun onCreateItemViewHolder(
         inflater: LayoutInflater,
         parent: ViewGroup,
         viewType: Int
     ): ViewBindingHolder<VB> {
         return ViewBindingHolder(onCreateItemView(inflater, parent, viewType))
-    }
-
-    final override fun onBindItemViewHolder(
-        holder: ViewBindingHolder<VB>,
-        item: T,
-        payloads: MutableList<Any>
-    ) {
-        onBindItemView(holder.binding, item, payloads)
     }
 
 }
