@@ -41,12 +41,14 @@ class OkFaker<T> internal constructor(
 
     fun getOrNull(): T? = runCatching { get() }.getOrNull()
 
+    fun getOrDefault(defaultValue: T): T = getOrNull() ?: defaultValue
+
     fun getOrElse(defaultValue: () -> T): T = getOrNull() ?: defaultValue()
 
     fun start() = apply {
         request.enqueue(OkCalbackWrapper(transformer, object : OkCallback<T> {
             override fun onStart() {
-                onStartActions?.forEach { action -> action.onAction()}
+                onStartActions?.forEach { action -> action.onAction() }
             }
 
             override fun onSuccess(result: T) {
@@ -482,6 +484,8 @@ class OkFaker<T> internal constructor(
         fun get(): T = build().get()
 
         fun getOrNull(): T? = build().getOrNull()
+
+        fun getOrDefault(defaultValue: T): T = build().getOrDefault(defaultValue)
 
         fun getOrElse(defaultValue: () -> T): T = build().getOrElse(defaultValue)
 

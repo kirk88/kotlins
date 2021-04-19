@@ -238,8 +238,8 @@ fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: 
     return items.getOrNull(position) ?: defaultValue
 }
 
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: () -> T): T {
-    return items.getOrNull(position) ?: defaultValue()
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
+    return items.getOrNull(position) ?: defaultValue(position)
 }
 
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
