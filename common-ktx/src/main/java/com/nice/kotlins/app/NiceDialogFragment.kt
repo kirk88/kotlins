@@ -11,7 +11,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.DialogFragment
 
-abstract class NiceDialogFragment : DialogFragment(),
+abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) : DialogFragment(),
     NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
@@ -25,6 +25,9 @@ abstract class NiceDialogFragment : DialogFragment(),
         super.onCreate(savedInstanceState)
         activityForResultLauncher.register(this)
         delegate.onCreate()
+        if(contentLayoutId != 0){
+            setContentView(contentLayoutId)
+        }
     }
 
     final override fun onCreateView(

@@ -12,7 +12,7 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
-abstract class NiceFragment : Fragment(),
+abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : Fragment(),
     NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
@@ -26,6 +26,9 @@ abstract class NiceFragment : Fragment(),
         super.onCreate(savedInstanceState)
         activityForResultLauncher.register(this)
         delegate.onCreate()
+        if(contentLayoutId != 0){
+            setContentView(contentLayoutId)
+        }
     }
 
     final override fun onCreateView(

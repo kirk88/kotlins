@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 
-abstract class NiceActivity : AppCompatActivity() {
+abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
+    AppCompatActivity(contentLayoutId) {
 
     private var subtitle: CharSequence? = null
 

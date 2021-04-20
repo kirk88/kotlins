@@ -10,6 +10,7 @@ import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.onClick
+import com.nice.kotlins.helper.string
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
@@ -41,11 +42,18 @@ class MainActivity : NiceActivity() {
             }
         }
 
+        val deviceId = DeviceIdUtil.getDeviceId(this)
 
-        binding.textView
+        binding.textView.string = deviceId
+
+        Log.e("TAGTAG", "deviceId: $deviceId")
 
 
+        //075E7351B1765B249CC9010525484FD8A203E042
+        //075E7351B1765B249CC9010525484FD8A203E042
 
+        //619CBA39E85BBC6FE18C762BEFD1105ADA4F742C
+        //619CBA39E85BBC6FE18C762BEFD1105ADA4F742C
     }
 
 }
