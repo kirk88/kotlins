@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
-import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
@@ -15,9 +14,6 @@ import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class MainActivity : NiceActivity() {
 
@@ -45,22 +41,10 @@ class MainActivity : NiceActivity() {
             }
         }
 
-        lifecycleScope.launch(Dispatchers.Default) {
-            progressView.showProgress("你好啊")
 
-            delay(1000)
-
-            progressView.dismissProgress()
+        binding.textView
 
 
-            delay(200)
-
-            progressView.showProgress("还好吧")
-
-
-            delay(2000)
-            progressView.dismissProgress()
-        }
 
     }
 

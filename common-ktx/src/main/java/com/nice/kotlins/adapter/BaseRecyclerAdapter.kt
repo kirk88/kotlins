@@ -52,7 +52,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     protected fun callOnItemLongClick(holder: VH) {
-        if (setOnItemLongClickListener(holder)) return
+        if (onItemLongClick(holder)) return
         itemLongClickListener?.onItemLongClick(this, holder)
     }
 
@@ -116,7 +116,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         return false
     }
 
-    open fun setOnItemLongClickListener(holder: VH): Boolean {
+    open fun onItemLongClick(holder: VH): Boolean {
         return false
     }
 
@@ -150,7 +150,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
         if (itemLongClickListener != null || itemLongClickable) {
             holder.setOnLongClickListener {
-                if (!setOnItemLongClickListener(holder))
+                if (!onItemLongClick(holder))
                     itemLongClickListener?.onItemLongClick(this, holder) ?: false
                 else true
             }
