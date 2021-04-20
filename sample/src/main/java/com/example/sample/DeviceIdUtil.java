@@ -56,23 +56,23 @@ public class DeviceIdUtil {
             deviceId.append(uuid);
         }
 
-        //生成SHA1，统一DeviceId长度
-        if (deviceId.length() > 0) {
-            try {
-                byte[] hash = getHashByString(deviceId.toString());
-                String sha1 = bytesToHex(hash);
-                if (!TextUtils.isEmpty(sha1)) {
-                    //返回最终的DeviceId
-                    return sha1;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        if (deviceId.length() == 0) {
+            deviceId.append(UUID.randomUUID().toString());
         }
 
-        //如果以上硬件标识数据均无法获得，
-        //则DeviceId默认使用系统随机数，这样保证DeviceId不为空
-        return UUID.randomUUID().toString().replace("-", "");
+        //生成SHA1，统一DeviceId长度
+        try {
+            byte[] hash = getHashByString(deviceId.toString());
+            String sha1 = bytesToHex(hash);
+            if (!TextUtils.isEmpty(sha1)) {
+                //返回最终的DeviceId
+                return sha1;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return deviceId.toString();
     }
 
     //需要获得READ_PHONE_STATE权限，>=6.0，默认返回null
