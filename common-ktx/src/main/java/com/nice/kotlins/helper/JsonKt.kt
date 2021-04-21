@@ -20,12 +20,12 @@ internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): 
     )
 }
 
-inline fun <reified T> String.parseJsonObject(): T {
-    return gson.fromJson(this, T::class.java)
+inline fun <reified T> parseJsonObject(json: String): T {
+    return gson.fromJson(json, T::class.java)
 }
 
-inline fun <reified T> String.parseJsonArray(): List<T> {
-    return gson.fromJson(this, typeOf(ArrayList::class.java, T::class.java))
+inline fun <reified T> parseJsonArray(json: String): List<T> {
+    return gson.fromJson(json, typeOf(ArrayList::class.java, T::class.java))
 }
 
 inline fun <reified T> JsonObject.parse(): T {
