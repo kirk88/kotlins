@@ -16,14 +16,14 @@ fun Activity.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHO
     Snackbar.make(this.window.decorView, message, duration)
 
 
-fun View.snackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this, message, duration)
+fun View.snackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
+    Snackbar.make(this, messageId, duration)
 
-fun Fragment.snackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.requireView(), message, duration)
+fun Fragment.snackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
+    Snackbar.make(this.requireView(), messageId, duration)
 
-fun Activity.snackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.window.decorView, message, duration)
+fun Activity.snackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
+    Snackbar.make(this.window.decorView, messageId, duration)
 
 
 fun View.showSnackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT) {
@@ -38,14 +38,14 @@ fun Activity.showSnackBar(message: CharSequence, duration: Int = Snackbar.LENGTH
     Snackbar.make(this.window.decorView, message, duration).show()
 }
 
-fun View.showSnackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT) {
-    Snackbar.make(this, message, duration).show()
+fun View.showSnackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT) {
+    Snackbar.make(this, messageId, duration).show()
 }
 
-fun Fragment.showSnackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT) {
-    Snackbar.make(this.requireView(), message, duration).show()
+fun Fragment.showSnackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT) {
+    Snackbar.make(this.requireView(), messageId, duration).show()
 }
 
-fun Activity.showSnackBar(@StringRes message: Int, duration: Int = Snackbar.LENGTH_SHORT) {
-    Snackbar.make(this.window.decorView, message, duration).show()
+fun Activity.showSnackBar(@StringRes messageId: Int, duration: Int = Snackbar.LENGTH_SHORT) {
+    Snackbar.make(this.window.decorView, messageId, duration).show()
 }
