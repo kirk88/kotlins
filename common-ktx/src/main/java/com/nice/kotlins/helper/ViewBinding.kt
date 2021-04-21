@@ -45,18 +45,6 @@ inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
 inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
     viewBinding(VB::class.java, binding.root)
 
-fun ViewBinding.attachTo(activity: Activity) = activity.setContentView(root)
-
-fun ViewBinding.attachTo(fragment: NiceFragment) = fragment.setContentView(root)
-
-fun ViewBinding.attachTo(parent: ViewGroup) = parent.addView(root)
-
-fun ViewBinding.attachTo(dialog: Dialog) = dialog.setContentView(root)
-
-fun ViewBinding.attachTo(popupWindow: PopupWindow) {
-    popupWindow.contentView = root
-}
-
 @PublishedApi
 @Suppress("UNCHECKED_CAST")
 internal fun <VB : ViewBinding> viewBinding(
@@ -101,7 +89,6 @@ inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -
 inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
     viewBinding(VB::class.java, binding.root).apply(block).root
 
-
 class FragmentViewBindingLazy<VB : ViewBinding>(
     private val fragment: Fragment,
     private val clazz: Class<VB>
@@ -139,4 +126,16 @@ class FragmentViewBindingLazy<VB : ViewBinding>(
         }
     }
 
+}
+
+fun ViewBinding.attachTo(activity: Activity) = activity.setContentView(root)
+
+fun ViewBinding.attachTo(fragment: NiceFragment) = fragment.setContentView(root)
+
+fun ViewBinding.attachTo(parent: ViewGroup) = parent.addView(root)
+
+fun ViewBinding.attachTo(dialog: Dialog) = dialog.setContentView(root)
+
+fun ViewBinding.attachTo(popupWindow: PopupWindow) {
+    popupWindow.contentView = root
 }
