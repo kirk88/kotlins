@@ -106,7 +106,11 @@ object Status {
 
 }
 
-fun event(what: Int = Status.NONE, message: CharSequence? = null): Event = Event(what, message)
+fun event(what: Int): Event = Event(what)
+
+fun event(message: CharSequence): Event = Event(message = message)
+
+fun event(what: Int, message: CharSequence): Event = Event(what, message)
 
 fun event(events: List<Event>): Event = EventCollection(events = events)
 
