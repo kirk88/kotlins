@@ -37,16 +37,12 @@ class OkFaker<T> internal constructor(
     fun cancel() = request.cancel()
 
     @Throws(IOException::class)
-    fun get(): T = transformer.transformResponse(request.execute())
+    fun execute(): T = transformer.transformResponse(request.execute())
 
-    fun getOrNull(): T? = runCatching { get() }.getOrNull()
+    fun execute(onFailure: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onFailure)
 
-    fun getOrDefault(defaultValue: T): T = getOrNull() ?: defaultValue
-
-    fun getOrElse(defaultValue: () -> T): T = getOrNull() ?: defaultValue()
-
-    fun start() = apply {
-        request.enqueue(OkCalbackWrapper(transformer, object : OkCallback<T> {
+    fun enqueue() = apply {
+        request.enqueue(OkCallbackWrapper(transformer, object : OkCallback<T> {
             override fun onStart() {
                 onStartActions?.forEach { action -> action.onAction() }
             }
@@ -69,7 +65,7 @@ class OkFaker<T> internal constructor(
         }))
     }
 
-    private class OkCalbackWrapper<T>(
+    private class OkCallbackWrapper<T>(
         private val transformer: OkTransformer<T>,
         private val callback: OkCallback<T>
     ) : OkCallback<Response> {
@@ -481,15 +477,11 @@ class OkFaker<T> internal constructor(
         )
 
         @Throws(IOException::class)
-        fun get(): T = build().get()
+        fun execute(): T = build().execute()
 
-        fun getOrNull(): T? = build().getOrNull()
+        fun execute(onFailure: (Throwable) -> T): T = build().execute(onFailure)
 
-        fun getOrDefault(defaultValue: T): T = build().getOrDefault(defaultValue)
-
-        fun getOrElse(defaultValue: () -> T): T = build().getOrElse(defaultValue)
-
-        fun start(): OkFaker<T> = build().start()
+        fun enqueue(): OkFaker<T> = build().enqueue()
 
     }
 
@@ -501,38 +493,26 @@ class OkFaker<T> internal constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpGet")
         fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.GET, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpPost")
         fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.POST, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpDelete")
         fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.DELETE, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpPut")
         fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PUT, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpHead")
         fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.HEAD, CONFIG).apply(block)
 
         @JvmStatic
-        @JvmOverloads
-        @JvmName("httpPatch")
         fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(OkRequestMethod.PATCH, CONFIG).apply(block)
 
@@ -626,12 +606,12 @@ fun requestPairsOf(
 }
 
 fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    emit(suspendBlocking(CoroutineExecutors.IO) { get() })
+    emit(suspendBlocking(CoroutineExecutors.IO) { execute() })
 }
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    emit(suspendBlocking(CoroutineExecutors.IO) { get() })
+    emit(suspendBlocking(CoroutineExecutors.IO) { execute() })
 }
