@@ -6,7 +6,7 @@ internal interface OkCallback<T> {
 
     fun onSuccess(result: T)
 
-    fun onFailure(error: Throwable)
+    fun onError(error: Throwable)
 
     fun onCompletion()
 

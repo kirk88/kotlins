@@ -39,7 +39,7 @@ class OkFaker<T> internal constructor(
     @Throws(IOException::class)
     fun execute(): T = transformer.transformResponse(request.execute())
 
-    fun execute(onFailure: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onFailure)
+    fun execute(onError: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onError)
 
     fun enqueue() = apply {
         request.enqueue(OkCallbackWrapper(transformer, object : OkCallback<T> {
@@ -51,7 +51,7 @@ class OkFaker<T> internal constructor(
                 onSuccessActions?.forEach { action -> action.onAction(result) }
             }
 
-            override fun onFailure(error: Throwable) {
+            override fun onError(error: Throwable) {
                 onErrorActions?.forEach { action -> action.onAction(error) }
             }
 
@@ -77,8 +77,8 @@ class OkFaker<T> internal constructor(
             OkCallbacks.onSuccess(callback) { transformer.transformResponse(result) }
         }
 
-        override fun onFailure(error: Throwable) {
-            OkCallbacks.onFailure(callback) { error }
+        override fun onError(error: Throwable) {
+            OkCallbacks.onError(callback) { error }
         }
 
         override fun onCompletion() {
@@ -479,7 +479,7 @@ class OkFaker<T> internal constructor(
         @Throws(IOException::class)
         fun execute(): T = build().execute()
 
-        fun execute(onFailure: (Throwable) -> T): T = build().execute(onFailure)
+        fun execute(onError: (Throwable) -> T): T = build().execute(onError)
 
         fun enqueue(): OkFaker<T> = build().enqueue()
 

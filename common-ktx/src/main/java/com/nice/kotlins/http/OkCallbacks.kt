@@ -8,7 +8,7 @@ internal object OkCallbacks {
     private const val MSG_WHAT_BASE = 1000000000
     private const val MSG_WHAT_ON_START = MSG_WHAT_BASE + 1
     private const val MSG_WHAT_ON_SUCCESS = MSG_WHAT_BASE + 2
-    private const val MSG_WHAT_ON_FAILURE = MSG_WHAT_BASE + 3
+    private const val MSG_WHAT_ON_ERROR = MSG_WHAT_BASE + 3
     private const val MSG_WHAT_ON_CANCEL = MSG_WHAT_BASE + 4
     private const val MSG_WHAT_ON_COMPLETION = MSG_WHAT_BASE + 5
 
@@ -26,8 +26,8 @@ internal object OkCallbacks {
                     @Suppress("UNCHECKED_CAST") val callback = body.callback as OkCallback<Any>
                     dispatchOnSuccess(callback, body.args[0])
                 }
-                MSG_WHAT_ON_FAILURE -> {
-                    dispatchOnFailure(body.callback, body.args[0] as Throwable)
+                MSG_WHAT_ON_ERROR -> {
+                    dispatchOnError(body.callback, body.args[0] as Throwable)
                 }
                 MSG_WHAT_ON_CANCEL -> {
                     dispatchOnCancel(body.callback)
@@ -37,18 +37,17 @@ internal object OkCallbacks {
     }
 
     fun <T> onSuccess(callback: OkCallback<T>, value: () -> T) {
-        runCatching {
-            value() as Any
-        }.onFailure {
-            HANDLER.obtainMessage(MSG_WHAT_ON_FAILURE, MessageBody(callback, it)).sendToTarget()
-        }.onSuccess {
-            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, it))
+        try {
+            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, value() as Any))
+                .sendToTarget()
+        } catch (error: Throwable) {
+            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, error))
                 .sendToTarget()
         }
     }
 
-    fun onFailure(callback: OkCallback<*>, error: () -> Throwable) {
-        HANDLER.obtainMessage(MSG_WHAT_ON_FAILURE, MessageBody(callback, error())).sendToTarget()
+    fun onError(callback: OkCallback<*>, error: () -> Throwable) {
+        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error())).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>) {
@@ -66,39 +65,39 @@ internal object OkCallbacks {
     private fun dispatchOnStart(callback: OkCallback<*>) {
         try {
             callback.onStart()
-        } catch (error: Exception) {
-            dispatchOnFailure(callback, error)
+        } catch (error: Throwable) {
+            dispatchOnError(callback, error)
         }
     }
 
     private fun dispatchOnCompletion(callback: OkCallback<*>) {
         try {
             callback.onCompletion()
-        } catch (error: Exception) {
-            dispatchOnFailure(callback, error)
+        } catch (error: Throwable) {
+            dispatchOnError(callback, error)
         }
     }
 
     private fun dispatchOnCancel(callback: OkCallback<*>) {
         try {
             callback.onCancel()
-        } catch (error: Exception) {
-            dispatchOnFailure(callback, error)
+        } catch (error: Throwable) {
+            dispatchOnError(callback, error)
         }
     }
 
     private fun <T> dispatchOnSuccess(callback: OkCallback<T>, result: T) {
         try {
             callback.onSuccess(result)
-        } catch (error: Exception) {
-            dispatchOnFailure(callback, error)
+        } catch (error: Throwable) {
+            dispatchOnError(callback, error)
         }
     }
 
-    private fun dispatchOnFailure(callback: OkCallback<*>, error: Throwable) {
+    private fun dispatchOnError(callback: OkCallback<*>, error: Throwable) {
         try {
-            callback.onFailure(error)
-        } catch (_: Exception) {
+            callback.onError(error)
+        } catch (_: Throwable) {
         }
     }
 

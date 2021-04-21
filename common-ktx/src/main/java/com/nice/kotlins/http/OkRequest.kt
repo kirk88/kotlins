@@ -88,7 +88,7 @@ internal class OkRequest(
         }
 
         try {
-            callback.onFailure(error)
+            callback.onError(error)
         } finally {
             callback.onCompletion()
         }
@@ -102,7 +102,7 @@ internal class OkRequest(
         try {
             callback.onSuccess(processResponse(response))
         } catch (error: Throwable) {
-            callback.onFailure(error)
+            callback.onError(error)
         } finally {
             callback.onCompletion()
         }
