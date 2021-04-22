@@ -4,12 +4,14 @@ package com.nice.kotlins.http
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.google.gson.reflect.TypeToken
 import com.nice.kotlins.helper.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.*
 import java.io.File
 import java.io.IOException
+import java.lang.reflect.Type
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -90,7 +92,7 @@ class OkFaker<T> internal constructor(
         }
     }
 
-    class Builder<T> internal constructor(method: OkRequestMethod, config: OkConfig) {
+    class Builder<T>(method: OkRequestMethod, config: OkConfig) {
         private val builder = OkRequest.Builder(method, config)
 
         private var onStartApplied = false
@@ -437,6 +439,14 @@ class OkFaker<T> internal constructor(
             }
         }
 
+        fun mapResponse(clazz: Class<T>) = apply {
+            transformer.mapResponse(clazz)
+        }
+
+        fun mapResponse(type: Type) = apply {
+            transformer.mapResponse(type)
+        }
+
         fun mapError(mapper: OkMapper<Throwable, T>) = apply {
             transformer.mapError(mapper)
         }
@@ -487,34 +497,39 @@ class OkFaker<T> internal constructor(
 
     companion object {
 
-        private val CONFIG = OkConfig()
+        @PublishedApi
+        internal val CONFIG = OkConfig()
 
         @JvmStatic
         fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
-        fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET, CONFIG).apply(block)
+        fun <T> method(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(method, CONFIG).apply(block)
 
         @JvmStatic
-        fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST, CONFIG).apply(block)
+        inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.GET, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE, CONFIG).apply(block)
+        inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.POST, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT, CONFIG).apply(block)
+        inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.DELETE, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD, CONFIG).apply(block)
+        inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.PUT, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH, CONFIG).apply(block)
+        inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.HEAD, CONFIG).mapResponse(T::class.java).apply(block)
+
+        @JvmStatic
+        inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.PATCH, CONFIG).mapResponse(T::class.java).apply(block)
 
     }
 

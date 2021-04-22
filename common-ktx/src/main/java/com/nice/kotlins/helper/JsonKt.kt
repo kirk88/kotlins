@@ -4,13 +4,14 @@ package com.nice.kotlins.helper
 
 import com.google.gson.*
 import com.google.gson.internal.`$Gson$Types`
+import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
 @PublishedApi
 internal val gson = Gson()
 
 @PublishedApi
-internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): Type? {
+internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): Type {
     return `$Gson$Types`.canonicalize(
         `$Gson$Types`.newParameterizedTypeWithOwner(
             null,
@@ -20,12 +21,16 @@ internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): 
     )
 }
 
-inline fun <reified T> parseJsonObject(json: String): T {
-    return gson.fromJson(json, T::class.java)
+fun <T> parseJson(json: String, type: Type): T {
+    return gson.fromJson(json, type)
 }
 
-inline fun <reified T> parseJsonArray(json: String): List<T> {
-    return gson.fromJson(json, typeOf(ArrayList::class.java, T::class.java))
+fun <T> parseJson(json: String, clazz: Class<T>): T {
+    return gson.fromJson(json, clazz)
+}
+
+inline fun <reified T> parseJson(json: String): T {
+    return gson.fromJson(json, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonObject.parse(): T {
@@ -43,14 +48,6 @@ fun Any.toJsonArray(): JsonArray = JsonParser.parseString(toJson()).asJsonArray
 fun Any?.toJsonOrNull(): String? = if (this == null) null else runCatching { toJson() }.getOrNull()
 
 fun Any.toJson(): String = gson.toJson(this)
-
-val JsonArray.values: List<JsonElement>
-    get() {
-        if (size() == 0) {
-            return emptyList()
-        }
-        return this.toList()
-    }
 
 fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
     for ((name, element) in entrySet()) {
