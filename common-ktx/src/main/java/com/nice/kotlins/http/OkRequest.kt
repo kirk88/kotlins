@@ -142,7 +142,7 @@ internal class OkRequest(
     private fun processRequest(request: Request): Request {
         var handledRequest = request
         for (interceptor in requestInterceptors) {
-            handledRequest = interceptor.shouldInterceptRequest(handledRequest)
+            handledRequest = interceptor.intercept(handledRequest)
         }
         return handledRequest
     }
@@ -150,7 +150,7 @@ internal class OkRequest(
     private fun processResponse(response: Response): Response {
         var handledResponse = response
         for (interceptor in responseInterceptors) {
-            handledResponse = interceptor.shouldInterceptResponse(handledResponse)
+            handledResponse = interceptor.intercept(handledResponse)
         }
         return handledResponse
     }
@@ -270,6 +270,7 @@ internal class OkRequest(
         fun password(password: String) = apply {
             urlBuilder.password(password)
         }
+
 
         fun addQueryParameter(name: String, value: String) = apply {
             urlBuilder.addQueryParameter(name, value)

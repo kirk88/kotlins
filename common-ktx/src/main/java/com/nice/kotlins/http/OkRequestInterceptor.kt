@@ -4,6 +4,6 @@ import okhttp3.Request
 
 fun interface OkRequestInterceptor {
 
-    fun shouldInterceptRequest(request: Request): Request
+    fun intercept(request: Request): Request
 
 }

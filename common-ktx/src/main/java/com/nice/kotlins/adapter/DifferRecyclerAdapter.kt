@@ -3,13 +3,11 @@
 package com.nice.kotlins.adapter
 
 import android.content.Context
-import androidx.recyclerview.widget.AdapterListUpdateCallback
-import androidx.recyclerview.widget.AsyncDifferConfig
-import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.AsyncListDiffer.ListListener
-import androidx.recyclerview.widget.DiffUtil
 
 abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapter<T, VH> {
+
 
     override val items: List<T>
         get() = differ.currentList

@@ -16,4 +16,5 @@ class SecondActivity : NiceActivity(R.layout.activity_second) {
 
     }
 
+
 }

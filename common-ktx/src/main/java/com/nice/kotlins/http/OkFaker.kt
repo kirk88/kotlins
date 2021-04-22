@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.flow
 import okhttp3.*
 import java.io.File
 import java.io.IOException
+import java.lang.reflect.Type
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-class OkFaker<T> internal constructor(
+class OkFaker<T> private constructor(
     private val request: OkRequest,
     private val transformer: OkTransformer<T>,
     private val onStartActions: List<SimpleAction>?,
@@ -90,7 +91,7 @@ class OkFaker<T> internal constructor(
         }
     }
 
-    class Builder<T> internal constructor(method: OkRequestMethod, config: OkConfig) {
+    class Builder<T>(method: OkRequestMethod, config: OkConfig) {
         private val builder = OkRequest.Builder(method, config)
 
         private var onStartApplied = false
@@ -372,8 +373,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun parts(vararg parts: RequestBody) = apply {
-            parts.forEach {
+        fun parts(vararg bodies: RequestBody) = apply {
+            bodies.forEach {
                 builder.addPart(it)
             }
         }
@@ -422,11 +423,11 @@ class OkFaker<T> internal constructor(
             builder.tag(type, tag)
         }
 
-        fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
+        fun addRequestInterceptor(interceptor: OkRequestInterceptor) = apply {
             builder.addRequestInterceptor(interceptor)
         }
 
-        fun addResponseInterceptor(interceptor: OkResponseInterceptor) {
+        fun addResponseInterceptor(interceptor: OkResponseInterceptor) = apply {
             builder.addResponseInterceptor(interceptor)
         }
 
@@ -435,6 +436,14 @@ class OkFaker<T> internal constructor(
             if (mapper is OkDownloadMapper) {
                 builder.addRequestInterceptor(mapper.requestInterceptor)
             }
+        }
+
+        fun mapResponse(clazz: Class<T>) = apply {
+            transformer.mapResponse(clazz)
+        }
+
+        fun mapResponse(type: Type) = apply {
+            transformer.mapResponse(type)
         }
 
         fun mapError(mapper: OkMapper<Throwable, T>) = apply {
@@ -487,34 +496,39 @@ class OkFaker<T> internal constructor(
 
     companion object {
 
-        private val CONFIG = OkConfig()
+        @PublishedApi
+        internal val CONFIG = OkConfig()
 
         @JvmStatic
         fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
-        fun <T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET, CONFIG).apply(block)
+        fun <T> method(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(method, CONFIG).apply(block)
 
         @JvmStatic
-        fun <T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST, CONFIG).apply(block)
+        inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.GET, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE, CONFIG).apply(block)
+        inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.POST, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT, CONFIG).apply(block)
+        inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.DELETE, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD, CONFIG).apply(block)
+        inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.PUT, CONFIG).mapResponse(T::class.java).apply(block)
 
         @JvmStatic
-        fun <T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH, CONFIG).apply(block)
+        inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.HEAD, CONFIG).mapResponse(T::class.java).apply(block)
+
+        @JvmStatic
+        inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
+            Builder<T>(OkRequestMethod.PATCH, CONFIG).mapResponse(T::class.java).apply(block)
 
     }
 
@@ -595,7 +609,7 @@ fun requestPairsOf(
                 put(key.toString(), value)
             }
         } else {
-            copyFrom.toJsonObject().forEach { key, value ->
+            for ((key, value) in copyFrom.toJsonObject()) {
                 when {
                     value.isJsonPrimitive -> put(key, value.asString)
                     value.isJsonNull -> put(key, null)

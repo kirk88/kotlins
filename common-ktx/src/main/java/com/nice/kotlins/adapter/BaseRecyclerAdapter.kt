@@ -98,6 +98,18 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         return items[position]
     }
 
+    fun getItemOrNull(position: Int): T? {
+        return items.getOrNull(position)
+    }
+
+    fun getItemOrDefault(position: Int, defaultValue: T): T {
+        return items.getOrNull(position) ?: defaultValue
+    }
+
+    fun getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
+        return items.getOrNull(position) ?: defaultValue(position)
+    }
+
     fun containsItem(item: T): Boolean {
         return items.contains(item)
     }
@@ -134,7 +146,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     override fun getItemViewType(position: Int): Int {
         val item = getItemOrNull(position)
-        return if (item is AdapterItem) item.type else 0
+        return if (item is AdapterItem) item.itemViewType else 0
     }
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -230,34 +242,6 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
 }
 
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? {
-    return items.getOrNull(position)
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T {
-    return items.getOrNull(position) ?: defaultValue
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
-    return items.getOrNull(position) ?: defaultValue(position)
-}
-
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
 
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
-
-fun <T, VH : ItemViewHolder> BaseRecyclerAdapter<T, VH>.onItemClick(listener: (adapter: BaseRecyclerAdapter<T, VH>, holder: VH) -> Unit) {
-    setOnItemClickListener(listener)
-}
-
-fun <T, VH : ItemViewHolder> BaseRecyclerAdapter<T, VH>.onItemLongClick(listener: (adapter: BaseRecyclerAdapter<T, VH>, holder: VH) -> Boolean) {
-    setOnItemLongClickListener(listener)
-}
-
-fun <T, VH : ItemViewHolder> BaseRecyclerAdapter<T, VH>.onItemChildClick(listener: (adapter: BaseRecyclerAdapter<T, VH>, holder: VH, view: View) -> Unit) {
-    setOnItemChildClickListener(listener)
-}
-
-fun <T, VH : ItemViewHolder> BaseRecyclerAdapter<T, VH>.onItemChildLongClick(listener: (adapter: BaseRecyclerAdapter<T, VH>, holder: VH, view: View) -> Boolean) {
-    setOnItemChildLongClickListener(listener)
-}
