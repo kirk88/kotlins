@@ -14,7 +14,7 @@ import java.text.MessageFormat
 open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
     OkDownloadMapper<Response, File>() {
 
-    private val file: File by lazy { File(path + DOWNLOAD_SUFFIX_TMP) }
+    private val file: File = File(path + DOWNLOAD_SUFFIX_TMP)
 
     override fun shouldInterceptRequest(request: Request): Request {
         val range = if (continuing) file.length() else 0L
@@ -23,7 +23,6 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
         ).build()
     }
-
 
     override fun map(value: Response): File {
         if (file.exists() && !continuing) {
@@ -103,4 +102,5 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
             } else throw IOException("Rename file failed")
         }
     }
+
 }

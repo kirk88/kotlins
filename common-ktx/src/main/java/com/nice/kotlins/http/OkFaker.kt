@@ -4,7 +4,6 @@ package com.nice.kotlins.http
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.google.gson.reflect.TypeToken
 import com.nice.kotlins.helper.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,7 +15,7 @@ import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-class OkFaker<T> internal constructor(
+class OkFaker<T> private constructor(
     private val request: OkRequest,
     private val transformer: OkTransformer<T>,
     private val onStartActions: List<SimpleAction>?,
@@ -374,8 +373,8 @@ class OkFaker<T> internal constructor(
             }
         }
 
-        fun parts(vararg parts: RequestBody) = apply {
-            parts.forEach {
+        fun parts(vararg bodies: RequestBody) = apply {
+            bodies.forEach {
                 builder.addPart(it)
             }
         }
@@ -424,11 +423,11 @@ class OkFaker<T> internal constructor(
             builder.tag(type, tag)
         }
 
-        fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
+        fun addRequestInterceptor(interceptor: OkRequestInterceptor) = apply {
             builder.addRequestInterceptor(interceptor)
         }
 
-        fun addResponseInterceptor(interceptor: OkResponseInterceptor) {
+        fun addResponseInterceptor(interceptor: OkResponseInterceptor) = apply {
             builder.addResponseInterceptor(interceptor)
         }
 

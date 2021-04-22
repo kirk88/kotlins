@@ -43,7 +43,7 @@ dependencies {
     api deps.kotlinStdlib
     api deps.kotlinCoroutinesCore
     api deps.kotlinCoroutinesAndroid
-    api deps.kotlinLifecycleViewmodel
+    api deps.kotlinLifecycleViewmodelKtx
     api deps.kotlinLifecycleViewmodelSavedstate
     api deps.kotlinLifecycleRuntime
     api deps.kotlinLifecycleLivedata
