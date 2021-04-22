@@ -1,7 +1,6 @@
 package com.nice.kotlins.http
 
 import com.nice.kotlins.helper.parseJson
-import okhttp3.OkHttpClient
 import okhttp3.Response
 import java.lang.reflect.Type
 
@@ -51,40 +50,4 @@ internal class OkTransformer<T> {
         }
 
     }
-}
-
-data class Test(
-    val code: Int,
-    val data: Data,
-    val msg: String
-) {
-
-    data class Data(
-        val id: String,
-        val username: String,
-        val email: String,
-        val devices: String?
-    )
-
-}
-
-fun main() {
-
-    OkFaker.configSetter().client {
-        OkHttpClient()
-    }.baseUrl("http://101.132.255.180:8888")
-        .apply()
-
-    val result =
-        OkFaker.get<Test>().client(OkHttpClient()).url("/user/login")
-            .headers {
-                "username" and "1231"
-            }
-            .queryParameters {
-                "username" and 1
-                "password" and 1
-            }.execute()
-
-    println(result)
-
 }

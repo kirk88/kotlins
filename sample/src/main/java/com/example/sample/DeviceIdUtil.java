@@ -23,6 +23,7 @@ public class DeviceIdUtil {
      *
      * @param context 上下文
      * @return 设备硬件标识
+     *
      */
     public static String getDeviceId(Context context) {
         final StringBuilder deviceId = new StringBuilder();

@@ -2,6 +2,7 @@
 
 package com.nice.kotlins.helper
 
+import android.view.View
 import com.google.gson.*
 import com.google.gson.internal.`$Gson$Types`
 import com.google.gson.reflect.TypeToken
@@ -48,6 +49,12 @@ fun Any.toJsonArray(): JsonArray = JsonParser.parseString(toJson()).asJsonArray
 fun Any?.toJsonOrNull(): String? = if (this == null) null else runCatching { toJson() }.getOrNull()
 
 fun Any.toJson(): String = gson.toJson(this)
+
+fun JsonObject.isEmpty() = size() == 0
+
+fun JsonObject.isNotEmpty() = size() != 0
+
+operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> = entrySet().iterator()
 
 fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
     for ((name, element) in entrySet()) {

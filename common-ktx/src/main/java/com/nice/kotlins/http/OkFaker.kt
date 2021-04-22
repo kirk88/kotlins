@@ -609,7 +609,7 @@ fun requestPairsOf(
                 put(key.toString(), value)
             }
         } else {
-            copyFrom.toJsonObject().forEach { key, value ->
+            for ((key, value) in copyFrom.toJsonObject()) {
                 when {
                     value.isJsonPrimitive -> put(key, value.asString)
                     value.isJsonNull -> put(key, null)
