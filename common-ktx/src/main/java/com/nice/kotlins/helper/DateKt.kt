@@ -17,6 +17,9 @@ fun Date.toDateString(pattern: String = DEFAULT_TIME_PATTERN): String =
 fun String.toDate(pattern: String = DEFAULT_TIME_PATTERN): Date =
     runCatching { getFormatter(pattern).parse(this) }.getOrElse { Date() }
 
+fun String.toDateOrNull(pattern: String = DEFAULT_TIME_PATTERN): Date? =
+    runCatching { getFormatter(pattern).parse(this) }.getOrNull()
+
 fun Long.asDate(): Date = Date(this)
 
 fun String.asDate(): Date = Date(this.toLong())
