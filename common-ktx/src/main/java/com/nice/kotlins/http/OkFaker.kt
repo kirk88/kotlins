@@ -42,6 +42,8 @@ class OkFaker<T> private constructor(
 
     fun execute(onError: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onError)
 
+    fun executeOrNull(): T? = runCatching { execute() }.getOrNull()
+
     fun enqueue() = apply {
         request.enqueue(OkCallbackWrapper(transformer, object : OkCallback<T> {
             override fun onStart() {
@@ -489,6 +491,8 @@ class OkFaker<T> private constructor(
         fun execute(): T = build().execute()
 
         fun execute(onError: (Throwable) -> T): T = build().execute(onError)
+
+        fun executeOrNull(): T? = build().executeOrNull()
 
         fun enqueue(): OkFaker<T> = build().enqueue()
 
