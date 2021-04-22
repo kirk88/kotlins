@@ -11,12 +11,12 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 
-fun Context.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
+fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
-fun Context.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? =
+fun Context.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? =
     ContextCompat.getColorStateList(this, resId)
 
-fun Context.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
+fun Context.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
     ContextCompat.getDrawable(
         this,
         resId
@@ -31,18 +31,18 @@ fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int =
 fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int =
     resources.getDimensionPixelSize(resId)
 
-fun Fragment.getCompatColor(@ColorRes resId: Int): Int = ContextCompat.getColor(
+fun Fragment.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(
     requireContext(),
     resId
 )
 
-fun Fragment.getCompatColorStateList(@ColorRes resId: Int): ColorStateList? =
+fun Fragment.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? =
     ContextCompat.getColorStateList(
         requireContext(),
         resId
     )
 
-fun Fragment.getCompatDrawable(@DrawableRes resId: Int): Drawable = requireNotNull(
+fun Fragment.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
     ContextCompat.getDrawable(
         requireContext(),
         resId
