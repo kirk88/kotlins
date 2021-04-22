@@ -14,3 +14,11 @@ fun String.decodeBase64ToString(
     charset: Charset = Charsets.UTF_8,
     flag: Int = Base64.DEFAULT
 ): String = Base64.decode(this.toByteArray(charset), flag).decodeToString()
+
+fun ByteArray.encodeBase64ToString(
+    flag: Int = Base64.DEFAULT
+): String = Base64.encode(this, flag).decodeToString()
+
+fun ByteArray.decodeBase64ToString(
+    flag: Int = Base64.DEFAULT
+): String = Base64.decode(this, flag).decodeToString()
