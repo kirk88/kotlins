@@ -1,5 +1,7 @@
 package com.example.sample
 
+import android.R.attr.left
+import android.R.attr.right
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -20,6 +22,7 @@ import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.divider.Divider
 import com.nice.kotlins.widget.divider.DividerBuilder
 import com.nice.kotlins.widget.divider.XDividerItemDecoration
+
 
 class SecondFragment : NiceFragment() {
 
@@ -65,8 +68,13 @@ class SecondFragment : NiceFragment() {
         binding.recyclerView.addItemDecoration(object: XDividerItemDecoration(){
             override fun getDivider(parent: RecyclerView, child: View, position: Int): Divider {
                 val layout = parent.layoutManager as GridLayoutManager
+                val spanCount = layout.spanCount
+                val eachWidth: Int = (spanCount - 1) * 100 / spanCount
+                val left = position % spanCount * (100 - eachWidth)
+                val right = eachWidth - left
                 return DividerBuilder(requireContext())
-                    .right(100, 150, visible = position % layout.spanCount != layout.spanCount - 1)
+                    .left(left, visible = false)
+                    .right(100, offset = right, visible = position % spanCount != spanCount - 1)
                     .bottom(100)
                     .build()
             }
