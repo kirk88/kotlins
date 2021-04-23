@@ -24,43 +24,31 @@ fun <T, VH : ItemViewHolder> adapterBuilder(context: Context): RecyclerAdapterBu
 fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.typedBy(
     selector: AdapterItemViewTypeSelector
 ) = apply {
-    setItemViewTypeSelector(selector)
+    itemViewTypeSelector = selector
 }
 
 fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.add(
     viewType: Int = 0,
     creator: ViewHolderCreator<out VH>
 ) = apply {
-    addViewHolderCreator(viewType, creator)
+    @Suppress("UNCHECKED_CAST")
+    viewHolderCreators[viewType] = creator as ViewHolderCreator<VH>
 }
 
 fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.bind(
     viewType: Int = 0,
     binder: ViewHolderBinder<out T, out VH>
 ) = apply {
-    addViewHolderBinder(viewType, binder)
+    @Suppress("UNCHECKED_CAST")
+    viewHolderBinders[viewType] = binder as ViewHolderBinder<T, VH>
 }
 
 class RecyclerAdapterBuilder<T, VH : ItemViewHolder>(context: Context) :
     CommonRecyclerAdapter<T, VH>(context) {
 
-    private var itemViewTypeSelector: AdapterItemViewTypeSelector? = null
-    private val viewHolderBuilders = mutableMapOf<Int, ViewHolderCreator<VH>>()
-    private val viewHolderBinders = mutableMapOf<Int, ViewHolderBinder<T, VH>>()
-
-    internal fun addViewHolderCreator(viewType: Int, creator: ViewHolderCreator<out VH>) {
-        @Suppress("UNCHECKED_CAST")
-        viewHolderBuilders[viewType] = creator as ViewHolderCreator<VH>
-    }
-
-    internal fun addViewHolderBinder(viewType: Int, binder: ViewHolderBinder<out T, out VH>) {
-        @Suppress("UNCHECKED_CAST")
-        viewHolderBinders[viewType] = binder as ViewHolderBinder<T, VH>
-    }
-
-    internal fun setItemViewTypeSelector(selector: AdapterItemViewTypeSelector) {
-        itemViewTypeSelector = selector
-    }
+    internal var itemViewTypeSelector: AdapterItemViewTypeSelector? = null
+    internal val viewHolderCreators = mutableMapOf<Int, ViewHolderCreator<VH>>()
+    internal val viewHolderBinders = mutableMapOf<Int, ViewHolderBinder<T, VH>>()
 
     override fun getItemViewType(position: Int): Int {
         return itemViewTypeSelector?.select(position) ?: super.getItemViewType(position)
@@ -71,7 +59,7 @@ class RecyclerAdapterBuilder<T, VH : ItemViewHolder>(context: Context) :
         parent: ViewGroup,
         viewType: Int
     ): VH {
-        return viewHolderBuilders.getValue(viewType).create(inflater, parent)
+        return viewHolderCreators.getValue(viewType).create(inflater, parent)
     }
 
     override fun onBindItemViewHolder(holder: VH, item: T, payloads: MutableList<Any>) {

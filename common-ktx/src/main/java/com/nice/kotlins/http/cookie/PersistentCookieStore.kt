@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.http.cookie
 
 import android.content.Context
@@ -8,6 +10,7 @@ import okhttp3.Cookie
 import okhttp3.HttpUrl
 import okhttp3.internal.and
 import java.io.*
+import java.net.CookieManager
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,7 +46,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
         prefsWriter.apply()
     }
 
-    override fun set(httpUrl: HttpUrl, cookie: Cookie) {
+    override fun add(httpUrl: HttpUrl, cookie: Cookie) {
         if (omitNonPersistentCookies && !cookie.persistent) {
             return
         }
@@ -54,7 +57,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
         if (!cookies.containsKey(hostKey)) {
             cookies[hostKey] = ConcurrentHashMap()
         }
-        cookies.getValue(hostKey)[name!!] = cookie
+        cookies.getValue(hostKey)[name] = cookie
 
         // Save cookie into persistent store
         val prefsWriter = cookiePrefs.edit()
@@ -65,29 +68,29 @@ class PersistentCookieStore(context: Context) : CookieStore {
         prefsWriter.apply()
     }
 
-    override fun set(httpUrl: HttpUrl, cookies: List<Cookie>) {
+    override fun add(httpUrl: HttpUrl, cookies: List<Cookie>) {
         for (cookie in cookies) {
             if (isCookieExpired(cookie)) {
                 continue
             }
-            this.set(httpUrl, cookie)
+            this.add(httpUrl, cookie)
         }
     }
 
     override fun get(httpUrl: HttpUrl): List<Cookie> {
-        return this[hostName(httpUrl)]
+        return getCookies(hostName(httpUrl))
     }
 
     override fun getCookies(): List<Cookie> {
         val result = ArrayList<Cookie>()
         for (hostKey in cookies.keys) {
-            result.addAll(this[hostKey])
+            result.addAll(getCookies(hostKey))
         }
         return result
     }
 
     /** 获取cookie集合  */
-    private operator fun get(hostKey: String): List<Cookie> {
+    private fun getCookies(hostKey: String): List<Cookie> {
         val result = ArrayList<Cookie>()
         if (cookies.containsKey(hostKey)) {
             val cookies: Collection<Cookie> = cookies.getValue(hostKey).values
@@ -103,6 +106,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
     }
 
     override fun remove(httpUrl: HttpUrl, cookie: Cookie): Boolean {
+        CookieManager()
         return this.remove(hostName(httpUrl), cookie)
     }
 
@@ -146,8 +150,8 @@ class PersistentCookieStore(context: Context) : CookieStore {
         return if (httpUrl.host.startsWith(HOST_NAME_PREFIX)) httpUrl.host else HOST_NAME_PREFIX + httpUrl.host
     }
 
-    private fun cookieName(cookie: Cookie?): String? {
-        return if (cookie == null) null else cookie.name + cookie.domain
+    private fun cookieName(cookie: Cookie): String {
+        return cookie.name + cookie.domain
     }
 
     private fun encodeCookie(cookie: SerializableCookie?): String? {
@@ -157,7 +161,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
             val outputStream = ObjectOutputStream(os)
             outputStream.writeObject(cookie)
         } catch (e: IOException) {
-            Log.d(LOG_TAG, "IOException in encodeCookie", e)
+            Log.d(TAG, "IOException in encodeCookie", e)
             return null
         }
         return byteArrayToHexString(os.toByteArray())
@@ -171,9 +175,9 @@ class PersistentCookieStore(context: Context) : CookieStore {
             val objectInputStream = ObjectInputStream(byteArrayInputStream)
             cookie = (objectInputStream.readObject() as SerializableCookie).getCookie()
         } catch (e: IOException) {
-            Log.d(LOG_TAG, "IOException in decodeCookie", e)
+            Log.d(TAG, "IOException in decodeCookie", e)
         } catch (e: ClassNotFoundException) {
-            Log.d(LOG_TAG, "ClassNotFoundException in decodeCookie", e)
+            Log.d(TAG, "ClassNotFoundException in decodeCookie", e)
         }
         return cookie
     }
@@ -205,7 +209,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
     }
 
     companion object {
-        private const val LOG_TAG = "PersistentCookieStore"
+        private const val TAG = "PersistentCookieStore"
         private const val COOKIE_PREFS = "CookiePrefsFile"
         private const val HOST_NAME_PREFIX = "host_"
         private const val COOKIE_NAME_PREFIX = "cookie_"

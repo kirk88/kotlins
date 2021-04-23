@@ -50,6 +50,12 @@ class MainActivity : NiceActivity() {
         binding.textView.string = deviceId
 
         Log.e("TAGTAG", "deviceId: $deviceId")
+
+
+        //075E7351B1765B249CC9010525484FD8A203E042
+        //075E7351B1765B249CC9010525484FD8A203E042
+
+        //619CBA39E85BBC6FE18C762BEFD1105ADA4F742C
     }
 
 }

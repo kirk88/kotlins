@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.EventLifecycleObserver
 import com.nice.kotlins.event.Status
-import com.nice.kotlins.helper.toast
 import com.nice.kotlins.viewmodel.ViewModelController
 import com.nice.kotlins.viewmodel.ViewModelEventDispatcher
 import com.nice.kotlins.viewmodel.ViewModelEvents
@@ -16,6 +15,7 @@ import com.nice.kotlins.viewmodel.ViewModelOwner
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.RefreshView
+import com.nice.kotlins.widget.TipsView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     NiceFragment(contentLayoutId),
@@ -23,11 +23,13 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
-    open val refreshView: RefreshView? = null
-
     open val loaderView: LoaderView? = null
 
+    open val refreshView: RefreshView? = null
+
     open val progressView: ProgressView? = null
+
+    open val tipsView: TipsView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +62,8 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
 
     override fun onViewModelEvent(event: Event): Boolean {
         when (event.what) {
-            Status.SHOW_PROGRESS -> progressView?.showProgress(event.message)
-            Status.DISMISS_PROGRESS -> progressView?.dismissProgress()
+            Status.SHOW_PROGRESS -> progressView?.show(event.message)
+            Status.DISMISS_PROGRESS -> progressView?.dismiss()
             Status.REFRESH_SUCCESS -> refreshView?.finishRefresh()
             Status.LOADMORE_SUCCESS -> refreshView?.finishLoadMore()
             Status.LOADMORE_SUCCESS_NO_MORE -> refreshView?.finishLoadMore(false)
@@ -82,7 +84,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
             Status.SHOW_CONTENT -> loaderView?.showContent()
             Status.ACTIVITY_FINISH -> activity?.finish()
             Status.ACTIVITY_START -> {
-                val intent = event.intent ?: return false
+                val intent = event.intent ?: return true
                 val callback = event.resultCallback
                 if (callback == null) {
                     startActivity(intent)
@@ -94,7 +96,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
                 it.setResult(event.resultCode, event.intent)
                 it.finish()
             }
-            else -> event.message?.let { toast(it) }
+            else -> event.message?.let { tipsView?.show(it) }
         }
         return false
     }

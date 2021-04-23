@@ -2,7 +2,6 @@
 
 package com.nice.kotlins.helper
 
-import android.view.View
 import com.google.gson.*
 import com.google.gson.internal.`$Gson$Types`
 import com.google.gson.reflect.TypeToken

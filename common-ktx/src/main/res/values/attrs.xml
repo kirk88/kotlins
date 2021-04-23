@@ -32,7 +32,7 @@
         <attr name="errorButtonBackground" format="reference" />
         <attr name="errorButtonVisible" format="boolean" />
 
-        <attr name="loadingProgressColor" format="color"/>
+        <attr name="loadingProgressColor" format="color" />
         <attr name="loadingProgressDrawable" format="reference" />
         <attr name="loadingText" format="string" />
         <attr name="loadingTextColor" format="color" />
@@ -47,17 +47,17 @@
         <attr name="subtitle" />
         <attr name="subtitleTextAppearance" />
         <attr name="subtitleTextColor" />
-        <attr name="titleMargin"/>
-        <attr name="titleMarginStart"/>
-        <attr name="titleMarginEnd"/>
-        <attr name="titleMarginTop"/>
-        <attr name="titleMarginBottom"/>
-        <attr name="contentInsetStart"/>
-        <attr name="contentInsetEnd"/>
-        <attr name="contentInsetLeft"/>
-        <attr name="contentInsetRight"/>
-        <attr name="contentInsetStartWithNavigation"/>
-        <attr name="contentInsetEndWithActions"/>
+        <attr name="titleMargin" />
+        <attr name="titleMarginStart" />
+        <attr name="titleMarginEnd" />
+        <attr name="titleMarginTop" />
+        <attr name="titleMarginBottom" />
+        <attr name="contentInsetStart" />
+        <attr name="contentInsetEnd" />
+        <attr name="contentInsetLeft" />
+        <attr name="contentInsetRight" />
+        <attr name="contentInsetStartWithNavigation" />
+        <attr name="contentInsetEndWithActions" />
         <attr name="popupTheme" />
         <attr name="menu" />
         <attr name="navigationIcon" />

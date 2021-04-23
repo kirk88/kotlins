@@ -6,25 +6,24 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 
-class SerializableCookie(@field:Transient private val cookie: Cookie) : Serializable {
+class SerializableCookie(@field:Transient private val defaultCookie: Cookie) : Serializable {
     @Transient
-    private var clientCookie: Cookie? = null
+    private var cookie: Cookie? = null
 
     fun getCookie(): Cookie {
-        return clientCookie ?: cookie
+        return cookie ?: defaultCookie
     }
 
     @Throws(IOException::class)
     private fun writeObject(outputStream: ObjectOutputStream) {
-        outputStream.writeObject(cookie.name)
-        outputStream.writeObject(cookie.value)
-        outputStream.writeLong(cookie.expiresAt)
-        outputStream.writeObject(cookie.domain)
-        outputStream.writeObject(cookie.path)
-        outputStream.writeBoolean(cookie.secure)
-        outputStream.writeBoolean(cookie.httpOnly)
-        outputStream.writeBoolean(cookie.hostOnly)
-        outputStream.writeBoolean(cookie.persistent)
+        outputStream.writeObject(defaultCookie.name)
+        outputStream.writeObject(defaultCookie.value)
+        outputStream.writeLong(defaultCookie.expiresAt)
+        outputStream.writeObject(defaultCookie.domain)
+        outputStream.writeObject(defaultCookie.path)
+        outputStream.writeBoolean(defaultCookie.secure)
+        outputStream.writeBoolean(defaultCookie.httpOnly)
+        outputStream.writeBoolean(defaultCookie.hostOnly)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
@@ -37,7 +36,6 @@ class SerializableCookie(@field:Transient private val cookie: Cookie) : Serializ
         val secure = inputStream.readBoolean()
         val httpOnly = inputStream.readBoolean()
         val hostOnly = inputStream.readBoolean()
-        val persistent = inputStream.readBoolean()
         val builder = Cookie.Builder()
             .name(name)
             .value(value)
@@ -46,7 +44,7 @@ class SerializableCookie(@field:Transient private val cookie: Cookie) : Serializ
         if (hostOnly) builder.hostOnlyDomain(domain) else builder.domain(domain)
         if (secure) builder.secure()
         if (httpOnly) builder.httpOnly()
-        clientCookie = builder.build()
+        cookie = builder.build()
     }
 
     companion object {

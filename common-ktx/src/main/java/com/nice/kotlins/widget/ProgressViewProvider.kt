@@ -45,9 +45,21 @@ internal class DefaultProgressViewFactory(private val parent: View) : ProgressVi
 
 }
 
-internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
+internal class DefaultProgressView(parent: View) : ProgressView {
 
     private val view: View? by weak { parent.rootView }
+
+    private val popup: PopupWindow by lazy {
+        PopupWindow().apply {
+            width = WindowManager.LayoutParams.WRAP_CONTENT
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
+            animationStyle = R.style.Animation_Progress_Popup
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            contentView = View.inflate(parent.context, R.layout.abc_dialog_progress_view, null)
+        }
+    }
 
     private var messageText: CharSequence? = null
 
@@ -58,7 +70,7 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         isPostShow = false
         if (!isDismissed) {
             startTime = System.currentTimeMillis()
-            show()
+            showInternal()
         }
     }
 
@@ -66,28 +78,18 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
     private val hideRunnable: Runnable = Runnable {
         isPostHide = false
         startTime = -1L
-        dismiss()
+        dismissInternal()
     }
 
-    init {
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
-        inputMethodMode = INPUT_METHOD_NOT_NEEDED
-        animationStyle = R.style.Animation_Progress_Popup
-        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-        contentView = View.inflate(parent.context, R.layout.abc_dialog_progress_view, null)
-    }
-
-    override fun showProgress(message: CharSequence?) {
+    override fun show(message: CharSequence?) {
         delayShow(message)
     }
 
-    override fun showProgress(messageId: Int) {
+    override fun show(messageId: Int) {
         delayShow(view?.context?.getText(messageId))
     }
 
-    override fun dismissProgress() {
+    override fun dismiss() {
         delayHide()
     }
 
@@ -119,13 +121,17 @@ internal class DefaultProgressView(parent: View) : PopupWindow(), ProgressView {
         }
     }
 
-    private fun show() {
-        findViewById<TextView>(R.id.message)?.apply {
+    private fun showInternal() {
+        popup.findViewById<TextView>(R.id.message)?.apply {
             text = messageText.ifNullOrEmpty {
                 context.getText(R.string.loader_progress_tip)
             }
         }
-        view?.let { showAtLocation(it, Gravity.CENTER, 0, 0) }
+        view?.let { popup.showAtLocation(it, Gravity.CENTER, 0, 0) }
+    }
+
+    private fun dismissInternal() {
+        popup.dismiss()
     }
 
     private fun removeCallbacks(runnable: Runnable) {

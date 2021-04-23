@@ -5,9 +5,9 @@ import okhttp3.HttpUrl
 
 interface CookieStore {
 
-    operator fun set(httpUrl: HttpUrl, cookie: Cookie)
+    fun add(httpUrl: HttpUrl, cookie: Cookie)
 
-    operator fun set(httpUrl: HttpUrl, cookies: List<Cookie>)
+    fun add(httpUrl: HttpUrl, cookies: List<Cookie>)
 
     operator fun get(httpUrl: HttpUrl): List<Cookie>
 

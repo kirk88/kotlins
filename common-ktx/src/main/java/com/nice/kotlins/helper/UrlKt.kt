@@ -8,15 +8,15 @@ fun String.toUrl(): URL = URL(this)
 
 operator fun URL.plus(spec: String): URL = URL(this, spec)
 
-fun String.isFileUrl(): Boolean = UrlGuess.isFileUrl(this)
+fun String.isFileUrl(): Boolean = GuessUrl.isFileUrl(this)
 
-fun String.isContentUrl(): Boolean = UrlGuess.isContentUrl(this)
+fun String.isContentUrl(): Boolean = GuessUrl.isContentUrl(this)
 
-fun String.isAssetUrl(): Boolean = UrlGuess.isAssetUrl(this)
+fun String.isAssetUrl(): Boolean = GuessUrl.isAssetUrl(this)
 
-fun String.isNetworkUrl(): Boolean = UrlGuess.isNetworkUrl(this)
+fun String.isNetworkUrl(): Boolean = GuessUrl.isNetworkUrl(this)
 
-internal object UrlGuess {
+internal object GuessUrl {
 
     const val ASSET_BASE = "file:///android_asset/"
 
@@ -57,6 +57,5 @@ internal object UrlGuess {
         return url.length > 7 &&
                 url.substring(0, 8).equals(HTTPS_BASE, ignoreCase = true)
     }
-
 
 }

@@ -23,7 +23,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     private var itemAnimation: ItemViewAnimation? = null
     private var itemClickable: Boolean = false
     private var itemLongClickable: Boolean = false
-    private var isAttachToRecyclerView: Boolean = false
+    private var isAttachedToRecyclerView: Boolean = false
 
     protected val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -71,7 +71,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
             return
         }
         this.itemClickable = itemClickable
-        if (isAttachToRecyclerView) {
+        if (isAttachedToRecyclerView) {
             notifyDataSetChanged()
         }
     }
@@ -81,7 +81,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
             return
         }
         this.itemLongClickable = itemLongClickable
-        if (isAttachToRecyclerView) {
+        if (isAttachedToRecyclerView) {
             notifyDataSetChanged()
         }
     }
@@ -90,24 +90,12 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         this.itemAnimation = itemAnimation
     }
 
-    fun resetItemAnimation() {
-        this.itemAnimation?.reset()
+    fun getItemAnimation(): ItemViewAnimation? {
+        return this.itemAnimation
     }
 
     fun getItem(position: Int): T {
         return items[position]
-    }
-
-    fun getItemOrNull(position: Int): T? {
-        return items.getOrNull(position)
-    }
-
-    fun getItemOrDefault(position: Int, defaultValue: T): T {
-        return items.getOrNull(position) ?: defaultValue
-    }
-
-    fun getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
-        return items.getOrNull(position) ?: defaultValue(position)
     }
 
     fun containsItem(item: T): Boolean {
@@ -120,7 +108,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     fun isEmpty(): Boolean = items.isEmpty()
 
-    open fun getSpanSize(item: T, position: Int): Int {
+    open fun getSpanSize(position: Int): Int {
         return 1
     }
 
@@ -211,15 +199,13 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        isAttachToRecyclerView = true
+        isAttachedToRecyclerView = true
 
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    return getItemOrNull(position)?.let {
-                        getSpanSize(it, position)
-                    } ?: manager.spanCount
+                    return this@BaseRecyclerAdapter.getSpanSize(position)
                 }
             }
         }
@@ -227,7 +213,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        isAttachToRecyclerView = false
+        isAttachedToRecyclerView = false
     }
 
     @CallSuper
@@ -242,6 +228,18 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
 }
 
-fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
-
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
+
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? {
+    return items.getOrNull(position)
+}
+
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T {
+    return items.getOrNull(position) ?: defaultValue
+}
+
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
+    return items.getOrNull(position) ?: defaultValue(position)
+}
+
+fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()

@@ -18,16 +18,12 @@ open class Event(
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
-    var intent: Intent? = null
+    internal var intent: Intent? = null
         private set
-    var resultCode: Int = Activity.RESULT_OK
+    internal var resultCode: Int = Activity.RESULT_OK
         private set
-    var resultCallback: ActivityResultCallback<ActivityResult>? = null
+    internal var resultCallback: ActivityResultCallback<ActivityResult>? = null
         private set
-
-    operator fun set(key: String, value: Any?) {
-        this.extras[key] = value
-    }
 
     operator fun <T : Any> get(key: String): T? {
         @Suppress("UNCHECKED_CAST")
@@ -76,6 +72,8 @@ fun <T : Any> Event.getValue(key: String): T = requireNotNull(get(key)) {
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
 
 fun <T : Any?> Event.getOrElse(key: String, defaultValue: () -> T): T = get(key) ?: defaultValue()
+
+operator fun Event.set(key: String, value: Any?) = put(key, value)
 
 fun Event.putAll(vararg extras: Pair<String, Any?>) = putAll(extras.toMap())
 

@@ -3,6 +3,9 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.ArrayAdapter
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.sample.databinding.FragmentSecondBinding
 import com.example.sample.databinding.ItemRecyclerViewBinding
 import com.nice.kotlins.adapter.ViewBindingHolder
@@ -14,6 +17,9 @@ import com.nice.kotlins.app.title
 import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.toast
 import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.widget.divider.Divider
+import com.nice.kotlins.widget.divider.DividerBuilder
+import com.nice.kotlins.widget.divider.XDividerItemDecoration
 
 class SecondFragment : NiceFragment() {
 
@@ -33,10 +39,6 @@ class SecondFragment : NiceFragment() {
         val adapter =
             object : ViewBindingRecyclerAdapter<String, ItemRecyclerViewBinding>(requireContext()) {
 
-                init {
-                    setItemClickable(true)
-                }
-
                 override fun onCreateItemView(
                     inflater: LayoutInflater,
                     parent: ViewGroup,
@@ -54,16 +56,23 @@ class SecondFragment : NiceFragment() {
                     holder.binding.title.text = item
                 }
 
-                override fun onItemClick(holder: ViewBindingHolder<ItemRecyclerViewBinding>): Boolean {
-                    Log.e("TAGTAG", "onItemCLick")
-                    return super.onItemClick(holder)
-                }
-
             }
 
         binding.recyclerView.adapter = adapter
 
-        adapter += listOf("abcd", "abcde", "abcdef")
+        adapter += listOf("abcd", "abcde", "abcdef","abcd", "abcde", "abcdef","abcd", "abcde", "abcdef","abcd", "abcde", "abcdef","abcd", "abcde", "abcdef","abcd", "abcde", "abcdef")
+
+        binding.recyclerView.addItemDecoration(object: XDividerItemDecoration(){
+            override fun getDivider(parent: RecyclerView, child: View, position: Int): Divider {
+                val layout = parent.layoutManager as GridLayoutManager
+                return DividerBuilder(requireContext())
+                    .right(100, visible = position % layout.spanCount != layout.spanCount - 1)
+                    .bottom(100)
+                    .build()
+            }
+        })
+
+        binding.listView.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, listOf("abcd", "abcde", "abcdef"))
 
         Log.e("TAGTAG", "onCreate")
     }

@@ -2,9 +2,9 @@ package com.nice.kotlins.widget
 
 interface ProgressView {
 
-    fun showProgress(message: CharSequence? = null)
+    fun show(message: CharSequence? = null)
 
-    fun showProgress(messageId: Int)
+    fun show(messageId: Int)
 
-    fun dismissProgress()
+    fun dismiss()
 }

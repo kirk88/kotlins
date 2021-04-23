@@ -9,6 +9,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
+import java.net.URI
+import java.net.URL
 
 internal class OkRequest(
     private val client: OkHttpClient,
@@ -246,6 +248,10 @@ internal class OkRequest(
                 urlBuilder.query(query)
             }
         }
+
+        fun url(url: URL) = url(url.toString())
+
+        fun url(uri: URI) = url(uri.toString())
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             requestBuilder.cacheControl(cacheControl)
