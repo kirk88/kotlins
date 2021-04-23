@@ -22,7 +22,7 @@ class DividerBuilder {
 
     constructor() : this(VERTICAL)
 
-    constructor(context: Context): this(context, VERTICAL)
+    constructor(context: Context) : this(context, VERTICAL)
 
     constructor(orientation: Int) {
         this.orientation = orientation
@@ -43,18 +43,16 @@ class DividerBuilder {
     fun left(
         @ColorInt color: Int,
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         leftSideLine =
-            DividerSideLine(ColorDrawable(color), size, offset, startPadding, endPadding, visible)
+            DividerSideLine(ColorDrawable(color), size, startPadding, endPadding, visible)
     }
 
     fun left(
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
@@ -63,7 +61,6 @@ class DividerBuilder {
             DividerSideLine(
                 drawable,
                 size,
-                offset,
                 startPadding,
                 endPadding,
                 visible
@@ -73,13 +70,12 @@ class DividerBuilder {
     fun left(
         drawable: Drawable,
         @Px size: Int = drawable.intrinsicWidth,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         leftSideLine =
-            DividerSideLine(drawable, size, offset, startPadding, endPadding, visible)
+            DividerSideLine(drawable, size, startPadding, endPadding, visible)
     }
 
     fun top(sideLine: DividerSideLine) = apply {
@@ -89,18 +85,16 @@ class DividerBuilder {
     fun top(
         @ColorInt color: Int,
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         topSideLine =
-            DividerSideLine(ColorDrawable(color), size, offset, startPadding, endPadding, visible)
+            DividerSideLine(ColorDrawable(color), size, startPadding, endPadding, visible)
     }
 
     fun top(
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
@@ -109,7 +103,6 @@ class DividerBuilder {
             DividerSideLine(
                 drawable,
                 size,
-                offset,
                 startPadding,
                 endPadding,
                 visible
@@ -119,13 +112,12 @@ class DividerBuilder {
     fun top(
         drawable: Drawable,
         @Px size: Int = drawable.intrinsicHeight,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         topSideLine =
-            DividerSideLine(drawable, size, offset, startPadding, endPadding, visible)
+            DividerSideLine(drawable, size, startPadding, endPadding, visible)
     }
 
     fun right(sideLine: DividerSideLine) = apply {
@@ -135,18 +127,16 @@ class DividerBuilder {
     fun right(
         @ColorInt color: Int,
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         rightSideLine =
-            DividerSideLine(ColorDrawable(color), size, offset, startPadding, endPadding, visible)
+            DividerSideLine(ColorDrawable(color), size, startPadding, endPadding, visible)
     }
 
     fun right(
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
@@ -155,7 +145,6 @@ class DividerBuilder {
             DividerSideLine(
                 drawable,
                 size,
-                offset,
                 startPadding,
                 endPadding,
                 visible
@@ -165,13 +154,12 @@ class DividerBuilder {
     fun right(
         drawable: Drawable,
         @Px size: Int = drawable.intrinsicWidth,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         rightSideLine =
-            DividerSideLine(drawable, size, offset, startPadding, endPadding, visible)
+            DividerSideLine(drawable, size, startPadding, endPadding, visible)
     }
 
     fun bottom(sideLine: DividerSideLine) = apply {
@@ -181,18 +169,16 @@ class DividerBuilder {
     fun bottom(
         @ColorInt color: Int,
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         bottomSideLine =
-            DividerSideLine(ColorDrawable(color), size, offset, startPadding, endPadding, visible)
+            DividerSideLine(ColorDrawable(color), size, startPadding, endPadding, visible)
     }
 
     fun bottom(
         @Px size: Int,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
@@ -201,7 +187,6 @@ class DividerBuilder {
             DividerSideLine(
                 drawable,
                 size,
-                offset,
                 startPadding,
                 endPadding,
                 visible
@@ -211,24 +196,21 @@ class DividerBuilder {
     fun bottom(
         drawable: Drawable,
         @Px size: Int = drawable.intrinsicHeight,
-        @Px offset: Int = size,
         @Px startPadding: Int = 0,
         @Px endPadding: Int = 0,
         visible: Boolean = true
     ): DividerBuilder = apply {
         bottomSideLine =
-            DividerSideLine(drawable, size, offset, startPadding, endPadding, visible)
+            DividerSideLine(drawable, size, startPadding, endPadding, visible)
     }
 
     fun build(): Divider {
         val vSideLine = if (orientation == HORIZONTAL) DividerSideLine(
             drawable,
-            drawable.intrinsicWidth,
             drawable.intrinsicWidth
         ) else null
         val hSideLine = if (orientation == VERTICAL) DividerSideLine(
             drawable,
-            drawable.intrinsicHeight,
             drawable.intrinsicHeight
         ) else null
         return Divider(

@@ -212,10 +212,10 @@ open class XDividerItemDecoration(private val divider: Divider? = null) : ItemDe
         val rightSideLine = divider.rightSideLine
         val bottomSideLine = divider.bottomSideLine
         outRect.set(
-            if (leftSideLine != null && leftSideLine.visible) leftSideLine.offset else 0,
-            if (topSideLine != null && topSideLine.visible) topSideLine.offset else 0,
-            if (rightSideLine != null && rightSideLine.visible) rightSideLine.offset else 0,
-            if (bottomSideLine != null && bottomSideLine.visible) bottomSideLine.offset else 0
+            if (leftSideLine != null && leftSideLine.visible) leftSideLine.size else 0,
+            if (topSideLine != null && topSideLine.visible) topSideLine.size else 0,
+            if (rightSideLine != null && rightSideLine.visible) rightSideLine.size else 0,
+            if (bottomSideLine != null && bottomSideLine.visible) bottomSideLine.size else 0
         )
     }
 

@@ -66,7 +66,7 @@ class SecondFragment : NiceFragment() {
             override fun getDivider(parent: RecyclerView, child: View, position: Int): Divider {
                 val layout = parent.layoutManager as GridLayoutManager
                 return DividerBuilder(requireContext())
-                    .right(100, visible = position % layout.spanCount != layout.spanCount - 1)
+                    .right(100, 150, visible = position % layout.spanCount != layout.spanCount - 1)
                     .bottom(100)
                     .build()
             }
