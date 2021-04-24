@@ -23,9 +23,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:spanCount="3"
+        android:padding="20dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         />
 
     <ListView
