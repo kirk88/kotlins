@@ -23,14 +23,6 @@ fun Context.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNul
     )
 )
 
-fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
-
-fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int =
-    resources.getDimensionPixelOffset(resId)
-
-fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int =
-    resources.getDimensionPixelSize(resId)
-
 fun Fragment.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(
     requireContext(),
     resId
@@ -49,12 +41,12 @@ fun Fragment.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNu
     )
 )
 
-fun Fragment.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
+fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
 
-fun Fragment.getDimensionPixelOffset(@DimenRes resId: Int): Int =
+fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int =
     resources.getDimensionPixelOffset(resId)
 
-fun Fragment.getDimensionPixelSize(@DimenRes resId: Int): Int =
+fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int =
     resources.getDimensionPixelSize(resId)
 
 val Context.screenWidthPixels: Int
@@ -62,3 +54,23 @@ val Context.screenWidthPixels: Int
 
 val Context.screenHeightPixels: Int
     get() = resources.displayMetrics.heightPixels
+
+val Context.statusBarHeight: Int
+    get() {
+        var result = 0
+        val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
+
+val Context.navigationBarHeight: Int
+    get() {
+        var result = 0
+        val resourceId: Int = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
