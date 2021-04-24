@@ -21,13 +21,13 @@ fun <T, VH : ItemViewHolder> RecyclerView.adapter(): RecyclerAdapterBuilder<T, V
 fun <T, VH : ItemViewHolder> adapterBuilder(context: Context): RecyclerAdapterBuilder<T, VH> =
     RecyclerAdapterBuilder(context)
 
-fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.typedBy(
+fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.itemViewTypedBy(
     selector: AdapterItemViewTypeSelector
 ) = apply {
     itemViewTypeSelector = selector
 }
 
-fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.add(
+fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.addViewHolder(
     viewType: Int = 0,
     creator: ViewHolderCreator<out VH>
 ) = apply {
@@ -35,7 +35,7 @@ fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.add(
     viewHolderCreators[viewType] = creator as ViewHolderCreator<VH>
 }
 
-fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.bind(
+fun <T, VH : ItemViewHolder> RecyclerAdapterBuilder<T, VH>.bindViewHolder(
     viewType: Int = 0,
     binder: ViewHolderBinder<out T, out VH>
 ) = apply {
