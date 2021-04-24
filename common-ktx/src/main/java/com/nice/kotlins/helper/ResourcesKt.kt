@@ -10,6 +10,7 @@ import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.nice.kotlins.R
 
 fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
@@ -55,10 +56,18 @@ val Context.screenWidthPixels: Int
 val Context.screenHeightPixels: Int
     get() = resources.displayMetrics.heightPixels
 
+val Context.actionBarHeight: Int
+    get() {
+        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.actionBarSize))
+        val result = ta.getDimensionPixelSize(0, 0)
+        ta.recycle()
+        return result
+    }
+
 val Context.statusBarHeight: Int
     get() {
         var result = 0
-        val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
             result = resources.getDimensionPixelSize(resourceId)
         }
@@ -68,7 +77,7 @@ val Context.statusBarHeight: Int
 val Context.navigationBarHeight: Int
     get() {
         var result = 0
-        val resourceId: Int = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
         if (resourceId > 0) {
             result = resources.getDimensionPixelSize(resourceId)
         }
