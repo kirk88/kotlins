@@ -7,37 +7,23 @@ import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 
-inline fun <reified T : Fragment> FragmentManager.show(
-    @IdRes id: Int,
+fun <T : Fragment> FragmentManager.loadFragment(
+    fragmentClass: Class<T>,
     tag: String? = null,
-    allowingStateLoss: Boolean = false,
     args: Bundle.() -> Unit = { }
-): Int {
-    return beginTransaction().let {
-        val fragmentClass = T::class.java
-        val fragmentTag = tag ?: fragmentClass.canonicalName
-
-        val fragment = findFragmentByTag(fragmentTag) ?: fragmentClass.newInstance().apply {
-            arguments = Bundle().apply(args)
-        }
-
-        for (existedFragment in fragments) {
-            if (existedFragment == fragment) continue
-
-            it.hide(existedFragment)
-        }
-
-        if (fragment.isAdded) {
-            it.show(fragment)
-        } else {
-            it.add(id, fragment, fragmentTag)
-        }
-
-        if (allowingStateLoss) {
-            it.commitAllowingStateLoss()
-        } else {
-            it.commit()
-        }
+): Fragment {
+    val fragmentTag = tag ?: fragmentClass.canonicalName
+    val fragment = findFragmentByTag(fragmentTag)
+    if (fragment != null) {
+        return fragment
+    }
+    val classLoader = fragmentClass.classLoader
+    val className = fragmentClass.canonicalName
+    check(classLoader != null && className != null) {
+        "Can not instantiate fragment for class: $fragmentClass"
+    }
+    return fragmentFactory.instantiate(classLoader, className).apply {
+        arguments = Bundle().apply(args)
     }
 }
 
@@ -47,13 +33,7 @@ fun FragmentManager.show(
     tag: String? = null,
     allowingStateLoss: Boolean = false
 ): Int {
-    if (fragment.isAdded && fragment.id != id) {
-        return -1
-    }
-
     return beginTransaction().let {
-        val fragmentTag = tag ?: fragment.javaClass.canonicalName
-
         for (existedFragment in fragments) {
             if (existedFragment == fragment) continue
 
@@ -63,7 +43,7 @@ fun FragmentManager.show(
         if (fragment.isAdded) {
             it.show(fragment)
         } else {
-            it.add(id, fragment, fragmentTag)
+            it.add(id, fragment, tag ?: fragment.javaClass.canonicalName)
         }
 
         if (allowingStateLoss) {
@@ -74,40 +54,30 @@ fun FragmentManager.show(
     }
 }
 
-inline fun <reified T : Fragment> FragmentManager.hide(
+fun <T : Fragment> FragmentManager.show(
+    fragmentClass: Class<T>,
     @IdRes id: Int,
     tag: String? = null,
-    allowingStateLoss: Boolean = false
-): Int {
-    val fragmentClass = T::class.java
-    val fragmentTag = tag ?: fragmentClass.canonicalName
-
-    val fragment = findFragmentByTag(fragmentTag) ?: fragmentClass.newInstance()
-
-    if (!fragment.isAdded || fragment.id != id) {
-        return -1
-    }
-
-    return beginTransaction().let {
-        it.hide(fragment)
-
-        if (allowingStateLoss) {
-            it.commitAllowingStateLoss()
-        } else {
-            it.commit()
-        }
-    }
+    allowingStateLoss: Boolean = false,
+    args: Bundle.() -> Unit = { }
+): Fragment = loadFragment(fragmentClass, tag, args).also { fragment ->
+    show(fragment, id, tag, allowingStateLoss)
 }
+
+inline fun <reified T : Fragment> FragmentManager.show(
+    @IdRes id: Int,
+    tag: String? = null,
+    allowingStateLoss: Boolean = false,
+    noinline args: Bundle.() -> Unit = { }
+): Fragment = show(T::class.java, id, tag, allowingStateLoss, args)
 
 fun FragmentManager.hide(
     fragment: Fragment,
-    @IdRes id: Int,
     allowingStateLoss: Boolean = false
 ): Int {
-    if (!fragment.isAdded || fragment.id != id) {
+    if (!fragments.contains(fragment)) {
         return -1
     }
-
     return beginTransaction().let {
         it.hide(fragment)
 
@@ -117,4 +87,12 @@ fun FragmentManager.hide(
             it.commit()
         }
     }
+}
+
+fun <T : Fragment> FragmentManager.hide(
+    tag: String,
+    allowingStateLoss: Boolean = false
+): Int {
+    val fragment = findFragmentByTag(tag) ?: return -1
+    return hide(fragment, allowingStateLoss)
 }
