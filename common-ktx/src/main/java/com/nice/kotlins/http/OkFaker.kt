@@ -369,8 +369,8 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun parts(operation: MutableList<RequestBody>.() -> Unit) = apply {
-            mutableListOf<RequestBody>().apply(operation).forEach {
+        fun parts(bodies: Collection<RequestBody>) = apply {
+            bodies.forEach {
                 builder.addPart(it)
             }
         }
@@ -381,8 +381,8 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun multiparts(operation: MutableList<MultipartBody.Part>.() -> Unit) = apply {
-            mutableListOf<MultipartBody.Part>().apply(operation).forEach {
+        fun multiparts(multiparts: Collection<MultipartBody.Part>) = apply {
+            multiparts.forEach {
                 builder.addPart(it)
             }
         }
