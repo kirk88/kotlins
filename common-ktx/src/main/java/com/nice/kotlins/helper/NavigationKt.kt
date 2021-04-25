@@ -5,9 +5,9 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.SparseArrayCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.nice.kotlins.helper.NavigationController.NavigationCallback
-import java.util.NoSuchElementException
+import java.util.*
 import java.util.regex.Pattern
 
 class NavigationDestination(
@@ -21,21 +21,24 @@ class NavigationDestination(
 }
 
 class NavigationController internal constructor(
+    val fragmentManager: FragmentManager,
     @IdRes val containerViewId: Int
 ) : Iterable<NavigationDestination> {
 
     private val nodes = SparseArrayCompat<NavigationDestination>()
 
     fun addDestination(destination: NavigationDestination) {
-        if (nodes[destination.id] == destination) {
+        val existingDestination = nodes.get(destination.id)
+        if (existingDestination === destination) {
             return
         }
-
         check(destination.parent == null) {
-            ("Destination already has a parent set."
-                    + " Call NavigationController.remove() to remove the previous parent.")
+            "Destination already has a parent set. Call NavGraph.remove() to remove the previous parent."
         }
-
+        if (existingDestination != null) {
+            existingDestination.parent = null
+        }
+        destination.parent = this
         nodes.put(destination.id, destination)
     }
 
@@ -61,6 +64,12 @@ class NavigationController internal constructor(
             nodes.valueAt(index).parent = null
             nodes.removeAt(index)
         }
+    }
+
+    fun NavigationController.navigate(@IdRes id: Int) {
+        val destination = getDestination(id) ?: return
+
+
     }
 
     override fun iterator(): Iterator<NavigationDestination> {
@@ -119,7 +128,7 @@ fun NavigationController.navigate(fragment: Fragment, @IdRes id: Int) {
     }
 }
 
-fun AppCompatActivity.setupNavigationViewWithConfiguration(
+fun AppCompatActivity.setupNavigationViewWithController(
     navView: BottomNavigationView,
     controller: NavigationController
 ) {
