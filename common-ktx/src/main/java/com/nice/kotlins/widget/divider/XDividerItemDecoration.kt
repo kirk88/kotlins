@@ -4,7 +4,6 @@ package com.nice.kotlins.widget.divider
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -199,16 +198,20 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
 
     constructor(context: Context, orientation: Int) {
         val builder = DividerBuilder()
+
+        val defaultDrawablePromise = {
+            getDividerDrawable(context, ATTRS)
+        }
         if (orientation == VERTICAL) {
-            val a = context.obtainStyledAttributes(HORIZONTAL_ATTRS)
-            val drawable = a.getDrawable(0) ?: ColorDrawable(Color.TRANSPARENT)
-            a.recycle()
-            builder.bottom(drawable)
+            val drawable = getDividerDrawable(context, HORIZONTAL_ATTRS) ?: defaultDrawablePromise()
+            if (drawable != null) {
+                builder.bottom(drawable)
+            }
         } else {
-            val a = context.obtainStyledAttributes(VERTICAL_ATTRS)
-            val drawable = a.getDrawable(0) ?: ColorDrawable(Color.TRANSPARENT)
-            a.recycle()
-            builder.right(drawable)
+            val drawable = getDividerDrawable(context, VERTICAL_ATTRS) ?: defaultDrawablePromise()
+            if (drawable != null) {
+                builder.right(drawable)
+            }
         }
         divider = builder.build()
     }
@@ -217,14 +220,21 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         return divider
     }
 
+    private fun getDividerDrawable(context: Context, attrs: IntArray): Drawable? {
+        val ta = context.obtainStyledAttributes(attrs)
+        val drawable = ta.getDrawable(0)
+        ta.recycle()
+        return drawable
+    }
+
     companion object {
+        private val ATTRS = intArrayOf(android.R.attr.listDivider)
 
         private val VERTICAL_ATTRS = intArrayOf(android.R.attr.dividerVertical)
         private val HORIZONTAL_ATTRS = intArrayOf(android.R.attr.dividerHorizontal)
 
         const val HORIZONTAL = LinearLayout.HORIZONTAL
         const val VERTICAL = LinearLayout.VERTICAL
-
     }
 
 }

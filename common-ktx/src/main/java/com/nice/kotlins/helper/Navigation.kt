@@ -418,42 +418,67 @@ private class FragmentPagerAdapter :
 }
 
 fun AppCompatActivity.setupAppBarWithController(controller: NavigationController) {
-    controller.addOnDestinationChangedListener { _, destination ->
+    val listener = NavigationController.OnDestinationChangedListener { _, destination ->
         val title = getTitleFromDestination(destination)
         if (title != null) {
             setTitle(title)
         }
+    }
+    controller.addOnDestinationChangedListener(listener)
+
+    val firstDestination = controller.findStartDestination()
+    if (firstDestination != null) {
+        listener.onDestinationChanged(controller, firstDestination)
     }
 }
 
 fun ActionBar.setupWithController(controller: NavigationController) {
-    controller.addOnDestinationChangedListener { _, destination ->
+    val listener = NavigationController.OnDestinationChangedListener { _, destination ->
         val title = getTitleFromDestination(destination)
         if (title != null) {
             setTitle(title)
         }
+    }
+    controller.addOnDestinationChangedListener(listener)
+
+    val firstDestination = controller.findStartDestination()
+    if (firstDestination != null) {
+        listener.onDestinationChanged(controller, firstDestination)
     }
 }
 
 fun Toolbar.setupWithController(controller: NavigationController) {
-    controller.addOnDestinationChangedListener { _, destination ->
+    val listener = NavigationController.OnDestinationChangedListener { _, destination ->
         val title = getTitleFromDestination(destination)
         if (title != null) {
             setTitle(title)
         }
+    }
+    controller.addOnDestinationChangedListener(listener)
+
+    val firstDestination = controller.findStartDestination()
+    if (firstDestination != null) {
+        listener.onDestinationChanged(controller, firstDestination)
     }
 }
 
 fun TitleAppBar.setupWithController(controller: NavigationController) {
-    controller.addOnDestinationChangedListener { _, destination ->
+    val listener = NavigationController.OnDestinationChangedListener { _, destination ->
         val title = getTitleFromDestination(destination)
         if (title != null) {
             setTitle(title)
         }
     }
+    controller.addOnDestinationChangedListener(listener)
+
+    val firstDestination = controller.findStartDestination()
+    if (firstDestination != null) {
+        listener.onDestinationChanged(controller, firstDestination)
+    }
 }
 
-private fun getTitleFromDestination(destination: NavigationDestination): CharSequence? {
+private fun getTitleFromDestination(destination: NavigationDestination?): CharSequence? {
+    destination ?: return null
     val label = destination.label
     if (!label.isNullOrBlank()) {
         val arguments = destination.args
