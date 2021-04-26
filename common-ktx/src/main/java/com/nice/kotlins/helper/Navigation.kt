@@ -9,16 +9,20 @@ import android.view.View
 import androidx.annotation.AnimRes
 import androidx.annotation.AnimatorRes
 import androidx.annotation.IdRes
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.collection.SparseArrayCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.*
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.nice.kotlins.R
+import com.nice.kotlins.widget.TitleAppBar
 import java.util.*
 import java.util.regex.Pattern
 
@@ -27,9 +31,18 @@ class NavigationDestination(
     val clazzName: String,
     val tag: String? = null,
     val label: CharSequence? = null,
-    val arguments: Bundle? = null
+    val args: Bundle? = null
 ) {
-    internal var parent: NavigationController? = null
+
+    val parent: NavigationController?
+        get() = _parent
+
+    private var _parent: NavigationController? = null
+
+    internal fun setParent(parent: NavigationController?) {
+        _parent = parent
+    }
+
 }
 
 fun AppCompatActivity.findNavigationController(@IdRes id: Int): NavigationController {
@@ -75,23 +88,22 @@ class NavigationController(
 
     private val listeners = mutableListOf<OnDestinationChangedListener>()
 
-    private val nodes = SparseArrayCompat<NavigationDestination>()
+    private val destinations = SparseArrayCompat<NavigationDestination>()
 
+    @IdRes
     private var startDestination: Int = -1
 
     fun addDestination(destination: NavigationDestination) {
-        val existingDestination = nodes.get(destination.id)
+        val existingDestination = destinations.get(destination.id)
         if (existingDestination === destination) {
             return
         }
         check(destination.parent == null) {
             "Destination already has a parent set. Call NavGraph.remove() to remove the previous parent."
         }
-        if (existingDestination != null) {
-            existingDestination.parent = null
-        }
-        destination.parent = this
-        nodes.put(destination.id, destination)
+        existingDestination?.setParent(null)
+        destination.setParent(this)
+        destinations.put(destination.id, destination)
     }
 
     fun addDestinations(destinations: Collection<NavigationDestination>) {
@@ -106,15 +118,30 @@ class NavigationController(
         }
     }
 
-    fun getDestination(@IdRes id: Int): NavigationDestination? {
-        return nodes[id]
+    fun findDestination(@IdRes id: Int): NavigationDestination? {
+        return destinations[id]
+    }
+
+    fun getDestination(index: Int): NavigationDestination? {
+        if (index in 0 until destinations.size()) {
+            return destinations.valueAt(index)
+        }
+        return null
     }
 
     fun removeDestination(destination: NavigationDestination) {
-        val index: Int = nodes.indexOfKey(destination.id)
+        val index: Int = destinations.indexOfKey(destination.id)
         if (index >= 0) {
-            nodes.valueAt(index).parent = null
-            nodes.removeAt(index)
+            destinations.valueAt(index).setParent(null)
+            destinations.removeAt(index)
+        }
+    }
+
+    fun removeAllDestinations() {
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            iterator.next()
+            iterator.remove()
         }
     }
 
@@ -122,6 +149,7 @@ class NavigationController(
         startDestination = id
     }
 
+    @IdRes
     fun getStartDestination(): Int {
         return startDestination
     }
@@ -164,7 +192,7 @@ class NavigationController(
             enter,
             exit
         ) {
-            destination.arguments
+            destination.args
         }
     }
 
@@ -178,12 +206,12 @@ class NavigationController(
         listeners.remove(listener)
     }
 
-    override fun iterator(): Iterator<NavigationDestination> {
+    override fun iterator(): MutableIterator<NavigationDestination> {
         return object : MutableIterator<NavigationDestination> {
             private var index = -1
             private var wentToNext = false
             override fun hasNext(): Boolean {
-                return index + 1 < nodes.size()
+                return index + 1 < destinations.size()
             }
 
             override fun next(): NavigationDestination {
@@ -191,13 +219,13 @@ class NavigationController(
                     throw NoSuchElementException()
                 }
                 wentToNext = true
-                return nodes.valueAt(++index)
+                return destinations.valueAt(++index)
             }
 
             override fun remove() {
                 check(wentToNext) { "You must call next() before you can remove an element" }
-                nodes.valueAt(index).parent = null
-                nodes.removeAt(index)
+                destinations.valueAt(index).setParent(null)
+                destinations.removeAt(index)
                 index--
                 wentToNext = false
             }
@@ -214,11 +242,11 @@ class NavigationController(
 }
 
 operator fun NavigationController.get(@IdRes id: Int): NavigationDestination =
-    requireNotNull(getDestination(id)) {
+    requireNotNull(findDestination(id)) {
         "No destination for $id was found in $this"
     }
 
-operator fun NavigationController.contains(@IdRes id: Int): Boolean = getDestination(id) != null
+operator fun NavigationController.contains(@IdRes id: Int): Boolean = findDestination(id) != null
 
 operator fun NavigationController.plusAssign(destination: NavigationDestination) {
     addDestination(destination)
@@ -257,24 +285,146 @@ fun AppCompatActivity.setupNavigationViewWithController(
     navView.onItemSelected {
         controller.navigate(it)
     }
+    setupAppBarWithController(controller)
+    navView.selectedItemId = controller.getStartDestination()
+}
+
+fun TabLayout.setupWithController(
+    controller: NavigationController,
+    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+) {
+    onTabSelected {
+        controller.navigate(it)
+    }
+
+    for ((index, destination) in controller.withIndex()) {
+        val tab = newTab().setText(destination.label)
+        tabConfigurationStrategy(tab, index)
+        addTab(tab)
+    }
+}
+
+fun AppCompatActivity.setupTabLayoutWithController(
+    tabLayout: TabLayout,
+    viewPager2: ViewPager2,
+    controller: NavigationController,
+    autoRefresh: Boolean = true,
+    smoothScroll: Boolean = true,
+    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+) {
+    viewPager2.adapter = FragmentPagerAdapter(this, controller)
+
+    TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
+        tab.text = controller.getDestination(position)?.label
+        tabConfigurationStrategy(tab, position)
+    }.attach()
+}
+
+fun Fragment.setupTabLayoutWithController(
+    tabLayout: TabLayout,
+    viewPager2: ViewPager2,
+    controller: NavigationController,
+    autoRefresh: Boolean = true,
+    smoothScroll: Boolean = true,
+    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+) {
+    viewPager2.adapter = FragmentPagerAdapter(this, controller)
+
+    TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
+        tab.text = controller.getDestination(position)?.label
+        tabConfigurationStrategy(tab, position)
+    }.attach()
+}
+
+private class FragmentPagerAdapter :
+    FragmentStateAdapter {
+
+    private val destinations: List<NavigationDestination>
+
+    private val fragmentFactory: FragmentFactory
+    private val classLoader: ClassLoader
+
+    constructor(fragmentActivity: FragmentActivity, controller: NavigationController) : super(
+        fragmentActivity
+    ) {
+        destinations = controller.toList()
+        fragmentFactory = fragmentActivity.supportFragmentManager.fragmentFactory
+        classLoader = fragmentActivity.classLoader
+    }
+
+    constructor(fragment: Fragment, controller: NavigationController) : super(fragment) {
+        destinations = controller.toList()
+        fragmentFactory = fragment.childFragmentManager.fragmentFactory
+        classLoader = fragment.requireContext().classLoader
+    }
+
+
+    override fun getItemCount(): Int {
+        return destinations.size
+    }
+
+    override fun createFragment(position: Int): Fragment {
+        val destination = destinations[position]
+        return fragmentFactory.instantiate(classLoader, destination.clazzName).apply {
+            arguments = destination.args
+        }
+    }
+
+}
+
+fun AppCompatActivity.setupAppBarWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
-        val label = destination.label
-        if (!label.isNullOrBlank()) {
-            val arguments = destination.arguments
-            val title = StringBuffer()
-            val fillInPattern = Pattern.compile("\\{(.+?)\\}")
-            val matcher = fillInPattern.matcher(label)
-            while (matcher.find()) {
-                val argName = matcher.group(1)
-                check(arguments != null && arguments.containsKey(argName)) {
-                    "Could not find $argName in $arguments to fill label $label"
-                }
-                matcher.appendReplacement(title, "")
-                title.append(arguments.get(argName).toString())
-            }
-            matcher.appendTail(title)
+        val title = getTitleFromDestination(destination)
+        if (title != null) {
             setTitle(title)
         }
     }
-    navView.selectedItemId = controller.getStartDestination()
+}
+
+fun ActionBar.setupWithController(controller: NavigationController) {
+    controller.addOnDestinationChangedListener { _, destination ->
+        val title = getTitleFromDestination(destination)
+        if (title != null) {
+            setTitle(title)
+        }
+    }
+}
+
+fun Toolbar.setupWithController(controller: NavigationController) {
+    controller.addOnDestinationChangedListener { _, destination ->
+        val title = getTitleFromDestination(destination)
+        if (title != null) {
+            setTitle(title)
+        }
+    }
+}
+
+fun TitleAppBar.setupWithController(controller: NavigationController) {
+    controller.addOnDestinationChangedListener { _, destination ->
+        val title = getTitleFromDestination(destination)
+        if (title != null) {
+            setTitle(title)
+        }
+    }
+}
+
+private fun getTitleFromDestination(destination: NavigationDestination): CharSequence? {
+    val label = destination.label
+    if (!label.isNullOrBlank()) {
+        val arguments = destination.args
+        val title = StringBuffer()
+        val fillInPattern = Pattern.compile("\\{(.+?)\\}")
+        val matcher = fillInPattern.matcher(label)
+        while (matcher.find()) {
+            val argName = matcher.group(1)
+            check(arguments != null && arguments.containsKey(argName)) {
+                "Could not find $argName in $arguments to fill label $label"
+            }
+            matcher.appendReplacement(title, "")
+            title.append(arguments.get(argName).toString())
+        }
+        matcher.appendTail(title)
+        return title
+    }
+    return null
 }

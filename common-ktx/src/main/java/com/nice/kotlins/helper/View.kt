@@ -315,10 +315,23 @@ inline fun ViewPager2.onPageScrollStateChanged(crossinline action: (position: In
 }
 
 
-inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Tab) -> Unit) {
+inline fun TabLayout.onTabSelected(crossinline action: (tab: TabLayout.Tab) -> Unit) {
     addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab?) {
             tab?.let { action(it) }
+        }
+
+        override fun onTabUnselected(tab: TabLayout.Tab?) {
+        }
+
+        override fun onTabReselected(tab: TabLayout.Tab?) {
+        }
+    })
+}
+
+inline fun TabLayout.onTabUnselected(crossinline action: (tab: TabLayout.Tab) -> Unit) {
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab?) {
         }
 
         override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -326,6 +339,21 @@ inline fun TabLayout.onTabSelectedChanged(crossinline action: (tab: TabLayout.Ta
         }
 
         override fun onTabReselected(tab: TabLayout.Tab?) {
+        }
+    })
+}
+
+inline fun TabLayout.onTabReselected(crossinline action: (tab: TabLayout.Tab) -> Unit) {
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab?) {
+        }
+
+        override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+        }
+
+        override fun onTabReselected(tab: TabLayout.Tab?) {
+            tab?.let { action(it) }
         }
     })
 }

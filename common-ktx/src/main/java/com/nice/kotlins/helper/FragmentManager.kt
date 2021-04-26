@@ -10,6 +10,14 @@ import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 
+fun FragmentManager.createFragment(
+    classLoader: ClassLoader,
+    className: String,
+    args: Bundle? = null
+): Fragment = fragmentFactory.instantiate(classLoader, className).apply {
+    arguments = args
+}
+
 fun FragmentManager.loadFragment(
     classLoader: ClassLoader,
     className: String,
@@ -21,9 +29,7 @@ fun FragmentManager.loadFragment(
     if (fragment != null) {
         return fragment
     }
-    return fragmentFactory.instantiate(classLoader, className).apply {
-        arguments = args()
-    }
+    return createFragment(classLoader, className, args())
 }
 
 fun FragmentManager.loadFragment(
