@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.AnimRes
 import androidx.annotation.AnimatorRes
 import androidx.annotation.IdRes
@@ -15,6 +14,7 @@ import androidx.collection.SparseArrayCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
@@ -45,7 +45,7 @@ fun Fragment.findNavigationController(@IdRes id: Int): NavigationController {
 fun NavigationController(fragmentManager: FragmentManager, view: View): NavigationController {
     var containerView: View? = view
     while (containerView != null) {
-        if (containerView is ViewGroup) {
+        if (containerView is FragmentContainerView) {
             return NavigationController(fragmentManager, containerView.context, containerView.id)
         }
         containerView = view.parent as? View
