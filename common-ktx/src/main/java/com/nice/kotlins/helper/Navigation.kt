@@ -33,20 +33,26 @@ class NavigationDestination(
 
 fun AppCompatActivity.findNavigationController(@IdRes id: Int): NavigationController {
     val view = ActivityCompat.requireViewById<View>(this, id)
-    return findNavigationController(view, supportFragmentManager)
+    return getNavigationController(supportFragmentManager, view)
 }
 
 fun Fragment.findNavigationController(@IdRes id: Int): NavigationController {
     val view = ViewCompat.requireViewById<View>(requireView(), id)
-    return findNavigationController(view, childFragmentManager)
+    return getNavigationController(childFragmentManager, view)
 }
 
-fun findNavigationController(view: View, fragmentManager: FragmentManager): NavigationController {
+fun NavigationController(fragmentManager: FragmentManager, view: View): NavigationController =
+    NavigationController(fragmentManager, view.context, view.id)
+
+private fun getNavigationController(
+    fragmentManager: FragmentManager,
+    view: View
+): NavigationController {
     val controller = view.getTag(R.id.navigation_controller_tag_id) as? NavigationController
     if (controller != null) {
         return controller
     }
-    return NavigationController(fragmentManager, view.context, view.id).also {
+    return NavigationController(fragmentManager, view).also {
         view.setTag(R.id.navigation_controller_tag_id, it)
     }
 }
