@@ -61,7 +61,7 @@ class NavigationController(
 
     private val nodes = SparseArrayCompat<NavigationDestination>()
 
-    private var startDestinationId: Int = -1
+    private var startDestination: Int = -1
 
     fun addDestination(destination: NavigationDestination) {
         val existingDestination = nodes.get(destination.id)
@@ -103,11 +103,11 @@ class NavigationController(
     }
 
     fun setStartDestination(@IdRes id: Int) {
-        startDestinationId = id
+        startDestination = id
     }
 
-    fun getStartDestination(): NavigationDestination? {
-        return getDestination(startDestinationId)
+    fun getStartDestination(): Int {
+        return startDestination
     }
 
     fun navigate(@IdRes id: Int) {
@@ -238,6 +238,7 @@ fun AppCompatActivity.setupNavigationViewWithController(
     navView: BottomNavigationView,
     controller: NavigationController
 ) {
+    navView.selectedItemId = controller.getStartDestination()
     navView.onItemSelected {
         controller.navigate(it)
     }
@@ -259,10 +260,5 @@ fun AppCompatActivity.setupNavigationViewWithController(
             matcher.appendTail(title)
             setTitle(title)
         }
-    }
-    val destination = controller.getStartDestination()
-    if (destination != null) {
-        navView.selectedItemId = destination.id
-        controller.navigate(destination)
     }
 }
