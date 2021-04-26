@@ -165,6 +165,10 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
 }
 
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.plusAssign(item: T) {
+    addItem(item)
+}
+
 operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Iterable<T>) {
     if (items is List<*>) {
         setItems(items as List<T>)
@@ -177,32 +181,19 @@ operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) {
     setItems(items.toList())
 }
 
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(item: T): A =
-    this.apply { addItem(item) }
 
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(items: Iterable<T>): A {
-    if (items is List<*>) {
-        addItems(items as List<T>)
-    } else {
-        addItems(items.toList())
-    }
-    return this
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(item: T) {
+    removeItem(item)
 }
 
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.plus(items: Array<T>): A =
-    this.apply { addItems(items.toList()) }
-
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(item: T): A =
-    this.apply { removeItem(item) }
-
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(items: Iterable<T>): A {
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Iterable<T>) {
     if (items is List<*>) {
         removeItems(items as List<T>)
     } else {
         removeItems(items.toList())
     }
-    return this
 }
 
-operator fun <T, VH : ItemViewHolder, A : CommonRecyclerAdapter<T, VH>> A.minus(items: Array<T>): A =
-    this.apply { removeItems(items.toList()) }
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) {
+    removeItems(items.toList())
+}

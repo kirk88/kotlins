@@ -123,7 +123,7 @@ class NavigationController(
     }
 
     fun navigate(destination: NavigationDestination) {
-        navigate(destination, android.R.anim.fade_in, android.R.anim.fade_out)
+        navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit)
     }
 
     fun navigate(

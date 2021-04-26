@@ -230,6 +230,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
 
+operator fun <T> BaseRecyclerAdapter<T, *>.contains(item: T): Boolean = containsItem(item)
+
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? {
     return items.getOrNull(position)
 }
