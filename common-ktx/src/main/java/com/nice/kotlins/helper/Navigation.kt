@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.AnimRes
 import androidx.annotation.AnimatorRes
 import androidx.annotation.IdRes
@@ -41,8 +42,17 @@ fun Fragment.findNavigationController(@IdRes id: Int): NavigationController {
     return getNavigationController(childFragmentManager, view)
 }
 
-fun NavigationController(fragmentManager: FragmentManager, view: View): NavigationController =
-    NavigationController(fragmentManager, view.context, view.id)
+fun NavigationController(fragmentManager: FragmentManager, view: View): NavigationController {
+    var containerView: View? = view
+    while (containerView != null) {
+        if (containerView is ViewGroup) {
+            return NavigationController(fragmentManager, containerView.context, containerView.id)
+        }
+        containerView = view.parent as? View
+    }
+    throw IllegalStateException("Can not create a NavigationController for view：$view")
+}
+
 
 private fun getNavigationController(
     fragmentManager: FragmentManager,
