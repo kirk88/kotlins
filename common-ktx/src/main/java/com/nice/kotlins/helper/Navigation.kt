@@ -254,7 +254,6 @@ fun AppCompatActivity.setupNavigationViewWithController(
     navView: BottomNavigationView,
     controller: NavigationController
 ) {
-    navView.selectedItemId = controller.getStartDestination()
     navView.onItemSelected {
         controller.navigate(it)
     }
@@ -277,4 +276,5 @@ fun AppCompatActivity.setupNavigationViewWithController(
             setTitle(title)
         }
     }
+    navView.selectedItemId = controller.getStartDestination()
 }
