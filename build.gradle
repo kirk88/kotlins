@@ -55,7 +55,7 @@ buildscript {
             kotlinCoroutinesCore              : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinCoroutines}",
             kotlinCoroutinesAndroid           : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinCoroutines}",
 
-            kotlinLifecycleViewmodelKtx          : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
+            kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
             kotlinLifecycleViewmodelSavedstate: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.kotlinLifecycle}",
             kotlinLifecycleRuntime            : "androidx.lifecycle:lifecycle-runtime-ktx:${versions.kotlinLifecycle}",
             kotlinLifecycleLivedata           : "androidx.lifecycle:lifecycle-livedata-ktx:${versions.kotlinLifecycle}",
