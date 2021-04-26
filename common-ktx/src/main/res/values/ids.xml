@@ -17,4 +17,7 @@
     <item name="navigation" type="id" />
     <item name="toolbar" type="id" />
 
+
+    <item name="navigation_controller_tag_id" type="id"/>
+
 </resources>

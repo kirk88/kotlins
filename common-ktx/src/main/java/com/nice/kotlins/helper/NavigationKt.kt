@@ -1,12 +1,21 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.helper
 
+import android.content.Context
 import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.SparseArrayCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.tabs.TabLayout
+import com.nice.kotlins.R
 import java.util.*
 import java.util.regex.Pattern
 
@@ -20,10 +29,32 @@ class NavigationDestination(
     internal var parent: NavigationController? = null
 }
 
+fun AppCompatActivity.findNavigationController(@IdRes id: Int): NavigationController {
+    val view = ActivityCompat.requireViewById<View>(this, id)
+    return findNavigationController(view, supportFragmentManager)
+}
+
+fun Fragment.findNavigationController(@IdRes id: Int): NavigationController {
+    val view = ViewCompat.requireViewById<View>(requireView(), id)
+    return findNavigationController(view, childFragmentManager)
+}
+
+fun findNavigationController(view: View, fragmentManager: FragmentManager): NavigationController {
+    val controller = view.getTag(R.id.navigation_controller_tag_id) as? NavigationController
+    if (controller != null) {
+        return controller
+    }
+    return NavigationController(fragmentManager, view.context, view.id).also {
+        view.setTag(R.id.navigation_controller_tag_id, it)
+    }
+}
+
 class NavigationController internal constructor(
-    val fragmentManager: FragmentManager,
-    @IdRes val containerViewId: Int
+    private val fragmentManager: FragmentManager,
+    private val context: Context,
+    @IdRes private val containerViewId: Int
 ) : Iterable<NavigationDestination> {
+    private val listeners = mutableListOf<OnDestinationChangedListener>()
 
     private val nodes = SparseArrayCompat<NavigationDestination>()
 
@@ -66,10 +97,43 @@ class NavigationController internal constructor(
         }
     }
 
-    fun NavigationController.navigate(@IdRes id: Int) {
-        val destination = getDestination(id) ?: return
+    fun navigate(@IdRes id: Int) {
+        val destination = getDestination(id)
+        check(destination != null) {
+            "Not found navigation destination for id: $id"
+        }
+        navigate(destination)
+    }
 
+    fun navigate(destination: NavigationDestination) {
+        val parent = destination.parent
+        check(parent != null && parent == this) {
+            "Destination not has a parent set yet or it's parent not this NavigationController"
+        }
+        fragmentManager.show(
+            containerViewId,
+            context,
+            destination.clazzName,
+            destination.tag
+        ) {
+            if (destination.arguments != null) {
+                putAll(destination.arguments)
+            }
+        }
 
+        for (callback in listeners) {
+            callback.onDestinationChanged(this, destination)
+        }
+    }
+
+    fun addOnDestinationChangedListener(listener: OnDestinationChangedListener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener)
+        }
+    }
+
+    fun removeOnDestinationChangedListener(listener: OnDestinationChangedListener) {
+        listeners.remove(listener)
     }
 
     override fun iterator(): Iterator<NavigationDestination> {
@@ -98,33 +162,30 @@ class NavigationController internal constructor(
         }
     }
 
-    fun interface NavigationCallback {
-        fun onNavigate(controller: NavigationController, destination: NavigationDestination)
+    fun interface OnDestinationChangedListener {
+        fun onDestinationChanged(
+            controller: NavigationController,
+            destination: NavigationDestination
+        )
     }
 
 }
 
-fun NavigationController.navigate(activity: AppCompatActivity, @IdRes id: Int) {
-    val destination = getDestination(id) ?: return
-
-
+fun NavigationController.navigate(item: MenuItem): Boolean {
+    return try {
+        navigate(item.itemId)
+        true
+    } catch (_: Exception) {
+        false
+    }
 }
 
-fun NavigationController.navigate(fragment: Fragment, @IdRes id: Int) {
-    for (destination in nodes) {
-        if (destination.id == id && !callback.onNavigate(destination)) {
-            fragment.childFragmentManager.show(
-                containerViewId,
-                fragment.requireContext(),
-                destination.clazzName,
-                destination.tag
-            ) {
-                if (destination.arguments != null) {
-                    putAll(destination.arguments)
-                }
-            }
-            break
-        }
+fun NavigationController.navigate(tab: TabLayout.Tab): Boolean {
+    return try {
+        navigate(tab.id)
+        true
+    } catch (_: Exception) {
+        false
     }
 }
 
@@ -133,57 +194,25 @@ fun AppCompatActivity.setupNavigationViewWithController(
     controller: NavigationController
 ) {
     navView.onItemSelected {
-        for (destination in controller.nodes) {
-            if (destination.id == it.itemId && !controller.callback.onNavigate(destination)) {
-                setTitleWithDestination(destination)
-
-                onNavigationDestinationSelected(
-                    destination,
-                    controller.containerViewId
-                )
-                break
-            }
-        }
-        true
+        controller.navigate(it)
     }
-}
-
-private fun AppCompatActivity.setTitleWithDestination(destination: NavigationDestination) {
-    val label = destination.label
-    if (!label.isNullOrBlank()) {
-        val arguments = destination.arguments
-        val title = StringBuffer()
-        val fillInPattern = Pattern.compile("\\{(.+?)\\}")
-        val matcher = fillInPattern.matcher(label)
-        while (matcher.find()) {
-            val argName = matcher.group(1)
-            if (arguments != null && arguments.containsKey(argName)) {
+    controller.addOnDestinationChangedListener { _, destination ->
+        val label = destination.label
+        if (!label.isNullOrBlank()) {
+            val arguments = destination.arguments
+            val title = StringBuffer()
+            val fillInPattern = Pattern.compile("\\{(.+?)\\}")
+            val matcher = fillInPattern.matcher(label)
+            while (matcher.find()) {
+                val argName = matcher.group(1)
+                check(arguments != null && arguments.containsKey(argName)) {
+                    "Could not find $argName in $arguments to fill label $label"
+                }
                 matcher.appendReplacement(title, "")
                 title.append(arguments.get(argName).toString())
-            } else {
-                throw IllegalArgumentException(
-                    "Could not find " + argName + " in "
-                            + arguments + " to fill label " + label
-                )
             }
-        }
-        matcher.appendTail(title)
-        setTitle(title)
-    }
-}
-
-private fun AppCompatActivity.onNavigationDestinationSelected(
-    destination: NavigationDestination,
-    @IdRes containerViewId: Int
-) {
-    supportFragmentManager.show(
-        containerViewId,
-        this,
-        destination.clazzName,
-        destination.tag
-    ) {
-        if (destination.arguments != null) {
-            putAll(destination.arguments)
+            matcher.appendTail(title)
+            setTitle(title)
         }
     }
 }
