@@ -191,8 +191,6 @@ abstract class XDividerItemDecoration : ItemDecoration() {
 
 }
 
-private val ATTRS = intArrayOf(android.R.attr.listDivider)
-
 class LinearDividerItemDecoration : XDividerItemDecoration {
 
     private val divider: Divider
@@ -200,14 +198,16 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
     constructor(context: Context) : this(context, VERTICAL)
 
     constructor(context: Context, orientation: Int) {
-        val a = context.obtainStyledAttributes(ATTRS)
-        val drawable = a.getDrawable(0) ?: ColorDrawable(Color.TRANSPARENT)
-        a.recycle()
-
         val builder = DividerBuilder()
         if (orientation == VERTICAL) {
+            val a = context.obtainStyledAttributes(HORIZONTAL_ATTRS)
+            val drawable = a.getDrawable(0) ?: ColorDrawable(Color.TRANSPARENT)
+            a.recycle()
             builder.bottom(drawable)
         } else {
+            val a = context.obtainStyledAttributes(VERTICAL_ATTRS)
+            val drawable = a.getDrawable(0) ?: ColorDrawable(Color.TRANSPARENT)
+            a.recycle()
             builder.right(drawable)
         }
         divider = builder.build()
@@ -218,6 +218,9 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
     }
 
     companion object {
+
+        private val VERTICAL_ATTRS = intArrayOf(android.R.attr.dividerVertical)
+        private val HORIZONTAL_ATTRS = intArrayOf(android.R.attr.dividerHorizontal)
 
         const val HORIZONTAL = LinearLayout.HORIZONTAL
         const val VERTICAL = LinearLayout.VERTICAL
