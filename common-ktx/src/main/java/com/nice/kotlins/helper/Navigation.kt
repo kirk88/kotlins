@@ -6,6 +6,8 @@ import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.annotation.AnimRes
+import androidx.annotation.AnimatorRes
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.SparseArrayCompat
@@ -112,24 +114,41 @@ class NavigationController(
         navigate(this[id])
     }
 
+    fun navigate(
+        @IdRes id: Int,
+        @AnimatorRes @AnimRes enter: Int,
+        @AnimatorRes @AnimRes exit: Int
+    ) {
+        navigate(this[id], enter, exit)
+    }
+
     fun navigate(destination: NavigationDestination) {
+        navigate(destination, android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    fun navigate(
+        destination: NavigationDestination,
+        @AnimatorRes @AnimRes enter: Int,
+        @AnimatorRes @AnimRes exit: Int
+    ) {
         val parent = destination.parent
         check(parent != null && parent == this) {
             "Destination not has a parent set yet or it's parent not this NavigationController"
         }
+
+        for (callback in listeners) {
+            callback.onDestinationChanged(this, destination)
+        }
+
         fragmentManager.show(
             containerViewId,
             context,
             destination.clazzName,
-            destination.tag
+            destination.tag,
+            enter,
+            exit
         ) {
-            if (destination.arguments != null) {
-                putAll(destination.arguments)
-            }
-        }
-
-        for (callback in listeners) {
-            callback.onDestinationChanged(this, destination)
+            destination.arguments
         }
     }
 
