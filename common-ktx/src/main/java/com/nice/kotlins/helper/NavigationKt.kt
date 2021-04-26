@@ -49,14 +49,17 @@ fun findNavigationController(view: View, fragmentManager: FragmentManager): Navi
     }
 }
 
-class NavigationController internal constructor(
+class NavigationController(
     private val fragmentManager: FragmentManager,
     private val context: Context,
     @IdRes private val containerViewId: Int
 ) : Iterable<NavigationDestination> {
+
     private val listeners = mutableListOf<OnDestinationChangedListener>()
 
     private val nodes = SparseArrayCompat<NavigationDestination>()
+
+    private var startDestinationId: Int = -1
 
     fun addDestination(destination: NavigationDestination) {
         val existingDestination = nodes.get(destination.id)
@@ -97,12 +100,16 @@ class NavigationController internal constructor(
         }
     }
 
+    fun setStartDestination(@IdRes id: Int) {
+        startDestinationId = id
+    }
+
+    fun getStartDestination(): NavigationDestination? {
+        return getDestination(startDestinationId)
+    }
+
     fun navigate(@IdRes id: Int) {
-        val destination = getDestination(id)
-        check(destination != null) {
-            "Not found navigation destination for id: $id"
-        }
-        navigate(destination)
+        navigate(this[id])
     }
 
     fun navigate(destination: NavigationDestination) {
@@ -171,6 +178,25 @@ class NavigationController internal constructor(
 
 }
 
+operator fun NavigationController.get(@IdRes id: Int): NavigationDestination =
+    requireNotNull(getDestination(id)) {
+        "No destination for $id was found in $this"
+    }
+
+operator fun NavigationController.contains(@IdRes id: Int): Boolean = getDestination(id) != null
+
+operator fun NavigationController.plusAssign(destination: NavigationDestination) {
+    addDestination(destination)
+}
+
+operator fun NavigationController.plusAssign(destinations: Collection<NavigationDestination>) {
+    addDestinations(destinations)
+}
+
+operator fun NavigationController.minusAssign(node: NavigationDestination) {
+    removeDestination(node)
+}
+
 fun NavigationController.navigate(item: MenuItem): Boolean {
     return try {
         navigate(item.itemId)
@@ -214,5 +240,10 @@ fun AppCompatActivity.setupNavigationViewWithController(
             matcher.appendTail(title)
             setTitle(title)
         }
+    }
+    val destination = controller.getStartDestination()
+    if (destination != null) {
+        navView.selectedItemId = destination.id
+        controller.navigate(destination)
     }
 }
