@@ -4,6 +4,7 @@ package com.nice.kotlins.helper
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.AnimRes
@@ -15,6 +16,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.collection.SparseArrayCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isEmpty
 import androidx.fragment.app.*
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -154,6 +156,10 @@ class NavigationController(
         return startDestination
     }
 
+    fun findStartDestination(): NavigationDestination? {
+        return findDestination(startDestination)
+    }
+
     fun navigate(@IdRes id: Int) {
         navigate(this[id])
     }
@@ -280,27 +286,54 @@ fun NavigationController.navigate(tab: TabLayout.Tab): Boolean {
 
 fun AppCompatActivity.setupNavigationViewWithController(
     navView: BottomNavigationView,
-    controller: NavigationController
+    controller: NavigationController,
+    itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
 ) {
     navView.onItemSelected {
         controller.navigate(it)
     }
-    setupAppBarWithController(controller)
-    navView.selectedItemId = controller.getStartDestination()
+
+    val menu = navView.menu
+    if (menu.isEmpty()) {
+        for ((index, destination) in controller.withIndex()) {
+            val item = menu.add(Menu.NONE, destination.id, Menu.NONE, destination.label)
+            itemConfigurationStrategy(item, index)
+
+            if (destination.id == controller.getStartDestination()) {
+                item.isChecked = true
+            }
+        }
+    } else {
+        navView.selectedItemId = controller.getStartDestination()
+    }
 }
 
 fun TabLayout.setupWithController(
     controller: NavigationController,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
     onTabSelected {
         controller.navigate(it)
     }
 
-    for ((index, destination) in controller.withIndex()) {
-        val tab = newTab().setText(destination.label)
-        tabConfigurationStrategy(tab, index)
-        addTab(tab)
+    if (tabCount == 0) {
+        for ((index, destination) in controller.withIndex()) {
+            val tab = newTab().setId(destination.id).setText(destination.label)
+            tabConfigurationStrategy(tab, index)
+            addTab(tab, false)
+
+            if (destination.id == controller.getStartDestination()) {
+                tab.select()
+            }
+        }
+    } else {
+        for (index in 0 until tabCount) {
+            val tab = getTabAt(index) ?: continue
+            if (tab.id == controller.getStartDestination()) {
+                tab.select()
+                break
+            }
+        }
     }
 }
 
@@ -310,8 +343,14 @@ fun AppCompatActivity.setupTabLayoutWithController(
     controller: NavigationController,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
+    val startDestination = controller.findStartDestination()
+    if (startDestination != null) {
+        val index = controller.indexOf(startDestination)
+        viewPager2.currentItem = index
+    }
+
     viewPager2.adapter = FragmentPagerAdapter(this, controller)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
@@ -328,6 +367,12 @@ fun Fragment.setupTabLayoutWithController(
     smoothScroll: Boolean = true,
     tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
 ) {
+    val startDestination = controller.findStartDestination()
+    if (startDestination != null) {
+        val index = controller.indexOf(startDestination)
+        viewPager2.currentItem = index
+    }
+
     viewPager2.adapter = FragmentPagerAdapter(this, controller)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
