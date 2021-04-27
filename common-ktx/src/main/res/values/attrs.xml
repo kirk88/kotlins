@@ -88,7 +88,7 @@
         <enum name="add" value="16" />
     </attr>
 
-    <attr name="titleBarStyle" format="reference" />
+    <attr name="titleAppBarStyle" format="reference" />
 
     <declare-styleable name="TitleToolbar">
         <attr name="titleTextAppearance" />

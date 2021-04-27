@@ -6,14 +6,18 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
+import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.helper.*
 
-class SecondActivity : NiceActivity(R.layout.activity_second) {
+class SecondActivity : NiceActivity() {
+
+    private val bindings: ActivitySecondBinding by viewBindings()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        bindings.attachTo(this)
 
         val navView = findViewById<BottomNavigationView>(R.id.nav_view)
 
