@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 
 val Context.activity: Activity?
@@ -28,3 +29,6 @@ private tailrec fun scanCompatActivity(context: Context?): AppCompatActivity? {
         else -> null
     }
 }
+
+val Context.layoutInflater: LayoutInflater
+    get() = LayoutInflater.from(this)
