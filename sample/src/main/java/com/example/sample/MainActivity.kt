@@ -28,12 +28,9 @@ class MainActivity : NiceActivity() {
 
         title = "Home"
 
-        val loader = binding.loaderLayout
         val titleBar = binding.titleBar
         val fab = binding.fab
 
-
-        loader.setDefaultView(LoaderView.TYPE_CONTENT_VIEW)
 
         fab.onClick {
 //            startActivity<SecondActivity>()
@@ -50,7 +47,6 @@ class MainActivity : NiceActivity() {
         binding.textView.string = deviceId
 
         Log.e("TAGTAG", "deviceId: $deviceId")
-
     }
 
 }

@@ -360,7 +360,7 @@ class TitleAppBar @JvmOverloads constructor(
         val toolbarView = findViewById<View>(R.id.toolbar)
         if (toolbarView != null) {
             check(toolbarView is TitleToolbar) {
-                "The View with ID ${toolbarView.id} not a TitleToolbar"
+                "The view with ID ${toolbarView.id} is not a TitleToolbar"
             }
             return toolbarView
         }
@@ -1076,7 +1076,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val titleView = findViewById<View>(R.id.title) ?: return
         check(titleView is TextView) {
-            "The Title View with ID ${titleView.id} not a TextView"
+            "The view with ID ${titleView.id} is not a TextView"
         }
 
         titleTextView = titleView
@@ -1089,7 +1089,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val subtitleView = findViewById<View>(R.id.subtitle) ?: return
         check(subtitleView is TextView) {
-            "The Subtitle View with ID ${subtitleView.id}  not a TextView"
+            "The view with ID ${subtitleView.id} is not a TextView"
         }
 
         subtitleTextView = subtitleView
@@ -1114,7 +1114,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val buttonView = findViewById<View>(R.id.navigation) ?: return
         check(buttonView is ImageButton) {
-            "The Navigation View with ID ${buttonView.id}  not a ImageButton"
+            "The view with ID ${buttonView.id} is not a ImageButton"
         }
 
         navigationButtonView = buttonView

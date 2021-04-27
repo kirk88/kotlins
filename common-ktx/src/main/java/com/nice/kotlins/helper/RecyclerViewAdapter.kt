@@ -6,10 +6,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.nice.kotlins.adapter.BaseRecyclerAdapter
 import com.nice.kotlins.adapter.CommonRecyclerAdapter
 import com.nice.kotlins.adapter.ItemViewHolder
+import com.nice.kotlins.adapter.ViewBindingHolder
 
 fun <T, VH : ItemViewHolder> adapterBuilder(context: Context): RecyclerViewAdapter.Builder<T, VH> =
     RecyclerViewAdapter.Builder(context)

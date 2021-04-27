@@ -1,124 +1,72 @@
 package com.example.sample
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
-import android.view.*
-import android.widget.ArrayAdapter
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import android.widget.TextView
 import com.example.sample.databinding.FragmentSecondBinding
-import com.example.sample.databinding.ItemRecyclerViewBinding
-import com.nice.kotlins.adapter.ViewBindingHolder
-import com.nice.kotlins.adapter.ViewBindingRecyclerAdapter
+import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.plusAssign
 import com.nice.kotlins.app.NiceFragment
-import com.nice.kotlins.app.subtitle
-import com.nice.kotlins.app.title
+import com.nice.kotlins.helper.adapterBuilder
 import com.nice.kotlins.helper.attachTo
-import com.nice.kotlins.helper.toast
 import com.nice.kotlins.helper.viewBindings
-import com.nice.kotlins.widget.divider.*
+import com.nice.kotlins.widget.divider.LinearDividerItemDecoration
 
 
 class SecondFragment : NiceFragment() {
 
-    init {
-        setHasOptionsMenu(true)
-    }
-
     private val binding: FragmentSecondBinding by viewBindings()
+
+    val adapter by lazy {
+        adapterBuilder<String, ItemViewHolder>(requireContext())
+            .register { inflater, parent ->
+                ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
+            }.bind { holder, item, _ ->
+                holder.findViewById<TextView>(R.id.title)?.text = item
+            }.into(binding.recyclerView)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.attachTo(this)
 
-        title = "Hello World"
-        subtitle = "Bye World"
-
-        val adapter =
-            object : ViewBindingRecyclerAdapter<String, ItemRecyclerViewBinding>(requireContext()) {
-
-                override fun onCreateItemView(
-                    inflater: LayoutInflater,
-                    parent: ViewGroup,
-                    viewType: Int
-                ): ItemRecyclerViewBinding {
-                    return ItemRecyclerViewBinding.inflate(inflater, parent, false)
-                }
-
-
-                override fun onBindItemViewHolder(
-                    holder: ViewBindingHolder<ItemRecyclerViewBinding>,
-                    item: String,
-                    payloads: MutableList<Any>
-                ) {
-                    holder.binding.title.text = item
-                }
-
-            }
-
-        binding.recyclerView.adapter = adapter
+        binding.recyclerView.addItemDecoration(LinearDividerItemDecoration(requireContext()))
 
         adapter += listOf(
             "abcd",
             "abcde",
             "abcdef",
             "abcd",
-            "abcde",
-            "abcdef",
             "abcd",
             "abcde",
             "abcdef",
             "abcd",
-            "abcde",
-            "abcdef",
             "abcd",
             "abcde",
             "abcdef",
             "abcd",
+            "abcd",
             "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd"
         )
 
-        binding.recyclerView.addItemDecoration(LinearDividerItemDecoration(requireContext()))
-
-        binding.listView.adapter = ArrayAdapter(
-            requireContext(),
-            R.layout.item_recycler_view,
-            R.id.title,
-            listOf("abcd", "abcde", "abcdef")
-        )
-
-        Log.e("TAGTAG", "onCreate")
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.add("测试").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-        } else if (item.title == "测试") {
-            toast("哈哈哈哈哈")
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        Log.e("TAGTAG", "onPostCreate")
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.e("TAGTAG", "onStart")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.e("TAGTAG", "onResume")
+//        binding.listview.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, )
     }
 
 }

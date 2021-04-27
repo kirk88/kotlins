@@ -26,7 +26,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
         super.onCreate(savedInstanceState)
         activityForResultLauncher.register(this)
         delegate.onCreate()
-        if(contentLayoutId != 0){
+        if (contentLayoutId != 0) {
             setContentView(contentLayoutId)
         }
     }
@@ -76,7 +76,13 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     fun setTitle(title: CharSequence?) {
-        activity?.title = title
+        activity?.let {
+            when (it) {
+                is NiceActivity -> it.title = title
+                is AppCompatActivity -> it.supportActionBar?.title = title
+                else -> it.actionBar?.title = title
+            }
+        }
     }
 
     fun setTitle(titleId: Int) {
@@ -84,15 +90,21 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     fun getTitle(): CharSequence? {
-        return activity?.title
+        return activity?.let {
+            when (it) {
+                is NiceActivity -> it.title
+                is AppCompatActivity -> it.supportActionBar?.title
+                else -> it.actionBar?.title
+            }
+        }
     }
 
     fun setSubtitle(subtitle: CharSequence?) {
         activity?.let {
-            if (it is NiceActivity) {
-                it.subtitle = subtitle
-            } else if (it is AppCompatActivity) {
-                it.supportActionBar?.subtitle = subtitle
+            when (it) {
+                is NiceActivity -> it.subtitle = subtitle
+                is AppCompatActivity -> it.supportActionBar?.subtitle = subtitle
+                else -> it.actionBar?.subtitle = subtitle
             }
         }
     }
@@ -106,7 +118,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
             when (it) {
                 is NiceActivity -> it.subtitle
                 is AppCompatActivity -> it.supportActionBar?.subtitle
-                else -> null
+                else -> it.actionBar?.subtitle
             }
         }
     }

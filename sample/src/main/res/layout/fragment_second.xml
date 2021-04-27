@@ -5,34 +5,21 @@
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.nice.kotlins.widget.TitleAppBar
-        android:id="@+id/title_bar"
-        android:layout_width="match_parent"
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:title="@string/app_name"
-        app:provideSupportActionBar="true"
-        app:displayShowHomeEnabled="true"
-        app:displayShowHomeAsUpEnabled="true"
-        app:layout_constraintTop_toTopOf="parent"
-        android:theme="@style/Theme.Kotlins.AppBarOverlay"/>
-
-
+        android:textSize="36sp"
+        android:text="FirstFragment"
+        android:layout_gravity="center_horizontal"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:padding="20dp"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         />
-
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
 
 </LinearLayout>

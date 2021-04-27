@@ -13,6 +13,7 @@ import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import com.nice.kotlins.R
 
 abstract class XDividerItemDecoration : ItemDecoration() {
 
@@ -199,9 +200,7 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
     constructor(context: Context, orientation: Int) {
         val builder = DividerBuilder()
 
-        val defaultDrawablePromise = {
-            getDividerDrawable(context, ATTRS)
-        }
+        val defaultDrawablePromise = { getDividerDrawable(context, ATTRS) }
         if (orientation == VERTICAL) {
             val drawable = getDividerDrawable(context, HORIZONTAL_ATTRS) ?: defaultDrawablePromise()
             if (drawable != null) {
@@ -230,8 +229,8 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
     companion object {
         private val ATTRS = intArrayOf(android.R.attr.listDivider)
 
-        private val VERTICAL_ATTRS = intArrayOf(android.R.attr.dividerVertical)
-        private val HORIZONTAL_ATTRS = intArrayOf(android.R.attr.dividerHorizontal)
+        private val VERTICAL_ATTRS = intArrayOf(R.attr.dividerVertical)
+        private val HORIZONTAL_ATTRS = intArrayOf(R.attr.dividerHorizontal)
 
         const val HORIZONTAL = LinearLayout.HORIZONTAL
         const val VERTICAL = LinearLayout.VERTICAL

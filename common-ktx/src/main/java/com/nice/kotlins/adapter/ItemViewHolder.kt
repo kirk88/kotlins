@@ -5,7 +5,6 @@ package com.nice.kotlins.adapter
 import android.util.SparseArray
 import android.view.View
 import androidx.annotation.IdRes
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 
 open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -73,5 +72,5 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 }
 
 operator fun <T : View> ItemViewHolder.get(@IdRes id: Int): T = requireNotNull(findViewById(id)) {
-    "ID does not reference a View inside the itemView of $this"
+    "No view with ID $id was found in the itemView of this ViewHolder"
 }

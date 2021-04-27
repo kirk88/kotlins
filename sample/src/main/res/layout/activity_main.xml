@@ -29,7 +29,8 @@
         <com.nice.kotlins.widget.LoaderLayout
             android:id="@+id/loader_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:defaultShow="content">
 
             <FrameLayout
                 android:layout_width="match_parent"
