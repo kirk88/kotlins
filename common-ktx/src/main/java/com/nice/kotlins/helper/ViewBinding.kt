@@ -3,6 +3,7 @@
 package com.nice.kotlins.helper
 
 import android.app.Activity
+import android.content.Context
 import android.app.Dialog
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,9 @@ import androidx.viewbinding.ViewBinding
 import com.nice.kotlins.app.NiceFragment
 
 inline fun <reified VB : ViewBinding> Activity.viewBindings() =
+    lazy { viewBinding<VB>(layoutInflater) }
+
+inline fun <reified VB : ViewBinding> Context.viewBindings() =
     lazy { viewBinding<VB>(layoutInflater) }
 
 inline fun <reified VB : ViewBinding> Fragment.viewBindings() =

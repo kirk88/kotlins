@@ -409,7 +409,7 @@ class TitleAppBar @JvmOverloads constructor(
         val ta = TintTypedArray.obtainStyledAttributes(
             getContext(),
             attrs, R.styleable.TitleAppBar,
-            R.attr.titleBarStyle, 0
+            R.attr.titleAppBarStyle, 0
         )
 
         if (ta.hasValue(R.styleable.TitleAppBar_customLayout)) {
