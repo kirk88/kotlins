@@ -226,12 +226,12 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         this.orientation = orientation
 
         val builder = DividerBuilder()
-        val dividerDrawable = getDividerDrawable(parent.context, orientation)
-        if (dividerDrawable != null) {
+        val drawable = dividerDrawable ?: getDividerDrawable(parent.context, orientation)
+        if (drawable != null) {
             if (orientation == RecyclerView.VERTICAL) {
-                builder.bottom(dividerDrawable)
+                builder.bottom(drawable)
             } else {
-                builder.right(dividerDrawable)
+                builder.right(drawable)
             }
         }
         return builder.build().also {
@@ -295,7 +295,8 @@ class GridDividerItemDecoration : XDividerItemDecoration {
             if (it == 0) spanCount else it
         }
 
-        val dividerSize = if (orientation == RecyclerView.VERTICAL) dividerDrawable.intrinsicHeight else dividerDrawable.intrinsicWidth
+        val dividerSize =
+            if (orientation == RecyclerView.VERTICAL) dividerDrawable.intrinsicHeight else dividerDrawable.intrinsicWidth
         val eachWidth: Int = (spanCount - 1) * dividerSize / spanCount
 
         val leftTop = position % spanCount * (dividerSize - eachWidth)
