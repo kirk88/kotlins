@@ -14,22 +14,22 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val clickViews: MutableSet<Int> = mutableSetOf()
     private val longClickViews: MutableSet<Int> = mutableSetOf()
 
-    fun addOnClickListener(@IdRes vararg viewIds: Int) {
+    fun addOnChildClickListener(@IdRes vararg viewIds: Int) {
         clickViews.addAll(viewIds.toList())
     }
 
-    fun addOnLongClickListener(@IdRes vararg viewIds: Int) {
+    fun addOnChildLongClickListener(@IdRes vararg viewIds: Int) {
         longClickViews.addAll(viewIds.toList())
     }
 
-    fun removeOnClickListener(@IdRes vararg viewIds: Int) {
+    fun removeOnChildClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             clickViews.remove(id)
             findViewById<View>(id)?.setOnClickListener(null)
         }
     }
 
-    fun removeOnLongClickListener(@IdRes vararg viewIds: Int) {
+    fun removeOnChildLongClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             longClickViews.remove(id)
             findViewById<View>(id)?.setOnLongClickListener(null)
