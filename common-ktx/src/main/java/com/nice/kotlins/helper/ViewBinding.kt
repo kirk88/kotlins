@@ -85,13 +85,8 @@ inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
 
 inline fun <reified VB : ViewBinding> bindingView(
     inflater: LayoutInflater,
-    block: VB.() -> Unit
-): View = viewBinding<VB>(inflater).apply(block).root
-
-inline fun <reified VB : ViewBinding> bindingView(
-    inflater: LayoutInflater,
-    parent: ViewGroup?,
-    attachToParent: Boolean,
+    parent: ViewGroup? = null,
+    attachToParent: Boolean = false,
     block: VB.() -> Unit
 ): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
 
