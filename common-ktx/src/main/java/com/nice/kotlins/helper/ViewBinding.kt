@@ -3,8 +3,8 @@
 package com.nice.kotlins.helper
 
 import android.app.Activity
-import android.content.Context
 import android.app.Dialog
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +16,35 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.viewbinding.ViewBinding
 import com.nice.kotlins.app.NiceFragment
+import java.lang.reflect.Method
+
+@PublishedApi
+internal object ViewBindings {
+
+    private val methods = mutableMapOf<String, Method>()
+
+    @Suppress("UNCHECKED_CAST")
+    fun <VB : ViewBinding> inflate(
+        clazz: Class<VB>,
+        inflater: LayoutInflater,
+        parent: ViewGroup? = null,
+        attachToParent: Boolean = false
+    ) = methods.getOrPut(clazz.name) {
+        clazz.getMethod(
+            "inflate",
+            LayoutInflater::class.java,
+            ViewGroup::class.java,
+            Boolean::class.java
+        )
+    }.invoke(null, inflater, parent, attachToParent) as VB
+
+    @Suppress("UNCHECKED_CAST")
+    fun <VB : ViewBinding> bind(clazz: Class<VB>, view: View) =
+        methods.getOrPut(clazz.name) {
+            clazz.getMethod("bind", View::class.java)
+        }.invoke(null, view) as VB
+
+}
 
 inline fun <reified VB : ViewBinding> Activity.viewBindings() =
     lazy { viewBinding<VB>(layoutInflater) }
@@ -36,38 +65,23 @@ inline fun <reified VB : ViewBinding> viewBinding(
     inflater: LayoutInflater,
     parent: ViewGroup? = null,
     attachToParent: Boolean = false
-) = viewBinding(VB::class.java, inflater, parent, attachToParent)
+) = ViewBindings.inflate(VB::class.java, inflater, parent, attachToParent)
 
 inline fun <reified VB : ViewBinding> viewBinding(
     parent: ViewGroup,
     attachToParent: Boolean = false
-) = viewBinding<VB>(LayoutInflater.from(parent.context), parent, attachToParent)
+) = ViewBindings.inflate(
+    VB::class.java,
+    LayoutInflater.from(parent.context),
+    parent,
+    attachToParent
+)
 
 inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
-    viewBinding(VB::class.java, rootView)
+    ViewBindings.bind(VB::class.java, rootView)
 
 inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
-    viewBinding(VB::class.java, binding.root)
-
-@PublishedApi
-@Suppress("UNCHECKED_CAST")
-internal fun <VB : ViewBinding> viewBinding(
-    clazz: Class<VB>,
-    inflater: LayoutInflater,
-    parent: ViewGroup? = null,
-    attachToParent: Boolean = false
-) = clazz.getMethod(
-    "inflate",
-    LayoutInflater::class.java,
-    ViewGroup::class.java,
-    Boolean::class.java
-).invoke(null, inflater, parent, attachToParent) as VB
-
-@PublishedApi
-@Suppress("UNCHECKED_CAST")
-internal fun <VB : ViewBinding> viewBinding(clazz: Class<VB>, view: View) =
-    clazz.getMethod("bind", View::class.java)
-        .invoke(null, view) as VB
+    ViewBindings.bind(VB::class.java, binding.root)
 
 inline fun <reified VB : ViewBinding> bindingView(
     inflater: LayoutInflater,
@@ -88,10 +102,10 @@ inline fun <reified VB : ViewBinding> bindingView(
 ): View = viewBinding<VB>(parent, attachToParent).apply(block).root
 
 inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
-    viewBinding(VB::class.java, rootView).apply(block).root
+    viewBinding<VB>(rootView).apply(block).root
 
 inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
-    viewBinding(VB::class.java, binding.root).apply(block).root
+    viewBinding<VB>(binding.root).apply(block).root
 
 class FragmentViewBindingLazy<VB : ViewBinding>(
     private val fragment: Fragment,
@@ -106,14 +120,16 @@ class FragmentViewBindingLazy<VB : ViewBinding>(
 
     override val value: VB
         get() {
-            if (binding == null) {
-                binding = if (fragment is NiceFragment) {
-                    viewBinding(clazz, fragment.layoutInflater)
+            val bindingPromise = {
+                if (fragment is NiceFragment) {
+                    ViewBindings.inflate(clazz, fragment.layoutInflater)
                 } else {
-                    viewBinding(clazz, fragment.requireView())
+                    ViewBindings.bind(clazz, fragment.requireView())
                 }
             }
-            return binding!!
+            return binding ?: bindingPromise().also {
+                binding = it
+            }
         }
 
     override fun isInitialized(): Boolean = binding != null

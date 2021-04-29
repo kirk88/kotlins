@@ -23,27 +23,50 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     private var itemAnimation: ItemViewAnimation? = null
     private var itemClickable: Boolean = false
     private var itemLongClickable: Boolean = false
-    private var isAttachedToRecyclerView: Boolean = false
+
+    private var recyclerView: RecyclerView? = null
+    private val parent: RecyclerView?
+        get() = recyclerView
 
     protected val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     open val items: List<T>
         get() = emptyList()
 
-    fun setOnItemClickListener(listener: OnItemClickListener<T, VH>) {
+    fun setOnItemClickListener(listener: OnItemClickListener<T, VH>?) {
         itemClickListener = listener
+        notifyDataSetChanged()
     }
 
-    fun setOnItemLongClickListener(listener: OnItemLongClickListener<T, VH>) {
+    fun setOnItemLongClickListener(listener: OnItemLongClickListener<T, VH>?) {
         itemLongClickListener = listener
+        notifyDataSetChanged()
     }
 
-    fun setOnItemChildClickListener(listener: OnItemChildClickListener<T, VH>) {
+    fun setOnItemChildClickListener(listener: OnItemChildClickListener<T, VH>?) {
         itemChildClickListener = listener
+        notifyDataSetChanged()
     }
 
-    fun setOnItemChildLongClickListener(listener: OnItemChildLongClickListener<T, VH>) {
+    fun setOnItemChildLongClickListener(listener: OnItemChildLongClickListener<T, VH>?) {
         itemChildLongClickListener = listener
+        notifyDataSetChanged()
+    }
+
+    fun setItemClickable(itemClickable: Boolean) {
+        if (this.itemClickable == itemClickable) {
+            return
+        }
+        this.itemClickable = itemClickable
+        notifyDataSetChanged()
+    }
+
+    fun setItemLongClickable(itemLongClickable: Boolean) {
+        if (this.itemLongClickable == itemLongClickable) {
+            return
+        }
+        this.itemLongClickable = itemLongClickable
+        notifyDataSetChanged()
     }
 
     protected fun callOnItemClick(holder: VH) {
@@ -64,26 +87,6 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     protected fun callOnItemChildLongClick(holder: VH, view: View) {
         if (onItemChildLongClick(holder, view)) return
         itemChildLongClickListener?.onItemChildLongClick(this, holder, view)
-    }
-
-    fun setItemClickable(itemClickable: Boolean) {
-        if (this.itemClickable == itemClickable) {
-            return
-        }
-        this.itemClickable = itemClickable
-        if (isAttachedToRecyclerView) {
-            notifyDataSetChanged()
-        }
-    }
-
-    fun setItemLongClickable(itemLongClickable: Boolean) {
-        if (this.itemLongClickable == itemLongClickable) {
-            return
-        }
-        this.itemLongClickable = itemLongClickable
-        if (isAttachedToRecyclerView) {
-            notifyDataSetChanged()
-        }
     }
 
     fun setItemAnimation(itemAnimation: ItemViewAnimation) {
@@ -146,6 +149,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
                     itemClickListener?.onItemClick(this, holder)
                 }
             }
+        } else {
+            holder.removeOnClickListener()
         }
 
         if (itemLongClickListener != null || itemLongClickable) {
@@ -154,6 +159,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
                     itemLongClickListener?.onItemLongClick(this, holder) ?: false
                 else true
             }
+        } else {
+            holder.removeOnLongClickListener()
         }
 
         holder.setOnChildClickListener {
@@ -199,7 +206,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        isAttachedToRecyclerView = true
+        this.recyclerView = recyclerView
 
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
@@ -213,7 +220,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        isAttachedToRecyclerView = false
+        this.recyclerView = null
     }
 
     @CallSuper

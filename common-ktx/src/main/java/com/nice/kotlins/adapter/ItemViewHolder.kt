@@ -52,8 +52,18 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         itemView.setOnClickListener(clickListener)
     }
 
+    fun removeOnClickListener() {
+        itemView.setOnClickListener(null)
+        itemView.isClickable = false
+    }
+
     fun setOnLongClickListener(longClickListener: View.OnLongClickListener) {
         itemView.setOnLongClickListener(longClickListener)
+    }
+
+    fun removeOnLongClickListener() {
+        itemView.setOnLongClickListener(null)
+        itemView.isLongClickable = false
     }
 
     fun <T : View> findViewById(@IdRes id: Int): T? {

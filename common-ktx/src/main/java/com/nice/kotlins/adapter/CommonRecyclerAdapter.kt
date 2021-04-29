@@ -16,14 +16,12 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
     private val lock: Any = Any()
 
-    fun setItems(items: List<T>?) {
+    fun setItems(items: List<T>) {
         synchronized(lock) {
             if (modifiableItems.isNotEmpty()) {
                 modifiableItems.clear()
             }
-            if (items != null) {
-                modifiableItems.addAll(items)
-            }
+            modifiableItems.addAll(items)
             notifyDataSetChanged()
         }
     }

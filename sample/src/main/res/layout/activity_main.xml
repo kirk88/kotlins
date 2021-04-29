@@ -10,47 +10,32 @@
     <com.nice.kotlins.widget.TitleAppBar
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         app:statusBarForeground="?colorPrimaryVariant"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
-        app:customLayout="@layout/layout_custom_title_view"
         app:displayShowHomeAsUpEnabled="true"
         app:displayShowHomeEnabled="true"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:provideSupportActionBar="true" />
 
-    <androidx.core.widget.NestedScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
+        android:padding="30dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.nice.kotlins.widget.LoaderLayout
-            android:id="@+id/loader_layout"
+        <WebView
+            android:id="@+id/web_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:defaultShow="content">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/text_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Hello World!"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:textSize="50sp"
-                    android:textStyle="bold" />
+            android:scrollbars="none"/>
 
 
-            </FrameLayout>
+    </FrameLayout>
 
-        </com.nice.kotlins.widget.LoaderLayout>
 
-    </androidx.core.widget.NestedScrollView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -59,7 +44,6 @@
         android:layout_margin="16dp"
         android:src="@drawable/abc_vector_test"
         app:elevation="10dp"
-        app:layout_anchor="@id/titleBar"
-        app:layout_anchorGravity="bottom|end" />
+        android:layout_gravity="bottom|end"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

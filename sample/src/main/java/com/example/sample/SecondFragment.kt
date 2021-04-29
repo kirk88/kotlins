@@ -29,42 +29,42 @@ class SecondFragment : NiceFragment() {
         super.onCreate(savedInstanceState)
         binding.attachTo(this)
 
-        binding.recyclerView.addItemDecoration(LinearDividerItemDecoration(requireContext()))
+        binding.recyclerView.addItemDecoration(LinearDividerItemDecoration())
 
-//        adapter += listOf(
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd",
-//            "abcd",
-//            "abcde",
-//            "abcdef",
-//            "abcd"
-//        )
+        adapter += listOf(
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd"
+        )
 
 //        binding.listview.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, )
     }

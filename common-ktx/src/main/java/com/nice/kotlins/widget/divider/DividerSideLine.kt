@@ -13,9 +13,7 @@ open class DividerSideLine(
 ) {
 
     companion object {
-
         const val NO_PADDING = Int.MIN_VALUE
-
     }
 
 }
