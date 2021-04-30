@@ -36,11 +36,6 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
         return super.onOptionsItemSelected(item)
     }
 
-    override fun setTitle(title: CharSequence?) {
-        super.setTitle(title)
-        supportActionBar?.title = title
-    }
-
     fun setSubtitle(subtitle: CharSequence?) {
         this.subtitle = subtitle
         supportActionBar?.subtitle = subtitle

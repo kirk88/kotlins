@@ -78,23 +78,11 @@ internal class NiceFragmentDelegate(
     }
 
     fun setTitle(title: CharSequence?) {
-        activity?.let {
-            when (it) {
-                is NiceActivity -> it.title = title
-                is AppCompatActivity -> it.supportActionBar?.title = title
-                else -> it.actionBar?.title = title
-            }
-        }
+        activity?.title = title
     }
 
     fun getTitle(): CharSequence? {
-        return activity?.let {
-            when (it) {
-                is NiceActivity -> it.title
-                is AppCompatActivity -> it.supportActionBar?.title
-                else -> it.actionBar?.title
-            }
-        }
+        return activity?.title
     }
 
     fun setSubtitle(subtitle: CharSequence?) {
