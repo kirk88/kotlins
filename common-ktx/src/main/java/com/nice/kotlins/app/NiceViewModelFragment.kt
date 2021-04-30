@@ -15,7 +15,7 @@ import com.nice.kotlins.viewmodel.ViewModelOwner
 import com.nice.kotlins.widget.LoaderView
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.RefreshView
-import com.nice.kotlins.widget.TipsView
+import com.nice.kotlins.widget.TipView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     NiceFragment(contentLayoutId),
@@ -29,7 +29,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
 
     open val progressView: ProgressView? = null
 
-    open val tipsView: TipsView? = null
+    open val tipView: TipView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +96,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
                 it.setResult(event.resultCode, event.intent)
                 it.finish()
             }
-            else -> event.message?.let { tipsView?.show(it) }
+            else -> event.message?.let { tipView?.show(it) }
         }
         return false
     }

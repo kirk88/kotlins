@@ -18,116 +18,62 @@ import androidx.viewbinding.ViewBinding
 import com.nice.kotlins.app.NiceFragment
 import java.lang.reflect.Method
 
-@PublishedApi
-internal object ViewBindings {
+interface ViewBindingFactory {
 
-    private val methods = mutableMapOf<String, Method>()
-
-    @Suppress("UNCHECKED_CAST")
-    fun <VB : ViewBinding> inflate(
-        clazz: Class<VB>,
-        inflater: LayoutInflater,
-        parent: ViewGroup? = null,
-        attachToParent: Boolean = false
-    ) = methods.getOrPut(clazz.name) {
-        clazz.getMethod(
-            "inflate",
-            LayoutInflater::class.java,
-            ViewGroup::class.java,
-            Boolean::class.java
-        )
-    }.invoke(null, inflater, parent, attachToParent) as VB
-
-    @Suppress("UNCHECKED_CAST")
-    fun <VB : ViewBinding> bind(clazz: Class<VB>, view: View) =
-        methods.getOrPut(clazz.name) {
-            clazz.getMethod("bind", View::class.java)
-        }.invoke(null, view) as VB
+    fun <VB : ViewBinding> create(viewBindingClass: Class<VB>): VB
 
 }
 
-inline fun <reified VB : ViewBinding> Activity.viewBindings() =
-    lazy { viewBinding<VB>(layoutInflater) }
+class ViewBindingInflateFactory(
+    private val inflater: LayoutInflater,
+    private val parent: ViewGroup? = null,
+    private val attachToParent: Boolean = false,
+) : ViewBindingFactory {
+    override fun <VB : ViewBinding> create(viewBindingClass: Class<VB>): VB {
+        return ViewBindings.inflate(viewBindingClass, inflater, parent, attachToParent)
+    }
+}
 
-inline fun <reified VB : ViewBinding> Context.viewBindings() =
-    lazy { viewBinding<VB>(layoutInflater) }
+class ViewBindingBindFactory(private val rootView: View) : ViewBindingFactory {
+    override fun <VB : ViewBinding> create(viewBindingClass: Class<VB>): VB {
+        return ViewBindings.bind(viewBindingClass, rootView)
+    }
+}
 
-inline fun <reified VB : ViewBinding> Fragment.viewBindings() =
-    FragmentViewBindingLazy(this, VB::class.java)
+class ViewBindingLazy<VB : ViewBinding>(
+    private val viewBindingClass: Class<VB>,
+    private val factoryProducer: () -> ViewBindingFactory,
+) :
+    Lazy<VB> {
 
-inline fun <reified VB : ViewBinding> Dialog.viewBindings() =
-    lazy { viewBinding<VB>(layoutInflater) }
+    private var cached: VB? = null
 
-inline fun <reified VB : ViewBinding> ViewGroup.viewBindings(attachToParent: Boolean = true) =
-    lazy { viewBinding<VB>(this, attachToParent) }
+    override val value: VB
+        get() = cached ?: factoryProducer().create(viewBindingClass).also {
+            cached = it
+        }
 
-inline fun <reified VB : ViewBinding> viewBinding(
-    inflater: LayoutInflater,
-    parent: ViewGroup? = null,
-    attachToParent: Boolean = false
-) = ViewBindings.inflate(VB::class.java, inflater, parent, attachToParent)
-
-inline fun <reified VB : ViewBinding> viewBinding(
-    parent: ViewGroup,
-    attachToParent: Boolean = false
-) = ViewBindings.inflate(
-    VB::class.java,
-    LayoutInflater.from(parent.context),
-    parent,
-    attachToParent
-)
-
-inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
-    ViewBindings.bind(VB::class.java, rootView)
-
-inline fun <reified VB : ViewBinding> viewBinding(binding: ViewBinding) =
-    ViewBindings.bind(VB::class.java, binding.root)
-
-inline fun <reified VB : ViewBinding> bindingView(
-    inflater: LayoutInflater,
-    parent: ViewGroup? = null,
-    attachToParent: Boolean = false,
-    block: VB.() -> Unit
-): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
-
-inline fun <reified VB : ViewBinding> bindingView(
-    parent: ViewGroup,
-    attachToParent: Boolean = false,
-    block: VB.() -> Unit
-): View = viewBinding<VB>(parent, attachToParent).apply(block).root
-
-inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
-    viewBinding<VB>(rootView).apply(block).root
-
-inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
-    viewBinding<VB>(binding.root).apply(block).root
+    override fun isInitialized(): Boolean = cached != null
+}
 
 class FragmentViewBindingLazy<VB : ViewBinding>(
+    private val viewBindingClass: Class<VB>,
     private val fragment: Fragment,
-    private val clazz: Class<VB>
+    private val factoryProducer: () -> ViewBindingFactory,
 ) : Lazy<VB>, Observer<LifecycleOwner>, LifecycleEventObserver {
 
     init {
         fragment.viewLifecycleOwnerLiveData.observe(fragment, this)
     }
 
-    private var binding: VB? = null
+    private var cached: VB? = null
 
     override val value: VB
-        get() {
-            val bindingPromise = {
-                if (fragment is NiceFragment) {
-                    ViewBindings.inflate(clazz, fragment.layoutInflater)
-                } else {
-                    ViewBindings.bind(clazz, fragment.requireView())
-                }
-            }
-            return binding ?: bindingPromise().also {
-                binding = it
-            }
+        get() = cached ?: factoryProducer().create(viewBindingClass).also {
+            cached = it
         }
 
-    override fun isInitialized(): Boolean = binding != null
+    override fun isInitialized(): Boolean = cached != null
 
     override fun onChanged(owner: LifecycleOwner?) {
         owner ?: return
@@ -137,11 +83,116 @@ class FragmentViewBindingLazy<VB : ViewBinding>(
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         if (event == Lifecycle.Event.ON_DESTROY) {
-            binding = null
+            cached = null
         }
     }
 
 }
+
+object ViewBindings {
+
+    private val methods: MutableMap<Class<*>, Method> by lazy { mutableMapOf() }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <VB : ViewBinding> inflate(
+        viewBindingClass: Class<VB>,
+        inflater: LayoutInflater,
+        parent: ViewGroup? = null,
+        attachToParent: Boolean = false,
+    ) = methods.getOrPut(viewBindingClass) {
+        viewBindingClass.getMethod(
+            "inflate",
+            LayoutInflater::class.java,
+            ViewGroup::class.java,
+            Boolean::class.java
+        )
+    }.invoke(null, inflater, parent, attachToParent) as VB
+
+    @Suppress("UNCHECKED_CAST")
+    fun <VB : ViewBinding> bind(viewBindingClass: Class<VB>, rootView: View) =
+        methods.getOrPut(viewBindingClass) {
+            viewBindingClass.getMethod("bind", View::class.java)
+        }.invoke(null, rootView) as VB
+
+}
+
+val Context.viewBindingFactory: ViewBindingFactory
+    get() = ViewBindingInflateFactory(layoutInflater)
+
+val Fragment.viewBindingFactory: ViewBindingFactory
+    get() = if (this is NiceFragment) ViewBindingInflateFactory(layoutInflater)
+    else ViewBindingBindFactory(requireView())
+
+val ViewGroup.viewBindingFactory: ViewBindingFactory
+    get() = ViewBindingInflateFactory(layoutInflater, this, true)
+
+val Dialog.viewBindingFactory: ViewBindingFactory
+    get() = ViewBindingInflateFactory(layoutInflater)
+
+inline fun <reified VB : ViewBinding> Activity.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
+    val factoryPromise = factoryProducer ?: { viewBindingFactory }
+    return ViewBindingLazy(VB::class.java, factoryPromise)
+}
+
+inline fun <reified VB : ViewBinding> Context.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
+    val factoryPromise = factoryProducer ?: { viewBindingFactory }
+    return ViewBindingLazy(VB::class.java, factoryPromise)
+}
+
+inline fun <reified VB : ViewBinding> Fragment.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
+    val factoryPromise = factoryProducer ?: { viewBindingFactory }
+    return FragmentViewBindingLazy(VB::class.java, this, factoryPromise)
+}
+
+inline fun <reified VB : ViewBinding> Dialog.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
+    val factoryPromise = factoryProducer ?: { viewBindingFactory }
+    return ViewBindingLazy(VB::class.java, factoryPromise)
+}
+
+inline fun <reified VB : ViewBinding> ViewGroup.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
+    val factoryPromise = factoryProducer ?: { viewBindingFactory }
+    return ViewBindingLazy(VB::class.java, factoryPromise)
+}
+
+inline fun <reified VB : ViewBinding> viewBinding(
+    factory: ViewBindingFactory,
+) = factory.create(VB::class.java)
+
+inline fun <reified VB : ViewBinding> viewBinding(
+    inflater: LayoutInflater,
+    parent: ViewGroup? = null,
+    attachToParent: Boolean = false,
+) = ViewBindings.inflate(VB::class.java, inflater, parent, attachToParent)
+
+inline fun <reified VB : ViewBinding> viewBinding(
+    parent: ViewGroup,
+    attachToParent: Boolean = false,
+) = ViewBindings.inflate(VB::class.java, parent.layoutInflater, parent, attachToParent)
+
+inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
+    ViewBindings.bind(VB::class.java, rootView)
+
+inline fun <reified VB : ViewBinding> viewBinding(rootViewBinding: ViewBinding) =
+    ViewBindings.bind(VB::class.java, rootViewBinding.root)
+
+inline fun <reified VB : ViewBinding> bindingView(
+    inflater: LayoutInflater,
+    parent: ViewGroup? = null,
+    attachToParent: Boolean = false,
+    block: VB.() -> Unit,
+): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(
+    parent: ViewGroup,
+    attachToParent: Boolean = false,
+    block: VB.() -> Unit,
+): View = viewBinding<VB>(parent, attachToParent).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
+    viewBinding<VB>(rootView).apply(block).root
+
+inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
+    viewBinding<VB>(binding.root).apply(block).root
 
 fun ViewBinding.attachTo(activity: Activity) = activity.setContentView(root)
 

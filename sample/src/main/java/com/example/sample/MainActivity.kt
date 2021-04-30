@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.core.text.HtmlCompat
+import androidx.viewbinding.ViewBinding
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
@@ -71,7 +72,6 @@ class MainActivity : NiceActivity() {
                 super.onPageFinished(view, url)
                 Log.e("TAGTAG", "finish url: $url")
             }
-
         }
 
 

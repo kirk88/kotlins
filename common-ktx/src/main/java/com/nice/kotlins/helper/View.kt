@@ -152,6 +152,9 @@ var View.layoutHeight: Int
         requestLayout()
     }
 
+val View.layoutInflater: LayoutInflater
+    get() = LayoutInflater.from(context)
+
 inline fun <T : View> T.onClick(crossinline action: (view: T) -> Unit) {
     @Suppress("UNCHECKED_CAST")
     setOnClickListener { v -> action(v as T) }
@@ -192,14 +195,14 @@ inline fun ViewPager.onPageScrolled(
     crossinline action: (
         position: Int,
         positionOffset: Float,
-        positionOffsetPixels: Int
-    ) -> Unit
+        positionOffsetPixels: Int,
+    ) -> Unit,
 ) {
     addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
             action(position, positionOffset, positionOffsetPixels)
         }
@@ -218,7 +221,7 @@ inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit)
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
         }
 
@@ -237,7 +240,7 @@ inline fun ViewPager.onPageScrollStateChanged(crossinline action: (position: Int
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
         }
 
@@ -255,14 +258,14 @@ inline fun ViewPager2.onPageScrolled(
     crossinline action: (
         position: Int,
         positionOffset: Float,
-        positionOffsetPixels: Int
-    ) -> Unit
+        positionOffsetPixels: Int,
+    ) -> Unit,
 ) {
     registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
             action(position, positionOffset, positionOffsetPixels)
         }
@@ -281,7 +284,7 @@ inline fun ViewPager2.onPageSelected(crossinline action: (position: Int) -> Unit
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
         }
 
@@ -300,7 +303,7 @@ inline fun ViewPager2.onPageScrollStateChanged(crossinline action: (position: In
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
         }
 

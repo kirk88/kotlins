@@ -1,11 +1,14 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
+import androidx.viewbinding.ViewBinding
 import com.example.sample.databinding.FragmentSecondBinding
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.plusAssign
 import com.nice.kotlins.app.NiceFragment
+import com.nice.kotlins.helper.ViewBindingFactory
 import com.nice.kotlins.helper.adapterBuilder
 import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.viewBindings
@@ -27,7 +30,10 @@ class SecondFragment : NiceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val start = System.currentTimeMillis()
         binding.attachTo(this)
+
+        Log.e("TAGTAG", "time: ${System.currentTimeMillis() - start}")
 
         binding.recyclerView.addItemDecoration(LinearDividerItemDecoration())
 

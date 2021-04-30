@@ -68,7 +68,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     private fun drawChildLeftVertical(
         child: View,
         canvas: Canvas,
-        sideLine: DividerSideLine
+        sideLine: DividerSideLine,
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
@@ -91,7 +91,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     private fun drawChildTopHorizontal(
         child: View,
         canvas: Canvas,
-        sideLine: DividerSideLine
+        sideLine: DividerSideLine,
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
@@ -115,7 +115,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     private fun drawChildRightVertical(
         child: View,
         canvas: Canvas,
-        sideLine: DividerSideLine
+        sideLine: DividerSideLine,
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
@@ -138,7 +138,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     private fun drawChildBottomHorizontal(
         child: View,
         canvas: Canvas,
-        sideLine: DividerSideLine
+        sideLine: DividerSideLine,
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
@@ -170,7 +170,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         outRect: Rect,
         child: View,
         parent: RecyclerView,
-        state: RecyclerView.State
+        state: RecyclerView.State,
     ) {
         val position = (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition
         val divider = getDivider(
@@ -193,9 +193,6 @@ abstract class XDividerItemDecoration : ItemDecoration() {
 }
 
 class LinearDividerItemDecoration : XDividerItemDecoration {
-
-    private var orientation: Int = -1
-    private var divider: Divider? = null
 
     private var dividerDrawable: Drawable?
 
@@ -220,23 +217,17 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
             "LinearDividerItemDecoration only support the LinearLayoutManager"
         }
         val orientation = layoutManager.orientation
-        if (divider != null && this.orientation == layoutManager.orientation) {
-            return divider!!
-        }
-        this.orientation = orientation
 
         val builder = DividerBuilder()
-        val drawable = dividerDrawable ?: getDividerDrawable(parent.context, orientation)
-        if (drawable != null) {
-            if (orientation == RecyclerView.VERTICAL) {
-                builder.bottom(drawable)
-            } else {
-                builder.right(drawable)
-            }
+        val drawable = getDividerDrawable(parent, orientation)
+        drawable ?: return builder.build()
+
+        if (orientation == RecyclerView.VERTICAL) {
+            builder.bottom(drawable)
+        } else {
+            builder.right(drawable)
         }
-        return builder.build().also {
-            divider = it
-        }
+        return builder.build()
     }
 
     private fun getDividerDrawable(context: Context, attrs: IntArray): Drawable? {
@@ -246,18 +237,21 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         return drawable
     }
 
-    private fun getDividerDrawable(context: Context, orientation: Int): Drawable? {
-        val dividerDrawable = if (orientation == RecyclerView.VERTICAL) {
-            getDividerDrawable(context, HORIZONTAL_ATTRS)
+    private fun getDividerDrawable(parent: RecyclerView, orientation: Int): Drawable? {
+        return dividerDrawable ?: if (orientation == RecyclerView.VERTICAL) {
+            val drawable = parent.getTag(R.id.horizontal_divider_drawable_id) as? Drawable
+            drawable ?: getDividerDrawable(parent.context, HORIZONTAL_ATTRS).also {
+                parent.setTag(R.id.horizontal_divider_drawable_id, it)
+            }
         } else {
-            getDividerDrawable(context, VERTICAL_ATTRS)
+            val drawable = parent.getTag(R.id.vertical_divider_drawable_id) as? Drawable
+            drawable ?: getDividerDrawable(parent.context, VERTICAL_ATTRS).also {
+                parent.setTag(R.id.vertical_divider_drawable_id, it)
+            }
         }
-        return dividerDrawable ?: getDividerDrawable(context, ATTRS)
     }
 
     companion object {
-        private val ATTRS = intArrayOf(android.R.attr.listDivider)
-
         private val VERTICAL_ATTRS = intArrayOf(R.attr.dividerVertical)
         private val HORIZONTAL_ATTRS = intArrayOf(R.attr.dividerHorizontal)
     }
@@ -272,10 +266,16 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         dividerDrawable = drawable
     }
 
-    constructor(@ColorInt dividerColor: Int, dividerSize: Int) {
+    constructor(@ColorInt dividerColor: Int, dividerSize: Int) : this(
+        dividerColor,
+        dividerSize,
+        dividerSize
+    )
+
+    constructor(@ColorInt dividerColor: Int, dividerWidth: Int, dividerHeight: Int) {
         dividerDrawable = GradientDrawable().apply {
             setColor(dividerColor)
-            setSize(dividerSize, dividerSize)
+            setSize(dividerWidth, dividerHeight)
         }
     }
 
@@ -294,19 +294,16 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         val isLastColumn = position >= itemCount - (itemCount % spanCount).let {
             if (it == 0) spanCount else it
         }
-
-        val dividerSize =
-            if (orientation == RecyclerView.VERTICAL) dividerDrawable.intrinsicHeight else dividerDrawable.intrinsicWidth
-        val eachWidth: Int = (spanCount - 1) * dividerSize / spanCount
-
-        val leftTop = position % spanCount * (dividerSize - eachWidth)
-        val rightBottom = eachWidth - leftTop
         if (orientation == RecyclerView.VERTICAL) {
+            val dividerSize = dividerDrawable.intrinsicHeight
+            val eachWidth: Int = (spanCount - 1) * dividerSize / spanCount
+            val left = position % spanCount * (dividerSize - eachWidth)
+            val right = eachWidth - left
             return DividerBuilder()
-                .left(leftTop)
+                .left(left)
                 .right(
                     dividerDrawable,
-                    offset = rightBottom,
+                    offset = right,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastColumn) -dividerSize else 0,
                     visible = !isLastRow
@@ -319,8 +316,12 @@ class GridDividerItemDecoration : XDividerItemDecoration {
                 )
                 .build()
         } else {
+            val dividerSize = dividerDrawable.intrinsicWidth
+            val eachWidth: Int = (spanCount - 1) * dividerSize / spanCount
+            val top = position % spanCount * (dividerSize - eachWidth)
+            val bottom = eachWidth - top
             return DividerBuilder()
-                .top(leftTop)
+                .top(top)
                 .right(
                     dividerDrawable,
                     paddingStart = if (isFirstColumn) 0 else -dividerSize,
@@ -329,7 +330,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
                 )
                 .bottom(
                     dividerDrawable,
-                    offset = rightBottom,
+                    offset = bottom,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastColumn) -dividerSize else 0,
                     visible = !isLastRow

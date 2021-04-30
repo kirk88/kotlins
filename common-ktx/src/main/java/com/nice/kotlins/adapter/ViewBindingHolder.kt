@@ -2,6 +2,9 @@
 
 package com.nice.kotlins.adapter
 
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.view.ViewParent
 import androidx.viewbinding.ViewBinding
 
 class ViewBindingHolder<VB : ViewBinding>(val binding: VB) : ItemViewHolder(binding.root)

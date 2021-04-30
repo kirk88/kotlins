@@ -249,10 +249,6 @@ internal class OkRequest(
             }
         }
 
-        fun url(url: URL) = url(url.toString())
-
-        fun url(uri: URI) = url(uri.toString())
-
         fun cacheControl(cacheControl: CacheControl) = apply {
             requestBuilder.cacheControl(cacheControl)
         }

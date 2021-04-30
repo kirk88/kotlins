@@ -35,7 +35,7 @@ abstract class SelectQueryBuilder(private val table: String) {
         return this
     }
 
-    fun columns(names: List<SqlColumnProperty>): SelectQueryBuilder {
+    fun columns(names: Collection<SqlColumnProperty>): SelectQueryBuilder {
         this.columnsApplied = true
         this.columns.addAll(names.map { it.name })
         return this

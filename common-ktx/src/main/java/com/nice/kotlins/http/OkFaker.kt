@@ -11,6 +11,7 @@ import okhttp3.*
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
+import java.net.URL
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext

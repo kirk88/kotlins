@@ -18,6 +18,9 @@
     <item name="toolbar" type="id" />
 
 
-    <item name="navigation_controller_tag_id" type="id"/>
+    <item name="navigation_controller_tag_id" type="id" />
+
+    <item name="vertical_divider_drawable_id" type="id" />
+    <item name="horizontal_divider_drawable_id" type="id" />
 
 </resources>

@@ -18,7 +18,7 @@ abstract class UpdateQueryBuilder(private val table: String) {
         return this
     }
 
-    fun values(values: List<SqlColumnElement>): UpdateQueryBuilder {
+    fun values(values: Collection<SqlColumnElement>): UpdateQueryBuilder {
         this.values.addAll(values)
         return this
     }

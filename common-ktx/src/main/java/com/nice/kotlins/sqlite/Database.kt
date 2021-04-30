@@ -16,7 +16,7 @@ fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnElement): Long 
     return insert(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.insert(table: String, values: List<SqlColumnElement>): Long {
+fun SQLiteDatabase.insert(table: String, values: Collection<SqlColumnElement>): Long {
     return insert(table, null, values.toContentValues())
 }
 
@@ -24,7 +24,7 @@ fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnElement)
     return insertOrThrow(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.insertOrThrow(table: String, values: List<SqlColumnElement>): Long {
+fun SQLiteDatabase.insertOrThrow(table: String, values: Collection<SqlColumnElement>): Long {
     return insertOrThrow(table, null, values.toContentValues())
 }
 
@@ -39,7 +39,7 @@ fun SQLiteDatabase.insertWithOnConflict(
 fun SQLiteDatabase.insertWithOnConflict(
     table: String,
     conflictAlgorithm: Int,
-    values: List<SqlColumnElement>
+    values: Collection<SqlColumnElement>
 ): Long {
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
@@ -48,7 +48,7 @@ fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnElement): Long
     return replace(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.replace(table: String, values: List<SqlColumnElement>): Long {
+fun SQLiteDatabase.replace(table: String, values: Collection<SqlColumnElement>): Long {
     return replace(table, null, values.toContentValues())
 }
 
@@ -56,7 +56,7 @@ fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnElement
     return replaceOrThrow(table, null, values.toContentValues())
 }
 
-fun SQLiteDatabase.replaceOrThrow(table: String, values: List<SqlColumnElement>): Long {
+fun SQLiteDatabase.replaceOrThrow(table: String, values: Collection<SqlColumnElement>): Long {
     return replaceOrThrow(table, null, values.toContentValues())
 }
 
@@ -100,7 +100,7 @@ fun SQLiteDatabase.update(
 
 fun SQLiteDatabase.update(
     table: String,
-    values: List<SqlColumnElement>
+    values: Collection<SqlColumnElement>
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table).also {
         it.values(values)
@@ -122,7 +122,7 @@ fun SQLiteDatabase.query(
 
 fun SQLiteDatabase.query(
     table: String,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ): SelectQueryBuilder {
     return AndroidDatabaseSelectQueryBuilder(this, table).also {
         it.columns(columns)
@@ -151,12 +151,12 @@ fun SQLiteDatabase.createTable(
 fun SQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = createTable(table, ifNotExists, *columns.toTypedArray())
 
 fun SQLiteDatabase.createTable(
     table: String,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = createTable(table, false, columns)
 
 
@@ -208,13 +208,13 @@ fun SQLiteDatabase.createIndex(
     unique: Boolean,
     ifNotExists: Boolean,
     index: String,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = createIndex(table, unique, ifNotExists, index, *columns.toTypedArray())
 
 fun SQLiteDatabase.createIndex(
     table: String,
     index: String,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = createIndex(
     table = table,
     unique = false,
@@ -280,7 +280,7 @@ fun SQLiteDatabase.createColumns(
 fun SQLiteDatabase.createColumns(
     table: String,
     ifNotExists: Boolean = false,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = transaction {
     for (column in columns) {
         createColumn(table, ifNotExists, column)
@@ -289,7 +289,7 @@ fun SQLiteDatabase.createColumns(
 
 fun SQLiteDatabase.createColumns(
     table: String,
-    columns: List<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>
 ) = createColumns(table, false, columns)
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
@@ -300,7 +300,7 @@ fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     return values
 }
 
-fun List<SqlColumnElement>.toContentValues(): ContentValues {
+fun Collection<SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
     for (element in this) {
         values.put(element)

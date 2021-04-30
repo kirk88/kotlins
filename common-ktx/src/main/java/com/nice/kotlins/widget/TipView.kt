@@ -2,7 +2,7 @@ package com.nice.kotlins.widget
 
 import androidx.annotation.StringRes
 
-interface TipsView {
+interface TipView {
 
     fun show(message: CharSequence)
 
