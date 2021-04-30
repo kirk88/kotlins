@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.adapter.anim
 
 import android.animation.Animator
