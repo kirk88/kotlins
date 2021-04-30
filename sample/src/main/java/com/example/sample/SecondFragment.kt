@@ -3,9 +3,12 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.sample.databinding.FragmentSecondBinding
 import com.nice.kotlins.adapter.ItemViewHolder
+import com.nice.kotlins.adapter.anim.ItemViewAnimationMode
+import com.nice.kotlins.adapter.anim.ScaleInAnimation
 import com.nice.kotlins.adapter.plusAssign
 import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.ViewBindingFactory
@@ -13,6 +16,8 @@ import com.nice.kotlins.helper.adapterBuilder
 import com.nice.kotlins.helper.attachTo
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.divider.LinearDividerItemDecoration
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class SecondFragment : NiceFragment() {
@@ -36,6 +41,8 @@ class SecondFragment : NiceFragment() {
         Log.e("TAGTAG", "time: ${System.currentTimeMillis() - start}")
 
         binding.recyclerView.addItemDecoration(LinearDividerItemDecoration())
+
+        adapter.setItemAnimation(ScaleInAnimation(0.9f, 0.7f))
 
         adapter += listOf(
             "abcd",
@@ -103,6 +110,77 @@ class SecondFragment : NiceFragment() {
             "abcdef",
             "abcd"
         )
+
+        lifecycleScope.launch {
+            delay(2000)
+
+            adapter += listOf(
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcd"
+            )
+        }
 
 //        binding.listview.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, )
     }

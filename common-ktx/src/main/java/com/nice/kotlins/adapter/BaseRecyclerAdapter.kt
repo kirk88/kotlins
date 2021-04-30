@@ -223,14 +223,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         this.recyclerView = null
     }
 
-    @CallSuper
     override fun onViewAttachedToWindow(holder: VH) {
         itemAnimation?.start(holder)
-    }
-
-    @CallSuper
-    override fun onViewDetachedFromWindow(holder: VH) {
-        itemAnimation?.cancel()
     }
 
 }

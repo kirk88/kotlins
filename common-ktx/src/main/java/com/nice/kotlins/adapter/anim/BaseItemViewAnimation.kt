@@ -4,47 +4,34 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.nice.kotlins.helper.opt
 
-abstract class BaseItemViewAnimation(protected open val animationMode: ItemViewAnimationMode) :
+abstract class BaseItemViewAnimation(private val animationMode: ItemViewAnimationMode) :
     ItemViewAnimation {
 
     private var lastAnimateIndex = -1
 
-    private var animatorSet: AnimatorSet? = null
-
-    protected open fun getAnimators(holder: RecyclerView.ViewHolder): Array<Animator> {
-        val animators: Array<Animator> = when (animationMode) {
-            ItemViewAnimationMode.UPWARD -> (lastAnimateIndex < holder.layoutPosition).opt(
-                getAnimators(holder.itemView), emptyArray()
-            )
-            ItemViewAnimationMode.DOWNWARD -> (lastAnimateIndex > holder.layoutPosition).opt(
-                getAnimators(holder.itemView), emptyArray()
-            )
-            ItemViewAnimationMode.NORMAL -> getAnimators(holder.itemView)
+    protected open fun getAnimatorSet(holder: RecyclerView.ViewHolder): AnimatorSet? {
+        val animatorSet = when (animationMode) {
+            ItemViewAnimationMode.UPWARD -> if (lastAnimateIndex < holder.layoutPosition) {
+                AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
+            } else null
+            ItemViewAnimationMode.DOWNWARD -> if (lastAnimateIndex > holder.layoutPosition) {
+                AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
+            } else null
+            ItemViewAnimationMode.NORMAL -> AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
         }
         lastAnimateIndex = holder.layoutPosition
-        return animators
+        return animatorSet
     }
 
     override fun start(holder: RecyclerView.ViewHolder) {
-        val animators = getAnimators(holder)
-        if (animators.isNotEmpty()) {
-            AnimatorSet().also {
-                animatorSet = it
-                it.playTogether(*animators)
-            }.start()
-        }
-    }
-
-    override fun cancel() {
-        animatorSet?.cancel()
+        getAnimatorSet(holder)?.start()
     }
 
     override fun reset() {
         lastAnimateIndex = -1
     }
 
-    protected abstract fun getAnimators(view: View): Array<Animator>
+    protected abstract fun getAnimators(view: View): List<Animator>
 
 }

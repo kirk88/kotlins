@@ -10,10 +10,10 @@ class ScaleInAnimation(
     itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,
 ) : BaseItemViewAnimation(itemAnimationMode) {
 
-    override fun getAnimators(view: View): Array<Animator> {
+    override fun getAnimators(view: View): List<Animator> {
         val scaleX = ObjectAnimator.ofFloat(view, "scaleX", fromX, 1f)
         val scaleY = ObjectAnimator.ofFloat(view, "scaleY", fromY, 1f)
-        return arrayOf(scaleX, scaleY)
+        return listOf(scaleX, scaleY)
     }
 
     companion object {

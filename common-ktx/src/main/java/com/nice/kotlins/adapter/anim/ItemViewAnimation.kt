@@ -6,8 +6,6 @@ interface ItemViewAnimation {
 
     fun start(holder: RecyclerView.ViewHolder)
 
-    fun cancel()
-
     fun reset()
 
 }
