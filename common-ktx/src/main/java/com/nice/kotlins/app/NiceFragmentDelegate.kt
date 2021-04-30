@@ -1,5 +1,6 @@
 package com.nice.kotlins.app
 
+import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -7,22 +8,26 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
 internal class NiceFragmentDelegate(
     private val fragment: Fragment,
-    private val callback: Callback
+    private val callback: Callback,
 ) {
 
     private val context: Context
         get() = fragment.requireContext()
+
+    private val activity: Activity?
+        get() = fragment.activity
 
     private val layoutInflater: LayoutInflater
         get() = fragment.layoutInflater
 
     private var subDecor: ViewGroup? = null
 
-    fun onCreate(){
+    fun onCreate() {
         ensureSubDecor()
     }
 
@@ -68,8 +73,48 @@ internal class NiceFragmentDelegate(
         callback.onContentChanged()
     }
 
-    fun getView(): View?{
+    fun getView(): View? {
         return subDecor
+    }
+
+    fun setTitle(title: CharSequence?) {
+        activity?.let {
+            when (it) {
+                is NiceActivity -> it.title = title
+                is AppCompatActivity -> it.supportActionBar?.title = title
+                else -> it.actionBar?.title = title
+            }
+        }
+    }
+
+    fun getTitle(): CharSequence? {
+        return activity?.let {
+            when (it) {
+                is NiceActivity -> it.title
+                is AppCompatActivity -> it.supportActionBar?.title
+                else -> it.actionBar?.title
+            }
+        }
+    }
+
+    fun setSubtitle(subtitle: CharSequence?) {
+        activity?.let {
+            when (it) {
+                is NiceActivity -> it.subtitle = subtitle
+                is AppCompatActivity -> it.supportActionBar?.subtitle = subtitle
+                else -> it.actionBar?.subtitle = subtitle
+            }
+        }
+    }
+
+    fun getSubtitle(): CharSequence? {
+        return activity?.let {
+            when (it) {
+                is NiceActivity -> it.subtitle
+                is AppCompatActivity -> it.supportActionBar?.subtitle
+                else -> it.actionBar?.subtitle
+            }
+        }
     }
 
     private fun ensureSubDecor() {

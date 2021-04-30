@@ -76,13 +76,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     fun setTitle(title: CharSequence?) {
-        activity?.let {
-            when (it) {
-                is NiceActivity -> it.title = title
-                is AppCompatActivity -> it.supportActionBar?.title = title
-                else -> it.actionBar?.title = title
-            }
-        }
+        delegate.setTitle(title)
     }
 
     fun setTitle(titleId: Int) {
@@ -90,23 +84,11 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     fun getTitle(): CharSequence? {
-        return activity?.let {
-            when (it) {
-                is NiceActivity -> it.title
-                is AppCompatActivity -> it.supportActionBar?.title
-                else -> it.actionBar?.title
-            }
-        }
+        return delegate.getTitle()
     }
 
     fun setSubtitle(subtitle: CharSequence?) {
-        activity?.let {
-            when (it) {
-                is NiceActivity -> it.subtitle = subtitle
-                is AppCompatActivity -> it.supportActionBar?.subtitle = subtitle
-                else -> it.actionBar?.subtitle = subtitle
-            }
-        }
+        delegate.setSubtitle(subtitle)
     }
 
     fun setSubtitle(subtitleId: Int) {
@@ -114,13 +96,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     fun getSubtitle(): CharSequence? {
-        return activity?.let {
-            when (it) {
-                is NiceActivity -> it.subtitle
-                is AppCompatActivity -> it.supportActionBar?.subtitle
-                else -> it.actionBar?.subtitle
-            }
-        }
+        return delegate.getSubtitle()
     }
 
     override fun onContentChanged() {
