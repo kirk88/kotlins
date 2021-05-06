@@ -194,7 +194,13 @@ inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: V
 
 fun Activity.setContentView(binding: ViewBinding) = setContentView(binding.root)
 
+fun Activity.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
+    addContentView(binding.root, params)
+
 fun NiceFragment.setContentView(binding: ViewBinding) = setContentView(binding.root)
+
+fun NiceFragment.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
+    addContentView(binding.root, params)
 
 fun ViewGroup.addView(binding: ViewBinding) = addView(binding.root)
 
