@@ -47,6 +47,7 @@ class TitleAppBar @JvmOverloads constructor(
     attrs,
     defStyleAttr
 ) {
+
     @IntDef(value = [SHOW_BOTTOM_DIVIDER_IF_NEED, SHOW_BOTTOM_DIVIDER_ALWAYS, SHOW_BOTTOM_DIVIDER_NEVER])
     @Retention(AnnotationRetention.SOURCE)
     annotation class BottomDividerMode
@@ -58,6 +59,21 @@ class TitleAppBar @JvmOverloads constructor(
     private var bottomDividerHeight: Int = 0
     private var bottomDividerColor: Int = 0
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
+
+    fun provideSupportActionBar(
+        activity: AppCompatActivity,
+        showHome: Boolean = false,
+        showHomeAsUp: Boolean = false
+    ) {
+        check(actionBar == null) {
+            "ActionBar already exists"
+        }
+        activity.setSupportActionBar(toolbar)
+        actionBar = activity.supportActionBar!!.apply {
+            setDisplayShowHomeEnabled(showHome)
+            setDisplayHomeAsUpEnabled(showHomeAsUp)
+        }
+    }
 
     fun setPopupTheme(@StyleRes theme: Int) {
         toolbar.popupTheme = theme
