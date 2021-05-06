@@ -9,11 +9,10 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
 abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : Fragment(),
-    NiceFragmentDelegate.Callback {
+    NiceFragmentDelegate.Callback, HasActionBarTitle, HasActionBarSubtitle {
 
     private val delegate: NiceFragmentDelegate by lazy {
         NiceFragmentDelegate(this, this)
@@ -34,7 +33,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     final override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val subDecor = delegate.getSubDecor()
         subDecor.post {
@@ -53,6 +52,30 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
 
     override fun getView(): View? {
         return delegate.getView()
+    }
+
+    override fun setTitle(title: CharSequence?) {
+        delegate.setTitle(title)
+    }
+
+    override fun setTitle(resId: Int) {
+        setTitle(getText(resId))
+    }
+
+    override fun getTitle(): CharSequence? {
+        return delegate.getTitle()
+    }
+
+    override fun setSubtitle(subtitle: CharSequence?) {
+        delegate.setSubtitle(subtitle)
+    }
+
+    override fun setSubtitle(resId: Int) {
+        setSubtitle(getText(resId))
+    }
+
+    override fun getSubtitle(): CharSequence? {
+        return delegate.getSubtitle()
     }
 
     fun <T : View> findViewById(@IdRes id: Int): T? {
@@ -75,44 +98,8 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
         delegate.addContentView(view, params)
     }
 
-    fun setTitle(title: CharSequence?) {
-        delegate.setTitle(title)
-    }
-
-    fun setTitle(titleId: Int) {
-        setTitle(getText(titleId))
-    }
-
-    fun getTitle(): CharSequence? {
-        return delegate.getTitle()
-    }
-
-    fun setSubtitle(subtitle: CharSequence?) {
-        delegate.setSubtitle(subtitle)
-    }
-
-    fun setSubtitle(subtitleId: Int) {
-        setSubtitle(getText(subtitleId))
-    }
-
-    fun getSubtitle(): CharSequence? {
-        return delegate.getSubtitle()
-    }
-
     override fun onContentChanged() {
 
     }
 
 }
-
-var NiceFragment.title: CharSequence?
-    get() = getTitle()
-    set(title) {
-        setTitle(title)
-    }
-
-var NiceFragment.subtitle: CharSequence?
-    get() = getSubtitle()
-    set(subtitle) {
-        setSubtitle(subtitle)
-    }

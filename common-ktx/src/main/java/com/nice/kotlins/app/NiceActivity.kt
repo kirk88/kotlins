@@ -10,7 +10,7 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 
 abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
-    AppCompatActivity(contentLayoutId) {
+    AppCompatActivity(contentLayoutId), HasActionBarSubtitle {
 
     private var subtitle: CharSequence? = null
 
@@ -36,23 +36,23 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
         return super.onOptionsItemSelected(item)
     }
 
-    fun setSubtitle(subtitle: CharSequence?) {
+    override fun setSubtitle(subtitle: CharSequence?) {
         this.subtitle = subtitle
         supportActionBar?.subtitle = subtitle
     }
 
-    fun setSubtitle(subtitleId: Int) {
-        setSubtitle(getText(subtitleId))
+    override fun setSubtitle(resId: Int) {
+        setSubtitle(getText(resId))
     }
 
-    fun getSubtitle(): CharSequence? {
+    override fun getSubtitle(): CharSequence? {
         return subtitle
     }
 
 }
 
-var NiceActivity.subtitle: CharSequence?
-    get() = getSubtitle()
-    set(subtitle) {
-        setSubtitle(subtitle)
+class A: NiceActivity(){
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
     }
+}

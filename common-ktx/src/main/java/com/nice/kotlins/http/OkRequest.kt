@@ -9,8 +9,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
-import java.net.URI
-import java.net.URL
 
 internal class OkRequest(
     private val client: OkHttpClient,
@@ -164,12 +162,26 @@ internal class OkRequest(
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder().also {
             it.username(config.username.orEmpty())
             it.password(config.password.orEmpty())
+
+            val queryParameters = config.queryParameters
+            if(queryParameters != null){
+                for ((name, value) in queryParameters){
+                    it.addQueryParameter(name, value)
+                }
+            }
         }
 
         private val requestBuilder: Request.Builder = Request.Builder().also {
             val cacheControl = config.cacheControl
             if (cacheControl != null) {
                 it.cacheControl(cacheControl)
+            }
+
+            val headers = config.headers
+            if(headers != null){
+                for ((name, value) in headers){
+                    it.addHeader(name, value)
+                }
             }
         }
 
@@ -178,6 +190,13 @@ internal class OkRequest(
             get() = field ?: FormBody.Builder().also {
                 check(!multipartBodyApplied && !requestBodyApplied) {
                     "Can not build FormBody, a request body already existed"
+                }
+
+                val formParameters = config.formParameters
+                if(formParameters != null){
+                    for ((name, value) in formParameters){
+                        it.add(name, value)
+                    }
                 }
 
                 formBodyApplied = true
@@ -272,7 +291,6 @@ internal class OkRequest(
         fun password(password: String) = apply {
             urlBuilder.password(password)
         }
-
 
         fun addQueryParameter(name: String, value: String) = apply {
             urlBuilder.addQueryParameter(name, value)

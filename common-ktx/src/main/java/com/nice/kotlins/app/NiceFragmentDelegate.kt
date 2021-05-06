@@ -88,7 +88,7 @@ internal class NiceFragmentDelegate(
     fun setSubtitle(subtitle: CharSequence?) {
         activity?.let {
             when (it) {
-                is NiceActivity -> it.subtitle = subtitle
+                is HasActionBarSubtitle -> it.subtitle = subtitle
                 is AppCompatActivity -> it.supportActionBar?.subtitle = subtitle
                 else -> it.actionBar?.subtitle = subtitle
             }
@@ -98,7 +98,7 @@ internal class NiceFragmentDelegate(
     fun getSubtitle(): CharSequence? {
         return activity?.let {
             when (it) {
-                is NiceActivity -> it.subtitle
+                is HasActionBarSubtitle -> it.subtitle
                 is AppCompatActivity -> it.supportActionBar?.subtitle
                 else -> it.actionBar?.subtitle
             }

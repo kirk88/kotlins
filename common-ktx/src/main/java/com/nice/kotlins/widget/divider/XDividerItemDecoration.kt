@@ -230,13 +230,6 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         return builder.build()
     }
 
-    private fun getDividerDrawable(context: Context, attrs: IntArray): Drawable? {
-        val ta = context.obtainStyledAttributes(attrs)
-        val drawable = ta.getDrawable(0)
-        ta.recycle()
-        return drawable
-    }
-
     private fun getDividerDrawable(parent: RecyclerView, orientation: Int): Drawable? {
         return dividerDrawable ?: if (orientation == RecyclerView.VERTICAL) {
             val drawable = parent.getTag(R.id.horizontal_divider_drawable_id) as? Drawable
@@ -254,6 +247,13 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
     companion object {
         private val VERTICAL_ATTRS = intArrayOf(R.attr.dividerVertical)
         private val HORIZONTAL_ATTRS = intArrayOf(R.attr.dividerHorizontal)
+
+        private fun getDividerDrawable(context: Context, attrs: IntArray): Drawable? {
+            val ta = context.obtainStyledAttributes(attrs)
+            val drawable = ta.getDrawable(0)
+            ta.recycle()
+            return drawable
+        }
     }
 
 }

@@ -102,7 +102,7 @@ object Status {
     const val ACTIVITY_START = STATUS_BASE + 13
     const val ACTIVITY_RESULT = STATUS_BASE + 14
 
-    fun isStatus(status: Int): Boolean = status > STATUS_BASE && status < STATUS_BASE + 15
+    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value < STATUS_BASE + 15
 
 }
 
