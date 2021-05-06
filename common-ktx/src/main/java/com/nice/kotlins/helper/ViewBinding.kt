@@ -123,11 +123,11 @@ val Fragment.viewBindingFactory: ViewBindingFactory
     get() = if (this is NiceFragment) ViewBindingInflateFactory(layoutInflater)
     else ViewBindingBindFactory(requireView())
 
-val ViewGroup.viewBindingFactory: ViewBindingFactory
-    get() = ViewBindingInflateFactory(layoutInflater, this, true)
-
 val Dialog.viewBindingFactory: ViewBindingFactory
     get() = ViewBindingInflateFactory(layoutInflater)
+
+val ViewGroup.viewBindingFactory: ViewBindingFactory
+    get() = ViewBindingInflateFactory(layoutInflater, this, true)
 
 inline fun <reified VB : ViewBinding> Activity.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
     val factoryPromise = factoryProducer ?: { viewBindingFactory }
@@ -149,9 +149,8 @@ inline fun <reified VB : ViewBinding> Dialog.viewBindings(noinline factoryProduc
     return ViewBindingLazy(VB::class.java, factoryPromise)
 }
 
-inline fun <reified VB : ViewBinding> ViewGroup.viewBindings(noinline factoryProducer: (() -> ViewBindingFactory)? = null): Lazy<VB> {
-    val factoryPromise = factoryProducer ?: { viewBindingFactory }
-    return ViewBindingLazy(VB::class.java, factoryPromise)
+inline fun <reified VB : ViewBinding> ViewGroup.viewBindings(factory: ViewBindingFactory? = null): VB {
+    return (factory ?: viewBindingFactory).create(VB::class.java)
 }
 
 inline fun <reified VB : ViewBinding> viewBinding(

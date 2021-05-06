@@ -34,7 +34,7 @@ import com.nice.kotlins.widget.LoaderView.Companion.TYPE_LOADING_VIEW
 class LoaderLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.loaderLayoutStyle
+    defStyleAttr: Int = R.attr.loaderLayoutStyle,
 ) : FrameLayout(context, attrs, defStyleAttr), LoaderView {
 
     private var emptyLayoutId: Int
@@ -418,7 +418,7 @@ class LoaderLayout @JvmOverloads constructor(
     private fun setView(
         layoutResId: Int,
         viewType: Int,
-        preventAddView: Boolean = false
+        preventAddView: Boolean = false,
     ): View {
         return inflater.inflate(layoutResId, this, false).also {
             setView(it, viewType, preventAddView)
@@ -567,7 +567,7 @@ class LoaderLayout @JvmOverloads constructor(
 
     private class AdapterDataObserver(
         val adapter: RecyclerView.Adapter<*>,
-        loaderLayout: () -> LoaderLayout
+        loaderLayout: () -> LoaderLayout,
     ) : RecyclerView.AdapterDataObserver() {
 
         private val layout: LoaderLayout? by weak(loaderLayout)
