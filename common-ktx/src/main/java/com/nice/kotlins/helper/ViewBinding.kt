@@ -43,8 +43,7 @@ class ViewBindingBindFactory(private val rootView: View) : ViewBindingFactory {
 class ViewBindingLazy<VB : ViewBinding>(
     private val viewBindingClass: Class<VB>,
     private val factoryProducer: () -> ViewBindingFactory,
-) :
-    Lazy<VB> {
+) : Lazy<VB> {
 
     private var cached: VB? = null
 
