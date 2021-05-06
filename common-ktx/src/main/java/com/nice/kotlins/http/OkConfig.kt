@@ -26,10 +26,6 @@ class OkConfig internal constructor() {
 
     fun newSetter() = Setter(this)
 
-    override fun toString(): String {
-        return "OkConfig(client=$client, baseUrl=$baseUrl, cacheControl=$cacheControl, username=$username, password=$password)"
-    }
-
     class Setter internal constructor(private val config: OkConfig) {
 
         private var client: OkHttpClient? = null
@@ -89,11 +85,11 @@ class OkConfig internal constructor() {
             this.headers!!.putAll(parameters)
         }
 
-        fun headers(parameters: RequestPairs<String, String>.() -> Unit) = apply {
+        fun headers(operation: RequestPairs<String, String>.() -> Unit) = apply {
             if (this.headers == null) {
                 this.headers = mutableMapOf()
             }
-            this.headers!!.putAll(RequestPairs<String, String>().apply(parameters).toMap())
+            this.headers!!.putAll(RequestPairs<String, String>().apply(operation).toMap())
         }
 
         fun removeHeader(name: String) = apply {
@@ -107,11 +103,11 @@ class OkConfig internal constructor() {
             this.queryParameters!!.putAll(parameters)
         }
 
-        fun queryParameters(parameters: RequestPairs<String, String>.() -> Unit) = apply {
+        fun queryParameters(operation: RequestPairs<String, String>.() -> Unit) = apply {
             if (this.queryParameters == null) {
                 this.queryParameters = mutableMapOf()
             }
-            this.queryParameters!!.putAll(RequestPairs<String, String>().apply(parameters).toMap())
+            this.queryParameters!!.putAll(RequestPairs<String, String>().apply(operation).toMap())
         }
 
         fun removeQueryParameter(name: String) = apply {
@@ -125,11 +121,11 @@ class OkConfig internal constructor() {
             this.formParameters!!.putAll(parameters)
         }
 
-        fun formParameters(parameters: RequestPairs<String, String>.() -> Unit) = apply {
+        fun formParameters(operation: RequestPairs<String, String>.() -> Unit) = apply {
             if (this.formParameters == null) {
                 this.formParameters = mutableMapOf()
             }
-            this.formParameters!!.putAll(RequestPairs<String, String>().apply(parameters).toMap())
+            this.formParameters!!.putAll(RequestPairs<String, String>().apply(operation).toMap())
         }
 
         fun removeFormParameter(name: String) = apply {

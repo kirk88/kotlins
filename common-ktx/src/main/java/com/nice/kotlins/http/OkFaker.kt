@@ -154,29 +154,15 @@ class OkFaker<T> private constructor(
             builder.password(password())
         }
 
-        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.header(it.key, it.value.toString())
-            }
-        }
-
         fun headers(headers: Map<String, Any?>) = apply {
             headers.forEach {
                 builder.header(it.key, it.value.toString())
             }
         }
 
-        fun headers(vararg headers: Pair<String, Any?>) = apply {
-            headers.forEach {
-                builder.header(it.first, it.second.toString())
-            }
-        }
+        fun headers(vararg headers: Pair<String, Any?>) = headers(mapOf(*headers))
 
-        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.addHeader(it.key, it.value.toString())
-            }
-        }
+        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = headers(requestPairsOf(operation).toMap())
 
         fun addHeaders(headers: Map<String, Any?>) = apply {
             headers.forEach {
@@ -184,20 +170,12 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addHeaders(vararg headers: Pair<String, Any?>) = apply {
-            headers.forEach {
-                builder.addHeader(it.first, it.second.toString())
-            }
-        }
+        fun addHeaders(vararg headers: Pair<String, Any?>) = addHeaders(mapOf(*headers))
+
+        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = addHeaders(requestPairsOf(operation).toMap())
 
         fun removeHeaders(name: String) = apply {
             builder.removeHeaders(name)
-        }
-
-        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.setQueryParameter(it.key, it.value.toString())
-            }
         }
 
         fun queryParameters(queryParameters: Map<String, Any?>) = apply {
@@ -206,17 +184,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun queryParameters(vararg queryParameters: Pair<String, Any?>) = apply {
-            queryParameters.forEach {
-                builder.setQueryParameter(it.first, it.second.toString())
-            }
-        }
+        fun queryParameters(vararg queryParameters: Pair<String, Any?>) = queryParameters(mapOf(*queryParameters))
 
-        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.addQueryParameter(it.key, it.value.toString())
-            }
-        }
+        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = queryParameters(requestPairsOf(operation).toMap())
 
         fun addQueryParameters(queryParameters: Map<String, Any?>) = apply {
             queryParameters.forEach {
@@ -224,17 +194,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = apply {
-            queryParameters.forEach {
-                builder.addQueryParameter(it.first, it.second.toString())
-            }
-        }
+        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = addQueryParameters(mapOf(*queryParameters))
 
-        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.setEncodedQueryParameter(it.key, it.value.toString())
-            }
-        }
+        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addQueryParameters(requestPairsOf(operation).toMap())
 
         fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -242,17 +204,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = apply {
-            encodedQueryParameters.forEach {
-                builder.setEncodedQueryParameter(it.first, it.second.toString())
-            }
-        }
+        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = encodedQueryParameters(mapOf(*encodedQueryParameters))
 
-        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.addEncodedQueryParameter(it.key, it.value.toString())
-            }
-        }
+        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -260,11 +214,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = apply {
-            encodedQueryParameters.forEach {
-                builder.addEncodedQueryParameter(it.first, it.second.toString())
-            }
-        }
+        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = addEncodedQueryParameters(mapOf(*encodedQueryParameters))
+
+        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addEncodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun removeQueryParameters(name: String) = apply {
             builder.removeQueryParameters(name)
@@ -274,29 +226,15 @@ class OkFaker<T> private constructor(
             builder.removeEncodedQueryParameters(name)
         }
 
-        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.addFormParameter(it.key, it.value.toString())
-            }
-        }
-
         fun formParameters(formParameters: Map<String, Any?>) = apply {
             formParameters.forEach {
                 builder.addFormParameter(it.key, it.value.toString())
             }
         }
 
-        fun formParameters(vararg formParameters: Pair<String, Any?>) = apply {
-            formParameters.forEach {
-                builder.addFormParameter(it.first, it.second.toString())
-            }
-        }
+        fun formParameters(vararg formParameters: Pair<String, Any?>) = formParameters(mapOf(*formParameters))
 
-        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                builder.addEncodedFormParameter(it.key, it.value.toString())
-            }
-        }
+        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = formParameters(requestPairsOf(operation).toMap())
 
         fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = apply {
             encodedFormParameters.forEach {
@@ -304,31 +242,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = apply {
-            encodedFormParameters.forEach {
-                builder.addEncodedFormParameter(it.first, it.second.toString())
-            }
-        }
+        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = encodedFormParameters(mapOf(*encodedFormParameters))
 
-        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = apply {
-            requestPairsOf(operation).forEach {
-                it.value.let { value ->
-                    when (value) {
-                        is BodyFormDataPart -> builder.addFormDataPart(
-                            it.key,
-                            value.filename,
-                            value.body
-                        )
-                        is FileFormDataPart -> builder.addFormDataPart(
-                            it.key,
-                            value.contentType,
-                            value.file
-                        )
-                        else -> builder.addFormDataPart(it.key, value.toString())
-                    }
-                }
-            }
-        }
+        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedFormParameters(requestPairsOf(operation).toMap())
 
         fun formDataParts(formDataParts: Map<String, Any?>) = apply {
             formDataParts.forEach {
@@ -350,25 +266,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun formDataParts(vararg formDataParts: Pair<String, Any?>) = apply {
-            formDataParts.forEach {
-                it.second.let { value ->
-                    when (value) {
-                        is BodyFormDataPart -> builder.addFormDataPart(
-                            it.first,
-                            value.filename,
-                            value.body
-                        )
-                        is FileFormDataPart -> builder.addFormDataPart(
-                            it.first,
-                            value.contentType,
-                            value.file
-                        )
-                        else -> builder.addFormDataPart(it.first, value.toString())
-                    }
-                }
-            }
-        }
+        fun formDataParts(vararg formDataParts: Pair<String, Any?>) = formDataParts(mapOf(*formDataParts))
+
+        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = formDataParts(requestPairsOf(operation).toMap())
 
         fun parts(bodies: Collection<RequestBody>) = apply {
             bodies.forEach {
