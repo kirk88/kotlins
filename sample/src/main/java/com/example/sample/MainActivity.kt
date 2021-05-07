@@ -18,6 +18,7 @@ import com.nice.kotlins.helper.setContentView
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
+import com.nice.kotlins.widget.setSupportActionBar
 
 class MainActivity : NiceActivity() {
 

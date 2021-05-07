@@ -41,7 +41,7 @@ import java.util.*
 class TitleAppBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.appBarLayoutStyle
+    defStyleAttr: Int = R.attr.appBarLayoutStyle,
 ) : AppBarLayout(
     context,
     attrs,
@@ -63,16 +63,12 @@ class TitleAppBar @JvmOverloads constructor(
     fun provideSupportActionBar(
         activity: AppCompatActivity,
         showHome: Boolean = false,
-        showHomeAsUp: Boolean = false
+        showHomeAsUp: Boolean = false,
     ) {
         check(actionBar == null) {
             "ActionBar already exists"
         }
-        activity.setSupportActionBar(toolbar)
-        actionBar = activity.supportActionBar!!.apply {
-            setDisplayShowHomeEnabled(showHome)
-            setDisplayHomeAsUpEnabled(showHomeAsUp)
-        }
+        actionBar = getSupportActionBar(activity, toolbar, showHome, showHomeAsUp)
     }
 
     fun setPopupTheme(@StyleRes theme: Int) {
@@ -295,7 +291,7 @@ class TitleAppBar @JvmOverloads constructor(
         title: CharSequence,
         groupId: Int = Menu.NONE,
         itemId: Int = Menu.NONE,
-        order: Int = Menu.NONE
+        order: Int = Menu.NONE,
     ): MenuItem {
         return toolbar.menu.add(groupId, itemId, order, title)
     }
@@ -304,7 +300,7 @@ class TitleAppBar @JvmOverloads constructor(
         @StringRes titleId: Int,
         groupId: Int = Menu.NONE,
         itemId: Int = Menu.NONE,
-        order: Int = Menu.NONE
+        order: Int = Menu.NONE,
     ): MenuItem {
         return toolbar.menu.add(groupId, itemId, order, titleId)
     }
@@ -409,7 +405,7 @@ class TitleAppBar @JvmOverloads constructor(
             activity: AppCompatActivity,
             toolbar: TitleToolbar,
             showHome: Boolean,
-            showHomeAsUp: Boolean
+            showHomeAsUp: Boolean,
         ): ActionBar {
             activity.setSupportActionBar(toolbar)
             val actionBar = activity.supportActionBar!!
@@ -503,18 +499,15 @@ class TitleAppBar @JvmOverloads constructor(
             )
         )
 
-        if (ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar, false)) {
+        val activity = context.appCompatActivity
+        if (activity != null && ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar,
+                false
+            )
+        ) {
             val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
             val showHomeAsUp =
                 ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
-            actionBar = context.appCompatActivity?.let {
-                getSupportActionBar(
-                    it,
-                    toolbar,
-                    showHome,
-                    showHomeAsUp
-                )
-            }
+            provideSupportActionBar(activity, showHome, showHomeAsUp)
         }
 
         val titleText = ta.getText(R.styleable.TitleAppBar_title)
@@ -587,6 +580,14 @@ class TitleAppBar @JvmOverloads constructor(
         ta.recycle()
     }
 
+}
+
+fun AppCompatActivity.setSupportActionBar(
+    titleAppBar: TitleAppBar,
+    showHome: Boolean = false,
+    showHomeAsUp: Boolean = false,
+) {
+    titleAppBar.provideSupportActionBar(this, showHome, showHomeAsUp)
 }
 
 var TitleAppBar.title: CharSequence?
@@ -718,7 +719,7 @@ var TitleAppBar.isDisplayShowTitleEnabled: Boolean
 class TitleToolbar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.toolbarStyle
+    defStyleAttr: Int = R.attr.toolbarStyle,
 ) : Toolbar(
     context,
     attrs,

@@ -1,9 +1,13 @@
 package com.example.sample
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.util.SparseIntArray
 import android.widget.TextView
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.sample.databinding.FragmentSecondBinding
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.anim.ScaleInAnimation
@@ -12,7 +16,7 @@ import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.adapterBuilder
 import com.nice.kotlins.helper.setContentView
 import com.nice.kotlins.helper.viewBindings
-import com.nice.kotlins.widget.divider.LinearDividerItemDecoration
+import com.nice.kotlins.widget.divider.GridDividerItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -21,23 +25,27 @@ class SecondFragment : NiceFragment() {
 
     private val binding: FragmentSecondBinding by viewBindings()
 
+    private val heights = mutableMapOf<Int, Int>()
+
     val adapter by lazy {
         adapterBuilder<String, ItemViewHolder>(requireContext())
             .register { inflater, parent ->
                 ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
             }.bind { holder, item, _ ->
+//                holder.itemView.updateLayoutParams<RecyclerView.LayoutParams> {
+//                    height = heights.getOrPut(holder.layoutPosition){
+//                        100.rangeTo(200).random()
+//                    }
+//                }
                 holder.findViewById<TextView>(R.id.title)?.text = item
             }.into(binding.recyclerView)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val start = System.currentTimeMillis()
         setContentView(binding)
 
-        Log.e("TAGTAG", "time: ${System.currentTimeMillis() - start}")
-
-        binding.recyclerView.addItemDecoration(LinearDividerItemDecoration())
+        binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.RED, 10))
 
         adapter.setItemAnimation(ScaleInAnimation(0.9f, 0.7f))
 
@@ -107,77 +115,6 @@ class SecondFragment : NiceFragment() {
             "abcdef",
             "abcd"
         )
-
-        lifecycleScope.launch {
-            delay(2000)
-
-            adapter += listOf(
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd"
-            )
-        }
 
 //        binding.listview.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, )
     }
