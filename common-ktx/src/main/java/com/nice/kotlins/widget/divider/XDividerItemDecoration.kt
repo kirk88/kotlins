@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.nice.kotlins.R
 
 abstract class XDividerItemDecoration : ItemDecoration() {
@@ -290,10 +291,10 @@ class GridDividerItemDecoration : XDividerItemDecoration {
 
         val isFirstRow = position < spanCount
         val isFirstColumn = position % spanCount == 0
-        val isLastRow = position >= itemCount - (itemCount % spanCount).let {
+        val isLastRow = position % spanCount == spanCount - 1
+        val isLastColumn = position >= itemCount - (itemCount % spanCount).let {
             if (it == 0) spanCount else it
         }
-        val isLastColumn = position % spanCount == spanCount - 1
 
         if (orientation == RecyclerView.VERTICAL) {
             val dividerSize = dividerDrawable.intrinsicHeight
@@ -307,13 +308,13 @@ class GridDividerItemDecoration : XDividerItemDecoration {
                     offset = right,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastColumn) -dividerSize else 0,
-                    visible = !isLastColumn
+                    visible = !isLastRow
                 )
                 .bottom(
                     dividerDrawable,
                     paddingStart = if (isFirstColumn) 0 else -dividerSize,
                     paddingEnd = if (!isLastRow) -dividerSize else 0,
-                    visible = !isLastRow
+                    visible = !isLastColumn
                 )
                 .build()
         } else {
@@ -327,14 +328,14 @@ class GridDividerItemDecoration : XDividerItemDecoration {
                     dividerDrawable,
                     paddingStart = if (isFirstColumn) 0 else -dividerSize,
                     paddingEnd = if (!isLastRow) -dividerSize else 0,
-                    visible = !isLastRow
+                    visible = !isLastColumn
                 )
                 .bottom(
                     dividerDrawable,
                     offset = bottom,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastColumn) -dividerSize else 0,
-                    visible = !isLastColumn
+                    visible = !isLastRow
                 )
                 .build()
         }
