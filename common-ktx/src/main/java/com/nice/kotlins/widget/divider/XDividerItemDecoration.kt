@@ -287,14 +287,13 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         val itemCount = layout.itemCount
         val orientation = layout.orientation
         val spanCount = layout.spanCount
-        val spanIndex = (child.layoutParams as GridLayoutManager.LayoutParams).spanIndex
 
         val isFirstRow = position < spanCount
+        val isFirstColumn = position % spanCount == 0
         val isLastRow = position >= itemCount - (itemCount % spanCount).let {
             if (it == 0) spanCount else it
         }
-        val isFirstColumn = spanIndex == 0
-        val isLastColumn = spanIndex == spanCount - 1
+        val isLastColumn = position % spanCount == spanCount - 1
 
         if (orientation == RecyclerView.VERTICAL) {
             val dividerSize = dividerDrawable.intrinsicHeight
