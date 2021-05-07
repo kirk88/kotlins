@@ -8,14 +8,12 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.nice.kotlins.R
 
 abstract class XDividerItemDecoration : ItemDecoration() {
@@ -282,33 +280,20 @@ class GridDividerItemDecoration : XDividerItemDecoration {
     }
 
     override fun getDivider(parent: RecyclerView, child: View, position: Int): Divider {
-        val layout = parent.layoutManager!!
-        check(layout is GridLayoutManager || layout is StaggeredGridLayoutManager) {
+        val layout = parent.layoutManager
+        check(layout is GridLayoutManager) {
             "GridDividerItemDecoration only support the GridLayoutManager"
         }
         val itemCount = layout.itemCount
-        val orientation = when (layout) {
-            is GridLayoutManager -> layout.orientation
-            is StaggeredGridLayoutManager -> layout.orientation
-            else -> RecyclerView.VERTICAL
-        }
-        val spanCount = when (layout) {
-            is GridLayoutManager -> layout.spanCount
-            is StaggeredGridLayoutManager -> layout.spanCount
-            else -> 1
-        }
-        val spanIndex = when (val params = child.layoutParams) {
-            is GridLayoutManager.LayoutParams -> params.spanIndex
-            is StaggeredGridLayoutManager.LayoutParams -> params.spanIndex
-            else -> -1
-        }
-
-        Log.e("TAGTAG", "spanCount: $spanCount  spanIndex：$spanIndex" )
+        val orientation = layout.orientation
+        val spanCount = layout.spanCount
 
         val isFirstRow = position < spanCount
-        val isFirstColumn = spanIndex == 0
+        val isFirstColumn = position % spanCount == 0
         val isLastRow = position % spanCount == spanCount - 1
-        val isLastColumn = false
+        val isLastColumn = position >= itemCount - (itemCount % spanCount).let {
+            if (it == 0) spanCount else it
+        }
 
         if (orientation == RecyclerView.VERTICAL) {
             val dividerSize = dividerDrawable.intrinsicHeight
