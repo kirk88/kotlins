@@ -4,6 +4,7 @@ package com.nice.kotlins.helper
 
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
+import android.view.KeyEvent
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.nice.kotlins.helper.Internals.NO_GETTER
@@ -131,3 +132,9 @@ fun TextView.isBlank(): Boolean = text.isNullOrBlank()
 fun TextView.isNotEmpty(): Boolean = !isEmpty()
 
 fun TextView.isNotBlank(): Boolean = !isBlank()
+
+inline fun TextView.onEditorAction(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Boolean) {
+    setOnEditorActionListener { v, actionId, event ->
+        action(v, actionId, event)
+    }
+}

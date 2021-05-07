@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.helper
 
 import android.view.MenuItem
@@ -22,4 +24,17 @@ fun BottomNavigationView.getItemAt(index: Int): MenuItem? {
 
 fun BottomNavigationView.requireItemAt(index: Int): MenuItem = requireNotNull(getItemAt(index)) {
     "No item with index $index is found in the BottomNavigationView"
+}
+
+
+inline fun BottomNavigationView.onItemSelected(crossinline action: (item: MenuItem) -> Boolean) {
+    setOnNavigationItemSelectedListener {
+        action(it)
+    }
+}
+
+inline fun BottomNavigationView.onItemReselected(crossinline action: (item: MenuItem) -> Unit) {
+    setOnNavigationItemReselectedListener {
+        action(it)
+    }
 }

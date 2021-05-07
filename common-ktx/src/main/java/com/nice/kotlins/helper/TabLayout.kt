@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.helper
 
 import android.view.View
@@ -22,4 +24,35 @@ var TabLayout.selectedTabId: Int
 
 fun TabLayout.requireTabAt(index: Int): TabLayout.Tab = requireNotNull(getTabAt(index)) {
     "No tab with index $index is found in the TabLayout"
+}
+
+inline fun TabLayout.onTabSelected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
+    addOnTabSelectedListener(onTabSelected = action)
+
+inline fun TabLayout.onTabUnselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
+    addOnTabSelectedListener(onTabUnselected = action)
+
+inline fun TabLayout.onTabReselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
+    addOnTabSelectedListener(onTabReselected = action)
+
+inline fun TabLayout.addOnTabSelectedListener(
+    crossinline onTabSelected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+    crossinline onTabUnselected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+    crossinline onTabReselected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+): TabLayout.OnTabSelectedListener {
+    val listener = object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab) {
+            onTabSelected.invoke(tab)
+        }
+
+        override fun onTabUnselected(tab: TabLayout.Tab) {
+            onTabUnselected.invoke(tab)
+        }
+
+        override fun onTabReselected(tab: TabLayout.Tab) {
+            onTabReselected.invoke(tab)
+        }
+    }
+    addOnTabSelectedListener(listener)
+    return listener
 }

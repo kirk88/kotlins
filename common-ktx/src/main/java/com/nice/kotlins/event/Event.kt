@@ -25,9 +25,13 @@ open class Event(
     internal var resultCallback: ActivityResultCallback<ActivityResult>? = null
         private set
 
-    operator fun <T : Any> get(key: String): T? {
+    operator fun <T : Any?> get(key: String): T {
         @Suppress("UNCHECKED_CAST")
-        return this.extras[key] as T?
+        return this.extras[key] as T
+    }
+
+    operator fun Event.set(key: String, value: Any?) {
+        put(key, value)
     }
 
     fun put(key: String, value: Any?): Any? {
@@ -65,15 +69,9 @@ open class Event(
 
 }
 
-fun <T : Any> Event.getValue(key: String): T = requireNotNull(get(key)) {
-    "Key $key is missing in the event"
-}
-
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
 
 fun <T : Any?> Event.getOrElse(key: String, defaultValue: () -> T): T = get(key) ?: defaultValue()
-
-operator fun Event.set(key: String, value: Any?) = put(key, value)
 
 fun Event.putAll(vararg extras: Pair<String, Any?>) = putAll(extras.toMap())
 
