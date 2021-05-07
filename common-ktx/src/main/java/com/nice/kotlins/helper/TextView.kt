@@ -124,14 +124,10 @@ fun TextView.updateDrawableRelative(
     )
 }
 
-fun TextView.isEmpty(): Boolean = this.text?.isEmpty() ?: true
+fun TextView.isEmpty(): Boolean = text.isNullOrEmpty()
 
-fun TextView.isBlank(): Boolean = this.text?.isBlank() ?: true
+fun TextView.isBlank(): Boolean = text.isNullOrBlank()
 
-fun TextView.isNullOrEmpty(): Boolean = this.text.isNullOrEmpty()
+fun TextView.isNotEmpty(): Boolean = !isEmpty()
 
-fun TextView.isNullOrBlank(): Boolean = this.text.isNullOrBlank()
-
-fun TextView.isNotEmpty(): Boolean = this.text?.isNotEmpty() ?: false
-
-fun TextView.isNotBlank(): Boolean = this.text?.isNotBlank() ?: false
+fun TextView.isNotBlank(): Boolean = !isBlank()
