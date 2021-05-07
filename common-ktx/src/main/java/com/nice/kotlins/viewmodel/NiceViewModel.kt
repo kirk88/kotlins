@@ -28,11 +28,11 @@ private class DefaultViewModelController : ViewModelController {
     override var event: Event by eventDelegate
 
     override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
-        eventDelegate.addEventObserver(owner, observer)
+        eventDelegate.addObserver(owner, observer)
     }
 
     override fun addEventObserver(observer: EventLifecycleObserver) {
-        eventDelegate.addEventObserver(observer)
+        eventDelegate.addObserver(observer)
     }
 
 }

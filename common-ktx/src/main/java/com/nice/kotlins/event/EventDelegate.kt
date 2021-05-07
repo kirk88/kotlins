@@ -19,13 +19,13 @@ class EventDelegate {
         }
     }
 
-    fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
+    fun addObserver(owner: LifecycleOwner, observer: EventObserver) {
         liveEvent.observeActive(owner) {
             if (it != null) observer.onEventChanged(it)
         }
     }
 
-    fun addEventObserver(observer: EventLifecycleObserver) {
+    fun addObserver(observer: EventLifecycleObserver) {
         liveEvent.observeActive(observer) {
             if (it != null) observer.onEventChanged(it)
         }

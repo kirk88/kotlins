@@ -1,11 +1,6 @@
 package com.example.sample
 
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentFactory
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.kotlins.app.NiceActivity
@@ -13,11 +8,11 @@ import com.nice.kotlins.helper.*
 
 class SecondActivity : NiceActivity() {
 
-    private val bindings: ActivitySecondBinding by viewBindings()
+    private val binding: ActivitySecondBinding by viewBindings()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bindings.attachTo(this)
+        setContentView(binding)
 
         val navView = findViewById<BottomNavigationView>(R.id.nav_view)
 

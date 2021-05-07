@@ -40,7 +40,7 @@ internal class OkTransformer<T> {
         return errorMapper?.map(error) ?: throw error
     }
 
-    private inner class OkMapperImpl(private val type: Type) : OkMapper<Response, T> {
+    private class OkMapperImpl<T>(private val type: Type) : OkMapper<Response, T> {
 
         @Suppress("UNCHECKED_CAST")
         override fun map(value: Response): T = when (type) {

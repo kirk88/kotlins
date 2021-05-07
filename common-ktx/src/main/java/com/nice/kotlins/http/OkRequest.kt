@@ -155,48 +155,19 @@ internal class OkRequest(
         return handledResponse
     }
 
-    class Builder(private val method: OkRequestMethod, private val config: OkConfig) {
+    class Builder(private val method: OkRequestMethod) {
 
-        private var client: OkHttpClient? = config.client
+        private var client: OkHttpClient? = null
 
-        private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder().also {
-            it.username(config.username.orEmpty())
-            it.password(config.password.orEmpty())
+        private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
 
-            val queryParameters = config.queryParameters
-            if(queryParameters != null){
-                for ((name, value) in queryParameters){
-                    it.addQueryParameter(name, value)
-                }
-            }
-        }
-
-        private val requestBuilder: Request.Builder = Request.Builder().also {
-            val cacheControl = config.cacheControl
-            if (cacheControl != null) {
-                it.cacheControl(cacheControl)
-            }
-
-            val headers = config.headers
-            if(headers != null){
-                for ((name, value) in headers){
-                    it.addHeader(name, value)
-                }
-            }
-        }
+        private val requestBuilder: Request.Builder = Request.Builder()
 
         private var formBodyApplied: Boolean = false
         private var formBodyBuilder: FormBody.Builder? = null
             get() = field ?: FormBody.Builder().also {
                 check(!multipartBodyApplied && !requestBodyApplied) {
                     "Can not build FormBody, a request body already existed"
-                }
-
-                val formParameters = config.formParameters
-                if(formParameters != null){
-                    for ((name, value) in formParameters){
-                        it.add(name, value)
-                    }
                 }
 
                 formBodyApplied = true
@@ -232,14 +203,12 @@ internal class OkRequest(
             this.client = client
         }
 
-        fun url(url: String) = apply {
-            val httpUrl: HttpUrl = config.baseUrl.let {
-                when {
-                    url.isNetworkUrl() -> url.toHttpUrl()
-                    it != null -> (it.toUrl() + url).toString().toHttpUrl()
-                    else -> throw IllegalArgumentException("Invalid url: $url")
-                }
-            }
+        fun url(baseUrl: String?, url: String) = apply {
+            val httpUrl = when {
+                url.isNetworkUrl() -> url
+                !baseUrl.isNullOrEmpty() -> (baseUrl.toUrl() + url).toString()
+                else -> throw IllegalArgumentException("Invalid url: $url")
+            }.toHttpUrl()
 
             urlBuilder.scheme(httpUrl.scheme)
                 .host(httpUrl.host)

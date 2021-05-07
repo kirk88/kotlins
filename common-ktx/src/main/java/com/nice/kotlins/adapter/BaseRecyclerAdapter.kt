@@ -235,9 +235,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
 }
 
-operator fun <T> BaseRecyclerAdapter<T, *>.iterator(): Iterator<T> {
-    return items.iterator()
-}
+operator fun <T> BaseRecyclerAdapter<T, *>.iterator(): Iterator<T> = items.iterator()
 
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
 

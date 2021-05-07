@@ -3,21 +3,19 @@ package com.example.sample
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.text.Html
 import android.util.Log
-import android.webkit.WebSettings
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
-import androidx.core.text.HtmlCompat
-import androidx.viewbinding.ViewBinding
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
-import com.nice.kotlins.helper.*
-import com.nice.kotlins.widget.LoaderView
+import com.nice.kotlins.helper.onClick
+import com.nice.kotlins.helper.setContentView
+import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
 
@@ -30,7 +28,7 @@ class MainActivity : NiceActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.attachTo(this)
+        setContentView(binding)
 
         title = "Home"
 
@@ -58,10 +56,10 @@ class MainActivity : NiceActivity() {
             allowFileAccess = true
             allowFileAccessFromFileURLs = true
             allowUniversalAccessFromFileURLs = true
-            useWideViewPort=true
+            useWideViewPort = true
         }
 
-        webView.webViewClient = object : WebViewClient(){
+        webView.webViewClient = object : WebViewClient() {
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)

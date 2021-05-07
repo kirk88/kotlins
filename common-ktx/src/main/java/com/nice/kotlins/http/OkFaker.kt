@@ -11,7 +11,6 @@ import okhttp3.*
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
-import java.net.URL
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -23,7 +22,7 @@ class OkFaker<T> private constructor(
     private val onSuccessActions: List<Action<T>>?,
     private val onErrorActions: List<Action<Throwable>>?,
     private val onCompletionActions: List<SimpleAction>?,
-    private val onCancelActions: List<SimpleAction>?
+    private val onCancelActions: List<SimpleAction>?,
 ) {
 
     val isCanceled: Boolean
@@ -41,7 +40,7 @@ class OkFaker<T> private constructor(
     @Throws(IOException::class)
     fun execute(): T = transformer.transformResponse(request.execute())
 
-    fun execute(onError: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onError)
+    fun executeOrElse(onError: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onError)
 
     fun executeOrNull(): T? = runCatching { execute() }.getOrNull()
 
@@ -71,7 +70,7 @@ class OkFaker<T> private constructor(
 
     private class OkCallbackWrapper<T>(
         private val transformer: OkTransformer<T>,
-        private val callback: OkCallback<T>
+        private val callback: OkCallback<T>,
     ) : OkCallback<Response> {
         override fun onStart() {
             OkCallbacks.onStart(callback)
@@ -94,8 +93,11 @@ class OkFaker<T> private constructor(
         }
     }
 
-    class Builder<T>(method: OkRequestMethod, config: OkConfig) {
-        private val builder = OkRequest.Builder(method, config)
+    class Builder<T> @JvmOverloads constructor(
+        method: OkRequestMethod,
+        private val config: OkConfig? = null,
+    ) {
+        private val builder = OkRequest.Builder(method)
 
         private var onStartApplied = false
         private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -114,6 +116,39 @@ class OkFaker<T> private constructor(
 
         private val transformer = OkTransformer<T>()
 
+        init {
+            val client = config?.client
+            if (client != null) {
+                client(client)
+            }
+
+            val cacheControl = config?.cacheControl
+            if (cacheControl != null) {
+                cacheControl(cacheControl)
+            }
+
+            val username = config?.username
+            if (!username.isNullOrEmpty()) {
+                username(username)
+                password(config?.password.orEmpty())
+            }
+
+            val headers = config?.headers
+            if (headers != null) {
+                headers(headers)
+            }
+
+            val queryParameters = config?.queryParameters
+            if (queryParameters != null) {
+                queryParameters(queryParameters)
+            }
+
+            val formParameters = config?.formParameters
+            if (formParameters != null) {
+                formParameters(formParameters)
+            }
+        }
+
         fun client(client: OkHttpClient) = apply {
             builder.client(client)
         }
@@ -123,11 +158,11 @@ class OkFaker<T> private constructor(
         }
 
         fun url(url: String) = apply {
-            builder.url(url)
+            builder.url(config?.baseUrl, url)
         }
 
         fun url(url: () -> String) = apply {
-            builder.url(url())
+            builder.url(config?.baseUrl, url())
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
@@ -162,7 +197,8 @@ class OkFaker<T> private constructor(
 
         fun headers(vararg headers: Pair<String, Any?>) = headers(mapOf(*headers))
 
-        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = headers(requestPairsOf(operation).toMap())
+        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) =
+            headers(requestPairsOf(operation).toMap())
 
         fun addHeaders(headers: Map<String, Any?>) = apply {
             headers.forEach {
@@ -172,7 +208,8 @@ class OkFaker<T> private constructor(
 
         fun addHeaders(vararg headers: Pair<String, Any?>) = addHeaders(mapOf(*headers))
 
-        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = addHeaders(requestPairsOf(operation).toMap())
+        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) =
+            addHeaders(requestPairsOf(operation).toMap())
 
         fun removeHeaders(name: String) = apply {
             builder.removeHeaders(name)
@@ -184,9 +221,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun queryParameters(vararg queryParameters: Pair<String, Any?>) = queryParameters(mapOf(*queryParameters))
+        fun queryParameters(vararg queryParameters: Pair<String, Any?>) =
+            queryParameters(mapOf(*queryParameters))
 
-        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = queryParameters(requestPairsOf(operation).toMap())
+        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            queryParameters(requestPairsOf(operation).toMap())
 
         fun addQueryParameters(queryParameters: Map<String, Any?>) = apply {
             queryParameters.forEach {
@@ -194,9 +233,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = addQueryParameters(mapOf(*queryParameters))
+        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) =
+            addQueryParameters(mapOf(*queryParameters))
 
-        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addQueryParameters(requestPairsOf(operation).toMap())
+        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            addQueryParameters(requestPairsOf(operation).toMap())
 
         fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -204,9 +245,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = encodedQueryParameters(mapOf(*encodedQueryParameters))
+        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) =
+            encodedQueryParameters(mapOf(*encodedQueryParameters))
 
-        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedQueryParameters(requestPairsOf(operation).toMap())
+        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            encodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -214,9 +257,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = addEncodedQueryParameters(mapOf(*encodedQueryParameters))
+        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) =
+            addEncodedQueryParameters(mapOf(*encodedQueryParameters))
 
-        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addEncodedQueryParameters(requestPairsOf(operation).toMap())
+        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            addEncodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun removeQueryParameters(name: String) = apply {
             builder.removeQueryParameters(name)
@@ -232,9 +277,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun formParameters(vararg formParameters: Pair<String, Any?>) = formParameters(mapOf(*formParameters))
+        fun formParameters(vararg formParameters: Pair<String, Any?>) =
+            formParameters(mapOf(*formParameters))
 
-        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = formParameters(requestPairsOf(operation).toMap())
+        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            formParameters(requestPairsOf(operation).toMap())
 
         fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = apply {
             encodedFormParameters.forEach {
@@ -242,9 +289,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = encodedFormParameters(mapOf(*encodedFormParameters))
+        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) =
+            encodedFormParameters(mapOf(*encodedFormParameters))
 
-        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedFormParameters(requestPairsOf(operation).toMap())
+        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
+            encodedFormParameters(requestPairsOf(operation).toMap())
 
         fun formDataParts(formDataParts: Map<String, Any?>) = apply {
             formDataParts.forEach {
@@ -266,9 +315,11 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun formDataParts(vararg formDataParts: Pair<String, Any?>) = formDataParts(mapOf(*formDataParts))
+        fun formDataParts(vararg formDataParts: Pair<String, Any?>) =
+            formDataParts(mapOf(*formDataParts))
 
-        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = formDataParts(requestPairsOf(operation).toMap())
+        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) =
+            formDataParts(requestPairsOf(operation).toMap())
 
         fun parts(bodies: Collection<RequestBody>) = apply {
             bodies.forEach {
@@ -391,7 +442,7 @@ class OkFaker<T> private constructor(
         @Throws(IOException::class)
         fun execute(): T = build().execute()
 
-        fun execute(onError: (Throwable) -> T): T = build().execute(onError)
+        fun executeOrElse(onError: (Throwable) -> T): T = build().executeOrElse(onError)
 
         fun executeOrNull(): T? = build().executeOrNull()
 
@@ -408,7 +459,7 @@ class OkFaker<T> private constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
-        fun <T> method(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
+        fun <T> with(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(method, CONFIG).apply(block)
 
         @JvmStatic
@@ -451,7 +502,7 @@ class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
 class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
 class RequestPairs<K, V>(
-    pairs: Map<K, V> = mutableMapOf()
+    pairs: Map<K, V> = mutableMapOf(),
 ) : Iterable<Map.Entry<K, V>> {
 
     private val pairs: MutableMap<K, V> = pairs.toMutableMap()
@@ -497,7 +548,7 @@ inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -
 
 fun requestPairsOf(
     vararg pairs: Pair<String, Any?>,
-    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null,
 ): RequestPairs<String, Any?> {
     return RequestPairs(pairs.toMap()).also {
         operation?.invoke(it)
@@ -506,7 +557,7 @@ fun requestPairsOf(
 
 fun requestPairsOf(
     copyFrom: Any,
-    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null,
 ): RequestPairs<String, Any?> {
     return RequestPairs<String, Any?>().apply {
         if (copyFrom is RequestPairs<*, *>) {
@@ -530,7 +581,12 @@ fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
-    timeoutInMillis: Long = 5000L
+    timeoutInMillis: Long = 5000L,
 ): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(suspendBlocking(CoroutineExecutors.IO) { execute() })
+}
+
+fun main() {
+    val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com/").executeOrNull()
+    println(result)
 }
