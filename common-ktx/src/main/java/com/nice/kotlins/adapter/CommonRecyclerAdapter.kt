@@ -9,12 +9,11 @@ import java.util.*
 abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
     BaseRecyclerAdapter<T, VH>(context) {
 
+    private val lock: Any = Any()
+
     override val items: List<T>
         get() = modifiableItems.toImmutableList()
-
     protected val modifiableItems: MutableList<T> = mutableListOf()
-
-    private val lock: Any = Any()
 
     fun setItems(items: List<T>) {
         synchronized(lock) {
@@ -67,19 +66,19 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         }
     }
 
-    fun removeItem(position: Int) {
-        synchronized(lock) {
-            if (modifiableItems.removeAt(position) != null) {
-                notifyItemRemoved(position)
-            }
-        }
-    }
-
     fun removeItem(item: T) {
         synchronized(lock) {
             val position = modifiableItems.indexOf(item)
             if (position >= 0) {
                 modifiableItems.removeAt(position)
+                notifyItemRemoved(position)
+            }
+        }
+    }
+
+    fun removeItemAt(position: Int) {
+        synchronized(lock) {
+            if (modifiableItems.removeAt(position) != null) {
                 notifyItemRemoved(position)
             }
         }
@@ -125,7 +124,7 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         }
     }
 
-    fun sortItems(comparator: Comparator<T>) {
+    fun sortItemsWith(comparator: Comparator<T>) {
         synchronized(lock) {
             if (modifiableItems.isNotEmpty()) {
                 modifiableItems.sortWith(comparator)
@@ -134,7 +133,7 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         }
     }
 
-    fun <R : Comparable<R>> sortItems(selector: (T) -> R?) {
+    fun <R : Comparable<R>> sortItemsBy(selector: (T) -> R?) {
         synchronized(lock) {
             if (modifiableItems.isNotEmpty()) {
                 modifiableItems.sortBy(selector)
@@ -152,15 +151,15 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         }
     }
 
-    fun refreshItems(payload: Any? = null) {
-        notifyItemRangeChanged(0, modifiableItems.size, payload)
-    }
-
     fun clearItems() {
         synchronized(lock) {
             modifiableItems.clear()
             notifyDataSetChanged()
         }
+    }
+
+    fun refreshItems(payload: Any? = null) {
+        notifyItemRangeChanged(0, modifiableItems.size, payload)
     }
 
 }

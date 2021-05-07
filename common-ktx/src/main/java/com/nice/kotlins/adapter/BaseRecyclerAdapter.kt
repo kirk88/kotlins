@@ -24,14 +24,34 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     private var itemClickable: Boolean = false
     private var itemLongClickable: Boolean = false
 
-    private var recyclerView: RecyclerView? = null
-    private val parent: RecyclerView?
-        get() = recyclerView
-
-    protected val layoutInflater: LayoutInflater = LayoutInflater.from(context)
+    var parent: RecyclerView? = null
+        private set
+    val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     open val items: List<T>
         get() = emptyList()
+
+    fun getItem(position: Int): T {
+        return items[position]
+    }
+
+    fun containsItem(item: T): Boolean {
+        return items.contains(item)
+    }
+
+    fun containsAllItems(items: Collection<T>): Boolean {
+        return items.containsAll(items)
+    }
+
+    fun indexOfItem(item: T): Int {
+        return items.indexOf(item)
+    }
+
+    fun lastIndexOfItem(item: T): Int {
+        return items.lastIndexOf(item)
+    }
+
+    fun isEmpty(): Boolean = items.isEmpty()
 
     fun setOnItemClickListener(listener: OnItemClickListener<T, VH>?) {
         itemClickListener = listener
@@ -89,27 +109,13 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         itemChildLongClickListener?.onItemChildLongClick(this, holder, view)
     }
 
-    fun setItemAnimation(itemAnimation: ItemViewAnimation) {
-        this.itemAnimation = itemAnimation
+    fun setItemAnimation(animation: ItemViewAnimation?) {
+        this.itemAnimation = animation
     }
 
     fun getItemAnimation(): ItemViewAnimation? {
         return this.itemAnimation
     }
-
-    fun getItem(position: Int): T {
-        return items[position]
-    }
-
-    fun containsItem(item: T): Boolean {
-        return items.contains(item)
-    }
-
-    fun indexOfItem(item: T): Int {
-        return items.indexOf(item)
-    }
-
-    fun isEmpty(): Boolean = items.isEmpty()
 
     open fun getSpanSize(position: Int): Int {
         return 1
@@ -182,7 +188,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     abstract fun onCreateItemViewHolder(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): VH
 
     open fun onItemViewHolderCreated(holder: VH) {
@@ -198,7 +204,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     final override fun onBindViewHolder(
         holder: VH,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         val item = getItemOrNull(holder.layoutPosition) ?: return
         onBindItemViewHolder(holder, item, payloads)
@@ -206,7 +212,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        this.recyclerView = recyclerView
+        this.parent = recyclerView
 
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
@@ -220,7 +226,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        this.recyclerView = null
+        this.parent = null
     }
 
     override fun onViewAttachedToWindow(holder: VH) {
@@ -229,9 +235,15 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
 }
 
+operator fun <T> BaseRecyclerAdapter<T, *>.iterator(): Iterator<T> {
+    return items.iterator()
+}
+
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
 
 operator fun <T> BaseRecyclerAdapter<T, *>.contains(item: T): Boolean = containsItem(item)
+
+fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
 
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? {
     return items.getOrNull(position)
@@ -244,5 +256,3 @@ fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: 
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
     return items.getOrNull(position) ?: defaultValue(position)
 }
-
-fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()

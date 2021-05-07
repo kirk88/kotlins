@@ -7,10 +7,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.adapter.*
+import com.nice.kotlins.adapter.anim.ItemViewAnimation
 
 fun <T, VH : ItemViewHolder> adapterBuilder(
     context: Context,
-    items: List<T>? = null
+    items: List<T>? = null,
 ): RecyclerViewAdapter.Builder<T, VH> =
     RecyclerViewAdapter.Builder(context, items)
 
@@ -18,7 +19,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
     context: Context,
     private val viewHolderCreators: Map<Int, ViewHolderCreator<VH>>,
     private val viewHolderBinders: Map<Int, ViewHolderBinder<T, VH>>,
-    private val itemViewTypeSelector: AdapterItemViewTypeSelector?
+    private val itemViewTypeSelector: AdapterItemViewTypeSelector?,
 ) : CommonRecyclerAdapter<T, VH>(context) {
 
     override fun getItemViewType(position: Int): Int {
@@ -28,7 +29,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
     override fun onCreateItemViewHolder(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): VH {
         return viewHolderCreators.getValue(viewType).create(inflater, parent)
     }
@@ -39,7 +40,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
 
     class Builder<T, VH : ItemViewHolder>(
         private val context: Context,
-        private val items: List<T>? = null
+        private val items: List<T>? = null,
     ) {
 
         internal val viewHolderCreators = mutableMapOf<Int, ViewHolderCreator<VH>>()
@@ -51,9 +52,11 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         private var itemChildClickListener: OnItemChildClickListener<T, VH>? = null
         private var itemChildLongClickListener: OnItemChildLongClickListener<T, VH>? = null
 
+        private var itemAnimation: ItemViewAnimation? = null
+
         fun register(
             viewType: Int,
-            creator: ViewHolderCreator<out VH>
+            creator: ViewHolderCreator<out VH>,
         ) = apply {
             @Suppress("UNCHECKED_CAST")
             viewHolderCreators[viewType] = creator as ViewHolderCreator<VH>
@@ -63,7 +66,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
 
         fun bind(
             viewType: Int,
-            binder: ViewHolderBinder<out T, out VH>
+            binder: ViewHolderBinder<out T, out VH>,
         ) = apply {
             @Suppress("UNCHECKED_CAST")
             viewHolderBinders[viewType] = binder as ViewHolderBinder<T, VH>
@@ -91,6 +94,10 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
             itemChildLongClickListener = listener
         }
 
+        fun itemAnimation(animation: ItemViewAnimation) = apply {
+            itemAnimation = animation
+        }
+
         fun build(): RecyclerViewAdapter<T, VH> =
             RecyclerViewAdapter(
                 context,
@@ -98,6 +105,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
                 viewHolderBinders,
                 itemViewTypeSelector
             ).also {
+                it.setItemAnimation(itemAnimation)
                 it.setOnItemClickListener(itemClickListener)
                 it.setOnItemLongClickListener(itemLongClickListener)
                 it.setOnItemChildClickListener(itemChildClickListener)
