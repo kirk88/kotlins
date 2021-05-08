@@ -3,7 +3,7 @@ package com.nice.kotlins.event.livebus
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 
-internal class LiveEvent<T> : Observable<T> {
+internal class LiveEventObservable<T> : Observable<T> {
 
     private val delegate = LiveEventDelegate<T>()
 
@@ -46,4 +46,5 @@ internal class LiveEvent<T> : Observable<T> {
     override fun removeObserver(observer: Observer<T>) {
         delegate.removeObserver(observer)
     }
+
 }

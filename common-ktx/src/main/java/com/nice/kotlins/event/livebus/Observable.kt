@@ -24,4 +24,5 @@ interface Observable<T> {
     fun observeStickyForever(observer: Observer<T>)
 
     fun removeObserver(observer: Observer<T>)
+
 }

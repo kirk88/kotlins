@@ -31,8 +31,8 @@ import androidx.lifecycle.Observer
  *
  *
  *
- * In addition, LiveEventData has [LiveEventData.onActive] and
- * [LiveEventData.onInactive] methods
+ * In addition, LiveEventData has [LiveEvent.onActive] and
+ * [LiveEvent.onInactive] methods
  * to get notified when number of active [Observer]s change between 0 and 1.
  * This allows LiveEventData to release any heavy resources when it does not have any Observers that
  * are actively observing.
@@ -44,7 +44,7 @@ import androidx.lifecycle.Observer
  * @param <T> The type of data held by this instance
 </T> */
 @SuppressLint("RestrictedApi")
-open class LiveEventData<T> {
+open class LiveEvent<T> {
     private val observers: SafeIterableMap<Observer<in T>, ObserverWrapper> =
         SafeIterableMap()
 
@@ -246,7 +246,7 @@ open class LiveEventData<T> {
 
     /**
      * Adds the given observer to the observers list. This call is similar to
-     * [LiveEventData.observe] with a LifecycleOwner, which
+     * [LiveEvent.observe] with a LifecycleOwner, which
      * is always active. This means that the given observer will receive all events and will never
      * be automatically removed. You should manually call [.removeObserver] to stop
      * observing this LiveEventData.
@@ -477,9 +477,8 @@ open class LiveEventData<T> {
         }
     }
 
-    private inner class PostValueRunnable(val newValue: T?) : Runnable {
+    private inner class PostValueRunnable(private val newValue: T?) : Runnable {
         override fun run() {
-            // noinspection unchecked
             setValue(newValue)
         }
     }

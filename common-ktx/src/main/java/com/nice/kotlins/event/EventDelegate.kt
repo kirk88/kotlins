@@ -5,7 +5,7 @@ import kotlin.reflect.KProperty
 
 class EventDelegate {
 
-    private val liveEvent = MutableLiveEventData<Event>()
+    private val liveEvent = MutableLiveEvent<Event>()
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): Event {
         return liveEvent.getValue() ?: NOT_SET

@@ -3,7 +3,7 @@ package com.nice.kotlins.event.livebus
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 
-internal class SimpleLiveEvent : SimpleObservable {
+internal class SimpleLiveEventObservable : SimpleObservable {
 
     private val delegate = LiveEventDelegate<Nothing>()
     private val observers = mutableMapOf<SimpleObserver, Observer<Nothing>>()

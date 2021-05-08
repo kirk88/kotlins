@@ -5,12 +5,12 @@ import android.os.Looper
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import com.nice.kotlins.event.MutableLiveEventData
+import com.nice.kotlins.event.MutableLiveEvent
 import com.nice.kotlins.helper.isMainThread
 
 internal class LiveEventDelegate<T> {
 
-    private val liveData = MutableLiveEventData<T>()
+    private val liveData = MutableLiveEvent<T>()
 
     fun post(value: T?) {
         if (isMainThread) {

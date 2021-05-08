@@ -166,9 +166,9 @@ inline fun <T : View> View.onTouch(crossinline action: (view: T, event: MotionEv
     setOnTouchListener { v, event -> action(v as T, event) }
 }
 
-fun View.visible(anim: Boolean = true) {
+fun View.visible(animate: Boolean = true) {
     visibility = View.VISIBLE
-    if (anim) {
+    if (animate) {
         alpha = 0.0f
         animate().apply {
             cancel()
@@ -179,9 +179,9 @@ fun View.visible(anim: Boolean = true) {
     }
 }
 
-fun View.invisible(anim: Boolean = true) {
+fun View.invisible(animate: Boolean = true) {
     alpha = 1.0f
-    if (anim) {
+    if (animate) {
         animate().apply {
             cancel()
             alpha(0.0f)
@@ -197,9 +197,9 @@ fun View.invisible(anim: Boolean = true) {
     }
 }
 
-fun View.gone(anim: Boolean = true) {
+fun View.gone(animate: Boolean = true) {
     alpha = 1.0f
-    if (anim) {
+    if (animate) {
         animate().apply {
             cancel()
             alpha(0.0f)

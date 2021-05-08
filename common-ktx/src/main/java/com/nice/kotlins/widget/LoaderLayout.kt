@@ -23,6 +23,7 @@ import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.R
+import com.nice.kotlins.helper.forEachValue
 import com.nice.kotlins.helper.invisible
 import com.nice.kotlins.helper.visible
 import com.nice.kotlins.helper.weak
@@ -83,12 +84,6 @@ class LoaderLayout @JvmOverloads constructor(
         }
     }
 
-    private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
-
-    private val inflater: LayoutInflater = LayoutInflater.from(context)
-
-    private val views = mutableMapOf<Int, View>()
-
     private val viewTypeLock = Any()
     private var viewType: Int = NO_TYPE
     private var pendingViewType = NO_TYPE
@@ -101,6 +96,12 @@ class LoaderLayout @JvmOverloads constructor(
         }
         showImmediately(newViewType)
     }
+
+    private val views: MutableMap<Int, View> = mutableMapOf()
+
+    private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
+
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     init {
         val a = context.obtainStyledAttributes(
@@ -358,29 +359,29 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        dataObservers?.forEach {
-            it.value.unregister()
+        if (dataObservers != null) {
+            dataObservers!!.forEachValue {
+                it.unregister()
+            }
+            dataObservers!!.clear()
+            dataObservers = null
         }
     }
 
     override fun onSaveInstanceState(): Parcelable {
         val superState = super.onSaveInstanceState()
-
         val ss = SavedState(superState)
-
         ss.viewType = viewType
         return ss
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         val ss = state as SavedState
-
         super.onRestoreInstanceState(ss.superState)
-
         setDefaultView(ss.viewType)
     }
 
-    private fun showImmediately(viewType: Int, anim: Boolean = true) {
+    private fun showImmediately(viewType: Int, animate: Boolean = true) {
         if (viewType == NO_TYPE || this.viewType == viewType) {
             return
         }
@@ -390,7 +391,7 @@ class LoaderLayout @JvmOverloads constructor(
         for ((type, view) in views) {
             if (type == viewType) continue
 
-            view.invisible(anim)
+            view.invisible(animate)
         }
 
         views.getOrElse(viewType) {
@@ -400,7 +401,7 @@ class LoaderLayout @JvmOverloads constructor(
                 TYPE_ERROR_VIEW -> setView(errorLayoutId, TYPE_ERROR_VIEW, true)
                 else -> null
             }
-        }?.visible(anim)
+        }?.visible(animate)
     }
 
     private fun show(viewType: Int) {
@@ -572,7 +573,7 @@ class LoaderLayout @JvmOverloads constructor(
 
         private val layout: LoaderLayout? by weak(loaderLayout)
 
-        private var registed: Boolean = false
+        private var registered: Boolean = false
 
         override fun onChanged() {
             if (adapter.itemCount == 0) {
@@ -595,21 +596,19 @@ class LoaderLayout @JvmOverloads constructor(
         }
 
         fun register() {
-            if (registed) {
-                return
-            }
+            check(!registered) { "Already registered" }
 
             adapter.registerAdapterDataObserver(this)
-            registed = true
+            registered = true
         }
 
         fun unregister() {
-            if (!registed) {
+            if (!registered) {
                 return
             }
 
             adapter.unregisterAdapterDataObserver(this)
-            registed = false
+            registered = false
         }
 
     }

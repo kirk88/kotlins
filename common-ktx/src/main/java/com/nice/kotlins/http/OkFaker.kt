@@ -386,10 +386,11 @@ class OkFaker<T> private constructor(
         }
 
         fun mapResponse(mapper: OkMapper<Response, T>) = apply {
-            transformer.mapResponse(mapper)
             if (mapper is OkDownloadMapper) {
                 builder.addRequestInterceptor(mapper.requestInterceptor)
+                builder.addResponseInterceptor(mapper.responseInterceptor)
             }
+            transformer.mapResponse(mapper)
         }
 
         fun mapResponse(clazz: Class<T>) = apply {
@@ -587,6 +588,7 @@ fun <T : Any> OkFaker<T>.asLiveData(
 }
 
 fun main() {
-    val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com/").executeOrNull()
+    val result =
+        OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com/").executeOrNull()
     println(result)
 }

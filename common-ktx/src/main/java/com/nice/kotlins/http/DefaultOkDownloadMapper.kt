@@ -12,7 +12,7 @@ import java.io.RandomAccessFile
 import java.text.MessageFormat
 
 open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
-    OkDownloadMapper<Response, File>() {
+    OkDownloadMapper<File>() {
 
     private val file: File = File(path + DOWNLOAD_SUFFIX_TMP)
 

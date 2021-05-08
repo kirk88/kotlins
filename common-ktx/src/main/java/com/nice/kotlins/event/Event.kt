@@ -13,7 +13,7 @@ import com.nice.kotlins.helper.opt
 
 open class Event(
     val what: Int = Status.NONE,
-    val message: CharSequence? = null
+    val message: CharSequence? = null,
 ) {
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
@@ -117,12 +117,12 @@ fun event(vararg events: Event): Event = EventCollection(events = events.toList(
 inline fun buildEvent(
     what: Int = Status.NONE,
     message: CharSequence? = null,
-    crossinline init: Event.() -> Unit
+    crossinline init: Event.() -> Unit,
 ) = Event(what, message).apply(init)
 
 inline fun <reified A : Activity> activityStart(
     context: Context,
-    vararg pairs: Pair<String, Any?>
+    vararg pairs: Pair<String, Any?>,
 ) = buildEvent(Status.ACTIVITY_START) {
     setIntent(context.intent<A>(*pairs))
 }
@@ -130,7 +130,7 @@ inline fun <reified A : Activity> activityStart(
 inline fun <reified A : Activity> activityStartForResult(
     context: Context,
     vararg pairs: Pair<String, Any?>,
-    callback: ActivityResultCallback<ActivityResult>
+    callback: ActivityResultCallback<ActivityResult>,
 ) = buildEvent((Status.ACTIVITY_START)) {
     setIntent(context.intent<A>(*pairs), callback)
 }

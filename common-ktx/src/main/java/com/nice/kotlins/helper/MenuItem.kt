@@ -9,11 +9,10 @@ import androidx.annotation.ColorInt
 import androidx.core.view.ActionProvider
 import androidx.core.view.MenuItemCompat
 
-inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Boolean) = apply {
+inline fun MenuItem.onMenuItemClick(crossinline action: (item: MenuItem) -> Boolean): MenuItem =
     setOnMenuItemClickListener { item ->
         action(item)
     }
-}
 
 fun MenuItem.showAsActionAlways() = apply {
     setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)

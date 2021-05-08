@@ -8,12 +8,12 @@ internal object LiveBus {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> get(key: String?, clazz: Class<T>): Observable<T> {
-        return liveEvents.getOrPut(key ?: clazz.name) { LiveEvent<T>() } as Observable<T>
+        return liveEvents.getOrPut(key ?: clazz.name) { LiveEventObservable<T>() } as Observable<T>
     }
 
     fun get(key: String): SimpleObservable {
         return liveEvents.getOrPut(key) {
-            SimpleLiveEvent()
+            SimpleLiveEventObservable()
         } as SimpleObservable
     }
 }

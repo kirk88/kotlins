@@ -2,7 +2,7 @@
 
 package com.nice.kotlins.event
 
-open class MutableLiveEventData<T> : LiveEventData<T> {
+open class MutableLiveEvent<T> : LiveEvent<T> {
 
     constructor() : super()
     constructor(value: T) : super(value)

@@ -55,13 +55,13 @@ fun JsonObject.isNotEmpty() = size() != 0
 
 operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> = entrySet().iterator()
 
-fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
+inline fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
     for ((name, element) in entrySet()) {
         block(name, element)
     }
 }
 
-fun JsonObject.forEachIndexed(block: (index: Int, key: String, value: JsonElement) -> Unit) {
+inline fun JsonObject.forEachIndexed(block: (index: Int, key: String, value: JsonElement) -> Unit) {
     for ((index, entry) in entrySet().withIndex()) {
         block(index, entry.key, entry.value)
     }
