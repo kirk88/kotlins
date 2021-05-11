@@ -3,22 +3,26 @@ package com.example.sample
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
-import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
+import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
-import com.nice.kotlins.helper.onClick
-import com.nice.kotlins.helper.setContentView
-import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.helper.*
+import com.nice.kotlins.http.DefaultOkDownloadMapper
+import com.nice.kotlins.http.OkFaker
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
-import com.nice.kotlins.widget.setSupportActionBar
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import java.io.File
 
 class MainActivity : NiceActivity() {
 
@@ -77,6 +81,32 @@ class MainActivity : NiceActivity() {
         webView.loadUrl("file:///android_asset/html/index.html?file:///android_asset/html/0110219001619502821.pdf")
 
         Log.e("TAGTAG", "deviceId: $deviceId")
+
+
+        var faker: OkFaker<File>? = null
+        lifecycleScope.launch {
+            val f = suspendBlocking(ExecutorDispatchers.IO) {
+                var start = System.currentTimeMillis()
+                faker = OkFaker.get<File> {
+                    client(OkHttpClient())
+
+                    url("https://r4---sn-ni57rn7k.gvt1.com/edgedl/android/studio/ide-zips/4.2.0.17/android-studio-ide-202.6987402-windows.zip?cms_redirect=yes&mh=hz&mip=59.53.31.32&mm=28&mn=sn-ni57rn7k&ms=nvh&mt=1607303531&mv=m&mvi=4&pl=20&shardbypass=yes")
+
+                    val f =
+                        File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "download.exe")
+                    mapResponse(DefaultOkDownloadMapper(f.absolutePath, true) { readBytes, totalBytes ->
+                        if(System.currentTimeMillis() - start > 2000){
+                            Log.e("TAGTAG", "$readBytes   $totalBytes")
+                            start = System.currentTimeMillis()
+                        }
+                    })
+                }.build()
+
+                faker?.executeOrNull()
+            }
+
+            Log.e("TAGTAG", f?.absolutePath.ifNull { "null" })
+        }
 
     }
 

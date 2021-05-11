@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * }
  */
 suspend fun <T> suspendBlocking(
-    dispatcher: ExecutorDispatcher = CoroutineExecutors.UNCONFINED,
+    dispatcher: ExecutorDispatcher = ExecutorDispatchers.UNCONFINED,
     block: () -> T
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
@@ -59,7 +59,7 @@ interface MainExecutorDispatcher : ExecutorDispatcher {
 
 }
 
-object CoroutineExecutors {
+object ExecutorDispatchers {
 
     @JvmField
     val DEFAULT: ExecutorDispatcher = DefaultExecutorDispatcher

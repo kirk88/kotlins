@@ -67,7 +67,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         fun notifyProgressChanged(
             mapper: DefaultOkDownloadMapper,
             readBytes: Long,
-            totalBytes: Long
+            totalBytes: Long,
         ) {
             val message = Message()
             message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
@@ -77,7 +77,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         private class ProgressPerformer(
             private val mapper: DefaultOkDownloadMapper,
             private val readBytes: Long,
-            private val totalBytes: Long
+            private val totalBytes: Long,
         ) {
             fun perform() {
                 mapper.onProgress(readBytes, totalBytes)
@@ -87,7 +87,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     }
 
     companion object {
-        private const val DOWNLOAD_SUFFIX_TMP = ".tmp" // 下载临时文件后缀
+        private const val DOWNLOAD_SUFFIX_TMP = ".tmp"
         private const val DOWNLOAD_HEADER_RANGE_NAME = "Range"
         private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes={0,number,#}-"
 
@@ -103,4 +103,14 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         }
     }
 
+}
+
+fun DefaultOkDownloadMapper(
+    path: String,
+    continuing: Boolean = false,
+    onProgress: (readBytes: Long, totalBytes: Long) -> Unit = { _, _ -> },
+): DefaultOkDownloadMapper = object : DefaultOkDownloadMapper(path, continuing) {
+    override fun onProgress(readBytes: Long, totalBytes: Long) {
+        onProgress.invoke(readBytes, totalBytes)
+    }
 }

@@ -577,14 +577,14 @@ fun requestPairsOf(
 }
 
 fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    emit(suspendBlocking(CoroutineExecutors.IO) { execute() })
+    emit(suspendBlocking(ExecutorDispatchers.IO) { execute() })
 }
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
     timeoutInMillis: Long = 5000L,
 ): LiveData<T> = liveData(context, timeoutInMillis) {
-    emit(suspendBlocking(CoroutineExecutors.IO) { execute() })
+    emit(suspendBlocking(ExecutorDispatchers.IO) { execute() })
 }
 
 fun main() {
