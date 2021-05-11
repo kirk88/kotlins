@@ -60,8 +60,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     private class ProgressHandler : Handler(Looper.getMainLooper()) {
 
         override fun handleMessage(msg: Message) {
-            val performer = msg.obj as ProgressPerformer
-            performer.perform()
+            (msg.obj as ProgressPerformer).perform()
         }
 
         fun notifyProgressChanged(
