@@ -36,6 +36,11 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
         return super.onOptionsItemSelected(item)
     }
 
+    override fun setTitle(title: CharSequence?) {
+        super.setTitle(title)
+        supportActionBar?.title = title
+    }
+
     override fun setSubtitle(subtitle: CharSequence?) {
         this.subtitle = subtitle
         supportActionBar?.subtitle = subtitle
@@ -49,10 +54,4 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
         return subtitle
     }
 
-}
-
-class A: NiceActivity(){
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 }

@@ -4,7 +4,7 @@ package com.nice.kotlins.helper
 
 import androidx.viewpager.widget.ViewPager
 
-inline fun ViewPager.onPageScrolled(
+inline fun ViewPager.doOnPageScrolled(
     crossinline action: (
         position: Int,
         positionOffset: Float,
@@ -12,10 +12,10 @@ inline fun ViewPager.onPageScrolled(
     ) -> Unit,
 ) = addOnPageChangeListener(onPageScrolled = action)
 
-inline fun ViewPager.onPageSelected(crossinline action: (position: Int) -> Unit) =
+inline fun ViewPager.doOnPageSelected(crossinline action: (position: Int) -> Unit) =
     addOnPageChangeListener(onPageSelected = action)
 
-inline fun ViewPager.onPageScrollStateChanged(crossinline action: (position: Int) -> Unit) =
+inline fun ViewPager.doOnPageScrollStateChanged(crossinline action: (position: Int) -> Unit) =
     addOnPageChangeListener(onPageScrollStateChanged = action)
 
 inline fun ViewPager.addOnPageChangeListener(

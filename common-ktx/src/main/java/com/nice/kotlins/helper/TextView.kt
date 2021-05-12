@@ -14,7 +14,7 @@ import kotlin.DeprecationLevel.ERROR
 var TextView.string: String?
     get() = text?.toString()
     set(value) {
-        text = value?.asEditable()
+        text = value?.toEditable()
     }
 
 var TextView.textResource: Int
@@ -53,53 +53,29 @@ var TextView.isBoldTextStyle: Boolean
         this.paint?.isFakeBoldText = value
     }
 
-var TextView.drawableLeft: Drawable?
+val TextView.drawableLeft: Drawable?
     get() = compoundDrawables[0]
-    set(value) {
-        val drawables = compoundDrawables
-        setCompoundDrawables(value, drawables[1], drawables[2], drawables[3])
-    }
 
-var TextView.drawableStart: Drawable?
+val TextView.drawableStart: Drawable?
     get() = compoundDrawablesRelative[0]
-    set(value) {
-        val drawables = compoundDrawablesRelative
-        setCompoundDrawablesRelative(value, drawables[1], drawables[2], drawables[3])
-    }
 
-var TextView.drawableTop: Drawable?
+val TextView.drawableTop: Drawable?
     get() = compoundDrawables[1]
-    set(value) {
-        val drawables = compoundDrawables
-        setCompoundDrawables(drawables[0], value, drawables[2], drawables[3])
-    }
 
-var TextView.drawableRight: Drawable?
+val TextView.drawableRight: Drawable?
     get() = compoundDrawables[2]
-    set(value) {
-        val drawables = compoundDrawables
-        setCompoundDrawables(drawables[0], drawables[1], value, drawables[3])
-    }
 
-var TextView.drawableEnd: Drawable?
+val TextView.drawableEnd: Drawable?
     get() = compoundDrawablesRelative[2]
-    set(value) {
-        val drawables = compoundDrawablesRelative
-        setCompoundDrawablesRelative(drawables[0], drawables[1], value, drawables[3])
-    }
 
-var TextView.drawableBottom: Drawable?
+val TextView.drawableBottom: Drawable?
     get() = compoundDrawables[3]
-    set(value) {
-        val drawables = compoundDrawables
-        setCompoundDrawables(drawables[0], drawables[1], drawables[2], value)
-    }
 
 fun TextView.updateDrawable(
     left: Drawable? = null,
     top: Drawable? = null,
     right: Drawable? = null,
-    bottom: Drawable? = null
+    bottom: Drawable? = null,
 ) {
     val drawables = compoundDrawables
     setCompoundDrawables(
@@ -114,7 +90,7 @@ fun TextView.updateDrawableRelative(
     start: Drawable? = null,
     top: Drawable? = null,
     end: Drawable? = null,
-    bottom: Drawable? = null
+    bottom: Drawable? = null,
 ) {
     val drawables = compoundDrawablesRelative
     setCompoundDrawablesRelative(
@@ -133,7 +109,7 @@ fun TextView.isNotEmpty(): Boolean = !isEmpty()
 
 fun TextView.isNotBlank(): Boolean = !isBlank()
 
-inline fun TextView.onEditorAction(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Boolean) {
+inline fun TextView.doOnEditorAction(crossinline action: (view: TextView, actionId: Int, event: KeyEvent?) -> Boolean) {
     setOnEditorActionListener { v, actionId, event ->
         action(v, actionId, event)
     }

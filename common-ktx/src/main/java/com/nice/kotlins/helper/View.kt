@@ -8,7 +8,9 @@ import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
+import androidx.annotation.Px
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
 
@@ -22,116 +24,6 @@ var View.backgroundResource: Int
     @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
     set(value) {
         setBackgroundResource(value)
-    }
-
-var View.startPadding: Int
-    get() = paddingStart
-    set(value) {
-        setPaddingRelative(value, paddingTop, paddingEnd, paddingBottom)
-    }
-
-var View.endPadding: Int
-    get() = paddingEnd
-    set(value) {
-        setPaddingRelative(paddingStart, paddingTop, value, paddingBottom)
-    }
-
-var View.horizontalPadding: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        setPaddingRelative(value, paddingTop, value, paddingBottom)
-    }
-
-var View.topPadding: Int
-    get() = paddingTop
-    set(value) {
-        setPaddingRelative(paddingStart, value, paddingEnd, paddingBottom)
-    }
-
-var View.bottomPadding: Int
-    get() = paddingBottom
-    set(value) {
-        setPaddingRelative(paddingStart, paddingTop, paddingEnd, value)
-    }
-
-var View.verticalPadding: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        setPaddingRelative(paddingStart, value, paddingEnd, value)
-    }
-
-var View.padding: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        setPaddingRelative(value, value, value, value)
-    }
-
-var View.startMargin: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.marginStart ?: 0
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            leftMargin = value
-            requestLayout()
-        }
-    }
-
-var View.endMargin: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.marginEnd ?: 0
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            rightMargin = value
-            requestLayout()
-        }
-    }
-
-var View.horizontalMargin: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            leftMargin = value
-            rightMargin = value
-            requestLayout()
-        }
-    }
-
-var View.topMargin: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            topMargin = value
-            requestLayout()
-        }
-    }
-
-var View.bottomMargin: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            bottomMargin = value
-            requestLayout()
-        }
-    }
-
-var View.verticalMargin: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            topMargin = value
-            bottomMargin = value
-            requestLayout()
-        }
-    }
-
-var View.margin: Int
-    @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get() = NO_GETTER
-    set(value) {
-        (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            leftMargin = value
-            topMargin = value
-            rightMargin = value
-            bottomMargin = value
-            requestLayout()
-        }
     }
 
 var View.layoutWidth: Int
@@ -151,19 +43,26 @@ var View.layoutHeight: Int
 val View.layoutInflater: LayoutInflater
     get() = LayoutInflater.from(context)
 
-inline fun <T : View> T.onClick(crossinline action: (view: T) -> Unit) {
-    @Suppress("UNCHECKED_CAST")
-    setOnClickListener { v -> action(v as T) }
+val View.windowInsetsControllerCompat: WindowInsetsControllerCompat?
+    get() = ViewCompat.getWindowInsetsController(this)
+
+fun View.setPaddingRelative(@Px size: Int) {
+    setPaddingRelative(size, size, size, size)
 }
 
-inline fun <T : View> T.onLongClick(crossinline action: (view: T) -> Boolean) {
+inline fun <T : View> T.doOnClick(crossinline action: (view: T) -> Unit) {
     @Suppress("UNCHECKED_CAST")
-    setOnLongClickListener { v -> action(v as T) }
+    setOnClickListener { view -> action(view as T) }
 }
 
-inline fun <T : View> View.onTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
+inline fun <T : View> T.doOnLongClick(crossinline action: (view: T) -> Boolean) {
+    @Suppress("UNCHECKED_CAST")
+    setOnLongClickListener { view -> action(view as T) }
+}
+
+inline fun <T : View> View.doOnTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
     @Suppress("ClickableViewAccessibility", "UNCHECKED_CAST")
-    setOnTouchListener { v, event -> action(v as T, event) }
+    setOnTouchListener { view, event -> action(view as T, event) }
 }
 
 fun View.visible(animate: Boolean = true) {

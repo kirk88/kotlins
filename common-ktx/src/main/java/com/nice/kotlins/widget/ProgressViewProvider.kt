@@ -157,14 +157,14 @@ val View.progressViewFactory: ProgressViewFactory
 val Context.progressViewFactory: ProgressViewFactory
     get() {
         val activity = this.activity
-            ?: throw IllegalStateException("Can not create ProgressView for a application or service context")
+            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
         return activity.progressViewFactory
     }
 
 val Activity.progressViewFactory: ProgressViewFactory
     get() {
         val view = window?.decorView
-            ?: throw IllegalStateException("Can not create ProgressView for a activity not attach to window")
+            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
         return view.progressViewFactory
     }
 

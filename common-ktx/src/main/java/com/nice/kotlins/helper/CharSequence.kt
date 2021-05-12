@@ -4,24 +4,30 @@ package com.nice.kotlins.helper
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.text.*
+import android.text.Editable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.style.*
 import androidx.annotation.ColorInt
+import androidx.core.text.set
+import androidx.core.text.toSpannable
 
-fun CharSequence.asEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
+fun CharSequence.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
-fun CharSequence.asSpannableBuilder(): SpannableStringBuilder =
-    if (this is SpannableStringBuilder) this else SpannableStringBuilder(this)
+fun CharSequence.toSpannableStringBuilder(builderAction: SpannableStringBuilder.() -> Unit = {}): SpannableStringBuilder {
+    val builder = if (this is SpannableStringBuilder) this else SpannableStringBuilder(this)
+    return builder.apply(builderAction)
+}
 
 fun CharSequence.highlight(
-    target: String?,
+    target: String,
     startIndex: Int = 0,
     @ColorInt color: Int = Color.RED,
     size: Int = 0,
-    style: Int = Typeface.NORMAL
+    style: Int = Typeface.NORMAL,
 ): CharSequence {
-    return asSpannableBuilder().apply {
-        target ?: return@apply
+    return toSpannableStringBuilder {
         for (result in target.toRegex().findAll(this, startIndex)) {
             setSpan(
                 ForegroundColorSpan(color),
@@ -54,9 +60,9 @@ fun CharSequence.highlight(
     end: Int = length,
     @ColorInt color: Int = Color.RED,
     size: Int = 0,
-    style: Int = Typeface.NORMAL
+    style: Int = Typeface.NORMAL,
 ): CharSequence {
-    return asSpannableBuilder().apply {
+    return toSpannableStringBuilder {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         if (size != 0) {
             setSpan(AbsoluteSizeSpan(size), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -73,7 +79,7 @@ fun CharSequence.insertImage(
     width: Int = 0,
     height: Int = 0,
     prefix: String = "",
-    postfix: String = ""
+    postfix: String = "",
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else if (drawable.bounds.isEmpty) drawable.setBounds(
@@ -82,14 +88,11 @@ fun CharSequence.insertImage(
         drawable.intrinsicWidth,
         drawable.intrinsicHeight
     )
-    return asSpannableBuilder().insert(where, SpannableString("$prefix $postfix").apply {
-        setSpan(
-            CenterAlignImageSpan(drawable),
-            prefix.length,
-            length - postfix.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-    })
+    return toSpannableStringBuilder {
+        val spannable = "$prefix $postfix".toSpannable()
+        spannable[prefix.length, length - postfix.length] = CenterAlignImageSpan(drawable)
+        insert(where, spannable)
+    }
 }
 
 fun CharSequence.appendImage(
@@ -97,7 +100,7 @@ fun CharSequence.appendImage(
     width: Int = 0,
     height: Int = 0,
     prefix: String = "",
-    postfix: String = ""
+    postfix: String = "",
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else if (drawable.bounds.isEmpty) drawable.setBounds(
@@ -106,14 +109,11 @@ fun CharSequence.appendImage(
         drawable.intrinsicWidth,
         drawable.intrinsicHeight
     )
-    return asSpannableBuilder().append(SpannableString("$prefix $postfix").apply {
-        setSpan(
-            CenterAlignImageSpan(drawable),
-            prefix.length,
-            length - postfix.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-    })
+    return toSpannableStringBuilder {
+        val spannable = "$prefix $postfix".toSpannable()
+        spannable[prefix.length, length - postfix.length] = CenterAlignImageSpan(drawable)
+        append(spannable)
+    }
 }
 
 internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
@@ -127,7 +127,7 @@ internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val d = drawable
         val transY = ((bottom - top) - d.bounds.bottom) / 2 + top
@@ -142,7 +142,7 @@ internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
         text: CharSequence?,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         val d = drawable
         val rect: Rect = d.bounds
@@ -167,10 +167,10 @@ fun CharSequence.insert(
     span: Any? = null,
     start: Int = 0,
     end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
 ): CharSequence {
-    return asSpannableBuilder().apply {
-        insert(where, text.asSpannableBuilder().also {
+    return toSpannableStringBuilder {
+        insert(where, text.toSpannableStringBuilder().also {
             if (span != null) {
                 it.setSpan(span, start, end, flags)
             }
@@ -183,9 +183,9 @@ fun CharSequence.append(
     span: Any? = null,
     start: Int = 0,
     end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
 ): CharSequence {
-    return asSpannableBuilder().apply {
+    return toSpannableStringBuilder {
         append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
 }
@@ -195,9 +195,9 @@ fun CharSequence.appendLine(
     span: Any? = null,
     start: Int = 0,
     end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
 ): CharSequence {
-    return asSpannableBuilder().apply {
+    return toSpannableStringBuilder {
         append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else text)
     }
 }
@@ -206,9 +206,9 @@ fun CharSequence.withSpan(
     what: Any,
     start: Int = 0,
     end: Int = length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
 ): CharSequence {
-    return asSpannableBuilder().apply {
+    return toSpannableStringBuilder {
         setSpan(what, start, end, flags)
     }
 }
@@ -242,57 +242,11 @@ inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R 
 fun CharSequence.splitSkipBlank(
     vararg delimiters: String,
     ignoreCase: Boolean = false,
-    limit: Int = 0
+    limit: Int = 0,
 ): List<String> {
     return split(
         ignoreCase = ignoreCase,
         limit = limit,
         delimiters = delimiters
     ).filter { it.isNotBlank() }
-}
-
-fun <K, V> Map<K, V>.joinKeysToString(
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((K) -> CharSequence)? = null
-): String {
-    return keys.joinToString(separator, prefix, postfix, limit, truncated, transform)
-}
-
-fun <K, V> Map<K, V>.joinValuesToString(
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((V) -> CharSequence)? = null
-): String {
-    return values.joinToString(separator, prefix, postfix, limit, truncated, transform)
-}
-
-fun <K, V, A : Appendable> Map<K, V>.joinKeysTo(
-    buffer: A,
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((K) -> CharSequence)? = null
-): A {
-    return keys.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
-}
-
-fun <K, V, A : Appendable> Map<K, V>.joinValuesTo(
-    buffer: A,
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((V) -> CharSequence)? = null
-): A {
-    return values.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
 }

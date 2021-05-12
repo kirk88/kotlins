@@ -21,16 +21,16 @@ internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): 
     )
 }
 
-fun <T> parseJson(json: String, type: Type): T {
-    return gson.fromJson(json, type)
+fun <T> String.parseAsJson(type: Type): T {
+    return gson.fromJson(this, type)
 }
 
-fun <T> parseJson(json: String, clazz: Class<T>): T {
-    return gson.fromJson(json, clazz)
+fun <T> String.parseAsJson(clazz: Class<T>): T {
+    return gson.fromJson(this, clazz)
 }
 
-inline fun <reified T> parseJson(json: String): T {
-    return gson.fromJson(json, object : TypeToken<T>() {}.type)
+inline fun <reified T> String.parseAsJson(): T {
+    return gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonObject.parse(): T {
@@ -53,7 +53,8 @@ fun JsonObject.isEmpty() = size() == 0
 
 fun JsonObject.isNotEmpty() = size() != 0
 
-operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> = entrySet().iterator()
+operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> =
+    entrySet().iterator()
 
 inline fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
     for ((name, element) in entrySet()) {

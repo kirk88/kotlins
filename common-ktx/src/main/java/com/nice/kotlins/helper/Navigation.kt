@@ -309,7 +309,7 @@ fun BottomNavigationView.setupWithController(
     controller: NavigationController,
     itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
 ) {
-    onItemSelected {
+    doOnItemSelected {
         controller.navigate(it)
     }
 
@@ -335,7 +335,7 @@ fun TabLayout.setupWithController(
     controller: NavigationController,
     tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
-    onTabSelected {
+    doOnTabSelected {
         controller.navigate(it)
     }
 
@@ -368,11 +368,11 @@ fun AppCompatActivity.setupTabLayoutWithController(
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
-        val index = controller.indexOf(startDestination)
-        viewPager2.currentItem = index
+        controller.setPrimaryNavigationDestination(startDestination)
+        viewPager2.currentItem = controller.indexOf(startDestination)
     }
 
-    viewPager2.onPageSelected {
+    viewPager2.doOnPageSelected {
         val destination = controller.getDestination(it)
         controller.setPrimaryNavigationDestination(destination)
     }
@@ -395,11 +395,11 @@ fun Fragment.setupTabLayoutWithController(
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
-        val index = controller.indexOf(startDestination)
-        viewPager2.currentItem = index
+        controller.setPrimaryNavigationDestination(startDestination)
+        viewPager2.currentItem = controller.indexOf(startDestination)
     }
 
-    viewPager2.onPageSelected {
+    viewPager2.doOnPageSelected {
         val destination = controller.getDestination(it)
         controller.setPrimaryNavigationDestination(destination)
     }
@@ -450,7 +450,7 @@ private class FragmentPagerAdapter :
 
 fun AppCompatActivity.setupAppBarWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
-        val title = createTitleWithDestination(destination)
+        val title = getTitleByDestination(destination)
         if (title != null) {
             setTitle(title)
         }
@@ -459,7 +459,7 @@ fun AppCompatActivity.setupAppBarWithController(controller: NavigationController
 
 fun ActionBar.setupWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
-        val title = createTitleWithDestination(destination)
+        val title = getTitleByDestination(destination)
         if (title != null) {
             setTitle(title)
         }
@@ -468,7 +468,7 @@ fun ActionBar.setupWithController(controller: NavigationController) {
 
 fun Toolbar.setupWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
-        val title = createTitleWithDestination(destination)
+        val title = getTitleByDestination(destination)
         if (title != null) {
             setTitle(title)
         }
@@ -477,14 +477,14 @@ fun Toolbar.setupWithController(controller: NavigationController) {
 
 fun TitleAppBar.setupWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
-        val title = createTitleWithDestination(destination)
+        val title = getTitleByDestination(destination)
         if (title != null) {
             setTitle(title)
         }
     }
 }
 
-private fun createTitleWithDestination(destination: NavigationDestination?): CharSequence? {
+private fun getTitleByDestination(destination: NavigationDestination?): CharSequence? {
     destination ?: return null
     val label = destination.label
     if (!label.isNullOrBlank()) {
