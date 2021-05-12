@@ -5,6 +5,8 @@ package com.nice.kotlins.helper
 import com.google.gson.*
 import com.google.gson.internal.`$Gson$Types`
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import java.io.Reader
 import java.lang.reflect.Type
 
 @PublishedApi
@@ -30,6 +32,18 @@ fun <T> String.parseAsJson(clazz: Class<T>): T {
 }
 
 inline fun <reified T> String.parseAsJson(): T {
+    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+}
+
+inline fun <reified T> Reader.parseAsJson(): T {
+    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+}
+
+inline fun <reified T> JsonReader.parse(): T {
+    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+}
+
+inline fun <reified T> JsonElement.parse(): T {
     return gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 

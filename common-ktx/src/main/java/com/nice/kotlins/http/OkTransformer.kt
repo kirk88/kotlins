@@ -1,6 +1,6 @@
 package com.nice.kotlins.http
 
-import com.nice.kotlins.helper.parseJson
+import com.nice.kotlins.helper.parseAsJson
 import okhttp3.Response
 import java.lang.reflect.Type
 
@@ -46,7 +46,7 @@ internal class OkTransformer<T> {
         override fun map(value: Response): T = when (type) {
             Response::class.java -> value as T
             String::class.java -> value.body!!.string() as T
-            else -> parseJson(value.body!!.string(), type)
+            else -> value.body!!.string().parseAsJson(type)
         }
 
     }
