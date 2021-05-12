@@ -63,9 +63,17 @@ fun Any?.toJsonOrNull(): String? = if (this == null) null else runCatching { toJ
 
 fun Any.toJson(): String = gson.toJson(this)
 
+fun JsonArray.isEmpty() = size() == 0
+
+fun JsonArray.isNotEmpty() = size() != 0
+
+val JsonArray.size: Int get() = size()
+
 fun JsonObject.isEmpty() = size() == 0
 
 fun JsonObject.isNotEmpty() = size() != 0
+
+val JsonObject.size: Int get() = size()
 
 operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> =
     entrySet().iterator()

@@ -29,10 +29,10 @@ import java.util.regex.Pattern
 
 class NavigationDestination(
     @IdRes val id: Int,
-    val clazzName: String,
+    val className: String,
     val tag: String? = null,
     val label: CharSequence? = null,
-    val args: Bundle? = null
+    val args: Bundle? = null,
 ) {
 
     val parent: NavigationController?
@@ -70,7 +70,7 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
 
 private fun getNavigationController(
     fragmentManager: FragmentManager,
-    view: View
+    view: View,
 ): NavigationController {
     val controller = view.getTag(R.id.navigation_controller_tag_id) as? NavigationController
     if (controller != null) {
@@ -84,7 +84,7 @@ private fun getNavigationController(
 class NavigationController(
     private val fragmentManager: FragmentManager,
     private val context: Context,
-    @IdRes private val containerViewId: Int
+    @IdRes private val containerViewId: Int,
 ) : Iterable<NavigationDestination> {
 
     private val listeners = mutableListOf<OnDestinationChangedListener>()
@@ -171,7 +171,7 @@ class NavigationController(
     fun navigate(
         @IdRes id: Int,
         @AnimatorRes @AnimRes enter: Int,
-        @AnimatorRes @AnimRes exit: Int
+        @AnimatorRes @AnimRes exit: Int,
     ) {
         navigate(this[id], enter, exit)
     }
@@ -183,7 +183,7 @@ class NavigationController(
     fun navigate(
         destination: NavigationDestination,
         @AnimatorRes @AnimRes enter: Int,
-        @AnimatorRes @AnimRes exit: Int
+        @AnimatorRes @AnimRes exit: Int,
     ) {
         val parent = destination.parent
         check(parent != null && parent == this) {
@@ -195,7 +195,7 @@ class NavigationController(
         fragmentManager.show(
             containerViewId,
             context,
-            destination.clazzName,
+            destination.className,
             destination.tag,
             enter,
             exit
@@ -262,7 +262,7 @@ class NavigationController(
     fun interface OnDestinationChangedListener {
         fun onDestinationChanged(
             controller: NavigationController,
-            destination: NavigationDestination
+            destination: NavigationDestination,
         )
     }
 
@@ -307,7 +307,7 @@ fun NavigationController.navigate(tab: TabLayout.Tab): Boolean {
 
 fun BottomNavigationView.setupWithController(
     controller: NavigationController,
-    itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
+    itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> },
 ) {
     doOnItemSelected {
         controller.navigate(it)
@@ -333,7 +333,7 @@ fun BottomNavigationView.setupWithController(
 
 fun TabLayout.setupWithController(
     controller: NavigationController,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
+    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> },
 ) {
     doOnTabSelected {
         controller.navigate(it)
@@ -364,7 +364,7 @@ fun AppCompatActivity.setupTabLayoutWithController(
     controller: NavigationController,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
+    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> },
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
@@ -391,7 +391,7 @@ fun Fragment.setupTabLayoutWithController(
     controller: NavigationController,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
+    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> },
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
@@ -441,7 +441,7 @@ private class FragmentPagerAdapter :
 
     override fun createFragment(position: Int): Fragment {
         val destination = controller.getDestination(position)!!
-        return fragmentFactory.instantiate(classLoader, destination.clazzName).apply {
+        return fragmentFactory.instantiate(classLoader, destination.className).apply {
             arguments = destination.args
         }
     }
