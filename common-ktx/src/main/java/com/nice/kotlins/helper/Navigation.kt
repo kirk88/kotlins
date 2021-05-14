@@ -64,7 +64,7 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
         }
         containerView = view.parent as? View
     }
-    throw IllegalStateException("Can not create a NavigationController for view：$view")
+    throw IllegalStateException("Can not create NavigationController for view：$view")
 }
 
 
