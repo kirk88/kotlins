@@ -13,7 +13,6 @@ class FirstFragment: NiceFragment(R.layout.fragment_first) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         val editText = findViewById<EditText>(R.id.edittext)
         findViewById<Button>(R.id.button).doOnClick {
             editText.showIme()

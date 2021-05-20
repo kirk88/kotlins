@@ -5,4 +5,6 @@
     <item name="fragment_second" type="id"/>
     <item name="fragment_third" type="id"/>
 
+    <item name="zoomable" type="id"/>
+    <item name="unzoomable" type="id"/>
 </resources>
