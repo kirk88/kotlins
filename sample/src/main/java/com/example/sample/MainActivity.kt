@@ -43,6 +43,7 @@ class MainActivity : NiceActivity() {
 //            .pageFitPolicy(FitPolicy.BOTH)
 //            .load()
 
+
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
                 this,
