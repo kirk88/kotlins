@@ -25,7 +25,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         for (index in 0 until parent.childCount) {
             val child = parent.getChildAt(index)
-            val position = (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition
+            val position = parent.getChildLayoutPosition(child)
             val divider = getDivider(parent, child, position)
             val leftSideLine = divider.leftSideLine
             if (leftSideLine != null && leftSideLine.visible) {
@@ -168,7 +168,7 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         parent: RecyclerView,
         state: RecyclerView.State,
     ) {
-        val position = (child.layoutParams as RecyclerView.LayoutParams).viewLayoutPosition
+        val position = parent.getChildLayoutPosition(child)
         val divider = getDivider(parent, child, position)
         val leftSideLine = divider.leftSideLine
         val topSideLine = divider.topSideLine
