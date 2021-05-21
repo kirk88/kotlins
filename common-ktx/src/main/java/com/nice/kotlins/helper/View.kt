@@ -79,8 +79,8 @@ fun View.visible(animate: Boolean = true) {
 }
 
 fun View.invisible(animate: Boolean = true) {
-    alpha = 1.0f
     if (animate) {
+        alpha = 1.0f
         animate().apply {
             cancel()
             alpha(0.0f)

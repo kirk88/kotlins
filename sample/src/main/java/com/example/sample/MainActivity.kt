@@ -14,6 +14,7 @@ import com.nice.kotlins.helper.setContentView
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
+import java.io.File
 
 
 class MainActivity : NiceActivity() {
@@ -31,9 +32,9 @@ class MainActivity : NiceActivity() {
 
         val titleBar = binding.titleBar
         val fab = binding.fab
-        val pdfView=  binding.pdfView
+        val pdfView = binding.pdfView
 
-//        pdfView.open(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
+        pdfView.open(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
 
 //        pdfView.fromFile(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
 //            .defaultPage(0)

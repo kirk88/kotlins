@@ -35,7 +35,7 @@ enum class ConstraintActions {
     NO_ACTION;
 
     override fun toString(): String {
-        return super.toString().replace("_", " ")
+        return name.replace("_", " ")
     }
 }
 
@@ -51,7 +51,7 @@ fun FOREIGN_KEY(
     columnName: String,
     referenceTable: String,
     referenceColumn: String,
-    vararg actions: SqlTypeModifier
+    vararg actions: SqlTypeModifier,
 ): SqlColumnProperty {
     return "" with SqlTypeImpl(
         "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${

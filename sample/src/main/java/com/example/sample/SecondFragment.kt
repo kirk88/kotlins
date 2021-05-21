@@ -3,6 +3,8 @@ package com.example.sample
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
+import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.RecyclerView
 import com.example.sample.databinding.FragmentSecondBinding
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.anim.ScaleInAnimation
@@ -11,6 +13,7 @@ import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.adapterBuilder
 import com.nice.kotlins.helper.setContentView
 import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.widget.divider.GridDividerItemDecoration
 import com.nice.kotlins.widget.divider.LinearDividerItemDecoration
 
 
@@ -25,11 +28,11 @@ class SecondFragment : NiceFragment() {
             .register { inflater, parent ->
                 ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
             }.bind { holder, item, _ ->
-//                holder.itemView.updateLayoutParams<RecyclerView.LayoutParams> {
-//                    height = heights.getOrPut(holder.layoutPosition){
-//                        100.rangeTo(200).random()
-//                    }
-//                }
+                holder.itemView.updateLayoutParams<RecyclerView.LayoutParams> {
+                    height = heights.getOrPut(holder.layoutPosition){
+                        100.rangeTo(200).random()
+                    }
+                }
                 holder.findViewById<TextView>(R.id.title)?.text = item
             }.into(binding.recyclerView)
     }

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.http
 
 import android.os.Handler
@@ -9,7 +11,6 @@ import okhttp3.ResponseBody
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
-import java.text.MessageFormat
 
 open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
     OkDownloadMapper<File>() {
@@ -20,7 +21,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         val range = if (continuing) file.length() else 0L
         return request.newBuilder().header(
             DOWNLOAD_HEADER_RANGE_NAME,
-            MessageFormat.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
+            String.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
         ).build()
     }
 
@@ -88,14 +89,13 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
     companion object {
         private const val DOWNLOAD_SUFFIX_TMP = ".tmp"
         private const val DOWNLOAD_HEADER_RANGE_NAME = "Range"
-        private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes={0,number,#}-"
+        private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes=%d-"
 
         private val HANDLER = ProgressHandler()
 
         private fun rename(srcFile: File): File {
             val tmpFilePath = srcFile.absolutePath
             val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_SUFFIX_TMP)))
-
             return if (srcFile.renameTo(destFile)) {
                 destFile
             } else throw IOException("Rename file failed")

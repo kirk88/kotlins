@@ -94,7 +94,7 @@ public abstract class HorizonPageAnim extends PageAnimation implements GestureDe
             isMoved = true;
         }
         if (isMoved) {
-            isCancel = mDirection == Direction.NEXT ? distanceX < 0 : distanceX > 0;
+            isCancel = mDirection == Direction.NEXT ? distanceX < -TOUCH_THRESHOLD : distanceX > TOUCH_THRESHOLD;
             isRunning = true;
             setTouchPoint(e2.getX(), e2.getY());
             invalidate();

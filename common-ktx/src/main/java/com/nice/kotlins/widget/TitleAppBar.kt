@@ -62,13 +62,16 @@ class TitleAppBar @JvmOverloads constructor(
 
     fun provideSupportActionBar(
         activity: AppCompatActivity,
-        showHome: Boolean = false,
-        showHomeAsUp: Boolean = false,
+        block: ActionBar.() -> Unit = { },
     ) {
         check(actionBar == null) {
             "ActionBar already exists"
         }
-        actionBar = getSupportActionBar(activity, toolbar, showHome, showHomeAsUp)
+        activity.setSupportActionBar(toolbar)
+        actionBar = activity.supportActionBar?.apply {
+            setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
+            block()
+        }
     }
 
     fun setPopupTheme(@StyleRes theme: Int) {
@@ -401,20 +404,6 @@ class TitleAppBar @JvmOverloads constructor(
 
         private const val NO_DIMEN = Int.MIN_VALUE
 
-        private fun getSupportActionBar(
-            activity: AppCompatActivity,
-            toolbar: TitleToolbar,
-            showHome: Boolean,
-            showHomeAsUp: Boolean,
-        ): ActionBar {
-            activity.setSupportActionBar(toolbar)
-            val actionBar = activity.supportActionBar!!
-            actionBar.setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
-            actionBar.setDisplayShowHomeEnabled(showHome)
-            actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp)
-            return actionBar
-        }
-
     }
 
     init {
@@ -501,13 +490,15 @@ class TitleAppBar @JvmOverloads constructor(
 
         val activity = context.appCompatActivity
         if (activity != null && ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar,
-                false
-            )
+                false)
         ) {
             val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
             val showHomeAsUp =
                 ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
-            provideSupportActionBar(activity, showHome, showHomeAsUp)
+            provideSupportActionBar(activity) {
+                setDisplayShowHomeEnabled(showHome)
+                setDisplayHomeAsUpEnabled(showHomeAsUp)
+            }
         }
 
         val titleText = ta.getText(R.styleable.TitleAppBar_title)
@@ -584,10 +575,9 @@ class TitleAppBar @JvmOverloads constructor(
 
 fun AppCompatActivity.setSupportActionBar(
     titleAppBar: TitleAppBar,
-    showHome: Boolean = false,
-    showHomeAsUp: Boolean = false,
+    block: ActionBar.() -> Unit = {},
 ) {
-    titleAppBar.provideSupportActionBar(this, showHome, showHomeAsUp)
+    titleAppBar.provideSupportActionBar(this, block)
 }
 
 var TitleAppBar.title: CharSequence?
