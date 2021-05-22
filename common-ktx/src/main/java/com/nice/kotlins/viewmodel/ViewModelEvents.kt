@@ -26,7 +26,6 @@ object ViewModelEvents {
         val activity = requireNotNull(owner.activity) {
             "Fragment $owner was not attach to an activity"
         }
-
         if (activity is EventLifecycleObserver
             && activity is ViewModelOwner<*>
             && activity.viewModel == owner.viewModel
