@@ -1,17 +1,18 @@
 package com.example.sample
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
-import androidx.lifecycle.liveData
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
-import com.nice.kotlins.helper.*
+import com.nice.kotlins.helper.doOnClick
+import com.nice.kotlins.helper.plusAssign
+import com.nice.kotlins.helper.setContentView
+import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
@@ -24,7 +25,7 @@ class MainActivity : NiceActivity() {
 
     private val binding: ActivityMainBinding by viewBindings()
 
-    private val tipView:TipView by tipViews()
+    private val tipView: TipView by tipViews()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +48,7 @@ class MainActivity : NiceActivity() {
 
         val liveEvent = MutableLiveEvent<String>()
 
-        liveEvent.observe(this){
+        liveEvent.observe(this) {
             Log.e("TAGTAG", "event: $it")
         }
         liveEvent += "event1"
