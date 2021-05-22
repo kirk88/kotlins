@@ -13,7 +13,9 @@ import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
 import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.ProgressView
+import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
+import com.nice.kotlins.widget.tipViews
 
 
 class MainActivity : NiceActivity() {
@@ -22,7 +24,8 @@ class MainActivity : NiceActivity() {
 
     private val binding: ActivityMainBinding by viewBindings()
 
-    @SuppressLint("SetJavaScriptEnabled")
+    private val tipView:TipView by tipViews()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding)
@@ -32,16 +35,6 @@ class MainActivity : NiceActivity() {
         val titleBar = binding.titleBar
         val fab = binding.fab
         val pdfView = binding.pdfView
-
-
-//        pdfView.fromFile(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
-//            .defaultPage(0)
-//            .fitEachPage(true)
-//            .swipeHorizontal(true)
-//            .swipeSimulation(true)
-//            .pageFitPolicy(FitPolicy.BOTH)
-//            .load()
-
 
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
@@ -54,13 +47,14 @@ class MainActivity : NiceActivity() {
 
         val liveEvent = MutableLiveEvent<String>()
 
-
         liveEvent.observe(this){
             Log.e("TAGTAG", "event: $it")
         }
         liveEvent += "event1"
 
         liveEvent += "event2"
+
+        tipView.show("你好啊")
     }
 
 

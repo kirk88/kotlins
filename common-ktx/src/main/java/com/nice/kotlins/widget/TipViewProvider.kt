@@ -39,9 +39,7 @@ internal class DefaultTipViewFactory(private val context: Context) : TipViewFact
 internal class DefaultTipView(context: Context) : TipView {
 
     private val toast: Toast by lazy {
-        Toast(context).apply {
-            duration = Toast.LENGTH_SHORT
-        }
+        Toast.makeText(context, "", Toast.LENGTH_SHORT)
     }
 
     override fun show(message: CharSequence) {
