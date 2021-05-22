@@ -6,15 +6,14 @@ import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
+import androidx.lifecycle.liveData
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
-import com.nice.kotlins.helper.doOnClick
-import com.nice.kotlins.helper.setContentView
-import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.event.MutableLiveEvent
+import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.progressViews
-import java.io.File
 
 
 class MainActivity : NiceActivity() {
@@ -34,7 +33,6 @@ class MainActivity : NiceActivity() {
         val fab = binding.fab
         val pdfView = binding.pdfView
 
-        pdfView.open(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
 
 //        pdfView.fromFile(File("/storage/emulated/0/DoctorAideImg/doctor/.西医书籍/诊断/从症状到诊断——循证学指导（第2版）.pdf"))
 //            .defaultPage(0)
@@ -54,6 +52,15 @@ class MainActivity : NiceActivity() {
             }
         }
 
+        val liveEvent = MutableLiveEvent<String>()
+
+
+        liveEvent.observe(this){
+            Log.e("TAGTAG", "event: $it")
+        }
+        liveEvent += "event1"
+
+        liveEvent += "event2"
     }
 
 

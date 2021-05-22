@@ -1,12 +1,20 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.viewModels
+import androidx.fragment.app.viewModels
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.app.NiceViewModelActivity
+import com.nice.kotlins.event.Event
+import com.nice.kotlins.event.event
 import com.nice.kotlins.helper.*
 
-class SecondActivity : NiceActivity() {
+class SecondActivity : NiceViewModelActivity<TestViewModel>() {
+
+    override val viewModel: TestViewModel by viewModels()
 
     private val binding: ActivitySecondBinding by viewBindings()
 
@@ -44,7 +52,23 @@ class SecondActivity : NiceActivity() {
         }
 
         setupAppBarWithController(navController)
+
+        viewModel.event = event("hello world")
     }
 
 
+    override fun dispatchViewModelEvent(event: Event): Boolean {
+        Log.e("TAGTAG", "activity dispatchViewModelEvent: "+event.message)
+        return super.dispatchViewModelEvent(event)
+    }
+
+    override fun onInterceptViewModelEvent(event: Event): Boolean {
+        Log.e("TAGTAG", "activity onInterceptViewModelEvent: "+event.message)
+        return super.onInterceptViewModelEvent(event)
+    }
+
+    override fun onViewModelEvent(event: Event): Boolean {
+        Log.e("TAGTAG", "activity onViewModelEvent: "+event.message)
+        return super.onViewModelEvent(event)
+    }
 }

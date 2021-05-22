@@ -318,12 +318,8 @@ open class LiveEvent<T> {
      * @param value The new value
      */
     protected open fun postValue(value: T) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            setValue(value)
-        } else {
-            ArchTaskExecutor.getInstance().postToMainThread(PostValueRunnable(value))
-        }
-    }// noinspection unchecked
+        ArchTaskExecutor.getInstance().postToMainThread(PostValueRunnable(value))
+    }
 
     /**
      * Returns the current value.
@@ -348,9 +344,15 @@ open class LiveEvent<T> {
      *
      * @param value The new value
      */
-    @MainThread
     protected open fun setValue(value: T?) {
-        assertMainThread("setValue")
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            setValueInternal(value)
+        } else {
+            ArchTaskExecutor.getInstance().postToMainThread(PostValueRunnable(value))
+        }
+    }
+
+    private fun setValueInternal(value: T?) {
         version++
         data = value
         dispatchingValue(null)
@@ -399,7 +401,7 @@ open class LiveEvent<T> {
     private inner class LifecycleActiveObserver(
         owner: LifecycleOwner,
         observer: Observer<in T>,
-        isSticky: Boolean
+        isSticky: Boolean,
     ) : LifecycleBoundObserver(owner, observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
@@ -409,7 +411,7 @@ open class LiveEvent<T> {
     private open inner class LifecycleBoundObserver(
         val owner: LifecycleOwner,
         observer: Observer<in T>,
-        isSticky: Boolean
+        isSticky: Boolean,
     ) : ObserverWrapper(observer, isSticky), LifecycleEventObserver {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
@@ -434,7 +436,7 @@ open class LiveEvent<T> {
 
     private abstract inner class ObserverWrapper(
         val observer: Observer<in T>,
-        isSticky: Boolean
+        isSticky: Boolean,
     ) {
         var active = false
         var lastVersion: Int = if (isSticky) START_VERSION else version
@@ -470,7 +472,7 @@ open class LiveEvent<T> {
 
     private inner class AlwaysActiveObserver(
         observer: Observer<in T>,
-        isSticky: Boolean
+        isSticky: Boolean,
     ) : ObserverWrapper(observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return true
@@ -479,7 +481,7 @@ open class LiveEvent<T> {
 
     private inner class PostValueRunnable(private val newValue: T?) : Runnable {
         override fun run() {
-            setValue(newValue)
+            setValueInternal(newValue)
         }
     }
 

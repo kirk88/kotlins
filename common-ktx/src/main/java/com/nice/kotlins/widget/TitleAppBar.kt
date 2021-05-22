@@ -285,8 +285,11 @@ class TitleAppBar @JvmOverloads constructor(
         return toolbar.isDisplayShowTitleEnabled()
     }
 
-    fun inflateMenu(@MenuRes id: Int): Menu {
+    fun inflateMenu(@MenuRes id: Int) {
         toolbar.inflateMenu(id)
+    }
+
+    fun getMenu(): Menu {
         return toolbar.menu
     }
 
@@ -579,6 +582,9 @@ fun AppCompatActivity.setSupportActionBar(
 ) {
     titleAppBar.provideSupportActionBar(this, block)
 }
+
+val TitleAppBar.menu: Menu
+    get() = getMenu()
 
 var TitleAppBar.title: CharSequence?
     get() = getTitle()

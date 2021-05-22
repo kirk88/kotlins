@@ -27,11 +27,19 @@ object ViewModelEvents {
             "Fragment $owner was not attach to an activity"
         }
 
-        if (activity is EventLifecycleObserver) {
+        if (activity is EventLifecycleObserver
+            && activity is ViewModelOwner<*>
+            && activity.viewModel == owner.viewModel
+        ) {
             return
         }
 
-        if (owner.parentFragment is EventLifecycleObserver) {
+
+        val fragment = owner.parentFragment
+        if (fragment is EventLifecycleObserver
+            && fragment is ViewModelOwner<*>
+            && fragment.viewModel == owner.viewModel
+        ) {
             return
         }
 

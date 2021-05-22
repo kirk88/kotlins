@@ -16,3 +16,9 @@ open class MutableLiveEvent<T> : LiveEvent<T> {
     }
 
 }
+
+var <T> MutableLiveEvent<T>.value: T?
+    get() = getValue()
+    set(value) {
+        setValue(value)
+    }
