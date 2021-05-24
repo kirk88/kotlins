@@ -45,7 +45,4 @@ dependencies {
     implementation project(':common-ktx')
     implementation 'com.github.barteksc:pdfium-android:1.9.0'
     implementation 'com.faendir.rhino:rhino-android:1.6.0'
-//    implementation group: 'us.codecraft', name: 'webmagic-core', version: '0.7.4'
-//    implementation group: 'us.codecraft', name: 'webmagic-extension', version: '0.7.4'
-    implementation group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0'
 }

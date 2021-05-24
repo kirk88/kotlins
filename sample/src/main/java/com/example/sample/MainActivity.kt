@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
 import com.example.sample.databinding.ActivityMainBinding
+import com.faendir.rhino_android.RhinoAndroidHelper
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
@@ -17,6 +18,9 @@ import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
+import org.mozilla.javascript.Context
+import org.mozilla.javascript.ImporterTopLevel
+import org.mozilla.javascript.NativeJavaObject
 
 
 class MainActivity : NiceActivity() {
@@ -55,8 +59,25 @@ class MainActivity : NiceActivity() {
 
         liveEvent += "event2"
 
-        tipView.show("你好啊")
+
+
+        val helper= RhinoAndroidHelper(this)
+      val ctx =  helper.enterContext()
+        ctx.optimizationLevel = 1
+        ctx.applicationClassLoader = application.classLoader
+        val scope = ImporterTopLevel(ctx)
+        scope.put("test", scope, Context.javaToJS(Test(), scope))
+       val result = ctx.evaluateString(scope, "test.add('123')", "tt", 0, null)
+        Log.e("TAGTAG", "result: ${Context.jsToJava(result, Array<String>::class.java)}")
     }
 
+
+    class Test{
+
+        fun add(string: String): Array<String>{
+            return arrayOf("$string ppp")
+        }
+
+    }
 
 }
