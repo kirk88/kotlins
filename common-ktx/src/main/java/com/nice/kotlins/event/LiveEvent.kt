@@ -53,18 +53,21 @@ open class LiveEvent<T> {
 
     @Volatile
     private var data: Any?
-    private var version: Int
+    private var dataVersion: Int
     private var dispatchingValue = false
     private var dispatchInvalidated = false
 
+    internal val version: Int
+        get() = dataVersion
+
     constructor() {
         data = NOT_SET
-        version = START_VERSION
+        dataVersion = START_VERSION
     }
 
     constructor(value: T) {
         data = value
-        version = START_VERSION + 1
+        dataVersion = START_VERSION + 1
     }
 
     private fun considerNotify(observer: ObserverWrapper) {
@@ -80,10 +83,10 @@ open class LiveEvent<T> {
             observer.activeStateChanged(false)
             return
         }
-        if (observer.lastVersion >= version) {
+        if (observer.lastVersion >= dataVersion) {
             return
         }
-        observer.lastVersion = version
+        observer.lastVersion = dataVersion
         @Suppress("UNCHECKED_CAST")
         observer.observer.onChanged(data as T)
     }
@@ -322,20 +325,6 @@ open class LiveEvent<T> {
     }
 
     /**
-     * Returns the current value.
-     * Note that calling this method on a background thread does not guarantee that the latest
-     * value set will be received.
-     *
-     * @return the current value
-     */
-    fun getValue(): T? {
-        @Suppress("UNCHECKED_CAST")
-        return if (data !== NOT_SET) {
-            data as T
-        } else null
-    }
-
-    /**
      * Sets the value. If there are active observers, the value will be dispatched to them.
      *
      *
@@ -353,9 +342,23 @@ open class LiveEvent<T> {
     }
 
     private fun setValueInternal(value: T?) {
-        version++
+        dataVersion++
         data = value
         dispatchingValue(null)
+    }
+
+    /**
+     * Returns the current value.
+     * Note that calling this method on a background thread does not guarantee that the latest
+     * value set will be received.
+     *
+     * @return the current value
+     */
+    fun getValue(): T? {
+        @Suppress("UNCHECKED_CAST")
+        return if (data !== NOT_SET) {
+            data as T
+        } else null
     }
 
     /**
@@ -365,7 +368,7 @@ open class LiveEvent<T> {
      * This callback can be used to know that this LiveEventData is being used thus should be kept
      * up to date.
      */
-    protected fun onActive() {}
+    protected open fun onActive() {}
 
     /**
      * Called when the number of active observers change from 1 to 0.
@@ -378,7 +381,7 @@ open class LiveEvent<T> {
      *
      * You can check if there are observers via [.hasObservers].
      */
-    protected fun onInactive() {}
+    protected open fun onInactive() {}
 
     /**
      * Returns true if this LiveEventData has observers.
@@ -439,7 +442,7 @@ open class LiveEvent<T> {
         isSticky: Boolean,
     ) {
         var active = false
-        var lastVersion: Int = if (isSticky) START_VERSION else version
+        var lastVersion: Int = if (isSticky) START_VERSION else dataVersion
 
         abstract fun shouldBeActive(): Boolean
         open fun isAttachedTo(owner: LifecycleOwner): Boolean {

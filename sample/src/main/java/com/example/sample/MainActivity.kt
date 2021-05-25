@@ -18,9 +18,7 @@ import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
-import org.mozilla.javascript.Context
 import org.mozilla.javascript.ImporterTopLevel
-import org.mozilla.javascript.NativeJavaObject
 
 
 class MainActivity : NiceActivity() {
@@ -44,40 +42,39 @@ class MainActivity : NiceActivity() {
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
                 this,
-                "key" to "ppppppp"
+                "key" to "value"
             ) {
                 Log.e("TAGTAG", "" + it.component1() + " " + it.component2())
             }
         }
 
         val liveEvent = MutableLiveEvent<String>()
-
         liveEvent.observe(this) {
             Log.e("TAGTAG", "event: $it")
         }
+
         liveEvent += "event1"
 
         liveEvent += "event2"
 
-
-
-        val helper= RhinoAndroidHelper(this)
-      val ctx =  helper.enterContext()
+        val helper = RhinoAndroidHelper(this)
+        val ctx = helper.enterContext()
         ctx.optimizationLevel = 1
         ctx.applicationClassLoader = application.classLoader
         val scope = ImporterTopLevel(ctx)
-        scope.put("test", scope, Context.javaToJS(Test(), scope))
-       val result = ctx.evaluateString(scope, "test.add('123')", "tt", 0, null)
-        Log.e("TAGTAG", "result: ${Context.jsToJava(result, Array<String>::class.java)}")
+        scope.put("test", scope, Test().toJs(scope))
+        val result = ctx.evaluateString<List<String>>(scope, "test.add('123')", "tt")
+        Log.e("TAGTAG", "result: ${result}")
     }
 
 
-    class Test{
+    class Test {
 
-        fun add(string: String): Array<String>{
-            return arrayOf("$string ppp")
+        fun add(string: String): List<String> {
+            return listOf("$string ppp")
         }
 
     }
 
 }
+

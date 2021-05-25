@@ -5,5 +5,5 @@ package com.nice.kotlins.helper
 import com.nice.kotlins.event.MutableLiveEvent
 
 operator fun <T> MutableLiveEvent<T>.plusAssign(value: T) {
-    setValue(value)
+    postValue(value)
 }
