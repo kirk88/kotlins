@@ -49,7 +49,7 @@ fun Any.toJsonObject(): JsonObject = JsonParser.parseString(toJson()).asJsonObje
 
 fun Any.toJsonArray(): JsonArray = JsonParser.parseString(toJson()).asJsonArray
 
-fun Any?.toJsonOrNull(): String? = if (this == null) null else runCatching { toJson() }.getOrNull()
+fun Any?.toJsonOrNull(): String? = this?.runCatching { toJson() }?.getOrNull()
 
 fun Any.toJson(): String = GsonProvider.gson.toJson(this)
 
