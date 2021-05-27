@@ -3,56 +3,46 @@
 package com.nice.kotlins.helper
 
 import com.google.gson.*
-import com.google.gson.internal.`$Gson$Types`
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import java.io.Reader
 import java.lang.reflect.Type
 
-@PublishedApi
-internal val gson = Gson()
+object GsonProvider {
 
-@PublishedApi
-internal fun typeOf(parametrized: Class<*>, vararg parameterClasses: Class<*>): Type {
-    return `$Gson$Types`.canonicalize(
-        `$Gson$Types`.newParameterizedTypeWithOwner(
-            null,
-            parametrized,
-            *parameterClasses
-        )
-    )
+    @Volatile
+    private var globalGson = Gson()
+    val gson: Gson
+        get() = globalGson
+
+    fun setGson(gson: Gson) {
+        globalGson = gson
+    }
+
 }
 
 fun <T> String.parseAsJson(type: Type): T {
-    return gson.fromJson(this, type)
+    return GsonProvider.gson.fromJson(this, type)
 }
 
 fun <T> String.parseAsJson(clazz: Class<T>): T {
-    return gson.fromJson(this, clazz)
+    return GsonProvider.gson.fromJson(this, clazz)
 }
 
 inline fun <reified T> String.parseAsJson(): T {
-    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> Reader.parseAsJson(): T {
-    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonReader.parse(): T {
-    return gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonElement.parse(): T {
-    return gson.fromJson(this, object : TypeToken<T>() {}.type)
-}
-
-inline fun <reified T> JsonObject.parse(): T {
-    return gson.fromJson(this, T::class.java)
-}
-
-inline fun <reified T> JsonArray.parse(): List<T> {
-    return gson.fromJson(this, typeOf(ArrayList::class.java, T::class.java))
+    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 fun Any.toJsonObject(): JsonObject = JsonParser.parseString(toJson()).asJsonObject
@@ -61,7 +51,7 @@ fun Any.toJsonArray(): JsonArray = JsonParser.parseString(toJson()).asJsonArray
 
 fun Any?.toJsonOrNull(): String? = if (this == null) null else runCatching { toJson() }.getOrNull()
 
-fun Any.toJson(): String = gson.toJson(this)
+fun Any.toJson(): String = GsonProvider.gson.toJson(this)
 
 fun JsonArray.isEmpty() = size() == 0
 
@@ -79,6 +69,7 @@ operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, Jso
     entrySet().iterator()
 
 inline fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
+    this[""]
     for ((name, element) in entrySet()) {
         block(name, element)
     }
