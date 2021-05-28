@@ -1,10 +1,6 @@
 package com.nice.kotlins.http
 
-import com.nice.kotlins.helper.isNetworkUrl
-import com.nice.kotlins.helper.plus
-import com.nice.kotlins.helper.toUrl
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
@@ -203,35 +199,29 @@ internal class OkRequest(
             this.client = client
         }
 
-        fun url(baseUrl: String?, url: String) = apply {
-            val httpUrl = when {
-                url.isNetworkUrl() -> url
-                !baseUrl.isNullOrEmpty() -> (baseUrl.toUrl() + url).toString()
-                else -> throw IllegalArgumentException("Invalid url: $url")
-            }.toHttpUrl()
+        fun url(url: HttpUrl) = apply {
+            urlBuilder.scheme(url.scheme)
+                .host(url.host)
+                .port(url.port)
 
-            urlBuilder.scheme(httpUrl.scheme)
-                .host(httpUrl.host)
-                .port(httpUrl.port)
-
-            val username = httpUrl.username
-            val password = httpUrl.password
+            val username = url.username
+            val password = url.password
             if (username.isNotEmpty() || password.isNotEmpty()) {
                 urlBuilder.username(username)
                 urlBuilder.password(password)
             }
 
-            val pathSegments = httpUrl.pathSegments
+            val pathSegments = url.pathSegments
             for (pathSegment in pathSegments) {
                 urlBuilder.addPathSegment(pathSegment)
             }
 
-            val fragment = httpUrl.fragment
+            val fragment = url.fragment
             if (!fragment.isNullOrEmpty()) {
                 urlBuilder.fragment(fragment)
             }
 
-            val query = httpUrl.query
+            val query = url.query
             if (!query.isNullOrEmpty()) {
                 urlBuilder.query(query)
             }

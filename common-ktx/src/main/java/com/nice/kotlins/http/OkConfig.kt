@@ -2,7 +2,12 @@
 
 package com.nice.kotlins.http
 
+import com.nice.kotlins.helper.isNetworkUrl
+import com.nice.kotlins.helper.plus
+import com.nice.kotlins.helper.toUrl
 import okhttp3.CacheControl
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 
 class OkConfig internal constructor() {
@@ -169,4 +174,13 @@ class OkConfig internal constructor() {
         }
     }
 
+}
+
+fun String.toHttpUrl(config: OkConfig?): HttpUrl {
+    val baseUrl = config?.baseUrl
+    return when {
+        this.isNetworkUrl() -> this
+        !baseUrl.isNullOrEmpty() -> (baseUrl.toUrl() + this).toString()
+        else -> throw IllegalArgumentException("Invalid url: $this")
+    }.toHttpUrl()
 }

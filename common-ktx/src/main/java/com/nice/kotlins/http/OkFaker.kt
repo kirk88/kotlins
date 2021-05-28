@@ -158,11 +158,11 @@ class OkFaker<T> private constructor(
         }
 
         fun url(url: String) = apply {
-            builder.url(config?.baseUrl, url)
+            builder.url(url.toHttpUrl(config))
         }
 
         fun url(url: () -> String) = apply {
-            builder.url(config?.baseUrl, url())
+            builder.url(url().toHttpUrl(config))
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
