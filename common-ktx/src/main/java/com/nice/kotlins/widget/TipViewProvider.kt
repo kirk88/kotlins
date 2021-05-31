@@ -3,6 +3,8 @@
 package com.nice.kotlins.widget
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -38,18 +40,24 @@ internal class DefaultTipViewFactory(private val context: Context) : TipViewFact
 
 internal class DefaultTipView(context: Context) : TipView {
 
+    private val handler = Handler(Looper.getMainLooper())
+
     private val toast: Toast by lazy {
         Toast.makeText(context, "", Toast.LENGTH_SHORT)
     }
 
     override fun show(message: CharSequence) {
-        toast.setText(message)
-        toast.show()
+        handler.post {
+            toast.setText(message)
+            toast.show()
+        }
     }
 
     override fun show(messageId: Int) {
-        toast.setText(messageId)
-        toast.show()
+        handler.post {
+            toast.setText(messageId)
+            toast.show()
+        }
     }
 
     override fun dismiss() {
