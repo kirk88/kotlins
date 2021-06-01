@@ -31,7 +31,7 @@ fun SQLiteDatabase.insertOrThrow(table: String, values: Collection<SqlColumnElem
 fun SQLiteDatabase.insertWithOnConflict(
     table: String,
     conflictAlgorithm: Int,
-    vararg values: SqlColumnElement
+    vararg values: SqlColumnElement,
 ): Long {
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
@@ -39,7 +39,7 @@ fun SQLiteDatabase.insertWithOnConflict(
 fun SQLiteDatabase.insertWithOnConflict(
     table: String,
     conflictAlgorithm: Int,
-    values: Collection<SqlColumnElement>
+    values: Collection<SqlColumnElement>,
 ): Long {
     return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
 }
@@ -63,7 +63,7 @@ fun SQLiteDatabase.replaceOrThrow(table: String, values: Collection<SqlColumnEle
 fun SQLiteDatabase.delete(
     table: String,
     whereClause: String = "",
-    vararg whereArgs: Pair<String, Any>
+    vararg whereArgs: Pair<String, Any>,
 ): Int {
     return delete(
         table,
@@ -74,7 +74,7 @@ fun SQLiteDatabase.delete(
 
 fun SQLiteDatabase.delete(
     table: String,
-    condition: SqlWhereCondition
+    condition: SqlWhereCondition,
 ): Int {
     return delete(
         table,
@@ -91,7 +91,7 @@ fun SQLiteDatabase.update(
 
 fun SQLiteDatabase.update(
     table: String,
-    vararg values: SqlColumnElement
+    vararg values: SqlColumnElement,
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table).also {
         it.values(*values)
@@ -100,7 +100,7 @@ fun SQLiteDatabase.update(
 
 fun SQLiteDatabase.update(
     table: String,
-    values: Collection<SqlColumnElement>
+    values: Collection<SqlColumnElement>,
 ): UpdateQueryBuilder {
     return AndroidDatabaseUpdateQueryBuilder(this, table).also {
         it.values(values)
@@ -113,7 +113,7 @@ fun SQLiteDatabase.query(table: String): SelectQueryBuilder {
 
 fun SQLiteDatabase.query(
     table: String,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ): SelectQueryBuilder {
     return AndroidDatabaseSelectQueryBuilder(this, table).also {
         it.columns(*columns)
@@ -122,7 +122,7 @@ fun SQLiteDatabase.query(
 
 fun SQLiteDatabase.query(
     table: String,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ): SelectQueryBuilder {
     return AndroidDatabaseSelectQueryBuilder(this, table).also {
         it.columns(columns)
@@ -132,7 +132,7 @@ fun SQLiteDatabase.query(
 fun SQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) {
     val escapedTableName = table.replace("`", "``")
     val ifNotExistsText = if (ifNotExists) "IF NOT EXISTS" else ""
@@ -145,24 +145,24 @@ fun SQLiteDatabase.createTable(
 
 fun SQLiteDatabase.createTable(
     table: String,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) = createTable(table, false, *columns)
 
 fun SQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = createTable(table, ifNotExists, *columns.toTypedArray())
 
 fun SQLiteDatabase.createTable(
     table: String,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = createTable(table, false, columns)
 
 
 fun SQLiteDatabase.dropTable(
     table: String,
-    ifExists: Boolean
+    ifExists: Boolean,
 ) {
     val escapedTableName = table.replace("`", "``")
     val ifExistsText = if (ifExists) "IF EXISTS" else ""
@@ -170,7 +170,7 @@ fun SQLiteDatabase.dropTable(
 }
 
 fun SQLiteDatabase.dropTable(
-    table: String
+    table: String,
 ) = dropTable(table, false)
 
 fun SQLiteDatabase.createIndex(
@@ -178,7 +178,7 @@ fun SQLiteDatabase.createIndex(
     unique: Boolean,
     ifNotExists: Boolean,
     index: String,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) {
     val escapedTableName = table.replace("`", "``")
     val escapedIndexName = index.replace("`", "``")
@@ -194,7 +194,7 @@ fun SQLiteDatabase.createIndex(
 fun SQLiteDatabase.createIndex(
     table: String,
     index: String,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) = createIndex(
     table = table,
     unique = false,
@@ -208,13 +208,13 @@ fun SQLiteDatabase.createIndex(
     unique: Boolean,
     ifNotExists: Boolean,
     index: String,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = createIndex(table, unique, ifNotExists, index, *columns.toTypedArray())
 
 fun SQLiteDatabase.createIndex(
     table: String,
     index: String,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = createIndex(
     table = table,
     unique = false,
@@ -242,7 +242,7 @@ fun SQLiteDatabase.dropIndex(
 fun SQLiteDatabase.createColumn(
     table: String,
     ifNotExists: Boolean,
-    column: SqlColumnProperty
+    column: SqlColumnProperty,
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
@@ -259,13 +259,13 @@ fun SQLiteDatabase.createColumn(
 
 fun SQLiteDatabase.createColumn(
     table: String,
-    column: SqlColumnProperty
+    column: SqlColumnProperty,
 ) = createColumn(table, false, column)
 
 fun SQLiteDatabase.createColumns(
     table: String,
     ifNotExists: Boolean,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) = transaction {
     for (column in columns) {
         createColumn(table, ifNotExists, column)
@@ -274,13 +274,13 @@ fun SQLiteDatabase.createColumns(
 
 fun SQLiteDatabase.createColumns(
     table: String,
-    vararg columns: SqlColumnProperty
+    vararg columns: SqlColumnProperty,
 ) = createColumns(table, false, *columns)
 
 fun SQLiteDatabase.createColumns(
     table: String,
     ifNotExists: Boolean = false,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = transaction {
     for (column in columns) {
         createColumn(table, ifNotExists, column)
@@ -289,7 +289,7 @@ fun SQLiteDatabase.createColumns(
 
 fun SQLiteDatabase.createColumns(
     table: String,
-    columns: Collection<SqlColumnProperty>
+    columns: Collection<SqlColumnProperty>,
 ) = createColumns(table, false, columns)
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
@@ -325,6 +325,10 @@ private fun ContentValues.put(element: SqlColumnElement) {
     }
 }
 
+fun Map<String, Any?>.toColumnElements(): List<SqlColumnElement> {
+    return map { SqlColumnElement.create(it.key, it.value) }
+}
+
 fun Any.toColumnElements(): List<SqlColumnElement> {
     return ClassReflections.getAdapter(javaClass) {
         Modifier.isTransient(it.modifiers)
@@ -342,7 +346,7 @@ abstract class ManagedSQLiteOpenHelper(
     context: Context,
     name: String?,
     factory: SQLiteDatabase.CursorFactory? = null,
-    version: Int = 1
+    version: Int = 1,
 ) : SQLiteOpenHelper(context, name, factory, version) {
 
     private val counter = AtomicInteger()

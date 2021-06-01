@@ -8,19 +8,19 @@ import com.nice.kotlins.sqlite.db.*
 object TestTable {
     val TABLE_NAME = "Test"
 
-    val ID = "id" with INTEGER + PRIMARY_KEY
+    val ID = "id" of INTEGER + PRIMARY_KEY
 
-    val NAME = "name" with TEXT
+    val NAME = "name" of TEXT
 
-    val AGE = "age" with INTEGER
+    val AGE = "age" of INTEGER
 
-    val NUMBER = "number" with INTEGER + UNIQUE
+    val NUMBER = "number" of INTEGER + UNIQUE
 
-    val DATA = "data" with TEXT
+    val DATA = "data" of TEXT
 
-    val TIP = "tip" with TEXT + NOT_NULL + DEFAULT("wow")
+    val TIP = "tip" of TEXT + NOT_NULL + DEFAULT("wow")
 
-    val PP = "pp" with TEXT
+    val PP = "pp" of TEXT
 }
 
 class Test(

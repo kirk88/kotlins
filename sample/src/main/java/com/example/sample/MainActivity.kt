@@ -60,25 +60,18 @@ class MainActivity : NiceActivity() {
         }
 
         liveEvent += "event1"
-
         liveEvent += "event2"
 
         lifecycleScope.launch(Dispatchers.IO) {
-
             DB.use(true) {
 
                 var start = System.currentTimeMillis()
                 for (index in 0..10000) {
                     val startN = System.nanoTime()
-                    val test = Test(index.toLong(),
-                        "jack${index}",
-                        20,
-                        index,
-                        listOf("A", "B", "C", "D"),
-                        "lalalalal",
-                        "")
-
-                    replace(TestTable.TABLE_NAME, test.toColumnElements())
+                    replace(TestTable.TABLE_NAME,
+                        "id" with index.toLong(), "name" with "jack${index}",
+                        "age" with 20, "number" with index, "data" with listOf("A", "B", "C", "D").joinToString(","),
+                        "tip" with "lalalalal", "pp" with "")
                     Log.e("TAGTAG", "each: ${System.nanoTime() - startN}")
                 }
 

@@ -12,13 +12,15 @@ fun Any.serialize(): String? = runCatching {
         ObjectOutputStream(byteArrayOutputStream).use { objectOutputStream ->
             objectOutputStream.writeObject(this)
         }
-        byteArrayOutputStream.toString("ISO-8859-1")
+        byteArrayOutputStream.toString(Charsets.ISO_8859_1.name())
     }
 }.getOrNull()
 
 fun <T : Any> String.deserialize(): T? = runCatching {
-    ObjectInputStream(ByteArrayInputStream(this.toByteArray(charset("ISO-8859-1")))).use {
+    ByteArrayInputStream(this.toByteArray(Charsets.ISO_8859_1)).use { byteArrayInputStream ->
         @Suppress("UNCHECKED_CAST")
-        it.readObject() as? T
+        ObjectInputStream(byteArrayInputStream).use { objectInputStream ->
+            objectInputStream.readObject()
+        } as? T
     }
 }.getOrNull()
