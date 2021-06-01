@@ -12,7 +12,7 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 
-open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean = false) :
+open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean) :
     OkDownloadMapper<File>() {
 
     private val file: File = File(path + DOWNLOAD_SUFFIX_TMP)

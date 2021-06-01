@@ -586,9 +586,3 @@ fun <T : Any> OkFaker<T>.asLiveData(
 ): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(suspendBlocking(ExecutorDispatchers.IO) { execute() })
 }
-
-fun main() {
-    val result =
-        OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com/").executeOrNull()
-    println(result)
-}
