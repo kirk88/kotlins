@@ -1,7 +1,6 @@
 package com.example.sample.db
 
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import com.nice.kotlins.app.appContext
 import com.nice.kotlins.sqlite.db.*
 

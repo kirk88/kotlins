@@ -5,11 +5,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.app.NiceViewModelFragment
 import com.nice.kotlins.event.Event
-import com.nice.kotlins.event.event
 import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.showIme
 

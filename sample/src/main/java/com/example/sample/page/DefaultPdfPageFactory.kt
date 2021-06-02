@@ -6,7 +6,6 @@ import android.graphics.Rect
 import android.os.ParcelFileDescriptor
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfiumCore
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

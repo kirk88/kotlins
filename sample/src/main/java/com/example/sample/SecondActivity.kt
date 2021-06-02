@@ -3,10 +3,8 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.fragment.app.viewModels
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.event
