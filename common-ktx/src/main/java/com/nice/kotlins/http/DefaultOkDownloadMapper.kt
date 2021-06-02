@@ -12,8 +12,10 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 
-open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean) :
-    OkDownloadMapper<File>() {
+open class DefaultOkDownloadMapper internal constructor(
+    path: String,
+    private val continuing: Boolean,
+) : OkDownloadMapper<File>() {
 
     private val file: File = File(path + DOWNLOAD_SUFFIX_TMP)
 
@@ -21,7 +23,7 @@ open class DefaultOkDownloadMapper(path: String, private val continuing: Boolean
         val range = if (continuing) file.length() else 0L
         return request.newBuilder().header(
             DOWNLOAD_HEADER_RANGE_NAME,
-            String.format(DOWNLOAD_HEADER_RANGE_VALUE, range)
+            DOWNLOAD_HEADER_RANGE_VALUE.format(range)
         ).build()
     }
 

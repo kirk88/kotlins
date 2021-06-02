@@ -20,38 +20,23 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     private var itemChildClickListener: OnItemChildClickListener<T, VH>? = null
     private var itemChildLongClickListener: OnItemChildLongClickListener<T, VH>? = null
 
-    private var itemAnimation: ItemViewAnimation? = null
     private var itemClickable: Boolean = false
     private var itemLongClickable: Boolean = false
 
-    var parent: RecyclerView? = null
-        private set
+    private var itemViewAnimation: ItemViewAnimation? = null
+    val itemAnimation: ItemViewAnimation? get() = itemViewAnimation
+
+    private var recyclerView: RecyclerView? = null
+    val parent: RecyclerView? get() = recyclerView
+
     val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     open val items: List<T>
         get() = emptyList()
 
-    fun getItem(position: Int): T {
-        return items[position]
-    }
+    open fun isEmpty(): Boolean = itemCount == 0
 
-    fun containsItem(item: T): Boolean {
-        return items.contains(item)
-    }
-
-    fun containsAllItems(items: Collection<T>): Boolean {
-        return items.containsAll(items)
-    }
-
-    fun indexOfItem(item: T): Int {
-        return items.indexOf(item)
-    }
-
-    fun lastIndexOfItem(item: T): Int {
-        return items.lastIndexOf(item)
-    }
-
-    fun isEmpty(): Boolean = items.isEmpty()
+    fun getItem(position: Int): T = items[position]
 
     fun setOnItemClickListener(listener: OnItemClickListener<T, VH>?) {
         itemClickListener = listener
@@ -110,11 +95,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     fun setItemAnimation(animation: ItemViewAnimation?) {
-        this.itemAnimation = animation
-    }
-
-    fun getItemAnimation(): ItemViewAnimation? {
-        return this.itemAnimation
+        this.itemViewAnimation = animation
     }
 
     open fun getSpanSize(position: Int): Int {
@@ -212,7 +193,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        this.parent = recyclerView
+        this.recyclerView = recyclerView
 
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
@@ -226,11 +207,11 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     @CallSuper
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        this.parent = null
+        this.recyclerView = null
     }
 
     override fun onViewAttachedToWindow(holder: VH) {
-        itemAnimation?.start(holder)
+        itemViewAnimation?.start(holder)
     }
 
 }
@@ -239,18 +220,6 @@ operator fun <T> BaseRecyclerAdapter<T, *>.iterator(): Iterator<T> = items.itera
 
 operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(position)
 
-operator fun <T> BaseRecyclerAdapter<T, *>.contains(item: T): Boolean = containsItem(item)
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? = items.getOrNull(position)
 
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
-
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? {
-    return items.getOrNull(position)
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T {
-    return items.getOrNull(position) ?: defaultValue
-}
-
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T): T {
-    return items.getOrNull(position) ?: defaultValue(position)
-}

@@ -23,8 +23,7 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
             modifiableItems.addAll(items)
             notifyDataSetChanged()
         }
-
-        getItemAnimation()?.reset()
+        itemAnimation?.reset()
     }
 
     fun addItem(item: T) {

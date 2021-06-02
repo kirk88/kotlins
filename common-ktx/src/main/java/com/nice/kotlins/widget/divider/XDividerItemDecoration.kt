@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -196,7 +197,7 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         dividerDrawable = drawable
     }
 
-    constructor(@ColorInt dividerColor: Int, dividerSize: Int) {
+    constructor(@ColorInt dividerColor: Int, @Px dividerSize: Int) {
         dividerDrawable = GradientDrawable().apply {
             setColor(dividerColor)
             setSize(dividerSize, dividerSize)
@@ -258,13 +259,13 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         dividerDrawable = drawable
     }
 
-    constructor(@ColorInt dividerColor: Int, dividerSize: Int) : this(
+    constructor(@ColorInt dividerColor: Int, @Px dividerSize: Int) : this(
         dividerColor,
         dividerSize,
         dividerSize
     )
 
-    constructor(@ColorInt dividerColor: Int, dividerWidth: Int, dividerHeight: Int) {
+    constructor(@ColorInt dividerColor: Int, @Px dividerWidth: Int, @Px dividerHeight: Int) {
         dividerDrawable = GradientDrawable().apply {
             setColor(dividerColor)
             setSize(dividerWidth, dividerHeight)

@@ -19,8 +19,8 @@
         android:layout_height="300dp"
         android:padding="20dp"
         android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-        app:spanCount="3"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="5"
         />
 
 </LinearLayout>
