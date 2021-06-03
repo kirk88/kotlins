@@ -98,6 +98,6 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
             }
             else -> event.message?.let { tipView?.show(it) }
         }
-        return false
+        return true
     }
 }

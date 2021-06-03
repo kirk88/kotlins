@@ -7,7 +7,6 @@ import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.event.Event
-import com.nice.kotlins.event.event
 import com.nice.kotlins.helper.*
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
@@ -50,8 +49,6 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
-
-        viewModel.event = event("hello world")
     }
 
 

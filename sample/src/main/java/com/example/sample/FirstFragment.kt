@@ -7,6 +7,7 @@ import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import com.nice.kotlins.app.NiceViewModelFragment
 import com.nice.kotlins.event.Event
+import com.nice.kotlins.event.event
 import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.showIme
 
@@ -23,6 +24,7 @@ class FirstFragment: NiceViewModelFragment<TestViewModel>(R.layout.fragment_firs
             editText.showIme()
         }
 
+        viewModel.event = event("hello world")
     }
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
