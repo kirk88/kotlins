@@ -35,6 +35,7 @@ class MainActivity : NiceActivity() {
     private val tipView: TipView by tipViews()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ScreenAdaptation.setCustomDensity(this)
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
@@ -66,7 +67,7 @@ class MainActivity : NiceActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(true) {
-            var start = System.currentTimeMillis()
+                var start = System.currentTimeMillis()
 //                for (index in 0..10000) {
 //                    insert(TestTable.TABLE_NAME,
 //                        SQLiteDatabase.CONFLICT_REPLACE,
@@ -96,10 +97,10 @@ class MainActivity : NiceActivity() {
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                        .selection(TestTable.ID.notBetween(3, 6))
-                        .limit(10)
-                        .groupBy(TestTable.NAME, TestTable.JJ)
-                        .parseList<Test>()
+                    .selection(TestTable.ID.notBetween(3, 6))
+                    .limit(10)
+                    .groupBy(TestTable.NAME, TestTable.JJ)
+                    .parseList<Test>()
 
                 Log.e("TAGTAG", "query: ${System.currentTimeMillis() - start}")
 

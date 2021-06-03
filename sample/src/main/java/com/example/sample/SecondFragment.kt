@@ -100,8 +100,6 @@ class SecondFragment : NiceFragment() {
             "abcdef",
             "abcd"
         )
-
-//        binding.listview.adapter = ArrayAdapter(requireContext(), R.layout.item_recycler_view, R.id.title, )
     }
 
 }
