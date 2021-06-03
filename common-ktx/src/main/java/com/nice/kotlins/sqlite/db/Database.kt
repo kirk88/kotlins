@@ -3,133 +3,66 @@
 package com.nice.kotlins.sqlite.db
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
-import androidx.core.database.sqlite.transaction
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.sqlite.db.transaction
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 
 enum class SqlOrderDirection { ASC, DESC }
 
-fun SQLiteDatabase.insert(table: String, vararg values: SqlColumnElement): Long {
-    return insert(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.insert(table: String, values: Collection<SqlColumnElement>): Long {
-    return insert(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.insertOrThrow(table: String, vararg values: SqlColumnElement): Long {
-    return insertOrThrow(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.insertOrThrow(table: String, values: Collection<SqlColumnElement>): Long {
-    return insertOrThrow(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.insertWithOnConflict(
+fun SupportSQLiteDatabase.insert(
     table: String,
     conflictAlgorithm: Int,
     vararg values: SqlColumnElement,
-): Long {
-    return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
-}
+): Long = insert(table, conflictAlgorithm, values.toContentValues())
 
-fun SQLiteDatabase.insertWithOnConflict(
+fun SupportSQLiteDatabase.insert(
+    table: String,
+    vararg values: SqlColumnElement,
+): Long = insert(table, SQLiteDatabase.CONFLICT_NONE, *values)
+
+fun SupportSQLiteDatabase.insert(
     table: String,
     conflictAlgorithm: Int,
     values: Collection<SqlColumnElement>,
-): Long {
-    return insertWithOnConflict(table, null, values.toContentValues(), conflictAlgorithm)
-}
+): Long = insert(table, conflictAlgorithm, values.toContentValues())
 
-fun SQLiteDatabase.replace(table: String, vararg values: SqlColumnElement): Long {
-    return replace(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.replace(table: String, values: Collection<SqlColumnElement>): Long {
-    return replace(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.replaceOrThrow(table: String, vararg values: SqlColumnElement): Long {
-    return replaceOrThrow(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.replaceOrThrow(table: String, values: Collection<SqlColumnElement>): Long {
-    return replaceOrThrow(table, null, values.toContentValues())
-}
-
-fun SQLiteDatabase.delete(
+fun SupportSQLiteDatabase.insert(
     table: String,
-    whereClause: String = "",
-    vararg whereArgs: Pair<String, Any>,
-): Int {
-    return delete(
-        table,
-        applyArguments(whereClause, *whereArgs),
-        null
-    )
-}
+    values: Collection<SqlColumnElement>,
+): Long = insert(table, SQLiteDatabase.CONFLICT_NONE, values)
 
-fun SQLiteDatabase.delete(
+fun SupportSQLiteDatabase.delete(
+    table: String,
+    whereClause: String,
+    vararg whereArgs: Pair<String, Any>,
+): Int = delete(
+    table,
+    applyArguments(whereClause, *whereArgs),
+    null
+)
+
+fun SupportSQLiteDatabase.delete(
     table: String,
     condition: SqlWhereCondition,
-): Int {
-    return delete(
-        table,
-        condition.whereClause,
-        condition.whereArgs.map { it.toString() }.toTypedArray()
-    )
+): Int = delete(
+    table,
+    condition.whereClause,
+    condition.whereArgs
+)
+
+fun SupportSQLiteDatabase.updateBuilder(table: String): DatabaseUpdateBuilder {
+    return DatabaseUpdateBuilder(this, table)
 }
 
-fun SQLiteDatabase.update(
-    table: String,
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table)
+fun SupportSQLiteDatabase.queryBuilder(table: String): DatabaseQueryBuilder {
+    return DatabaseQueryBuilder(this, table)
 }
 
-fun SQLiteDatabase.update(
-    table: String,
-    vararg values: SqlColumnElement,
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table).also {
-        it.values(*values)
-    }
-}
-
-fun SQLiteDatabase.update(
-    table: String,
-    values: Collection<SqlColumnElement>,
-): UpdateQueryBuilder {
-    return AndroidDatabaseUpdateQueryBuilder(this, table).also {
-        it.values(values)
-    }
-}
-
-fun SQLiteDatabase.query(table: String): SelectQueryBuilder {
-    return AndroidDatabaseSelectQueryBuilder(this, table)
-}
-
-fun SQLiteDatabase.query(
-    table: String,
-    vararg columns: SqlColumnProperty,
-): SelectQueryBuilder {
-    return AndroidDatabaseSelectQueryBuilder(this, table).also {
-        it.columns(*columns)
-    }
-}
-
-fun SQLiteDatabase.query(
-    table: String,
-    columns: Collection<SqlColumnProperty>,
-): SelectQueryBuilder {
-    return AndroidDatabaseSelectQueryBuilder(this, table).also {
-        it.columns(columns)
-    }
-}
-
-fun SQLiteDatabase.createTable(
+fun SupportSQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean,
     vararg columns: SqlColumnProperty,
@@ -143,24 +76,24 @@ fun SQLiteDatabase.createTable(
     ) { col -> col.render() })
 }
 
-fun SQLiteDatabase.createTable(
+fun SupportSQLiteDatabase.createTable(
     table: String,
     vararg columns: SqlColumnProperty,
 ) = createTable(table, false, *columns)
 
-fun SQLiteDatabase.createTable(
+fun SupportSQLiteDatabase.createTable(
     table: String,
     ifNotExists: Boolean,
     columns: Collection<SqlColumnProperty>,
 ) = createTable(table, ifNotExists, *columns.toTypedArray())
 
-fun SQLiteDatabase.createTable(
+fun SupportSQLiteDatabase.createTable(
     table: String,
     columns: Collection<SqlColumnProperty>,
 ) = createTable(table, false, columns)
 
 
-fun SQLiteDatabase.dropTable(
+fun SupportSQLiteDatabase.dropTable(
     table: String,
     ifExists: Boolean,
 ) {
@@ -169,11 +102,11 @@ fun SQLiteDatabase.dropTable(
     execSQL("DROP TABLE $ifExistsText `$escapedTableName`;")
 }
 
-fun SQLiteDatabase.dropTable(
+fun SupportSQLiteDatabase.dropTable(
     table: String,
 ) = dropTable(table, false)
 
-fun SQLiteDatabase.createIndex(
+fun SupportSQLiteDatabase.createIndex(
     table: String,
     unique: Boolean,
     ifNotExists: Boolean,
@@ -191,7 +124,7 @@ fun SQLiteDatabase.createIndex(
     ) { it.name })
 }
 
-fun SQLiteDatabase.createIndex(
+fun SupportSQLiteDatabase.createIndex(
     table: String,
     index: String,
     vararg columns: SqlColumnProperty,
@@ -203,7 +136,7 @@ fun SQLiteDatabase.createIndex(
     columns = columns
 )
 
-fun SQLiteDatabase.createIndex(
+fun SupportSQLiteDatabase.createIndex(
     table: String,
     unique: Boolean,
     ifNotExists: Boolean,
@@ -211,7 +144,7 @@ fun SQLiteDatabase.createIndex(
     columns: Collection<SqlColumnProperty>,
 ) = createIndex(table, unique, ifNotExists, index, *columns.toTypedArray())
 
-fun SQLiteDatabase.createIndex(
+fun SupportSQLiteDatabase.createIndex(
     table: String,
     index: String,
     columns: Collection<SqlColumnProperty>,
@@ -223,7 +156,7 @@ fun SQLiteDatabase.createIndex(
     columns = columns
 )
 
-fun SQLiteDatabase.dropIndex(
+fun SupportSQLiteDatabase.dropIndex(
     table: String,
     ifExists: Boolean,
     index: String,
@@ -234,19 +167,19 @@ fun SQLiteDatabase.dropIndex(
     execSQL("DROP INDEX $ifExistsText `$escapedIndexName` ON `$escapedTableName`;")
 }
 
-fun SQLiteDatabase.dropIndex(
+fun SupportSQLiteDatabase.dropIndex(
     table: String,
     index: String,
 ) = dropIndex(table, false, index)
 
-fun SQLiteDatabase.createColumn(
+fun SupportSQLiteDatabase.addColumn(
     table: String,
     ifNotExists: Boolean,
     column: SqlColumnProperty,
 ) {
     val escapedTableName = table.replace("`", "``")
     val exists = if (ifNotExists) {
-        rawQuery("SELECT * FROM `$escapedTableName` LIMIT 0", null).use {
+        query("SELECT * FROM `$escapedTableName` LIMIT 0", null).use {
             it.getColumnIndex(column.name) > -1
         }
     } else {
@@ -257,40 +190,41 @@ fun SQLiteDatabase.createColumn(
     }
 }
 
-fun SQLiteDatabase.createColumn(
+fun SupportSQLiteDatabase.addColumn(
     table: String,
     column: SqlColumnProperty,
-) = createColumn(table, false, column)
+) = addColumn(table, false, column)
 
-fun SQLiteDatabase.createColumns(
+fun SupportSQLiteDatabase.addColumns(
     table: String,
     ifNotExists: Boolean,
     vararg columns: SqlColumnProperty,
-) = transaction {
+) {
     for (column in columns) {
-        createColumn(table, ifNotExists, column)
+        addColumn(table, ifNotExists, column)
     }
 }
 
-fun SQLiteDatabase.createColumns(
+
+fun SupportSQLiteDatabase.addColumns(
     table: String,
     vararg columns: SqlColumnProperty,
-) = createColumns(table, false, *columns)
+) = addColumns(table, false, *columns)
 
-fun SQLiteDatabase.createColumns(
+fun SupportSQLiteDatabase.addColumns(
     table: String,
-    ifNotExists: Boolean = false,
+    ifNotExists: Boolean,
     columns: Collection<SqlColumnProperty>,
-) = transaction {
+) {
     for (column in columns) {
-        createColumn(table, ifNotExists, column)
+        addColumn(table, ifNotExists, column)
     }
 }
 
-fun SQLiteDatabase.createColumns(
+fun SupportSQLiteDatabase.addColumns(
     table: String,
     columns: Collection<SqlColumnProperty>,
-) = createColumns(table, false, columns)
+) = addColumns(table, false, columns)
 
 fun Array<out SqlColumnElement>.toContentValues(): ContentValues {
     val values = ContentValues()
@@ -342,17 +276,19 @@ fun Any.toColumnElements(destination: MutableList<SqlColumnElement>): List<SqlCo
     return destination
 }
 
-abstract class ManagedSQLiteOpenHelper(
-    context: Context,
-    name: String?,
-    factory: SQLiteDatabase.CursorFactory? = null,
-    version: Int = 1,
-) : SQLiteOpenHelper(context, name, factory, version) {
+val AndroidSQLiteOpenHelperFactory = FrameworkSQLiteOpenHelperFactory()
+
+class ManagedSQLiteOpenHelper(
+    configuration: SupportSQLiteOpenHelper.Configuration,
+    factory: SupportSQLiteOpenHelper.Factory = AndroidSQLiteOpenHelperFactory,
+) {
+
+    private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)
 
     private val counter = AtomicInteger()
-    private var db: SQLiteDatabase? = null
+    private var db: SupportSQLiteDatabase? = null
 
-    fun <T> use(inTransaction: Boolean = false, action: SQLiteDatabase.() -> T): T {
+    fun <T> use(inTransaction: Boolean = false, action: SupportSQLiteDatabase.() -> T): T {
         try {
             return openDatabase().let {
                 if (inTransaction) it.transaction { action() }
@@ -364,9 +300,9 @@ abstract class ManagedSQLiteOpenHelper(
     }
 
     @Synchronized
-    private fun openDatabase(): SQLiteDatabase {
+    private fun openDatabase(): SupportSQLiteDatabase {
         if (counter.incrementAndGet() == 1) {
-            db = writableDatabase
+            db = delegate.writableDatabase
         }
         return db!!
     }

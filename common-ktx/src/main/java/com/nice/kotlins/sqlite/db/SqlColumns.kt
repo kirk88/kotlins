@@ -110,7 +110,7 @@ private class SqlFunctionPropertyImpl(override val name: String) :
 
 }
 
-infix fun String.of(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
+infix fun String.has(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
 
 infix fun String.with(value: Number?): SqlColumnElement = SqlColumnElementImpl(this, value)
 infix fun String.with(value: Boolean?): SqlColumnElement = SqlColumnElementImpl(this, value)

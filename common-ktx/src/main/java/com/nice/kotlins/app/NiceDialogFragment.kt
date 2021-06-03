@@ -25,7 +25,7 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
         super.onCreate(savedInstanceState)
         activityForResultLauncher.register(this)
         delegate.onCreate()
-        if(contentLayoutId != 0){
+        if (contentLayoutId != 0) {
             setContentView(contentLayoutId)
         }
     }
@@ -33,7 +33,7 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
     final override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val decor = delegate.getSubDecor()
         decor.post {

@@ -75,6 +75,18 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>androidx.sqlite</groupId>
+      <artifactId>sqlite-ktx</artifactId>
+      <version>2.1.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>androidx.sqlite</groupId>
+      <artifactId>sqlite-framework</artifactId>
+      <version>2.1.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>androidx.appcompat</groupId>
       <artifactId>appcompat</artifactId>
       <version>1.4.0-alpha01</version>

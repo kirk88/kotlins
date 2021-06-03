@@ -1,25 +1,28 @@
 package com.example.sample.db
 
-import android.database.sqlite.SQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.kotlins.app.appContext
 import com.nice.kotlins.sqlite.db.*
 
 object TestTable {
     val TABLE_NAME = "Test"
 
-    val ID = "id" of INTEGER + PRIMARY_KEY
+    val ID = "id" has INTEGER + PRIMARY_KEY
 
-    val NAME = "name" of TEXT
+    val NAME = "name" has TEXT
 
-    val AGE = "age" of INTEGER
+    val AGE = "age" has INTEGER
 
-    val NUMBER = "number" of INTEGER + UNIQUE
+    val NUMBER = "number" has INTEGER + UNIQUE
 
-    val DATA = "data" of TEXT
+    val DATA = "data" has TEXT
 
-    val TIP = "tip" of TEXT + NOT_NULL + DEFAULT("wow")
+    val TIP = "tip" has TEXT + NOT_NULL + DEFAULT("wow")
 
-    val PP = "pp" of TEXT
+    val PP = "pp" has TEXT
+
+    val JJ = "jj" has TEXT + DEFAULT("heheheheh")
 }
 
 class Test(
@@ -36,15 +39,14 @@ class Test(
     var dataList: List<String>? = null,
     var tip: String = "",
     var pp: String? = null,
+    var jj: String? = null
 ) {
 
     @IgnoreOnTable
     var text: String = "2343"
 
     override fun toString(): String {
-        return "Test(id=$id, name=$name, age=$age, number=$number, dataList=$dataList, text=$text, tip=$tip, pp=${
-            pp?.plus("ll")
-        })"
+        return "Test(id=$id, name=$name, age=$age, number=$number, dataList=$dataList, text=$text, tip=$tip, pp=$pp, jj=$jj)"
     }
 
 
@@ -63,30 +65,33 @@ class C : ColumnValueConverter<List<String>, String> {
 }
 
 object DB : ManagedSQLiteOpenHelper(
-    context = appContext,
-    name = "testdemo.db",
-    version = 4
+    SupportSQLiteOpenHelper.Configuration.builder(appContext)
+        .name("testdemo.db")
+        .callback(Callback())
+        .build()
 ) {
 
-    override fun onCreate(db: SQLiteDatabase) {
-        db.createTable(
-            TestTable.TABLE_NAME,
-            true,
-            TestTable.ID,
-            TestTable.NAME,
-            TestTable.AGE,
-            TestTable.NUMBER,
-            TestTable.DATA,
-            TestTable.TIP,
-            TestTable.PP
-        )
-    }
+    private class Callback : SupportSQLiteOpenHelper.Callback(5) {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            db.createTable(
+                TestTable.TABLE_NAME,
+                true,
+                TestTable.ID,
+                TestTable.NAME,
+                TestTable.AGE,
+                TestTable.NUMBER,
+                TestTable.DATA,
+                TestTable.TIP,
+                TestTable.PP,
+                TestTable.JJ
+            )
+        }
 
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db ?: return
-
-        db.createColumn(TestTable.TABLE_NAME, true, TestTable.TIP)
-        db.createColumn(TestTable.TABLE_NAME, true, TestTable.PP)
+        override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            db.addColumn(TestTable.TABLE_NAME, true, TestTable.TIP)
+            db.addColumn(TestTable.TABLE_NAME, true, TestTable.PP)
+            db.addColumn(TestTable.TABLE_NAME, true, TestTable.JJ)
+        }
     }
 
 }

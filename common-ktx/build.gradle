@@ -49,6 +49,8 @@ dependencies {
     api deps.androidxCoreKtx
     api deps.androidxActivityKtx
     api deps.androidxFragmentKtx
+    api deps.sqliteKtx
+    api deps.sqliteFramework
     api deps.androidxAppcompat
     api deps.androidxRecyclerview
     api deps.androidxConstraintlayout

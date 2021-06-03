@@ -22,6 +22,8 @@ buildscript {
             activityKtx        : "1.3.0-alpha08",
             fragmentKtx        : "1.4.0-alpha01",
 
+            sqlite             : "2.1.0",
+
             appcompat          : "1.4.0-alpha01",
 
             recyclerview       : "1.2.0",
@@ -64,6 +66,9 @@ buildscript {
 
             androidxActivityKtx               : "androidx.activity:activity-ktx:${versions.activityKtx}",
             androidxFragmentKtx               : "androidx.fragment:fragment-ktx:${versions.fragmentKtx}",
+
+            sqliteKtx                         : "androidx.sqlite:sqlite-ktx:${versions.sqlite}",
+            sqliteFramework                   : "androidx.sqlite:sqlite-framework:${versions.sqlite}",
 
             androidxAppcompat                 : "androidx.appcompat:appcompat:${versions.appcompat}",
 
