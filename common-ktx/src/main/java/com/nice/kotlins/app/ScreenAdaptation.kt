@@ -20,10 +20,9 @@ object ScreenAdaptation {
                 application.packageName,
                 PackageManager.GET_META_DATA
             )
-            compatScreenWidth = appInfo.metaData.getFloat("COMPAT_SCREEN_WIDTH")
-            if (compatScreenWidth <= 0) {
-                return
-            }
+            val value = appInfo.metaData.get("COMPAT_SCREEN_WIDTH").toString().toFloatOrNull()
+                ?: return
+            compatScreenWidth = value
         }
 
         val appDisplayMetrics = application.resources.displayMetrics
