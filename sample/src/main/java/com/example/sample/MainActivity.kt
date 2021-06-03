@@ -13,10 +13,7 @@ import com.example.sample.db.TestTable
 import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
-import com.nice.kotlins.helper.doOnClick
-import com.nice.kotlins.helper.plusAssign
-import com.nice.kotlins.helper.setContentView
-import com.nice.kotlins.helper.viewBindings
+import com.nice.kotlins.helper.*
 import com.nice.kotlins.sqlite.db.equal
 import com.nice.kotlins.sqlite.db.notBetween
 import com.nice.kotlins.sqlite.db.queryBuilder
@@ -56,6 +53,9 @@ class MainActivity : NiceActivity() {
             }
         }
 
+        fab.doOnLongClick {
+            true
+        }
         val liveEvent = MutableLiveEvent<String>()
         liveEvent.observe(this) {
             Log.e("TAGTAG", "event: $it")
@@ -66,8 +66,7 @@ class MainActivity : NiceActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(true) {
-
-                var start = System.currentTimeMillis()
+            var start = System.currentTimeMillis()
 //                for (index in 0..10000) {
 //                    insert(TestTable.TABLE_NAME,
 //                        SQLiteDatabase.CONFLICT_REPLACE,
@@ -96,8 +95,7 @@ class MainActivity : NiceActivity() {
                 Log.e("TAGTAG", "update: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
-                val result =
-                    queryBuilder(TestTable.TABLE_NAME)
+                val result = queryBuilder(TestTable.TABLE_NAME)
                         .selection(TestTable.ID.notBetween(3, 6))
                         .limit(10)
                         .groupBy(TestTable.NAME, TestTable.JJ)
