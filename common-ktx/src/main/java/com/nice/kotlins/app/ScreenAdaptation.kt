@@ -7,7 +7,8 @@ import android.content.res.Configuration
 
 object ScreenAdaptation {
 
-    private var compatScreenWidth: Float = 0.toFloat()
+    private var designScreenWidth: Float = 0.toFloat()
+    private var designScreenHeight: Float = 0.toFloat()
 
     private var defaultDensity: Float = 0.toFloat()
     private var defaultScaledDensity: Float = 0.toFloat()
@@ -15,18 +16,18 @@ object ScreenAdaptation {
     fun setCustomDensityIfNeed(activity: Activity) {
         val application = activity.application
 
-        if (compatScreenWidth == 0.toFloat()) {
+        if (designScreenWidth == 0.toFloat()) {
             val appInfo = application.packageManager.getApplicationInfo(
                 application.packageName,
                 PackageManager.GET_META_DATA
             )
-            val value = appInfo.metaData.get("COMPAT_SCREEN_WIDTH").toString().toFloatOrNull()
+            val value = appInfo.metaData.get("DESIGN_SCREEN_WIDTH").toString().toFloatOrNull()
                 ?: return
-            compatScreenWidth = value
+            designScreenWidth = value
         }
 
-        val appDisplayMetrics = application.resources.displayMetrics
 
+        val appDisplayMetrics = application.resources.displayMetrics
         if (defaultDensity == 0.toFloat()
             && defaultScaledDensity == 0.toFloat()
         ) {
@@ -44,8 +45,7 @@ object ScreenAdaptation {
             })
         }
 
-        val targetDensity: Float =
-            appDisplayMetrics.widthPixels / compatScreenWidth
+        val targetDensity: Float = appDisplayMetrics.widthPixels / designScreenWidth
         val targetScaledDensity: Float = targetDensity * (defaultScaledDensity / defaultDensity)
         val targetDensityDpi: Int = (targetDensity * 160).toInt()
 
@@ -57,6 +57,10 @@ object ScreenAdaptation {
         activityDisplayMetrics.density = targetDensity
         activityDisplayMetrics.scaledDensity = targetScaledDensity
         activityDisplayMetrics.densityDpi = targetDensityDpi
+    }
+
+    private fun setDensity(activity: Activity, density: Float, scaleDensity: Float, densityDpi: Float){
+
     }
 
 }

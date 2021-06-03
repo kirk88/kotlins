@@ -90,7 +90,7 @@ fun CharSequence.insertImage(
     )
     return toSpannableStringBuilder {
         val spannable = "$prefix $postfix".toSpannable()
-        spannable[prefix.length, length - postfix.length] = CenterAlignImageSpan(drawable)
+        spannable[prefix.length, spannable.length - postfix.length] = CenterAlignImageSpan(drawable)
         insert(where, spannable)
     }
 }
@@ -111,7 +111,7 @@ fun CharSequence.appendImage(
     )
     return toSpannableStringBuilder {
         val spannable = "$prefix $postfix".toSpannable()
-        spannable[prefix.length, length - postfix.length] = CenterAlignImageSpan(drawable)
+        spannable[prefix.length, spannable.length - postfix.length] = CenterAlignImageSpan(drawable)
         append(spannable)
     }
 }
