@@ -11,6 +11,7 @@ import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
 import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.app.ScreenAdaptation
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
 import com.nice.kotlins.helper.*
@@ -35,7 +36,7 @@ class MainActivity : NiceActivity() {
     private val tipView: TipView by tipViews()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ScreenAdaptation.setCustomDensity(this)
+        ScreenAdaptation.setCustomDensityIfNeed(this)
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
