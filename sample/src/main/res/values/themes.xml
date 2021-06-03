@@ -34,8 +34,5 @@
 
     <style name="Theme.Kotlins.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="android:minHeight">72dp</item>
-        <item name="contentInsetStartWithNavigation">56dp</item>
-    </style>
+    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.Toolbar"/>
 </resources>
