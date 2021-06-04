@@ -1,54 +1,52 @@
 package com.nice.kotlins.app
 
 import android.app.Activity
-import android.content.ComponentCallbacks
-import android.content.pm.PackageManager
-import android.content.res.Configuration
+import android.content.res.Resources
+import android.util.Log
 
-object ScreenAdaptation {
+internal object ScreenAdaptation {
 
-    private var designScreenWidth: Float = 0.toFloat()
-    private var designScreenHeight: Float = 0.toFloat()
-
-    private var defaultDensity: Float = 0.toFloat()
-    private var defaultScaledDensity: Float = 0.toFloat()
+    private val TAG = ScreenAdaptation::class.simpleName
 
     fun setCustomDensityIfNeed(activity: Activity) {
         val application = activity.application
 
-        if (designScreenWidth == 0.toFloat()) {
-            val appInfo = application.packageManager.getApplicationInfo(
-                application.packageName,
-                PackageManager.GET_META_DATA
-            )
-            val value = appInfo.metaData.get("DESIGN_SCREEN_WIDTH").toString().toFloatOrNull()
-                ?: return
-            designScreenWidth = value
+        val activityAdapter = activity as? ScreenCompatAdapter
+        val appAdapter = application as? ScreenCompatAdapter
+
+        val screenCompatStrategy =
+            activityAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+        val baseScreenWidth = activityAdapter?.baseScreenWidth ?: appAdapter?.baseScreenWidth
+        val baseScreenHeight = activityAdapter?.baseScreenHeight ?: appAdapter?.baseScreenHeight
+
+        if (screenCompatStrategy == null || baseScreenWidth == null || baseScreenHeight == null) {
+            return
         }
 
+        val systemDisplayMetrics = Resources.getSystem().displayMetrics
 
-        val appDisplayMetrics = application.resources.displayMetrics
-        if (defaultDensity == 0.toFloat()
-            && defaultScaledDensity == 0.toFloat()
-        ) {
-            defaultDensity = appDisplayMetrics.density
-            defaultScaledDensity = appDisplayMetrics.scaledDensity
-            application.registerComponentCallbacks(object : ComponentCallbacks {
-                override fun onConfigurationChanged(newConfig: Configuration) {
-                    if (newConfig.fontScale > 0) {
-                        defaultScaledDensity = application.resources.displayMetrics.scaledDensity
-                    }
-                }
-
-                override fun onLowMemory() {
-                }
-            })
+        val targetDensity: Float = when (screenCompatStrategy) {
+            ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / baseScreenWidth.toFloat()
+            ScreenCompatStrategy.BASE_ON_HEIGHT -> systemDisplayMetrics.heightPixels / baseScreenHeight.toFloat()
+            else -> systemDisplayMetrics.density
         }
-
-        val targetDensity: Float = appDisplayMetrics.widthPixels / designScreenWidth
-        val targetScaledDensity: Float = targetDensity * (defaultScaledDensity / defaultDensity)
+        val targetScaledDensity: Float = if (screenCompatStrategy == ScreenCompatStrategy.NONE) {
+            systemDisplayMetrics.scaledDensity
+        } else {
+            targetDensity * (systemDisplayMetrics.scaledDensity / systemDisplayMetrics.density)
+        }
         val targetDensityDpi: Int = (targetDensity * 160).toInt()
 
+        setDensity(activity, targetDensity, targetScaledDensity, targetDensityDpi)
+    }
+
+    private fun setDensity(
+        activity: Activity,
+        targetDensity: Float,
+        targetScaledDensity: Float,
+        targetDensityDpi: Int,
+    ) {
+        val appDisplayMetrics = activity.application.resources.displayMetrics
         appDisplayMetrics.density = targetDensity
         appDisplayMetrics.scaledDensity = targetScaledDensity
         appDisplayMetrics.densityDpi = targetDensityDpi
@@ -57,10 +55,27 @@ object ScreenAdaptation {
         activityDisplayMetrics.density = targetDensity
         activityDisplayMetrics.scaledDensity = targetScaledDensity
         activityDisplayMetrics.densityDpi = targetDensityDpi
+
+        Log.i(TAG, "density: $targetDensity, scaledDensity: $targetScaledDensity, densityDpi: $targetDensityDpi")
     }
 
-    private fun setDensity(activity: Activity, density: Float, scaleDensity: Float, densityDpi: Float){
+}
 
+enum class ScreenCompatStrategy {
+    NONE, BASE_ON_WIDTH, BASE_ON_HEIGHT
+}
+
+interface ScreenCompatAdapter {
+
+    val screenCompatStrategy: ScreenCompatStrategy get() = ScreenCompatStrategy.BASE_ON_WIDTH
+
+    val baseScreenWidth: Int get() = DEFAULT_BASE_SCREEN_WIDTH
+
+    val baseScreenHeight: Int get() = DEFAULT_BASE_SCREEN_HEIGHT
+
+    companion object {
+        private const val DEFAULT_BASE_SCREEN_WIDTH = 360
+        private const val DEFAULT_BASE_SCREEN_HEIGHT = 640
     }
 
 }

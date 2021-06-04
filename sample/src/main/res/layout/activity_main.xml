@@ -19,20 +19,65 @@
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
         app:provideSupportActionBar="true" />
 
-    <FrameLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-<!--        <com.github.barteksc.pdfviewer.PDFView-->
-<!--            android:id="@+id/pdf_view"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"/>-->
 
-        <com.example.sample.page.PdfPageView
-            android:id="@+id/pdf_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:textIsSelectable="true"
+            android:layout_width="50dp"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_red_light"
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="12sp"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:textIsSelectable="true"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_blue_bright"
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:textIsSelectable="true"
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_green_light"
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:textIsSelectable="true"
+            android:layout_width="200dp"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_orange_light"
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="18sp"/>
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:textIsSelectable="true"
+            android:layout_width="250dp"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_purple"
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
 
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -40,9 +85,11 @@
             android:layout_width="300dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_red_light"
-            android:text="adfisdofasdgdg"/>
-
-    </FrameLayout>
+            android:text="ABC"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="22sp"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 
 

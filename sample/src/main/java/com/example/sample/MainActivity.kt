@@ -11,7 +11,6 @@ import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
 import com.nice.kotlins.app.NiceActivity
-import com.nice.kotlins.app.ScreenAdaptation
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
 import com.nice.kotlins.helper.*
@@ -24,6 +23,7 @@ import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -36,7 +36,6 @@ class MainActivity : NiceActivity() {
     private val tipView: TipView by tipViews()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ScreenAdaptation.setCustomDensityIfNeed(this)
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
@@ -44,7 +43,6 @@ class MainActivity : NiceActivity() {
 
         val titleBar = binding.titleBar
         val fab = binding.fab
-        val pdfView = binding.pdfView
 
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
@@ -109,8 +107,14 @@ class MainActivity : NiceActivity() {
             }
         }
 
-    }
 
+        Log.e("TAGTAG", "width: ${actionBarHeight}")
+
+        lifecycleScope.launch {
+            delay(500)
+            Log.e("TAGTAG", "width: ${actionBarHeight}")
+        }
+    }
 
 }
 

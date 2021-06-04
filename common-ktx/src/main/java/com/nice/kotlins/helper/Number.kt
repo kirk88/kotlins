@@ -29,3 +29,9 @@ fun Float.between(min: Float, max: Float): Float {
 fun Double.between(min: Double, max: Double): Double {
     return min(max, max(this, min))
 }
+
+inline fun <T : Number> T.ifZero(defaultValue: () -> T): T =
+    if (this.toInt() != 0) this else defaultValue()
+
+inline fun <T : Number> T?.ifNullOrZero(defaultValue: () -> T): T =
+    if (this != null && this.toInt() != 0) this else defaultValue()

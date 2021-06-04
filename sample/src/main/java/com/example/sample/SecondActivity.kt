@@ -66,4 +66,5 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         Log.e("TAGTAG", "activity onViewModelEvent: "+event.message)
         return super.onViewModelEvent(event)
     }
+
 }
