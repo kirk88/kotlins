@@ -18,6 +18,7 @@
         tools:ignore="AllowBackup">
         <activity android:name=".MainActivity"
             android:label="Sample"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.Kotlins.NoActionBar.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

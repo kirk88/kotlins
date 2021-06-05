@@ -40,8 +40,8 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         navController.setStartDestination(R.id.fragment_first)
 
-        navView.setupWithController(navController){ item, position ->
-            item.setIcon(when(position){
+        navView.setupWithController(navController) { item, position ->
+            item.setIcon(when (position) {
                 0 -> R.drawable.ic_home_black_24dp
                 1 -> R.drawable.ic_dashboard_black_24dp
                 else -> R.drawable.ic_notifications_black_24dp
@@ -53,17 +53,17 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity dispatchViewModelEvent: "+event.message)
+        Log.e("TAGTAG", "activity dispatchViewModelEvent: " + event.message)
         return super.dispatchViewModelEvent(event)
     }
 
     override fun onInterceptViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity onInterceptViewModelEvent: "+event.message)
+        Log.e("TAGTAG", "activity onInterceptViewModelEvent: " + event.message)
         return super.onInterceptViewModelEvent(event)
     }
 
     override fun onViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity onViewModelEvent: "+event.message)
+        Log.e("TAGTAG", "activity onViewModelEvent: " + event.message)
         return super.onViewModelEvent(event)
     }
 

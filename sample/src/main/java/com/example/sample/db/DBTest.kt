@@ -2,7 +2,7 @@ package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import com.nice.kotlins.app.appContext
+import com.nice.kotlins.app.applicationContext
 import com.nice.kotlins.sqlite.db.*
 
 object TestTable {
@@ -65,7 +65,7 @@ class C : ColumnValueConverter<List<String>, String> {
 }
 
 object DB : ManagedSQLiteOpenHelper(
-    SupportSQLiteOpenHelper.Configuration.builder(appContext)
+    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
         .name("testdemo.db")
         .callback(Callback())
         .build()

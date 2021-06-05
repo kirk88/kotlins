@@ -1,23 +1,27 @@
 package com.nice.kotlins.app
 
 import android.app.Activity
+import android.app.Application
+import android.content.pm.ActivityInfo
 import android.content.res.Resources
-import android.util.Log
+import android.os.Bundle
 
 internal object ScreenAdaptation {
 
-    private val TAG = ScreenAdaptation::class.simpleName
+    fun init(application: Application) {
+        application.registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks())
+    }
 
-    fun setCustomDensityIfNeed(activity: Activity) {
+    private fun applyCustomDensityIfNeed(target: Any, activity: Activity) {
         val application = activity.application
 
-        val activityAdapter = activity as? ScreenCompatAdapter
         val appAdapter = application as? ScreenCompatAdapter
+        val targetAdapter = target as? ScreenCompatAdapter
 
         val screenCompatStrategy =
-            activityAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
-        val baseScreenWidth = activityAdapter?.baseScreenWidth ?: appAdapter?.baseScreenWidth
-        val baseScreenHeight = activityAdapter?.baseScreenHeight ?: appAdapter?.baseScreenHeight
+            targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+        val baseScreenWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
+        val baseScreenHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
 
         if (screenCompatStrategy == null || baseScreenWidth == null || baseScreenHeight == null) {
             return
@@ -28,6 +32,13 @@ internal object ScreenAdaptation {
         val targetDensity: Float = when (screenCompatStrategy) {
             ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / baseScreenWidth.toFloat()
             ScreenCompatStrategy.BASE_ON_HEIGHT -> systemDisplayMetrics.heightPixels / baseScreenHeight.toFloat()
+            ScreenCompatStrategy.AUTO -> {
+                if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                    systemDisplayMetrics.widthPixels / baseScreenWidth.toFloat()
+                } else {
+                    systemDisplayMetrics.heightPixels / baseScreenHeight.toFloat()
+                }
+            }
             else -> systemDisplayMetrics.density
         }
         val targetScaledDensity: Float = if (screenCompatStrategy == ScreenCompatStrategy.NONE) {
@@ -55,27 +66,47 @@ internal object ScreenAdaptation {
         activityDisplayMetrics.density = targetDensity
         activityDisplayMetrics.scaledDensity = targetScaledDensity
         activityDisplayMetrics.densityDpi = targetDensityDpi
+    }
 
-        Log.i(TAG, "density: $targetDensity, scaledDensity: $targetScaledDensity, densityDpi: $targetDensityDpi")
+    private class ActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            applyCustomDensityIfNeed(activity, activity)
+        }
+
+        override fun onActivityStarted(activity: Activity) {
+        }
+
+        override fun onActivityResumed(activity: Activity) {
+        }
+
+        override fun onActivityPaused(activity: Activity) {
+        }
+
+        override fun onActivityStopped(activity: Activity) {
+        }
+
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+        }
     }
 
 }
 
 enum class ScreenCompatStrategy {
-    NONE, BASE_ON_WIDTH, BASE_ON_HEIGHT
+    NONE, AUTO, BASE_ON_WIDTH, BASE_ON_HEIGHT
 }
 
 interface ScreenCompatAdapter {
 
     val screenCompatStrategy: ScreenCompatStrategy get() = ScreenCompatStrategy.BASE_ON_WIDTH
-
-    val baseScreenWidth: Int get() = DEFAULT_BASE_SCREEN_WIDTH
-
-    val baseScreenHeight: Int get() = DEFAULT_BASE_SCREEN_HEIGHT
+    val screenCompatWidth: Int get() = DEFAULT_SCREEN_COMPAT_WIDTH
+    val screenCompatHeight: Int get() = DEFAULT_SCREEN_COMPAT_HEIGHT
 
     companion object {
-        private const val DEFAULT_BASE_SCREEN_WIDTH = 360
-        private const val DEFAULT_BASE_SCREEN_HEIGHT = 640
+        private const val DEFAULT_SCREEN_COMPAT_WIDTH = 360
+        private const val DEFAULT_SCREEN_COMPAT_HEIGHT = 640
     }
 
 }

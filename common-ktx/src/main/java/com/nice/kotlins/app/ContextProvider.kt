@@ -1,15 +1,19 @@
 package com.nice.kotlins.app
 
+import android.app.Application
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 
+
 class ContextProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        ContextHolder.initContext(context!!)
+        val application = context!!.applicationContext as Application
+        ApplicationContextHolder.initContext(application)
+        ScreenAdaptation.init(application)
         return true
     }
 
@@ -18,7 +22,7 @@ class ContextProvider : ContentProvider() {
         projection: Array<out String>?,
         selection: String?,
         selectionArgs: Array<out String>?,
-        sortOrder: String?
+        sortOrder: String?,
     ): Cursor? = null
 
     override fun getType(uri: Uri): String? = null
@@ -31,21 +35,22 @@ class ContextProvider : ContentProvider() {
         uri: Uri,
         values: ContentValues?,
         selection: String?,
-        selectionArgs: Array<out String>?
+        selectionArgs: Array<out String>?,
     ): Int = -1
 
 }
 
-internal object ContextHolder {
+internal object ApplicationContextHolder {
 
-    lateinit var applicationContext: Context
+    lateinit var context: Context
+        private set
 
     fun initContext(context: Context) {
-        applicationContext = context.applicationContext
+        this.context = context.applicationContext
     }
 
 }
 
 
-val appContext: Context
-    get() = ContextHolder.applicationContext
+val applicationContext: Context
+    get() = ApplicationContextHolder.context

@@ -18,7 +18,6 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
         PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ScreenAdaptation.setCustomDensityIfNeed(this)
         super.onCreate(savedInstanceState)
         activityForResultLauncher.register(this)
     }

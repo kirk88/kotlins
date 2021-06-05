@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.ActivityResult
@@ -23,7 +24,6 @@ import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -106,14 +106,11 @@ class MainActivity : NiceActivity() {
                 Log.e("TAGTAG", "result: ${result.size}  " + result.toString())
             }
         }
+    }
 
-
-        Log.e("TAGTAG", "width: ${actionBarHeight}")
-
-        lifecycleScope.launch {
-            delay(500)
-            Log.e("TAGTAG", "width: ${actionBarHeight}")
-        }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Log.e("TAGTAG", "onConfigurationChanged")
     }
 
 }
