@@ -383,16 +383,16 @@ class TitleAppBar @JvmOverloads constructor(
             return toolbarView
         }
 
-        val queue = LinkedList<View>()
-        queue.add(this)
-        while (!queue.isEmpty()) {
-            val view = queue.removeFirst()
+        val views = LinkedList<View>()
+        views.add(this)
+        while (!views.isEmpty()) {
+            val view = views.removeFirst()
             if (view is TitleToolbar) {
                 return view
             }
 
             if (view is ViewGroup) {
-                queue.addAll(view.children)
+                views.addAll(view.children)
             }
         }
 
