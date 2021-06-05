@@ -20,23 +20,23 @@ internal object ScreenAdaptation {
 
         val screenCompatStrategy =
             targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
-        val baseScreenWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
-        val baseScreenHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
+        val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
+        val screenCompatHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
 
-        if (screenCompatStrategy == null || baseScreenWidth == null || baseScreenHeight == null) {
+        if (screenCompatStrategy == null || screenCompatWidth == null || screenCompatHeight == null) {
             return
         }
 
         val systemDisplayMetrics = Resources.getSystem().displayMetrics
 
         val targetDensity: Float = when (screenCompatStrategy) {
-            ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / baseScreenWidth.toFloat()
-            ScreenCompatStrategy.BASE_ON_HEIGHT -> systemDisplayMetrics.heightPixels / baseScreenHeight.toFloat()
+            ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
+            ScreenCompatStrategy.BASE_ON_HEIGHT -> systemDisplayMetrics.heightPixels / screenCompatHeight.toFloat()
             ScreenCompatStrategy.AUTO -> {
                 if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    systemDisplayMetrics.widthPixels / baseScreenWidth.toFloat()
+                    systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
                 } else {
-                    systemDisplayMetrics.heightPixels / baseScreenHeight.toFloat()
+                    systemDisplayMetrics.heightPixels / screenCompatHeight.toFloat()
                 }
             }
             else -> systemDisplayMetrics.density

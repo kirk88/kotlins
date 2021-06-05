@@ -71,28 +71,28 @@ class LoaderLayout @JvmOverloads constructor(
     private var defaultViewType: Int
 
     private var errorActionListener: LoaderView.OnActionListener? = null
-    private val errorButtonClickListener = OnClickListener { _ ->
+    private val errorButtonClickListener = OnClickListener {
         if (errorActionListener != null) {
             errorActionListener!!.onAction(this)
         }
     }
 
     private var emptyActionListener: LoaderView.OnActionListener? = null
-    private val emptyButtonClickListener = OnClickListener { _ ->
+    private val emptyButtonClickListener = OnClickListener {
         if (emptyActionListener != null) {
             emptyActionListener!!.onAction(this)
         }
     }
 
     private val viewTypeLock = Any()
-    private var viewType: Int = NO_TYPE
-    private var pendingViewType = NO_TYPE
+    private var viewType: Int = NO_VALUE
+    private var pendingViewType = NO_VALUE
     private var isViewTypeChanged = false
     private val showRunnable = Runnable {
         var newViewType: Int
         synchronized(viewTypeLock) {
             newViewType = pendingViewType
-            pendingViewType = NO_TYPE
+            pendingViewType = NO_VALUE
         }
         showImmediately(newViewType)
     }
@@ -382,7 +382,7 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private fun showImmediately(viewType: Int, animate: Boolean = true) {
-        if (viewType == NO_TYPE || this.viewType == viewType) {
+        if (viewType == NO_VALUE || this.viewType == viewType) {
             return
         }
 
@@ -407,7 +407,7 @@ class LoaderLayout @JvmOverloads constructor(
     private fun show(viewType: Int) {
         val postShow: Boolean
         synchronized(viewTypeLock) {
-            postShow = viewType != NO_TYPE
+            postShow = viewType != NO_VALUE
             pendingViewType = viewType
         }
         if (!postShow) {
@@ -536,7 +536,7 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private class SavedState : BaseSavedState {
-        var viewType = NO_TYPE
+        var viewType = NO_VALUE
 
         constructor(superState: Parcelable?) : super(superState)
 
@@ -614,8 +614,7 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     companion object {
-        private const val NO_VALUE = -1
-        private const val NO_TYPE = 0
+        private const val NO_VALUE = Int.MIN_VALUE
 
         fun wrap(activity: Activity): LoaderView {
             return wrap(
