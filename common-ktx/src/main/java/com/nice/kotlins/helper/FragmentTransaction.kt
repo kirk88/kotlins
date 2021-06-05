@@ -11,11 +11,6 @@ inline fun <reified F : Fragment> FragmentTransaction.add(
     tag: String? = null
 ): FragmentTransaction = add(containerViewId, F::class.java, bundleOf(*args), tag)
 
-inline fun <reified F : Fragment> FragmentTransaction.add(
-    vararg args: Pair<String, Any?>,
-    tag: String? = null
-): FragmentTransaction = add(F::class.java, bundleOf(*args), tag)
-
 inline fun <reified F : Fragment> FragmentTransaction.replace(
     @IdRes containerViewId: Int,
     vararg args: Pair<String, Any?>,
