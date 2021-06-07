@@ -17,7 +17,7 @@ open class DefaultOkDownloadMapper internal constructor(
     private val continuing: Boolean,
 ) : OkDownloadMapper<File>() {
 
-    private val file: File = File(path + DOWNLOAD_SUFFIX_TMP)
+    private val file: File = File(path + DOWNLOAD_FILE_SUFFIX_TMP)
 
     override fun shouldInterceptRequest(request: Request): Request {
         val range = if (continuing) file.length() else 0L
@@ -31,7 +31,6 @@ open class DefaultOkDownloadMapper internal constructor(
         if (file.exists() && !continuing) {
             file.delete()
         }
-
         return writeStreamToFile(requireNotNull(value.body) { "ResponseBody is null" }, file)
     }
 
@@ -69,7 +68,7 @@ open class DefaultOkDownloadMapper internal constructor(
         fun notifyProgressChanged(
             mapper: DefaultOkDownloadMapper,
             readBytes: Long,
-            totalBytes: Long,
+            totalBytes: Long
         ) {
             val message = Message()
             message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
@@ -79,7 +78,7 @@ open class DefaultOkDownloadMapper internal constructor(
         private class ProgressPerformer(
             private val mapper: DefaultOkDownloadMapper,
             private val readBytes: Long,
-            private val totalBytes: Long,
+            private val totalBytes: Long
         ) {
             fun perform() {
                 mapper.onProgress(readBytes, totalBytes)
@@ -89,7 +88,7 @@ open class DefaultOkDownloadMapper internal constructor(
     }
 
     companion object {
-        private const val DOWNLOAD_SUFFIX_TMP = ".tmp"
+        private const val DOWNLOAD_FILE_SUFFIX_TMP = ".tmp"
         private const val DOWNLOAD_HEADER_RANGE_NAME = "Range"
         private const val DOWNLOAD_HEADER_RANGE_VALUE = "bytes=%d-"
 
@@ -97,7 +96,7 @@ open class DefaultOkDownloadMapper internal constructor(
 
         private fun rename(srcFile: File): File {
             val tmpFilePath = srcFile.absolutePath
-            val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_SUFFIX_TMP)))
+            val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_FILE_SUFFIX_TMP)))
             return if (srcFile.renameTo(destFile)) {
                 destFile
             } else throw IOException("Rename file failed")

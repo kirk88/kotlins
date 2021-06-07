@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.os.Bundle
+import com.nice.kotlins.helper.statusBarHeight
 
 internal object ScreenAdaptation {
 
@@ -22,8 +23,12 @@ internal object ScreenAdaptation {
             targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
         val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
         val screenCompatHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
+        val screenCompatUselessHeight =
+            targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
 
-        if (screenCompatStrategy == null || screenCompatWidth == null || screenCompatHeight == null) {
+        if (screenCompatStrategy == null || screenCompatWidth == null
+            || screenCompatHeight == null || screenCompatUselessHeight == null
+        ) {
             return
         }
 
@@ -31,12 +36,12 @@ internal object ScreenAdaptation {
 
         val targetDensity: Float = when (screenCompatStrategy) {
             ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
-            ScreenCompatStrategy.BASE_ON_HEIGHT -> systemDisplayMetrics.heightPixels / screenCompatHeight.toFloat()
+            ScreenCompatStrategy.BASE_ON_HEIGHT -> (systemDisplayMetrics.heightPixels - screenCompatUselessHeight) / screenCompatHeight.toFloat()
             ScreenCompatStrategy.AUTO -> {
                 if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
                     systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
                 } else {
-                    systemDisplayMetrics.heightPixels / screenCompatHeight.toFloat()
+                    (systemDisplayMetrics.heightPixels - screenCompatUselessHeight) / screenCompatHeight.toFloat()
                 }
             }
             else -> systemDisplayMetrics.density
@@ -103,10 +108,13 @@ interface ScreenCompatAdapter {
     val screenCompatStrategy: ScreenCompatStrategy get() = ScreenCompatStrategy.BASE_ON_WIDTH
     val screenCompatWidth: Int get() = DEFAULT_SCREEN_COMPAT_WIDTH
     val screenCompatHeight: Int get() = DEFAULT_SCREEN_COMPAT_HEIGHT
+    val screenCompatUselessHeight: Int get() = DEFAULT_SCREEN_COMPAT_USELESS_HEIGHT
 
     companion object {
         private const val DEFAULT_SCREEN_COMPAT_WIDTH = 360
         private const val DEFAULT_SCREEN_COMPAT_HEIGHT = 640
+
+        private val DEFAULT_SCREEN_COMPAT_USELESS_HEIGHT = applicationContext.statusBarHeight
     }
 
 }

@@ -10,41 +10,59 @@ import java.lang.reflect.Type
 import java.math.BigDecimal
 import java.math.BigInteger
 
-object GsonProvider {
+object GlobalGson {
 
     @Volatile
-    private var globalGson = Gson()
-    val gson: Gson
-        get() = globalGson
+    private var gson = Gson()
 
     fun setGson(gson: Gson) {
-        globalGson = gson
+        this.gson = gson
     }
+
+    fun toJson(src: Any): String = gson.toJson(src)
+
+    fun toJson(src: JsonElement): String = gson.toJson(src)
+
+    fun <T> fromJson(json: String, classOfT: Class<T>): T = gson.fromJson(json, classOfT)
+
+    fun <T> fromJson(json: JsonElement, classOfT: Class<T>): T = gson.fromJson(json, classOfT)
+
+    fun <T> fromJson(reader: JsonReader, classOfT: Class<T>): T = gson.fromJson(reader, classOfT)
+
+    fun <T> fromJson(reader: Reader, classOfT: Class<T>): T = gson.fromJson(reader, classOfT)
+
+    fun <T> fromJson(json: String, type: Type): T = gson.fromJson(json, type)
+
+    fun <T> fromJson(json: JsonElement, type: Type): T = gson.fromJson(json, type)
+
+    fun <T> fromJson(reader: JsonReader, type: Type): T = gson.fromJson(reader, type)
+
+    fun <T> fromJson(reader: Reader, type: Type): T = gson.fromJson(reader, type)
 
 }
 
 fun <T> String.parseAsJson(type: Type): T {
-    return GsonProvider.gson.fromJson(this, type)
+    return GlobalGson.fromJson(this, type)
 }
 
 fun <T> String.parseAsJson(clazz: Class<T>): T {
-    return GsonProvider.gson.fromJson(this, clazz)
+    return GlobalGson.fromJson(this, clazz)
 }
 
 inline fun <reified T> String.parseAsJson(): T {
-    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GlobalGson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> Reader.parseAsJson(): T {
-    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GlobalGson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonReader.parse(): T {
-    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GlobalGson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 inline fun <reified T> JsonElement.parse(): T {
-    return GsonProvider.gson.fromJson(this, object : TypeToken<T>() {}.type)
+    return GlobalGson.fromJson(this, object : TypeToken<T>() {}.type)
 }
 
 fun Any.toJsonElement(): JsonElement = JsonParser.parseString(toJson())
@@ -55,7 +73,7 @@ fun Any.toJsonArray(): JsonArray = toJsonElement().asJsonArray
 
 fun Any?.toJsonOrNull(): String? = this?.runCatching { toJson() }?.getOrNull()
 
-fun Any.toJson(): String = if (this is String) this else GsonProvider.gson.toJson(this)
+fun Any.toJson(): String = if (this is String) this else GlobalGson.toJson(this)
 
 fun JsonObject.getOrNull(name: String): JsonElement? =
     this[name]?.let { if (it is JsonNull) null else it }
@@ -142,15 +160,7 @@ fun JsonObject.getBigInteger(
         if (it is JsonPrimitive && it.isNumber) it.asBigInteger else defaultValue
     } ?: defaultValue
 
-fun JsonArray.isEmpty() = size() == 0
-
-fun JsonArray.isNotEmpty() = size() != 0
-
 val JsonArray.size: Int get() = size()
-
-fun JsonObject.isEmpty() = size() == 0
-
-fun JsonObject.isNotEmpty() = size() != 0
 
 val JsonObject.size: Int get() = size()
 

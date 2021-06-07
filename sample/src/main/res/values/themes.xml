@@ -34,5 +34,8 @@
 
     <style name="Theme.Kotlins.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.Toolbar"/>
+    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:minHeight">56dp</item>
+        <item name="maxButtonHeight">56dp</item>
+    </style>
 </resources>

@@ -77,11 +77,21 @@ class OkFaker<T> private constructor(
         }
 
         override fun onSuccess(result: Response) {
-            OkCallbacks.onSuccess(callback) { transformer.transformResponse(result) }
+            runCatching { transformer.transformResponse(result) }
+                .onSuccess {
+                    OkCallbacks.onSuccess(callback, it)
+                }.onFailure {
+                    OkCallbacks.onError(callback, it)
+                }
         }
 
         override fun onError(error: Throwable) {
-            OkCallbacks.onError(callback) { error }
+            runCatching { transformer.transformError(error) }
+                .onSuccess {
+                    OkCallbacks.onSuccess(callback, it)
+                }.onFailure {
+                    OkCallbacks.onError(callback, it)
+                }
         }
 
         override fun onCompletion() {

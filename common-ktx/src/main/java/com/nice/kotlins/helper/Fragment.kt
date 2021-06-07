@@ -3,7 +3,6 @@
 package com.nice.kotlins.helper
 
 import android.app.Application
-import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -21,24 +20,12 @@ fun <T : Fragment> T.withBundle(vararg args: Pair<String, Any?>): T = apply {
 }
 
 val Fragment.application: Application
-    get() {
-        var application: Application? = null
-        var appContext = requireContext().applicationContext
-        while (appContext is ContextWrapper) {
-            if (appContext is Application) {
-                application = appContext
-                break
-            }
-            appContext = appContext.baseContext
-        }
+    get() = requireActivity().application
 
-        return application ?: requireActivity().application
-    }
-
-fun Fragment.setActivityResult(resultCode: Int){
+fun Fragment.setActivityResult(resultCode: Int) {
     requireActivity().setResult(resultCode)
 }
 
-fun Fragment.setActivityResult(resultCode: Int, data: Intent){
+fun Fragment.setActivityResult(resultCode: Int, data: Intent) {
     requireActivity().setResult(resultCode, data)
 }

@@ -92,8 +92,6 @@
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -101,6 +99,7 @@
         android:layout_margin="16dp"
         android:src="@drawable/abc_vector_test"
         app:elevation="10dp"
+        app:fabCustomSize="48dp"
         android:layout_gravity="bottom|end"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

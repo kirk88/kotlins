@@ -1,17 +1,18 @@
 package com.nice.kotlins.app
 
-import android.app.Application
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-
+import com.nice.kotlins.helper.application
 
 class ContextProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        val application = context!!.applicationContext as Application
+        val application = requireNotNull(context?.application) {
+            "Can not get application from context $context"
+        }
         ApplicationContextHolder.initContext(application)
         ScreenAdaptation.init(application)
         return true
@@ -50,7 +51,6 @@ internal object ApplicationContextHolder {
     }
 
 }
-
 
 val applicationContext: Context
     get() = ApplicationContextHolder.context

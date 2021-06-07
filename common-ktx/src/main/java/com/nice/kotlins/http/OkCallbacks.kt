@@ -36,18 +36,13 @@ internal object OkCallbacks {
         }
     }
 
-    fun <T> onSuccess(callback: OkCallback<T>, value: () -> T) {
-        try {
-            HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, value() as Any))
-                .sendToTarget()
-        } catch (error: Throwable) {
-            HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error))
-                .sendToTarget()
-        }
+    fun <T> onSuccess(callback: OkCallback<T>, value: T) {
+        HANDLER.obtainMessage(MSG_WHAT_ON_SUCCESS, MessageBody(callback, value as Any))
+            .sendToTarget()
     }
 
-    fun onError(callback: OkCallback<*>, error: () -> Throwable) {
-        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error())).sendToTarget()
+    fun onError(callback: OkCallback<*>, error: Throwable) {
+        HANDLER.obtainMessage(MSG_WHAT_ON_ERROR, MessageBody(callback, error)).sendToTarget()
     }
 
     fun onStart(callback: OkCallback<*>) {

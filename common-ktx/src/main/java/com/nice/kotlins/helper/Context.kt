@@ -1,11 +1,26 @@
 package com.nice.kotlins.helper
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
+
+val Context.application: Application?
+    get() {
+        var application: Application? = null
+        var context = this.applicationContext
+        while (context is ContextWrapper) {
+            if (context is Application) {
+                application = context
+                break
+            }
+            context = context.baseContext
+        }
+        return application
+    }
 
 val Context.activity: Activity?
     get() = scanActivity(this)

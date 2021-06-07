@@ -8,7 +8,7 @@ import com.nice.kotlins.app.ScreenCompatStrategy
 class App : MultiDexApplication(), ScreenCompatAdapter {
 
     override val screenCompatStrategy: ScreenCompatStrategy
-        get() = ScreenCompatStrategy.AUTO
+        get() = ScreenCompatStrategy.BASE_ON_HEIGHT
 
     override fun onCreate() {
         super.onCreate()

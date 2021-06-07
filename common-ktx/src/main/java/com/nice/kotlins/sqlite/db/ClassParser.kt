@@ -15,16 +15,13 @@ annotation class ClassParserConstructor
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 annotation class Column(
     val name: String = "",
-    val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class
+    val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class,
 )
 
 @Target(AnnotationTarget.FIELD)
 annotation class IgnoreOnTable
 
-inline fun <reified T : Any> classParser(): MapRowParser<T> = classParser(T::class.java)
-
-@PublishedApi
-internal fun <T> classParser(clazz: Class<T>): MapRowParser<T> = ClassParsers.get(clazz)
+inline fun <reified T : Any> classParser(): MapRowParser<T> = ClassParsers.get(T::class.java)
 
 private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
     if (type.first.isPrimitive || type.second.any { it is Column }) {
@@ -37,7 +34,8 @@ private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean 
         java.lang.Byte::class.java, java.lang.Character::class.java,
         java.lang.Boolean::class.java, java.lang.Float::class.java,
         java.lang.Double::class.java, java.lang.Short::class.java,
-        ByteArray::class.java -> true
+        ByteArray::class.java,
+        -> true
         else -> false
     }
 }
@@ -97,7 +95,7 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 internal class ClassConstructorParser<T>(
     private val preferredConstructor: Constructor<*>,
     private val parameterAnnotations: Array<Array<Annotation>>,
-    private val parameterTypes: Array<Class<*>>
+    private val parameterTypes: Array<Class<*>>,
 ) : MapRowParser<T> {
 
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
@@ -132,8 +130,9 @@ internal class ClassConstructorParser<T>(
 }
 
 internal class ClassFieldParser<T>(
-    private val converter: Constructor<*>
+    private val converter: Constructor<*>,
 ) : MapRowParser<T> {
+
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
         val target = converter.newInstance()
         ClassReflections.getAdapter(target.javaClass) {
@@ -147,6 +146,7 @@ internal class ClassFieldParser<T>(
 
 }
 
+@PublishedApi
 internal object ClassParsers {
 
     private val parsers: MutableMap<Class<*>, ClassParser<*>> by lazy { mutableMapOf() }

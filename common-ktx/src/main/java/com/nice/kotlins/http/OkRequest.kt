@@ -49,11 +49,11 @@ internal class OkRequest(
 
     fun enqueue(callback: OkCallback<Response>) {
         var call: Call? = null
-        var failure: Exception? = null
+        var failure: Throwable? = null
         try {
             call = createCall()
-        } catch (e: Exception) {
-            failure = e
+        } catch (error: Throwable) {
+            failure = error
         }
 
         if (failure != null) {
