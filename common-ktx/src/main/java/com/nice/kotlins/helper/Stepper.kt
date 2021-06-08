@@ -22,7 +22,7 @@ class Stepper {
         delayed: Long = 0,
         block: suspend CoroutineScope.() -> Unit
     ) {
-        channel.offer(DelayedTask(delayed, context, block))
+        channel.trySend(DelayedTask(delayed, context, block))
     }
 
     suspend fun start() {

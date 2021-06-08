@@ -28,13 +28,13 @@ fun BottomNavigationView.requireItemAt(index: Int): MenuItem = requireNotNull(ge
 
 
 inline fun BottomNavigationView.doOnItemSelected(crossinline action: (item: MenuItem) -> Boolean) {
-    setOnNavigationItemSelectedListener {
+    setOnItemSelectedListener {
         action(it)
     }
 }
 
 inline fun BottomNavigationView.doOnItemReselected(crossinline action: (item: MenuItem) -> Unit) {
-    setOnNavigationItemReselectedListener {
+    setOnItemReselectedListener {
         action(it)
     }
 }

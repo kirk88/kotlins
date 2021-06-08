@@ -191,7 +191,7 @@ class PersistentCookieStore(context: Context) : CookieStore {
             }
             sb.append(Integer.toHexString(v))
         }
-        return sb.toString().toUpperCase(Locale.US)
+        return sb.toString().uppercase(Locale.US)
     }
 
     private fun hexStringToByteArray(hexString: String): ByteArray {
