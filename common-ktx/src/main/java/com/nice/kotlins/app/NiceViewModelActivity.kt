@@ -23,9 +23,9 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes contentLayoutId: Int = 0) :
     ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
-    open val refreshView: RefreshView? = null
-
     open val loaderView: LoaderView? = null
+
+    open val refreshView: RefreshView? = null
 
     open val progressView: ProgressView? = null
 

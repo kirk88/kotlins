@@ -14,14 +14,14 @@ class SpiderClient(context: Context) : Closeable {
 
     @SuppressLint("SetJavaScriptEnabled")
     private val delegate = WebView(context).apply {
+        val client = SpiderWebViewClient()
+        webViewClient = client
         settings.apply {
             javaScriptEnabled = true
-            addJavascriptInterface(HtmlGetter(), "htmlGetter")
+            addJavascriptInterface(client, "htmlGetter")
         }
-        webViewClient = SpiderWebViewClient()
     }
 
-//
 //    fun open(url: String): WebPage {
 //
 //    }
@@ -32,15 +32,6 @@ class SpiderClient(context: Context) : Closeable {
         delegate.destroy()
     }
 
-
-    class HtmlGetter {
-
-        @JavascriptInterface
-        fun receiveSource(html: String) {
-
-        }
-
-    }
 
     private class SpiderWebViewClient : WebViewClient(), CoroutineScope by MainScope() {
 
@@ -80,6 +71,11 @@ class SpiderClient(context: Context) : Closeable {
 
                 view.loadUrl(JS_OUTER_HTML)
             }
+        }
+
+        @JavascriptInterface
+        fun receiveSource(html: String) {
+
         }
 
         companion object {

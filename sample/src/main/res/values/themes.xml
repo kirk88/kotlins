@@ -22,12 +22,12 @@
     </style>
 
     <style name="Theme.Kotlins.NoActionBar.Main">
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
     </style>
 
     <style name="Theme.Kotlins.NoActionBar.Translucent">
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
+        <item name="android:windowTranslucentNavigation" tools:targetApi="kitkat">true</item>
     </style>
 
     <style name="Theme.Kotlins.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
