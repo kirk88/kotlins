@@ -37,10 +37,6 @@ interface DialogBuilder<out D : DialogInterface> {
 
 }
 
-fun DialogBuilder<*>.contentView(view: () -> View) {
-    contentView = view()
-}
-
 fun DialogBuilder<*>.contentView(
     @LayoutRes layoutResId: Int,
     action: View.() -> Unit = {}

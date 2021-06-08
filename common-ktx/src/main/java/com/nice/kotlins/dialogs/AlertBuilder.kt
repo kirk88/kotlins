@@ -51,19 +51,19 @@ interface AlertBuilder<out D : DialogInterface> {
     fun positiveButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
     fun positiveButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
     fun negativeButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
     fun negativeButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
     fun neutralButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
     fun neutralButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
     fun onCancelled(handler: (dialog: DialogInterface) -> Unit)
@@ -74,48 +74,40 @@ interface AlertBuilder<out D : DialogInterface> {
 
     fun items(
         items: List<CharSequence>,
-        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit,
     )
 
     fun <T> items(
         items: List<T>,
-        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit,
     )
 
     fun multiChoiceItems(
         items: Array<String>,
         checkedItems: BooleanArray,
-        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit
+        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit,
     )
 
     fun singleChoiceItems(
         items: Array<String>,
         checkedItem: Int = 0,
-        onClick: ((dialog: DialogInterface, which: Int) -> Unit)? = null
+        onClick: ((dialog: DialogInterface, which: Int) -> Unit)? = null,
     )
 
     fun build(): D
     fun show(): D
 }
 
-fun AlertBuilder<*>.customTitle(view: () -> View) {
-    customTitle = view()
-}
-
 fun AlertBuilder<*>.customTitle(
     @LayoutRes layoutResId: Int,
-    action: View.() -> Unit = {}
+    action: View.() -> Unit = {},
 ) {
     customTitle = View.inflate(context, layoutResId, null).apply(action)
 }
 
-fun AlertBuilder<*>.customView(view: () -> View) {
-    customView = view()
-}
-
 fun AlertBuilder<*>.customView(
     @LayoutRes layoutResId: Int,
-    action: View.() -> Unit = {}
+    action: View.() -> Unit = {},
 ) {
     customView = View.inflate(context, layoutResId, null).apply(action)
 }
