@@ -17,6 +17,7 @@ import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
@@ -110,6 +111,33 @@ class MainActivity : NiceActivity() {
 
             Log.e("TAGTAG", "result: " + result)
         }
+
+
+       val job =  step {
+            add(Dispatchers.IO) {
+                val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
+                    .mapResponse{
+                        it.body!!.string()
+                    }.execute()
+
+
+                Log.e("TAGTAG", "result: " + result)
+            }
+
+            add {
+                delay(3000)
+                Log.e("TAGTAG", "step2")
+            }
+
+            add {
+                Log.e("TAGTAG", "step3")
+            }
+        }.launchIn(lifecycleScope)
+
+//        lifecycleScope.launch {
+//            delay(2000)
+//            job.cancel()
+//        }
     }
 
 }

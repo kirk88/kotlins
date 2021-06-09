@@ -19,23 +19,14 @@ class Stepper {
 
     fun add(
         context: CoroutineContext = EmptyCoroutineContext,
-        delayed: Long = 0,
-        block: suspend CoroutineScope.() -> Unit
+        block: suspend CoroutineScope.() -> Unit,
     ) {
-        channel.trySend(DelayedTask(delayed, context, block))
+        channel.trySend(DelayedTask(context, block))
     }
 
     suspend fun start() {
         for (task in channel) {
             task.run()
-        }
-    }
-
-    fun launchIn(scope: CoroutineScope) {
-        scope.launch {
-            for (task in channel) {
-                task.run()
-            }
         }
     }
 
@@ -48,14 +39,11 @@ class Stepper {
     }
 
     private class DelayedTask(
-        private val delayed: Long,
         private val context: CoroutineContext,
-        private val block: suspend CoroutineScope.() -> Unit
+        private val block: suspend CoroutineScope.() -> Unit,
     ) : SuspendedTask {
 
         override suspend fun run() = withContext(Dispatchers.Main.immediate + context) {
-            delay(delayed)
-
             try {
                 block()
             } catch (error: Throwable) {
@@ -66,6 +54,10 @@ class Stepper {
 
     }
 
+}
+
+fun Stepper.launchIn(scope: CoroutineScope): Job = scope.launch {
+    start()
 }
 
 fun step(block: Stepper.() -> Unit): Stepper = Stepper().apply(block)

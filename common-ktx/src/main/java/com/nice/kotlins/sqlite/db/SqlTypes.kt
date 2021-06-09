@@ -87,4 +87,4 @@ private open class SqlTypeImpl(override val name: String, val modifiers: String?
     }
 }
 
-private open class SqlTypeModifierImpl(override val modifier: String) : SqlTypeModifier
+private class SqlTypeModifierImpl(override val modifier: String) : SqlTypeModifier

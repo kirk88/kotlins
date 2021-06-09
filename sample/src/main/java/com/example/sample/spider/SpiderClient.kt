@@ -86,7 +86,3 @@ class SpiderClient(context: Context) : Closeable {
     }
 
 }
-
-class WebPage(source: String) {
-
-}
