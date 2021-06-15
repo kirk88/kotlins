@@ -79,7 +79,8 @@ class MainActivity : NiceActivity() {
                         "number" with index,
                         "data" with listOf("A", "B", "C", "D").joinToString(","),
                         "tip" with "lalalalal",
-                        "pp" with "")
+                        "pp" with ""
+                    )
                 }
 
                 Log.e("TAGTAG", "insert: ${System.currentTimeMillis() - start}")

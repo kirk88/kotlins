@@ -50,7 +50,7 @@ class DatabaseUpdateBuilder(
         this.whereArgs = arrayOf(*whereArgs)
     }
 
-    fun execute(conflictAlgorithm: Int): Int {
+    fun execute(conflictAlgorithm: Int = SQLiteDatabase.CONFLICT_NONE): Int {
         check(values.isNotEmpty()) { "Update values is empty" }
         val values = values.toContentValues()
         val finalWhereClause = if (whereApplied) whereClause else null
@@ -63,7 +63,5 @@ class DatabaseUpdateBuilder(
             finalWhereArgs
         )
     }
-
-    fun execute(): Int = execute(SQLiteDatabase.CONFLICT_NONE)
 
 }

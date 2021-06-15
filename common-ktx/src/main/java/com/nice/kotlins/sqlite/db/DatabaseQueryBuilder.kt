@@ -121,9 +121,13 @@ class DatabaseQueryBuilder(
     inline fun <reified T : Any> parseOpt(): T? = parseOpt(classParser())
     inline fun <reified T : Any> parseList(): List<T> = parseList(classParser())
 
-    fun <T> execute(cancellationSignal: CancellationSignal, action: Cursor.() -> T): T =
-        database.query(delegate.create(), cancellationSignal).use(action)
-
-    fun <T> execute(action: Cursor.() -> T): T = database.query(delegate.create()).use(action)
+    fun <T> execute(cancellationSignal: CancellationSignal? = null, action: Cursor.() -> T): T {
+        val cursor = if (cancellationSignal != null) {
+            database.query(delegate.create(), cancellationSignal)
+        } else {
+            database.query(delegate.create())
+        }
+        return cursor.use(action)
+    }
 
 }
