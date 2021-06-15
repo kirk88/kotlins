@@ -17,3 +17,5 @@ inline fun <reified T> Context.evaluateString(
     lineno: Int = 0,
     securityDomain: Any? = null,
 ): T = evaluateString(scope, source, sourceName, lineno, securityDomain).toJava()
+
+inline fun <reified T> Context.evaluateString(scope: Scriptable, source: String){}

@@ -12,21 +12,21 @@ import okhttp3.OkHttpClient
 
 class OkConfig internal constructor() {
 
-    var client: OkHttpClient? = null
+    internal var client: OkHttpClient? = null
         private set
-    var baseUrl: String? = null
+    internal var baseUrl: String? = null
         private set
-    var cacheControl: CacheControl? = null
+    internal var cacheControl: CacheControl? = null
         private set
-    var username: String? = null
+    internal var username: String? = null
         private set
-    var password: String? = null
+    internal var password: String? = null
         private set
-    var headers: Map<String, String>? = null
+    internal var headers: Map<String, String>? = null
         private set
-    var queryParameters: Map<String, String>? = null
+    internal var queryParameters: Map<String, String>? = null
         private set
-    var formParameters: Map<String, String>? = null
+    internal var formParameters: Map<String, String>? = null
         private set
 
     fun newSetter() = Setter(this)
@@ -176,7 +176,7 @@ class OkConfig internal constructor() {
 
 }
 
-fun String.toHttpUrl(config: OkConfig?): HttpUrl {
+internal fun String.toHttpUrl(config: OkConfig?): HttpUrl {
     val baseUrl = config?.baseUrl
     return when {
         this.isNetworkUrl() -> this

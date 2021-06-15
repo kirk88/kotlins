@@ -14,7 +14,7 @@ import java.io.RandomAccessFile
 
 open class DefaultOkDownloadMapper internal constructor(
     path: String,
-    private val continuing: Boolean,
+    private val continuing: Boolean
 ) : OkDownloadMapper<File>() {
 
     private val file: File = File(path + DOWNLOAD_FILE_SUFFIX_TMP)
@@ -55,7 +55,7 @@ open class DefaultOkDownloadMapper internal constructor(
             }
             if (readBytes == totalBytes) {
                 rename(srcFile)
-            } else throw IOException("Response is closed or write file failed")
+            } else throw IOException("Response closed or failed to write to file")
         }
     }
 
@@ -108,7 +108,7 @@ open class DefaultOkDownloadMapper internal constructor(
 fun DefaultOkDownloadMapper(
     path: String,
     continuing: Boolean = false,
-    onProgress: (readBytes: Long, totalBytes: Long) -> Unit = { _, _ -> },
+    onProgress: (readBytes: Long, totalBytes: Long) -> Unit = { _, _ -> }
 ): DefaultOkDownloadMapper = object : DefaultOkDownloadMapper(path, continuing) {
     override fun onProgress(readBytes: Long, totalBytes: Long) {
         onProgress.invoke(readBytes, totalBytes)
