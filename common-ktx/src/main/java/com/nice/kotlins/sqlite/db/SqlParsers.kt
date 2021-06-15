@@ -169,7 +169,6 @@ class SqlColumnValue internal constructor(internal val value: Any?) {
     override fun toString(): String {
         return "SqlColumnValue(value=$value)"
     }
-
 }
 
 inline fun <reified T : Any> SqlColumnValue.asTyped(): T? = asTyped(T::class.java)

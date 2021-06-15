@@ -5,7 +5,7 @@ import java.lang.reflect.Field
 
 internal class FieldWrapper(private val field: Field) {
 
-    private val column: Column?
+    private val valueConverter: ColumnValueConverter<Any, Any>?
     private val isBooleanType: Boolean
 
     val name: String
@@ -13,52 +13,33 @@ internal class FieldWrapper(private val field: Field) {
     init {
         field.isAccessible = true
 
-        column = field.getAnnotation(Column::class.java)
+        val column = field.getAnnotation(Column::class.java)
+        valueConverter = if (column == null) null else ColumnConverters.get(column.converter)
         isBooleanType = field.type == java.lang.Boolean.TYPE
                 || field.type == java.lang.Boolean::class.java
-
         name = column?.name.ifNullOrEmpty { field.name }
     }
 
     fun read(reader: Any, values: MutableList<SqlColumnElement>) {
         val value = field.get(reader)
         values.add(
-            if (column != null) {
-                SqlColumnElement.create(
-                    name,
-                    if (value != null) {
-                        ColumnConverters.get(
-                            column.converter
-                        ).fromValue(value)
-                    } else {
-                        value
-                    }
-                )
-            } else {
-                SqlColumnElement.create(
-                    name,
-                    if (isBooleanType) {
-                        if (value as Boolean? == true) 1 else 0
-                    } else {
-                        value
-                    }
-                )
-            }
+            SqlColumnElement.create(
+                name,
+                when {
+                    valueConverter != null && value != null -> valueConverter.fromValue(value)
+                    isBooleanType -> if (value as Boolean? == true) 1 else 0
+                    else -> value
+                }
+            )
         )
     }
 
     fun write(writer: Any, value: SqlColumnValue) {
-        if (!value.isNull() && column != null) {
-            field.set(
-                writer,
-                ColumnConverters.get(
-                    column.converter
-                ).toValue(value.value!!)
-            )
-        } else if (isBooleanType) {
-            field.set(writer, value.asInt() == 1)
-        } else {
-            field.set(writer, value.asTyped(field.type))
+        when {
+            !value.isNull() && valueConverter != null -> field.set(writer,
+                valueConverter.toValue(value.value!!))
+            isBooleanType -> field.set(writer, value.asInt() == 1)
+            else -> field.set(writer, value.asTyped(field.type))
         }
     }
 
