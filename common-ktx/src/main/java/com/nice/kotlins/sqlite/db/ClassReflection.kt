@@ -21,26 +21,26 @@ internal class FieldWrapper(private val field: Field) {
     }
 
     fun read(reader: Any, values: MutableList<SqlColumnElement>) {
-        val fieldValue = field.get(reader)
+        val value = field.get(reader)
         values.add(
             if (column != null) {
                 SqlColumnElement.create(
                     name,
-                    if (fieldValue != null) {
+                    if (value != null) {
                         ColumnConverters.get(
                             column.converter
-                        ).fromValue(fieldValue)
+                        ).fromValue(value)
                     } else {
-                        fieldValue
+                        value
                     }
                 )
             } else {
                 SqlColumnElement.create(
                     name,
                     if (isBooleanType) {
-                        if (fieldValue as Boolean? == true) 1 else 0
+                        if (value as Boolean? == true) 1 else 0
                     } else {
-                        fieldValue
+                        value
                     }
                 )
             }

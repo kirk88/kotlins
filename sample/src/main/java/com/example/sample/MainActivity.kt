@@ -71,16 +71,9 @@ class MainActivity : NiceActivity() {
             DB.use(true) {
                 var start = System.currentTimeMillis()
                 for (index in 0..10000) {
-                    insert(TestTable.TABLE_NAME,
-                        SQLiteDatabase.CONFLICT_REPLACE,
-                        "id" with index.toLong(),
-                        "name" with "jack${index}",
-                        "age" with 20,
-                        "number" with index,
-                        "data" with listOf("A", "B", "C", "D").joinToString(","),
-                        "tip" with "lalalalal",
-                        "pp" with ""
-                    )
+                    val test = Test(index.toLong(), "jack$index", 20, index, listOf("A", "B", "C", "D"), "lalalalal", "")
+
+                    insert(TestTable.TABLE_NAME, SQLiteDatabase.CONFLICT_REPLACE, test.toColumnElements())
                 }
 
                 Log.e("TAGTAG", "insert: ${System.currentTimeMillis() - start}")
