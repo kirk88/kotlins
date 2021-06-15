@@ -5,7 +5,7 @@ package com.nice.kotlins.sqlite.db
 import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-class DatabaseUpdateBuilder(
+class SupportDatabaseUpdateBuilder(
     private val database: SupportSQLiteDatabase,
     private val table: String,
 ) {

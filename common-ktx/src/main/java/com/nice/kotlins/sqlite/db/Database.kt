@@ -54,12 +54,12 @@ fun SupportSQLiteDatabase.delete(
     condition.whereArgs
 )
 
-fun SupportSQLiteDatabase.updateBuilder(table: String): DatabaseUpdateBuilder {
-    return DatabaseUpdateBuilder(this, table)
+fun SupportSQLiteDatabase.updateBuilder(table: String): SupportDatabaseUpdateBuilder {
+    return SupportDatabaseUpdateBuilder(this, table)
 }
 
-fun SupportSQLiteDatabase.queryBuilder(table: String): DatabaseQueryBuilder {
-    return DatabaseQueryBuilder(this, table)
+fun SupportSQLiteDatabase.queryBuilder(table: String): SupportDatabaseQueryBuilder {
+    return SupportDatabaseQueryBuilder(this, table)
 }
 
 fun SupportSQLiteDatabase.createTable(

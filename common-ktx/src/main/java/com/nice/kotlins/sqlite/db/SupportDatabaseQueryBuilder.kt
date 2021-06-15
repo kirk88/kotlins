@@ -7,7 +7,7 @@ import android.os.CancellationSignal
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteQueryBuilder
 
-class DatabaseQueryBuilder(
+class SupportDatabaseQueryBuilder(
     private val database: SupportSQLiteDatabase,
     table: String,
 ) {
