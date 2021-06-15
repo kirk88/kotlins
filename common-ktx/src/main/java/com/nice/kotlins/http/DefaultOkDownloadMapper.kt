@@ -14,7 +14,7 @@ import java.io.RandomAccessFile
 
 open class DefaultOkDownloadMapper internal constructor(
     path: String,
-    private val continuing: Boolean
+    private val continuing: Boolean,
 ) : OkDownloadMapper<File>() {
 
     private val file: File = File(path + DOWNLOAD_FILE_SUFFIX_TMP)
@@ -68,7 +68,7 @@ open class DefaultOkDownloadMapper internal constructor(
         fun notifyProgressChanged(
             mapper: DefaultOkDownloadMapper,
             readBytes: Long,
-            totalBytes: Long
+            totalBytes: Long,
         ) {
             val message = Message()
             message.obj = ProgressPerformer(mapper, readBytes, totalBytes)
@@ -78,7 +78,7 @@ open class DefaultOkDownloadMapper internal constructor(
         private class ProgressPerformer(
             private val mapper: DefaultOkDownloadMapper,
             private val readBytes: Long,
-            private val totalBytes: Long
+            private val totalBytes: Long,
         ) {
             fun perform() {
                 mapper.onProgress(readBytes, totalBytes)
@@ -96,7 +96,8 @@ open class DefaultOkDownloadMapper internal constructor(
 
         private fun rename(srcFile: File): File {
             val tmpFilePath = srcFile.absolutePath
-            val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_FILE_SUFFIX_TMP)))
+            val destFile =
+                File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_FILE_SUFFIX_TMP)))
             return if (srcFile.renameTo(destFile)) {
                 destFile
             } else throw IOException("Rename file failed")
@@ -108,7 +109,7 @@ open class DefaultOkDownloadMapper internal constructor(
 fun DefaultOkDownloadMapper(
     path: String,
     continuing: Boolean = false,
-    onProgress: (readBytes: Long, totalBytes: Long) -> Unit = { _, _ -> }
+    onProgress: (readBytes: Long, totalBytes: Long) -> Unit = { _, _ -> },
 ): DefaultOkDownloadMapper = object : DefaultOkDownloadMapper(path, continuing) {
     override fun onProgress(readBytes: Long, totalBytes: Long) {
         onProgress.invoke(readBytes, totalBytes)

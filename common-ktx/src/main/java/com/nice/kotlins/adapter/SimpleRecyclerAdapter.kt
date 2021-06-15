@@ -10,13 +10,13 @@ import androidx.annotation.LayoutRes
 
 abstract class SimpleRecyclerAdapter<T>(
     context: Context,
-    @LayoutRes private val itemLayoutId: Int = 0
+    @LayoutRes private val itemLayoutId: Int = 0,
 ) : CommonRecyclerAdapter<T, ItemViewHolder>(context) {
 
     final override fun onCreateItemViewHolder(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): ItemViewHolder {
         return ItemViewHolder(onCreateItemView(inflater, parent, viewType))
     }
@@ -24,7 +24,7 @@ abstract class SimpleRecyclerAdapter<T>(
     open fun onCreateItemView(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): View {
         return inflater.inflate(itemLayoutId, parent, false)
     }

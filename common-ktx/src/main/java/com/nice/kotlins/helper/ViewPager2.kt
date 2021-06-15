@@ -22,13 +22,13 @@ inline fun ViewPager2.registerOnPageChangeCallback(
     crossinline onPageScrolled: (
         position: Int,
         positionOffset: Float,
-        positionOffsetPixels: Int
+        positionOffsetPixels: Int,
     ) -> Unit = { _, _, _ -> },
     crossinline onPageSelected: (
-        position: Int
+        position: Int,
     ) -> Unit = { _ -> },
     crossinline onPageScrollStateChanged: (
-        position: Int
+        position: Int,
     ) -> Unit = { _ -> },
 ): ViewPager2.OnPageChangeCallback {
     val callback = object : ViewPager2.OnPageChangeCallback() {

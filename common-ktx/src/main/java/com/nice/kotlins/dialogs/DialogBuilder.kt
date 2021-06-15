@@ -39,7 +39,7 @@ interface DialogBuilder<out D : DialogInterface> {
 
 fun DialogBuilder<*>.contentView(
     @LayoutRes layoutResId: Int,
-    action: View.() -> Unit = {}
+    action: View.() -> Unit = {},
 ) {
     contentView = View.inflate(context, layoutResId, null).apply(action)
 }

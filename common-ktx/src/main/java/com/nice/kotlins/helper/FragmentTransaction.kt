@@ -8,11 +8,11 @@ import androidx.fragment.app.FragmentTransaction
 inline fun <reified F : Fragment> FragmentTransaction.add(
     @IdRes containerViewId: Int,
     vararg args: Pair<String, Any?>,
-    tag: String? = null
+    tag: String? = null,
 ): FragmentTransaction = add(containerViewId, F::class.java, bundleOf(*args), tag)
 
 inline fun <reified F : Fragment> FragmentTransaction.replace(
     @IdRes containerViewId: Int,
     vararg args: Pair<String, Any?>,
-    tag: String? = null
+    tag: String? = null,
 ): FragmentTransaction = replace(containerViewId, F::class.java, bundleOf(*args), tag)

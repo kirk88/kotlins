@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 suspend fun <T> suspendBlocking(
     dispatcher: ExecutorDispatcher = ExecutorDispatchers.UNCONFINED,
-    block: () -> T
+    block: () -> T,
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
         runCatching(block).onSuccess {

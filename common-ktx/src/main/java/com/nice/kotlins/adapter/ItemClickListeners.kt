@@ -8,7 +8,7 @@ fun interface OnItemClickListener<T, VH : ItemViewHolder> {
 
 }
 
-fun interface OnItemLongClickListener<T, VH: ItemViewHolder>{
+fun interface OnItemLongClickListener<T, VH : ItemViewHolder> {
 
     fun onItemLongClick(adapter: BaseRecyclerAdapter<T, VH>, holder: VH): Boolean
 
@@ -21,7 +21,7 @@ fun interface OnItemChildClickListener<T, VH : ItemViewHolder> {
 
 }
 
-fun interface OnItemChildLongClickListener<T, VH: ItemViewHolder>{
+fun interface OnItemChildLongClickListener<T, VH : ItemViewHolder> {
 
     fun onItemChildLongClick(adapter: BaseRecyclerAdapter<T, VH>, holder: VH, view: View): Boolean
 

@@ -20,7 +20,7 @@ interface SqlWhereCondition {
 
 private class SqlWhereConditionImpl(
     override val whereClause: String,
-    vararg whereArgs: Any
+    vararg whereArgs: Any,
 ) : SqlWhereCondition {
 
     override val whereArgs: Array<Any> = arrayOf(*whereArgs)

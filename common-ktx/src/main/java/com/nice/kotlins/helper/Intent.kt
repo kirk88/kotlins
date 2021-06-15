@@ -34,12 +34,12 @@ inline fun <reified T : Activity> Fragment.startActivity(vararg values: Pair<Str
 
 inline fun <reified T : Activity> Context.startActivity(
     options: ActivityOptionsCompat?,
-    vararg values: Pair<String, Any?>
+    vararg values: Pair<String, Any?>,
 ) = startActivity(intent<T>(*values), options?.toBundle())
 
 inline fun <reified T : Activity> Fragment.startActivity(
     options: ActivityOptionsCompat?,
-    vararg values: Pair<String, Any?>
+    vararg values: Pair<String, Any?>,
 ) = startActivity(intent<T>(*values), options?.toBundle())
 
 fun Intent.putExtras(vararg values: Pair<String, Any?>) = apply {

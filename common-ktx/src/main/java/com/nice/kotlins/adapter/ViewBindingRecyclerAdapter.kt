@@ -12,13 +12,13 @@ abstract class ViewBindingRecyclerAdapter<T, VB : ViewBinding>(
     abstract fun onCreateItemView(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): VB
 
     final override fun onCreateItemViewHolder(
         inflater: LayoutInflater,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): ViewBindingHolder<VB> {
         return ViewBindingHolder(onCreateItemView(inflater, parent, viewType))
     }

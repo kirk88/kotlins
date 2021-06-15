@@ -38,7 +38,7 @@ internal class LiveEventDelegate<T> {
 
     fun observeSticky(
         owner: LifecycleOwner,
-        observer: Observer<T>
+        observer: Observer<T>,
     ) {
         if (isMainThread) {
             observeStickyInternal(owner, observer)
@@ -57,7 +57,7 @@ internal class LiveEventDelegate<T> {
 
     fun observeActiveSticky(
         owner: LifecycleOwner,
-        observer: Observer<T>
+        observer: Observer<T>,
     ) {
         if (isMainThread) {
             observeActiveStickyInternal(owner, observer)

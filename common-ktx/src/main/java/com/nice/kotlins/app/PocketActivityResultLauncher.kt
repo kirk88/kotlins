@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import com.nice.kotlins.helper.putExtras
 
 class PocketActivityResultLauncher<I, O>(
-    private val activityResultContract: ActivityResultContract<I, O>
+    private val activityResultContract: ActivityResultContract<I, O>,
 ) : ActivityResultLauncher<I>() {
 
     private val callbacks = mutableListOf<ActivityResultCallback<O>>()
@@ -71,7 +71,7 @@ class PocketActivityResultLauncher<I, O>(
     fun launch(
         input: I,
         options: ActivityOptionsCompat?,
-        callback: ActivityResultCallback<O>
+        callback: ActivityResultCallback<O>,
     ) {
         check(isRegistered) { "Not registered yet" }
         oneShotCallbacks.add(callback)
@@ -104,7 +104,7 @@ class PocketActivityResultLauncher<I, O>(
 
 inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
     context: Context,
-    vararg values: Pair<String, Any?>
+    vararg values: Pair<String, Any?>,
 ) = launch(
     Intent(context, T::class.java).putExtras(*values)
 )
@@ -112,7 +112,7 @@ inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
 inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
     context: Context,
     options: ActivityOptionsCompat?,
-    vararg values: Pair<String, Any?>
+    vararg values: Pair<String, Any?>,
 ) = launch(
     Intent(context, T::class.java).putExtras(*values), options
 )
@@ -120,7 +120,7 @@ inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
 inline fun <reified T, R> PocketActivityResultLauncher<Intent, R>.launch(
     context: Context,
     vararg values: Pair<String, Any?>,
-    callback: ActivityResultCallback<R>
+    callback: ActivityResultCallback<R>,
 ) = launch(
     Intent(context, T::class.java).putExtras(*values), callback
 )
@@ -129,7 +129,7 @@ inline fun <reified T, R> PocketActivityResultLauncher<Intent, R>.launch(
     context: Context,
     options: ActivityOptionsCompat?,
     vararg values: Pair<String, Any?>,
-    callback: ActivityResultCallback<R>
+    callback: ActivityResultCallback<R>,
 ) = launch(
     Intent(context, T::class.java).putExtras(*values), options, callback
 )

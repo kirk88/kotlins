@@ -22,13 +22,13 @@ inline fun ViewPager.addOnPageChangeListener(
     crossinline onPageScrolled: (
         position: Int,
         positionOffset: Float,
-        positionOffsetPixels: Int
+        positionOffsetPixels: Int,
     ) -> Unit = { _, _, _ -> },
     crossinline onPageSelected: (
-        position: Int
+        position: Int,
     ) -> Unit = { _ -> },
     crossinline onPageScrollStateChanged: (
-        position: Int
+        position: Int,
     ) -> Unit = { _ -> },
 ): ViewPager.OnPageChangeListener {
     val listener = object : ViewPager.OnPageChangeListener {

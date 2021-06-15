@@ -39,7 +39,7 @@ class Test(
     var dataList: List<String>? = null,
     var tip: String = "",
     var pp: String? = null,
-    var jj: String? = null
+    var jj: String? = null,
 ) {
 
     @IgnoreOnTable

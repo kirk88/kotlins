@@ -7,5 +7,5 @@ data class Divider(
     val leftSideLine: DividerSideLine?,
     val topSideLine: DividerSideLine?,
     val rightSideLine: DividerSideLine?,
-    val bottomSideLine: DividerSideLine?
+    val bottomSideLine: DividerSideLine?,
 )

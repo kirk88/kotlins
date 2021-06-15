@@ -15,7 +15,7 @@ fun <D : DialogInterface> Fragment.alertBuilder(
     title: CharSequence? = null,
     message: CharSequence? = null,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): AlertBuilder<D> = requireActivity().alertBuilder(factory, title, message, themeId, init)
 
 fun <D : DialogInterface> Context.alertBuilder(
@@ -23,7 +23,7 @@ fun <D : DialogInterface> Context.alertBuilder(
     title: CharSequence? = null,
     message: CharSequence? = null,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): AlertBuilder<D> {
     return factory(this, themeId).apply {
         if (title != null) {
@@ -41,7 +41,7 @@ fun <D : DialogInterface> Fragment.alertBuilder(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): AlertBuilder<D> = requireActivity().alertBuilder(factory, titleId, messageId, themeId, init)
 
 fun <D : DialogInterface> Context.alertBuilder(
@@ -49,7 +49,7 @@ fun <D : DialogInterface> Context.alertBuilder(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): AlertBuilder<D> {
     return factory(this, themeId).apply {
         if (titleId != 0) {
@@ -67,7 +67,7 @@ fun <D : DialogInterface> Fragment.alert(
     title: CharSequence? = null,
     message: CharSequence? = null,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): D = requireActivity().alert(factory, title, message, themeId, init)
 
 fun <D : DialogInterface> Context.alert(
@@ -75,7 +75,7 @@ fun <D : DialogInterface> Context.alert(
     title: CharSequence? = null,
     message: CharSequence? = null,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): D = alertBuilder(factory, title, message, themeId, init).show()
 
 fun <D : DialogInterface> Fragment.alert(
@@ -83,7 +83,7 @@ fun <D : DialogInterface> Fragment.alert(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): D = requireActivity().alert(factory, titleId, messageId, themeId, init)
 
 fun <D : DialogInterface> Context.alert(
@@ -91,5 +91,5 @@ fun <D : DialogInterface> Context.alert(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
     @StyleRes themeId: Int = 0,
-    init: (AlertBuilder<D>.() -> Unit)? = null
+    init: (AlertBuilder<D>.() -> Unit)? = null,
 ): D = alertBuilder(factory, titleId, messageId, themeId, init).show()

@@ -156,11 +156,11 @@ public class PhotoView extends AppCompatImageView {
         mAttacher.setZoomable(zoomable);
     }
 
-    public boolean isFlingable(){
+    public boolean isFlingable() {
         return mAttacher.isFlingable();
     }
 
-    public void setFlingable(boolean flingable){
+    public void setFlingable(boolean flingable) {
         mAttacher.setFlingable(flingable);
     }
 
@@ -172,7 +172,8 @@ public class PhotoView extends AppCompatImageView {
         mAttacher.getDisplayMatrix(matrix);
     }
 
-    @SuppressWarnings("UnusedReturnValue") public boolean setDisplayMatrix(Matrix finalRectangle) {
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean setDisplayMatrix(Matrix finalRectangle) {
         return mAttacher.setDisplayMatrix(finalRectangle);
     }
 
@@ -200,11 +201,11 @@ public class PhotoView extends AppCompatImageView {
         return mAttacher.getScale();
     }
 
-    public boolean isScaling(){
+    public boolean isScaling() {
         return mAttacher.isScaling();
     }
 
-    public boolean isDragging(){
+    public boolean isDragging() {
         return mAttacher.isDragging();
     }
 

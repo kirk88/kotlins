@@ -13,14 +13,14 @@ fun Fragment.selector(
     title: CharSequence,
     items: List<CharSequence>,
     @StyleRes themeId: Int = 0,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ): AlertDialog = requireActivity().selector(title, items, themeId, onClick)
 
 fun Context.selector(
     title: CharSequence,
     items: List<CharSequence>,
     @StyleRes themeId: Int = 0,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ): AlertDialog = with(AndroidAlertBuilder(this, themeId)) {
     this.title = title
     items(items, onClick)
@@ -31,14 +31,14 @@ fun Fragment.selector(
     @StringRes titleId: Int,
     items: List<CharSequence>,
     @StyleRes themeId: Int = 0,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ): AlertDialog = requireActivity().selector(titleId, items, themeId, onClick)
 
 fun Context.selector(
     @StringRes titleId: Int,
     items: List<CharSequence>,
     @StyleRes themeId: Int = 0,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ): AlertDialog = with(AndroidAlertBuilder(this, themeId)) {
     this.titleResource = titleId
     items(items, onClick)

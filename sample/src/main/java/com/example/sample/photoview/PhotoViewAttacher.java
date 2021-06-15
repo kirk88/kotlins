@@ -463,11 +463,11 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         mOnViewDragListener = listener;
     }
 
-    public boolean isScaling(){
+    public boolean isScaling() {
         return mScaleDragDetector.isScaling();
     }
 
-    public boolean isDragging(){
+    public boolean isDragging() {
         return mScaleDragDetector.isDragging();
     }
 

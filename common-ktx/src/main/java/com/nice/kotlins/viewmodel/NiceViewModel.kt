@@ -49,7 +49,7 @@ open class StatefulAndroidViewModel(application: Application, val state: SavedSt
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null,
 ): VM {
     return ViewModelProvider(
         viewModelStore, factoryProducer
@@ -59,7 +59,7 @@ inline fun <reified VM : ViewModel> Fragment.viewModel(
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.activityViewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null,
 ): VM {
     return ViewModelProvider(
         requireActivity().viewModelStore, factoryProducer
@@ -69,7 +69,7 @@ inline fun <reified VM : ViewModel> Fragment.activityViewModel(
 
 @MainThread
 inline fun <reified VM : ViewModel> ComponentActivity.viewModel(
-    factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null,
 ): VM {
     return ViewModelProvider(
         viewModelStore, factoryProducer

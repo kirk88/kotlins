@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import java.util.regex.Pattern
 
 class MainActivity : NiceActivity() {
 
@@ -150,5 +151,14 @@ class MainActivity : NiceActivity() {
 //        }
     }
 
+}
+
+fun main() {
+    val str = "https://www.baidu.com"
+
+    val pattern = Pattern.compile("http(s)?://www\\..+\\..+")
+    println(str.matches(pattern.toRegex()))
+
+    val pattern2 = Pattern.compile(".+")
 }
 

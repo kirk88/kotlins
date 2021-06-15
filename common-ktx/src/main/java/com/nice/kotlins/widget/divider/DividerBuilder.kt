@@ -24,7 +24,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         leftSideLine =
             ColorDividerSideLine(color, size, offset, paddingStart, paddingEnd, visible)
@@ -36,7 +36,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         leftSideLine =
             DrawableDividerSideLine(drawable, size, offset, paddingStart, paddingEnd, visible)
@@ -44,7 +44,7 @@ class DividerBuilder {
 
 
     fun left(
-        @Px offset: Int
+        @Px offset: Int,
     ): DividerBuilder = apply {
         leftSideLine =
             DividerSideLine(offset = offset)
@@ -60,7 +60,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         topSideLine =
             ColorDividerSideLine(color, size, offset, paddingStart, paddingEnd, visible)
@@ -72,7 +72,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         topSideLine =
             DrawableDividerSideLine(drawable, size, offset, paddingStart, paddingEnd, visible)
@@ -92,7 +92,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         rightSideLine =
             ColorDividerSideLine(color, size, offset, paddingStart, paddingEnd, visible)
@@ -104,7 +104,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         rightSideLine =
             DrawableDividerSideLine(drawable, size, offset, paddingStart, paddingEnd, visible)
@@ -124,7 +124,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         bottomSideLine =
             ColorDividerSideLine(color, size, offset, paddingStart, paddingEnd, visible)
@@ -136,7 +136,7 @@ class DividerBuilder {
         @Px offset: Int = size,
         @Px paddingStart: Int = NO_PADDING,
         @Px paddingEnd: Int = NO_PADDING,
-        visible: Boolean = true
+        visible: Boolean = true,
     ): DividerBuilder = apply {
         bottomSideLine =
             DrawableDividerSideLine(drawable, size, offset, paddingStart, paddingEnd, visible)

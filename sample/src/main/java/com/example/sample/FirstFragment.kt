@@ -15,7 +15,8 @@ import com.nice.kotlins.helper.add
 import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.showIme
 
-class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first), ScreenCompatAdapter {
+class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first),
+    ScreenCompatAdapter {
 
     override val screenCompatStrategy: ScreenCompatStrategy
         get() = ScreenCompatStrategy.NONE
@@ -34,9 +35,7 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
         viewModel.event = event("hello world")
 
         childFragmentManager.commit {
-
             add<ChildFragment>(R.id.frame_container)
-
         }
     }
 
