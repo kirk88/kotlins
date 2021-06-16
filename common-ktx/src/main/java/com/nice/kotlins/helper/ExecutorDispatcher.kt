@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * }
  */
 suspend fun <T> suspendBlocking(
-    dispatcher: ExecutorDispatcher = ExecutorDispatchers.UNCONFINED,
+    dispatcher: ExecutorDispatcher = ExecutorDispatchers.Unconfined,
     block: () -> T,
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
@@ -44,34 +44,40 @@ interface ExecutorDispatcher {
 }
 
 interface SimpleExecutorDispatcher : ExecutorDispatcher, Closeable {
-
     val executor: Executor
+
+    override fun dispatch(command: Runnable) {
+        executor.execute(command)
+    }
 
     override fun close() {
         (executor as? ExecutorService)?.shutdown()
     }
-
 }
 
-interface MainExecutorDispatcher : ExecutorDispatcher {
+interface HandlerExecutorDispatcher : SimpleExecutorDispatcher {
 
-    val immediate: MainExecutorDispatcher
+    val immediate: ExecutorDispatcher
 
 }
 
 object ExecutorDispatchers {
 
-    @JvmField
-    val DEFAULT: ExecutorDispatcher = DefaultExecutorDispatcher
+    val Default: ExecutorDispatcher = DefaultExecutorDispatcher
 
-    @JvmStatic
-    val Main: MainExecutorDispatcher = MainThreadExecutorDispatcher
+    val Main: HandlerExecutorDispatcher = MainThreadExecutorDispatcher
 
-    @JvmStatic
-    val UNCONFINED: ExecutorDispatcher = UnconfinedExecutorDispatcher
+    val Unconfined: ExecutorDispatcher = UnconfinedExecutorDispatcher
 
-    @JvmStatic
     val IO: ExecutorDispatcher = IOExecutorDispatcher
+
+}
+
+internal object DefaultExecutorDispatcher : SimpleExecutorDispatcher {
+
+    override val executor: Executor = Executors.newSingleThreadExecutor {
+        Thread(it, "ExecutorDispatchers.Default")
+    }
 
 }
 
@@ -79,63 +85,40 @@ internal object IOExecutorDispatcher : SimpleExecutorDispatcher {
 
     override val executor: Executor = Executors.newCachedThreadPool(WorkThreadFactory())
 
-    override fun dispatch(command: Runnable) {
-        executor.execute(command)
-    }
-
     class WorkThreadFactory : ThreadFactory {
 
         private val counter: AtomicInteger = AtomicInteger(1)
 
         override fun newThread(runnable: Runnable): Thread {
-            return Thread(runnable, "CoroutineExecutors.IO-${counter.getAndIncrement()}")
+            return Thread(runnable, "ExecutorDispatchers.IO-${counter.getAndIncrement()}")
         }
 
     }
 
 }
 
-internal object DefaultExecutorDispatcher : SimpleExecutorDispatcher {
+internal object MainThreadExecutorDispatcher : HandlerExecutorDispatcher {
 
-    override val executor: Executor = Executors.newSingleThreadExecutor {
-        Thread(it, "CoroutineExecutors.Default")
-    }
+    override val executor: Executor = HandlerExecutor()
 
-    override fun dispatch(command: Runnable) {
-        executor.execute(command)
-    }
-
-}
-
-internal object MainThreadExecutorDispatcher : MainExecutorDispatcher {
-
-    private val delegate: ExecutorDispatcher = HandlerDispatcher()
-
-    override val immediate: MainExecutorDispatcher = object : MainExecutorDispatcher {
-        override val immediate: MainExecutorDispatcher get() = this
-
+    override val immediate: ExecutorDispatcher = object : ExecutorDispatcher {
         override fun dispatch(command: Runnable) {
             if (isMainThread) {
                 command.run()
             } else {
-                delegate.dispatch(command)
+                executor.execute(command)
             }
         }
-
     }
 
-    override fun dispatch(command: Runnable) {
-        delegate.dispatch(command)
-    }
-
-    class HandlerDispatcher : ExecutorDispatcher {
+    class HandlerExecutor : Executor {
 
         private val lock = Any()
 
         @Volatile
         private var handler: Handler? = null
 
-        override fun dispatch(command: Runnable) {
+        override fun execute(command: Runnable) {
             if (handler == null) {
                 synchronized(lock) {
                     if (handler == null) {
@@ -161,7 +144,6 @@ internal object MainThreadExecutorDispatcher : MainExecutorDispatcher {
                 } catch (_: InstantiationException) {
                 } catch (_: NoSuchMethodException) {
                 } catch (_: InvocationTargetException) {
-                    return Handler(looper)
                 }
                 return Handler(looper)
             }

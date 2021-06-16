@@ -53,18 +53,22 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity dispatchViewModelEvent: " + event.message)
+        Log.e(TAG, "dispatchViewModelEvent: " + event.message)
         return super.dispatchViewModelEvent(event)
     }
 
     override fun onInterceptViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity onInterceptViewModelEvent: " + event.message)
+        Log.e(TAG, "onInterceptViewModelEvent: " + event.message)
         return super.onInterceptViewModelEvent(event)
     }
 
     override fun onViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "activity onViewModelEvent: " + event.message)
+        Log.e(TAG, "onViewModelEvent: " + event.message)
         return super.onViewModelEvent(event)
+    }
+
+    companion object {
+        private val TAG = SecondActivity::class.simpleName
     }
 
 }

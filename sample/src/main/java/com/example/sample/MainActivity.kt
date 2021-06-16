@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.annotation.SuppressLint
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
@@ -28,7 +29,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import java.util.regex.Pattern
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.X509TrustManager
 
 class MainActivity : NiceActivity() {
 
@@ -52,7 +58,7 @@ class MainActivity : NiceActivity() {
                 this,
                 "key" to "value"
             ) {
-                Log.e("TAGTAG", "" + it.component1() + " " + it.component2())
+                Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
         }
 
@@ -61,7 +67,7 @@ class MainActivity : NiceActivity() {
         }
         val liveEvent = MutableLiveEvent<String>()
         liveEvent.observe(this) {
-            Log.e("TAGTAG", "event: $it")
+            Log.e(TAG, "event: $it")
         }
 
         liveEvent += "event1"
@@ -71,12 +77,20 @@ class MainActivity : NiceActivity() {
             DB.use(true) {
                 var start = System.currentTimeMillis()
                 for (index in 0..10000) {
-                    val test = Test(index.toLong(), "jack$index", 20, index, listOf("A", "B", "C", "D"), "lalalalal", "")
+                    val test = Test(index.toLong(),
+                        "jack$index",
+                        20,
+                        index,
+                        listOf("A", "B", "C", "D"),
+                        "lalalalal",
+                        "")
 
-                    insert(TestTable.TABLE_NAME, SQLiteDatabase.CONFLICT_REPLACE, test.toColumnElements())
+                    insert(TestTable.TABLE_NAME,
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                        test.toColumnElements())
                 }
 
-                Log.e("TAGTAG", "insert: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 updateBuilder(TestTable.TABLE_NAME)
@@ -89,7 +103,7 @@ class MainActivity : NiceActivity() {
                     .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
                     .execute()
 
-                Log.e("TAGTAG", "update: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
@@ -97,9 +111,9 @@ class MainActivity : NiceActivity() {
                     .groupBy(TestTable.NAME, TestTable.JJ)
                     .parseList<Test>()
 
-                Log.e("TAGTAG", "query: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
-                Log.e("TAGTAG", "result: ${result.size}  " + result.toString())
+                Log.e(TAG, "result: ${result.size}  " + result.toString())
             }
         }
 
@@ -109,9 +123,9 @@ class MainActivity : NiceActivity() {
                 .mapResponse {
                     throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
                 }.build().asFlow().catch {
-                    Log.e("TAGTAG", "error: " + it)
+                    Log.e(TAG, "error: $it")
                 }.collect {
-                    Log.e("TAGTAG", "result1: " + it)
+                    Log.e(TAG, "result1: $it")
                 }
 
         }
@@ -126,33 +140,74 @@ class MainActivity : NiceActivity() {
                         }.execute()
 
 
-                Log.e("TAGTAG", "result2: " + result)
+                Log.e(TAG, "result2: $result")
             }
 
             add {
                 delay(3000)
-                Log.e("TAGTAG", "step2")
+                Log.e(TAG, "step2")
             }
 
             add {
-                Log.e("TAGTAG", "step3")
+                Log.e(TAG, "step3")
             }
         }.launchIn(lifecycleScope)
 
-//        lifecycleScope.launch {
-//            delay(2000)
-//            job.cancel()
-//        }
+        lifecycleScope.launch {
+            suspendBlocking {
+                Log.e(TAG, Thread.currentThread().name)
+            }
+
+            suspendBlocking(ExecutorDispatchers.Default) {
+                Log.e(TAG, Thread.currentThread().name)
+            }
+
+            suspendBlocking(ExecutorDispatchers.IO) {
+                val result = OkFaker.get<String>().url("https://www.biquge.com").client {
+                    val trustManager = TrustAllX509TrustManager()
+
+                    val sslContext = SSLContext.getInstance("TLS")
+                    sslContext.init(null, arrayOf(trustManager), null)
+                    val sslSocketFactory = sslContext.socketFactory
+
+                    OkHttpClient.Builder()
+                        .sslSocketFactory(sslSocketFactory, trustManager)
+                        .hostnameVerifier(TrustAllHostnameVerifier())
+                        .build()
+                }.execute()
+                Log.e(TAG, "${Thread.currentThread().name}:  $result")
+            }
+        }
+
     }
 
+    @SuppressLint("TrustAllX509TrustManager")
+    private class TrustAllX509TrustManager : X509TrustManager {
+
+        @Throws(CertificateException::class)
+        override fun checkServerTrusted(chain: Array<X509Certificate?>, authType: String) {
+        }
+
+        @Throws(CertificateException::class)
+        override fun checkClientTrusted(x509Certificates: Array<X509Certificate?>, s: String) {
+        }
+
+        override fun getAcceptedIssuers(): Array<X509Certificate> {
+            return emptyArray()
+        }
+
+    }
+
+    @SuppressLint("BadHostnameVerifier")
+    private class TrustAllHostnameVerifier : HostnameVerifier {
+        override fun verify(hostname: String, session: SSLSession): Boolean {
+            return true
+        }
+    }
+
+    companion object {
+        private val TAG = MainActivity::class.simpleName
+    }
 }
 
-fun main() {
-    val str = "https://www.baidu.com"
-
-    val pattern = Pattern.compile("http(s)?://www\\..+\\..+")
-    println(str.matches(pattern.toRegex()))
-
-    val pattern2 = Pattern.compile(".+")
-}
 

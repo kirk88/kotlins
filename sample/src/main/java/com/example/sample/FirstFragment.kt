@@ -40,18 +40,22 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
     }
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "fragment dispatchViewModelEvent: " + event.message)
+        Log.e(TAG, "dispatchViewModelEvent: " + event.message)
         return super.dispatchViewModelEvent(event)
     }
 
     override fun onInterceptViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "fragment onInterceptViewModelEvent: " + event.message)
+        Log.e(TAG, "onInterceptViewModelEvent: " + event.message)
         return super.onInterceptViewModelEvent(event)
     }
 
     override fun onViewModelEvent(event: Event): Boolean {
-        Log.e("TAGTAG", "fragment onViewModelEvent: " + event.message)
+        Log.e(TAG, "onViewModelEvent: " + event.message)
         return super.onViewModelEvent(event)
+    }
+
+    companion object {
+        private val TAG = FirstFragment::class.simpleName
     }
 
 }

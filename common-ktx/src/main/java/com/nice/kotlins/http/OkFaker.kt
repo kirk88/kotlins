@@ -470,7 +470,7 @@ class OkFaker<T> private constructor(
         fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
 
         @JvmStatic
-        fun <T> with(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
+        fun <T> builder(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
             Builder<T>(method, CONFIG).apply(block)
 
         @JvmStatic
@@ -578,6 +578,7 @@ fun requestPairsOf(
         } else {
             for ((key, value) in copyFrom.toJsonObject()) {
                 when {
+                    value.isJsonArray || value.isJsonObject -> put(key, value.toString())
                     value.isJsonPrimitive -> put(key, value.asString)
                     value.isJsonNull -> put(key, null)
                 }

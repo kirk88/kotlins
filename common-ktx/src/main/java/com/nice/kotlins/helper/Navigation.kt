@@ -32,6 +32,7 @@ class NavigationDestination(
     val className: String,
     val tag: String? = null,
     val label: CharSequence? = null,
+    val icon: Int? = null,
     val args: Bundle? = null,
 ) {
 
@@ -105,7 +106,7 @@ class NavigationController(
             return
         }
         check(destination.parent == null) {
-            "Destination already has a parent set. Call NavGraph.remove() to remove the previous parent."
+            "Destination already has a parent set. Call NavigationController.remove() to remove the previous parent."
         }
         existingDestination?.setParent(null)
         destination.setParent(this)
@@ -164,30 +165,32 @@ class NavigationController(
         return findDestination(startDestination)
     }
 
-    fun navigate(@IdRes id: Int) {
-        navigate(this[id])
+    fun navigate(@IdRes id: Int): Boolean {
+        val destination = findDestination(id) ?: return false
+        return navigate(destination)
     }
 
     fun navigate(
         @IdRes id: Int,
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
-    ) {
-        navigate(this[id], enter, exit)
+    ): Boolean {
+        val destination = findDestination(id) ?: return false
+        return navigate(destination, enter, exit)
     }
 
-    fun navigate(destination: NavigationDestination) {
-        navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit)
+    fun navigate(destination: NavigationDestination): Boolean {
+        return navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit)
     }
 
     fun navigate(
         destination: NavigationDestination,
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
-    ) {
+    ): Boolean {
         val parent = destination.parent
-        check(parent != null && parent == this) {
-            "Destination not has a parent set yet or it's parent not this NavigationController"
+        if (parent == null || parent != this) {
+            return false
         }
 
         setPrimaryNavigationDestination(destination)
@@ -202,6 +205,7 @@ class NavigationController(
         ) {
             destination.args
         }
+        return true
     }
 
     internal fun setPrimaryNavigationDestination(destination: NavigationDestination?) {
@@ -287,23 +291,9 @@ operator fun NavigationController.minusAssign(node: NavigationDestination) {
     removeDestination(node)
 }
 
-fun NavigationController.navigate(item: MenuItem): Boolean {
-    return try {
-        navigate(item.itemId)
-        true
-    } catch (_: Exception) {
-        false
-    }
-}
+fun NavigationController.navigate(item: MenuItem): Boolean = navigate(item.itemId)
 
-fun NavigationController.navigate(tab: TabLayout.Tab): Boolean {
-    return try {
-        navigate(tab.id)
-        true
-    } catch (_: Exception) {
-        false
-    }
-}
+fun NavigationController.navigate(tab: TabLayout.Tab): Boolean = navigate(tab.id)
 
 fun BottomNavigationView.setupWithController(
     controller: NavigationController,
