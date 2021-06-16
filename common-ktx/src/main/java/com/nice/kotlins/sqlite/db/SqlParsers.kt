@@ -121,28 +121,24 @@ private fun readColumnsMap(cursor: Cursor): Map<String, SqlColumnValue> {
 }
 
 private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, SqlColumnValue>> {
-    override fun iterator() = CursorMapIterator(cursor)
-}
+    override fun iterator() = object : Iterator<Map<String, SqlColumnValue>> {
+        override fun hasNext() = cursor.position < cursor.count - 1
 
-private class CursorSequence(val cursor: Cursor) : Sequence<Array<SqlColumnValue>> {
-    override fun iterator() = CursorIterator(cursor)
-}
-
-private class CursorIterator(val cursor: Cursor) : Iterator<Array<SqlColumnValue>> {
-    override fun hasNext() = cursor.position < cursor.count - 1
-
-    override fun next(): Array<SqlColumnValue> {
-        cursor.moveToNext()
-        return readColumnsArray(cursor)
+        override fun next(): Map<String, SqlColumnValue> {
+            cursor.moveToNext()
+            return readColumnsMap(cursor)
+        }
     }
 }
 
-private class CursorMapIterator(val cursor: Cursor) : Iterator<Map<String, SqlColumnValue>> {
-    override fun hasNext() = cursor.position < cursor.count - 1
+private class CursorSequence(val cursor: Cursor) : Sequence<Array<SqlColumnValue>> {
+    override fun iterator() = object : Iterator<Array<SqlColumnValue>> {
+        override fun hasNext() = cursor.position < cursor.count - 1
 
-    override fun next(): Map<String, SqlColumnValue> {
-        cursor.moveToNext()
-        return readColumnsMap(cursor)
+        override fun next(): Array<SqlColumnValue> {
+            cursor.moveToNext()
+            return readColumnsArray(cursor)
+        }
     }
 }
 
@@ -223,7 +219,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
     if (value is String && value.length == 1
         && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)
     ) {
-        return value[0]
+        return value.first()
     }
 
     if (value is ByteArray && (type == ByteArray::class.java)) {
