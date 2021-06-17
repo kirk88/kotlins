@@ -117,12 +117,6 @@ class SupportDatabaseQueryBuilder(
         parseList(parser)
     }
 
-    inline fun <reified T : Any> parseSingle(): T = parseSingle(classParser())
-
-    inline fun <reified T : Any> parseSingleOrNull(): T? = parseSingleOrNull(classParser())
-
-    inline fun <reified T : Any> parseList(): List<T> = parseList(classParser())
-
     fun <T> execute(cancellationSignal: CancellationSignal? = null, action: Cursor.() -> T): T {
         val cursor = if (cancellationSignal != null) {
             database.query(delegate.create(), cancellationSignal)
@@ -133,3 +127,12 @@ class SupportDatabaseQueryBuilder(
     }
 
 }
+
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingle(): T =
+    parseSingle(classParser())
+
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingleOrNull(): T? =
+    parseSingleOrNull(classParser())
+
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseList(): List<T> =
+    parseList(classParser())
