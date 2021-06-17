@@ -25,3 +25,7 @@ fun Drawable.setTintModeCompat(mode: PorterDuff.Mode): Drawable = wrappedCompat(
 }
 
 fun Drawable.clearColorFilterCompat() = DrawableCompat.clearColorFilter(this)
+
+fun Drawable.withIntrinsicBounds(): Drawable = apply {
+    setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+}
