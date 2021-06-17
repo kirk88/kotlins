@@ -15,7 +15,7 @@ buildscript {
             pluginAndroid      : '4.2.1',
             pluginKotlin       : "1.5.10",
 
-            kotlinMain         : "1.5.10",
+            kotlinMain         : "1.5.0",
             kotlinLifecycle    : "2.4.0-alpha01",
 
             coreKtx            : "1.6.0-beta02",
