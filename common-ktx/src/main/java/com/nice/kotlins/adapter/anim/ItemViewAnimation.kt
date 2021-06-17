@@ -4,8 +4,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 interface ItemViewAnimation {
 
-    fun start(holder: RecyclerView.ViewHolder)
+    fun setStartPosition(position: Int)
 
-    fun reset()
+    fun start(holder: RecyclerView.ViewHolder)
 
 }

@@ -59,19 +59,17 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     fun setItemClickable(itemClickable: Boolean) {
-        if (this.itemClickable == itemClickable) {
-            return
+        if (this.itemClickable != itemClickable) {
+            this.itemClickable = itemClickable
+            notifyDataSetChanged()
         }
-        this.itemClickable = itemClickable
-        notifyDataSetChanged()
     }
 
     fun setItemLongClickable(itemLongClickable: Boolean) {
-        if (this.itemLongClickable == itemLongClickable) {
-            return
+        if (this.itemLongClickable != itemLongClickable) {
+            this.itemLongClickable = itemLongClickable
+            notifyDataSetChanged()
         }
-        this.itemLongClickable = itemLongClickable
-        notifyDataSetChanged()
     }
 
     protected fun callOnItemClick(holder: VH) {

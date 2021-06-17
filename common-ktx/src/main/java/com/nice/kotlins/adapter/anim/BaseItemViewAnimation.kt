@@ -8,28 +8,28 @@ import androidx.recyclerview.widget.RecyclerView
 abstract class BaseItemViewAnimation(private val animationMode: ItemViewAnimationMode) :
     ItemViewAnimation {
 
-    private var lastAnimateIndex = -1
+    private var lastAnimatePosition = -1
 
     protected open fun getAnimatorSet(holder: RecyclerView.ViewHolder): AnimatorSet? {
         val animatorSet = when (animationMode) {
-            ItemViewAnimationMode.UPWARD -> if (lastAnimateIndex < holder.layoutPosition) {
+            ItemViewAnimationMode.UPWARD -> if (lastAnimatePosition < holder.layoutPosition) {
                 AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
             } else null
-            ItemViewAnimationMode.DOWNWARD -> if (lastAnimateIndex > holder.layoutPosition) {
+            ItemViewAnimationMode.DOWNWARD -> if (lastAnimatePosition > holder.layoutPosition) {
                 AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
             } else null
             ItemViewAnimationMode.NORMAL -> AnimatorSet().apply { playTogether(getAnimators(holder.itemView)) }
         }
-        lastAnimateIndex = holder.layoutPosition
+        lastAnimatePosition = holder.layoutPosition
         return animatorSet
+    }
+
+    override fun setStartPosition(position: Int) {
+        lastAnimatePosition = position
     }
 
     override fun start(holder: RecyclerView.ViewHolder) {
         getAnimatorSet(holder)?.start()
-    }
-
-    override fun reset() {
-        lastAnimateIndex = -1
     }
 
     protected abstract fun getAnimators(view: View): List<Animator>
