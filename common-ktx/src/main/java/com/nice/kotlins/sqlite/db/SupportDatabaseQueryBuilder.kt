@@ -97,8 +97,8 @@ class SupportDatabaseQueryBuilder(
         parseSingle(parser)
     }
 
-    fun <T : Any> parseOpt(parser: RowParser<T>): T? = execute {
-        parseOpt(parser)
+    fun <T : Any> parseSingleOrNull(parser: RowParser<T>): T? = execute {
+        parseSingleOrNull(parser)
     }
 
     fun <T : Any> parseList(parser: RowParser<T>): List<T> = execute {
@@ -109,8 +109,8 @@ class SupportDatabaseQueryBuilder(
         parseSingle(parser)
     }
 
-    fun <T : Any> parseOpt(parser: MapRowParser<T>): T? = execute {
-        parseOpt(parser)
+    fun <T : Any> parseSingleOrNull(parser: MapRowParser<T>): T? = execute {
+        parseSingleOrNull(parser)
     }
 
     fun <T : Any> parseList(parser: MapRowParser<T>): List<T> = execute {
@@ -118,7 +118,9 @@ class SupportDatabaseQueryBuilder(
     }
 
     inline fun <reified T : Any> parseSingle(): T = parseSingle(classParser())
-    inline fun <reified T : Any> parseOpt(): T? = parseOpt(classParser())
+
+    inline fun <reified T : Any> parseSingleOrNull(): T? = parseSingleOrNull(classParser())
+
     inline fun <reified T : Any> parseList(): List<T> = parseList(classParser())
 
     fun <T> execute(cancellationSignal: CancellationSignal? = null, action: Cursor.() -> T): T {

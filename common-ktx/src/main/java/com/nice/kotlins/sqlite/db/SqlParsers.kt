@@ -37,7 +37,7 @@ fun <T : Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
     return parser.parseRow(readColumnsArray(this))
 }
 
-fun <T : Any> Cursor.parseOpt(parser: RowParser<T>): T? = use {
+fun <T : Any> Cursor.parseSingleOrNull(parser: RowParser<T>): T? = use {
     if (count > 1)
         throw SQLiteException("parseSingle accepts only cursors with a single entry or empty cursors")
     if (count == 0)
@@ -63,7 +63,7 @@ fun <T : Any> Cursor.parseSingle(parser: MapRowParser<T>): T = use {
     return parser.parseRow(readColumnsMap(this))
 }
 
-fun <T : Any> Cursor.parseOpt(parser: MapRowParser<T>): T? = use {
+fun <T : Any> Cursor.parseSingleOrNull(parser: MapRowParser<T>): T? = use {
     if (count > 1)
         throw SQLiteException("parseSingle accepts only cursors with getCount() == 1 or empty cursors")
     if (count == 0)
