@@ -20,8 +20,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     private var itemChildClickListener: OnItemChildClickListener<T, VH>? = null
     private var itemChildLongClickListener: OnItemChildLongClickListener<T, VH>? = null
 
-    private var itemClickable: Boolean = false
-    private var itemLongClickable: Boolean = false
+    private var itemClickable: Boolean = true
+    private var itemLongClickable: Boolean = true
 
     private var itemViewAnimation: ItemViewAnimation? = null
     val itemAnimation: ItemViewAnimation? get() = itemViewAnimation
