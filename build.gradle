@@ -13,9 +13,9 @@ buildscript {
             pluginVersions     : "0.38.0",
 
             pluginAndroid      : '4.2.1',
-            pluginKotlin       : "1.5.0",
+            pluginKotlin       : "1.5.10",
 
-            kotlinMain         : "1.5.0",
+            kotlinMain         : "1.5.10",
             kotlinLifecycle    : "2.4.0-alpha01",
 
             coreKtx            : "1.6.0-beta02",
@@ -94,7 +94,7 @@ buildscript {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "https://maven.google.com" }
+        maven { url "https://dl.google.com/dl/android/maven2" }
     }
 
     dependencies {
@@ -110,6 +110,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://maven.google.com" }
+        maven { url "https://dl.google.com/dl/android/maven2" }
     }
 }
