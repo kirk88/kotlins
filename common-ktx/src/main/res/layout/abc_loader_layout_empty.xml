@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:gravity="center"
-        android:minWidth="220dp"
+        android:minWidth="160dp"
         tools:background="@drawable/loading_layout_button"
         tools:textAppearance="@style/TextAppearance.LoaderLayout.ButtonText"
         tools:textColor="#ffffff" />
