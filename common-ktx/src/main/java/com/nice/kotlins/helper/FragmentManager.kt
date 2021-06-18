@@ -2,7 +2,6 @@
 
 package com.nice.kotlins.helper
 
-import android.content.Context
 import android.os.Bundle
 import androidx.annotation.AnimRes
 import androidx.annotation.AnimatorRes
@@ -33,13 +32,6 @@ fun FragmentManager.loadFragment(
     return createFragment(classLoader, className, args())
 }
 
-fun FragmentManager.loadFragment(
-    context: Context,
-    className: String,
-    tag: String? = null,
-    args: () -> Bundle? = { null },
-): Fragment = loadFragment(context.classLoader, className, tag, args)
-
 fun <T : Fragment> FragmentManager.loadFragment(
     fragmentClass: Class<T>,
     tag: String? = null,
@@ -52,6 +44,11 @@ fun <T : Fragment> FragmentManager.loadFragment(
     @Suppress("UNCHECKED_CAST")
     return loadFragment(classLoader, fragmentClass.name, tag, args) as T
 }
+
+inline fun <reified T : Fragment> FragmentManager.loadFragment(
+    tag: String? = null,
+    noinline args: () -> Bundle? = { null },
+): T = loadFragment(T::class.java, tag, args)
 
 fun FragmentManager.show(
     @IdRes containerViewId: Int,
@@ -99,26 +96,6 @@ fun FragmentManager.show(
     show(containerViewId, fragment, tag, enter, exit, allowingStateLoss)
 }
 
-fun FragmentManager.show(
-    @IdRes containerViewId: Int,
-    context: Context,
-    className: String,
-    tag: String? = null,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-    args: () -> Bundle? = { null },
-): Fragment = show(
-    containerViewId,
-    context.classLoader,
-    className,
-    tag,
-    enter,
-    exit,
-    allowingStateLoss,
-    args
-)
-
 fun <T : Fragment> FragmentManager.show(
     @IdRes containerViewId: Int,
     fragmentClass: Class<T>,
@@ -140,39 +117,6 @@ inline fun <reified T : Fragment> FragmentManager.show(
     noinline args: () -> Bundle? = { null },
 ): T = show(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)
 
-fun FragmentManager.hide(
-    fragment: Fragment,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-) {
-    if (!fragments.contains(fragment)) {
-        return
-    }
-    beginTransaction().run {
-        setCustomAnimations(enter, exit)
-
-        hide(fragment)
-
-        if (allowingStateLoss) {
-            commitAllowingStateLoss()
-        } else {
-            commit()
-        }
-    }
-}
-
-fun <T : Fragment> FragmentManager.hide(
-    tag: String,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-) {
-    val fragment = findFragmentByTag(tag) ?: return
-    hide(fragment, enter, exit, allowingStateLoss)
-}
-
-
 fun FragmentManager.add(
     @IdRes containerViewId: Int,
     classLoader: ClassLoader,
@@ -182,68 +126,12 @@ fun FragmentManager.add(
     @AnimatorRes @AnimRes exit: Int = 0,
     allowingStateLoss: Boolean = false,
     args: Bundle? = null,
-): Fragment = createFragment(classLoader, className, args).also {
+): Fragment = createFragment(classLoader, className, args).also { fragment ->
     commit(allowingStateLoss) {
         setCustomAnimations(enter, exit)
-        add(containerViewId, it, tag)
+        add(containerViewId, fragment, tag)
     }
 }
-
-fun FragmentManager.replace(
-    @IdRes containerViewId: Int,
-    classLoader: ClassLoader,
-    className: String,
-    tag: String? = null,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-    args: Bundle? = null,
-): Fragment = createFragment(classLoader, className, args).also {
-    commit(allowingStateLoss) {
-        setCustomAnimations(enter, exit)
-        replace(containerViewId, it, tag)
-    }
-}
-
-fun FragmentManager.add(
-    @IdRes containerViewId: Int,
-    context: Context,
-    className: String,
-    tag: String? = null,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-    args: Bundle? = null,
-): Fragment = add(
-    containerViewId,
-    context.classLoader,
-    className,
-    tag,
-    enter,
-    exit,
-    allowingStateLoss,
-    args
-)
-
-fun FragmentManager.replace(
-    @IdRes containerViewId: Int,
-    context: Context,
-    className: String,
-    tag: String? = null,
-    @AnimatorRes @AnimRes enter: Int = 0,
-    @AnimatorRes @AnimRes exit: Int = 0,
-    allowingStateLoss: Boolean = false,
-    args: Bundle? = null,
-): Fragment = replace(
-    containerViewId,
-    context.classLoader,
-    className,
-    tag,
-    enter,
-    exit,
-    allowingStateLoss,
-    args
-)
 
 fun <T : Fragment> FragmentManager.add(
     @IdRes containerViewId: Int,
@@ -271,6 +159,31 @@ fun <T : Fragment> FragmentManager.add(
     ) as T
 }
 
+inline fun <reified T : Fragment> FragmentManager.add(
+    @IdRes containerViewId: Int,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: Bundle? = null,
+): T = add(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)
+
+fun FragmentManager.replace(
+    @IdRes containerViewId: Int,
+    classLoader: ClassLoader,
+    className: String,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: Bundle? = null,
+): Fragment = createFragment(classLoader, className, args).also { fragment ->
+    commit(allowingStateLoss) {
+        setCustomAnimations(enter, exit)
+        replace(containerViewId, fragment, tag)
+    }
+}
+
 fun <T : Fragment> FragmentManager.replace(
     @IdRes containerViewId: Int,
     fragmentClass: Class<T>,
@@ -296,3 +209,12 @@ fun <T : Fragment> FragmentManager.replace(
         args
     ) as T
 }
+
+inline fun <reified T : Fragment> FragmentManager.replace(
+    @IdRes containerViewId: Int,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: Bundle? = null,
+): T = replace(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)

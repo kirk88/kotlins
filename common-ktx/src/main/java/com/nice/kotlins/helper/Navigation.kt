@@ -2,7 +2,6 @@
 
 package com.nice.kotlins.helper
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -61,7 +60,9 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
     var containerView: View? = view
     while (containerView != null) {
         if (containerView is FragmentContainerView) {
-            return NavigationController(fragmentManager, containerView.context, containerView.id)
+            return NavigationController(fragmentManager,
+                containerView.context.classLoader,
+                containerView.id)
         }
         containerView = view.parent as? View
     }
@@ -82,11 +83,55 @@ private fun getNavigationController(
     }
 }
 
-class NavigationController(
+fun interface FragmentNavigator {
+
+    fun navigate(
+        fragmentManager: FragmentManager,
+        @IdRes containerViewId: Int,
+        classLoader: ClassLoader,
+        className: String,
+        tag: String?,
+        @AnimatorRes @AnimRes enter: Int,
+        @AnimatorRes @AnimRes exit: Int,
+        allowingStateLoss: Boolean,
+        args: Bundle?,
+    )
+
+}
+
+internal object DefaultFragmentNavigator : FragmentNavigator {
+
+    override fun navigate(
+        fragmentManager: FragmentManager,
+        containerViewId: Int,
+        classLoader: ClassLoader,
+        className: String,
+        tag: String?,
+        enter: Int,
+        exit: Int,
+        allowingStateLoss: Boolean,
+        args: Bundle?,
+    ) {
+        fragmentManager.show(
+            containerViewId,
+            classLoader,
+            className,
+            tag,
+            enter,
+            exit,
+            allowingStateLoss
+        ) { args }
+    }
+
+}
+
+class NavigationController internal constructor(
     private val fragmentManager: FragmentManager,
-    private val context: Context,
+    private val classLoader: ClassLoader,
     @IdRes private val containerViewId: Int,
 ) : Iterable<NavigationDestination> {
+
+    private var navigator: FragmentNavigator = DefaultFragmentNavigator
 
     private val listeners = mutableListOf<OnDestinationChangedListener>()
 
@@ -99,6 +144,10 @@ class NavigationController(
 
     val size: Int
         get() = destinations.size()
+
+    fun setFragmentNavigator(navigator: FragmentNavigator) {
+        this.navigator = navigator
+    }
 
     fun addDestination(destination: NavigationDestination) {
         val existingDestination = destinations.get(destination.id)
@@ -165,28 +214,36 @@ class NavigationController(
         return findDestination(startDestination)
     }
 
-    fun navigate(@IdRes id: Int): Boolean {
+    fun navigate(
+        @IdRes id: Int,
+        allowingStateLoss: Boolean = false,
+    ): Boolean {
         val destination = findDestination(id) ?: return false
-        return navigate(destination)
+        return navigate(destination, allowingStateLoss)
     }
 
     fun navigate(
         @IdRes id: Int,
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
+        allowingStateLoss: Boolean = false,
     ): Boolean {
         val destination = findDestination(id) ?: return false
-        return navigate(destination, enter, exit)
+        return navigate(destination, enter, exit, allowingStateLoss)
     }
 
-    fun navigate(destination: NavigationDestination): Boolean {
-        return navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit)
+    fun navigate(
+        destination: NavigationDestination,
+        allowingStateLoss: Boolean = false,
+    ): Boolean {
+        return navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit, allowingStateLoss)
     }
 
     fun navigate(
         destination: NavigationDestination,
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
+        allowingStateLoss: Boolean = false,
     ): Boolean {
         val parent = destination.parent
         if (parent == null || parent != this) {
@@ -195,16 +252,17 @@ class NavigationController(
 
         setPrimaryNavigationDestination(destination)
 
-        fragmentManager.show(
+        navigator.navigate(
+            fragmentManager,
             containerViewId,
-            context,
+            classLoader,
             destination.className,
             destination.tag,
             enter,
-            exit
-        ) {
+            exit,
+            allowingStateLoss,
             destination.args
-        }
+        )
         return true
     }
 
@@ -291,9 +349,15 @@ operator fun NavigationController.minusAssign(node: NavigationDestination) {
     removeDestination(node)
 }
 
-fun NavigationController.navigate(item: MenuItem): Boolean = navigate(item.itemId)
+fun NavigationController.navigate(
+    item: MenuItem,
+    allowingStateLoss: Boolean = false,
+): Boolean = navigate(item.itemId, allowingStateLoss)
 
-fun NavigationController.navigate(tab: TabLayout.Tab): Boolean = navigate(tab.id)
+fun NavigationController.navigate(
+    tab: TabLayout.Tab,
+    allowingStateLoss: Boolean = false,
+): Boolean = navigate(tab.id, allowingStateLoss)
 
 fun BottomNavigationView.setupWithController(
     controller: NavigationController,
