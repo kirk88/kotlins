@@ -4,6 +4,7 @@ package com.nice.kotlins.http
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.google.gson.reflect.TypeToken
 import com.nice.kotlins.helper.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -475,27 +476,27 @@ class OkFaker<T> private constructor(
 
         @JvmStatic
         inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.GET, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
         @JvmStatic
         inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.POST, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
         @JvmStatic
         inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.DELETE, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
         @JvmStatic
         inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.PUT, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
         @JvmStatic
         inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.HEAD, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
         @JvmStatic
         inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH, CONFIG).mapResponse(T::class.java).apply(block)
+            Builder<T>(OkRequestMethod.PATCH, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
 
     }
 

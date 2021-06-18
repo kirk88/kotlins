@@ -85,22 +85,20 @@ object Status {
 
     const val SHOW_PROGRESS = STATUS_BASE + 1
     const val DISMISS_PROGRESS = STATUS_BASE + 2
-    const val REFRESH_SUCCESS = STATUS_BASE + 3
-    const val LOADMORE_SUCCESS = STATUS_BASE + 4
-    const val LOADMORE_SUCCESS_NO_MORE = STATUS_BASE + 5
-    const val REFRESH_FAILURE = STATUS_BASE + 6
-    const val LOADMORE_FAILURE = STATUS_BASE + 7
+    const val REFRESH_COMPLETE = STATUS_BASE + 3
+    const val LOADMORE_COMPLETE = STATUS_BASE + 4
+    const val LOADMORE_COMPLETE_NO_MORE = STATUS_BASE + 5
 
-    const val SHOW_LOADING = STATUS_BASE + 8
-    const val SHOW_EMPTY = STATUS_BASE + 9
-    const val SHOW_ERROR = STATUS_BASE + 10
-    const val SHOW_CONTENT = STATUS_BASE + 11
+    const val SHOW_LOADING = STATUS_BASE + 6
+    const val SHOW_EMPTY = STATUS_BASE + 7
+    const val SHOW_ERROR = STATUS_BASE + 8
+    const val SHOW_CONTENT = STATUS_BASE + 9
 
-    const val ACTIVITY_FINISH = STATUS_BASE + 12
-    const val ACTIVITY_START = STATUS_BASE + 13
-    const val ACTIVITY_RESULT = STATUS_BASE + 14
+    const val ACTIVITY_FINISH = STATUS_BASE + 10
+    const val ACTIVITY_START = STATUS_BASE + 11
+    const val ACTIVITY_RESULT = STATUS_BASE + 12
 
-    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value < STATUS_BASE + 15
+    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value <= STATUS_BASE + 12
 
 }
 
@@ -150,14 +148,10 @@ fun progressShow(message: CharSequence? = null): Event = Event(Status.SHOW_PROGR
 
 fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
-fun refreshSuccess(): Event = Event(Status.REFRESH_SUCCESS)
+fun refreshComplete(): Event = Event(Status.REFRESH_COMPLETE)
 
-fun refreshFailure(): Event = Event(Status.REFRESH_FAILURE)
-
-fun loadMoreSuccess(hasMore: Boolean = true): Event =
-    Event(hasMore.opt(Status.LOADMORE_SUCCESS, Status.LOADMORE_SUCCESS_NO_MORE))
-
-fun loadMoreFailure(): Event = Event(Status.LOADMORE_FAILURE)
+fun loadMoreComplete(hasMore: Boolean = true): Event =
+    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
 fun loadingShow(message: CharSequence? = null): Event = Event(Status.SHOW_LOADING, message)
 
