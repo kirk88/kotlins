@@ -5,9 +5,9 @@ import android.graphics.Canvas
 import android.graphics.Rect
 
 data class PdfPage(
-    val index: Int,
-    val bounds: Rect,
-    val bitmap: Bitmap,
+        val index: Int,
+        val bounds: Rect,
+        val bitmap: Bitmap
 ) {
 
     val isRecycled: Boolean

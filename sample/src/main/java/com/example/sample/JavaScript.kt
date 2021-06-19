@@ -11,11 +11,11 @@ fun <T> Any.toJava(classOfT: Class<T>): T = Context.jsToJava(this, classOfT) as 
 inline fun <reified T> Any.toJava(): T = toJava(T::class.java)
 
 inline fun <reified T> Context.evaluateString(
-    scope: Scriptable,
-    source: String,
-    sourceName: String,
-    lineno: Int = 0,
-    securityDomain: Any? = null,
+        scope: Scriptable,
+        source: String,
+        sourceName: String,
+        lineno: Int = 0,
+        securityDomain: Any? = null
 ): T = evaluateString(scope, source, sourceName, lineno, securityDomain).toJava()
 
 inline fun <reified T> Context.evaluateString(scope: Scriptable, source: String) {}

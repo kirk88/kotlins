@@ -23,19 +23,19 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         val navController = findNavigationController(R.id.frame_container)
         navController += NavigationDestination(
-            R.id.fragment_first,
-            FirstFragment::class.java.name,
-            label = "First"
+                R.id.fragment_first,
+                FirstFragment::class.java.name,
+                label = "First"
         )
         navController += NavigationDestination(
-            R.id.fragment_second,
-            SecondFragment::class.java.name,
-            label = "Second"
+                R.id.fragment_second,
+                SecondFragment::class.java.name,
+                label = "Second"
         )
         navController += NavigationDestination(
-            R.id.fragment_third,
-            ThirdFragment::class.java.name,
-            label = "Third"
+                R.id.fragment_third,
+                ThirdFragment::class.java.name,
+                label = "Third"
         )
 
         navController.setStartDestination(R.id.fragment_first)

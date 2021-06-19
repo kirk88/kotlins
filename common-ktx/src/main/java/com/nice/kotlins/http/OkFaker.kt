@@ -23,7 +23,7 @@ class OkFaker<T> private constructor(
     private val onSuccessActions: List<Action<T>>?,
     private val onErrorActions: List<Action<Throwable>>?,
     private val onCompletionActions: List<SimpleAction>?,
-    private val onCancelActions: List<SimpleAction>?,
+    private val onCancelActions: List<SimpleAction>?
 ) {
 
     val isCanceled: Boolean
@@ -71,7 +71,7 @@ class OkFaker<T> private constructor(
 
     private class OkCallbackWrapper<T>(
         private val transformer: OkTransformer<T>,
-        private val callback: OkCallback<T>,
+        private val callback: OkCallback<T>
     ) : OkCallback<Response> {
         override fun onStart() {
             OkCallbacks.onStart(callback)
@@ -104,11 +104,13 @@ class OkFaker<T> private constructor(
         }
     }
 
-    class Builder<T> @JvmOverloads constructor(
-        method: OkRequestMethod,
-        private val config: OkConfig? = null,
-    ) {
-        private val builder = OkRequest.Builder(method)
+    class Builder<T> {
+
+        private val config: OkConfig?
+
+        private val builder: OkRequest.Builder
+
+        private val transformer = OkTransformer<T>()
 
         private var onStartApplied = false
         private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -125,39 +127,24 @@ class OkFaker<T> private constructor(
         private var onCancelApplied = false
         private val onCancelActions: MutableList<SimpleAction> by lazy { mutableListOf() }
 
-        private val transformer = OkTransformer<T>()
+        @PublishedApi
+        internal constructor(method: OkRequestMethod) {
+            builder = OkRequest.Builder(method)
+            this.config = null
+        }
 
-        init {
-            val client = config?.client
-            if (client != null) {
-                client(client)
-            }
+        @PublishedApi
+        internal constructor(method: OkRequestMethod, config: OkConfig) {
+            builder = OkRequest.Builder(method)
+            this.config = config
 
-            val cacheControl = config?.cacheControl
-            if (cacheControl != null) {
-                cacheControl(cacheControl)
-            }
-
-            val username = config?.username
-            if (!username.isNullOrEmpty()) {
-                username(username)
-                password(config?.password.orEmpty())
-            }
-
-            val headers = config?.headers
-            if (headers != null) {
-                headers(headers)
-            }
-
-            val queryParameters = config?.queryParameters
-            if (queryParameters != null) {
-                queryParameters(queryParameters)
-            }
-
-            val formParameters = config?.formParameters
-            if (formParameters != null) {
-                formParameters(formParameters)
-            }
+            config.client?.let { client(it) }
+            config.cacheControl?.let { cacheControl(it) }
+            config.username?.let { username(it) }
+            config.password?.let { password(it) }
+            config.headers?.let { headers(it) }
+            config.queryParameters?.let { queryParameters(it) }
+            config.formParameters?.let { formParameters(it) }
         }
 
         fun client(client: OkHttpClient) = apply {
@@ -202,7 +189,7 @@ class OkFaker<T> private constructor(
 
         fun headers(headers: Map<String, Any?>) = apply {
             headers.forEach {
-                builder.header(it.key, it.value.toString())
+                builder.header(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -213,7 +200,7 @@ class OkFaker<T> private constructor(
 
         fun addHeaders(headers: Map<String, Any?>) = apply {
             headers.forEach {
-                builder.addHeader(it.key, it.value.toString())
+                builder.addHeader(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -228,7 +215,7 @@ class OkFaker<T> private constructor(
 
         fun queryParameters(queryParameters: Map<String, Any?>) = apply {
             queryParameters.forEach {
-                builder.setQueryParameter(it.key, it.value.toString())
+                builder.setQueryParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -240,7 +227,7 @@ class OkFaker<T> private constructor(
 
         fun addQueryParameters(queryParameters: Map<String, Any?>) = apply {
             queryParameters.forEach {
-                builder.addQueryParameter(it.key, it.value.toString())
+                builder.addQueryParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -252,7 +239,7 @@ class OkFaker<T> private constructor(
 
         fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
-                builder.setEncodedQueryParameter(it.key, it.value.toString())
+                builder.setEncodedQueryParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -264,7 +251,7 @@ class OkFaker<T> private constructor(
 
         fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
-                builder.addEncodedQueryParameter(it.key, it.value.toString())
+                builder.addEncodedQueryParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -284,7 +271,7 @@ class OkFaker<T> private constructor(
 
         fun formParameters(formParameters: Map<String, Any?>) = apply {
             formParameters.forEach {
-                builder.addFormParameter(it.key, it.value.toString())
+                builder.addFormParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -296,7 +283,7 @@ class OkFaker<T> private constructor(
 
         fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = apply {
             encodedFormParameters.forEach {
-                builder.addEncodedFormParameter(it.key, it.value.toString())
+                builder.addEncodedFormParameter(it.key, it.value.toStringOrEmpty())
             }
         }
 
@@ -320,7 +307,7 @@ class OkFaker<T> private constructor(
                             value.contentType,
                             value.file
                         )
-                        else -> builder.addFormDataPart(it.key, value.toString())
+                        else -> builder.addFormDataPart(it.key, value.toStringOrEmpty())
                     }
                 }
             }
@@ -464,39 +451,63 @@ class OkFaker<T> private constructor(
 
     companion object {
 
-        @PublishedApi
-        internal val CONFIG = OkConfig()
+        private var CONFIG: OkConfig = OkConfig()
+
+        val globalConfig: OkConfig get() = CONFIG
 
         @JvmStatic
-        fun configSetter(): OkConfig.Setter = CONFIG.newSetter()
+        fun setGlobalConfig(config: OkConfig) {
+            CONFIG = config
+        }
 
         @JvmStatic
-        fun <T> builder(method: OkRequestMethod, block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(method, CONFIG).apply(block)
+        fun <T> builder(
+            method: OkRequestMethod,
+            config: OkConfig,
+            block: Builder<T>.() -> Unit = {}
+        ): Builder<T> = Builder<T>(method, config).apply(block)
+
+        @JvmStatic
+        fun <T> builder(
+            method: OkRequestMethod,
+            block: Builder<T>.() -> Unit = {}
+        ): Builder<T> = Builder<T>(method).apply(block)
 
         @JvmStatic
         inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.GET, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
         @JvmStatic
         inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.POST, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
         @JvmStatic
         inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.DELETE, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
         @JvmStatic
         inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.PUT, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
         @JvmStatic
         inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.HEAD, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
         @JvmStatic
         inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH, CONFIG).mapResponse(object : TypeToken<T>(){}.type).apply(block)
+            Builder<T>(OkRequestMethod.PATCH, globalConfig)
+                .mapResponse(object : TypeToken<T>() {}.type)
+                .apply(block)
 
     }
 
@@ -510,11 +521,11 @@ fun interface SimpleAction {
     fun onAction()
 }
 
-class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
-class FileFormDataPart(val file: File, val contentType: MediaType? = null)
+data class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
+data class FileFormDataPart(val file: File, val contentType: MediaType? = null)
 
 class RequestPairs<K, V>(
-    pairs: Map<K, V> = mutableMapOf(),
+    pairs: Map<K, V> = mutableMapOf()
 ) : Iterable<Map.Entry<K, V>> {
 
     private val pairs: MutableMap<K, V> = pairs.toMutableMap()
@@ -560,7 +571,7 @@ inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -
 
 fun requestPairsOf(
     vararg pairs: Pair<String, Any?>,
-    operation: (RequestPairs<String, Any?>.() -> Unit)? = null,
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
 ): RequestPairs<String, Any?> {
     return RequestPairs(pairs.toMap()).also {
         operation?.invoke(it)
@@ -569,7 +580,7 @@ fun requestPairsOf(
 
 fun requestPairsOf(
     copyFrom: Any,
-    operation: (RequestPairs<String, Any?>.() -> Unit)? = null,
+    operation: (RequestPairs<String, Any?>.() -> Unit)? = null
 ): RequestPairs<String, Any?> {
     return RequestPairs<String, Any?>().apply {
         if (copyFrom is RequestPairs<*, *>) {
@@ -594,7 +605,7 @@ fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
 
 fun <T : Any> OkFaker<T>.asLiveData(
     context: CoroutineContext = EmptyCoroutineContext,
-    timeoutInMillis: Long = 5000L,
+    timeoutInMillis: Long = 5000L
 ): LiveData<T> = liveData(context, timeoutInMillis) {
     emit(suspendBlocking(ExecutorDispatchers.IO) { execute() })
 }

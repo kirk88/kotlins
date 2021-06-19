@@ -14,7 +14,7 @@ import kotlinx.coroutines.*
 import java.io.File
 
 class PdfPageView(context: Context, attrs: AttributeSet?) : PhotoView(context, attrs),
-    CoroutineScope by MainScope() {
+        CoroutineScope by MainScope() {
 
     val factory = DefaultPdfPageFactory(context)
 

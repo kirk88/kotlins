@@ -79,10 +79,10 @@ interface LoaderView {
     fun detachTo(adapter: RecyclerView.Adapter<*>): LoaderView
 
     @IntDef(
-        TYPE_CONTENT_VIEW,
-        TYPE_EMPTY_VIEW,
-        TYPE_LOADING_VIEW,
-        TYPE_ERROR_VIEW
+            TYPE_CONTENT_VIEW,
+            TYPE_EMPTY_VIEW,
+            TYPE_LOADING_VIEW,
+            TYPE_ERROR_VIEW
     )
     annotation class ViewType
 

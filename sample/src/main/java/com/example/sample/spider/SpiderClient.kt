@@ -36,31 +36,31 @@ class SpiderClient(context: Context) : Closeable {
     private class SpiderWebViewClient : WebViewClient(), CoroutineScope by MainScope() {
 
         override fun shouldOverrideUrlLoading(
-            view: WebView,
-            request: WebResourceRequest,
+                view: WebView,
+                request: WebResourceRequest
         ): Boolean {
             return true
         }
 
         override fun shouldInterceptRequest(
-            view: WebView,
-            request: WebResourceRequest,
+                view: WebView,
+                request: WebResourceRequest
         ): WebResourceResponse? {
             return super.shouldInterceptRequest(view, request)
         }
 
         override fun onReceivedError(
-            view: WebView,
-            request: WebResourceRequest,
-            error: WebResourceError,
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
         ) {
             super.onReceivedError(view, request, error)
         }
 
         override fun onReceivedSslError(
-            view: WebView,
-            handler: SslErrorHandler,
-            error: SslError,
+                view: WebView,
+                handler: SslErrorHandler,
+                error: SslError
         ) {
             handler.proceed()
         }
@@ -80,7 +80,7 @@ class SpiderClient(context: Context) : Closeable {
 
         companion object {
             private const val JS_OUTER_HTML =
-                "javascript:window.htmlGetter.receiveSource('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');"
+                    "javascript:window.htmlGetter.receiveSource('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');"
         }
 
     }

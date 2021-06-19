@@ -18,10 +18,10 @@ import com.nice.kotlins.widget.RefreshView
 import com.nice.kotlins.widget.TipView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
-    NiceFragment(contentLayoutId),
-    EventLifecycleObserver,
-    ViewModelEventDispatcher,
-    ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
+        NiceFragment(contentLayoutId),
+        EventLifecycleObserver,
+        ViewModelEventDispatcher,
+        ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val loaderView: LoaderView? = null
 

@@ -12,8 +12,8 @@ import androidx.annotation.StyleRes
 import com.nice.kotlins.helper.Internals.NO_GETTER
 
 internal class AndroidDialogBuilder(
-    override val context: Context,
-    @StyleRes themeResId: Int = 0,
+        override val context: Context,
+        @StyleRes themeResId: Int = 0
 ) : DialogBuilder<Dialog> {
 
     private val dialog = Dialog(context, themeResId)

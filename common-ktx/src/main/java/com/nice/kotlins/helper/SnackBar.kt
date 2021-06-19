@@ -9,22 +9,22 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 
 fun View.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this, message, duration)
+        Snackbar.make(this, message, duration)
 
 fun Fragment.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.requireView(), message, duration)
+        Snackbar.make(this.requireView(), message, duration)
 
 fun Activity.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.window.decorView, message, duration)
+        Snackbar.make(this.window.decorView, message, duration)
 
 fun View.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this, resId, duration)
+        Snackbar.make(this, resId, duration)
 
 fun Fragment.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.requireView(), resId, duration)
+        Snackbar.make(this.requireView(), resId, duration)
 
 fun Activity.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    Snackbar.make(this.window.decorView, resId, duration)
+        Snackbar.make(this.window.decorView, resId, duration)
 
 
 fun View.showSnackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT) {

@@ -19,27 +19,22 @@ import com.example.sample.page.PdfPageView;
 public class SimulationPageAnim extends HorizonPageAnim {
 
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-    private int mCornerX = 1; // 拖拽点对应的页脚
-    private int mCornerY = 1;
     private final Path mPath0 = new Path();
     private final Path mPath1 = new Path();
-
     private final PointF mBezierStart1 = new PointF(); // 贝塞尔曲线起始点
     private final PointF mBezierControl1 = new PointF(); // 贝塞尔曲线控制点
     private final PointF mBezierVertex1 = new PointF(); // 贝塞尔曲线顶点
-    private PointF mBezierEnd1 = new PointF(); // 贝塞尔曲线结束点
-
     private final PointF mBezierStart2 = new PointF(); // 另一条贝塞尔曲线
     private final PointF mBezierControl2 = new PointF();
     private final PointF mBezierVertex2 = new PointF();
+    private final float mMaxLength;
+    private int mCornerX = 1; // 拖拽点对应的页脚
+    private int mCornerY = 1;
+    private PointF mBezierEnd1 = new PointF(); // 贝塞尔曲线结束点
     private PointF mBezierEnd2 = new PointF();
-
     private float mDegrees;
     private float mTouchToCornerDis;
-
     private boolean mIsRTandLB; // 是否属于右上左下
-    private final float mMaxLength;
     private GradientDrawable mBackShadowDrawableLR; // 有阴影的GradientDrawable
     private GradientDrawable mBackShadowDrawableRL;
     private GradientDrawable mFolderShadowDrawableLR;

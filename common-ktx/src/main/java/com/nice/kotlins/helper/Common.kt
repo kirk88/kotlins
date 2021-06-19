@@ -23,3 +23,4 @@ fun <T : Any?> Boolean.optNulls(right: () -> T?, wrong: () -> T?): T? {
     return if (this) right() else wrong()
 }
 
+fun Any?.toStringOrEmpty(): String = this?.toString().orEmpty()

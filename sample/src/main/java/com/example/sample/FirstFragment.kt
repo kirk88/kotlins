@@ -16,7 +16,7 @@ import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.showIme
 
 class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first),
-    ScreenCompatAdapter {
+        ScreenCompatAdapter {
 
     override val screenCompatStrategy: ScreenCompatStrategy
         get() = ScreenCompatStrategy.NONE

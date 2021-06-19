@@ -33,9 +33,9 @@ import com.nice.kotlins.widget.LoaderView.Companion.TYPE_ERROR_VIEW
 import com.nice.kotlins.widget.LoaderView.Companion.TYPE_LOADING_VIEW
 
 class LoaderLayout @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.loaderLayoutStyle,
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = R.attr.loaderLayoutStyle
 ) : FrameLayout(context, attrs, defStyleAttr), LoaderView {
 
     private var emptyLayoutId: Int
@@ -105,10 +105,10 @@ class LoaderLayout @JvmOverloads constructor(
 
     init {
         val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.LoaderLayout,
-            defStyleAttr,
-            R.style.LoaderLayout_Style
+                attrs,
+                R.styleable.LoaderLayout,
+                defStyleAttr,
+                R.style.LoaderLayout_Style
         )
         emptyLayoutId = a.getResourceId(R.styleable.LoaderLayout_emptyLayout, NO_VALUE)
         loadingLayoutId = a.getResourceId(R.styleable.LoaderLayout_loadingLayout, NO_VALUE)
@@ -117,11 +117,11 @@ class LoaderLayout @JvmOverloads constructor(
         emptyText = a.getText(R.styleable.LoaderLayout_emptyText)
         emptyTextColor = a.getColor(R.styleable.LoaderLayout_emptyTextColor, NO_VALUE)
         emptyTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_emptyTextAppearance, NO_VALUE)
+                a.getResourceId(R.styleable.LoaderLayout_emptyTextAppearance, NO_VALUE)
         emptyButtonText = a.getText(R.styleable.LoaderLayout_emptyButtonText)
         emptyButtonTextColor = a.getColor(R.styleable.LoaderLayout_emptyButtonTextColor, NO_VALUE)
         emptyButtonTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_emptyButtonTextAppearance, NO_VALUE)
+                a.getResourceId(R.styleable.LoaderLayout_emptyButtonTextAppearance, NO_VALUE)
         emptyButtonBackground = a.getDrawable(R.styleable.LoaderLayout_emptyButtonBackground)
         if (emptyButtonBackground == null) {
             val color = a.getColor(R.styleable.LoaderLayout_emptyButtonBackground, NO_VALUE)
@@ -135,11 +135,11 @@ class LoaderLayout @JvmOverloads constructor(
         errorText = a.getText(R.styleable.LoaderLayout_errorText)
         errorTextColor = a.getColor(R.styleable.LoaderLayout_errorTextColor, NO_VALUE)
         errorTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_errorTextAppearance, NO_VALUE)
+                a.getResourceId(R.styleable.LoaderLayout_errorTextAppearance, NO_VALUE)
         errorButtonText = a.getText(R.styleable.LoaderLayout_errorButtonText)
         errorButtonTextColor = a.getColor(R.styleable.LoaderLayout_errorButtonTextColor, NO_VALUE)
         errorButtonTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_errorButtonTextAppearance, NO_VALUE)
+                a.getResourceId(R.styleable.LoaderLayout_errorButtonTextAppearance, NO_VALUE)
         errorButtonBackground = a.getDrawable(R.styleable.LoaderLayout_errorButtonBackground)
         if (errorButtonBackground == null) {
             val color = a.getColor(R.styleable.LoaderLayout_errorButtonBackground, NO_VALUE)
@@ -154,7 +154,7 @@ class LoaderLayout @JvmOverloads constructor(
         loadingText = a.getText(R.styleable.LoaderLayout_loadingText)
         loadingTextColor = a.getColor(R.styleable.LoaderLayout_loadingTextColor, NO_VALUE)
         loadingTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_loadingTextAppearance, NO_VALUE)
+                a.getResourceId(R.styleable.LoaderLayout_loadingTextAppearance, NO_VALUE)
 
         defaultViewType = a.getInt(R.styleable.LoaderLayout_defaultShow, TYPE_LOADING_VIEW)
         a.recycle()
@@ -235,10 +235,10 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setDefaultView(viewType: Int): LoaderView {
         check(
-            viewType == TYPE_CONTENT_VIEW
-                    || viewType == TYPE_LOADING_VIEW
-                    || viewType == TYPE_EMPTY_VIEW
-                    || viewType == TYPE_ERROR_VIEW
+                viewType == TYPE_CONTENT_VIEW
+                        || viewType == TYPE_LOADING_VIEW
+                        || viewType == TYPE_EMPTY_VIEW
+                        || viewType == TYPE_ERROR_VIEW
         ) {
             "Non-supported view type: $viewType"
         }
@@ -417,9 +417,9 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private fun setView(
-        layoutResId: Int,
-        viewType: Int,
-        preventAddView: Boolean = false,
+            layoutResId: Int,
+            viewType: Int,
+            preventAddView: Boolean = false
     ): View {
         return inflater.inflate(layoutResId, this, false).also {
             setView(it, viewType, preventAddView)
@@ -464,7 +464,7 @@ class LoaderLayout @JvmOverloads constructor(
                     } else if (Build.VERSION.SDK_INT >= 21 && loadingProgressColor != NO_VALUE) {
                         it.indeterminateTintMode = PorterDuff.Mode.SRC_ATOP
                         it.indeterminateTintList =
-                            ColorStateList.valueOf(loadingProgressColor)
+                                ColorStateList.valueOf(loadingProgressColor)
                     }
                 }
                 textView?.let {
@@ -567,8 +567,8 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private class AdapterDataObserver(
-        val adapter: RecyclerView.Adapter<*>,
-        loaderLayout: () -> LoaderLayout,
+            val adapter: RecyclerView.Adapter<*>,
+            loaderLayout: () -> LoaderLayout
     ) : RecyclerView.AdapterDataObserver() {
 
         private val layout: LoaderLayout? by weak(loaderLayout)
@@ -618,7 +618,7 @@ class LoaderLayout @JvmOverloads constructor(
 
         fun wrap(activity: Activity): LoaderView {
             return wrap(
-                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
+                    (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
             )
         }
 

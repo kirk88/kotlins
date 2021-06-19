@@ -27,12 +27,12 @@ import java.util.*
 import java.util.regex.Pattern
 
 class NavigationDestination(
-    @IdRes val id: Int,
-    val className: String,
-    val tag: String? = null,
-    val label: CharSequence? = null,
-    val icon: Int? = null,
-    val args: Bundle? = null,
+        @IdRes val id: Int,
+        val className: String,
+        val tag: String? = null,
+        val label: CharSequence? = null,
+        val icon: Int? = null,
+        val args: Bundle? = null
 ) {
 
     val parent: NavigationController?
@@ -61,8 +61,8 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
     while (containerView != null) {
         if (containerView is FragmentContainerView) {
             return NavigationController(fragmentManager,
-                containerView.context.classLoader,
-                containerView.id)
+                    containerView.context.classLoader,
+                    containerView.id)
         }
         containerView = view.parent as? View
     }
@@ -71,8 +71,8 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
 
 
 private fun getNavigationController(
-    fragmentManager: FragmentManager,
-    view: View,
+        fragmentManager: FragmentManager,
+        view: View
 ): NavigationController {
     val controller = view.getTag(R.id.navigation_controller_tag_id) as? NavigationController
     if (controller != null) {
@@ -86,15 +86,15 @@ private fun getNavigationController(
 fun interface FragmentNavigator {
 
     fun navigate(
-        fragmentManager: FragmentManager,
-        @IdRes containerViewId: Int,
-        classLoader: ClassLoader,
-        className: String,
-        tag: String?,
-        @AnimatorRes @AnimRes enter: Int,
-        @AnimatorRes @AnimRes exit: Int,
-        allowingStateLoss: Boolean,
-        args: Bundle?,
+            fragmentManager: FragmentManager,
+            @IdRes containerViewId: Int,
+            classLoader: ClassLoader,
+            className: String,
+            tag: String?,
+            @AnimatorRes @AnimRes enter: Int,
+            @AnimatorRes @AnimRes exit: Int,
+            allowingStateLoss: Boolean,
+            args: Bundle?
     )
 
 }
@@ -102,33 +102,33 @@ fun interface FragmentNavigator {
 internal object DefaultFragmentNavigator : FragmentNavigator {
 
     override fun navigate(
-        fragmentManager: FragmentManager,
-        containerViewId: Int,
-        classLoader: ClassLoader,
-        className: String,
-        tag: String?,
-        enter: Int,
-        exit: Int,
-        allowingStateLoss: Boolean,
-        args: Bundle?,
+            fragmentManager: FragmentManager,
+            containerViewId: Int,
+            classLoader: ClassLoader,
+            className: String,
+            tag: String?,
+            enter: Int,
+            exit: Int,
+            allowingStateLoss: Boolean,
+            args: Bundle?
     ) {
         fragmentManager.show(
-            containerViewId,
-            classLoader,
-            className,
-            tag,
-            enter,
-            exit,
-            allowingStateLoss
+                containerViewId,
+                classLoader,
+                className,
+                tag,
+                enter,
+                exit,
+                allowingStateLoss
         ) { args }
     }
 
 }
 
 class NavigationController internal constructor(
-    private val fragmentManager: FragmentManager,
-    private val classLoader: ClassLoader,
-    @IdRes private val containerViewId: Int,
+        private val fragmentManager: FragmentManager,
+        private val classLoader: ClassLoader,
+        @IdRes private val containerViewId: Int
 ) : Iterable<NavigationDestination> {
 
     private var navigator: FragmentNavigator = DefaultFragmentNavigator
@@ -215,35 +215,35 @@ class NavigationController internal constructor(
     }
 
     fun navigate(
-        @IdRes id: Int,
-        allowingStateLoss: Boolean = false,
+            @IdRes id: Int,
+            allowingStateLoss: Boolean = false
     ): Boolean {
         val destination = findDestination(id) ?: return false
         return navigate(destination, allowingStateLoss)
     }
 
     fun navigate(
-        @IdRes id: Int,
-        @AnimatorRes @AnimRes enter: Int,
-        @AnimatorRes @AnimRes exit: Int,
-        allowingStateLoss: Boolean = false,
+            @IdRes id: Int,
+            @AnimatorRes @AnimRes enter: Int,
+            @AnimatorRes @AnimRes exit: Int,
+            allowingStateLoss: Boolean = false
     ): Boolean {
         val destination = findDestination(id) ?: return false
         return navigate(destination, enter, exit, allowingStateLoss)
     }
 
     fun navigate(
-        destination: NavigationDestination,
-        allowingStateLoss: Boolean = false,
+            destination: NavigationDestination,
+            allowingStateLoss: Boolean = false
     ): Boolean {
         return navigate(destination, R.anim.anim_nav_enter, R.anim.anim_nav_exit, allowingStateLoss)
     }
 
     fun navigate(
-        destination: NavigationDestination,
-        @AnimatorRes @AnimRes enter: Int,
-        @AnimatorRes @AnimRes exit: Int,
-        allowingStateLoss: Boolean = false,
+            destination: NavigationDestination,
+            @AnimatorRes @AnimRes enter: Int,
+            @AnimatorRes @AnimRes exit: Int,
+            allowingStateLoss: Boolean = false
     ): Boolean {
         val parent = destination.parent
         if (parent == null || parent != this) {
@@ -253,15 +253,15 @@ class NavigationController internal constructor(
         setPrimaryNavigationDestination(destination)
 
         navigator.navigate(
-            fragmentManager,
-            containerViewId,
-            classLoader,
-            destination.className,
-            destination.tag,
-            enter,
-            exit,
-            allowingStateLoss,
-            destination.args
+                fragmentManager,
+                containerViewId,
+                classLoader,
+                destination.className,
+                destination.tag,
+                enter,
+                exit,
+                allowingStateLoss,
+                destination.args
         )
         return true
     }
@@ -323,17 +323,17 @@ class NavigationController internal constructor(
 
     fun interface OnDestinationChangedListener {
         fun onDestinationChanged(
-            controller: NavigationController,
-            destination: NavigationDestination,
+                controller: NavigationController,
+                destination: NavigationDestination
         )
     }
 
 }
 
 operator fun NavigationController.get(@IdRes id: Int): NavigationDestination =
-    requireNotNull(findDestination(id)) {
-        "No destination for $id was found in $this"
-    }
+        requireNotNull(findDestination(id)) {
+            "No destination for $id was found in $this"
+        }
 
 operator fun NavigationController.contains(@IdRes id: Int): Boolean = findDestination(id) != null
 
@@ -350,18 +350,18 @@ operator fun NavigationController.minusAssign(node: NavigationDestination) {
 }
 
 fun NavigationController.navigate(
-    item: MenuItem,
-    allowingStateLoss: Boolean = false,
+        item: MenuItem,
+        allowingStateLoss: Boolean = false
 ): Boolean = navigate(item.itemId, allowingStateLoss)
 
 fun NavigationController.navigate(
-    tab: TabLayout.Tab,
-    allowingStateLoss: Boolean = false,
+        tab: TabLayout.Tab,
+        allowingStateLoss: Boolean = false
 ): Boolean = navigate(tab.id, allowingStateLoss)
 
 fun BottomNavigationView.setupWithController(
-    controller: NavigationController,
-    itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> },
+        controller: NavigationController,
+        itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
 ) {
     doOnItemSelected {
         controller.navigate(it)
@@ -386,8 +386,8 @@ fun BottomNavigationView.setupWithController(
 }
 
 fun TabLayout.setupWithController(
-    controller: NavigationController,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> },
+        controller: NavigationController,
+        tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
     doOnTabSelected {
         controller.navigate(it)
@@ -413,12 +413,12 @@ fun TabLayout.setupWithController(
 }
 
 fun AppCompatActivity.setupTabLayoutWithController(
-    tabLayout: TabLayout,
-    viewPager2: ViewPager2,
-    controller: NavigationController,
-    autoRefresh: Boolean = true,
-    smoothScroll: Boolean = true,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> },
+        tabLayout: TabLayout,
+        viewPager2: ViewPager2,
+        controller: NavigationController,
+        autoRefresh: Boolean = true,
+        smoothScroll: Boolean = true,
+        tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
@@ -440,12 +440,12 @@ fun AppCompatActivity.setupTabLayoutWithController(
 }
 
 fun Fragment.setupTabLayoutWithController(
-    tabLayout: TabLayout,
-    viewPager2: ViewPager2,
-    controller: NavigationController,
-    autoRefresh: Boolean = true,
-    smoothScroll: Boolean = true,
-    tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> },
+        tabLayout: TabLayout,
+        viewPager2: ViewPager2,
+        controller: NavigationController,
+        autoRefresh: Boolean = true,
+        smoothScroll: Boolean = true,
+        tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
 ) {
     val startDestination = controller.findStartDestination()
     if (startDestination != null) {
@@ -467,7 +467,7 @@ fun Fragment.setupTabLayoutWithController(
 }
 
 private class FragmentPagerAdapter :
-    FragmentStateAdapter {
+        FragmentStateAdapter {
 
     private val controller: NavigationController
 
@@ -475,7 +475,7 @@ private class FragmentPagerAdapter :
     private val classLoader: ClassLoader
 
     constructor(fragmentActivity: FragmentActivity, controller: NavigationController) : super(
-        fragmentActivity
+            fragmentActivity
     ) {
         this.controller = controller
         fragmentFactory = fragmentActivity.supportFragmentManager.fragmentFactory

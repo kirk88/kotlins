@@ -12,14 +12,14 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.DialogFragment
 
 abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) : DialogFragment(),
-    NiceFragmentDelegate.Callback {
+        NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
         NiceFragmentDelegate(this, this)
     }
 
     val activityForResultLauncher =
-        PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+            PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +31,9 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
     }
 
     final override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         val decor = delegate.getSubDecor()
         decor.post {

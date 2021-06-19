@@ -12,12 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        app:statusBarForeground="?colorPrimaryVariant"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:displayShowHomeAsUpEnabled="true"
         app:displayShowHomeEnabled="true"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
-        app:provideSupportActionBar="true" />
+        app:provideSupportActionBar="true"
+        app:statusBarForeground="?colorPrimaryVariant" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -27,68 +27,68 @@
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="50dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_red_light"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="12sp"/>
+            android:textIsSelectable="true"
+            android:textSize="12sp" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="100dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_blue_bright"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="14sp"/>
+            android:textIsSelectable="true"
+            android:textSize="14sp" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="150dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_green_light"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="16sp"/>
+            android:textIsSelectable="true"
+            android:textSize="16sp" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="200dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_orange_light"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="18sp"/>
+            android:textIsSelectable="true"
+            android:textSize="18sp" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="250dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_purple"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="20sp"/>
+            android:textIsSelectable="true"
+            android:textSize="20sp" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:textIsSelectable="true"
             android:layout_width="300dp"
             android:layout_height="80dp"
             android:background="@android:color/holo_red_light"
-            android:text="ABC"
             android:gravity="center_vertical"
+            android:text="ABC"
             android:textColor="@color/white"
-            android:textSize="22sp"/>
+            android:textIsSelectable="true"
+            android:textSize="22sp" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 
@@ -96,10 +96,10 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/abc_vector_test"
         app:elevation="10dp"
-        app:fabCustomSize="48dp"
-        android:layout_gravity="bottom|end"/>
+        app:fabCustomSize="48dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

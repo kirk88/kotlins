@@ -44,13 +44,13 @@ interface SqlColumnProperty {
 
     companion object {
         fun create(name: String, type: SqlType): SqlColumnProperty =
-            SqlColumnPropertyImpl(name, type)
+                SqlColumnPropertyImpl(name, type)
     }
 
 }
 
 private open class SqlColumnElementImpl(override val name: String, override val value: Any?) :
-    SqlColumnElement {
+        SqlColumnElement {
 
     override fun toString(): String {
         return "SqlColumnElement(name='$name', value=$value)"
@@ -59,7 +59,7 @@ private open class SqlColumnElementImpl(override val name: String, override val 
 }
 
 private class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
-    SqlColumnProperty {
+        SqlColumnProperty {
 
     override val counter: SqlColumnProperty = SqlFunctionPropertyImpl("count(${name})")
     override val maximum: SqlColumnProperty = SqlFunctionPropertyImpl("max(${name})")
@@ -82,7 +82,7 @@ private class SqlColumnPropertyImpl(override val name: String, override val type
 }
 
 private class SqlFunctionPropertyImpl(override val name: String) :
-    SqlColumnProperty {
+        SqlColumnProperty {
 
     override val type: SqlType = INTEGER
     override val counter: SqlColumnProperty

@@ -12,14 +12,14 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 
 abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : Fragment(),
-    NiceFragmentDelegate.Callback, HasActionBarTitle, HasActionBarSubtitle {
+        NiceFragmentDelegate.Callback, HasActionBarTitle, HasActionBarSubtitle {
 
     private val delegate: NiceFragmentDelegate by lazy {
         NiceFragmentDelegate(this, this)
     }
 
     val activityForResultLauncher =
-        PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+            PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +31,9 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
     }
 
     final override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         val subDecor = delegate.getSubDecor()
         subDecor.post {

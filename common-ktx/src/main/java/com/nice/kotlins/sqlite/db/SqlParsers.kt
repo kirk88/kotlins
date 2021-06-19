@@ -202,7 +202,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
             java.lang.Byte.TYPE, java.lang.Byte::class.java -> return value.toByte()
             java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> return value != 0L
             java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toInt()
-                .toChar()
+                    .toChar()
         }
     }
 
@@ -217,7 +217,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
     }
 
     if (value is String && value.length == 1
-        && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)
+            && (type == java.lang.Character.TYPE || type == java.lang.Character::class.java)
     ) {
         return value.first()
     }

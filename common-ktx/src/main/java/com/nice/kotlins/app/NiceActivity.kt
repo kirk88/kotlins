@@ -10,12 +10,12 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 
 abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
-    AppCompatActivity(contentLayoutId), HasActionBarSubtitle {
+        AppCompatActivity(contentLayoutId), HasActionBarSubtitle {
 
     private var subtitle: CharSequence? = null
 
     val activityForResultLauncher =
-        PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+            PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

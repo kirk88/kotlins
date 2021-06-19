@@ -6,7 +6,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
 abstract class BaseItemViewAnimation(private val animationMode: ItemViewAnimationMode) :
-    ItemViewAnimation {
+        ItemViewAnimation {
 
     private var lastAnimatePosition = -1
 

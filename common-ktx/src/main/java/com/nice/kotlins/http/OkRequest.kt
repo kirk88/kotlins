@@ -7,10 +7,10 @@ import java.io.File
 import java.io.IOException
 
 internal class OkRequest(
-    private val client: OkHttpClient,
-    private val request: Request,
-    private val requestInterceptors: List<OkRequestInterceptor>,
-    private val responseInterceptors: List<OkResponseInterceptor>,
+        private val client: OkHttpClient,
+        private val request: Request,
+        private val requestInterceptors: List<OkRequestInterceptor>,
+        private val responseInterceptors: List<OkResponseInterceptor>
 ) {
 
     private var call: Call? = null
@@ -201,8 +201,8 @@ internal class OkRequest(
 
         fun url(url: HttpUrl) = apply {
             urlBuilder.scheme(url.scheme)
-                .host(url.host)
-                .port(url.port)
+                    .host(url.host)
+                    .port(url.port)
 
             val username = url.username
             val password = url.password
@@ -293,9 +293,9 @@ internal class OkRequest(
 
         fun addFormDataPart(name: String, contentType: MediaType?, file: File) = apply {
             multipartBodyBuilder!!.addFormDataPart(
-                name,
-                file.name,
-                file.asRequestBody(contentType)
+                    name,
+                    file.name,
+                    file.asRequestBody(contentType)
             )
         }
 
@@ -344,14 +344,14 @@ internal class OkRequest(
             }
 
             val request = requestBuilder.url(urlBuilder.build())
-                .method(method.name, body)
-                .build()
+                    .method(method.name, body)
+                    .build()
 
             return OkRequest(
-                requireNotNull(client) { "OkHttpClient must not be null" },
-                request,
-                requestInterceptors,
-                responseInterceptors,
+                    requireNotNull(client) { "OkHttpClient must not be null" },
+                    request,
+                    requestInterceptors,
+                    responseInterceptors
             )
         }
 

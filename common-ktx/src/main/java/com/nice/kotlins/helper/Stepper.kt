@@ -18,8 +18,8 @@ class Stepper {
     private val channel: Channel<SuspendedTask> = Channel(Channel.UNLIMITED)
 
     fun add(
-        context: CoroutineContext = EmptyCoroutineContext,
-        block: suspend CoroutineScope.() -> Unit,
+            context: CoroutineContext = EmptyCoroutineContext,
+            block: suspend CoroutineScope.() -> Unit
     ) {
         channel.trySend(DelayedTask(context, block))
     }
@@ -39,8 +39,8 @@ class Stepper {
     }
 
     private class DelayedTask(
-        private val context: CoroutineContext,
-        private val block: suspend CoroutineScope.() -> Unit,
+            private val context: CoroutineContext,
+            private val block: suspend CoroutineScope.() -> Unit
     ) : SuspendedTask {
 
         override suspend fun run() = withContext(Dispatchers.Main.immediate + context) {

@@ -21,34 +21,34 @@ fun CharSequence.toSpannableStringBuilder(builderAction: SpannableStringBuilder.
 }
 
 fun CharSequence.highlight(
-    target: String,
-    startIndex: Int = 0,
-    @ColorInt color: Int = Color.RED,
-    size: Int = 0,
-    style: Int = Typeface.NORMAL,
+        target: String,
+        startIndex: Int = 0,
+        @ColorInt color: Int = Color.RED,
+        size: Int = 0,
+        style: Int = Typeface.NORMAL
 ): CharSequence {
     return toSpannableStringBuilder {
         for (result in target.toRegex().findAll(this, startIndex)) {
             setSpan(
-                ForegroundColorSpan(color),
-                result.range.first,
-                result.range.last + 1,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            if (size != 0) {
-                setSpan(
-                    AbsoluteSizeSpan(size),
+                    ForegroundColorSpan(color),
                     result.range.first,
                     result.range.last + 1,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            if (size != 0) {
+                setSpan(
+                        AbsoluteSizeSpan(size),
+                        result.range.first,
+                        result.range.last + 1,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             }
             if (style != Typeface.NORMAL) {
                 setSpan(
-                    StyleSpan(style),
-                    result.range.first,
-                    result.range.last + 1,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        StyleSpan(style),
+                        result.range.first,
+                        result.range.last + 1,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             }
         }
@@ -56,11 +56,11 @@ fun CharSequence.highlight(
 }
 
 fun CharSequence.highlight(
-    start: Int = 0,
-    end: Int = length,
-    @ColorInt color: Int = Color.RED,
-    size: Int = 0,
-    style: Int = Typeface.NORMAL,
+        start: Int = 0,
+        end: Int = length,
+        @ColorInt color: Int = Color.RED,
+        size: Int = 0,
+        style: Int = Typeface.NORMAL
 ): CharSequence {
     return toSpannableStringBuilder {
         setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -74,19 +74,19 @@ fun CharSequence.highlight(
 }
 
 fun CharSequence.insertImage(
-    where: Int,
-    drawable: Drawable,
-    width: Int = 0,
-    height: Int = 0,
-    prefix: String = "",
-    postfix: String = "",
+        where: Int,
+        drawable: Drawable,
+        width: Int = 0,
+        height: Int = 0,
+        prefix: String = "",
+        postfix: String = ""
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else if (drawable.bounds.isEmpty) drawable.setBounds(
-        0,
-        0,
-        drawable.intrinsicWidth,
-        drawable.intrinsicHeight
+            0,
+            0,
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight
     )
     return toSpannableStringBuilder {
         val spannable = "$prefix $postfix".toSpannable()
@@ -96,18 +96,18 @@ fun CharSequence.insertImage(
 }
 
 fun CharSequence.appendImage(
-    drawable: Drawable,
-    width: Int = 0,
-    height: Int = 0,
-    prefix: String = "",
-    postfix: String = "",
+        drawable: Drawable,
+        width: Int = 0,
+        height: Int = 0,
+        prefix: String = "",
+        postfix: String = ""
 ): CharSequence {
     if (width > 0 && height > 0) drawable.setBounds(0, 0, width, height)
     else if (drawable.bounds.isEmpty) drawable.setBounds(
-        0,
-        0,
-        drawable.intrinsicWidth,
-        drawable.intrinsicHeight
+            0,
+            0,
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight
     )
     return toSpannableStringBuilder {
         val spannable = "$prefix $postfix".toSpannable()
@@ -119,15 +119,15 @@ fun CharSequence.appendImage(
 internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
 
     override fun draw(
-        canvas: Canvas,
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        x: Float,
-        top: Int,
-        y: Int,
-        bottom: Int,
-        paint: Paint,
+            canvas: Canvas,
+            text: CharSequence,
+            start: Int,
+            end: Int,
+            x: Float,
+            top: Int,
+            y: Int,
+            bottom: Int,
+            paint: Paint
     ) {
         val d = drawable
         val transY = ((bottom - top) - d.bounds.bottom) / 2 + top
@@ -138,11 +138,11 @@ internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
     }
 
     override fun getSize(
-        paint: Paint,
-        text: CharSequence?,
-        start: Int,
-        end: Int,
-        fm: Paint.FontMetricsInt?,
+            paint: Paint,
+            text: CharSequence?,
+            start: Int,
+            end: Int,
+            fm: Paint.FontMetricsInt?
     ): Int {
         val d = drawable
         val rect: Rect = d.bounds
@@ -162,12 +162,12 @@ internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
 }
 
 fun CharSequence.insert(
-    where: Int,
-    text: CharSequence,
-    span: Any? = null,
-    start: Int = 0,
-    end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        where: Int,
+        text: CharSequence,
+        span: Any? = null,
+        start: Int = 0,
+        end: Int = text.length,
+        flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): CharSequence {
     return toSpannableStringBuilder {
         insert(where, text.toSpannableStringBuilder().also {
@@ -179,11 +179,11 @@ fun CharSequence.insert(
 }
 
 fun CharSequence.append(
-    text: CharSequence,
-    span: Any? = null,
-    start: Int = 0,
-    end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        text: CharSequence,
+        span: Any? = null,
+        start: Int = 0,
+        end: Int = text.length,
+        flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): CharSequence {
     return toSpannableStringBuilder {
         append(if (span != null) text.withSpan(span, start, end, flags) else text)
@@ -191,11 +191,11 @@ fun CharSequence.append(
 }
 
 fun CharSequence.appendLine(
-    text: CharSequence,
-    span: Any? = null,
-    start: Int = 0,
-    end: Int = text.length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        text: CharSequence,
+        span: Any? = null,
+        start: Int = 0,
+        end: Int = text.length,
+        flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): CharSequence {
     return toSpannableStringBuilder {
         append('\n').append(if (span != null) text.withSpan(span, start, end, flags) else text)
@@ -203,10 +203,10 @@ fun CharSequence.appendLine(
 }
 
 fun CharSequence.withSpan(
-    what: Any,
-    start: Int = 0,
-    end: Int = length,
-    flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        what: Any,
+        start: Int = 0,
+        end: Int = length,
+        flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 ): CharSequence {
     return toSpannableStringBuilder {
         setSpan(what, start, end, flags)
@@ -231,22 +231,22 @@ fun CharSequence.justify(ems: Int): SpannableStringBuilder {
 }
 
 inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R =
-    this ?: defaultValue()
+        this ?: defaultValue()
 
 inline fun <R : CharSequence, C : R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
-    if (this.isNullOrEmpty()) defaultValue() else this
+        if (this.isNullOrEmpty()) defaultValue() else this
 
 inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R =
-    if (this.isNullOrBlank()) defaultValue() else this
+        if (this.isNullOrBlank()) defaultValue() else this
 
 fun CharSequence.splitSkipBlank(
-    vararg delimiters: String,
-    ignoreCase: Boolean = false,
-    limit: Int = 0,
+        vararg delimiters: String,
+        ignoreCase: Boolean = false,
+        limit: Int = 0
 ): List<String> {
     return split(
-        ignoreCase = ignoreCase,
-        limit = limit,
-        delimiters = delimiters
+            ignoreCase = ignoreCase,
+            limit = limit,
+            delimiters = delimiters
     ).filter { it.isNotBlank() }
 }

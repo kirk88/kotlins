@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 
 class TipViewLazy(private val factoryProducer: () -> TipViewFactory) :
-    Lazy<TipView> {
+        Lazy<TipView> {
 
     private var cached: TipView? = null
 

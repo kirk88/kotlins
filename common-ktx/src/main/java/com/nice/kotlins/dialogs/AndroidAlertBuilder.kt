@@ -12,7 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nice.kotlins.helper.Internals.NO_GETTER
 
 internal class AndroidAlertBuilder(override val context: Context, themeResId: Int = 0) :
-    AlertBuilder<AlertDialog> {
+        AlertBuilder<AlertDialog> {
     private val builder = MaterialAlertDialogBuilder(context, themeResId)
 
     override var title: CharSequence
@@ -82,50 +82,50 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     }
 
     override fun positiveButton(
-        buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonText: String,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setPositiveButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun positiveButton(
-        buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonTextResource: Int,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setPositiveButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun negativeButton(
-        buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonText: String,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setNegativeButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun negativeButton(
-        buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonTextResource: Int,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setNegativeButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun neutralButton(
-        buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonText: String,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setNeutralButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun neutralButton(
-        buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?,
+            buttonTextResource: Int,
+            onClicked: ((dialog: DialogInterface) -> Unit)?
     ) {
         builder.setNeutralButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun items(
-        items: List<CharSequence>,
-        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit,
+            items: List<CharSequence>,
+            onItemSelected: (dialog: DialogInterface, index: Int) -> Unit
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, which)
@@ -133,8 +133,8 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     }
 
     override fun <T> items(
-        items: List<T>,
-        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit,
+            items: List<T>,
+            onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, items[which], which)
@@ -142,9 +142,9 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     }
 
     override fun multiChoiceItems(
-        items: Array<String>,
-        checkedItems: BooleanArray,
-        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit,
+            items: Array<String>,
+            checkedItems: BooleanArray,
+            onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit
     ) {
         builder.setMultiChoiceItems(items, checkedItems) { dialog, which, isChecked ->
             onClick(dialog, which, isChecked)
@@ -152,9 +152,9 @@ internal class AndroidAlertBuilder(override val context: Context, themeResId: In
     }
 
     override fun singleChoiceItems(
-        items: Array<String>,
-        checkedItem: Int,
-        onClick: ((dialog: DialogInterface, which: Int) -> Unit)?,
+            items: Array<String>,
+            checkedItem: Int,
+            onClick: ((dialog: DialogInterface, which: Int) -> Unit)?
     ) {
         builder.setSingleChoiceItems(items, checkedItem) { dialog, which ->
             onClick?.invoke(dialog, which)

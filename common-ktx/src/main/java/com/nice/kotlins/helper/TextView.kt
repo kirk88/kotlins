@@ -72,62 +72,62 @@ val TextView.drawableBottom: Drawable?
     get() = compoundDrawables[3]
 
 fun TextView.updateCompoundDrawable(
-    left: Drawable? = null,
-    top: Drawable? = null,
-    right: Drawable? = null,
-    bottom: Drawable? = null,
+        left: Drawable? = null,
+        top: Drawable? = null,
+        right: Drawable? = null,
+        bottom: Drawable? = null
 ) {
     val drawables = compoundDrawables
     setCompoundDrawables(
-        left ?: drawables[0],
-        top ?: drawables[1],
-        right ?: drawables[2],
-        bottom ?: drawables[3]
+            left ?: drawables[0],
+            top ?: drawables[1],
+            right ?: drawables[2],
+            bottom ?: drawables[3]
     )
 }
 
 fun TextView.updateCompoundDrawableRelative(
-    start: Drawable? = null,
-    top: Drawable? = null,
-    end: Drawable? = null,
-    bottom: Drawable? = null,
+        start: Drawable? = null,
+        top: Drawable? = null,
+        end: Drawable? = null,
+        bottom: Drawable? = null
 ) {
     val drawables = compoundDrawablesRelative
     setCompoundDrawablesRelative(
-        start ?: drawables[0],
-        top ?: drawables[1],
-        end ?: drawables[2],
-        bottom ?: drawables[3]
+            start ?: drawables[0],
+            top ?: drawables[1],
+            end ?: drawables[2],
+            bottom ?: drawables[3]
     )
 }
 
 fun TextView.updateCompoundDrawableWithIntrinsicBounds(
-    left: Drawable? = null,
-    top: Drawable? = null,
-    right: Drawable? = null,
-    bottom: Drawable? = null,
+        left: Drawable? = null,
+        top: Drawable? = null,
+        right: Drawable? = null,
+        bottom: Drawable? = null
 ) {
     val drawables = compoundDrawables
     setCompoundDrawablesWithIntrinsicBounds(
-        left ?: drawables[0],
-        top ?: drawables[1],
-        right ?: drawables[2],
-        bottom ?: drawables[3]
+            left ?: drawables[0],
+            top ?: drawables[1],
+            right ?: drawables[2],
+            bottom ?: drawables[3]
     )
 }
 
 fun TextView.updateCompoundDrawableRelativeWithIntrinsicBounds(
-    start: Drawable? = null,
-    top: Drawable? = null,
-    end: Drawable? = null,
-    bottom: Drawable? = null,
+        start: Drawable? = null,
+        top: Drawable? = null,
+        end: Drawable? = null,
+        bottom: Drawable? = null
 ) {
     val drawables = compoundDrawablesRelative
     setCompoundDrawablesRelativeWithIntrinsicBounds(
-        start ?: drawables[0],
-        top ?: drawables[1],
-        end ?: drawables[2],
-        bottom ?: drawables[3]
+            start ?: drawables[0],
+            top ?: drawables[1],
+            end ?: drawables[2],
+            bottom ?: drawables[3]
     )
 }
 

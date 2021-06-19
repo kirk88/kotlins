@@ -11,9 +11,6 @@ public class FileType {
 
     public static String TYPE_UNKNOWN = "unknown";
 
-    private FileType() {
-    }
-
     static {
         FILE_TYPE_MAP.put("ffd8ffe000104a464946", "jpg"); //JPEG (jpg)
         FILE_TYPE_MAP.put("89504e470d0a1a0a0000", "png"); //PNG (png)
@@ -69,6 +66,9 @@ public class FileType {
         FILE_TYPE_MAP.put("AC9EBD8F", "qdf"); //Quicken (qdf)
         FILE_TYPE_MAP.put("E3828596", "pwl"); //Windows Password (pwl)
         FILE_TYPE_MAP.put("2E7261FD", "ram"); //Real Audio (ram)
+    }
+
+    private FileType() {
     }
 
     /**

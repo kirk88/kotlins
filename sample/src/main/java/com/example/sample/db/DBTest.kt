@@ -26,20 +26,20 @@ object TestTable {
 }
 
 class Test(
-    @JvmField
-    var id: Long = 0L,
-    @JvmField
-    var name: String? = null,
-    @JvmField
-    var age: Int = 0,
-    @JvmField
-    var number: Int = 0,
-    @JvmField
-    @field:Column("data", C::class)
-    var dataList: List<String>? = null,
-    var tip: String = "",
-    var pp: String? = null,
-    var jj: String? = null,
+        @JvmField
+        var id: Long = 0L,
+        @JvmField
+        var name: String? = null,
+        @JvmField
+        var age: Int = 0,
+        @JvmField
+        var number: Int = 0,
+        @JvmField
+        @field:Column("data", C::class)
+        var dataList: List<String>? = null,
+        var tip: String = "",
+        var pp: String? = null,
+        var jj: String? = null
 ) {
 
     @IgnoreOnTable
@@ -65,25 +65,25 @@ class C : ColumnValueConverter<List<String>, String> {
 }
 
 object DB : ManagedSQLiteOpenHelper(
-    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("testdemo.db")
-        .callback(Callback())
-        .build()
+        SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
+                .name("testdemo.db")
+                .callback(Callback())
+                .build()
 ) {
 
     private class Callback : SupportSQLiteOpenHelper.Callback(5) {
         override fun onCreate(db: SupportSQLiteDatabase) {
             db.createTable(
-                TestTable.TABLE_NAME,
-                true,
-                TestTable.ID,
-                TestTable.NAME,
-                TestTable.AGE,
-                TestTable.NUMBER,
-                TestTable.DATA,
-                TestTable.TIP,
-                TestTable.PP,
-                TestTable.JJ
+                    TestTable.TABLE_NAME,
+                    true,
+                    TestTable.ID,
+                    TestTable.NAME,
+                    TestTable.AGE,
+                    TestTable.NUMBER,
+                    TestTable.DATA,
+                    TestTable.TIP,
+                    TestTable.PP,
+                    TestTable.JJ
             )
         }
 

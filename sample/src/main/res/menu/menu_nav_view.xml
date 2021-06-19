@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/fragment_first"
-        android:title="First"
-        android:contentDescription="com.example.sample.FirstFragment"/>
+    <item
+        android:id="@+id/fragment_first"
+        android:contentDescription="com.example.sample.FirstFragment"
+        android:title="First" />
 
-    <item android:id="@+id/fragment_second"
-        android:title="First"
-        android:contentDescription="com.example.sample.FirstFragment"/>
+    <item
+        android:id="@+id/fragment_second"
+        android:contentDescription="com.example.sample.FirstFragment"
+        android:title="First" />
 
 
-    <item android:id="@+id/fragment_third"
-        android:title="First"
-        android:contentDescription="com.example.sample.FirstFragment"/>
+    <item
+        android:id="@+id/fragment_third"
+        android:contentDescription="com.example.sample.FirstFragment"
+        android:title="First" />
 
 </menu>

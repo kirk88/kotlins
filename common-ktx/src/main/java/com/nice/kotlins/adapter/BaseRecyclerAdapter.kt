@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.adapter.anim.ItemViewAnimation
 
 abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
-    val context: Context,
+        val context: Context
 ) : RecyclerView.Adapter<VH>() {
 
     private var itemClickListener: OnItemClickListener<T, VH>? = null
@@ -165,9 +165,9 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     abstract fun onCreateItemViewHolder(
-        inflater: LayoutInflater,
-        parent: ViewGroup,
-        viewType: Int,
+            inflater: LayoutInflater,
+            parent: ViewGroup,
+            viewType: Int
     ): VH
 
     open fun onItemViewHolderCreated(holder: VH) {
@@ -181,9 +181,9 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     final override fun onBindViewHolder(
-        holder: VH,
-        position: Int,
-        payloads: MutableList<Any>,
+            holder: VH,
+            position: Int,
+            payloads: MutableList<Any>
     ) {
         val item = getItemOrNull(holder.layoutPosition) ?: return
         onBindItemViewHolder(holder, item, payloads)

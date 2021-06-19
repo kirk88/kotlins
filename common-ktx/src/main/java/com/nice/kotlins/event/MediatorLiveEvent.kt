@@ -44,8 +44,8 @@ class MediatorLiveEvent<T> : MutableLiveEvent<T>() {
     }
 
     private class Source<V>(
-        private val liveEvent: LiveEvent<V>,
-        val observer: Observer<in V>,
+            private val liveEvent: LiveEvent<V>,
+            val observer: Observer<in V>
     ) : Observer<V> {
 
         var version = START_VERSION

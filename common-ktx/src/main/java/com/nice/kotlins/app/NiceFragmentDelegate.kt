@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
 internal class NiceFragmentDelegate(
-    private val fragment: Fragment,
-    private val callback: Callback,
+        private val fragment: Fragment,
+        private val callback: Callback
 ) {
 
     private val context: Context

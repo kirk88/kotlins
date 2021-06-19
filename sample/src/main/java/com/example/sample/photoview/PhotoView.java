@@ -78,6 +78,15 @@ public class PhotoView extends AppCompatImageView {
     }
 
     @Override
+    public void setScaleType(ScaleType scaleType) {
+        if (mAttacher == null) {
+            mPendingScaleType = scaleType;
+        } else {
+            mAttacher.setScaleType(scaleType);
+        }
+    }
+
+    @Override
     public Matrix getImageMatrix() {
         return mAttacher.getImageMatrix();
     }
@@ -90,15 +99,6 @@ public class PhotoView extends AppCompatImageView {
     @Override
     public void setOnClickListener(OnClickListener l) {
         mAttacher.setOnClickListener(l);
-    }
-
-    @Override
-    public void setScaleType(ScaleType scaleType) {
-        if (mAttacher == null) {
-            mPendingScaleType = scaleType;
-        } else {
-            mAttacher.setScaleType(scaleType);
-        }
     }
 
     @Override
@@ -189,16 +189,32 @@ public class PhotoView extends AppCompatImageView {
         return mAttacher.getMinimumScale();
     }
 
+    public void setMinimumScale(float minimumScale) {
+        mAttacher.setMinimumScale(minimumScale);
+    }
+
     public float getMediumScale() {
         return mAttacher.getMediumScale();
+    }
+
+    public void setMediumScale(float mediumScale) {
+        mAttacher.setMediumScale(mediumScale);
     }
 
     public float getMaximumScale() {
         return mAttacher.getMaximumScale();
     }
 
+    public void setMaximumScale(float maximumScale) {
+        mAttacher.setMaximumScale(maximumScale);
+    }
+
     public float getScale() {
         return mAttacher.getScale();
+    }
+
+    public void setScale(float scale) {
+        mAttacher.setScale(scale);
     }
 
     public boolean isScaling() {
@@ -211,18 +227,6 @@ public class PhotoView extends AppCompatImageView {
 
     public void setAllowParentInterceptOnEdge(boolean allow) {
         mAttacher.setAllowParentInterceptOnEdge(allow);
-    }
-
-    public void setMinimumScale(float minimumScale) {
-        mAttacher.setMinimumScale(minimumScale);
-    }
-
-    public void setMediumScale(float mediumScale) {
-        mAttacher.setMediumScale(mediumScale);
-    }
-
-    public void setMaximumScale(float maximumScale) {
-        mAttacher.setMaximumScale(maximumScale);
     }
 
     public void setScaleLevels(float minimumScale, float mediumScale, float maximumScale) {
@@ -247,10 +251,6 @@ public class PhotoView extends AppCompatImageView {
 
     public void setOnViewDragListener(OnViewDragListener listener) {
         mAttacher.setOnViewDragListener(listener);
-    }
-
-    public void setScale(float scale) {
-        mAttacher.setScale(scale);
     }
 
     public void setScale(float scale, boolean animate) {

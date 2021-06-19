@@ -10,9 +10,9 @@ import androidx.core.view.ActionProvider
 import androidx.core.view.MenuItemCompat
 
 inline fun MenuItem.doOnMenuItemClick(crossinline action: (item: MenuItem) -> Boolean): MenuItem =
-    setOnMenuItemClickListener { item ->
-        action(item)
-    }
+        setOnMenuItemClickListener { item ->
+            action(item)
+        }
 
 fun MenuItem.showAsActionAlways() = apply {
     setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)

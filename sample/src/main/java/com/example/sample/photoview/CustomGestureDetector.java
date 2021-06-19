@@ -27,18 +27,16 @@ import android.view.ViewConfiguration;
 class CustomGestureDetector {
 
     private static final int INVALID_POINTER_ID = -1;
-
+    private final ScaleGestureDetector mDetector;
+    private final float mTouchSlop;
+    private final float mMinimumVelocity;
+    private final OnGestureListener mListener;
     private int mActivePointerId = INVALID_POINTER_ID;
     private int mActivePointerIndex = 0;
-    private final ScaleGestureDetector mDetector;
-
     private VelocityTracker mVelocityTracker;
     private boolean mIsDragging;
     private float mLastTouchX;
     private float mLastTouchY;
-    private final float mTouchSlop;
-    private final float mMinimumVelocity;
-    private final OnGestureListener mListener;
 
     CustomGestureDetector(Context context, OnGestureListener listener) {
         final ViewConfiguration configuration = ViewConfiguration

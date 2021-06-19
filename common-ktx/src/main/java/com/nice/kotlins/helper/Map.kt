@@ -21,47 +21,47 @@ inline fun <V> Map<*, V>.forEachValueIndexed(action: (index: Int, value: V) -> U
 
 
 fun <K, V> Map<K, V>.joinKeysToString(
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((K) -> CharSequence)? = null,
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        transform: ((K) -> CharSequence)? = null
 ): String {
     return keys.joinToString(separator, prefix, postfix, limit, truncated, transform)
 }
 
 fun <K, V> Map<K, V>.joinValuesToString(
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((V) -> CharSequence)? = null,
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        transform: ((V) -> CharSequence)? = null
 ): String {
     return values.joinToString(separator, prefix, postfix, limit, truncated, transform)
 }
 
 fun <K, V, A : Appendable> Map<K, V>.joinKeysTo(
-    buffer: A,
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((K) -> CharSequence)? = null,
+        buffer: A,
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        transform: ((K) -> CharSequence)? = null
 ): A {
     return keys.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
 }
 
 fun <K, V, A : Appendable> Map<K, V>.joinValuesTo(
-    buffer: A,
-    separator: CharSequence = ", ",
-    prefix: CharSequence = "",
-    postfix: CharSequence = "",
-    limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((V) -> CharSequence)? = null,
+        buffer: A,
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        transform: ((V) -> CharSequence)? = null
 ): A {
     return values.joinTo(buffer, separator, prefix, postfix, limit, truncated, transform)
 }

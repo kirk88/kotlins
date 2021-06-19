@@ -10,16 +10,16 @@ import com.nice.kotlins.adapter.*
 import com.nice.kotlins.adapter.anim.ItemViewAnimation
 
 fun <T, VH : ItemViewHolder> adapterBuilder(
-    context: Context,
-    items: List<T>? = null,
+        context: Context,
+        items: List<T>? = null
 ): RecyclerViewAdapter.Builder<T, VH> =
-    RecyclerViewAdapter.Builder(context, items)
+        RecyclerViewAdapter.Builder(context, items)
 
 class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
-    context: Context,
-    private val viewHolderCreators: Map<Int, ViewHolderCreator<VH>>,
-    private val viewHolderBinders: Map<Int, ViewHolderBinder<T, VH>>,
-    private val itemViewTypeSelector: AdapterItemViewTypeSelector?,
+        context: Context,
+        private val viewHolderCreators: Map<Int, ViewHolderCreator<VH>>,
+        private val viewHolderBinders: Map<Int, ViewHolderBinder<T, VH>>,
+        private val itemViewTypeSelector: AdapterItemViewTypeSelector?
 ) : CommonRecyclerAdapter<T, VH>(context) {
 
     override fun getItemViewType(position: Int): Int {
@@ -27,9 +27,9 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
     }
 
     override fun onCreateItemViewHolder(
-        inflater: LayoutInflater,
-        parent: ViewGroup,
-        viewType: Int,
+            inflater: LayoutInflater,
+            parent: ViewGroup,
+            viewType: Int
     ): VH {
         return viewHolderCreators.getValue(viewType).create(inflater, parent)
     }
@@ -39,8 +39,8 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
     }
 
     class Builder<T, VH : ItemViewHolder>(
-        private val context: Context,
-        private val items: List<T>? = null,
+            private val context: Context,
+            private val items: List<T>? = null
     ) {
 
         internal val viewHolderCreators = mutableMapOf<Int, ViewHolderCreator<VH>>()
@@ -55,8 +55,8 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         private var itemAnimation: ItemViewAnimation? = null
 
         fun register(
-            viewType: Int,
-            creator: ViewHolderCreator<out VH>,
+                viewType: Int,
+                creator: ViewHolderCreator<out VH>
         ) = apply {
             @Suppress("UNCHECKED_CAST")
             viewHolderCreators[viewType] = creator as ViewHolderCreator<VH>
@@ -65,8 +65,8 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         fun register(creator: ViewHolderCreator<out VH>) = register(0, creator)
 
         fun bind(
-            viewType: Int,
-            binder: ViewHolderBinder<out T, out VH>,
+                viewType: Int,
+                binder: ViewHolderBinder<out T, out VH>
         ) = apply {
             @Suppress("UNCHECKED_CAST")
             viewHolderBinders[viewType] = binder as ViewHolderBinder<T, VH>
@@ -99,24 +99,24 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         }
 
         fun build(): RecyclerViewAdapter<T, VH> =
-            RecyclerViewAdapter(
-                context,
-                viewHolderCreators,
-                viewHolderBinders,
-                itemViewTypeSelector
-            ).also {
-                it.setItemAnimation(itemAnimation)
-                it.setOnItemClickListener(itemClickListener)
-                it.setOnItemLongClickListener(itemLongClickListener)
-                it.setOnItemChildClickListener(itemChildClickListener)
-                it.setOnItemChildLongClickListener(itemChildLongClickListener)
-                if (items != null) {
-                    it.setItems(items)
+                RecyclerViewAdapter(
+                        context,
+                        viewHolderCreators,
+                        viewHolderBinders,
+                        itemViewTypeSelector
+                ).also {
+                    it.setItemAnimation(itemAnimation)
+                    it.setOnItemClickListener(itemClickListener)
+                    it.setOnItemLongClickListener(itemLongClickListener)
+                    it.setOnItemChildClickListener(itemChildClickListener)
+                    it.setOnItemChildLongClickListener(itemChildLongClickListener)
+                    if (items != null) {
+                        it.setItems(items)
+                    }
                 }
-            }
 
         fun into(recyclerView: RecyclerView): RecyclerViewAdapter<T, VH> =
-            build().also { recyclerView.adapter = it }
+                build().also { recyclerView.adapter = it }
 
     }
 

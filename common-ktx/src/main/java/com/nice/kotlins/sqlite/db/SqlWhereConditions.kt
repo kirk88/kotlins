@@ -19,8 +19,8 @@ interface SqlWhereCondition {
 }
 
 private class SqlWhereConditionImpl(
-    override val whereClause: String,
-    vararg whereArgs: Any,
+        override val whereClause: String,
+        vararg whereArgs: Any
 ) : SqlWhereCondition {
 
     override val whereArgs: Array<Any> = arrayOf(*whereArgs)
@@ -41,8 +41,8 @@ private class SqlWhereConditionImpl(
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
-            "$whereClause AND ${condition.whereClause}",
-            *args.toTypedArray()
+                "$whereClause AND ${condition.whereClause}",
+                *args.toTypedArray()
         )
     }
 
@@ -51,8 +51,8 @@ private class SqlWhereConditionImpl(
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
-            "$whereClause OR ${condition.whereClause}",
-            *args.toTypedArray()
+                "$whereClause OR ${condition.whereClause}",
+                *args.toTypedArray()
         )
     }
 
@@ -63,45 +63,45 @@ private class SqlWhereConditionImpl(
 }
 
 fun SqlColumnProperty.equal(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}=?", value)
+        SqlWhereConditionImpl("${this.name}=?", value)
 
 fun SqlColumnProperty.notEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<>?", value)
+        SqlWhereConditionImpl("${this.name}<>?", value)
 
 fun SqlColumnProperty.greaterThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>?", value)
+        SqlWhereConditionImpl("${this.name}>?", value)
 
 fun SqlColumnProperty.lessThan(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<?", value)
+        SqlWhereConditionImpl("${this.name}<?", value)
 
 fun SqlColumnProperty.greaterThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}>=?", value)
+        SqlWhereConditionImpl("${this.name}>=?", value)
 
 fun SqlColumnProperty.lessThanOrEqual(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name}<=?", value)
+        SqlWhereConditionImpl("${this.name}<=?", value)
 
 fun SqlColumnProperty.like(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} LIKE ?", value)
+        SqlWhereConditionImpl("${this.name} LIKE ?", value)
 
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} GLOB ?", value)
+        SqlWhereConditionImpl("${this.name} GLOB ?", value)
 
 fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition =
-    SqlWhereConditionImpl(
-        "${this.name} BETWEEN ? AND ?",
-        value1,
-        value2
-    )
+        SqlWhereConditionImpl(
+                "${this.name} BETWEEN ? AND ?",
+                value1,
+                value2
+        )
 
 fun SqlColumnProperty.notBetween(value1: Any, value2: Any): SqlWhereCondition =
-    SqlWhereConditionImpl(
-        "${this.name} NOT BETWEEN ? AND ?",
-        value1,
-        value2
-    )
+        SqlWhereConditionImpl(
+                "${this.name} NOT BETWEEN ? AND ?",
+                value1,
+                value2
+        )
 
 fun SqlColumnProperty.notNull(): SqlWhereCondition =
-    SqlWhereConditionImpl("${this.name} IS NOT NULL")
+        SqlWhereConditionImpl("${this.name} IS NOT NULL")
 
 fun SqlColumnProperty.isNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NULL")
 
@@ -113,8 +113,8 @@ fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition {
     }
     builder.append(")")
     return SqlWhereConditionImpl(
-        builder.toString(),
-        *values
+            builder.toString(),
+            *values
     )
 }
 
@@ -126,8 +126,8 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
     }
     builder.append(")")
     return SqlWhereConditionImpl(
-        builder.toString(),
-        *values
+            builder.toString(),
+            *values
     )
 }
 

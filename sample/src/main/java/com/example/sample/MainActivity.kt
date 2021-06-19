@@ -55,8 +55,8 @@ class MainActivity : NiceActivity() {
 
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
-                this,
-                "key" to "value"
+                    this,
+                    "key" to "value"
             ) {
                 Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
@@ -78,38 +78,38 @@ class MainActivity : NiceActivity() {
                 var start = System.currentTimeMillis()
                 for (index in 0..10000) {
                     val test = Test(index.toLong(),
-                        "jack$index",
-                        20,
-                        index,
-                        listOf("A", "B", "C", "D"),
-                        "lalalalal",
-                        "")
+                            "jack$index",
+                            20,
+                            index,
+                            listOf("A", "B", "C", "D"),
+                            "lalalalal",
+                            "")
 
                     insert(TestTable.TABLE_NAME,
-                        SQLiteDatabase.CONFLICT_REPLACE,
-                        test.toColumnElements())
+                            SQLiteDatabase.CONFLICT_REPLACE,
+                            test.toColumnElements())
                 }
 
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 updateBuilder(TestTable.TABLE_NAME)
-                    .values(TestTable.NAME + "jack100")
-                    .where(TestTable.NAME.equal("jack1") or TestTable.NAME.equal("jack2"))
-                    .execute()
+                        .values(TestTable.NAME + "jack100")
+                        .where(TestTable.NAME.equal("jack1") or TestTable.NAME.equal("jack2"))
+                        .execute()
 
                 updateBuilder(TestTable.TABLE_NAME)
-                    .values(TestTable.NAME + "jack101")
-                    .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
-                    .execute()
+                        .values(TestTable.NAME + "jack101")
+                        .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
+                        .execute()
 
                 Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                    .selection(TestTable.ID.notBetween(3, 6))
-                    .groupBy(TestTable.NAME, TestTable.JJ)
-                    .parseList<Test>()
+                        .selection(TestTable.ID.notBetween(3, 6))
+                        .groupBy(TestTable.NAME, TestTable.JJ)
+                        .parseList<Test>()
 
                 Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
@@ -120,13 +120,13 @@ class MainActivity : NiceActivity() {
         lifecycleScope.launch {
 
             OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                .mapResponse {
-                    throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
-                }.build().asFlow().catch {
-                    Log.e(TAG, "error: $it")
-                }.collect {
-                    Log.e(TAG, "result1: $it")
-                }
+                    .mapResponse {
+                        throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
+                    }.build().asFlow().catch {
+                        Log.e(TAG, "error: $it")
+                    }.collect {
+                        Log.e(TAG, "result1: $it")
+                    }
 
         }
 
@@ -134,10 +134,10 @@ class MainActivity : NiceActivity() {
         val job = step {
             add(Dispatchers.IO) {
                 val result =
-                    OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                        .mapResponse {
-                            it.body!!.string()
-                        }.execute()
+                        OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
+                                .mapResponse {
+                                    it.body!!.string()
+                                }.execute()
 
 
                 Log.e(TAG, "result2: $result")
@@ -171,9 +171,9 @@ class MainActivity : NiceActivity() {
                     val sslSocketFactory = sslContext.socketFactory
 
                     OkHttpClient.Builder()
-                        .sslSocketFactory(sslSocketFactory, trustManager)
-                        .hostnameVerifier(TrustAllHostnameVerifier())
-                        .build()
+                            .sslSocketFactory(sslSocketFactory, trustManager)
+                            .hostnameVerifier(TrustAllHostnameVerifier())
+                            .build()
                 }.execute()
                 Log.e(TAG, "${Thread.currentThread().name}:  $result")
             }

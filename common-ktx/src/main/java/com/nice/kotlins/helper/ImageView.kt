@@ -54,6 +54,6 @@ fun ImageView.fitCenter(): ImageView = apply { scaleType = ImageView.ScaleType.F
 fun ImageView.center(): ImageView = apply { scaleType = ImageView.ScaleType.CENTER }
 
 fun ImageView.centerInside(): ImageView =
-    apply { scaleType = ImageView.ScaleType.CENTER_INSIDE }
+        apply { scaleType = ImageView.ScaleType.CENTER_INSIDE }
 
 fun ImageView.centerCrop(): ImageView = apply { scaleType = ImageView.ScaleType.CENTER_CROP }

@@ -31,7 +31,7 @@ fun Double.between(min: Double, max: Double): Double {
 }
 
 inline fun <T : Number> T.ifZero(defaultValue: () -> T): T =
-    if (this.toInt() != 0) this else defaultValue()
+        if (this.toInt() != 0) this else defaultValue()
 
 inline fun <T : Number> T?.ifNullOrZero(defaultValue: () -> T): T =
-    if (this != null && this.toInt() != 0) this else defaultValue()
+        if (this != null && this.toInt() != 0) this else defaultValue()

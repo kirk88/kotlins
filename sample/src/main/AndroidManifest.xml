@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.sample">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
@@ -17,9 +17,10 @@
         android:theme="@style/Theme.Kotlins"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
-        <activity android:name=".MainActivity"
-            android:label="Sample"
+        <activity
+            android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
+            android:label="Sample"
             android:theme="@style/Theme.Kotlins.NoActionBar.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,8 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SecondActivity"
-            android:theme="@style/Theme.Kotlins.NoActionBar"/>
+        <activity
+            android:name=".SecondActivity"
+            android:theme="@style/Theme.Kotlins.NoActionBar" />
     </application>
 
 </manifest>

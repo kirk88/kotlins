@@ -18,40 +18,40 @@ import com.nice.kotlins.R
 fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
 fun Context.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? =
-    ContextCompat.getColorStateList(this, resId)
+        ContextCompat.getColorStateList(this, resId)
 
 fun Context.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
-    ContextCompat.getDrawable(
-        this,
-        resId
-    )
+        ContextCompat.getDrawable(
+                this,
+                resId
+        )
 )
 
 fun Fragment.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(
-    requireContext(),
-    resId
+        requireContext(),
+        resId
 )
 
 fun Fragment.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? =
-    ContextCompat.getColorStateList(
-        requireContext(),
-        resId
-    )
+        ContextCompat.getColorStateList(
+                requireContext(),
+                resId
+        )
 
 fun Fragment.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
-    ContextCompat.getDrawable(
-        requireContext(),
-        resId
-    )
+        ContextCompat.getDrawable(
+                requireContext(),
+                resId
+        )
 )
 
 fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
 
 fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int =
-    resources.getDimensionPixelOffset(resId)
+        resources.getDimensionPixelOffset(resId)
 
 fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int =
-    resources.getDimensionPixelSize(resId)
+        resources.getDimensionPixelSize(resId)
 
 val Context.isTabletDevice: Boolean
     get() = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >=

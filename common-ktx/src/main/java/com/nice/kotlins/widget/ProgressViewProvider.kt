@@ -19,7 +19,7 @@ import com.nice.kotlins.helper.ifNullOrEmpty
 import com.nice.kotlins.helper.weak
 
 class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
-    Lazy<ProgressView> {
+        Lazy<ProgressView> {
 
     private var cached: ProgressView? = null
 
@@ -157,14 +157,14 @@ val View.progressViewFactory: ProgressViewFactory
 val Context.progressViewFactory: ProgressViewFactory
     get() {
         val activity = this.activity
-            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
+                ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
         return activity.progressViewFactory
     }
 
 val Activity.progressViewFactory: ProgressViewFactory
     get() {
         val view = window?.decorView
-            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
+                ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
         return view.progressViewFactory
     }
 

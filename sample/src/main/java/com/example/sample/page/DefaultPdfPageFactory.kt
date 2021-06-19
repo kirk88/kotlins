@@ -28,7 +28,7 @@ class DefaultPdfPageFactory(context: Context) : PdfPageFactory {
     override fun open(file: File) {
         check(!isOpened) { "Already opened" }
         document =
-            core.newDocument(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY))
+                core.newDocument(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY))
         isOpened = true
     }
 
@@ -76,12 +76,12 @@ class DefaultPdfPageFactory(context: Context) : PdfPageFactory {
 
         val bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.RGB_565)
         core.renderPageBitmap(document,
-            bitmap,
-            index,
-            bounds.left,
-            bounds.top,
-            bounds.width(),
-            bounds.height())
+                bitmap,
+                index,
+                bounds.left,
+                bounds.top,
+                bounds.width(),
+                bounds.height())
         return PdfPage(index, bounds, bitmap).also {
             PdfPageCache[index, bounds] = it
         }

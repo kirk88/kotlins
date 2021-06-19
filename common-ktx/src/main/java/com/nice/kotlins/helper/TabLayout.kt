@@ -27,18 +27,18 @@ fun TabLayout.requireTabAt(index: Int): TabLayout.Tab = requireNotNull(getTabAt(
 }
 
 inline fun TabLayout.doOnTabSelected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-    addOnTabSelectedListener(onTabSelected = action)
+        addOnTabSelectedListener(onTabSelected = action)
 
 inline fun TabLayout.doOnTabUnselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-    addOnTabSelectedListener(onTabUnselected = action)
+        addOnTabSelectedListener(onTabUnselected = action)
 
 inline fun TabLayout.doOnTabReselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-    addOnTabSelectedListener(onTabReselected = action)
+        addOnTabSelectedListener(onTabReselected = action)
 
 inline fun TabLayout.addOnTabSelectedListener(
-    crossinline onTabSelected: (tab: TabLayout.Tab) -> Unit = { _ -> },
-    crossinline onTabUnselected: (tab: TabLayout.Tab) -> Unit = { _ -> },
-    crossinline onTabReselected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+        crossinline onTabSelected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+        crossinline onTabUnselected: (tab: TabLayout.Tab) -> Unit = { _ -> },
+        crossinline onTabReselected: (tab: TabLayout.Tab) -> Unit = { _ -> }
 ): TabLayout.OnTabSelectedListener {
     val listener = object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab) {

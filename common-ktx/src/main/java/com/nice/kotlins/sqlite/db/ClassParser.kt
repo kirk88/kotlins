@@ -14,8 +14,8 @@ annotation class ClassParserConstructor
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 annotation class Column(
-    val name: String = "",
-    val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class,
+        val name: String = "",
+        val converter: KClass<out ColumnValueConverter<out Any, out Any>> = DefaultColumnValueConverter::class
 )
 
 @Target(AnnotationTarget.FIELD)
@@ -80,9 +80,9 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
             val parameterTypes = preferredConstructor.parameterTypes
 
             delegate = ClassConstructorParser(
-                preferredConstructor,
-                parameterAnnotations,
-                parameterTypes
+                    preferredConstructor,
+                    parameterAnnotations,
+                    parameterTypes
             )
         }
     }
@@ -93,19 +93,19 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 }
 
 internal class ClassConstructorParser<T>(
-    private val preferredConstructor: Constructor<*>,
-    private val parameterAnnotations: Array<Array<Annotation>>,
-    private val parameterTypes: Array<Class<*>>,
+        private val preferredConstructor: Constructor<*>,
+        private val parameterAnnotations: Array<Array<Annotation>>,
+        private val parameterTypes: Array<Class<*>>
 ) : MapRowParser<T> {
 
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
         if (parameterTypes.size != row.size) {
             val columnsRendered = row.values.joinToString(prefix = "[", postfix = "]")
             val parameterTypesRendered =
-                parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+                    parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
             throw IllegalArgumentException(
-                "Class parser for ${preferredConstructor.name} " +
-                        "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
+                    "Class parser for ${preferredConstructor.name} " +
+                            "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
             )
         }
 
@@ -130,7 +130,7 @@ internal class ClassConstructorParser<T>(
 }
 
 internal class ClassFieldParser<T>(
-    private val converter: Constructor<*>,
+        private val converter: Constructor<*>
 ) : MapRowParser<T> {
 
     override fun parseRow(row: Map<String, SqlColumnValue>): T {

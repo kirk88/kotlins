@@ -7,7 +7,7 @@ import okhttp3.internal.toImmutableList
 import java.util.*
 
 abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
-    BaseRecyclerAdapter<T, VH>(context) {
+        BaseRecyclerAdapter<T, VH>(context) {
 
     private val lock: Any = Any()
 

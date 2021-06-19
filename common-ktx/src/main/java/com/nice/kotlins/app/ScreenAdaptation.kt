@@ -20,14 +20,14 @@ internal object ScreenAdaptation {
         val targetAdapter = target as? ScreenCompatAdapter
 
         val screenCompatStrategy =
-            targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+                targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
         val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
         val screenCompatHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
         val screenCompatUselessHeight =
-            targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
+                targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
 
         if (screenCompatStrategy == null || screenCompatWidth == null
-            || screenCompatHeight == null || screenCompatUselessHeight == null
+                || screenCompatHeight == null || screenCompatUselessHeight == null
         ) {
             return
         }
@@ -57,10 +57,10 @@ internal object ScreenAdaptation {
     }
 
     private fun setDensity(
-        activity: Activity,
-        targetDensity: Float,
-        targetScaledDensity: Float,
-        targetDensityDpi: Int,
+            activity: Activity,
+            targetDensity: Float,
+            targetScaledDensity: Float,
+            targetDensityDpi: Int
     ) {
         val appDisplayMetrics = activity.application.resources.displayMetrics
         appDisplayMetrics.density = targetDensity

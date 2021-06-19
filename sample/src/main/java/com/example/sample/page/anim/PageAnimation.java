@@ -9,10 +9,10 @@ import com.example.sample.page.PdfPage;
 import com.example.sample.page.PdfPageView;
 
 public abstract class PageAnimation {
-    //正在使用的View
-    protected PdfPageView mView;
     //滑动装置
     protected final Scroller mScroller;
+    //正在使用的View
+    protected PdfPageView mView;
     //移动方向
     protected Direction mDirection = Direction.NONE;
 

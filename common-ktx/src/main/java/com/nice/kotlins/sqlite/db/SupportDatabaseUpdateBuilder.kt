@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 class SupportDatabaseUpdateBuilder(
-    private val database: SupportSQLiteDatabase,
-    private val table: String,
+        private val database: SupportSQLiteDatabase,
+        private val table: String
 ) {
 
     private val values: MutableList<SqlColumnElement> = mutableListOf()
@@ -56,11 +56,11 @@ class SupportDatabaseUpdateBuilder(
         val finalWhereClause = if (whereApplied) whereClause else null
         val finalWhereArgs = if (whereApplied) whereArgs else null
         return database.update(
-            table,
-            conflictAlgorithm,
-            values,
-            finalWhereClause,
-            finalWhereArgs
+                table,
+                conflictAlgorithm,
+                values,
+                finalWhereClause,
+                finalWhereArgs
         )
     }
 

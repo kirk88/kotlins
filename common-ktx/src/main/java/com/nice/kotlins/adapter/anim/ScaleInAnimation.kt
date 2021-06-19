@@ -7,9 +7,9 @@ import android.animation.ObjectAnimator
 import android.view.View
 
 class ScaleInAnimation(
-    private val fromX: Float = DEFAULT_SCALE_FROM_X,
-    private val fromY: Float = DEFAULT_SCALE_FROM_Y,
-    itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD,
+        private val fromX: Float = DEFAULT_SCALE_FROM_X,
+        private val fromY: Float = DEFAULT_SCALE_FROM_Y,
+        itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD
 ) : BaseItemViewAnimation(itemAnimationMode) {
 
     override fun getAnimators(view: View): List<Animator> {

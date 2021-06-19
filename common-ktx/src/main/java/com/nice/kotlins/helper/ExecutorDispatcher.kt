@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * }
  */
 suspend fun <T> suspendBlocking(
-    dispatcher: ExecutorDispatcher = ExecutorDispatchers.Unconfined,
-    block: () -> T,
+        dispatcher: ExecutorDispatcher = ExecutorDispatchers.Unconfined,
+        block: () -> T
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
         runCatching(block).onSuccess {
@@ -137,8 +137,8 @@ internal object MainThreadExecutorDispatcher : HandlerExecutorDispatcher {
                 }
                 try {
                     return Handler::class.java.getDeclaredConstructor(
-                        Looper::class.java, Handler.Callback::class.java,
-                        Boolean::class.javaPrimitiveType
+                            Looper::class.java, Handler.Callback::class.java,
+                            Boolean::class.javaPrimitiveType
                     ).newInstance(looper, null, true)
                 } catch (_: IllegalAccessException) {
                 } catch (_: InstantiationException) {

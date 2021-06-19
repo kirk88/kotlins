@@ -46,7 +46,7 @@ import androidx.lifecycle.Observer
 @SuppressLint("RestrictedApi")
 open class LiveEvent<T> {
     private val observers: SafeIterableMap<Observer<in T>, ObserverWrapper> =
-        SafeIterableMap()
+            SafeIterableMap()
 
     // how many observers are in active state
     private var activeCount = 0
@@ -104,7 +104,7 @@ open class LiveEvent<T> {
             } else {
                 @Suppress("INACCESSIBLE_TYPE")
                 val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> =
-                    observers.iteratorWithAdditions()
+                        observers.iteratorWithAdditions()
                 while (iterator.hasNext()) {
                     considerNotify(iterator.next().value)
                     if (dispatchInvalidated) {
@@ -281,7 +281,7 @@ open class LiveEvent<T> {
     fun removeObserver(observer: Observer<in T>) {
         assertMainThread("removeObserver")
         val removed: ObserverWrapper = observers.remove(observer)
-            ?: return
+                ?: return
         removed.detachObserver()
         removed.activeStateChanged(false)
     }
@@ -402,9 +402,9 @@ open class LiveEvent<T> {
     }
 
     private inner class LifecycleActiveObserver(
-        owner: LifecycleOwner,
-        observer: Observer<in T>,
-        isSticky: Boolean,
+            owner: LifecycleOwner,
+            observer: Observer<in T>,
+            isSticky: Boolean
     ) : LifecycleBoundObserver(owner, observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
@@ -412,9 +412,9 @@ open class LiveEvent<T> {
     }
 
     private open inner class LifecycleBoundObserver(
-        val owner: LifecycleOwner,
-        observer: Observer<in T>,
-        isSticky: Boolean,
+            val owner: LifecycleOwner,
+            observer: Observer<in T>,
+            isSticky: Boolean
     ) : ObserverWrapper(observer, isSticky), LifecycleEventObserver {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
@@ -438,8 +438,8 @@ open class LiveEvent<T> {
     }
 
     private abstract inner class ObserverWrapper(
-        val observer: Observer<in T>,
-        isSticky: Boolean,
+            val observer: Observer<in T>,
+            isSticky: Boolean
     ) {
         var active = false
         var lastVersion: Int = if (isSticky) START_VERSION else dataVersion
@@ -474,8 +474,8 @@ open class LiveEvent<T> {
     }
 
     private inner class AlwaysActiveObserver(
-        observer: Observer<in T>,
-        isSticky: Boolean,
+            observer: Observer<in T>,
+            isSticky: Boolean
     ) : ObserverWrapper(observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return true

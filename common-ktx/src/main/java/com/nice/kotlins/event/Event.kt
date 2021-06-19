@@ -12,8 +12,8 @@ import com.nice.kotlins.helper.intentOf
 import com.nice.kotlins.helper.opt
 
 open class Event(
-    val what: Int = Status.NONE,
-    val message: CharSequence? = null,
+        val what: Int = Status.NONE,
+        val message: CharSequence? = null
 ) {
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
@@ -113,22 +113,22 @@ fun event(events: List<Event>): Event = EventCollection(events = events)
 fun event(vararg events: Event): Event = EventCollection(events = events.toList())
 
 inline fun buildEvent(
-    what: Int = Status.NONE,
-    message: CharSequence? = null,
-    crossinline init: Event.() -> Unit,
+        what: Int = Status.NONE,
+        message: CharSequence? = null,
+        crossinline init: Event.() -> Unit
 ) = Event(what, message).apply(init)
 
 inline fun <reified A : Activity> activityStart(
-    context: Context,
-    vararg pairs: Pair<String, Any?>,
+        context: Context,
+        vararg pairs: Pair<String, Any?>
 ) = buildEvent(Status.ACTIVITY_START) {
     setIntent(context.intent<A>(*pairs))
 }
 
 inline fun <reified A : Activity> activityStartForResult(
-    context: Context,
-    vararg pairs: Pair<String, Any?>,
-    callback: ActivityResultCallback<ActivityResult>,
+        context: Context,
+        vararg pairs: Pair<String, Any?>,
+        callback: ActivityResultCallback<ActivityResult>
 ) = buildEvent((Status.ACTIVITY_START)) {
     setIntent(context.intent<A>(*pairs), callback)
 }
@@ -138,9 +138,9 @@ fun activityReturnResult(resultCode: Int) = buildEvent(Status.ACTIVITY_RESULT) {
 }
 
 fun activityReturnResult(resultCode: Int, vararg pairs: Pair<String, Any?>) =
-    buildEvent(Status.ACTIVITY_RESULT) {
-        setResult(resultCode, intentOf(*pairs))
-    }
+        buildEvent(Status.ACTIVITY_RESULT) {
+            setResult(resultCode, intentOf(*pairs))
+        }
 
 fun activityFinish(): Event = event(Status.ACTIVITY_FINISH)
 
@@ -151,7 +151,7 @@ fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 fun refreshComplete(): Event = Event(Status.REFRESH_COMPLETE)
 
 fun loadMoreComplete(hasMore: Boolean = true): Event =
-    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+        Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
 
 fun loadingShow(message: CharSequence? = null): Event = Event(Status.SHOW_LOADING, message)
 
