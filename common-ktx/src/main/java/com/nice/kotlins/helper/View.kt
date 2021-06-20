@@ -5,11 +5,13 @@ package com.nice.kotlins.helper
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.Px
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.nice.kotlins.helper.Internals.NO_GETTER
 import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
@@ -111,5 +113,29 @@ fun View.gone(animate: Boolean = true) {
         }
     } else {
         visibility = View.GONE
+    }
+}
+
+fun View.showIme() {
+    val shown = Runnable {
+        windowInsetsControllerCompat?.show(WindowInsetsCompat.Type.ime())
+    }
+    if (Build.VERSION.SDK_INT >= 30) {
+        requestFocus()
+        post(shown)
+    } else {
+        shown.run()
+    }
+}
+
+fun View.hideIme() {
+    val hidden = Runnable {
+        windowInsetsControllerCompat?.hide(WindowInsetsCompat.Type.ime())
+    }
+    if (Build.VERSION.SDK_INT >= 30) {
+        requestFocus()
+        post(hidden)
+    } else {
+        hidden.run()
     }
 }
