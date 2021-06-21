@@ -18,6 +18,7 @@ internal class OkRequest(
 
     @Volatile
     private var canceled = false
+    @Volatile
     private var executed = false
 
     val isExecuted: Boolean
