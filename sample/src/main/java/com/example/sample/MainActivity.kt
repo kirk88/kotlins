@@ -7,22 +7,21 @@ import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
 import com.nice.kotlins.app.NiceActivity
+import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
 import com.nice.kotlins.helper.*
 import com.nice.kotlins.http.OkFaker
 import com.nice.kotlins.http.asFlow
 import com.nice.kotlins.sqlite.db.*
-import com.nice.kotlins.widget.ProgressView
-import com.nice.kotlins.widget.TipView
-import com.nice.kotlins.widget.progressViews
-import com.nice.kotlins.widget.tipViews
+import com.nice.kotlins.widget.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -36,13 +35,22 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.X509TrustManager
 
-class MainActivity : NiceActivity() {
+class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
-    private val progressView: ProgressView by progressViews()
+    override val viewModel: MainViewModel by viewModels()
+
+    override val progressView: ProgressView by progressViews()
 
     private val binding: ActivityMainBinding by viewBindings()
 
-    private val tipView: TipView by tipViews()
+    override val tipView: TipView by tipViews()
+
+    override val loaderView: LoaderView by lazy {
+        LoaderLayout.wrap(binding.contentView)
+            .setOnErrorActionListener{
+                viewModel.start()
+            }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -179,6 +187,7 @@ class MainActivity : NiceActivity() {
             }
         }
 
+        viewModel.start()
     }
 
     @SuppressLint("TrustAllX509TrustManager")

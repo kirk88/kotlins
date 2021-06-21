@@ -85,14 +85,14 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private val viewTypeLock = Any()
-    private var viewType: Int = NO_VALUE
-    private var pendingViewType = NO_VALUE
+    private var viewType: Int = NO_TYPE
+    private var pendingViewType = NO_TYPE
     private var isViewTypeChanged = false
     private val showRunnable = Runnable {
         var newViewType: Int
         synchronized(viewTypeLock) {
             newViewType = pendingViewType
-            pendingViewType = NO_VALUE
+            pendingViewType = NO_TYPE
         }
         showImmediately(newViewType)
     }
@@ -382,7 +382,7 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private fun showImmediately(viewType: Int, animate: Boolean = true) {
-        if (viewType == NO_VALUE || this.viewType == viewType) {
+        if (viewType == NO_TYPE || this.viewType == viewType) {
             return
         }
 
@@ -407,7 +407,7 @@ class LoaderLayout @JvmOverloads constructor(
     private fun show(viewType: Int) {
         val postShow: Boolean
         synchronized(viewTypeLock) {
-            postShow = viewType != NO_VALUE
+            postShow = viewType != NO_TYPE
             pendingViewType = viewType
         }
         if (!postShow) {
@@ -614,7 +614,9 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     companion object {
+
         private const val NO_VALUE = Int.MIN_VALUE
+        private const val NO_TYPE = -1
 
         fun wrap(activity: Activity): LoaderView {
             return wrap(

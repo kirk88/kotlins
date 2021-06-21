@@ -16,10 +16,6 @@ class App : MultiDexApplication(), ScreenCompatAdapter {
     override fun onCreate() {
         super.onCreate()
 
-        OkFaker.setGlobalConfig(OkConfig.Builder()
-            .baseUrl("https://www.baidu.com")
-            .client(OkHttpClient())
-            .headers(mapOf<String, String>("fdsaf")))
     }
 
 }
