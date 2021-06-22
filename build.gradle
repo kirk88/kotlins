@@ -28,6 +28,7 @@ buildscript {
 
             recyclerview       : "1.2.1",
             constraintlayout   : "2.1.0-beta02",
+            refreshLayout      : "1.2.0-alpha01",
 
             datastore          : "1.0.0-beta01",
 
@@ -74,6 +75,7 @@ buildscript {
 
             androidxRecyclerview              : "androidx.recyclerview:recyclerview:${versions.recyclerview}",
             androidxConstraintlayout          : "androidx.constraintlayout:constraintlayout:${versions.constraintlayout}",
+            androidxRefreshLayout             : "androidx.swiperefreshlayout:swiperefreshlayout:${versions.refreshLayout}",
 
             androidxDatastorePreferences      : "androidx.datastore:datastore-preferences:${versions.datastore}",
             androidxDatastoreCore             : "androidx.datastore:datastore-core:${versions.datastore}",

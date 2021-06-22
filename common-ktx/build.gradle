@@ -54,6 +54,7 @@ dependencies {
     api deps.androidxAppcompat
     api deps.androidxRecyclerview
     api deps.androidxConstraintlayout
+    api deps.androidxRefreshLayout
     api deps.androidxDatastorePreferences
     api deps.androidxDatastoreCore
     api deps.androidxMultidex
