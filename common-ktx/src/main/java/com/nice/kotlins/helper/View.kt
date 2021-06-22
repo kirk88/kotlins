@@ -68,15 +68,20 @@ inline fun <T : View> View.doOnTouch(crossinline action: (view: T, event: Motion
 }
 
 fun View.visible(animate: Boolean = true) {
-    visibility = View.VISIBLE
     if (animate) {
         alpha = 0.0f
         animate().apply {
             cancel()
             alpha(1.0f)
-            setListener(null)
+            setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?) {
+                    visibility = View.VISIBLE
+                }
+            })
             start()
         }
+    } else {
+        visibility = View.VISIBLE
     }
 }
 
@@ -99,8 +104,8 @@ fun View.invisible(animate: Boolean = true) {
 }
 
 fun View.gone(animate: Boolean = true) {
-    alpha = 1.0f
     if (animate) {
+        alpha = 1.0f
         animate().apply {
             cancel()
             alpha(0.0f)

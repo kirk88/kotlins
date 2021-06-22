@@ -2,6 +2,7 @@
 
 package com.nice.kotlins.helper
 
+import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.max
 import kotlin.math.min
@@ -31,7 +32,14 @@ fun Double.between(min: Double, max: Double): Double {
 }
 
 inline fun <T : Number> T.ifZero(defaultValue: () -> T): T =
-        if (this.toInt() != 0) this else defaultValue()
+    if (this.toInt() != 0) this else defaultValue()
 
 inline fun <T : Number> T?.ifNullOrZero(defaultValue: () -> T): T =
-        if (this != null && this.toInt() != 0) this else defaultValue()
+    if (this != null && this.toInt() != 0) this else defaultValue()
+
+fun Number.toTrimmedString(): String = when (this) {
+    is BigDecimal -> stripTrailingZeros().toPlainString()
+    is Double -> toBigDecimal().stripTrailingZeros().toPlainString()
+    is Float -> toBigDecimal().stripTrailingZeros().toPlainString()
+    else -> toString()
+}

@@ -19,23 +19,19 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.contains
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.R
-import com.nice.kotlins.helper.forEachValue
-import com.nice.kotlins.helper.invisible
-import com.nice.kotlins.helper.visible
-import com.nice.kotlins.helper.weak
+import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.LoaderView.Companion.TYPE_CONTENT_VIEW
 import com.nice.kotlins.widget.LoaderView.Companion.TYPE_EMPTY_VIEW
 import com.nice.kotlins.widget.LoaderView.Companion.TYPE_ERROR_VIEW
 import com.nice.kotlins.widget.LoaderView.Companion.TYPE_LOADING_VIEW
 
 class LoaderLayout @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = R.attr.loaderLayoutStyle
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = R.attr.loaderLayoutStyle
 ) : FrameLayout(context, attrs, defStyleAttr), LoaderView {
 
     private var emptyLayoutId: Int
@@ -69,6 +65,11 @@ class LoaderLayout @JvmOverloads constructor(
     private var loadingTextAppearance: Int
 
     private var defaultViewType: Int
+    private var viewType: Int = NO_TYPE
+
+    private val views: MutableMap<Int, View> = mutableMapOf()
+    private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     private var errorActionListener: LoaderView.OnActionListener? = null
     private val errorButtonClickListener = OnClickListener {
@@ -84,31 +85,12 @@ class LoaderLayout @JvmOverloads constructor(
         }
     }
 
-    private val viewTypeLock = Any()
-    private var viewType: Int = NO_TYPE
-    private var pendingViewType = NO_TYPE
-    private var isViewTypeChanged = false
-    private val showRunnable = Runnable {
-        var newViewType: Int
-        synchronized(viewTypeLock) {
-            newViewType = pendingViewType
-            pendingViewType = NO_TYPE
-        }
-        showImmediately(newViewType)
-    }
-
-    private val views: MutableMap<Int, View> = mutableMapOf()
-
-    private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
-
-    private val inflater: LayoutInflater = LayoutInflater.from(context)
-
     init {
         val a = context.obtainStyledAttributes(
-                attrs,
-                R.styleable.LoaderLayout,
-                defStyleAttr,
-                R.style.LoaderLayout_Style
+            attrs,
+            R.styleable.LoaderLayout,
+            defStyleAttr,
+            R.style.LoaderLayout_Style
         )
         emptyLayoutId = a.getResourceId(R.styleable.LoaderLayout_emptyLayout, NO_VALUE)
         loadingLayoutId = a.getResourceId(R.styleable.LoaderLayout_loadingLayout, NO_VALUE)
@@ -117,11 +99,11 @@ class LoaderLayout @JvmOverloads constructor(
         emptyText = a.getText(R.styleable.LoaderLayout_emptyText)
         emptyTextColor = a.getColor(R.styleable.LoaderLayout_emptyTextColor, NO_VALUE)
         emptyTextAppearance =
-                a.getResourceId(R.styleable.LoaderLayout_emptyTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.LoaderLayout_emptyTextAppearance, NO_VALUE)
         emptyButtonText = a.getText(R.styleable.LoaderLayout_emptyButtonText)
         emptyButtonTextColor = a.getColor(R.styleable.LoaderLayout_emptyButtonTextColor, NO_VALUE)
         emptyButtonTextAppearance =
-                a.getResourceId(R.styleable.LoaderLayout_emptyButtonTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.LoaderLayout_emptyButtonTextAppearance, NO_VALUE)
         emptyButtonBackground = a.getDrawable(R.styleable.LoaderLayout_emptyButtonBackground)
         if (emptyButtonBackground == null) {
             val color = a.getColor(R.styleable.LoaderLayout_emptyButtonBackground, NO_VALUE)
@@ -135,11 +117,11 @@ class LoaderLayout @JvmOverloads constructor(
         errorText = a.getText(R.styleable.LoaderLayout_errorText)
         errorTextColor = a.getColor(R.styleable.LoaderLayout_errorTextColor, NO_VALUE)
         errorTextAppearance =
-                a.getResourceId(R.styleable.LoaderLayout_errorTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.LoaderLayout_errorTextAppearance, NO_VALUE)
         errorButtonText = a.getText(R.styleable.LoaderLayout_errorButtonText)
         errorButtonTextColor = a.getColor(R.styleable.LoaderLayout_errorButtonTextColor, NO_VALUE)
         errorButtonTextAppearance =
-                a.getResourceId(R.styleable.LoaderLayout_errorButtonTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.LoaderLayout_errorButtonTextAppearance, NO_VALUE)
         errorButtonBackground = a.getDrawable(R.styleable.LoaderLayout_errorButtonBackground)
         if (errorButtonBackground == null) {
             val color = a.getColor(R.styleable.LoaderLayout_errorButtonBackground, NO_VALUE)
@@ -154,7 +136,7 @@ class LoaderLayout @JvmOverloads constructor(
         loadingText = a.getText(R.styleable.LoaderLayout_loadingText)
         loadingTextColor = a.getColor(R.styleable.LoaderLayout_loadingTextColor, NO_VALUE)
         loadingTextAppearance =
-                a.getResourceId(R.styleable.LoaderLayout_loadingTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.LoaderLayout_loadingTextAppearance, NO_VALUE)
 
         defaultViewType = a.getInt(R.styleable.LoaderLayout_defaultShow, TYPE_LOADING_VIEW)
         a.recycle()
@@ -194,12 +176,12 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     override fun setContentView(layoutResId: Int): LoaderView {
-        setView(layoutResId, TYPE_CONTENT_VIEW, true)
+        setView(layoutResId, TYPE_CONTENT_VIEW)
         return this
     }
 
     override fun setContentView(view: View): LoaderView {
-        setView(view, TYPE_CONTENT_VIEW, true)
+        setView(view, TYPE_CONTENT_VIEW)
         return this
     }
 
@@ -235,10 +217,10 @@ class LoaderLayout @JvmOverloads constructor(
 
     override fun setDefaultView(viewType: Int): LoaderView {
         check(
-                viewType == TYPE_CONTENT_VIEW
-                        || viewType == TYPE_LOADING_VIEW
-                        || viewType == TYPE_EMPTY_VIEW
-                        || viewType == TYPE_ERROR_VIEW
+            viewType == TYPE_CONTENT_VIEW
+                    || viewType == TYPE_LOADING_VIEW
+                    || viewType == TYPE_EMPTY_VIEW
+                    || viewType == TYPE_ERROR_VIEW
         ) {
             "Non-supported view type: $viewType"
         }
@@ -381,6 +363,10 @@ class LoaderLayout @JvmOverloads constructor(
         setDefaultView(ss.viewType)
     }
 
+    private fun show(viewType: Int) {
+        post(ShowRunnable(viewType))
+    }
+
     private fun showImmediately(viewType: Int, animate: Boolean = true) {
         if (viewType == NO_TYPE || this.viewType == viewType) {
             return
@@ -396,47 +382,99 @@ class LoaderLayout @JvmOverloads constructor(
 
         views.getOrElse(viewType) {
             when (viewType) {
-                TYPE_EMPTY_VIEW -> setView(emptyLayoutId, TYPE_EMPTY_VIEW, true)
-                TYPE_LOADING_VIEW -> setView(loadingLayoutId, TYPE_LOADING_VIEW, true)
-                TYPE_ERROR_VIEW -> setView(errorLayoutId, TYPE_ERROR_VIEW, true)
+                TYPE_EMPTY_VIEW -> setView(emptyLayoutId, TYPE_EMPTY_VIEW)
+                TYPE_LOADING_VIEW -> setView(loadingLayoutId, TYPE_LOADING_VIEW)
+                TYPE_ERROR_VIEW -> setView(errorLayoutId, TYPE_ERROR_VIEW)
                 else -> null
             }
         }?.visible(animate)
     }
 
-    private fun show(viewType: Int) {
-        val postShow: Boolean
-        synchronized(viewTypeLock) {
-            postShow = viewType != NO_TYPE
-            pendingViewType = viewType
-        }
-        if (!postShow) {
-            return
-        }
-        post(showRunnable)
-    }
-
-    private fun setView(
-            layoutResId: Int,
-            viewType: Int,
-            preventAddView: Boolean = false
-    ): View {
+    private fun setView(layoutResId: Int, viewType: Int): View {
         return inflater.inflate(layoutResId, this, false).also {
-            setView(it, viewType, preventAddView)
+            setView(it, viewType)
         }
     }
 
-    private fun setView(view: View, viewType: Int, preventAddView: Boolean = false) {
-        updateView(view, viewType)
+    private fun setView(view: View, viewType: Int) {
+        view.visibility = if (this.viewType == viewType) VISIBLE else INVISIBLE
+        when (viewType) {
+            TYPE_LOADING_VIEW -> {
+                view.findViewById<ProgressBar>(R.id.loading_progress)?.apply {
+                    if (loadingProgressDrawable != null) {
+                        indeterminateDrawable = loadingProgressDrawable
+                    } else if (Build.VERSION.SDK_INT >= 21 && loadingProgressColor != NO_VALUE) {
+                        indeterminateTintMode = PorterDuff.Mode.SRC_ATOP
+                        indeterminateTintList = ColorStateList.valueOf(loadingProgressColor)
+                    }
+                }
+                view.findViewById<TextView>(R.id.loading_text)?.apply {
+                    text = loadingText
+                    if (loadingTextAppearance != NO_VALUE) {
+                        textAppearance = loadingTextAppearance
+                    }
+                    if (loadingTextColor != NO_VALUE) {
+                        textColor = loadingTextColor
+                    }
+                    visibility = if (loadingText.isNullOrBlank()) GONE else VISIBLE
+                }
+            }
+            TYPE_EMPTY_VIEW -> {
+                view.findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(this.emptyImage)
+                view.findViewById<TextView>(R.id.empty_text)?.apply {
+                    text = emptyText
+                    if (emptyTextAppearance != NO_VALUE) {
+                        textAppearance = emptyTextAppearance
+                    }
+                    if (emptyTextColor != NO_VALUE) {
+                        textColor = emptyTextColor
+                    }
+                }
+                view.findViewById<Button>(R.id.empty_button)?.apply {
+                    text = emptyButtonText
+                    background = emptyButtonBackground
+                    if (emptyButtonTextAppearance != NO_VALUE) {
+                        textAppearance = emptyButtonTextAppearance
+                    }
+                    if (emptyButtonTextColor != NO_VALUE) {
+                        setTextColor(emptyButtonTextColor)
+                    }
+                    visibility = if (emptyButtonVisible) VISIBLE else GONE
+                    setOnClickListener(emptyButtonClickListener)
+                }
+            }
+            TYPE_ERROR_VIEW -> {
+                view.findViewById<ImageView>(R.id.error_image)?.setImageDrawable(this.errorImage)
+                view.findViewById<TextView>(R.id.error_text)?.apply {
+                    text = errorText
+                    if (errorTextAppearance != NO_VALUE) {
+                        textAppearance = errorTextAppearance
+                    }
+                    if (errorTextColor != NO_VALUE) {
+                        textColor = errorTextColor
+                    }
+                }
+                view.findViewById<Button>(R.id.error_button)?.apply {
+                    text = errorButtonText
+                    background = errorButtonBackground
+                    if (errorButtonTextAppearance != NO_VALUE) {
+                        textAppearance = errorButtonTextAppearance
+                    }
+                    if (errorButtonTextColor != NO_VALUE) {
+                        textColor = errorButtonTextColor
+                    }
+                    visibility = if (errorButtonVisible) VISIBLE else GONE
+                    setOnClickListener(errorButtonClickListener)
+                }
+            }
+        }
 
         val existingView = views.put(viewType, view)
         if (existingView != null) {
             removeView(existingView)
         }
 
-        view.visibility = if (this.viewType == viewType) VISIBLE else INVISIBLE
-
-        if (!preventAddView || contains(view)) {
+        if (contains(view)) {
             return
         }
 
@@ -453,85 +491,9 @@ class LoaderLayout @JvmOverloads constructor(
         }
     }
 
-    private fun updateView(view: View, viewType: Int) {
-        when (viewType) {
-            TYPE_LOADING_VIEW -> {
-                val progressBar = view.findViewById<ProgressBar>(R.id.loading_progress)
-                val textView = view.findViewById<TextView>(R.id.loading_text)
-                progressBar?.let {
-                    if (loadingProgressDrawable != null) {
-                        it.indeterminateDrawable = loadingProgressDrawable
-                    } else if (Build.VERSION.SDK_INT >= 21 && loadingProgressColor != NO_VALUE) {
-                        it.indeterminateTintMode = PorterDuff.Mode.SRC_ATOP
-                        it.indeterminateTintList =
-                                ColorStateList.valueOf(loadingProgressColor)
-                    }
-                }
-                textView?.let {
-                    it.text = loadingText
-                    if (loadingTextAppearance != NO_VALUE) {
-                        TextViewCompat.setTextAppearance(it, loadingTextAppearance)
-                    }
-                    if (loadingTextColor != NO_VALUE) {
-                        it.setTextColor(loadingTextColor)
-                    }
-                    it.visibility = if (loadingText.isNullOrBlank()) GONE else VISIBLE
-                }
-            }
-            TYPE_EMPTY_VIEW -> {
-                val imageView = view.findViewById<ImageView>(R.id.empty_image)
-                val textView = view.findViewById<TextView>(R.id.empty_text)
-                val emptyButton = view.findViewById<Button>(R.id.empty_button)
-                imageView?.setImageDrawable(this.emptyImage)
-                textView?.let {
-                    it.text = emptyText
-                    if (emptyTextAppearance != NO_VALUE) {
-                        TextViewCompat.setTextAppearance(it, emptyTextAppearance)
-                    }
-                    if (emptyTextColor != NO_VALUE) {
-                        it.setTextColor(emptyTextColor)
-                    }
-                }
-                emptyButton?.let {
-                    it.text = emptyButtonText
-                    it.background = emptyButtonBackground
-                    if (emptyButtonTextAppearance != NO_VALUE) {
-                        TextViewCompat.setTextAppearance(it, emptyButtonTextAppearance)
-                    }
-                    if (emptyButtonTextColor != NO_VALUE) {
-                        it.setTextColor(emptyButtonTextColor)
-                    }
-                    it.setOnClickListener(emptyButtonClickListener)
-                    it.visibility = if (emptyButtonVisible) VISIBLE else GONE
-                }
-            }
-            TYPE_ERROR_VIEW -> {
-                val imageView = view.findViewById<ImageView>(R.id.error_image)
-                val textView = view.findViewById<TextView>(R.id.error_text)
-                val errorButton = view.findViewById<Button>(R.id.error_button)
-                imageView?.setImageDrawable(this.errorImage)
-                textView?.let {
-                    it.text = errorText
-                    if (errorTextAppearance != NO_VALUE) {
-                        TextViewCompat.setTextAppearance(it, errorTextAppearance)
-                    }
-                    if (errorTextColor != NO_VALUE) {
-                        it.setTextColor(errorTextColor)
-                    }
-                }
-                errorButton?.let {
-                    it.text = errorButtonText
-                    it.background = errorButtonBackground
-                    if (errorButtonTextAppearance != NO_VALUE) {
-                        TextViewCompat.setTextAppearance(it, errorButtonTextAppearance)
-                    }
-                    if (errorButtonTextColor != NO_VALUE) {
-                        it.setTextColor(errorButtonTextColor)
-                    }
-                    it.setOnClickListener(errorButtonClickListener)
-                    it.visibility = if (errorButtonVisible) VISIBLE else GONE
-                }
-            }
+    private inner class ShowRunnable(private val newViewType: Int) : Runnable {
+        override fun run() {
+            showImmediately(newViewType)
         }
     }
 
@@ -567,8 +529,8 @@ class LoaderLayout @JvmOverloads constructor(
     }
 
     private class AdapterDataObserver(
-            val adapter: RecyclerView.Adapter<*>,
-            loaderLayout: () -> LoaderLayout
+        val adapter: RecyclerView.Adapter<*>,
+        loaderLayout: () -> LoaderLayout
     ) : RecyclerView.AdapterDataObserver() {
 
         private val layout: LoaderLayout? by weak(loaderLayout)
@@ -620,7 +582,7 @@ class LoaderLayout @JvmOverloads constructor(
 
         fun wrap(activity: Activity): LoaderView {
             return wrap(
-                    (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
+                (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
             )
         }
 
