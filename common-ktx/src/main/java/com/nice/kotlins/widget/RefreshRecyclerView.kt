@@ -317,6 +317,10 @@ class RefreshRecyclerView @JvmOverloads constructor(
                 if (field != value) {
                     field = value
 
+                    if (value) {
+                        loadMoreState = STATE_IDLE
+                    }
+
                     if (itemCount > 0) {
                         if (value) {
                             notifyItemInserted(itemCount - 1)
@@ -324,10 +328,6 @@ class RefreshRecyclerView @JvmOverloads constructor(
                             notifyItemRemoved(itemCount)
                         }
                     }
-                }
-
-                if (value) {
-                    loadMoreState = STATE_IDLE
                 }
             }
 
