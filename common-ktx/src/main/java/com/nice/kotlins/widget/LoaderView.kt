@@ -96,4 +96,5 @@ interface LoaderView {
     fun interface OnActionListener {
         fun onAction(view: LoaderView)
     }
+
 }

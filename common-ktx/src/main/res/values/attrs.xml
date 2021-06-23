@@ -102,4 +102,21 @@
         <attr name="layout_attributesOverlay" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="RefreshRecyclerView">
+        <attr name="android:padding" />
+        <attr name="android:paddingTop" />
+        <attr name="android:paddingBottom" />
+        <attr name="android:paddingStart" />
+        <attr name="android:paddingEnd" />
+        <attr name="android:paddingLeft" />
+        <attr name="android:paddingRight" />
+        <attr name="android:orientation" />
+        <attr name="android:overScrollMode"/>
+        <attr name="layoutManager" />
+        <attr name="spanCount" />
+        <attr name="reverseLayout" />
+        <attr name="stackFromEnd" />
+        <attr name="fastScrollEnabled" />
+    </declare-styleable>
+
 </resources>

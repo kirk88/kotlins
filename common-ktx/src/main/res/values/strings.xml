@@ -1,8 +1,12 @@
 <resources>
 
-    <string name="loader_empty_tip">暂无数据~</string>
-    <string name="loader_progress_tip">加载中…</string>
-    <string name="loader_error_tip">加载失败~</string>
-    <string name="loader_retry_tip">点击重试</string>
+    <string name="loader_empty_message">暂无数据~</string>
+    <string name="loader_progress_message">加载中…</string>
+    <string name="loader_error_message">加载失败~</string>
+    <string name="loader_retry_message">点击重试</string>
+
+    <string name="load_more_running_message">正在加载…</string>
+    <string name="load_more_failed_message">加载失败，点击重试</string>
+    <string name="load_more_completed_message">没有更多了</string>
 
 </resources>

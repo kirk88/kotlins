@@ -21,6 +21,6 @@
         android:layout_marginTop="10dp"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
-        tools:text="@string/loader_progress_tip"
+        tools:text="@string/loader_progress_message"
         tools:textAppearance="@style/TextAppearance.LoaderLayout.LoadingText" />
 </LinearLayout>

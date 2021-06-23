@@ -2,8 +2,8 @@ package com.nice.kotlins.widget
 
 interface RefreshView {
 
-    fun finishRefresh()
+    fun finishRefresh(state: Int = 0)
 
-    fun finishLoadMore(hasMore: Boolean = true)
+    fun finishLoadMore(state: Int = 0)
 
 }

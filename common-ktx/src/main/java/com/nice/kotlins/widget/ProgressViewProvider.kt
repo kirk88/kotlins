@@ -126,7 +126,7 @@ internal class DefaultProgressView(parent: View) : ProgressView {
     private fun showInternal() {
         popup.findViewById<TextView>(R.id.message)?.apply {
             text = messageText.ifNullOrEmpty {
-                context.getText(R.string.loader_progress_tip)
+                context.getText(R.string.loader_progress_message)
             }
         }
         view?.let { popup.showAtLocation(it, Gravity.CENTER, 0, 0) }

@@ -11,12 +11,12 @@
         <item name="errorLayout">@layout/abc_loader_layout_error</item>
 
         <item name="emptyImage">@null</item>
-        <item name="emptyText">@string/loader_empty_tip</item>
-        <item name="loadingText">@string/loader_progress_tip</item>
+        <item name="emptyText">@string/loader_empty_message</item>
+        <item name="loadingText">@string/loader_progress_message</item>
         <item name="loadingProgressColor">?attr/colorAccent</item>
         <item name="errorImage">@null</item>
-        <item name="errorText">@string/loader_error_tip</item>
-        <item name="errorButtonText">@string/loader_retry_tip</item>
+        <item name="errorText">@string/loader_error_message</item>
+        <item name="errorButtonText">@string/loader_retry_message</item>
 
         <item name="emptyTextAppearance">@style/TextAppearance.LoaderLayout.EmptyText</item>
         <item name="emptyButtonTextAppearance">@style/TextAppearance.LoaderLayout.ButtonText

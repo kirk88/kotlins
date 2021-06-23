@@ -22,7 +22,7 @@
         android:layout_gravity="center"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        tools:text="@string/loader_empty_tip"
+        tools:text="@string/loader_empty_message"
         tools:textAppearance="@style/TextAppearance.LoaderLayout.EmptyText" />
 
     <androidx.appcompat.widget.AppCompatButton

@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
             android:textAppearance="?textAppearanceBody1"
-            tools:text="@string/loader_progress_tip" />
+            tools:text="@string/loader_progress_message" />
 
     </LinearLayout>
 

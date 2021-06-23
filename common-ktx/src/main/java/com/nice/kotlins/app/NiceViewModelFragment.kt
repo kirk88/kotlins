@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.EventLifecycleObserver
 import com.nice.kotlins.event.Status
+import com.nice.kotlins.event.getOrDefault
 import com.nice.kotlins.viewmodel.ViewModelController
 import com.nice.kotlins.viewmodel.ViewModelEventDispatcher
 import com.nice.kotlins.viewmodel.ViewModelEvents
@@ -18,10 +19,10 @@ import com.nice.kotlins.widget.RefreshView
 import com.nice.kotlins.widget.TipView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
-        NiceFragment(contentLayoutId),
-        EventLifecycleObserver,
-        ViewModelEventDispatcher,
-        ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
+    NiceFragment(contentLayoutId),
+    EventLifecycleObserver,
+    ViewModelEventDispatcher,
+    ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val loaderView: LoaderView? = null
 
@@ -64,9 +65,8 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
         when (event.what) {
             Status.SHOW_PROGRESS -> progressView?.show(event.message)
             Status.DISMISS_PROGRESS -> progressView?.dismiss()
-            Status.REFRESH_COMPLETE -> refreshView?.finishRefresh()
-            Status.LOADMORE_COMPLETE -> refreshView?.finishLoadMore()
-            Status.LOADMORE_COMPLETE_NO_MORE -> refreshView?.finishLoadMore(false)
+            Status.REFRESH_COMPLETE -> refreshView?.finishRefresh(event.getOrDefault("state", 0))
+            Status.LOADMORE_COMPLETE -> refreshView?.finishLoadMore(event.getOrDefault("state", 0))
             Status.SHOW_LOADING -> loaderView?.apply {
                 if (event.message != null) setLoadingText(event.message)
                 showLoading()

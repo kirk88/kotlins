@@ -9,7 +9,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.nice.kotlins.helper.intent
 import com.nice.kotlins.helper.intentOf
-import com.nice.kotlins.helper.opt
 
 open class Event(
     val what: Int = Status.NONE,
@@ -87,18 +86,17 @@ object Status {
     const val DISMISS_PROGRESS = STATUS_BASE + 2
     const val REFRESH_COMPLETE = STATUS_BASE + 3
     const val LOADMORE_COMPLETE = STATUS_BASE + 4
-    const val LOADMORE_COMPLETE_NO_MORE = STATUS_BASE + 5
 
-    const val SHOW_LOADING = STATUS_BASE + 6
-    const val SHOW_EMPTY = STATUS_BASE + 7
-    const val SHOW_ERROR = STATUS_BASE + 8
-    const val SHOW_CONTENT = STATUS_BASE + 9
+    const val SHOW_LOADING = STATUS_BASE + 5
+    const val SHOW_EMPTY = STATUS_BASE + 6
+    const val SHOW_ERROR = STATUS_BASE + 7
+    const val SHOW_CONTENT = STATUS_BASE + 8
 
-    const val ACTIVITY_FINISH = STATUS_BASE + 10
-    const val ACTIVITY_START = STATUS_BASE + 11
-    const val ACTIVITY_RESULT = STATUS_BASE + 12
+    const val ACTIVITY_FINISH = STATUS_BASE + 9
+    const val ACTIVITY_START = STATUS_BASE + 10
+    const val ACTIVITY_RESULT = STATUS_BASE + 11
 
-    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value <= STATUS_BASE + 12
+    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value <= STATUS_BASE + 11
 
 }
 
@@ -133,10 +131,12 @@ fun activityReturnResult(resultCode: Int) = buildEvent(Status.ACTIVITY_RESULT) {
     setResult(resultCode)
 }
 
-fun activityReturnResult(resultCode: Int, vararg pairs: Pair<String, Any?>) =
-    buildEvent(Status.ACTIVITY_RESULT) {
-        setResult(resultCode, intentOf(*pairs))
-    }
+fun activityReturnResult(
+    resultCode: Int,
+    vararg pairs: Pair<String, Any?>
+) = buildEvent(Status.ACTIVITY_RESULT) {
+    setResult(resultCode, intentOf(*pairs))
+}
 
 fun activityFinish(): Event = event(Status.ACTIVITY_FINISH)
 
@@ -144,10 +144,13 @@ fun progressShow(message: CharSequence? = null): Event = Event(Status.SHOW_PROGR
 
 fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
 
-fun refreshComplete(): Event = Event(Status.REFRESH_COMPLETE)
+fun refreshComplete(state: Int = 0): Event = buildEvent(Status.REFRESH_COMPLETE) {
+    put("state", state)
+}
 
-fun loadMoreComplete(hasMore: Boolean = true): Event =
-    Event(hasMore.opt(Status.LOADMORE_COMPLETE, Status.LOADMORE_COMPLETE_NO_MORE))
+fun loadMoreComplete(state: Int = 0): Event = buildEvent(Status.LOADMORE_COMPLETE) {
+    put("state", state)
+}
 
 fun loadingShow(message: CharSequence? = null): Event = Event(Status.SHOW_LOADING, message)
 
