@@ -325,7 +325,10 @@ class RefreshRecyclerView @JvmOverloads constructor(
                         }
                     }
                 }
-                loadMoreState = STATE_IDLE
+
+                if (value) {
+                    loadMoreState = STATE_IDLE
+                }
             }
 
         var loadMoreState = STATE_IDLE
