@@ -45,7 +45,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     override val tipView: TipView by tipViews()
 
     override val statefulView: StatefulView by lazy {
-        StatefulLayout.wrap(binding.contentView)
+        StatefulFrameLayout.wrap(binding.contentView)
             .setOnErrorActionListener{
                 viewModel.start()
             }

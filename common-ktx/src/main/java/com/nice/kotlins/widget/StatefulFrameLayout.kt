@@ -28,7 +28,7 @@ import com.nice.kotlins.widget.StatefulView.Companion.TYPE_EMPTY_VIEW
 import com.nice.kotlins.widget.StatefulView.Companion.TYPE_ERROR_VIEW
 import com.nice.kotlins.widget.StatefulView.Companion.TYPE_LOADING_VIEW
 
-class StatefulLayout @JvmOverloads constructor(
+class StatefulFrameLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.statefulLayoutStyle
@@ -200,7 +200,7 @@ class StatefulLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyView(view: View): StatefulLayout {
+    override fun setEmptyView(view: View): StatefulFrameLayout {
         setView(view, TYPE_EMPTY_VIEW)
         return this
     }
@@ -530,10 +530,10 @@ class StatefulLayout @JvmOverloads constructor(
 
     private class AdapterDataObserver(
         val adapter: RecyclerView.Adapter<*>,
-        loaderLayout: () -> StatefulLayout
+        layout: () -> StatefulFrameLayout
     ) : RecyclerView.AdapterDataObserver() {
 
-        private val layout: StatefulLayout? by weak(loaderLayout)
+        private val layout: StatefulFrameLayout? by weak(layout)
 
         private var registered: Boolean = false
 
@@ -595,7 +595,7 @@ class StatefulLayout @JvmOverloads constructor(
             val params = view.layoutParams
             val index = parent.indexOfChild(view)
             parent.removeView(view)
-            val layout = StatefulLayout(view.context)
+            val layout = StatefulFrameLayout(view.context)
             layout.setContentView(view)
             parent.addView(layout, index, params)
             return layout
