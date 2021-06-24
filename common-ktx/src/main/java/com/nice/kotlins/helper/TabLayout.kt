@@ -26,14 +26,11 @@ fun TabLayout.requireTabAt(index: Int): TabLayout.Tab = requireNotNull(getTabAt(
     "No tab with index $index is found in the TabLayout"
 }
 
-inline fun TabLayout.doOnTabSelected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-        addOnTabSelectedListener(onTabSelected = action)
+inline fun TabLayout.doOnTabSelected(crossinline action: (tab: TabLayout.Tab) -> Unit) = addOnTabSelectedListener(onTabSelected = action)
 
-inline fun TabLayout.doOnTabUnselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-        addOnTabSelectedListener(onTabUnselected = action)
+inline fun TabLayout.doOnTabUnselected(crossinline action: (tab: TabLayout.Tab) -> Unit) = addOnTabSelectedListener(onTabUnselected = action)
 
-inline fun TabLayout.doOnTabReselected(crossinline action: (tab: TabLayout.Tab) -> Unit) =
-        addOnTabSelectedListener(onTabReselected = action)
+inline fun TabLayout.doOnTabReselected(crossinline action: (tab: TabLayout.Tab) -> Unit) = addOnTabSelectedListener(onTabReselected = action)
 
 inline fun TabLayout.addOnTabSelectedListener(
         crossinline onTabSelected: (tab: TabLayout.Tab) -> Unit = { _ -> },

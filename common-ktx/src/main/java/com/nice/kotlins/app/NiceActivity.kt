@@ -14,8 +14,7 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
 
     private var subtitle: CharSequence? = null
 
-    val activityForResultLauncher =
-        PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+    val activityForResultLauncher = PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

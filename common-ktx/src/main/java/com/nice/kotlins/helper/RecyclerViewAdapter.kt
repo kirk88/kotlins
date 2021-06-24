@@ -12,8 +12,7 @@ import com.nice.kotlins.adapter.anim.ItemViewAnimation
 fun <T, VH : ItemViewHolder> adapterBuilder(
         context: Context,
         items: List<T>? = null
-): RecyclerViewAdapter.Builder<T, VH> =
-        RecyclerViewAdapter.Builder(context, items)
+): RecyclerViewAdapter.Builder<T, VH> = RecyclerViewAdapter.Builder(context, items)
 
 class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         context: Context,
@@ -98,8 +97,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
             itemAnimation = animation
         }
 
-        fun build(): RecyclerViewAdapter<T, VH> =
-                RecyclerViewAdapter(
+        fun build(): RecyclerViewAdapter<T, VH> = RecyclerViewAdapter(
                         context,
                         viewHolderCreators,
                         viewHolderBinders,
@@ -115,8 +113,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
                     }
                 }
 
-        fun into(recyclerView: RecyclerView): RecyclerViewAdapter<T, VH> =
-                build().also { recyclerView.adapter = it }
+        fun into(recyclerView: RecyclerView): RecyclerViewAdapter<T, VH> = build().also { recyclerView.adapter = it }
 
     }
 

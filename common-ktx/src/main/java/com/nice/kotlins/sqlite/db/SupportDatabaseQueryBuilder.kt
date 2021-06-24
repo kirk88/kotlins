@@ -128,11 +128,8 @@ class SupportDatabaseQueryBuilder(
 
 }
 
-inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingle(): T =
-        parseSingle(classParser())
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingle(): T = parseSingle(classParser())
 
-inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingleOrNull(): T? =
-        parseSingleOrNull(classParser())
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseSingleOrNull(): T? = parseSingleOrNull(classParser())
 
-inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseList(): List<T> =
-        parseList(classParser())
+inline fun <reified T : Any> SupportDatabaseQueryBuilder.parseList(): List<T> = parseList(classParser())

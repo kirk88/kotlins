@@ -75,11 +75,9 @@ fun Any?.toJsonOrNull(): String? = this?.runCatching { toJson() }?.getOrNull()
 
 fun Any.toJson(): String = if (this is String) this else GlobalGson.toJson(this)
 
-fun JsonObject.getOrNull(name: String): JsonElement? =
-        this[name]?.let { if (it is JsonNull) null else it }
+fun JsonObject.getOrNull(name: String): JsonElement? = this[name]?.let { if (it is JsonNull) null else it }
 
-fun JsonArray.getOrNull(index: Int): JsonElement? =
-        this[index]?.let { if (it is JsonNull) null else it }
+fun JsonArray.getOrNull(index: Int): JsonElement? = this[index]?.let { if (it is JsonNull) null else it }
 
 fun JsonObject.getString(name: String, defaultValue: String = ""): String {
     val element = getOrNull(name) ?: return defaultValue
@@ -109,54 +107,45 @@ fun JsonObject.getBoolean(name: String, defaultValue: Boolean = false): Boolean 
     return defaultValue
 }
 
-fun JsonObject.getNumber(name: String, defaultValue: Number = 0): Number =
-        getOrNull(name)?.let {
+fun JsonObject.getNumber(name: String, defaultValue: Number = 0): Number = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asNumber else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getDouble(name: String, defaultValue: Double = 0.toDouble()): Double =
-        getOrNull(name)?.let {
+fun JsonObject.getDouble(name: String, defaultValue: Double = 0.toDouble()): Double = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asDouble else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getFloat(name: String, defaultValue: Float = 0.toFloat()): Float =
-        getOrNull(name)?.let {
+fun JsonObject.getFloat(name: String, defaultValue: Float = 0.toFloat()): Float = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asFloat else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getLong(name: String, defaultValue: Long = 0.toLong()): Long =
-        getOrNull(name)?.let {
+fun JsonObject.getLong(name: String, defaultValue: Long = 0.toLong()): Long = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asLong else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getInt(name: String, defaultValue: Int = 0): Int =
-        getOrNull(name)?.let {
+fun JsonObject.getInt(name: String, defaultValue: Int = 0): Int = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asInt else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getShort(name: String, defaultValue: Short = 0.toShort()): Short =
-        getOrNull(name)?.let {
+fun JsonObject.getShort(name: String, defaultValue: Short = 0.toShort()): Short = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asShort else defaultValue
         } ?: defaultValue
 
-fun JsonObject.getByte(name: String, defaultValue: Byte = 0.toByte()): Byte =
-        getOrNull(name)?.let {
+fun JsonObject.getByte(name: String, defaultValue: Byte = 0.toByte()): Byte = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asByte else defaultValue
         } ?: defaultValue
 
 fun JsonObject.getBigDecimal(
         name: String,
         defaultValue: BigDecimal = 0.toBigDecimal()
-): BigDecimal =
-        getOrNull(name)?.let {
+): BigDecimal = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asBigDecimal else defaultValue
         } ?: defaultValue
 
 fun JsonObject.getBigInteger(
         name: String,
         defaultValue: BigInteger = 0.toBigInteger()
-): BigInteger =
-        getOrNull(name)?.let {
+): BigInteger = getOrNull(name)?.let {
             if (it is JsonPrimitive && it.isNumber) it.asBigInteger else defaultValue
         } ?: defaultValue
 
@@ -164,8 +153,7 @@ val JsonArray.size: Int get() = size()
 
 val JsonObject.size: Int get() = size()
 
-operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> =
-        entrySet().iterator()
+operator fun JsonObject.iterator(): Iterator<MutableMap.MutableEntry<String, JsonElement>> = entrySet().iterator()
 
 inline fun JsonObject.forEach(block: (name: String, value: JsonElement) -> Unit) {
     for ((name, element) in entrySet()) {

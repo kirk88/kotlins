@@ -45,8 +45,7 @@ import androidx.lifecycle.Observer
 </T> */
 @SuppressLint("RestrictedApi")
 open class LiveEvent<T> {
-    private val observers: SafeIterableMap<Observer<in T>, ObserverWrapper> =
-            SafeIterableMap()
+    private val observers: SafeIterableMap<Observer<in T>, ObserverWrapper> = SafeIterableMap()
 
     // how many observers are in active state
     private var activeCount = 0
@@ -103,8 +102,7 @@ open class LiveEvent<T> {
                 considerNotify(initiator)
             } else {
                 @Suppress("INACCESSIBLE_TYPE")
-                val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> =
-                        observers.iteratorWithAdditions()
+                val iterator: Iterator<Map.Entry<Observer<in T>, ObserverWrapper>> = observers.iteratorWithAdditions()
                 while (iterator.hasNext()) {
                     considerNotify(iterator.next().value)
                     if (dispatchInvalidated) {

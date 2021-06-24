@@ -18,8 +18,7 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
         NiceFragmentDelegate(this, this)
     }
 
-    val activityForResultLauncher =
-            PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
+    val activityForResultLauncher = PocketActivityResultLauncher(ActivityResultContracts.StartActivityForResult())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -11,26 +11,19 @@ import androidx.fragment.app.Fragment
 
 fun intentOf(vararg values: Pair<String, Any?>) = Intent().putExtras(*values)
 
-fun intentOf(action: String, vararg values: Pair<String, Any?>) =
-        Intent(action).putExtras(*values)
+fun intentOf(action: String, vararg values: Pair<String, Any?>) = Intent(action).putExtras(*values)
 
-inline fun <reified T> intentOf(context: Context, vararg values: Pair<String, Any?>) =
-        Intent(context, T::class.java).putExtras(*values)
+inline fun <reified T> intentOf(context: Context, vararg values: Pair<String, Any?>) = Intent(context, T::class.java).putExtras(*values)
 
-inline fun <reified T> intentOf(fragment: Fragment, vararg values: Pair<String, Any?>) =
-        Intent(fragment.requireContext(), T::class.java).putExtras(*values)
+inline fun <reified T> intentOf(fragment: Fragment, vararg values: Pair<String, Any?>) = Intent(fragment.requireContext(), T::class.java).putExtras(*values)
 
-inline fun <reified T> Context.intent(vararg values: Pair<String, Any?>) =
-        Intent(this, T::class.java).putExtras(*values)
+inline fun <reified T> Context.intent(vararg values: Pair<String, Any?>) = Intent(this, T::class.java).putExtras(*values)
 
-inline fun <reified T> Fragment.intent(vararg values: Pair<String, Any?>) =
-        Intent(requireContext(), T::class.java).putExtras(*values)
+inline fun <reified T> Fragment.intent(vararg values: Pair<String, Any?>) = Intent(requireContext(), T::class.java).putExtras(*values)
 
-inline fun <reified T : Activity> Context.startActivity(vararg values: Pair<String, Any?>) =
-        startActivity(intent<T>(*values))
+inline fun <reified T : Activity> Context.startActivity(vararg values: Pair<String, Any?>) = startActivity(intent<T>(*values))
 
-inline fun <reified T : Activity> Fragment.startActivity(vararg values: Pair<String, Any?>) =
-        startActivity(intent<T>(*values))
+inline fun <reified T : Activity> Fragment.startActivity(vararg values: Pair<String, Any?>) = startActivity(intent<T>(*values))
 
 inline fun <reified T : Activity> Context.startActivity(
         options: ActivityOptionsCompat?,

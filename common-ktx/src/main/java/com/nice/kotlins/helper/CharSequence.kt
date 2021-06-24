@@ -230,14 +230,11 @@ fun CharSequence.justify(ems: Int): SpannableStringBuilder {
     return builder
 }
 
-inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R =
-        this ?: defaultValue()
+inline fun <R : CharSequence, C : R> C?.ifNull(defaultValue: () -> R): R = this ?: defaultValue()
 
-inline fun <R : CharSequence, C : R> C?.ifNullOrEmpty(defaultValue: () -> R): R =
-        if (this.isNullOrEmpty()) defaultValue() else this
+inline fun <R : CharSequence, C : R> C?.ifNullOrEmpty(defaultValue: () -> R): R = if (this.isNullOrEmpty()) defaultValue() else this
 
-inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R =
-        if (this.isNullOrBlank()) defaultValue() else this
+inline fun <R : CharSequence, C : R> C?.ifNullOrBlack(defaultValue: () -> R): R = if (this.isNullOrBlank()) defaultValue() else this
 
 fun CharSequence.splitSkipBlank(
         vararg delimiters: String,

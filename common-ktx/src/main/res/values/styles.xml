@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <attr name="statefulLayoutStyle" format="reference" />
+    <attr name="statefulFrameLayoutStyle" format="reference" />
 
-    <style name="StatefulLayout" />
-
-    <style name="StatefulLayout.Style">
+    <style name="Widget.AppCompat.StatefulFrameLayout" parent="android:Widget">
         <item name="emptyLayout">@layout/abc_loader_layout_empty</item>
         <item name="loadingLayout">@layout/abc_loader_layout_loading</item>
         <item name="errorLayout">@layout/abc_loader_layout_error</item>
@@ -18,37 +16,37 @@
         <item name="errorText">@string/loader_error_message</item>
         <item name="errorButtonText">@string/loader_retry_message</item>
 
-        <item name="emptyTextAppearance">@style/TextAppearance.StatefulLayout.EmptyText</item>
-        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulLayout.ButtonText
+        <item name="emptyTextAppearance">@style/TextAppearance.StatefulFrameLayout.EmptyText</item>
+        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText
         </item>
-        <item name="loadingTextAppearance">@style/TextAppearance.StatefulLayout.LoadingText</item>
-        <item name="errorTextAppearance">@style/TextAppearance.StatefulLayout.ErrorText</item>
-        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulLayout.ButtonText
+        <item name="loadingTextAppearance">@style/TextAppearance.StatefulFrameLayout.LoadingText
+        </item>
+        <item name="errorTextAppearance">@style/TextAppearance.StatefulFrameLayout.ErrorText</item>
+        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText
         </item>
 
         <item name="emptyButtonBackground">@drawable/loading_layout_button</item>
         <item name="errorButtonBackground">@drawable/loading_layout_button</item>
     </style>
 
+    <style name="TextAppearance.StatefulFrameLayout" parent="TextAppearance.AppCompat" />
 
-    <style name="TextAppearance.StatefulLayout" parent="TextAppearance.AppCompat" />
-
-    <style name="TextAppearance.StatefulLayout.EmptyText">
+    <style name="TextAppearance.StatefulFrameLayout.EmptyText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.StatefulLayout.LoadingText">
+    <style name="TextAppearance.StatefulFrameLayout.LoadingText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.StatefulLayout.ErrorText">
+    <style name="TextAppearance.StatefulFrameLayout.ErrorText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.StatefulLayout.ButtonText">
+    <style name="TextAppearance.StatefulFrameLayout.ButtonText">
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">16sp</item>
     </style>

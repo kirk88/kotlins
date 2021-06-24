@@ -76,10 +76,8 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
-        val topPadding: Int =
-            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
-        val bottomPadding: Int =
-            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+        val topPadding: Int = if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+        val bottomPadding: Int = if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val top = child.top - params.topMargin + topPadding
         val bottom = child.bottom + params.bottomMargin + bottomPadding
@@ -98,10 +96,8 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
-        val leftPadding: Int =
-            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
-        val rightPadding: Int =
-            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+        val leftPadding: Int = if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+        val rightPadding: Int = if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val left = child.left - params.leftMargin + leftPadding
         val right = child.right + params.rightMargin + rightPadding
@@ -121,10 +117,8 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
-        val topPadding: Int =
-            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
-        val bottomPadding: Int =
-            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+        val topPadding: Int = if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+        val bottomPadding: Int = if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val top = child.top - params.topMargin + topPadding
         val bottom = child.bottom + params.bottomMargin + bottomPadding
@@ -143,10 +137,8 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
-        val leftPadding: Int =
-            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
-        val rightPadding: Int =
-            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+        val leftPadding: Int = if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+        val rightPadding: Int = if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val left = child.left - params.leftMargin + leftPadding
         val right = child.right + params.rightMargin + rightPadding

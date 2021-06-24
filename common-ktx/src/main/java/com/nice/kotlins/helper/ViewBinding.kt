@@ -108,8 +108,7 @@ object ViewBindings {
     }.invoke(null, inflater, parent, attachToParent) as VB
 
     @Suppress("UNCHECKED_CAST")
-    fun <VB : ViewBinding> bind(viewBindingClass: Class<VB>, rootView: View) =
-            methods.getOrPut(viewBindingClass) {
+    fun <VB : ViewBinding> bind(viewBindingClass: Class<VB>, rootView: View) = methods.getOrPut(viewBindingClass) {
                 viewBindingClass.getMethod("bind", View::class.java)
             }.invoke(null, rootView) as VB
 
@@ -167,11 +166,9 @@ inline fun <reified VB : ViewBinding> viewBinding(
         attachToParent: Boolean = false
 ) = ViewBindings.inflate(VB::class.java, parent.layoutInflater, parent, attachToParent)
 
-inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
-        ViewBindings.bind(VB::class.java, rootView)
+inline fun <reified VB : ViewBinding> viewBinding(rootView: View) = ViewBindings.bind(VB::class.java, rootView)
 
-inline fun <reified VB : ViewBinding> viewBinding(rootViewBinding: ViewBinding) =
-        ViewBindings.bind(VB::class.java, rootViewBinding.root)
+inline fun <reified VB : ViewBinding> viewBinding(rootViewBinding: ViewBinding) = ViewBindings.bind(VB::class.java, rootViewBinding.root)
 
 inline fun <reified VB : ViewBinding> bindingView(
         inflater: LayoutInflater,
@@ -186,21 +183,17 @@ inline fun <reified VB : ViewBinding> bindingView(
         block: VB.() -> Unit
 ): View = viewBinding<VB>(parent, attachToParent).apply(block).root
 
-inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
-        viewBinding<VB>(rootView).apply(block).root
+inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) = viewBinding<VB>(rootView).apply(block).root
 
-inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
-        viewBinding<VB>(binding.root).apply(block).root
+inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) = viewBinding<VB>(binding.root).apply(block).root
 
 fun Activity.setContentView(binding: ViewBinding) = setContentView(binding.root)
 
-fun Activity.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
-        addContentView(binding.root, params)
+fun Activity.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) = addContentView(binding.root, params)
 
 fun NiceFragment.setContentView(binding: ViewBinding) = setContentView(binding.root)
 
-fun NiceFragment.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
-        addContentView(binding.root, params)
+fun NiceFragment.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) = addContentView(binding.root, params)
 
 fun ViewGroup.addView(binding: ViewBinding) = addView(binding.root)
 

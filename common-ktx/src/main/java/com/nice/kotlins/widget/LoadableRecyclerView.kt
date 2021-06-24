@@ -60,19 +60,14 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
     init {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.LoadableRecyclerView)
-        val padding =
-            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_padding, 0)
-        val paddingTop =
-            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingTop, padding)
-        val paddingBottom =
-            ta.getDimensionPixelSize(
-                R.styleable.LoadableRecyclerView_android_paddingBottom,
-                padding
-            )
-        val paddingLeft =
-            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingLeft, padding)
-        val paddingRight =
-            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingRight, padding)
+        val padding = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_padding, 0)
+        val paddingTop = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingTop, padding)
+        val paddingBottom = ta.getDimensionPixelSize(
+            R.styleable.LoadableRecyclerView_android_paddingBottom,
+            padding
+        )
+        val paddingLeft = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingLeft, padding)
+        val paddingRight = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingRight, padding)
         val paddingStart = ta.getDimensionPixelSize(
             R.styleable.LoadableRecyclerView_android_paddingStart,
             paddingLeft
@@ -84,8 +79,7 @@ class LoadableRecyclerView @JvmOverloads constructor(
         recyclerView.setPaddingRelative(paddingStart, paddingTop, paddingEnd, paddingBottom)
 
         if (ta.hasValue(R.styleable.LoadableRecyclerView_android_overScrollMode)) {
-            val overScrollMode =
-                ta.getInt(R.styleable.LoadableRecyclerView_android_overScrollMode, 0)
+            val overScrollMode = ta.getInt(R.styleable.LoadableRecyclerView_android_overScrollMode, 0)
             recyclerView.overScrollMode = overScrollMode
         }
 
@@ -118,11 +112,9 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
     fun getLayoutManager(): RecyclerView.LayoutManager? = recyclerView.layoutManager
 
-    fun addItemDecoration(decor: RecyclerView.ItemDecoration) =
-        recyclerView.addItemDecoration(decor)
+    fun addItemDecoration(decor: RecyclerView.ItemDecoration) = recyclerView.addItemDecoration(decor)
 
-    fun removeItemDecoration(decor: RecyclerView.ItemDecoration) =
-        recyclerView.removeItemDecoration(decor)
+    fun removeItemDecoration(decor: RecyclerView.ItemDecoration) = recyclerView.removeItemDecoration(decor)
 
     fun invalidateItemDecorations() = recyclerView.invalidateItemDecorations()
 
@@ -140,23 +132,17 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
     fun setHasFixedSize(hasFixedSize: Boolean) = recyclerView.setHasFixedSize(hasFixedSize)
 
-    fun addOnScrollListener(listener: RecyclerView.OnScrollListener) =
-        recyclerView.addOnScrollListener(listener)
+    fun addOnScrollListener(listener: RecyclerView.OnScrollListener) = recyclerView.addOnScrollListener(listener)
 
-    fun removeOnScrollListener(listener: RecyclerView.OnScrollListener) =
-        recyclerView.removeOnScrollListener(listener)
+    fun removeOnScrollListener(listener: RecyclerView.OnScrollListener) = recyclerView.removeOnScrollListener(listener)
 
-    fun setColorSchemeColors(@ColorInt vararg colors: Int) =
-        refreshView.setColorSchemeColors(*colors)
+    fun setColorSchemeColors(@ColorInt vararg colors: Int) = refreshView.setColorSchemeColors(*colors)
 
-    fun setColorSchemeResources(@ColorRes vararg colorResIds: Int) =
-        refreshView.setColorSchemeResources(*colorResIds)
+    fun setColorSchemeResources(@ColorRes vararg colorResIds: Int) = refreshView.setColorSchemeResources(*colorResIds)
 
-    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) =
-        refreshView.setProgressBackgroundColorSchemeColor(color)
+    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) = refreshView.setProgressBackgroundColorSchemeColor(color)
 
-    fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) =
-        refreshView.setProgressBackgroundColorSchemeResource(colorResId)
+    fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) = refreshView.setProgressBackgroundColorSchemeResource(colorResId)
 
     override fun setRefreshState(state: LoadState) {
         if (refreshState != state) {
@@ -237,38 +223,31 @@ class LoadableRecyclerView @JvmOverloads constructor(
                         } catch (e1: NoSuchMethodException) {
                             e1.initCause(e)
                             throw IllegalStateException(
-                                attrs?.positionDescription
-                                        + ": Error creating LayoutManager " + className, e1
+                                "${attrs?.positionDescription}: Error creating LayoutManager $className", e1
                             )
                         }
                     }
                     constructor.isAccessible = true
-                    recyclerView.layoutManager =
-                        constructor.newInstance(context, attrs, defStyleAttr, 0)
+                    recyclerView.layoutManager = constructor.newInstance(context, attrs, defStyleAttr, 0)
                 } catch (e: ClassNotFoundException) {
                     throw IllegalStateException(
-                        attrs?.positionDescription
-                                + ": Unable to find LayoutManager " + className, e
+                        "${attrs?.positionDescription}: Unable to find LayoutManager $className", e
                     )
                 } catch (e: InvocationTargetException) {
                     throw IllegalStateException(
-                        (attrs?.positionDescription
-                                + ": Could not instantiate the LayoutManager: " + className), e
+                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e
                     )
                 } catch (e: InstantiationException) {
                     throw IllegalStateException(
-                        (attrs?.positionDescription
-                                + ": Could not instantiate the LayoutManager: " + className), e
+                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e
                     )
                 } catch (e: IllegalAccessException) {
                     throw IllegalStateException(
-                        (attrs?.positionDescription
-                                + ": Cannot access non-public constructor " + className), e
+                        "${attrs?.positionDescription}: Cannot access non-public constructor $className", e
                     )
                 } catch (e: ClassCastException) {
                     throw IllegalStateException(
-                        (attrs?.positionDescription
-                                + ": Class is not a LayoutManager " + className), e
+                        "${attrs?.positionDescription}: Class is not a LayoutManager $className", e
                     )
                 }
             }

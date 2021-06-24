@@ -97,8 +97,7 @@ class OkConfig internal constructor(
 
         fun headers(vararg parameters: Pair<String, String>) = headers(parameters.toMap())
 
-        fun headers(operation: RequestPairs<String, String>.() -> Unit) =
-            headers(RequestPairs<String, String>().apply(operation).toMap())
+        fun headers(operation: RequestPairs<String, String>.() -> Unit) = headers(RequestPairs<String, String>().apply(operation).toMap())
 
         fun removeHeader(name: String) = apply {
             this.headers?.remove(name)
@@ -111,11 +110,9 @@ class OkConfig internal constructor(
             this.queryParameters!!.putAll(parameters)
         }
 
-        fun queryParameters(vararg parameters: Pair<String, String>) =
-            queryParameters(parameters.toMap())
+        fun queryParameters(vararg parameters: Pair<String, String>) = queryParameters(parameters.toMap())
 
-        fun queryParameters(operation: RequestPairs<String, String>.() -> Unit) =
-            queryParameters(RequestPairs<String, String>().apply(operation).toMap())
+        fun queryParameters(operation: RequestPairs<String, String>.() -> Unit) = queryParameters(RequestPairs<String, String>().apply(operation).toMap())
 
         fun removeQueryParameter(name: String) = apply {
             this.queryParameters?.remove(name)
@@ -128,11 +125,9 @@ class OkConfig internal constructor(
             this.formParameters!!.putAll(parameters)
         }
 
-        fun formParameters(vararg parameters: Pair<String, String>) =
-            formParameters(parameters.toMap())
+        fun formParameters(vararg parameters: Pair<String, String>) = formParameters(parameters.toMap())
 
-        fun formParameters(operation: RequestPairs<String, String>.() -> Unit) =
-            formParameters(RequestPairs<String, String>().apply(operation).toMap())
+        fun formParameters(operation: RequestPairs<String, String>.() -> Unit) = formParameters(RequestPairs<String, String>().apply(operation).toMap())
 
         fun removeFormParameter(name: String) = apply {
             this.formParameters?.remove(name)

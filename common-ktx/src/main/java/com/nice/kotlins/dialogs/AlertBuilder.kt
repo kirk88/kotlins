@@ -112,8 +112,6 @@ fun AlertBuilder<*>.customView(
     customView = View.inflate(context, layoutResId, null).apply(action)
 }
 
-fun AlertBuilder<*>.okButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        positiveButton(android.R.string.ok, handler)
+fun AlertBuilder<*>.okButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = positiveButton(android.R.string.ok, handler)
 
-fun AlertBuilder<*>.cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        negativeButton(android.R.string.cancel, handler)
+fun AlertBuilder<*>.cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = negativeButton(android.R.string.cancel, handler)

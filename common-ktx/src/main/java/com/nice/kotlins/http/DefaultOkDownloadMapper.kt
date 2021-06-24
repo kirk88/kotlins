@@ -96,8 +96,7 @@ open class DefaultOkDownloadMapper internal constructor(
 
         private fun rename(srcFile: File): File {
             val tmpFilePath = srcFile.absolutePath
-            val destFile =
-                    File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_FILE_SUFFIX_TMP)))
+            val destFile = File(tmpFilePath.substring(0, tmpFilePath.indexOf(DOWNLOAD_FILE_SUFFIX_TMP)))
             return if (srcFile.renameTo(destFile)) {
                 destFile
             } else throw IOException("Rename file failed")

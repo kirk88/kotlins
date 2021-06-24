@@ -19,12 +19,10 @@ internal object ScreenAdaptation {
         val appAdapter = application as? ScreenCompatAdapter
         val targetAdapter = target as? ScreenCompatAdapter
 
-        val screenCompatStrategy =
-                targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+        val screenCompatStrategy = targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
         val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
         val screenCompatHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
-        val screenCompatUselessHeight =
-                targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
+        val screenCompatUselessHeight = targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
 
         if (screenCompatStrategy == null || screenCompatWidth == null
                 || screenCompatHeight == null || screenCompatUselessHeight == null

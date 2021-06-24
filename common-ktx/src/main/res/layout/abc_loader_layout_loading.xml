@@ -22,5 +22,5 @@
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         tools:text="@string/loader_progress_message"
-        tools:textAppearance="@style/TextAppearance.StatefulLayout.LoadingText" />
+        tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.LoadingText" />
 </LinearLayout>

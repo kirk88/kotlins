@@ -43,8 +43,7 @@ interface SqlColumnProperty {
     operator fun plus(value: Any?): SqlColumnElement
 
     companion object {
-        fun create(name: String, type: SqlType): SqlColumnProperty =
-                SqlColumnPropertyImpl(name, type)
+        fun create(name: String, type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(name, type)
     }
 
 }

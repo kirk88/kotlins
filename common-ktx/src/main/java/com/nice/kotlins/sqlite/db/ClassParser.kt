@@ -101,8 +101,7 @@ internal class ClassConstructorParser<T>(
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
         if (parameterTypes.size != row.size) {
             val columnsRendered = row.values.joinToString(prefix = "[", postfix = "]")
-            val parameterTypesRendered =
-                    parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+            val parameterTypesRendered = parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
             throw IllegalArgumentException(
                     "Class parser for ${preferredConstructor.name} " +
                             "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"

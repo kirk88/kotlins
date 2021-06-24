@@ -13,8 +13,7 @@ class SlideInLeftAnimation(
 ) : BaseItemViewAnimation(itemAnimationMode) {
 
 
-    override fun getAnimators(view: View): List<Animator> =
-            listOf(
+    override fun getAnimators(view: View): List<Animator> = listOf(
                     ObjectAnimator.ofFloat(
                             view,
                             "translationX",

@@ -414,16 +414,11 @@ class TitleAppBar @JvmOverloads constructor(
 
         toolbar = findSuitableTitleToolbar()
 
-        val titleMargin: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMargin, 0)
-        val marginStart: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginStart, titleMargin)
-        val marginEnd: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginEnd, titleMargin)
-        val marginTop: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginTop, titleMargin)
-        val marginBottom: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginBottom, titleMargin)
+        val titleMargin: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMargin, 0)
+        val marginStart: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginStart, titleMargin)
+        val marginEnd: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginEnd, titleMargin)
+        val marginTop: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginTop, titleMargin)
+        val marginBottom: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginBottom, titleMargin)
         if (marginStart != NO_DIMEN || marginEnd != NO_DIMEN
             || marginTop != NO_DIMEN || marginBottom != NO_DIMEN
         ) {
@@ -435,10 +430,8 @@ class TitleAppBar @JvmOverloads constructor(
             )
         }
 
-        val contentInsetLeft: Int =
-            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetLeft, NO_DIMEN)
-        val contentInsetRight: Int =
-            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetRight, NO_DIMEN)
+        val contentInsetLeft: Int = ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetLeft, NO_DIMEN)
+        val contentInsetRight: Int = ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetRight, NO_DIMEN)
 
         if (contentInsetLeft != NO_DIMEN
             || contentInsetRight != NO_DIMEN
@@ -449,10 +442,8 @@ class TitleAppBar @JvmOverloads constructor(
             )
         }
 
-        val contentInsetStart: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetStart, NO_DIMEN)
-        val contentInsetEnd: Int =
-            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetEnd, NO_DIMEN)
+        val contentInsetStart: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetStart, NO_DIMEN)
+        val contentInsetEnd: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetEnd, NO_DIMEN)
         if (contentInsetStart != NO_DIMEN ||
             contentInsetEnd != NO_DIMEN
         ) {
@@ -488,8 +479,7 @@ class TitleAppBar @JvmOverloads constructor(
             )
         ) {
             val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
-            val showHomeAsUp =
-                ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
+            val showHomeAsUp = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
             provideSupportActionBar(activity) {
                 setDisplayShowHomeEnabled(showHome)
                 setDisplayHomeAsUpEnabled(showHomeAsUp)
@@ -557,11 +547,9 @@ class TitleAppBar @JvmOverloads constructor(
             inflateMenu(ta.getResourceId(R.styleable.TitleAppBar_menu, 0))
         }
 
-        bottomDividerHeight =
-            ta.getDimensionPixelSize(R.styleable.TitleAppBar_bottomDividerHeight, 1)
+        bottomDividerHeight = ta.getDimensionPixelSize(R.styleable.TitleAppBar_bottomDividerHeight, 1)
         bottomDividerColor = ta.getColor(R.styleable.TitleAppBar_bottomDividerColor, Color.GRAY)
-        showBottomDivider =
-            ta.getInt(R.styleable.TitleAppBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
+        showBottomDivider = ta.getInt(R.styleable.TitleAppBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
 
         ta.recycle()
     }
@@ -1163,8 +1151,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.TitleToolbar_Layout)
-            isOverrideAttributes =
-                ta.getBoolean(R.styleable.TitleToolbar_Layout_layout_overrideAttributes, false)
+            isOverrideAttributes = ta.getBoolean(R.styleable.TitleToolbar_Layout_layout_overrideAttributes, false)
             ta.recycle()
         }
 
@@ -1188,11 +1175,9 @@ class TitleToolbar @JvmOverloads constructor(
             defStyleAttr, 0
         )
 
-        displayShowTitleEnabled =
-            ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
+        displayShowTitleEnabled = ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
         titleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_titleTextAppearance, 0)
-        subtitleTextAppearance =
-            ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
+        subtitleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
         navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
         navigationIconTintMode = DrawableUtils.parseTintMode(
             ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),

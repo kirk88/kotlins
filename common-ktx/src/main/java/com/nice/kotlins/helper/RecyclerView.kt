@@ -19,8 +19,6 @@ inline fun RecyclerView.addOnScrollListener(
     return listener
 }
 
-inline fun RecyclerView.doOnScrollStateChanged(crossinline onScrollStateChanged: (recyclerView: RecyclerView, newState: Int) -> Unit) =
-    addOnScrollListener(onScrollStateChanged = onScrollStateChanged)
+inline fun RecyclerView.doOnScrollStateChanged(crossinline onScrollStateChanged: (recyclerView: RecyclerView, newState: Int) -> Unit) = addOnScrollListener(onScrollStateChanged = onScrollStateChanged)
 
-inline fun RecyclerView.doOnScrolled(crossinline onScrolled: (recyclerView: RecyclerView, dx: Int, dy: Int) -> Unit) =
-    addOnScrollListener(onScrolled = onScrolled)
+inline fun RecyclerView.doOnScrolled(crossinline onScrolled: (recyclerView: RecyclerView, dx: Int, dy: Int) -> Unit) = addOnScrollListener(onScrolled = onScrolled)

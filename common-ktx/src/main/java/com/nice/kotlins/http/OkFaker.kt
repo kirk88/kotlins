@@ -195,8 +195,7 @@ class OkFaker<T> private constructor(
 
         fun headers(vararg headers: Pair<String, Any?>) = headers(mapOf(*headers))
 
-        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) =
-            headers(requestPairsOf(operation).toMap())
+        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = headers(requestPairsOf(operation).toMap())
 
         fun addHeaders(headers: Map<String, Any?>) = apply {
             headers.forEach {
@@ -206,8 +205,7 @@ class OkFaker<T> private constructor(
 
         fun addHeaders(vararg headers: Pair<String, Any?>) = addHeaders(mapOf(*headers))
 
-        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) =
-            addHeaders(requestPairsOf(operation).toMap())
+        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = addHeaders(requestPairsOf(operation).toMap())
 
         fun removeHeaders(name: String) = apply {
             builder.removeHeaders(name)
@@ -219,11 +217,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun queryParameters(vararg queryParameters: Pair<String, Any?>) =
-            queryParameters(mapOf(*queryParameters))
+        fun queryParameters(vararg queryParameters: Pair<String, Any?>) = queryParameters(mapOf(*queryParameters))
 
-        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            queryParameters(requestPairsOf(operation).toMap())
+        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = queryParameters(requestPairsOf(operation).toMap())
 
         fun addQueryParameters(queryParameters: Map<String, Any?>) = apply {
             queryParameters.forEach {
@@ -231,11 +227,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) =
-            addQueryParameters(mapOf(*queryParameters))
+        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = addQueryParameters(mapOf(*queryParameters))
 
-        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            addQueryParameters(requestPairsOf(operation).toMap())
+        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addQueryParameters(requestPairsOf(operation).toMap())
 
         fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -243,11 +237,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) =
-            encodedQueryParameters(mapOf(*encodedQueryParameters))
+        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = encodedQueryParameters(mapOf(*encodedQueryParameters))
 
-        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            encodedQueryParameters(requestPairsOf(operation).toMap())
+        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
             encodedQueryParameters.forEach {
@@ -255,11 +247,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) =
-            addEncodedQueryParameters(mapOf(*encodedQueryParameters))
+        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = addEncodedQueryParameters(mapOf(*encodedQueryParameters))
 
-        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            addEncodedQueryParameters(requestPairsOf(operation).toMap())
+        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addEncodedQueryParameters(requestPairsOf(operation).toMap())
 
         fun removeQueryParameters(name: String) = apply {
             builder.removeQueryParameters(name)
@@ -275,11 +265,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun formParameters(vararg formParameters: Pair<String, Any?>) =
-            formParameters(mapOf(*formParameters))
+        fun formParameters(vararg formParameters: Pair<String, Any?>) = formParameters(mapOf(*formParameters))
 
-        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            formParameters(requestPairsOf(operation).toMap())
+        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = formParameters(requestPairsOf(operation).toMap())
 
         fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = apply {
             encodedFormParameters.forEach {
@@ -287,11 +275,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) =
-            encodedFormParameters(mapOf(*encodedFormParameters))
+        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = encodedFormParameters(mapOf(*encodedFormParameters))
 
-        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) =
-            encodedFormParameters(requestPairsOf(operation).toMap())
+        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedFormParameters(requestPairsOf(operation).toMap())
 
         fun formDataParts(formDataParts: Map<String, Any?>) = apply {
             formDataParts.forEach {
@@ -313,11 +299,9 @@ class OkFaker<T> private constructor(
             }
         }
 
-        fun formDataParts(vararg formDataParts: Pair<String, Any?>) =
-            formDataParts(mapOf(*formDataParts))
+        fun formDataParts(vararg formDataParts: Pair<String, Any?>) = formDataParts(mapOf(*formDataParts))
 
-        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) =
-            formDataParts(requestPairsOf(operation).toMap())
+        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = formDataParts(requestPairsOf(operation).toMap())
 
         fun parts(bodies: Collection<RequestBody>) = apply {
             bodies.forEach {
@@ -474,38 +458,32 @@ class OkFaker<T> private constructor(
         ): Builder<T> = Builder<T>(method).apply(block)
 
         @JvmStatic
-        inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.GET, globalConfig)
+        inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.GET, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
         @JvmStatic
-        inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.POST, globalConfig)
+        inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.POST, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
         @JvmStatic
-        inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.DELETE, globalConfig)
+        inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.DELETE, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
         @JvmStatic
-        inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PUT, globalConfig)
+        inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PUT, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
         @JvmStatic
-        inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.HEAD, globalConfig)
+        inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.HEAD, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
         @JvmStatic
-        inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> =
-            Builder<T>(OkRequestMethod.PATCH, globalConfig)
+        inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PATCH, globalConfig)
                 .mapResponse(object : TypeToken<T>() {}.type)
                 .apply(block)
 
@@ -562,8 +540,7 @@ fun <K, V> RequestPairs<K, V>.putAll(vararg pairsFrom: Pair<K, V>) = putAll(pair
 
 fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = map { it.key to it.value }.toMap()
 
-fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M =
-    map { it.key to it.value }.toMap(destination)
+fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M = map { it.key to it.value }.toMap(destination)
 
 inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -> Unit): RequestPairs<String, Any?> {
     return RequestPairs<String, Any?>().apply(operation)

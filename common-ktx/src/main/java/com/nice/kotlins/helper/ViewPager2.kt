@@ -12,11 +12,9 @@ inline fun ViewPager2.doOnPageScrolled(
         ) -> Unit
 ) = registerOnPageChangeCallback(onPageScrolled = action)
 
-inline fun ViewPager2.doOnPageSelected(crossinline action: (position: Int) -> Unit) =
-        registerOnPageChangeCallback(onPageSelected = action)
+inline fun ViewPager2.doOnPageSelected(crossinline action: (position: Int) -> Unit) = registerOnPageChangeCallback(onPageSelected = action)
 
-inline fun ViewPager2.doOnPageScrollStateChanged(crossinline action: (position: Int) -> Unit) =
-        registerOnPageChangeCallback(onPageScrollStateChanged = action)
+inline fun ViewPager2.doOnPageScrollStateChanged(crossinline action: (position: Int) -> Unit) = registerOnPageChangeCallback(onPageScrollStateChanged = action)
 
 inline fun ViewPager2.registerOnPageChangeCallback(
         crossinline onPageScrolled: (

@@ -11,8 +11,7 @@ class AlphaInAnimation(
         itemAnimationMode: ItemViewAnimationMode = ItemViewAnimationMode.UPWARD
 ) : BaseItemViewAnimation(itemAnimationMode) {
 
-    override fun getAnimators(view: View): List<Animator> =
-            listOf(ObjectAnimator.ofFloat(view, "alpha", from, 1f))
+    override fun getAnimators(view: View): List<Animator> = listOf(ObjectAnimator.ofFloat(view, "alpha", from, 1f))
 
 
     companion object {

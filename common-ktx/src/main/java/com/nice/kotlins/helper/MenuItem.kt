@@ -9,8 +9,7 @@ import androidx.annotation.ColorInt
 import androidx.core.view.ActionProvider
 import androidx.core.view.MenuItemCompat
 
-inline fun MenuItem.doOnMenuItemClick(crossinline action: (item: MenuItem) -> Boolean): MenuItem =
-        setOnMenuItemClickListener { item ->
+inline fun MenuItem.doOnMenuItemClick(crossinline action: (item: MenuItem) -> Boolean): MenuItem = setOnMenuItemClickListener { item ->
             action(item)
         }
 

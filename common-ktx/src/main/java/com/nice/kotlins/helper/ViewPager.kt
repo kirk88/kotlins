@@ -12,11 +12,9 @@ inline fun ViewPager.doOnPageScrolled(
         ) -> Unit
 ) = addOnPageChangeListener(onPageScrolled = action)
 
-inline fun ViewPager.doOnPageSelected(crossinline action: (position: Int) -> Unit) =
-        addOnPageChangeListener(onPageSelected = action)
+inline fun ViewPager.doOnPageSelected(crossinline action: (position: Int) -> Unit) = addOnPageChangeListener(onPageSelected = action)
 
-inline fun ViewPager.doOnPageScrollStateChanged(crossinline action: (position: Int) -> Unit) =
-        addOnPageChangeListener(onPageScrollStateChanged = action)
+inline fun ViewPager.doOnPageScrollStateChanged(crossinline action: (position: Int) -> Unit) = addOnPageChangeListener(onPageScrollStateChanged = action)
 
 inline fun ViewPager.addOnPageChangeListener(
         crossinline onPageScrolled: (

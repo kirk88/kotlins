@@ -330,8 +330,7 @@ class NavigationController internal constructor(
 
 }
 
-operator fun NavigationController.get(@IdRes id: Int): NavigationDestination =
-        requireNotNull(findDestination(id)) {
+operator fun NavigationController.get(@IdRes id: Int): NavigationDestination = requireNotNull(findDestination(id)) {
             "No destination for $id was found in $this"
         }
 

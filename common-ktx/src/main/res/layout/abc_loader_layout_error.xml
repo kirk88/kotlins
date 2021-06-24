@@ -23,7 +23,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         tools:text="@string/loader_error_message"
-        tools:textAppearance="@style/TextAppearance.StatefulLayout.ErrorText" />
+        tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ErrorText" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@id/error_button"
@@ -34,7 +34,7 @@
         android:minWidth="160dp"
         tools:background="@drawable/loading_layout_button"
         tools:text="@string/loader_retry_message"
-        tools:textAppearance="@style/TextAppearance.StatefulLayout.ButtonText"
+        tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ButtonText"
         tools:textColor="#ffffff" />
 
 </LinearLayout>

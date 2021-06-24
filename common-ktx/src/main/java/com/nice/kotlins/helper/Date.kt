@@ -11,14 +11,11 @@ private fun getFormatter(pattern: String): SimpleDateFormat {
     return SimpleDateFormat(pattern, Locale.getDefault())
 }
 
-fun Date.toDateString(pattern: String = DEFAULT_TIME_PATTERN): String =
-        getFormatter(pattern).format(this)
+fun Date.toDateString(pattern: String = DEFAULT_TIME_PATTERN): String = getFormatter(pattern).format(this)
 
-fun String.toDate(pattern: String = DEFAULT_TIME_PATTERN): Date =
-        requireNotNull(getFormatter(pattern).parse(this))
+fun String.toDate(pattern: String = DEFAULT_TIME_PATTERN): Date = requireNotNull(getFormatter(pattern).parse(this))
 
-fun String.toDateOrNull(pattern: String = DEFAULT_TIME_PATTERN): Date? =
-        runCatching { getFormatter(pattern).parse(this) }.getOrNull()
+fun String.toDateOrNull(pattern: String = DEFAULT_TIME_PATTERN): Date? = runCatching { getFormatter(pattern).parse(this) }.getOrNull()
 
 fun Long.asDate(): Date = Date(this)
 
