@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -10,10 +11,10 @@ import com.example.sample.databinding.FragmentThirdBinding
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.*
-import com.nice.kotlins.widget.RefreshRecyclerView
+import com.nice.kotlins.widget.LoadState
+import com.nice.kotlins.widget.LoadableRecyclerView
 import com.nice.kotlins.widget.adapter
-import com.nice.kotlins.widget.isLoadingMore
-import com.nice.kotlins.widget.isRefreshing
+import com.nice.kotlins.widget.divider.GridDividerItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -29,7 +30,7 @@ class ThirdFragment : NiceFragment() {
 
         val adapter = adapterBuilder<String, ItemViewHolder>(requireContext(),
             mutableListOf<String>().apply {
-                repeat(10) {
+                repeat(20) {
                     add("")
                 }
             })
@@ -42,47 +43,43 @@ class ThirdFragment : NiceFragment() {
             })
             .build()
 
+        binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.BLUE, 8))
+
         binding.recyclerView.adapter = adapter
 
-        binding.recyclerView.setOnRefreshLoadMoreListener(object : RefreshRecyclerView.OnRefreshLoadMoreListener{
+        binding.recyclerView.setOnRefreshLoadMoreListener(object :
+            LoadableRecyclerView.OnRefreshLoadMoreListener {
 
-            var count = 0
+            var page = 0
 
             override fun onRefresh() {
-               Log.e("TAGTAG", "onRefresh")
+                Log.e("TAGTAG", "onRefresh")
                 adapter.setItems(mutableListOf<String>().apply {
-                    repeat(10) {
+                    repeat(20) {
                         add("")
                     }
                 })
 
                 lifecycleScope.launch {
-                    delay(1000)
+                    delay(400)
 
-                    binding.recyclerView.isRefreshing = false
+                    binding.recyclerView.setRefreshState(LoadState.STATE_COMPLETED)
                 }
             }
 
             override fun onLoadMore() {
                 Log.e("TAGTAG", "onLoadMore")
 
-                count += 1
-
                 lifecycleScope.launch {
-                    delay(1000)
+                    delay(400)
 
-                    if(count >= 3){
-                     binding.recyclerView.setLoadMoreState(RefreshRecyclerView.STATE_COMPLETED)
-                    }else {
-                        adapter.addItems(mutableListOf<String>().apply {
-                            repeat(10) {
-                                add("")
-                            }
-                        })
+                    adapter.addItems(mutableListOf<String>().apply {
+                        repeat(20) {
+                            add("")
+                        }
+                    })
 
-
-                        binding.recyclerView.isLoadingMore = false
-                    }
+                    binding.recyclerView.setLoadMoreState(LoadState.STATE_IDLE)
                 }
             }
 

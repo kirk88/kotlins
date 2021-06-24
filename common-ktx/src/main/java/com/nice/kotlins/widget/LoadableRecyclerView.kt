@@ -10,23 +10,27 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.annotation.IntDef
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.nice.kotlins.R
 import com.nice.kotlins.helper.layoutInflater
 import com.nice.kotlins.helper.textResource
+import com.nice.kotlins.widget.LoadState.*
 import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 
-class RefreshRecyclerView @JvmOverloads constructor(
+class LoadableRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : RelativeLayout(context, attrs, defStyleAttr) {
+) : RelativeLayout(context, attrs, defStyleAttr), LoadableView {
 
     internal var refreshState = STATE_IDLE
     internal var loadMoreState = STATE_IDLE
@@ -55,34 +59,40 @@ class RefreshRecyclerView @JvmOverloads constructor(
     }
 
     init {
-        val ta = context.obtainStyledAttributes(attrs, R.styleable.RefreshRecyclerView)
+        val ta = context.obtainStyledAttributes(attrs, R.styleable.LoadableRecyclerView)
         val padding =
-            ta.getDimensionPixelSize(R.styleable.RefreshRecyclerView_android_padding, 0)
+            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_padding, 0)
         val paddingTop =
-            ta.getDimensionPixelSize(R.styleable.RefreshRecyclerView_android_paddingTop, padding)
+            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingTop, padding)
         val paddingBottom =
-            ta.getDimensionPixelSize(R.styleable.RefreshRecyclerView_android_paddingBottom, padding)
+            ta.getDimensionPixelSize(
+                R.styleable.LoadableRecyclerView_android_paddingBottom,
+                padding
+            )
         val paddingLeft =
-            ta.getDimensionPixelSize(R.styleable.RefreshRecyclerView_android_paddingLeft, padding)
+            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingLeft, padding)
         val paddingRight =
-            ta.getDimensionPixelSize(R.styleable.RefreshRecyclerView_android_paddingRight, padding)
+            ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingRight, padding)
         val paddingStart = ta.getDimensionPixelSize(
-            R.styleable.RefreshRecyclerView_android_paddingStart,
+            R.styleable.LoadableRecyclerView_android_paddingStart,
             paddingLeft
         )
         val paddingEnd = ta.getDimensionPixelSize(
-            R.styleable.RefreshRecyclerView_android_paddingEnd,
+            R.styleable.LoadableRecyclerView_android_paddingEnd,
             paddingRight
         )
         recyclerView.setPaddingRelative(paddingStart, paddingTop, paddingEnd, paddingBottom)
 
-        if (ta.hasValue(R.styleable.RefreshRecyclerView_android_overScrollMode)) {
+        if (ta.hasValue(R.styleable.LoadableRecyclerView_android_overScrollMode)) {
             val overScrollMode =
-                ta.getInt(R.styleable.RefreshRecyclerView_android_overScrollMode, 0)
+                ta.getInt(R.styleable.LoadableRecyclerView_android_overScrollMode, 0)
             recyclerView.overScrollMode = overScrollMode
         }
 
-        val layoutManagerName = ta.getString(R.styleable.RefreshRecyclerView_layoutManager)
+        setRefreshEnabled(ta.getBoolean(R.styleable.LoadableRecyclerView_refreshEnabled, true))
+        setLoadMoreEnabled(ta.getBoolean(R.styleable.LoadableRecyclerView_loadMoreEnabled, true))
+
+        val layoutManagerName = ta.getString(R.styleable.LoadableRecyclerView_layoutManager)
         ta.recycle()
 
         createLayoutManager(context, layoutManagerName, attrs, defStyleAttr)
@@ -94,6 +104,109 @@ class RefreshRecyclerView @JvmOverloads constructor(
             recyclerView.isEnabled = false
             post(refreshRunnable)
         }
+    }
+
+    fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
+        recyclerView.adapter = adapter
+    }
+
+    fun getAdapter(): RecyclerView.Adapter<out RecyclerView.ViewHolder>? = recyclerView.adapter
+
+    fun setLayoutManager(layoutManager: RecyclerView.LayoutManager?) {
+        recyclerView.layoutManager = layoutManager
+    }
+
+    fun getLayoutManager(): RecyclerView.LayoutManager? = recyclerView.layoutManager
+
+    fun addItemDecoration(decor: RecyclerView.ItemDecoration) =
+        recyclerView.addItemDecoration(decor)
+
+    fun removeItemDecoration(decor: RecyclerView.ItemDecoration) =
+        recyclerView.removeItemDecoration(decor)
+
+    fun invalidateItemDecorations() = recyclerView.invalidateItemDecorations()
+
+    fun setItemAnimator(animator: RecyclerView.ItemAnimator?) {
+        recyclerView.itemAnimator = animator
+    }
+
+    fun getItemAnimator(): RecyclerView.ItemAnimator? = recyclerView.itemAnimator
+
+    fun setItemViewCacheSize(size: Int) = recyclerView.setItemViewCacheSize(size)
+
+    fun scrollToPosition(position: Int) = recyclerView.scrollToPosition(position)
+
+    fun smoothScrollToPosition(position: Int) = recyclerView.smoothScrollToPosition(position)
+
+    fun setHasFixedSize(hasFixedSize: Boolean) = recyclerView.setHasFixedSize(hasFixedSize)
+
+    fun addOnScrollListener(listener: RecyclerView.OnScrollListener) =
+        recyclerView.addOnScrollListener(listener)
+
+    fun removeOnScrollListener(listener: RecyclerView.OnScrollListener) =
+        recyclerView.removeOnScrollListener(listener)
+
+    fun setColorSchemeColors(@ColorInt vararg colors: Int) =
+        refreshView.setColorSchemeColors(*colors)
+
+    fun setColorSchemeResources(@ColorRes vararg colorResIds: Int) =
+        refreshView.setColorSchemeResources(*colorResIds)
+
+    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) =
+        refreshView.setProgressBackgroundColorSchemeColor(color)
+
+    fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) =
+        refreshView.setProgressBackgroundColorSchemeResource(colorResId)
+
+    override fun setRefreshState(state: LoadState) {
+        if (refreshState != state) {
+            refreshState = state
+            refreshView.isRefreshing = state == STATE_RUNNING
+
+            if (state != STATE_RUNNING) {
+                recyclerView.isEnabled = isLoadMoreEnabled
+            }
+        }
+    }
+
+    fun setRefreshEnabled(enabled: Boolean) {
+        if (isRefreshEnabled != enabled) {
+            isRefreshEnabled = enabled
+            refreshView.isEnabled = enabled
+        }
+    }
+
+    fun setOnRefreshListener(listener: OnRefreshListener?) {
+        refreshListener = listener
+    }
+
+    override fun setLoadMoreState(state: LoadState) {
+        if (loadMoreState != state) {
+            loadMoreState = state
+            recyclerView.loadMoreState = state
+        }
+    }
+
+    fun setLoadMoreEnabled(enabled: Boolean) {
+        if (isLoadMoreEnabled != enabled) {
+            isLoadMoreEnabled = enabled
+            recyclerView.isEnabled = enabled
+        }
+    }
+
+    fun setOnLoadMoreListener(listener: OnLoadMoreListener?) {
+        loadMoreListener = listener
+    }
+
+    fun setOnRefreshLoadMoreListener(listener: OnRefreshLoadMoreListener?) {
+        refreshListener = listener
+        loadMoreListener = listener
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        setRefreshEnabled(enabled)
+        setLoadMoreEnabled(enabled)
     }
 
     private fun createLayoutManager(
@@ -171,67 +284,6 @@ class RefreshRecyclerView @JvmOverloads constructor(
         } else RecyclerView::class.java.getPackage()?.name + '.' + className
     }
 
-    fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?) {
-        recyclerView.adapter = adapter
-    }
-
-    fun getAdapter(): RecyclerView.Adapter<out RecyclerView.ViewHolder>? = recyclerView.adapter
-
-    fun setRefreshState(@State state: Int) {
-        if (refreshState != state) {
-            refreshState = state
-            refreshView.isRefreshing = state == STATE_RUNNING
-
-            if (state != STATE_RUNNING) {
-                recyclerView.isEnabled = isLoadMoreEnabled
-            }
-        }
-    }
-
-    fun setRefreshEnabled(enabled: Boolean) {
-        if (isRefreshEnabled != enabled) {
-            isRefreshEnabled = enabled
-            refreshView.isEnabled = enabled
-        }
-    }
-
-    fun isRefreshEnabled() = isRefreshEnabled
-
-    fun setOnRefreshListener(listener: OnRefreshListener?) {
-        refreshListener = listener
-    }
-
-    fun setLoadMoreState(@State state: Int) {
-        if (loadMoreState != state) {
-            loadMoreState = state
-            recyclerView.loadMoreState = state
-        }
-    }
-
-    fun setLoadMoreEnabled(enabled: Boolean) {
-        if (isLoadMoreEnabled != enabled) {
-            isLoadMoreEnabled = enabled
-            recyclerView.isEnabled = enabled
-        }
-    }
-
-    fun isLoadMoreEnabled() = isLoadMoreEnabled
-
-    fun setOnLoadMoreListener(listener: OnLoadMoreListener?) {
-        loadMoreListener = listener
-    }
-
-    fun setOnRefreshLoadMoreListener(listener: OnRefreshLoadMoreListener?) {
-        refreshListener = listener
-        loadMoreListener = listener
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        setRefreshEnabled(enabled)
-        setLoadMoreEnabled(enabled)
-    }
-
     fun interface OnLoadMoreListener {
 
         fun onLoadMore()
@@ -251,7 +303,7 @@ class RefreshRecyclerView @JvmOverloads constructor(
         val onLoadMore: () -> Unit
     ) : RecyclerView(context) {
 
-        var loadMoreState: Int
+        var loadMoreState: LoadState
             get() {
                 val loadMoreAdapter = adapter as? LoadMoreAdapter ?: return STATE_IDLE
                 return loadMoreAdapter.loadMoreState
@@ -312,14 +364,10 @@ class RefreshRecyclerView @JvmOverloads constructor(
         val retryListener: () -> Unit
     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        var isLoadMoreEnabled = true
+        var isLoadMoreEnabled: Boolean = true
             set(value) {
                 if (field != value) {
                     field = value
-
-                    if (value) {
-                        loadMoreState = STATE_IDLE
-                    }
 
                     if (itemCount > 0) {
                         if (value) {
@@ -329,9 +377,13 @@ class RefreshRecyclerView @JvmOverloads constructor(
                         }
                     }
                 }
+
+                if (value) {
+                    loadMoreState = STATE_IDLE
+                }
             }
 
-        var loadMoreState = STATE_IDLE
+        var loadMoreState: LoadState = STATE_IDLE
             set(value) {
                 if (field != value) {
                     field = value
@@ -433,16 +485,16 @@ class RefreshRecyclerView @JvmOverloads constructor(
 
         override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
             if (isFooterView(holder.layoutPosition)) {
-                super.onViewAttachedToWindow(holder)
+                val lp = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams
+                    ?: return
+                lp.isFullSpan = true
             } else {
                 innerAdapter.onViewAttachedToWindow(holder)
             }
         }
 
         override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-            if (isFooterView(holder.layoutPosition)) {
-                super.onViewDetachedFromWindow(holder)
-            } else {
+            if (!isFooterView(holder.layoutPosition)) {
                 innerAdapter.onViewDetachedFromWindow(holder)
             }
         }
@@ -456,57 +508,68 @@ class RefreshRecyclerView @JvmOverloads constructor(
 
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
             innerAdapter.onAttachedToRecyclerView(recyclerView)
+            val layout = recyclerView.layoutManager as? GridLayoutManager ?: return
+            val originLookup = layout.spanSizeLookup
+            layout.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return if (isFooterView(position)) {
+                        layout.spanCount
+                    } else originLookup?.getSpanSize(position) ?: 1
+                }
+            }
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             innerAdapter.onDetachedFromRecyclerView(recyclerView)
         }
 
-        class FooterViewHolder(
+        private class FooterViewHolder(
             itemView: View,
             private val retryListener: () -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
 
-            val progress: ProgressBar = itemView.findViewById(R.id.progress)
-            val message: TextView = itemView.findViewById(R.id.message)
+            private var loadMoreState: LoadState? = null
 
-            private var loadMoreState = NO_STATE
+            private val progress: ProgressBar = itemView.findViewById(R.id.progress)
+            private val message: TextView = itemView.findViewById(R.id.message)
 
             private val clickListener = OnClickListener {
                 retryListener()
             }
 
-            fun setState(state: Int) {
+            fun setState(state: LoadState) {
                 if (loadMoreState == state) {
                     return
                 }
 
                 loadMoreState = state
 
-                when (state) {
-                    STATE_RUNNING -> {
-                        progress.isVisible = true
-                        message.isVisible = true
-                        message.textResource = R.string.load_more_running_message
-                        itemView.setOnClickListener(null)
-                    }
-                    STATE_FAILED -> {
-                        progress.isGone = true
-                        message.isVisible = true
-                        message.textResource = R.string.load_more_failed_message
-                        itemView.setOnClickListener(clickListener)
-                    }
-                    STATE_COMPLETED -> {
-                        progress.isGone = true
-                        message.isVisible = true
-                        message.textResource = R.string.load_more_completed_message
-                        itemView.setOnClickListener(null)
-                    }
-                    else -> {
-                        progress.isVisible = false
-                        message.isVisible = false
-                        itemView.setOnClickListener(null)
-                    }
+                itemView.post { updateViewWithState(state) }
+            }
+
+            private fun updateViewWithState(state: LoadState) = when (state) {
+                STATE_RUNNING -> {
+                    progress.isVisible = true
+                    message.isVisible = true
+                    message.textResource = R.string.load_more_running_message
+                    itemView.setOnClickListener(null)
+                }
+                STATE_FAILED -> {
+                    progress.isGone = true
+                    message.isVisible = true
+                    message.textResource = R.string.load_more_failed_message
+                    itemView.setOnClickListener(clickListener)
+                }
+                STATE_COMPLETED -> {
+                    progress.isGone = true
+                    message.isVisible = true
+                    message.textResource = R.string.load_more_completed_message
+                    itemView.setOnClickListener(null)
+                }
+                else -> {
+                    progress.isVisible = false
+                    message.isVisible = false
+                    itemView.setOnClickListener(null)
                 }
             }
 
@@ -524,34 +587,24 @@ class RefreshRecyclerView @JvmOverloads constructor(
 
         private const val TYPE_FOOTER = Int.MAX_VALUE / 2
 
-        private const val NO_STATE = Int.MIN_VALUE / 2
-
-        const val STATE_IDLE = -1
-        const val STATE_RUNNING = 0x001
-        const val STATE_FAILED = 0x002
-        const val STATE_COMPLETED = 0x003
-
     }
 
-    @IntDef(STATE_IDLE, STATE_RUNNING, STATE_FAILED, STATE_COMPLETED)
-    @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-    annotation class State
 }
 
-var RefreshRecyclerView.adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?
+var LoadableRecyclerView.adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?
     get() = getAdapter()
     set(value) {
         setAdapter(value)
     }
 
-var RefreshRecyclerView.isRefreshing: Boolean
-    get() = refreshState == RefreshRecyclerView.STATE_RUNNING
+var LoadableRecyclerView.layoutManager: RecyclerView.LayoutManager?
+    get() = getLayoutManager()
     set(value) {
-        setRefreshState(if (value) RefreshRecyclerView.STATE_RUNNING else RefreshRecyclerView.STATE_IDLE)
+        setLayoutManager(value)
     }
 
-var RefreshRecyclerView.isLoadingMore: Boolean
-    get() = loadMoreState == RefreshRecyclerView.STATE_RUNNING
+var LoadableRecyclerView.itemAnimator: RecyclerView.ItemAnimator?
+    get() = getItemAnimator()
     set(value) {
-        setLoadMoreState(if (value) RefreshRecyclerView.STATE_RUNNING else RefreshRecyclerView.STATE_IDLE)
+        setItemAnimator(value)
     }

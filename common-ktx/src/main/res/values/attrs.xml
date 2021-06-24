@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="LoaderLayout">
+    <declare-styleable name="StatefulLayout">
         <attr name="emptyLayout" format="reference" />
         <attr name="loadingLayout" format="reference" />
         <attr name="errorLayout" format="reference" />
@@ -99,10 +99,10 @@
     </declare-styleable>
 
     <declare-styleable name="TitleToolbar_Layout">
-        <attr name="layout_attributesOverlay" format="boolean" />
+        <attr name="layout_overrideAttributes" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="RefreshRecyclerView">
+    <declare-styleable name="LoadableRecyclerView">
         <attr name="android:padding" />
         <attr name="android:paddingTop" />
         <attr name="android:paddingBottom" />
@@ -111,12 +111,14 @@
         <attr name="android:paddingLeft" />
         <attr name="android:paddingRight" />
         <attr name="android:orientation" />
-        <attr name="android:overScrollMode"/>
+        <attr name="android:overScrollMode" />
         <attr name="layoutManager" />
         <attr name="spanCount" />
         <attr name="reverseLayout" />
         <attr name="stackFromEnd" />
         <attr name="fastScrollEnabled" />
+        <attr name="refreshEnabled" format="boolean" />
+        <attr name="loadMoreEnabled" format="boolean" />
     </declare-styleable>
 
 </resources>

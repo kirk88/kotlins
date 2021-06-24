@@ -9,9 +9,35 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.nice.kotlins.helper.intent
 import com.nice.kotlins.helper.intentOf
+import com.nice.kotlins.widget.LoadState
+
+
+object EventCode {
+
+    private const val CODE_BASE = 10000
+
+    const val NONE = -1
+
+    const val SHOW_PROGRESS = CODE_BASE + 1
+    const val DISMISS_PROGRESS = CODE_BASE + 2
+    const val REFRESH_STATE = CODE_BASE + 3
+    const val LOADMORE_STATE = CODE_BASE + 4
+
+    const val SHOW_LOADING = CODE_BASE + 5
+    const val SHOW_EMPTY = CODE_BASE + 6
+    const val SHOW_ERROR = CODE_BASE + 7
+    const val SHOW_CONTENT = CODE_BASE + 8
+
+    const val ACTIVITY_FINISH = CODE_BASE + 9
+    const val ACTIVITY_START = CODE_BASE + 10
+    const val ACTIVITY_RESULT = CODE_BASE + 11
+
+    operator fun contains(code: Int): Boolean = code > CODE_BASE && code <= CODE_BASE + 11
+
+}
 
 open class Event(
-    val what: Int = Status.NONE,
+    val code: Int = EventCode.NONE,
     val message: CharSequence? = null
 ) {
 
@@ -57,16 +83,22 @@ open class Event(
 
         other as Event
 
-        if (what != other.what) return false
+        if (code != other.code) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return what
+        return code
+    }
+
+    override fun toString(): String {
+        return "Event(code=$code, message=$message)"
     }
 
 }
+
+class EventCollection(val events: List<Event>) : Event()
 
 fun <T : Any?> Event.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
 
@@ -74,48 +106,22 @@ fun <T : Any?> Event.getOrElse(key: String, defaultValue: () -> T): T = get(key)
 
 fun Event.putAll(vararg extras: Pair<String, Any?>) = putAll(extras.toMap())
 
-class EventCollection(val events: List<Event>) : Event()
-
-object Status {
-
-    private const val STATUS_BASE = 10000
-
-    const val NONE = -1
-
-    const val SHOW_PROGRESS = STATUS_BASE + 1
-    const val DISMISS_PROGRESS = STATUS_BASE + 2
-    const val REFRESH_COMPLETE = STATUS_BASE + 3
-    const val LOADMORE_COMPLETE = STATUS_BASE + 4
-
-    const val SHOW_LOADING = STATUS_BASE + 5
-    const val SHOW_EMPTY = STATUS_BASE + 6
-    const val SHOW_ERROR = STATUS_BASE + 7
-    const val SHOW_CONTENT = STATUS_BASE + 8
-
-    const val ACTIVITY_FINISH = STATUS_BASE + 9
-    const val ACTIVITY_START = STATUS_BASE + 10
-    const val ACTIVITY_RESULT = STATUS_BASE + 11
-
-    fun isStatus(value: Int): Boolean = value > STATUS_BASE && value <= STATUS_BASE + 11
-
-}
-
 fun event(message: CharSequence): Event = Event(message = message)
 
-fun event(what: Int, message: CharSequence? = null): Event = Event(what, message)
+fun event(code: Int, message: CharSequence? = null): Event = Event(code, message)
 
 fun eventOf(vararg events: Event): Event = EventCollection(events.toList())
 
 inline fun buildEvent(
-    what: Int = Status.NONE,
+    code: Int = EventCode.NONE,
     message: CharSequence? = null,
     crossinline init: Event.() -> Unit
-) = Event(what, message).apply(init)
+) = Event(code, message).apply(init)
 
 inline fun <reified A : Activity> activityStart(
     context: Context,
     vararg pairs: Pair<String, Any?>
-) = buildEvent(Status.ACTIVITY_START) {
+) = buildEvent(EventCode.ACTIVITY_START) {
     setIntent(context.intent<A>(*pairs))
 }
 
@@ -123,39 +129,39 @@ inline fun <reified A : Activity> activityStartForResult(
     context: Context,
     vararg pairs: Pair<String, Any?>,
     callback: ActivityResultCallback<ActivityResult>
-) = buildEvent((Status.ACTIVITY_START)) {
+) = buildEvent((EventCode.ACTIVITY_START)) {
     setIntent(context.intent<A>(*pairs), callback)
 }
 
-fun activityReturnResult(resultCode: Int) = buildEvent(Status.ACTIVITY_RESULT) {
+fun activityReturnResult(resultCode: Int) = buildEvent(EventCode.ACTIVITY_RESULT) {
     setResult(resultCode)
 }
 
 fun activityReturnResult(
     resultCode: Int,
     vararg pairs: Pair<String, Any?>
-) = buildEvent(Status.ACTIVITY_RESULT) {
+) = buildEvent(EventCode.ACTIVITY_RESULT) {
     setResult(resultCode, intentOf(*pairs))
 }
 
-fun activityFinish(): Event = event(Status.ACTIVITY_FINISH)
+fun activityFinish(): Event = event(EventCode.ACTIVITY_FINISH)
 
-fun progressShow(message: CharSequence? = null): Event = Event(Status.SHOW_PROGRESS, message)
+fun progressShow(message: CharSequence? = null): Event = Event(EventCode.SHOW_PROGRESS, message)
 
-fun progressDismiss(): Event = Event(Status.DISMISS_PROGRESS)
+fun progressDismiss(): Event = Event(EventCode.DISMISS_PROGRESS)
 
-fun refreshComplete(state: Int = 0): Event = buildEvent(Status.REFRESH_COMPLETE) {
+fun refreshState(state: LoadState): Event = buildEvent(EventCode.REFRESH_STATE) {
     put("state", state)
 }
 
-fun loadMoreComplete(state: Int = 0): Event = buildEvent(Status.LOADMORE_COMPLETE) {
+fun loadMoreState(state: LoadState): Event = buildEvent(EventCode.LOADMORE_STATE) {
     put("state", state)
 }
 
-fun loadingShow(message: CharSequence? = null): Event = Event(Status.SHOW_LOADING, message)
+fun loadingShow(message: CharSequence? = null): Event = Event(EventCode.SHOW_LOADING, message)
 
-fun emptyShow(message: CharSequence? = null): Event = Event(Status.SHOW_EMPTY, message)
+fun emptyShow(message: CharSequence? = null): Event = Event(EventCode.SHOW_EMPTY, message)
 
-fun errorShow(message: CharSequence? = null): Event = Event(Status.SHOW_ERROR, message)
+fun errorShow(message: CharSequence? = null): Event = Event(EventCode.SHOW_ERROR, message)
 
-fun contentShow(): Event = Event(Status.SHOW_CONTENT)
+fun contentShow(): Event = Event(EventCode.SHOW_CONTENT)

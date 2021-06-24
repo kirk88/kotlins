@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <attr name="loaderLayoutStyle" format="reference" />
+    <attr name="statefulLayoutStyle" format="reference" />
 
-    <style name="LoaderLayout" />
+    <style name="StatefulLayout" />
 
-    <style name="LoaderLayout.Style">
+    <style name="StatefulLayout.Style">
         <item name="emptyLayout">@layout/abc_loader_layout_empty</item>
         <item name="loadingLayout">@layout/abc_loader_layout_loading</item>
         <item name="errorLayout">@layout/abc_loader_layout_error</item>
@@ -18,12 +18,12 @@
         <item name="errorText">@string/loader_error_message</item>
         <item name="errorButtonText">@string/loader_retry_message</item>
 
-        <item name="emptyTextAppearance">@style/TextAppearance.LoaderLayout.EmptyText</item>
-        <item name="emptyButtonTextAppearance">@style/TextAppearance.LoaderLayout.ButtonText
+        <item name="emptyTextAppearance">@style/TextAppearance.StatefulLayout.EmptyText</item>
+        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulLayout.ButtonText
         </item>
-        <item name="loadingTextAppearance">@style/TextAppearance.LoaderLayout.LoadingText</item>
-        <item name="errorTextAppearance">@style/TextAppearance.LoaderLayout.ErrorText</item>
-        <item name="errorButtonTextAppearance">@style/TextAppearance.LoaderLayout.ButtonText
+        <item name="loadingTextAppearance">@style/TextAppearance.StatefulLayout.LoadingText</item>
+        <item name="errorTextAppearance">@style/TextAppearance.StatefulLayout.ErrorText</item>
+        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulLayout.ButtonText
         </item>
 
         <item name="emptyButtonBackground">@drawable/loading_layout_button</item>
@@ -31,24 +31,24 @@
     </style>
 
 
-    <style name="TextAppearance.LoaderLayout" parent="TextAppearance.AppCompat" />
+    <style name="TextAppearance.StatefulLayout" parent="TextAppearance.AppCompat" />
 
-    <style name="TextAppearance.LoaderLayout.EmptyText">
+    <style name="TextAppearance.StatefulLayout.EmptyText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.LoaderLayout.LoadingText">
+    <style name="TextAppearance.StatefulLayout.LoadingText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.LoaderLayout.ErrorText">
+    <style name="TextAppearance.StatefulLayout.ErrorText">
         <item name="android:textColor">#333333</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.LoaderLayout.ButtonText">
+    <style name="TextAppearance.StatefulLayout.ButtonText">
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">16sp</item>
     </style>

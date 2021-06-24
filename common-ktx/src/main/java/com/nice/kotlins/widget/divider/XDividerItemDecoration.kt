@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.nice.kotlins.R
+import com.nice.kotlins.helper.weak
 
 abstract class XDividerItemDecoration : ItemDecoration() {
 
@@ -31,54 +32,54 @@ abstract class XDividerItemDecoration : ItemDecoration() {
             val leftSideLine = divider.leftSideLine
             if (leftSideLine != null && leftSideLine.visible) {
                 drawChildLeftVertical(
-                        child,
-                        canvas,
-                        leftSideLine
+                    child,
+                    canvas,
+                    leftSideLine
                 )
             }
 
             val topSideLine = divider.topSideLine
             if (topSideLine != null && topSideLine.visible) {
                 drawChildTopHorizontal(
-                        child,
-                        canvas,
-                        topSideLine
+                    child,
+                    canvas,
+                    topSideLine
                 )
             }
 
             val rightSideLine = divider.rightSideLine
             if (rightSideLine != null && rightSideLine.visible) {
                 drawChildRightVertical(
-                        child,
-                        canvas,
-                        rightSideLine
+                    child,
+                    canvas,
+                    rightSideLine
                 )
             }
 
             val bottomSideLine = divider.bottomSideLine
             if (bottomSideLine != null && bottomSideLine.visible) {
                 drawChildBottomHorizontal(
-                        child,
-                        canvas,
-                        bottomSideLine
+                    child,
+                    canvas,
+                    bottomSideLine
                 )
             }
         }
     }
 
     private fun drawChildLeftVertical(
-            child: View,
-            canvas: Canvas,
-            sideLine: DividerSideLine
+        child: View,
+        canvas: Canvas,
+        sideLine: DividerSideLine
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
         val topPadding: Int =
-                if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
         val bottomPadding: Int =
-                if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val top = child.top - params.topMargin + topPadding
         val bottom = child.bottom + params.bottomMargin + bottomPadding
@@ -89,18 +90,18 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     }
 
     private fun drawChildTopHorizontal(
-            child: View,
-            canvas: Canvas,
-            sideLine: DividerSideLine
+        child: View,
+        canvas: Canvas,
+        sideLine: DividerSideLine
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
         val leftPadding: Int =
-                if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
         val rightPadding: Int =
-                if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val left = child.left - params.leftMargin + leftPadding
         val right = child.right + params.rightMargin + rightPadding
@@ -112,18 +113,18 @@ abstract class XDividerItemDecoration : ItemDecoration() {
 
 
     private fun drawChildRightVertical(
-            child: View,
-            canvas: Canvas,
-            sideLine: DividerSideLine
+        child: View,
+        canvas: Canvas,
+        sideLine: DividerSideLine
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
         val topPadding: Int =
-                if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
         val bottomPadding: Int =
-                if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val top = child.top - params.topMargin + topPadding
         val bottom = child.bottom + params.bottomMargin + bottomPadding
@@ -134,18 +135,18 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     }
 
     private fun drawChildBottomHorizontal(
-            child: View,
-            canvas: Canvas,
-            sideLine: DividerSideLine
+        child: View,
+        canvas: Canvas,
+        sideLine: DividerSideLine
     ) {
         val drawable = getDividerDrawable(sideLine) ?: return
         val dividerSize = sideLine.size
         val startPadding = sideLine.startPadding
         val endPadding = sideLine.endPadding
         val leftPadding: Int =
-                if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
+            if (startPadding == DividerSideLine.NO_PADDING) -dividerSize else startPadding
         val rightPadding: Int =
-                if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
+            if (endPadding == DividerSideLine.NO_PADDING) dividerSize else -endPadding
         val params = child.layoutParams as RecyclerView.LayoutParams
         val left = child.left - params.leftMargin + leftPadding
         val right = child.right + params.rightMargin + rightPadding
@@ -164,10 +165,10 @@ abstract class XDividerItemDecoration : ItemDecoration() {
     }
 
     override fun getItemOffsets(
-            outRect: Rect,
-            child: View,
-            parent: RecyclerView,
-            state: RecyclerView.State
+        outRect: Rect,
+        child: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
     ) {
         val position = parent.getChildLayoutPosition(child)
         val divider = getDivider(parent, child, position)
@@ -176,10 +177,10 @@ abstract class XDividerItemDecoration : ItemDecoration() {
         val rightSideLine = divider.rightSideLine
         val bottomSideLine = divider.bottomSideLine
         outRect.set(
-                if (leftSideLine?.visible == true) leftSideLine.offset else 0,
-                if (topSideLine?.visible == true) topSideLine.offset else 0,
-                if (rightSideLine?.visible == true) rightSideLine.offset else 0,
-                if (bottomSideLine?.visible == true) bottomSideLine.offset else 0
+            if (leftSideLine?.visible == true) leftSideLine.offset else 0,
+            if (topSideLine?.visible == true) topSideLine.offset else 0,
+            if (rightSideLine?.visible == true) rightSideLine.offset else 0,
+            if (bottomSideLine?.visible == true) bottomSideLine.offset else 0
         )
     }
 
@@ -255,14 +256,16 @@ class GridDividerItemDecoration : XDividerItemDecoration {
 
     private val dividerDrawable: Drawable
 
+    private val dataObserver: AdapterDataObserver by lazy { AdapterDataObserver() }
+
     constructor(drawable: Drawable) {
         dividerDrawable = drawable
     }
 
     constructor(@ColorInt dividerColor: Int, @Px dividerSize: Int) : this(
-            dividerColor,
-            dividerSize,
-            dividerSize
+        dividerColor,
+        dividerSize,
+        dividerSize
     )
 
     constructor(@ColorInt dividerColor: Int, @Px dividerWidth: Int, @Px dividerHeight: Int) {
@@ -277,9 +280,17 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         check(layout is GridLayoutManager) {
             "GridDividerItemDecoration only support the GridLayoutManager"
         }
+
+        dataObserver.setRecyclerView(parent)
+
+        val spanSizeLookup = layout.spanSizeLookup
         val itemCount = layout.itemCount
         val orientation = layout.orientation
         val spanCount = layout.spanCount
+
+        if (spanSizeLookup.getSpanSize(position) == spanCount) {
+            return DividerBuilder().build()
+        }
 
         val isFirstRow = position < spanCount
         val isLastRow = position >= itemCount - (itemCount % spanCount).let {
@@ -294,43 +305,65 @@ class GridDividerItemDecoration : XDividerItemDecoration {
             val left = position % spanCount * (dividerSize - eachWidth)
             val right = eachWidth - left
             return DividerBuilder()
-                    .left(left)
-                    .right(
-                            dividerDrawable,
-                            offset = right,
-                            paddingStart = if (isFirstRow) 0 else -dividerSize,
-                            paddingEnd = if (!isLastRow) -dividerSize else 0,
-                            visible = !isLastColumn
-                    )
-                    .bottom(
-                            dividerDrawable,
-                            paddingStart = if (isFirstColumn) 0 else -dividerSize,
-                            paddingEnd = if (!isLastColumn) -dividerSize else 0,
-                            visible = !isLastRow
-                    )
-                    .build()
+                .left(left)
+                .right(
+                    dividerDrawable,
+                    offset = right,
+                    paddingStart = if (isFirstRow) 0 else -dividerSize,
+                    paddingEnd = if (!isLastRow) -dividerSize else 0,
+                    visible = !isLastColumn
+                )
+                .bottom(
+                    dividerDrawable,
+                    paddingStart = if (isFirstColumn) 0 else -dividerSize,
+                    paddingEnd = if (!isLastColumn) -dividerSize else 0,
+                    visible = !isLastRow
+                )
+                .build()
         } else {
             val dividerSize = dividerDrawable.intrinsicWidth
             val eachWidth: Int = (spanCount - 1) * dividerSize / spanCount
             val top = position % spanCount * (dividerSize - eachWidth)
             val bottom = eachWidth - top
             return DividerBuilder()
-                    .top(top)
-                    .right(
-                            dividerDrawable,
-                            paddingStart = if (isFirstColumn) 0 else -dividerSize,
-                            paddingEnd = if (!isLastColumn) -dividerSize else 0,
-                            visible = !isLastRow
-                    )
-                    .bottom(
-                            dividerDrawable,
-                            offset = bottom,
-                            paddingStart = if (isFirstRow) 0 else -dividerSize,
-                            paddingEnd = if (!isLastRow) -dividerSize else 0,
-                            visible = !isLastColumn
-                    )
-                    .build()
+                .top(top)
+                .right(
+                    dividerDrawable,
+                    paddingStart = if (isFirstColumn) 0 else -dividerSize,
+                    paddingEnd = if (!isLastColumn) -dividerSize else 0,
+                    visible = !isLastRow
+                )
+                .bottom(
+                    dividerDrawable,
+                    offset = bottom,
+                    paddingStart = if (isFirstRow) 0 else -dividerSize,
+                    paddingEnd = if (!isLastRow) -dividerSize else 0,
+                    visible = !isLastColumn
+                )
+                .build()
         }
+    }
+
+    private class AdapterDataObserver : RecyclerView.AdapterDataObserver() {
+
+        private var targetView: RecyclerView? by weak()
+
+        fun setRecyclerView(recyclerView: RecyclerView) {
+            if (targetView !== recyclerView) {
+                targetView?.adapter?.unregisterAdapterDataObserver(this)
+                recyclerView.adapter?.registerAdapterDataObserver(this)
+                targetView = recyclerView
+            }
+        }
+
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            targetView?.invalidateItemDecorations()
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            targetView?.invalidateItemDecorations()
+        }
+
     }
 
 }

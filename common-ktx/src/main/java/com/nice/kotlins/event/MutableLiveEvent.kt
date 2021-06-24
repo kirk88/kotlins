@@ -15,10 +15,14 @@ open class MutableLiveEvent<T> : LiveEvent<T> {
         super.setValue(value)
     }
 
-}
+    companion object {
 
-var <T> MutableLiveEvent<T>.value: T?
-    get() = getValue()
-    set(value) {
-        setValue(value)
+        var <T> MutableLiveEvent<T>.value: T?
+            get() = getValue()
+            set(value) {
+                setValue(value)
+            }
+
     }
+
+}

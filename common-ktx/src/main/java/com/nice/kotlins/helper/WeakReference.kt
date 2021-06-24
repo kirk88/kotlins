@@ -18,7 +18,6 @@ interface Weak<T> {
 internal class WeakImpl<T>(initializer: () -> T?) : Weak<T> {
 
     private var initializer: (() -> T?)? = initializer
-
     private var reference: WeakReference<T>? = null
 
     override val value: T?

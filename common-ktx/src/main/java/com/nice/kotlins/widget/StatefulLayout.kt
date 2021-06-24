@@ -23,16 +23,16 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.nice.kotlins.R
 import com.nice.kotlins.helper.*
-import com.nice.kotlins.widget.LoaderView.Companion.TYPE_CONTENT_VIEW
-import com.nice.kotlins.widget.LoaderView.Companion.TYPE_EMPTY_VIEW
-import com.nice.kotlins.widget.LoaderView.Companion.TYPE_ERROR_VIEW
-import com.nice.kotlins.widget.LoaderView.Companion.TYPE_LOADING_VIEW
+import com.nice.kotlins.widget.StatefulView.Companion.TYPE_CONTENT_VIEW
+import com.nice.kotlins.widget.StatefulView.Companion.TYPE_EMPTY_VIEW
+import com.nice.kotlins.widget.StatefulView.Companion.TYPE_ERROR_VIEW
+import com.nice.kotlins.widget.StatefulView.Companion.TYPE_LOADING_VIEW
 
-class LoaderLayout @JvmOverloads constructor(
+class StatefulLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.loaderLayoutStyle
-) : FrameLayout(context, attrs, defStyleAttr), LoaderView {
+    defStyleAttr: Int = R.attr.statefulLayoutStyle
+) : FrameLayout(context, attrs, defStyleAttr), StatefulView {
 
     private var emptyLayoutId: Int
     private var loadingLayoutId: Int
@@ -71,14 +71,14 @@ class LoaderLayout @JvmOverloads constructor(
     private var dataObservers: MutableMap<RecyclerView.Adapter<*>, AdapterDataObserver>? = null
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    private var errorActionListener: LoaderView.OnActionListener? = null
+    private var errorActionListener: StatefulView.OnActionListener? = null
     private val errorButtonClickListener = OnClickListener {
         if (errorActionListener != null) {
             errorActionListener!!.onAction(this)
         }
     }
 
-    private var emptyActionListener: LoaderView.OnActionListener? = null
+    private var emptyActionListener: StatefulView.OnActionListener? = null
     private val emptyButtonClickListener = OnClickListener {
         if (emptyActionListener != null) {
             emptyActionListener!!.onAction(this)
@@ -88,57 +88,57 @@ class LoaderLayout @JvmOverloads constructor(
     init {
         val a = context.obtainStyledAttributes(
             attrs,
-            R.styleable.LoaderLayout,
+            R.styleable.StatefulLayout,
             defStyleAttr,
-            R.style.LoaderLayout_Style
+            R.style.StatefulLayout_Style
         )
-        emptyLayoutId = a.getResourceId(R.styleable.LoaderLayout_emptyLayout, NO_VALUE)
-        loadingLayoutId = a.getResourceId(R.styleable.LoaderLayout_loadingLayout, NO_VALUE)
-        errorLayoutId = a.getResourceId(R.styleable.LoaderLayout_errorLayout, NO_VALUE)
-        emptyImage = a.getDrawable(R.styleable.LoaderLayout_emptyImage)
-        emptyText = a.getText(R.styleable.LoaderLayout_emptyText)
-        emptyTextColor = a.getColor(R.styleable.LoaderLayout_emptyTextColor, NO_VALUE)
+        emptyLayoutId = a.getResourceId(R.styleable.StatefulLayout_emptyLayout, NO_VALUE)
+        loadingLayoutId = a.getResourceId(R.styleable.StatefulLayout_loadingLayout, NO_VALUE)
+        errorLayoutId = a.getResourceId(R.styleable.StatefulLayout_errorLayout, NO_VALUE)
+        emptyImage = a.getDrawable(R.styleable.StatefulLayout_emptyImage)
+        emptyText = a.getText(R.styleable.StatefulLayout_emptyText)
+        emptyTextColor = a.getColor(R.styleable.StatefulLayout_emptyTextColor, NO_VALUE)
         emptyTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_emptyTextAppearance, NO_VALUE)
-        emptyButtonText = a.getText(R.styleable.LoaderLayout_emptyButtonText)
-        emptyButtonTextColor = a.getColor(R.styleable.LoaderLayout_emptyButtonTextColor, NO_VALUE)
+            a.getResourceId(R.styleable.StatefulLayout_emptyTextAppearance, NO_VALUE)
+        emptyButtonText = a.getText(R.styleable.StatefulLayout_emptyButtonText)
+        emptyButtonTextColor = a.getColor(R.styleable.StatefulLayout_emptyButtonTextColor, NO_VALUE)
         emptyButtonTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_emptyButtonTextAppearance, NO_VALUE)
-        emptyButtonBackground = a.getDrawable(R.styleable.LoaderLayout_emptyButtonBackground)
+            a.getResourceId(R.styleable.StatefulLayout_emptyButtonTextAppearance, NO_VALUE)
+        emptyButtonBackground = a.getDrawable(R.styleable.StatefulLayout_emptyButtonBackground)
         if (emptyButtonBackground == null) {
-            val color = a.getColor(R.styleable.LoaderLayout_emptyButtonBackground, NO_VALUE)
+            val color = a.getColor(R.styleable.StatefulLayout_emptyButtonBackground, NO_VALUE)
             if (color != NO_VALUE) {
                 emptyButtonBackground = ColorDrawable(color)
             }
         }
-        emptyButtonVisible = a.getBoolean(R.styleable.LoaderLayout_emptyButtonVisible, false)
+        emptyButtonVisible = a.getBoolean(R.styleable.StatefulLayout_emptyButtonVisible, false)
 
-        errorImage = a.getDrawable(R.styleable.LoaderLayout_errorImage)
-        errorText = a.getText(R.styleable.LoaderLayout_errorText)
-        errorTextColor = a.getColor(R.styleable.LoaderLayout_errorTextColor, NO_VALUE)
+        errorImage = a.getDrawable(R.styleable.StatefulLayout_errorImage)
+        errorText = a.getText(R.styleable.StatefulLayout_errorText)
+        errorTextColor = a.getColor(R.styleable.StatefulLayout_errorTextColor, NO_VALUE)
         errorTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_errorTextAppearance, NO_VALUE)
-        errorButtonText = a.getText(R.styleable.LoaderLayout_errorButtonText)
-        errorButtonTextColor = a.getColor(R.styleable.LoaderLayout_errorButtonTextColor, NO_VALUE)
+            a.getResourceId(R.styleable.StatefulLayout_errorTextAppearance, NO_VALUE)
+        errorButtonText = a.getText(R.styleable.StatefulLayout_errorButtonText)
+        errorButtonTextColor = a.getColor(R.styleable.StatefulLayout_errorButtonTextColor, NO_VALUE)
         errorButtonTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_errorButtonTextAppearance, NO_VALUE)
-        errorButtonBackground = a.getDrawable(R.styleable.LoaderLayout_errorButtonBackground)
+            a.getResourceId(R.styleable.StatefulLayout_errorButtonTextAppearance, NO_VALUE)
+        errorButtonBackground = a.getDrawable(R.styleable.StatefulLayout_errorButtonBackground)
         if (errorButtonBackground == null) {
-            val color = a.getColor(R.styleable.LoaderLayout_errorButtonBackground, NO_VALUE)
+            val color = a.getColor(R.styleable.StatefulLayout_errorButtonBackground, NO_VALUE)
             if (color != NO_VALUE) {
                 errorButtonBackground = ColorDrawable(color)
             }
         }
-        errorButtonVisible = a.getBoolean(R.styleable.LoaderLayout_errorButtonVisible, true)
+        errorButtonVisible = a.getBoolean(R.styleable.StatefulLayout_errorButtonVisible, true)
 
-        loadingProgressColor = a.getColor(R.styleable.LoaderLayout_loadingProgressColor, NO_VALUE)
-        loadingProgressDrawable = a.getDrawable(R.styleable.LoaderLayout_loadingProgressDrawable)
-        loadingText = a.getText(R.styleable.LoaderLayout_loadingText)
-        loadingTextColor = a.getColor(R.styleable.LoaderLayout_loadingTextColor, NO_VALUE)
+        loadingProgressColor = a.getColor(R.styleable.StatefulLayout_loadingProgressColor, NO_VALUE)
+        loadingProgressDrawable = a.getDrawable(R.styleable.StatefulLayout_loadingProgressDrawable)
+        loadingText = a.getText(R.styleable.StatefulLayout_loadingText)
+        loadingTextColor = a.getColor(R.styleable.StatefulLayout_loadingTextColor, NO_VALUE)
         loadingTextAppearance =
-            a.getResourceId(R.styleable.LoaderLayout_loadingTextAppearance, NO_VALUE)
+            a.getResourceId(R.styleable.StatefulLayout_loadingTextAppearance, NO_VALUE)
 
-        defaultViewType = a.getInt(R.styleable.LoaderLayout_defaultShow, TYPE_LOADING_VIEW)
+        defaultViewType = a.getInt(R.styleable.StatefulLayout_defaultShow, TYPE_LOADING_VIEW)
         a.recycle()
     }
 
@@ -175,47 +175,47 @@ class LoaderLayout @JvmOverloads constructor(
         show(TYPE_CONTENT_VIEW)
     }
 
-    override fun setContentView(layoutResId: Int): LoaderView {
+    override fun setContentView(layoutResId: Int): StatefulView {
         setView(layoutResId, TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setContentView(view: View): LoaderView {
+    override fun setContentView(view: View): StatefulView {
         setView(view, TYPE_CONTENT_VIEW)
         return this
     }
 
-    override fun setLoadingView(layoutResId: Int): LoaderView {
+    override fun setLoadingView(layoutResId: Int): StatefulView {
         setView(layoutResId, TYPE_LOADING_VIEW)
         return this
     }
 
-    override fun setLoadingView(view: View): LoaderView {
+    override fun setLoadingView(view: View): StatefulView {
         setView(view, TYPE_LOADING_VIEW)
         return this
     }
 
-    override fun setEmptyView(layoutResId: Int): LoaderView {
+    override fun setEmptyView(layoutResId: Int): StatefulView {
         setView(layoutResId, TYPE_EMPTY_VIEW)
         return this
     }
 
-    override fun setEmptyView(view: View): LoaderLayout {
+    override fun setEmptyView(view: View): StatefulLayout {
         setView(view, TYPE_EMPTY_VIEW)
         return this
     }
 
-    override fun setErrorView(layoutResId: Int): LoaderView {
+    override fun setErrorView(layoutResId: Int): StatefulView {
         setView(layoutResId, TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setErrorView(view: View): LoaderView {
+    override fun setErrorView(view: View): StatefulView {
         setView(view, TYPE_ERROR_VIEW)
         return this
     }
 
-    override fun setDefaultView(viewType: Int): LoaderView {
+    override fun setDefaultView(viewType: Int): StatefulView {
         check(
             viewType == TYPE_CONTENT_VIEW
                     || viewType == TYPE_LOADING_VIEW
@@ -228,37 +228,37 @@ class LoaderLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setEmptyImage(drawable: Drawable?): LoaderView {
+    override fun setEmptyImage(drawable: Drawable?): StatefulView {
         emptyImage = drawable
         findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setEmptyImage(drawableId: Int): LoaderView {
+    override fun setEmptyImage(drawableId: Int): StatefulView {
         return setEmptyImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setEmptyText(text: CharSequence): LoaderView {
+    override fun setEmptyText(text: CharSequence): StatefulView {
         emptyText = text
         findViewById<TextView>(R.id.empty_text)?.text = text
         return this
     }
 
-    override fun setEmptyText(textId: Int): LoaderView {
+    override fun setEmptyText(textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setEmptyButtonText(text: CharSequence): LoaderView {
+    override fun setEmptyButtonText(text: CharSequence): StatefulView {
         emptyButtonText = text
         findViewById<TextView>(R.id.empty_button)?.text = text
         return this
     }
 
-    override fun setEmptyButtonText(textId: Int): LoaderView {
+    override fun setEmptyButtonText(textId: Int): StatefulView {
         return setEmptyButtonText(context.getText(textId))
     }
 
-    override fun setEmptyButtonVisible(visible: Boolean): LoaderView {
+    override fun setEmptyButtonVisible(visible: Boolean): StatefulView {
         emptyButtonVisible = visible
         findViewById<TextView>(R.id.empty_button)?.let {
             it.visibility = if (visible) VISIBLE else GONE
@@ -266,52 +266,52 @@ class LoaderLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setOnEmptyActionListener(listener: LoaderView.OnActionListener): LoaderView {
+    override fun setOnEmptyActionListener(listener: StatefulView.OnActionListener): StatefulView {
         emptyActionListener = listener
         return this
     }
 
-    override fun setLoadingText(text: CharSequence): LoaderView {
+    override fun setLoadingText(text: CharSequence): StatefulView {
         loadingText = text
         findViewById<TextView>(R.id.loading_text)?.text = text
         return this
     }
 
-    override fun setLoadingText(textId: Int): LoaderView {
+    override fun setLoadingText(textId: Int): StatefulView {
         return setLoadingText(context.getText(textId))
     }
 
-    override fun setErrorImage(drawable: Drawable?): LoaderView {
+    override fun setErrorImage(drawable: Drawable?): StatefulView {
         errorImage = drawable
         findViewById<ImageView>(R.id.error_image)?.setImageDrawable(drawable)
         return this
     }
 
-    override fun setErrorImage(drawableId: Int): LoaderView {
+    override fun setErrorImage(drawableId: Int): StatefulView {
         return setErrorImage(ContextCompat.getDrawable(context, drawableId))
     }
 
-    override fun setErrorText(text: CharSequence): LoaderView {
+    override fun setErrorText(text: CharSequence): StatefulView {
         emptyText = text
         findViewById<TextView>(R.id.error_text)?.text = text
         return this
     }
 
-    override fun setErrorText(textId: Int): LoaderView {
+    override fun setErrorText(textId: Int): StatefulView {
         return setEmptyText(context.getText(textId))
     }
 
-    override fun setErrorButtonText(text: CharSequence): LoaderView {
+    override fun setErrorButtonText(text: CharSequence): StatefulView {
         errorButtonText = text
         findViewById<TextView>(R.id.error_button)?.text = text
         return this
     }
 
-    override fun setErrorButtonText(textId: Int): LoaderView {
+    override fun setErrorButtonText(textId: Int): StatefulView {
         return setErrorButtonText(context.getText(textId))
     }
 
-    override fun setErrorButtonVisible(visible: Boolean): LoaderView {
+    override fun setErrorButtonVisible(visible: Boolean): StatefulView {
         errorButtonVisible = visible
         findViewById<TextView>(R.id.error_button)?.let {
             it.visibility = if (visible) VISIBLE else GONE
@@ -319,12 +319,12 @@ class LoaderLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun setOnErrorActionListener(listener: LoaderView.OnActionListener): LoaderView {
+    override fun setOnErrorActionListener(listener: StatefulView.OnActionListener): StatefulView {
         errorActionListener = listener
         return this
     }
 
-    override fun attachTo(adapter: RecyclerView.Adapter<*>): LoaderView {
+    override fun attachTo(adapter: RecyclerView.Adapter<*>): StatefulView {
         if (dataObservers == null) {
             dataObservers = mutableMapOf()
         }
@@ -334,7 +334,7 @@ class LoaderLayout @JvmOverloads constructor(
         return this
     }
 
-    override fun detachTo(adapter: RecyclerView.Adapter<*>): LoaderView {
+    override fun detachTo(adapter: RecyclerView.Adapter<*>): StatefulView {
         dataObservers?.get(adapter)?.unregister()
         return this
     }
@@ -530,10 +530,10 @@ class LoaderLayout @JvmOverloads constructor(
 
     private class AdapterDataObserver(
         val adapter: RecyclerView.Adapter<*>,
-        loaderLayout: () -> LoaderLayout
+        loaderLayout: () -> StatefulLayout
     ) : RecyclerView.AdapterDataObserver() {
 
-        private val layout: LoaderLayout? by weak(loaderLayout)
+        private val layout: StatefulLayout? by weak(loaderLayout)
 
         private var registered: Boolean = false
 
@@ -580,22 +580,22 @@ class LoaderLayout @JvmOverloads constructor(
         private const val NO_VALUE = Int.MIN_VALUE
         private const val NO_TYPE = -1
 
-        fun wrap(activity: Activity): LoaderView {
+        fun wrap(activity: Activity): StatefulView {
             return wrap(
                 (activity.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0)
             )
         }
 
-        fun wrap(fragment: Fragment): LoaderView {
+        fun wrap(fragment: Fragment): StatefulView {
             return wrap(fragment.requireView())
         }
 
-        fun wrap(view: View): LoaderView {
+        fun wrap(view: View): StatefulView {
             val parent = view.parent as ViewGroup
             val params = view.layoutParams
             val index = parent.indexOfChild(view)
             parent.removeView(view)
-            val layout = LoaderLayout(view.context)
+            val layout = StatefulLayout(view.context)
             layout.setContentView(view)
             parent.addView(layout, index, params)
             return layout

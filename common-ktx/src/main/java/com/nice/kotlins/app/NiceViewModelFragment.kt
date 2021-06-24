@@ -6,17 +6,14 @@ import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.nice.kotlins.event.Event
+import com.nice.kotlins.event.EventCode
 import com.nice.kotlins.event.EventLifecycleObserver
-import com.nice.kotlins.event.Status
 import com.nice.kotlins.event.getOrDefault
 import com.nice.kotlins.viewmodel.ViewModelController
 import com.nice.kotlins.viewmodel.ViewModelEventDispatcher
 import com.nice.kotlins.viewmodel.ViewModelEvents
 import com.nice.kotlins.viewmodel.ViewModelOwner
-import com.nice.kotlins.widget.LoaderView
-import com.nice.kotlins.widget.ProgressView
-import com.nice.kotlins.widget.RefreshView
-import com.nice.kotlins.widget.TipView
+import com.nice.kotlins.widget.*
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     NiceFragment(contentLayoutId),
@@ -24,9 +21,9 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     ViewModelEventDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
-    open val loaderView: LoaderView? = null
+    open val statefulView: StatefulView? = null
 
-    open val refreshView: RefreshView? = null
+    open val loadableView: LoadableView? = null
 
     open val progressView: ProgressView? = null
 
@@ -62,26 +59,30 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     }
 
     override fun onViewModelEvent(event: Event): Boolean {
-        when (event.what) {
-            Status.SHOW_PROGRESS -> progressView?.show(event.message)
-            Status.DISMISS_PROGRESS -> progressView?.dismiss()
-            Status.REFRESH_COMPLETE -> refreshView?.finishRefresh(event.getOrDefault("state", 0))
-            Status.LOADMORE_COMPLETE -> refreshView?.finishLoadMore(event.getOrDefault("state", 0))
-            Status.SHOW_LOADING -> loaderView?.apply {
+        when (event.code) {
+            EventCode.SHOW_PROGRESS -> progressView?.show(event.message)
+            EventCode.DISMISS_PROGRESS -> progressView?.dismiss()
+            EventCode.REFRESH_STATE -> loadableView?.setRefreshState(
+                event.getOrDefault("state", LoadState.STATE_IDLE)
+            )
+            EventCode.LOADMORE_STATE -> loadableView?.setLoadMoreState(
+                event.getOrDefault("state", LoadState.STATE_IDLE)
+            )
+            EventCode.SHOW_LOADING -> statefulView?.apply {
                 if (event.message != null) setLoadingText(event.message)
                 showLoading()
             }
-            Status.SHOW_EMPTY -> loaderView?.apply {
+            EventCode.SHOW_EMPTY -> statefulView?.apply {
                 if (event.message != null) setEmptyText(event.message)
                 showEmpty()
             }
-            Status.SHOW_ERROR -> loaderView?.apply {
+            EventCode.SHOW_ERROR -> statefulView?.apply {
                 if (event.message != null) setErrorText(event.message)
                 showError()
             }
-            Status.SHOW_CONTENT -> loaderView?.showContent()
-            Status.ACTIVITY_FINISH -> activity?.finish()
-            Status.ACTIVITY_START -> {
+            EventCode.SHOW_CONTENT -> statefulView?.showContent()
+            EventCode.ACTIVITY_FINISH -> activity?.finish()
+            EventCode.ACTIVITY_START -> {
                 val intent = event.intent ?: return true
                 val callback = event.resultCallback
                 if (callback == null) {
@@ -90,7 +91,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
                     activityForResultLauncher.launch(intent, callback)
                 }
             }
-            Status.ACTIVITY_RESULT -> activity?.let {
+            EventCode.ACTIVITY_RESULT -> activity?.let {
                 it.setResult(event.resultCode, event.intent)
                 it.finish()
             }

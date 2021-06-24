@@ -45,7 +45,7 @@ buildscript {
     ext.publisher = [
             groupId   : "com.nice.kotlins",
             artifactId: "common-ktx",
-            version   : "1.3.92"
+            version   : "1.3.93"
     ]
 
     ext.deps = [

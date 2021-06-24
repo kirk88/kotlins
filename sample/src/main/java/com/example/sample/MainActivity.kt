@@ -13,7 +13,6 @@ import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
-import com.nice.kotlins.app.NiceActivity
 import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
@@ -45,8 +44,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override val tipView: TipView by tipViews()
 
-    override val loaderView: LoaderView by lazy {
-        LoaderLayout.wrap(binding.contentView)
+    override val statefulView: StatefulView by lazy {
+        StatefulLayout.wrap(binding.contentView)
             .setOnErrorActionListener{
                 viewModel.start()
             }
