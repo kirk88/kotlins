@@ -1147,7 +1147,7 @@ class TitleToolbar @JvmOverloads constructor(
 
     class LayoutParams : Toolbar.LayoutParams {
 
-        internal var isOverrideAttributes: Boolean = false
+        var isOverrideAttributes: Boolean = false
 
         constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.TitleToolbar_Layout)
