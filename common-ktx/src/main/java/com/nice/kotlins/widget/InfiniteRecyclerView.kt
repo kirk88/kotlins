@@ -20,17 +20,18 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.nice.kotlins.R
-import com.nice.kotlins.helper.layoutInflater
+import com.nice.kotlins.helper.inflate
+import com.nice.kotlins.helper.orZero
 import com.nice.kotlins.helper.textResource
-import com.nice.kotlins.widget.LoadState.*
+import com.nice.kotlins.widget.InfiniteState.*
 import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 
-class LoadableRecyclerView @JvmOverloads constructor(
+class InfiniteRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : RelativeLayout(context, attrs, defStyleAttr), LoadableView {
+) : RelativeLayout(context, attrs, defStyleAttr), InfiniteView {
 
     internal var refreshState = STATE_IDLE
     internal var loadMoreState = STATE_IDLE
@@ -42,51 +43,44 @@ class LoadableRecyclerView @JvmOverloads constructor(
     private var loadMoreListener: OnLoadMoreListener? = null
 
     private val refreshView = SwipeRefreshLayout(context)
-    private val recyclerView = LoadMoreRecyclerView(context) {
-        if (!refreshView.isRefreshing) {
-            post(loadMoreRunnable)
-        }
-    }
+    private val recyclerView = ScrollLoadMoreRecyclerView(context)
 
     private val refreshRunnable = Runnable {
         refreshState = STATE_RUNNING
         refreshListener?.onRefresh()
     }
 
-    private val loadMoreRunnable = Runnable {
+    private val loadRunnable = Runnable {
         loadMoreState = STATE_RUNNING
         loadMoreListener?.onLoadMore()
     }
 
     init {
-        val ta = context.obtainStyledAttributes(attrs, R.styleable.LoadableRecyclerView)
-        val padding = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_padding, 0)
-        val paddingTop = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingTop, padding)
+        val ta = context.obtainStyledAttributes(attrs, R.styleable.InfiniteRecyclerView)
+        val padding = ta.getDimensionPixelSize(R.styleable.InfiniteRecyclerView_android_padding, 0)
+        val paddingTop = ta.getDimensionPixelSize(R.styleable.InfiniteRecyclerView_android_paddingTop, padding)
         val paddingBottom = ta.getDimensionPixelSize(
-            R.styleable.LoadableRecyclerView_android_paddingBottom,
-            padding
+            R.styleable.InfiniteRecyclerView_android_paddingBottom, padding
         )
-        val paddingLeft = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingLeft, padding)
-        val paddingRight = ta.getDimensionPixelSize(R.styleable.LoadableRecyclerView_android_paddingRight, padding)
+        val paddingLeft = ta.getDimensionPixelSize(R.styleable.InfiniteRecyclerView_android_paddingLeft, padding)
+        val paddingRight = ta.getDimensionPixelSize(R.styleable.InfiniteRecyclerView_android_paddingRight, padding)
         val paddingStart = ta.getDimensionPixelSize(
-            R.styleable.LoadableRecyclerView_android_paddingStart,
-            paddingLeft
+            R.styleable.InfiniteRecyclerView_android_paddingStart, paddingLeft
         )
         val paddingEnd = ta.getDimensionPixelSize(
-            R.styleable.LoadableRecyclerView_android_paddingEnd,
-            paddingRight
+            R.styleable.InfiniteRecyclerView_android_paddingEnd, paddingRight
         )
         recyclerView.setPaddingRelative(paddingStart, paddingTop, paddingEnd, paddingBottom)
 
-        if (ta.hasValue(R.styleable.LoadableRecyclerView_android_overScrollMode)) {
-            val overScrollMode = ta.getInt(R.styleable.LoadableRecyclerView_android_overScrollMode, 0)
+        if (ta.hasValue(R.styleable.InfiniteRecyclerView_android_overScrollMode)) {
+            val overScrollMode = ta.getInt(R.styleable.InfiniteRecyclerView_android_overScrollMode, 0)
             recyclerView.overScrollMode = overScrollMode
         }
 
-        setRefreshEnabled(ta.getBoolean(R.styleable.LoadableRecyclerView_refreshEnabled, true))
-        setLoadMoreEnabled(ta.getBoolean(R.styleable.LoadableRecyclerView_loadMoreEnabled, true))
+        setRefreshEnabled(ta.getBoolean(R.styleable.InfiniteRecyclerView_refreshEnabled, true))
+        setLoadMoreEnabled(ta.getBoolean(R.styleable.InfiniteRecyclerView_loadMoreEnabled, true))
 
-        val layoutManagerName = ta.getString(R.styleable.LoadableRecyclerView_layoutManager)
+        val layoutManagerName = ta.getString(R.styleable.InfiniteRecyclerView_layoutManager)
         ta.recycle()
 
         createLayoutManager(context, layoutManagerName, attrs, defStyleAttr)
@@ -97,6 +91,12 @@ class LoadableRecyclerView @JvmOverloads constructor(
         refreshView.setOnRefreshListener {
             recyclerView.isEnabled = false
             post(refreshRunnable)
+        }
+
+        recyclerView.setOnLoadMoreListener {
+            if (!refreshView.isRefreshing) {
+                post(loadRunnable)
+            }
         }
     }
 
@@ -144,7 +144,7 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
     fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) = refreshView.setProgressBackgroundColorSchemeResource(colorResId)
 
-    override fun setRefreshState(state: LoadState) {
+    override fun setRefreshState(state: InfiniteState) {
         if (refreshState != state) {
             refreshState = state
             refreshView.isRefreshing = state == STATE_RUNNING
@@ -166,10 +166,10 @@ class LoadableRecyclerView @JvmOverloads constructor(
         refreshListener = listener
     }
 
-    override fun setLoadMoreState(state: LoadState) {
+    override fun setLoadMoreState(state: InfiniteState) {
         if (loadMoreState != state) {
             loadMoreState = state
-            recyclerView.loadMoreState = state
+            recyclerView.infiniteState = state
         }
     }
 
@@ -222,33 +222,21 @@ class LoadableRecyclerView @JvmOverloads constructor(
                             layoutManagerClass.getConstructor()
                         } catch (e1: NoSuchMethodException) {
                             e1.initCause(e)
-                            throw IllegalStateException(
-                                "${attrs?.positionDescription}: Error creating LayoutManager $className", e1
-                            )
+                            throw IllegalStateException("${attrs?.positionDescription}: Error creating LayoutManager $className", e1)
                         }
                     }
                     constructor.isAccessible = true
                     recyclerView.layoutManager = constructor.newInstance(context, attrs, defStyleAttr, 0)
                 } catch (e: ClassNotFoundException) {
-                    throw IllegalStateException(
-                        "${attrs?.positionDescription}: Unable to find LayoutManager $className", e
-                    )
+                    throw IllegalStateException("${attrs?.positionDescription}: Unable to find LayoutManager $className", e)
                 } catch (e: InvocationTargetException) {
-                    throw IllegalStateException(
-                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e
-                    )
+                    throw IllegalStateException("${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e)
                 } catch (e: InstantiationException) {
-                    throw IllegalStateException(
-                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e
-                    )
+                    throw IllegalStateException("${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e)
                 } catch (e: IllegalAccessException) {
-                    throw IllegalStateException(
-                        "${attrs?.positionDescription}: Cannot access non-public constructor $className", e
-                    )
+                    throw IllegalStateException("${attrs?.positionDescription}: Cannot access non-public constructor $className", e)
                 } catch (e: ClassCastException) {
-                    throw IllegalStateException(
-                        "${attrs?.positionDescription}: Class is not a LayoutManager $className", e
-                    )
+                    throw IllegalStateException("${attrs?.positionDescription}: Class is not a LayoutManager $className", e)
                 }
             }
         }
@@ -277,42 +265,48 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
     interface OnRefreshLoadMoreListener : OnRefreshListener, OnLoadMoreListener
 
-    private class LoadMoreRecyclerView(
-        context: Context,
-        val onLoadMore: () -> Unit
+    private class ScrollLoadMoreRecyclerView(
+        context: Context
     ) : RecyclerView(context) {
 
-        var loadMoreState: LoadState
-            get() {
-                val loadMoreAdapter = adapter as? LoadMoreAdapter ?: return STATE_IDLE
-                return loadMoreAdapter.loadMoreState
-            }
+        var infiniteState: InfiniteState
+            get() = (adapter as? LoadMoreAdapterWrapper)?.infiniteState ?: STATE_IDLE
             set(value) {
-                val loadMoreAdapter = adapter as? LoadMoreAdapter ?: return
-                loadMoreAdapter.loadMoreState = value
+                (adapter as? LoadMoreAdapterWrapper)?.infiniteState = value
             }
+
+        private var loadMoreListener: OnLoadMoreListener? = null
 
         init {
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
-                var lastVisiblePosition: Int = 0
-                var lastCompleteVisiblePosition: Int = 0
+                var lastVisiblePosition = 0
+                var lastCompleteVisiblePosition = 0
+                var isScrollChanged = false
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     val adapter = recyclerView.adapter ?: return
-                    if (isEnabled && loadMoreState == STATE_IDLE && newState == SCROLL_STATE_IDLE
-                        && lastCompleteVisiblePosition > recyclerView.childCount - 1
+                    if (isEnabled && isScrollChanged
                         && lastVisiblePosition == adapter.itemCount - 1
+                        && infiniteState == STATE_IDLE
+                        && newState == SCROLL_STATE_IDLE
                     ) {
-                        loadMoreState = STATE_RUNNING
-                        onLoadMore()
+                        infiniteState = STATE_RUNNING
+                        loadMoreListener?.onLoadMore()
                     }
                 }
 
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    val layout = recyclerView.layoutManager as? LinearLayoutManager ?: return
-                    lastVisiblePosition = layout.findLastVisibleItemPosition()
-                    lastCompleteVisiblePosition = layout.findLastCompletelyVisibleItemPosition()
+                    val layout = recyclerView.layoutManager ?: return
+                    if (layout is LinearLayoutManager) {
+                        isScrollChanged = if (layout.orientation == VERTICAL) dy > 0 else dx > 0
+                        lastVisiblePosition = layout.findLastVisibleItemPosition()
+                        lastCompleteVisiblePosition = layout.findLastCompletelyVisibleItemPosition()
+                    } else if (layout is StaggeredGridLayoutManager) {
+                        isScrollChanged = if (layout.orientation == VERTICAL) dy > 0 else dx > 0
+                        lastVisiblePosition = layout.findLastVisibleItemPositions(null).maxOrNull().orZero()
+                        lastCompleteVisiblePosition = layout.findLastCompletelyVisibleItemPositions(null).maxOrNull().orZero()
+                    }
                 }
 
             })
@@ -320,10 +314,10 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
         override fun setAdapter(adapter: Adapter<ViewHolder>?) {
             super.setAdapter(adapter?.let {
-                LoadMoreAdapter(it) {
-                    if (loadMoreState == STATE_FAILED) {
-                        loadMoreState = STATE_RUNNING
-                        onLoadMore()
+                LoadMoreAdapterWrapper(it) {
+                    if (infiniteState == STATE_FAILED) {
+                        infiniteState = STATE_RUNNING
+                        loadMoreListener?.onLoadMore()
                     }
                 }
             })
@@ -331,26 +325,27 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
         override fun setEnabled(enabled: Boolean) {
             super.setEnabled(enabled)
+            (adapter as? LoadMoreAdapterWrapper)?.isLoadMoreEnabled = enabled
+        }
 
-            val loadMoreAdapter = adapter as? LoadMoreAdapter ?: return
-            loadMoreAdapter.isLoadMoreEnabled = enabled
+        fun setOnLoadMoreListener(listener: OnLoadMoreListener?) {
+            loadMoreListener = listener
         }
 
     }
 
-    private class LoadMoreAdapter(
-        val innerAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>,
-        val retryListener: () -> Unit
+    private class LoadMoreAdapterWrapper(
+        private val innerAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>,
+        private val retryListener: () -> Unit
     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         var isLoadMoreEnabled: Boolean = true
             set(value) {
                 if (field != value) {
                     field = value
-
-                    if (itemCount > 0) {
+                    if (itemCount > 1) {
                         if (value) {
-                            notifyItemInserted(itemCount - 1)
+                            notifyItemInserted(itemCount)
                         } else {
                             notifyItemRemoved(itemCount)
                         }
@@ -358,15 +353,14 @@ class LoadableRecyclerView @JvmOverloads constructor(
                 }
 
                 if (value) {
-                    loadMoreState = STATE_IDLE
+                    infiniteState = STATE_IDLE
                 }
             }
 
-        var loadMoreState: LoadState = STATE_IDLE
+        var infiniteState: InfiniteState = STATE_IDLE
             set(value) {
                 if (field != value) {
                     field = value
-
                     if (isLoadMoreEnabled) {
                         notifyItemChanged(itemCount - 1, 0)
                     }
@@ -403,16 +397,13 @@ class LoadableRecyclerView @JvmOverloads constructor(
             innerAdapter.registerAdapterDataObserver(observer)
         }
 
-        private fun isFooterView(position: Int) = isLoadMoreEnabled && position == itemCount - 1
+        private fun isFooterView(position: Int) = isLoadMoreEnabled && position == innerAdapter.itemCount
+        private fun isFooterView(holder: RecyclerView.ViewHolder) = holder.itemViewType == TYPE_FOOTER
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             return if (viewType == TYPE_FOOTER) {
                 FooterViewHolder(
-                    parent.layoutInflater.inflate(
-                        R.layout.abc_load_more_view,
-                        parent,
-                        false
-                    ),
+                    parent.inflate(R.layout.abc_load_more_view, false),
                     retryListener
                 )
             } else {
@@ -429,7 +420,7 @@ class LoadableRecyclerView @JvmOverloads constructor(
             payloads: MutableList<Any>
         ) {
             if (holder is FooterViewHolder) {
-                holder.setState(loadMoreState)
+                holder.setState(infiniteState)
             } else {
                 innerAdapter.onBindViewHolder(holder, position, payloads)
             }
@@ -455,7 +446,7 @@ class LoadableRecyclerView @JvmOverloads constructor(
         }
 
         override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
-            if (isFooterView(holder.layoutPosition)) {
+            if (isFooterView(holder)) {
                 super.onViewRecycled(holder)
             } else {
                 innerAdapter.onViewRecycled(holder)
@@ -463,23 +454,21 @@ class LoadableRecyclerView @JvmOverloads constructor(
         }
 
         override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-            if (isFooterView(holder.layoutPosition)) {
-                val lp = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams
-                    ?: return
-                lp.isFullSpan = true
+            if (isFooterView(holder)) {
+                (holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
             } else {
                 innerAdapter.onViewAttachedToWindow(holder)
             }
         }
 
         override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-            if (!isFooterView(holder.layoutPosition)) {
+            if (isFooterView(holder)) {
                 innerAdapter.onViewDetachedFromWindow(holder)
             }
         }
 
         override fun onFailedToRecycleView(holder: RecyclerView.ViewHolder): Boolean {
-            if (isFooterView(holder.layoutPosition)) {
+            if (isFooterView(holder)) {
                 return super.onFailedToRecycleView(holder)
             }
             return innerAdapter.onFailedToRecycleView(holder)
@@ -507,7 +496,7 @@ class LoadableRecyclerView @JvmOverloads constructor(
             private val retryListener: () -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
 
-            private var loadMoreState: LoadState? = null
+            private var infiniteState: InfiniteState? = null
 
             private val progress: ProgressBar = itemView.findViewById(R.id.progress)
             private val message: TextView = itemView.findViewById(R.id.message)
@@ -516,17 +505,17 @@ class LoadableRecyclerView @JvmOverloads constructor(
                 retryListener()
             }
 
-            fun setState(state: LoadState) {
-                if (loadMoreState == state) {
+            fun setState(state: InfiniteState) {
+                if (infiniteState == state) {
                     return
                 }
 
-                loadMoreState = state
+                infiniteState = state
 
                 itemView.post { updateViewWithState(state) }
             }
 
-            private fun updateViewWithState(state: LoadState) = when (state) {
+            private fun updateViewWithState(state: InfiniteState) = when (state) {
                 STATE_RUNNING -> {
                     progress.isVisible = true
                     message.isVisible = true
@@ -570,19 +559,19 @@ class LoadableRecyclerView @JvmOverloads constructor(
 
 }
 
-var LoadableRecyclerView.adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?
+var InfiniteRecyclerView.adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>?
     get() = getAdapter()
     set(value) {
         setAdapter(value)
     }
 
-var LoadableRecyclerView.layoutManager: RecyclerView.LayoutManager?
+var InfiniteRecyclerView.layoutManager: RecyclerView.LayoutManager?
     get() = getLayoutManager()
     set(value) {
         setLayoutManager(value)
     }
 
-var LoadableRecyclerView.itemAnimator: RecyclerView.ItemAnimator?
+var InfiniteRecyclerView.itemAnimator: RecyclerView.ItemAnimator?
     get() = getItemAnimator()
     set(value) {
         setItemAnimator(value)

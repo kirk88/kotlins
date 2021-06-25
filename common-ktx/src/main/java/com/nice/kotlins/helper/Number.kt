@@ -3,6 +3,7 @@
 package com.nice.kotlins.helper
 
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.math.RoundingMode
 import kotlin.math.max
 import kotlin.math.min
@@ -29,6 +30,21 @@ fun Float.between(min: Float, max: Float): Float {
 
 fun Double.between(min: Double, max: Double): Double {
     return min(max, max(this, min))
+}
+
+fun <T : Number> T?.orZero(): T {
+    @Suppress("UNCHECKED_CAST")
+    return this ?: when (this) {
+        is Int? -> 0
+        is Long? -> 0.toLong()
+        is Float? -> 0.toFloat()
+        is Double? -> 0.toDouble()
+        is Short? -> 0.toShort()
+        is Byte? -> 0.toByte()
+        is BigDecimal? -> 0.toBigDecimal()
+        is BigInteger? -> 0.toBigInteger()
+        else -> throw IllegalArgumentException("Wrong number type: $this")
+    } as T
 }
 
 inline fun <T : Number> T.ifZero(defaultValue: () -> T): T = if (this.toInt() != 0) this else defaultValue()

@@ -102,7 +102,7 @@
         <attr name="layout_overrideAttributes" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="LoadableRecyclerView">
+    <declare-styleable name="InfiniteRecyclerView">
         <attr name="android:padding" />
         <attr name="android:paddingTop" />
         <attr name="android:paddingBottom" />

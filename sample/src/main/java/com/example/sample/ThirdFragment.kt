@@ -1,8 +1,6 @@
 package com.example.sample
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
@@ -11,10 +9,9 @@ import com.example.sample.databinding.FragmentThirdBinding
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.*
-import com.nice.kotlins.widget.LoadState
-import com.nice.kotlins.widget.LoadableRecyclerView
+import com.nice.kotlins.widget.InfiniteRecyclerView
+import com.nice.kotlins.widget.InfiniteState
 import com.nice.kotlins.widget.adapter
-import com.nice.kotlins.widget.divider.GridDividerItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -28,6 +25,8 @@ class ThirdFragment : NiceFragment() {
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
+        val heights = mutableMapOf<Int, Int>()
+
         val adapter = adapterBuilder<String, ItemViewHolder>(requireContext(),
             mutableListOf<String>().apply {
                 repeat(20) {
@@ -36,24 +35,23 @@ class ThirdFragment : NiceFragment() {
             })
             .register(ViewHolderCreator { inflater, parent ->
                 ItemViewHolder(AppCompatTextView(requireContext()).apply {
-                    layoutParams = ViewGroup.LayoutParams(-1, 200)
+                    layoutParams = ViewGroup.LayoutParams(-1, -2)
                 })
             }).bind(ViewHolderBinder { holder, item, payloads ->
-                (holder.itemView as TextView).string = "TEXT"
+                (holder.itemView as TextView).string = "TEXT${holder.layoutPosition}"
+
+                holder.itemView.layoutHeight = heights.getOrPut(holder.layoutPosition){
+                    200.rangeTo(300).random()
+                }
             })
             .build()
-
-        binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.BLUE, 8))
 
         binding.recyclerView.adapter = adapter
 
         binding.recyclerView.setOnRefreshLoadMoreListener(object :
-            LoadableRecyclerView.OnRefreshLoadMoreListener {
-
-            var page = 0
+            InfiniteRecyclerView.OnRefreshLoadMoreListener {
 
             override fun onRefresh() {
-                Log.e("TAGTAG", "onRefresh")
                 adapter.setItems(mutableListOf<String>().apply {
                     repeat(20) {
                         add("")
@@ -63,13 +61,11 @@ class ThirdFragment : NiceFragment() {
                 lifecycleScope.launch {
                     delay(400)
 
-                    binding.recyclerView.setRefreshState(LoadState.STATE_COMPLETED)
+                    binding.recyclerView.setRefreshState(InfiniteState.STATE_COMPLETED)
                 }
             }
 
             override fun onLoadMore() {
-                Log.e("TAGTAG", "onLoadMore")
-
                 lifecycleScope.launch {
                     delay(400)
 
@@ -79,12 +75,11 @@ class ThirdFragment : NiceFragment() {
                         }
                     })
 
-                    binding.recyclerView.setLoadMoreState(LoadState.STATE_IDLE)
+                    binding.recyclerView.setLoadMoreState(InfiniteState.STATE_IDLE)
                 }
             }
 
         })
-
     }
 
 }

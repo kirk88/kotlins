@@ -248,7 +248,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
 
     private val dividerDrawable: Drawable
 
-    private val dataObserver: AdapterDataObserver by lazy { AdapterDataObserver() }
+    private val changeObserver: DividerNeedChangeObserver by lazy { DividerNeedChangeObserver() }
 
     constructor(drawable: Drawable) {
         dividerDrawable = drawable
@@ -272,8 +272,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         check(layout is GridLayoutManager) {
             "GridDividerItemDecoration only support the GridLayoutManager"
         }
-
-        dataObserver.setRecyclerView(parent)
+        changeObserver.setRecyclerView(parent)
 
         val spanSizeLookup = layout.spanSizeLookup
         val itemCount = layout.itemCount
@@ -336,7 +335,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         }
     }
 
-    private class AdapterDataObserver : RecyclerView.AdapterDataObserver() {
+    private class DividerNeedChangeObserver : RecyclerView.AdapterDataObserver() {
 
         private var targetView: RecyclerView? by weak()
 
@@ -357,5 +356,4 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         }
 
     }
-
 }

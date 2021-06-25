@@ -5,14 +5,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <com.nice.kotlins.widget.LoadableRecyclerView
+    <com.nice.kotlins.widget.InfiniteRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         app:spanCount="3"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
-
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager" />
 
     <Button
         android:id="@+id/button"

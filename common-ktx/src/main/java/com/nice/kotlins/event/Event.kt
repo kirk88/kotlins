@@ -9,7 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.nice.kotlins.helper.intent
 import com.nice.kotlins.helper.intentOf
-import com.nice.kotlins.widget.LoadState
+import com.nice.kotlins.widget.InfiniteState
 
 
 object EventCode {
@@ -150,11 +150,11 @@ fun progressShow(message: CharSequence? = null): Event = Event(EventCode.SHOW_PR
 
 fun progressDismiss(): Event = Event(EventCode.DISMISS_PROGRESS)
 
-fun refreshState(state: LoadState): Event = buildEvent(EventCode.REFRESH_STATE) {
+fun refreshState(state: InfiniteState): Event = buildEvent(EventCode.REFRESH_STATE) {
     put("state", state)
 }
 
-fun loadMoreState(state: LoadState): Event = buildEvent(EventCode.LOADMORE_STATE) {
+fun loadMoreState(state: InfiniteState): Event = buildEvent(EventCode.LOADMORE_STATE) {
     put("state", state)
 }
 

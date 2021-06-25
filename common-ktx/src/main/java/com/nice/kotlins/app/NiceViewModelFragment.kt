@@ -23,7 +23,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
 
     open val statefulView: StatefulView? = null
 
-    open val loadableView: LoadableView? = null
+    open val infiniteView: InfiniteView? = null
 
     open val progressView: ProgressView? = null
 
@@ -62,11 +62,11 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
         when (event.code) {
             EventCode.SHOW_PROGRESS -> progressView?.show(event.message)
             EventCode.DISMISS_PROGRESS -> progressView?.dismiss()
-            EventCode.REFRESH_STATE -> loadableView?.setRefreshState(
-                event.getOrDefault("state", LoadState.STATE_IDLE)
+            EventCode.REFRESH_STATE -> infiniteView?.setRefreshState(
+                event.getOrDefault("state", InfiniteState.STATE_IDLE)
             )
-            EventCode.LOADMORE_STATE -> loadableView?.setLoadMoreState(
-                event.getOrDefault("state", LoadState.STATE_IDLE)
+            EventCode.LOADMORE_STATE -> infiniteView?.setLoadMoreState(
+                event.getOrDefault("state", InfiniteState.STATE_IDLE)
             )
             EventCode.SHOW_LOADING -> statefulView?.apply {
                 if (event.message != null) setLoadingText(event.message)
