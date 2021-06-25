@@ -47,7 +47,11 @@ class ThirdFragment : NiceFragment() {
 
         binding.recyclerView.adapter = adapter
 
+        var page = 0
+
         binding.recyclerView.doOnRefresh {
+            page = 0
+
             adapter.setItems(mutableListOf<String>().apply {
                 repeat(20) {
                     add("")
@@ -65,6 +69,11 @@ class ThirdFragment : NiceFragment() {
             lifecycleScope.launch {
                 delay(400)
 
+                if(page == 3){
+                    binding.recyclerView.setLoadMoreState(InfiniteState.STATE_FAILED)
+                    return@launch
+                }
+
                 adapter.addItems(mutableListOf<String>().apply {
                     repeat(20) {
                         add("")
@@ -72,6 +81,8 @@ class ThirdFragment : NiceFragment() {
                 })
 
                 binding.recyclerView.setLoadMoreState(InfiniteState.STATE_IDLE)
+
+                page += 1
             }
         }
     }
