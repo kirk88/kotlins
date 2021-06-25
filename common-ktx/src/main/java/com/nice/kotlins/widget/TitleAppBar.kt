@@ -771,7 +771,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val titleView = titleTextView
         if (titleView != null) {
-            if (!isAttributesOverlay(titleView)) {
+            if (!isOverrideAttributes(titleView)) {
                 TextViewCompat.setTextAppearance(titleView, resId)
             }
         } else {
@@ -788,7 +788,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val titleView = titleTextView
         if (titleView != null) {
-            if (!isAttributesOverlay(titleView)) {
+            if (!isOverrideAttributes(titleView)) {
                 titleView.setTextColor(color)
             }
         } else {
@@ -825,7 +825,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val subtitleView = subtitleTextView
         if (subtitleView != null) {
-            if (!isAttributesOverlay(subtitleView)) {
+            if (!isOverrideAttributes(subtitleView)) {
                 TextViewCompat.setTextAppearance(subtitleView, resId)
             }
         } else {
@@ -842,7 +842,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val subtitleView = subtitleTextView
         if (subtitleView != null) {
-            if (!isAttributesOverlay(subtitleView)) {
+            if (!isOverrideAttributes(subtitleView)) {
                 subtitleView.setTextColor(color)
             }
         } else {
@@ -881,7 +881,7 @@ class TitleToolbar @JvmOverloads constructor(
         if (navButtonView != null) {
             navButtonView.isGone = icon == null
             navButtonView.setImageDrawable(
-                if (isAttributesOverlay(navButtonView)) icon
+                if (isOverrideAttributes(navButtonView)) icon
                 else maybeTintNavigationIcon(icon)
             )
         } else {
@@ -896,7 +896,7 @@ class TitleToolbar @JvmOverloads constructor(
     fun setNavigationIconTintList(color: ColorStateList?) {
         navigationIconTint = color
 
-        if (!isAttributesOverlay(navigationButtonView)) {
+        if (!isOverrideAttributes(navigationButtonView)) {
             val navIcon = getNavigationIcon()
             if (navIcon != null) {
                 setNavigationIcon(navIcon)
@@ -915,7 +915,7 @@ class TitleToolbar @JvmOverloads constructor(
     fun setNavigationIconTintMode(mode: PorterDuff.Mode?) {
         navigationIconTintMode = mode
 
-        if (!isAttributesOverlay(navigationButtonView)) {
+        if (!isOverrideAttributes(navigationButtonView)) {
             val navIcon = getNavigationIcon()
             if (navIcon != null) {
                 setNavigationIcon(navIcon)
@@ -936,7 +936,7 @@ class TitleToolbar @JvmOverloads constructor(
 
         val navButtonView = navigationButtonView
         if (navButtonView != null) {
-            if (!isAttributesOverlay(navButtonView)) {
+            if (!isOverrideAttributes(navButtonView)) {
                 navButtonView.contentDescription = description
             }
         } else {
@@ -1135,7 +1135,7 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    private fun isAttributesOverlay(view: View?): Boolean {
+    private fun isOverrideAttributes(view: View?): Boolean {
         if (view == null || !contains(view)) {
             return false
         }
