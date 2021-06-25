@@ -220,6 +220,10 @@ operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(posit
 
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? = items.getOrNull(position)
 
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T = items.getOrNull(position) ?: defaultValue
+
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T) = items.getOrNull(position) ?: defaultValue(position)
+
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()
 
 
