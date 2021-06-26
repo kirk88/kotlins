@@ -52,21 +52,19 @@ open class LiveEvent<T> {
 
     @Volatile
     private var data: Any?
-    private var dataVersion: Int
+    private var version: Int
+
     private var dispatchingValue = false
     private var dispatchInvalidated = false
 
-    internal val version: Int
-        get() = dataVersion
-
     constructor() {
         data = NOT_SET
-        dataVersion = START_VERSION
+        version = START_VERSION
     }
 
     constructor(value: T) {
         data = value
-        dataVersion = START_VERSION + 1
+        version = START_VERSION + 1
     }
 
     private fun considerNotify(observer: ObserverWrapper) {
@@ -82,10 +80,10 @@ open class LiveEvent<T> {
             observer.activeStateChanged(false)
             return
         }
-        if (observer.lastVersion >= dataVersion) {
+        if (observer.lastVersion >= version) {
             return
         }
-        observer.lastVersion = dataVersion
+        observer.lastVersion = version
         @Suppress("UNCHECKED_CAST")
         observer.observer.onChanged(data as T)
     }
@@ -279,7 +277,7 @@ open class LiveEvent<T> {
     fun removeObserver(observer: Observer<in T>) {
         assertMainThread("removeObserver")
         val removed: ObserverWrapper = observers.remove(observer)
-                ?: return
+            ?: return
         removed.detachObserver()
         removed.activeStateChanged(false)
     }
@@ -298,6 +296,8 @@ open class LiveEvent<T> {
             }
         }
     }
+
+    internal fun getVersion(): Int = version
 
     /**
      * Posts a task to a main thread to set the given value. So if you have a following code
@@ -340,7 +340,7 @@ open class LiveEvent<T> {
     }
 
     private fun setValueInternal(value: T?) {
-        dataVersion++
+        version++
         data = value
         dispatchingValue(null)
     }
@@ -400,9 +400,9 @@ open class LiveEvent<T> {
     }
 
     private inner class LifecycleActiveObserver(
-            owner: LifecycleOwner,
-            observer: Observer<in T>,
-            isSticky: Boolean
+        owner: LifecycleOwner,
+        observer: Observer<in T>,
+        isSticky: Boolean
     ) : LifecycleBoundObserver(owner, observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
@@ -410,9 +410,9 @@ open class LiveEvent<T> {
     }
 
     private open inner class LifecycleBoundObserver(
-            val owner: LifecycleOwner,
-            observer: Observer<in T>,
-            isSticky: Boolean
+        val owner: LifecycleOwner,
+        observer: Observer<in T>,
+        isSticky: Boolean
     ) : ObserverWrapper(observer, isSticky), LifecycleEventObserver {
         override fun shouldBeActive(): Boolean {
             return owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
@@ -436,11 +436,11 @@ open class LiveEvent<T> {
     }
 
     private abstract inner class ObserverWrapper(
-            val observer: Observer<in T>,
-            isSticky: Boolean
+        val observer: Observer<in T>,
+        isSticky: Boolean
     ) {
         var active = false
-        var lastVersion: Int = if (isSticky) START_VERSION else dataVersion
+        var lastVersion: Int = if (isSticky) START_VERSION else version
 
         abstract fun shouldBeActive(): Boolean
         open fun isAttachedTo(owner: LifecycleOwner): Boolean {
@@ -472,8 +472,8 @@ open class LiveEvent<T> {
     }
 
     private inner class AlwaysActiveObserver(
-            observer: Observer<in T>,
-            isSticky: Boolean
+        observer: Observer<in T>,
+        isSticky: Boolean
     ) : ObserverWrapper(observer, isSticky) {
         override fun shouldBeActive(): Boolean {
             return true
@@ -487,7 +487,7 @@ open class LiveEvent<T> {
     }
 
     companion object {
-        const val START_VERSION = -1
+        internal const val START_VERSION = -1
         private val NOT_SET = Any()
         private fun assertMainThread(methodName: String) {
             check(ArchTaskExecutor.getInstance().isMainThread) { "Cannot invoke $methodName on a background thread" }

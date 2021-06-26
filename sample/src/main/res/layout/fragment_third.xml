@@ -10,8 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:spanCount="3"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager" />
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3" />
 
     <Button
         android:id="@+id/button"

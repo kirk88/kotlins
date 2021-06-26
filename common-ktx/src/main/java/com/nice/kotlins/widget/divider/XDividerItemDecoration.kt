@@ -205,8 +205,7 @@ class LinearDividerItemDecoration : XDividerItemDecoration {
         val orientation = layoutManager.orientation
 
         val builder = DividerBuilder()
-        val drawable = getDividerDrawable(parent, orientation)
-        drawable ?: return builder.build()
+        val drawable = getDividerDrawable(parent, orientation) ?: return builder.build()
 
         if (orientation == RecyclerView.VERTICAL) {
             builder.bottom(drawable)
@@ -274,14 +273,10 @@ class GridDividerItemDecoration : XDividerItemDecoration {
         }
         changeObserver.setRecyclerView(parent)
 
-        val spanSizeLookup = layout.spanSizeLookup
         val itemCount = layout.itemCount
         val orientation = layout.orientation
         val spanCount = layout.spanCount
-
-        if (spanSizeLookup.getSpanSize(position) == spanCount) {
-            return DividerBuilder().build()
-        }
+        val isFullSpan = layout.spanSizeLookup?.getSpanSize(position) == spanCount
 
         val isFirstRow = position < spanCount
         val isLastRow = position >= itemCount - (itemCount % spanCount).let {
@@ -296,13 +291,13 @@ class GridDividerItemDecoration : XDividerItemDecoration {
             val left = position % spanCount * (dividerSize - eachWidth)
             val right = eachWidth - left
             return DividerBuilder()
-                .left(left)
+                .left(if (isFullSpan) 0 else left)
                 .right(
                     dividerDrawable,
                     offset = right,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastRow) -dividerSize else 0,
-                    visible = !isLastColumn
+                    visible = !isLastColumn && !isFullSpan
                 )
                 .bottom(
                     dividerDrawable,
@@ -317,7 +312,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
             val top = position % spanCount * (dividerSize - eachWidth)
             val bottom = eachWidth - top
             return DividerBuilder()
-                .top(top)
+                .top(if (isFullSpan) 0 else top)
                 .right(
                     dividerDrawable,
                     paddingStart = if (isFirstColumn) 0 else -dividerSize,
@@ -329,7 +324,7 @@ class GridDividerItemDecoration : XDividerItemDecoration {
                     offset = bottom,
                     paddingStart = if (isFirstRow) 0 else -dividerSize,
                     paddingEnd = if (!isLastRow) -dividerSize else 0,
-                    visible = !isLastColumn
+                    visible = !isLastColumn && !isFullSpan
                 )
                 .build()
         }

@@ -15,8 +15,8 @@ abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapt
     val differ: AsyncListDiffer<T>
     private val changeListener = ListListener<T> { previousList, currentList ->
         this@DifferRecyclerAdapter.onCurrentListChanged(
-                previousList,
-                currentList
+            previousList,
+            currentList
         )
     }
 
@@ -48,14 +48,6 @@ abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapt
 
 }
 
-operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: Iterable<T>) {
-    if (items is List<*>) {
-        submitList(items as List<T>)
-    } else {
-        submitList(items.toList())
-    }
-}
+operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: List<T>) = submitList(items)
 
-operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: Array<T>) {
-    submitList(items.toList())
-}
+operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: Array<T>) = submitList(items.toList())

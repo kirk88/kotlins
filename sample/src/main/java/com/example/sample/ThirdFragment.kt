@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.TextView
@@ -11,6 +12,7 @@ import com.nice.kotlins.app.NiceFragment
 import com.nice.kotlins.helper.*
 import com.nice.kotlins.widget.InfiniteState
 import com.nice.kotlins.widget.adapter
+import com.nice.kotlins.widget.divider.GridDividerItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,16 +36,18 @@ class ThirdFragment : NiceFragment() {
             })
             .register(ViewHolderCreator { inflater, parent ->
                 ItemViewHolder(AppCompatTextView(requireContext()).apply {
-                    layoutParams = ViewGroup.LayoutParams(-1, -2)
+                    layoutParams = ViewGroup.LayoutParams(-1, 200)
                 })
             }).bind(ViewHolderBinder { holder, item, payloads ->
                 (holder.itemView as TextView).string = "TEXT${holder.layoutPosition}"
-
-                holder.itemView.layoutHeight = heights.getOrPut(holder.layoutPosition){
-                    200.rangeTo(300).random()
-                }
+//
+//                holder.itemView.layoutHeight = heights.getOrPut(holder.layoutPosition){
+//                    200.rangeTo(300).random()
+//                }
             })
             .build()
+
+        binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.BLUE, 8))
 
         binding.recyclerView.adapter = adapter
 
@@ -67,7 +71,7 @@ class ThirdFragment : NiceFragment() {
 
         binding.recyclerView.doOnLoadMore {
             lifecycleScope.launch {
-                delay(400)
+                delay(4000)
 
                 if(page == 3){
                     binding.recyclerView.setLoadMoreState(InfiniteState.STATE_FAILED)

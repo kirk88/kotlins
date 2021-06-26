@@ -94,9 +94,8 @@ class InfiniteRecyclerView @JvmOverloads constructor(
         }
 
         recyclerView.setOnLoadMoreListener {
-            if (!refreshView.isRefreshing) {
-                post(loadRunnable)
-            }
+            refreshView.isEnabled = false
+            post(loadRunnable)
         }
     }
 
@@ -170,6 +169,10 @@ class InfiniteRecyclerView @JvmOverloads constructor(
         if (loadMoreState != state) {
             loadMoreState = state
             recyclerView.infiniteState = state
+
+            if (state != STATE_RUNNING) {
+                refreshView.isEnabled = isRefreshEnabled
+            }
         }
     }
 
@@ -265,16 +268,15 @@ class InfiniteRecyclerView @JvmOverloads constructor(
 
     interface OnRefreshLoadMoreListener : OnRefreshListener, OnLoadMoreListener
 
-    private class ScrollLoadMoreRecyclerView(
-        context: Context
-    ) : RecyclerView(context) {
+    private class ScrollLoadMoreRecyclerView(context: Context) : RecyclerView(context) {
 
         var infiniteState: InfiniteState
-            get() = (adapter as? LoadMoreAdapterWrapper)?.infiniteState ?: STATE_IDLE
+            get() = adapterWrapper?.infiniteState ?: STATE_IDLE
             set(value) {
-                (adapter as? LoadMoreAdapterWrapper)?.infiniteState = value
+                adapterWrapper?.infiniteState = value
             }
 
+        private var adapterWrapper: LoadMoreAdapterWrapper? = null
         private var loadMoreListener: OnLoadMoreListener? = null
 
         init {
@@ -285,9 +287,9 @@ class InfiniteRecyclerView @JvmOverloads constructor(
                 var isScrollChanged = false
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    val adapter = recyclerView.adapter ?: return
+                    val lastPosition = recyclerView.adapter?.itemCount ?: return
                     if (isEnabled && isScrollChanged
-                        && lastVisiblePosition == adapter.itemCount - 1
+                        && lastVisiblePosition == lastPosition
                         && infiniteState == STATE_IDLE
                         && newState == SCROLL_STATE_IDLE
                     ) {
@@ -312,20 +314,28 @@ class InfiniteRecyclerView @JvmOverloads constructor(
             })
         }
 
-        override fun setAdapter(adapter: Adapter<ViewHolder>?) {
+        override fun setAdapter(adapter: Adapter<out ViewHolder>?) {
             super.setAdapter(adapter?.let {
-                LoadMoreAdapterWrapper(it) {
+                @Suppress("UNCHECKED_CAST")
+                LoadMoreAdapterWrapper(it as Adapter<ViewHolder>) {
                     if (infiniteState == STATE_FAILED) {
                         infiniteState = STATE_RUNNING
                         loadMoreListener?.onLoadMore()
                     }
+                }.also { wrapper ->
+                    adapterWrapper = wrapper
                 }
             })
         }
 
+        override fun getAdapter(): Adapter<out ViewHolder>? {
+            val adapter = super.getAdapter()
+            return if (adapter is LoadMoreAdapterWrapper) adapter.innerAdapter else adapter
+        }
+
         override fun setEnabled(enabled: Boolean) {
             super.setEnabled(enabled)
-            (adapter as? LoadMoreAdapterWrapper)?.isLoadMoreEnabled = enabled
+            adapterWrapper?.isLoadMoreEnabled = enabled
         }
 
         fun setOnLoadMoreListener(listener: OnLoadMoreListener?) {
@@ -335,7 +345,7 @@ class InfiniteRecyclerView @JvmOverloads constructor(
     }
 
     private class LoadMoreAdapterWrapper(
-        private val innerAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>,
+        val innerAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>,
         private val retryListener: () -> Unit
     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -367,7 +377,7 @@ class InfiniteRecyclerView @JvmOverloads constructor(
                 }
             }
 
-        private val observer = object : RecyclerView.AdapterDataObserver() {
+        private val dataObserver = object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() {
                 notifyDataSetChanged()
             }
@@ -394,7 +404,7 @@ class InfiniteRecyclerView @JvmOverloads constructor(
         }
 
         init {
-            innerAdapter.registerAdapterDataObserver(observer)
+            innerAdapter.registerAdapterDataObserver(dataObserver)
         }
 
         private fun isFooterView(position: Int) = isLoadMoreEnabled && position == innerAdapter.itemCount
@@ -477,12 +487,12 @@ class InfiniteRecyclerView @JvmOverloads constructor(
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
             innerAdapter.onAttachedToRecyclerView(recyclerView)
             val layout = recyclerView.layoutManager as? GridLayoutManager ?: return
-            val originLookup = layout.spanSizeLookup
+            val originalSpanSizeLookup = layout.spanSizeLookup
             layout.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     return if (isFooterView(position)) {
                         layout.spanCount
-                    } else originLookup?.getSpanSize(position) ?: 1
+                    } else originalSpanSizeLookup?.getSpanSize(position) ?: 1
                 }
             }
         }

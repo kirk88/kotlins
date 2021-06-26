@@ -7,7 +7,7 @@ import okhttp3.internal.toImmutableList
 import java.util.*
 
 abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
-        BaseRecyclerAdapter<T, VH>(context) {
+    BaseRecyclerAdapter<T, VH>(context) {
 
     private val lock: Any = Any()
 
@@ -163,35 +163,14 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
 }
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.plusAssign(item: T) {
-    addItem(item)
-}
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.plusAssign(item: T) = addItem(item)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Iterable<T>) {
-    if (items is List<*>) {
-        setItems(items as List<T>)
-    } else {
-        setItems(items.toList())
-    }
-}
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: List<T>) = setItems(items)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) {
-    setItems(items.toList())
-}
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) = setItems(items.toList())
 
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(item: T) = removeItem(item)
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(item: T) {
-    removeItem(item)
-}
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: List<T>) = removeItems(items)
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Iterable<T>) {
-    if (items is List<*>) {
-        removeItems(items as List<T>)
-    } else {
-        removeItems(items.toList())
-    }
-}
-
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) {
-    removeItems(items.toList())
-}
+operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) = removeItems(items.toList())

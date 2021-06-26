@@ -181,7 +181,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                             .sslSocketFactory(sslSocketFactory, trustManager)
                             .hostnameVerifier(TrustAllHostnameVerifier())
                             .build()
-                }.execute()
+                }.executeOrNull()
                 Log.e(TAG, "${Thread.currentThread().name}:  $result")
             }
         }

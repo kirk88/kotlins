@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.event
 
 import android.annotation.SuppressLint
@@ -44,11 +46,11 @@ class MediatorLiveEvent<T> : MutableLiveEvent<T>() {
     }
 
     private class Source<V>(
-            private val liveEvent: LiveEvent<V>,
-            val observer: Observer<in V>
+        private val liveEvent: LiveEvent<V>,
+        val observer: Observer<in V>
     ) : Observer<V> {
 
-        var version = START_VERSION
+        private var version = START_VERSION
 
         fun plug() {
             liveEvent.observeForever(this)
@@ -59,8 +61,8 @@ class MediatorLiveEvent<T> : MutableLiveEvent<T>() {
         }
 
         override fun onChanged(v: V?) {
-            if (version != liveEvent.version) {
-                version = liveEvent.version
+            if (version != liveEvent.getVersion()) {
+                version = liveEvent.getVersion()
                 observer.onChanged(v)
             }
         }
