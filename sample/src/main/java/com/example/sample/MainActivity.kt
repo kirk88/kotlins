@@ -69,9 +69,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        fab.doOnLongClick {
-            true
-        }
         val liveEvent = MutableLiveEvent<String>()
         liveEvent.observe(this) {
             Log.e(TAG, "event: $it")

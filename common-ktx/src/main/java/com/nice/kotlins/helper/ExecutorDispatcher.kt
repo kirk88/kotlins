@@ -2,12 +2,10 @@
 
 package com.nice.kotlins.helper
 
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
-import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -25,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * }
  */
 suspend fun <T> suspendBlocking(
-        dispatcher: ExecutorDispatcher = ExecutorDispatchers.Unconfined,
-        block: () -> T
+    dispatcher: ExecutorDispatcher = ExecutorDispatchers.Unconfined,
+    block: () -> T
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
         runCatching(block).onSuccess {
@@ -122,32 +120,11 @@ internal object MainThreadExecutorDispatcher : HandlerExecutorDispatcher {
             if (handler == null) {
                 synchronized(lock) {
                     if (handler == null) {
-                        handler = createAsync(Looper.getMainLooper())
+                        handler = Looper.getMainLooper().asHandler(true)
                     }
                 }
             }
             handler!!.post(command)
-        }
-
-        companion object {
-
-            private fun createAsync(looper: Looper): Handler {
-                if (Build.VERSION.SDK_INT >= 28) {
-                    return Handler.createAsync(looper)
-                }
-                try {
-                    return Handler::class.java.getDeclaredConstructor(
-                            Looper::class.java, Handler.Callback::class.java,
-                            Boolean::class.javaPrimitiveType
-                    ).newInstance(looper, null, true)
-                } catch (_: IllegalAccessException) {
-                } catch (_: InstantiationException) {
-                } catch (_: NoSuchMethodException) {
-                } catch (_: InvocationTargetException) {
-                }
-                return Handler(looper)
-            }
-
         }
 
     }

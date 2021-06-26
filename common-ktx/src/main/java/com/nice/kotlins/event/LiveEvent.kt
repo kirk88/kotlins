@@ -3,14 +3,17 @@
 package com.nice.kotlins.event
 
 import android.annotation.SuppressLint
+import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
-import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.internal.SafeIterableMap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import com.nice.kotlins.helper.asHandler
+import com.nice.kotlins.helper.isMainThread
+import java.util.concurrent.Executor
 
 /**
  * LiveEventData is a data holder class that can be observed within a given lifecycle.
@@ -319,7 +322,7 @@ open class LiveEvent<T> {
      * @param value The new value
      */
     protected open fun postValue(value: T) {
-        ArchTaskExecutor.getInstance().postToMainThread(PostValueRunnable(value))
+        MainThreadExecutor.execute(PostValueRunnable(value))
     }
 
     /**
@@ -335,7 +338,7 @@ open class LiveEvent<T> {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             setValueInternal(value)
         } else {
-            ArchTaskExecutor.getInstance().postToMainThread(PostValueRunnable(value))
+            MainThreadExecutor.execute(PostValueRunnable(value))
         }
     }
 
@@ -486,11 +489,32 @@ open class LiveEvent<T> {
         }
     }
 
+    private object MainThreadExecutor : Executor {
+
+        private val lock = Any()
+
+        @Volatile
+        private var handler: Handler? = null
+
+        override fun execute(command: Runnable) {
+            if (handler == null) {
+                synchronized(lock) {
+                    if (handler == null) {
+                        handler = Looper.getMainLooper().asHandler(true)
+                    }
+                }
+            }
+            handler!!.post(command)
+        }
+
+    }
+
     companion object {
         internal const val START_VERSION = -1
         private val NOT_SET = Any()
+
         private fun assertMainThread(methodName: String) {
-            check(ArchTaskExecutor.getInstance().isMainThread) { "Cannot invoke $methodName on a background thread" }
+            check(isMainThread) { "Cannot invoke $methodName on a background thread" }
         }
     }
 }
