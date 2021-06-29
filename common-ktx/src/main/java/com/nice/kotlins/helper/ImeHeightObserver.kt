@@ -53,7 +53,7 @@ class ImeHeightObserver : ViewTreeObserver.OnGlobalLayoutListener {
     }
 
     fun unregister() {
-        popup.contentView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        popup.contentView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
         popup.dismiss()
     }
 
