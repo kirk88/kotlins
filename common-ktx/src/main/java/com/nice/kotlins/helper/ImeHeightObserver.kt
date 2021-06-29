@@ -18,7 +18,6 @@ class ImeHeightObserver : ViewTreeObserver.OnGlobalLayoutListener {
         width = 0
         height = ViewGroup.LayoutParams.MATCH_PARENT
         inputMethodMode = PopupWindow.INPUT_METHOD_NEEDED
-
         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
@@ -26,6 +25,7 @@ class ImeHeightObserver : ViewTreeObserver.OnGlobalLayoutListener {
         bottom = Resources.getSystem().displayMetrics.heightPixels
     }
     private var contentBottom: Int = contentRect.bottom
+    private var currentHeight: Int = 0
 
     private var observer: ((Int) -> Unit)? = null
 
@@ -35,8 +35,11 @@ class ImeHeightObserver : ViewTreeObserver.OnGlobalLayoutListener {
             contentBottom = contentRect.bottom
         }
 
-        val imeHeight = contentBottom - contentRect.bottom
-        observer?.invoke(imeHeight)
+        val height = contentBottom - contentRect.bottom
+        if (currentHeight != height) {
+            currentHeight = height
+            observer?.invoke(height)
+        }
     }
 
     fun register(view: View, observer: (Int) -> Unit) {
@@ -53,7 +56,10 @@ class ImeHeightObserver : ViewTreeObserver.OnGlobalLayoutListener {
     }
 
     fun unregister() {
-        popup.contentView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+        val viewTreeObserver = popup.contentView?.viewTreeObserver
+        if (viewTreeObserver != null && viewTreeObserver.isAlive) {
+            viewTreeObserver.removeOnGlobalLayoutListener(this)
+        }
         popup.dismiss()
     }
 

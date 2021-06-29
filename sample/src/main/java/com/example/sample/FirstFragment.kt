@@ -31,10 +31,8 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
 
         val editText = findViewById<EditText>(R.id.edittext)
         findViewById<Button>(R.id.button).doOnClick {
+            showSnackBar("你好", Snackbar.LENGTH_INDEFINITE)
             editText.showIme()
-            editText.postDelayed({
-                showSnackBar("你好", Snackbar.LENGTH_INDEFINITE)
-            }, 1000)
         }
 
         viewModel.event = event("hello world")
