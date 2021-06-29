@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.AsyncListDiffer.ListListener
 
 abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapter<T, VH> {
 
-
     override val items: List<T>
         get() = differ.currentList
 

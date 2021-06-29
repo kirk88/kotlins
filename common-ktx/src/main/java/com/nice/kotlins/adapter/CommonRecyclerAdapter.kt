@@ -3,7 +3,6 @@
 package com.nice.kotlins.adapter
 
 import android.content.Context
-import okhttp3.internal.toImmutableList
 import java.util.*
 
 abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
@@ -11,9 +10,9 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
     private val lock: Any = Any()
 
-    override val items: List<T>
-        get() = modifiableItems.toImmutableList()
     protected val modifiableItems: MutableList<T> = mutableListOf()
+
+    override val items: List<T> by lazy { Collections.unmodifiableList(modifiableItems) }
 
     fun setItems(items: List<T>) {
         synchronized(lock) {
@@ -163,14 +162,14 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
 }
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.plusAssign(item: T) = addItem(item)
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(item: T) = addItem(item)
 
 operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: List<T>) = setItems(items)
 
 operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) = setItems(items.toList())
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(item: T) = removeItem(item)
+operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(item: T) = removeItem(item)
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: List<T>) = removeItems(items)
+operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(items: List<T>) = removeItems(items)
 
-operator fun <T, VH : ItemViewHolder> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) = removeItems(items.toList())
+operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) = removeItems(items.toList())

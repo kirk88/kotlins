@@ -459,33 +459,33 @@ class OkFaker<T> private constructor(
 
         @JvmStatic
         inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.GET, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
         @JvmStatic
         inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.POST, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
         @JvmStatic
         inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.DELETE, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
         @JvmStatic
         inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PUT, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
         @JvmStatic
         inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.HEAD, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
         @JvmStatic
         inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PATCH, globalConfig)
-                .mapResponse(object : TypeToken<T>() {}.type)
-                .apply(block)
+            .mapResponse(object : TypeToken<T>() {}.type)
+            .apply(block)
 
     }
 

@@ -111,7 +111,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                        .selection(TestTable.ID.notBetween(3, 6))
+                        .selection(TestTable.ID.between(3, 100))
                         .groupBy(TestTable.NAME, TestTable.JJ)
                         .parseList<Test>()
 
@@ -137,8 +137,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         val job = step {
             add(Dispatchers.IO) {
-                val result =
-                        OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
+                val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
                                 .mapResponse {
                                     it.body!!.string()
                                 }.execute()

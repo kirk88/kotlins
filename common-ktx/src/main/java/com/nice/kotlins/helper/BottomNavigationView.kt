@@ -3,8 +3,8 @@
 package com.nice.kotlins.helper
 
 import android.view.MenuItem
-import androidx.core.view.children
 import androidx.core.view.get
+import androidx.core.view.iterator
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 val BottomNavigationView.itemCount: Int
@@ -12,7 +12,7 @@ val BottomNavigationView.itemCount: Int
 
 val BottomNavigationView.items: Sequence<MenuItem>
     get() = object : Sequence<MenuItem> {
-        override fun iterator() = menu.children.iterator()
+        override fun iterator() = menu.iterator()
     }
 
 fun BottomNavigationView.getItemAt(index: Int): MenuItem? {
