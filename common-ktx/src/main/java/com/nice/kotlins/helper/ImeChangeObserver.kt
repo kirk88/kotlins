@@ -96,12 +96,12 @@ class ImeChangeObserver {
         }
 
         override fun showAtLocation(parent: View?, gravity: Int, x: Int, y: Int) {
-            if (!isShowing) {
+            super.showAtLocation(parent, gravity, x, y)
+            if (viewTreeObserver == null || !viewTreeObserver!!.isAlive) {
                 viewTreeObserver = contentView.viewTreeObserver.also {
                     it.addOnGlobalLayoutListener(this)
                 }
             }
-            super.showAtLocation(parent, gravity, x, y)
         }
 
         fun show(parent: View) = showAtLocation(parent, Gravity.NO_GRAVITY, 0, 0)
