@@ -43,7 +43,7 @@ private class SnackBarLocationChangedCallback : BaseTransientBottomBar.BaseCallb
 
     private var originalBottomMargin = -1
 
-    private val observer = ImeHeightObserver()
+    private val observer = ImeChangeObserver()
 
     override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
         observer.unregister()

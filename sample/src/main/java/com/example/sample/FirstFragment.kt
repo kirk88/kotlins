@@ -12,10 +12,7 @@ import com.nice.kotlins.app.ScreenCompatAdapter
 import com.nice.kotlins.app.ScreenCompatStrategy
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.event
-import com.nice.kotlins.helper.add
-import com.nice.kotlins.helper.doOnClick
-import com.nice.kotlins.helper.showIme
-import com.nice.kotlins.helper.showSnackBar
+import com.nice.kotlins.helper.*
 
 class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first),
     ScreenCompatAdapter {
@@ -39,6 +36,10 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
 
         childFragmentManager.commit {
             add<ChildFragment>(R.id.frame_container)
+        }
+
+        ImeChangeObserver.register(requireView()){
+
         }
     }
 

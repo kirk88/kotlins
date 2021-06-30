@@ -74,12 +74,12 @@ private fun getNavigationController(
         fragmentManager: FragmentManager,
         view: View
 ): NavigationController {
-    val controller = view.getTag(R.id.navigation_controller_tag_id) as? NavigationController
+    val controller = view.getTag(R.id.navigation_controller_id) as? NavigationController
     if (controller != null) {
         return controller
     }
     return NavigationController(fragmentManager, view).also {
-        view.setTag(R.id.navigation_controller_tag_id, it)
+        view.setTag(R.id.navigation_controller_id, it)
     }
 }
 
