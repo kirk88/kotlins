@@ -58,7 +58,7 @@ class ImeChangeObserver {
         private val receivers = mutableSetOf<ImeChangeReceiver>()
 
         private val contentRect = Rect().apply {
-            context.resources.displayMetrics.heightPixels
+            bottom = context.resources.displayMetrics.heightPixels
         }
         private var contentBottom: Int = contentRect.bottom
         private var currentHeight: Int = 0
