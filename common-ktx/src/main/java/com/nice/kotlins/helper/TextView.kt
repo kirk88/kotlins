@@ -8,8 +8,8 @@ import android.view.KeyEvent
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
-import com.nice.kotlins.helper.Internals.NO_GETTER
-import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
+import com.nice.kotlins.internal.Internals.NO_GETTER
+import com.nice.kotlins.internal.Internals.NO_GETTER_MESSAGE
 import kotlin.DeprecationLevel.ERROR
 
 var TextView.string: String?

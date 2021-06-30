@@ -1,4 +1,4 @@
-package com.nice.kotlins.helper
+package com.nice.kotlins.internal
 
 internal object Internals {
 

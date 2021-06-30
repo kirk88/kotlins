@@ -33,8 +33,8 @@ import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.nice.kotlins.R
-import com.nice.kotlins.helper.Internals.NO_GETTER
-import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
+import com.nice.kotlins.internal.Internals.NO_GETTER
+import com.nice.kotlins.internal.Internals.NO_GETTER_MESSAGE
 import com.nice.kotlins.helper.appCompatActivity
 import java.util.*
 

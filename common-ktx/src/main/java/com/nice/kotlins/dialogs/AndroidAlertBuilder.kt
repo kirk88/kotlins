@@ -9,7 +9,7 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.nice.kotlins.helper.Internals.NO_GETTER
+import com.nice.kotlins.internal.Internals.NO_GETTER
 
 internal class AndroidAlertBuilder(override val context: Context, themeResId: Int = 0) :
         AlertBuilder<AlertDialog> {

@@ -13,8 +13,8 @@ import androidx.annotation.Px
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.nice.kotlins.helper.Internals.NO_GETTER
-import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
+import com.nice.kotlins.internal.Internals.NO_GETTER
+import com.nice.kotlins.internal.Internals.NO_GETTER_MESSAGE
 
 var View.backgroundColor: Int
     get() = if (background is ColorDrawable) (background as ColorDrawable).color else 0

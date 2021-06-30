@@ -8,7 +8,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import androidx.annotation.LayoutRes
-import com.nice.kotlins.helper.Internals.NO_GETTER_MESSAGE
+import com.nice.kotlins.internal.Internals.NO_GETTER_MESSAGE
 
 interface DialogBuilder<out D : DialogInterface> {
 

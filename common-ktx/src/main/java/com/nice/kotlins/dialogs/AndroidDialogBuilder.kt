@@ -9,7 +9,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import androidx.annotation.StyleRes
-import com.nice.kotlins.helper.Internals.NO_GETTER
+import com.nice.kotlins.internal.Internals.NO_GETTER
 
 internal class AndroidDialogBuilder(
         override val context: Context,
