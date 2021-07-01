@@ -3,14 +3,14 @@ package com.nice.kotlins.sqlite.db
 import kotlin.reflect.KClass
 
 interface ColumnValueConverter<T : Any, R : Any> {
-    fun fromValue(value: T): R
+    fun toDatabaseValue(value: T?): R?
 
-    fun toValue(value: R): T
+    fun toPropertyValue(value: R?): T?
 }
 
 class DefaultColumnValueConverter : ColumnValueConverter<Any, Any> {
-    override fun fromValue(value: Any): Any = value
-    override fun toValue(value: Any): Any = value
+    override fun toDatabaseValue(value: Any?): Any? = value
+    override fun toPropertyValue(value: Any?): Any? = value
 }
 
 internal object ColumnConverters {

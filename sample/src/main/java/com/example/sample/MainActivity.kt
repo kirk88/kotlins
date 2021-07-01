@@ -1,6 +1,5 @@
 package com.example.sample
 
-import android.annotation.SuppressLint
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
@@ -16,23 +15,14 @@ import com.example.sample.db.TestTable
 import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.event.MutableLiveEvent
-import com.nice.kotlins.helper.*
-import com.nice.kotlins.http.OkFaker
-import com.nice.kotlins.http.asFlow
+import com.nice.kotlins.helper.doOnClick
+import com.nice.kotlins.helper.plusAssign
+import com.nice.kotlins.helper.setContentView
+import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.sqlite.db.*
 import com.nice.kotlins.widget.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLSession
-import javax.net.ssl.X509TrustManager
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
@@ -88,7 +78,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         index,
                         listOf("A", "B", "C", "D"),
                         "lalalalal",
-                        ""
+                        "",
+                        null,
+                        true
                     )
 
                     insert(
@@ -115,7 +107,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                    .selection(TestTable.ID.between(3, 100))
+                    .selection(TestTable.ID.notBetween(3, 100))
                     .groupBy(TestTable.NAME, TestTable.JJ)
                     .parseList<Test>()
 
@@ -125,92 +117,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        lifecycleScope.launch {
-
-            OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                .mapResponse {
-                    throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
-                }.build().asFlow().catch {
-                    Log.e(TAG, "error: $it")
-                }.collect {
-                    Log.e(TAG, "result1: $it")
-                }
-
-        }
-
-
-        val job = step {
-            add(Dispatchers.IO) {
-                val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                    .mapResponse {
-                        it.body!!.string()
-                    }.execute()
-
-
-                Log.e(TAG, "result2: $result")
-            }
-
-            add {
-                delay(3000)
-                Log.e(TAG, "step2")
-            }
-
-            add {
-                Log.e(TAG, "step3")
-            }
-        }.launchIn(lifecycleScope)
-
-        lifecycleScope.launch {
-            suspendBlocking {
-                Log.e(TAG, Thread.currentThread().name)
-            }
-
-            suspendBlocking(ExecutorDispatchers.Default) {
-                Log.e(TAG, Thread.currentThread().name)
-            }
-
-            suspendBlocking(ExecutorDispatchers.IO) {
-                val result = OkFaker.get<String>().url("https://www.biquge.com").client {
-                    val trustManager = TrustAllX509TrustManager()
-
-                    val sslContext = SSLContext.getInstance("TLS")
-                    sslContext.init(null, arrayOf(trustManager), null)
-                    val sslSocketFactory = sslContext.socketFactory
-
-                    OkHttpClient.Builder()
-                        .sslSocketFactory(sslSocketFactory, trustManager)
-                        .hostnameVerifier(TrustAllHostnameVerifier())
-                        .build()
-                }.executeOrNull()
-                Log.e(TAG, "${Thread.currentThread().name}:  $result")
-            }
-        }
-
         viewModel.start()
-    }
-
-    @SuppressLint("TrustAllX509TrustManager")
-    private class TrustAllX509TrustManager : X509TrustManager {
-
-        @Throws(CertificateException::class)
-        override fun checkServerTrusted(chain: Array<X509Certificate?>, authType: String) {
-        }
-
-        @Throws(CertificateException::class)
-        override fun checkClientTrusted(x509Certificates: Array<X509Certificate?>, s: String) {
-        }
-
-        override fun getAcceptedIssuers(): Array<X509Certificate> {
-            return emptyArray()
-        }
-
-    }
-
-    @SuppressLint("BadHostnameVerifier")
-    private class TrustAllHostnameVerifier : HostnameVerifier {
-        override fun verify(hostname: String, session: SSLSession): Boolean {
-            return true
-        }
     }
 
     companion object {

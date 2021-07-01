@@ -2,44 +2,36 @@ package com.nice.kotlins.sqlite.db
 
 import com.nice.kotlins.helper.ifNullOrEmpty
 import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 
 internal class FieldWrapper(private val field: Field) {
 
-    private val valueConverter: ColumnValueConverter<Any, Any>?
-    private val isBooleanType: Boolean
-
     val name: String
+    private val converter: ColumnValueConverter<Any, Any>?
 
     init {
         field.isAccessible = true
 
-        val column = field.getAnnotation(Column::class.java)
-        valueConverter = if (column == null) null else ColumnConverters.get(column.converter)
-        isBooleanType = field.type == java.lang.Boolean.TYPE
-                || field.type == java.lang.Boolean::class.java
-        name = column?.name.ifNullOrEmpty { field.name }
+        val annotation = field.getAnnotation(Column::class.java)
+        name = annotation?.name.ifNullOrEmpty { field.name }
+        converter = annotation?.let { ColumnConverters.get(it.converterClass) }
     }
 
     fun read(reader: Any, values: MutableList<SqlColumnElement>) {
         val value = field.get(reader)
         values.add(
-                SqlColumnElement.create(
-                        name,
-                        when {
-                            valueConverter != null && value != null -> valueConverter.fromValue(value)
-                            isBooleanType -> if (value as Boolean? == true) 1 else 0
-                            else -> value
-                        }
-                )
+            SqlColumnElement.create(
+                name,
+                if (converter != null) converter.toDatabaseValue(value) else value
+            )
         )
     }
 
     fun write(writer: Any, value: SqlColumnValue) {
-        when {
-            !value.isNull() && valueConverter != null -> field.set(writer,
-                    valueConverter.toValue(value.value!!))
-            isBooleanType -> field.set(writer, value.asInt() == 1)
-            else -> field.set(writer, value.asTyped(field.type))
+        if (converter != null) {
+            field.set(writer, converter.toPropertyValue(value.value))
+        } else {
+            field.set(writer, value.asTyped(field.type))
         }
     }
 
@@ -49,8 +41,8 @@ internal class ReflectAdapter(private val fields: Map<String, FieldWrapper>) {
 
     fun read(reader: Any): List<SqlColumnElement> {
         val values = mutableListOf<SqlColumnElement>()
-        for (field in fields) {
-            field.value.read(reader, values)
+        for (field in fields.values) {
+            field.read(reader, values)
         }
         return values
     }
@@ -67,7 +59,14 @@ internal object ClassReflections {
 
     private val adapters: MutableMap<Class<*>, ReflectAdapter> by lazy { mutableMapOf() }
 
-    fun getAdapter(clazz: Class<out Any>, ignored: (Field) -> Boolean): ReflectAdapter {
+    fun getAdapter(
+        clazz: Class<out Any>,
+        ignored: (Field) -> Boolean = {
+            Modifier.isTransient(it.modifiers)
+                    || Modifier.isStatic(it.modifiers)
+                    || it.isAnnotationPresent(IgnoreOnTable::class.java)
+        }
+    ): ReflectAdapter {
         return adapters.getOrPut(clazz) {
             val fields = mutableMapOf<String, FieldWrapper>()
             for (field in clazz.declaredFields) {

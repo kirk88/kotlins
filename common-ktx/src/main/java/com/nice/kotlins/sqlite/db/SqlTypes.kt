@@ -79,6 +79,8 @@ enum class ConflictClause {
 
 fun DEFAULT(value: String): SqlTypeModifier = SqlTypeModifierImpl("DEFAULT $value")
 
+fun DEFAULT(value: Number): SqlTypeModifier = SqlTypeModifierImpl("DEFAULT $value")
+
 private open class SqlTypeImpl(override val name: String, val modifiers: String? = null) : SqlType {
     override fun render() = if (modifiers == null) name else "$name $modifiers"
 

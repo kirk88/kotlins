@@ -23,30 +23,33 @@ object TestTable {
     val PP = "pp" of TEXT
 
     val JJ = "jj" of TEXT + DEFAULT("heheheheh")
+
+    val BOOL = "bool" of INTEGER + DEFAULT(1)
 }
 
 class Test(
-        @JvmField
-        var id: Long = 0L,
-        @JvmField
-        var name: String? = null,
-        @JvmField
-        var age: Int = 0,
-        @JvmField
-        var number: Int = 0,
-        @JvmField
-        @field:Column("data", C::class)
-        var dataList: List<String>? = null,
-        var tip: String = "",
-        var pp: String? = null,
-        var jj: String? = null
+    @JvmField
+    var id: Long = 0L,
+    @JvmField
+    var name: String? = null,
+    @JvmField
+    var age: Int = 0,
+    @JvmField
+    var number: Int = 0,
+    @JvmField
+    @field:Column("data", C::class)
+    var dataList: List<String>? = null,
+    var tip: String = "",
+    var pp: String? = null,
+    var jj: String? = null,
+    var bool: Boolean = false
 ) {
 
     @IgnoreOnTable
     var text: String = "2343"
 
     override fun toString(): String {
-        return "Test(id=$id, name=$name, age=$age, number=$number, dataList=$dataList, text=$text, tip=$tip, pp=$pp, jj=$jj)"
+        return "Test(id=$id, name=$name, age=$age, number=$number, dataList=$dataList, text=$text, tip=$tip, pp=$pp, jj=$jj, bool=$bool)"
     }
 
 
@@ -54,36 +57,41 @@ class Test(
 
 class C : ColumnValueConverter<List<String>, String> {
 
-    override fun fromValue(value: List<String>): String {
-        return value.joinToString(",")
+    override fun toDatabaseValue(value: List<String>?): String? {
+        return value?.joinToString(",")
     }
 
-    override fun toValue(value: String): List<String> {
-        return value.split(",")
+    override fun toPropertyValue(value: String?): List<String>? {
+        return value?.split(",")
     }
 
 }
 
 object DB : ManagedSQLiteOpenHelper(
-        SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-                .name("testdemo.db")
-                .callback(Callback())
-                .build()
+    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
+        .name("testdemo.db")
+        .callback(Callback())
+        .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(5) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(9) {
+        override fun onConfigure(db: SupportSQLiteDatabase) {
+            db.pageSize = 1024 * 32
+        }
+
         override fun onCreate(db: SupportSQLiteDatabase) {
             db.createTable(
-                    TestTable.TABLE_NAME,
-                    true,
-                    TestTable.ID,
-                    TestTable.NAME,
-                    TestTable.AGE,
-                    TestTable.NUMBER,
-                    TestTable.DATA,
-                    TestTable.TIP,
-                    TestTable.PP,
-                    TestTable.JJ
+                TestTable.TABLE_NAME,
+                true,
+                TestTable.ID,
+                TestTable.NAME,
+                TestTable.AGE,
+                TestTable.NUMBER,
+                TestTable.DATA,
+                TestTable.TIP,
+                TestTable.PP,
+                TestTable.JJ,
+                TestTable.BOOL
             )
         }
 
@@ -91,6 +99,7 @@ object DB : ManagedSQLiteOpenHelper(
             db.addColumn(TestTable.TABLE_NAME, true, TestTable.TIP)
             db.addColumn(TestTable.TABLE_NAME, true, TestTable.PP)
             db.addColumn(TestTable.TABLE_NAME, true, TestTable.JJ)
+            db.addColumn(TestTable.TABLE_NAME, true, TestTable.BOOL)
         }
     }
 

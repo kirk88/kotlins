@@ -8,7 +8,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
 
 enum class SqlOrderDirection { ASC, DESC }
@@ -264,11 +263,7 @@ fun Map<String, Any?>.toColumnElements(): List<SqlColumnElement> {
 }
 
 fun Any.toColumnElements(): List<SqlColumnElement> {
-    return ClassReflections.getAdapter(javaClass) {
-        Modifier.isTransient(it.modifiers)
-                || Modifier.isStatic(it.modifiers)
-                || it.isAnnotationPresent(IgnoreOnTable::class.java)
-    }.read(this)
+    return ClassReflections.getAdapter(javaClass).read(this)
 }
 
 fun Any.toColumnElements(destination: MutableList<SqlColumnElement>): List<SqlColumnElement> {
