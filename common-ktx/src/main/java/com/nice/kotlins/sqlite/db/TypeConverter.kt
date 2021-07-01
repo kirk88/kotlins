@@ -17,9 +17,9 @@ internal object ColumnConverters {
 
     private val CONVERTERS: MutableMap<KClass<out ColumnValueConverter<*, *>>, ColumnValueConverter<Any, Any>> by lazy { mutableMapOf() }
 
-    fun get(type: KClass<out ColumnValueConverter<*, *>>): ColumnValueConverter<Any, Any> {
+    fun get(clazz: KClass<out ColumnValueConverter<*, *>>): ColumnValueConverter<Any, Any> {
         @Suppress("UNCHECKED_CAST")
-        return CONVERTERS.getOrPut(type) { type.java.newInstance() as ColumnValueConverter<Any, Any> }
+        return CONVERTERS.getOrPut(clazz) { clazz.java.newInstance() as ColumnValueConverter<Any, Any> }
     }
 
 }
