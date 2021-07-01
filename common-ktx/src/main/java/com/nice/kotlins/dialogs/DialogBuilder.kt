@@ -25,13 +25,13 @@ interface DialogBuilder<out D : DialogInterface> {
     var isCanceledOnTouchOutside: Boolean
         @Deprecated(NO_GETTER_MESSAGE, level = DeprecationLevel.ERROR) get
 
-    fun onCancelled(handler: (dialog: DialogInterface) -> Unit)
+    fun onShow(handler: (dialog: DialogInterface) -> Unit)
 
-    fun onDismissed(handler: (dialog: DialogInterface) -> Unit)
+    fun onCancel(handler: (dialog: DialogInterface) -> Unit)
 
-    fun onShowed(handler: (dialog: DialogInterface) -> Unit)
+    fun onDismiss(handler: (dialog: DialogInterface) -> Unit)
 
-    fun onKeyPressed(handler: (dialog: DialogInterface, keyCode: Int, e: KeyEvent) -> Boolean)
+    fun onKey(handler: (dialog: DialogInterface, keyCode: Int, event: KeyEvent) -> Boolean)
 
     fun show(): D
 

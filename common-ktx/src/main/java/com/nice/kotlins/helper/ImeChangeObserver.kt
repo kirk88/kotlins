@@ -71,13 +71,7 @@ class ImeChangeObserver {
             inputMethodMode = INPUT_METHOD_NEEDED
             contentView = View(context)
 
-            doOnDismiss {
-                val vto = viewTreeObserver.let {
-                    if (it != null && it.isAlive) it
-                    else contentView.viewTreeObserver
-                }
-                vto.removeOnGlobalLayoutListener(this)
-            }
+            doOnDismiss { removeListener(this) }
         }
 
         override fun onGlobalLayout() {
@@ -89,19 +83,16 @@ class ImeChangeObserver {
             val height = contentBottom - contentRect.bottom
             if (currentHeight != height) {
                 currentHeight = height
-                for (listener in receivers) {
-                    listener.onReceive(height)
+                for (receiver in receivers) {
+                    receiver.onReceive(height)
                 }
             }
         }
 
         override fun showAtLocation(parent: View?, gravity: Int, x: Int, y: Int) {
             super.showAtLocation(parent, gravity, x, y)
-            if (viewTreeObserver == null || !viewTreeObserver!!.isAlive) {
-                viewTreeObserver = contentView.viewTreeObserver.also {
-                    it.addOnGlobalLayoutListener(this)
-                }
-            }
+            removeListener(this)
+            addListener(this)
         }
 
         fun show(parent: View) = showAtLocation(parent, Gravity.NO_GRAVITY, 0, 0)
@@ -114,6 +105,20 @@ class ImeChangeObserver {
 
         fun removeReceiver(receiver: ImeChangeReceiver) {
             receivers.remove(receiver)
+        }
+
+        private fun addListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {
+            viewTreeObserver = contentView.viewTreeObserver.also {
+                it.addOnGlobalLayoutListener(listener)
+            }
+        }
+
+        private fun removeListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {
+            val vto = viewTreeObserver.let {
+                if (it != null && it.isAlive) it
+                else contentView.viewTreeObserver
+            }
+            vto.removeOnGlobalLayoutListener(listener)
         }
 
     }

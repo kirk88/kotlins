@@ -40,8 +40,8 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     api deps.kotlinStdlib
-    api deps.kotlinCoroutinesCore
-    api deps.kotlinCoroutinesAndroid
+    api deps.kotlinxCoroutinesCore
+    api deps.kotlinxCoroutinesAndroid
     api deps.kotlinLifecycleViewmodelKtx
     api deps.kotlinLifecycleViewmodelSavedstate
     api deps.kotlinLifecycleRuntime

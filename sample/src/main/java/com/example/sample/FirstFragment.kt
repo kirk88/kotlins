@@ -8,8 +8,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import com.google.android.material.snackbar.Snackbar
 import com.nice.kotlins.app.NiceViewModelFragment
-import com.nice.kotlins.app.ScreenCompatAdapter
-import com.nice.kotlins.app.ScreenCompatStrategy
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.event.event
 import com.nice.kotlins.helper.add
@@ -17,11 +15,7 @@ import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.showIme
 import com.nice.kotlins.helper.showSnackBar
 
-class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first),
-    ScreenCompatAdapter {
-
-    override val screenCompatStrategy: ScreenCompatStrategy
-        get() = ScreenCompatStrategy.NONE
+class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first) {
 
     override val viewModel: TestViewModel by activityViewModels()
 
@@ -31,8 +25,9 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
 
         val editText = findViewById<EditText>(R.id.edittext)
         findViewById<Button>(R.id.button).doOnClick {
-            showSnackBar("你好", Snackbar.LENGTH_INDEFINITE)
             editText.showIme()
+
+            editText.postDelayed({ showSnackBar("你好", Snackbar.LENGTH_INDEFINITE) }, 2000)
         }
 
         viewModel.event = event("hello world")

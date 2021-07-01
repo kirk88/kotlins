@@ -5,7 +5,7 @@ package com.nice.kotlins.helper
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
@@ -14,34 +14,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.nice.kotlins.R
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
 fun Context.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(this, resId)
 
-fun Context.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
-        ContextCompat.getDrawable(
-                this,
-                resId
-        )
-)
+fun Context.getDrawableCompat(@DrawableRes resId: Int): Drawable? = ContextCompat.getDrawable(this, resId)
 
-fun Fragment.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(
-        requireContext(),
-        resId
-)
+fun Fragment.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(requireContext(), resId)
 
-fun Fragment.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(
-                requireContext(),
-                resId
-        )
+fun Fragment.getColorStateListCompat(@ColorRes resId: Int): ColorStateList? = ContextCompat.getColorStateList(requireContext(), resId)
 
-fun Fragment.getDrawableCompat(@DrawableRes resId: Int): Drawable = requireNotNull(
-        ContextCompat.getDrawable(
-                requireContext(),
-                resId
-        )
-)
+fun Fragment.getDrawableCompat(@DrawableRes resId: Int): Drawable? = ContextCompat.getDrawable(requireContext(), resId)
 
 fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(resId)
 
@@ -50,7 +36,13 @@ fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDi
 fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
 
 val Context.isTabletDevice: Boolean
-    get() = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    get() {
+        val dm = Resources.getSystem().displayMetrics
+        val x = (dm.widthPixels / dm.xdpi).toDouble().pow(2.0)
+        val y = (dm.heightPixels / dm.ydpi).toDouble().pow(2.0)
+        val screenInches = sqrt(x + y)
+        return screenInches >= 7.0
+    }
 
 val Context.screenWidthPixels: Int
     get() = resources.displayMetrics.widthPixels

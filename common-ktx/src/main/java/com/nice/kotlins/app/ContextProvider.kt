@@ -13,7 +13,7 @@ class ContextProvider : ContentProvider() {
         val application = requireNotNull(context?.application) {
             "Can not get application from context $context"
         }
-        ApplicationContextHolder.initContext(application)
+        ApplicationContextHolder.init(application)
         ScreenAdaptation.init(application)
         return true
     }
@@ -46,7 +46,7 @@ internal object ApplicationContextHolder {
     lateinit var context: Context
         private set
 
-    fun initContext(context: Context) {
+    fun init(context: Context) {
         this.context = context.applicationContext
     }
 

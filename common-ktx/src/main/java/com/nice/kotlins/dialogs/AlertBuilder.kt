@@ -66,11 +66,11 @@ interface AlertBuilder<out D : DialogInterface> {
             onClicked: ((dialog: DialogInterface) -> Unit)? = null
     )
 
-    fun onCancelled(handler: (dialog: DialogInterface) -> Unit)
+    fun onCancel(handler: (dialog: DialogInterface) -> Unit)
 
-    fun onDismissed(handler: (dialog: DialogInterface) -> Unit)
+    fun onDismiss(handler: (dialog: DialogInterface) -> Unit)
 
-    fun onKeyPressed(handler: (dialog: DialogInterface, keyCode: Int, e: KeyEvent) -> Boolean)
+    fun onKey(handler: (dialog: DialogInterface, keyCode: Int, event: KeyEvent) -> Boolean)
 
     fun items(
             items: List<CharSequence>,

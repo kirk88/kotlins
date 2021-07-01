@@ -39,19 +39,19 @@ internal class AndroidDialogBuilder(
             dialog.setCanceledOnTouchOutside(value)
         }
 
-    override fun onCancelled(handler: (dialog: DialogInterface) -> Unit) {
-        dialog.setOnCancelListener(handler)
-    }
-
-    override fun onDismissed(handler: (dialog: DialogInterface) -> Unit) {
-        dialog.setOnDismissListener(handler)
-    }
-
-    override fun onShowed(handler: (dialog: DialogInterface) -> Unit) {
+    override fun onShow(handler: (dialog: DialogInterface) -> Unit) {
         dialog.setOnShowListener(handler)
     }
 
-    override fun onKeyPressed(handler: (dialog: DialogInterface, keyCode: Int, e: KeyEvent) -> Boolean) {
+    override fun onCancel(handler: (dialog: DialogInterface) -> Unit) {
+        dialog.setOnCancelListener(handler)
+    }
+
+    override fun onDismiss(handler: (dialog: DialogInterface) -> Unit) {
+        dialog.setOnDismissListener(handler)
+    }
+
+    override fun onKey(handler: (dialog: DialogInterface, keyCode: Int, e: KeyEvent) -> Boolean) {
         dialog.setOnKeyListener(handler)
     }
 

@@ -46,7 +46,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override val statefulView: StatefulView by lazy {
         StatefulFrameLayout.wrap(binding.contentView)
-            .setOnErrorActionListener{
+            .setOnErrorActionListener {
                 viewModel.start()
             }
     }
@@ -62,8 +62,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
-                    this,
-                    "key" to "value"
+                this,
+                "key" to "value"
             ) {
                 Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
@@ -81,39 +81,43 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             DB.use(true) {
                 var start = System.currentTimeMillis()
                 for (index in 0..10000) {
-                    val test = Test(index.toLong(),
-                            "jack$index",
-                            20,
-                            index,
-                            listOf("A", "B", "C", "D"),
-                            "lalalalal",
-                            "")
+                    val test = Test(
+                        index.toLong(),
+                        "jack$index",
+                        20,
+                        index,
+                        listOf("A", "B", "C", "D"),
+                        "lalalalal",
+                        ""
+                    )
 
-                    insert(TestTable.TABLE_NAME,
-                            SQLiteDatabase.CONFLICT_REPLACE,
-                            test.toColumnElements())
+                    insert(
+                        TestTable.TABLE_NAME,
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                        test.toColumnElements()
+                    )
                 }
 
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 updateBuilder(TestTable.TABLE_NAME)
-                        .values(TestTable.NAME + "jack100")
-                        .where(TestTable.NAME.equal("jack1") or TestTable.NAME.equal("jack2"))
-                        .execute()
+                    .values(TestTable.NAME + "jack100")
+                    .where(TestTable.NAME.equal("jack1") or TestTable.NAME.equal("jack2"))
+                    .execute()
 
                 updateBuilder(TestTable.TABLE_NAME)
-                        .values(TestTable.NAME + "jack101")
-                        .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
-                        .execute()
+                    .values(TestTable.NAME + "jack101")
+                    .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
+                    .execute()
 
                 Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                        .selection(TestTable.ID.between(3, 100))
-                        .groupBy(TestTable.NAME, TestTable.JJ)
-                        .parseList<Test>()
+                    .selection(TestTable.ID.between(3, 100))
+                    .groupBy(TestTable.NAME, TestTable.JJ)
+                    .parseList<Test>()
 
                 Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
@@ -124,13 +128,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         lifecycleScope.launch {
 
             OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                    .mapResponse {
-                        throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
-                    }.build().asFlow().catch {
-                        Log.e(TAG, "error: $it")
-                    }.collect {
-                        Log.e(TAG, "result1: $it")
-                    }
+                .mapResponse {
+                    throw IllegalStateException("hhhhhhhhhhhhhhhhhhhhhh")
+                }.build().asFlow().catch {
+                    Log.e(TAG, "error: $it")
+                }.collect {
+                    Log.e(TAG, "result1: $it")
+                }
 
         }
 
@@ -138,9 +142,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         val job = step {
             add(Dispatchers.IO) {
                 val result = OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com")
-                                .mapResponse {
-                                    it.body!!.string()
-                                }.execute()
+                    .mapResponse {
+                        it.body!!.string()
+                    }.execute()
 
 
                 Log.e(TAG, "result2: $result")
@@ -174,9 +178,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     val sslSocketFactory = sslContext.socketFactory
 
                     OkHttpClient.Builder()
-                            .sslSocketFactory(sslSocketFactory, trustManager)
-                            .hostnameVerifier(TrustAllHostnameVerifier())
-                            .build()
+                        .sslSocketFactory(sslSocketFactory, trustManager)
+                        .hostnameVerifier(TrustAllHostnameVerifier())
+                        .build()
                 }.executeOrNull()
                 Log.e(TAG, "${Thread.currentThread().name}:  $result")
             }

@@ -13,19 +13,19 @@ internal object ScreenAdaptation {
         application.registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks())
     }
 
-    private fun applyCustomDensityIfNeed(target: Any, activity: Activity) {
+    private fun applyCustomDensityIfNeed(activity: Activity) {
         val application = activity.application
 
         val appAdapter = application as? ScreenCompatAdapter
-        val targetAdapter = target as? ScreenCompatAdapter
+        val activityAdapter = activity as? ScreenCompatAdapter
 
-        val screenCompatStrategy = targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
-        val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
-        val screenCompatHeight = targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
-        val screenCompatUselessHeight = targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
+        val screenCompatStrategy = activityAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+        val screenCompatWidth = activityAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
+        val screenCompatHeight = activityAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
+        val screenCompatUselessHeight = activityAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
 
         if (screenCompatStrategy == null || screenCompatWidth == null
-                || screenCompatHeight == null || screenCompatUselessHeight == null
+            || screenCompatHeight == null || screenCompatUselessHeight == null
         ) {
             return
         }
@@ -55,10 +55,10 @@ internal object ScreenAdaptation {
     }
 
     private fun setDensity(
-            activity: Activity,
-            targetDensity: Float,
-            targetScaledDensity: Float,
-            targetDensityDpi: Int
+        activity: Activity,
+        targetDensity: Float,
+        targetScaledDensity: Float,
+        targetDensityDpi: Int
     ) {
         val appDisplayMetrics = activity.application.resources.displayMetrics
         appDisplayMetrics.density = targetDensity
@@ -73,7 +73,7 @@ internal object ScreenAdaptation {
 
     private class ActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            applyCustomDensityIfNeed(activity, activity)
+            applyCustomDensityIfNeed(activity)
         }
 
         override fun onActivityStarted(activity: Activity) {

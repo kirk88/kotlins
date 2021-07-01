@@ -20,9 +20,9 @@
 
     <item name="navigation_controller_id" type="id" />
 
+    <item name="ime_change_observer_popup_id" type="id" />
+
     <item name="vertical_divider_drawable_id" type="id" />
     <item name="horizontal_divider_drawable_id" type="id" />
-
-    <item name="ime_change_observer_popup_id" type="id" />
 
 </resources>
