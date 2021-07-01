@@ -2,25 +2,20 @@
 
 package com.nice.kotlins.helper
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import java.io.*
 
-fun Any.serialize(): String? = runCatching {
-    ByteArrayOutputStream().use { byteArrayOutputStream ->
-        ObjectOutputStream(byteArrayOutputStream).use { objectOutputStream ->
-            objectOutputStream.writeObject(this)
+fun <T : Serializable> T.serialize(): String {
+    return ByteArrayOutputStream().let { bos ->
+        ObjectOutputStream(bos).use {
+            it.writeObject(this)
         }
-        byteArrayOutputStream.toString(Charsets.ISO_8859_1.name())
+        bos.toString(Charsets.ISO_8859_1.name())
     }
-}.getOrNull()
+}
 
-fun <T : Any> String.deserialize(): T? = runCatching {
-    ByteArrayInputStream(this.toByteArray(Charsets.ISO_8859_1)).use { byteArrayInputStream ->
-        @Suppress("UNCHECKED_CAST")
-        ObjectInputStream(byteArrayInputStream).use { objectInputStream ->
-            objectInputStream.readObject()
-        } as? T
-    }
-}.getOrNull()
+fun <T : Serializable> String.deserialize(): T {
+    @Suppress("UNCHECKED_CAST")
+    return ObjectInputStream(ByteArrayInputStream(toByteArray(Charsets.ISO_8859_1))).use {
+        it.readObject()
+    } as T
+}
