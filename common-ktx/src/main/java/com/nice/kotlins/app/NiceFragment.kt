@@ -77,7 +77,7 @@ abstract class NiceFragment(@LayoutRes private val contentLayoutId: Int = 0) : F
         return delegate.getSubtitle()
     }
 
-    fun <T : View?> findViewById(@IdRes id: Int): T {
+    fun <T : View> findViewById(@IdRes id: Int): T? {
         return delegate.findViewById(id)
     }
 

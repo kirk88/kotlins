@@ -19,86 +19,88 @@ class SecondFragment : NiceFragment() {
 
     val adapter by lazy {
         adapterBuilder<String, ItemViewHolder>(requireContext())
-                .register { inflater, parent ->
-                    ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
-                }.bind { holder, item, _ ->
-                    holder.findViewById<TextView>(R.id.title).text = item
-                }.into(binding.recyclerView)
+            .register { inflater, parent ->
+                ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
+            }.bind { holder, item, _ ->
+                holder.findViewById<TextView>(R.id.title)?.text = item
+            }.into(binding.recyclerView)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
+        binding.recyclerView.setHasFixedSize(true)
+
         binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.RED, 10))
 
         adapter.setItemAnimation(ScaleInAnimation(0.9f, 0.7f))
 
         adapter += listOf(
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd",
-                "abcd",
-                "abcde",
-                "abcdef",
-                "abcd"
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd",
+            "abcd",
+            "abcde",
+            "abcdef",
+            "abcd"
         )
     }
 

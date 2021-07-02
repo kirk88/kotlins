@@ -105,7 +105,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 val result = queryBuilder(TestTable.TABLE_NAME)
                     .parseList<Test>()
 
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}  size: ${result.size}" )
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}  size: ${result.size}")
             }
         }
 
@@ -116,5 +116,3 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         private val TAG = MainActivity::class.simpleName
     }
 }
-
-

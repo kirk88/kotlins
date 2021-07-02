@@ -25,25 +25,25 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun removeOnChildClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             clickViews.remove(id)
-            findViewById<View?>(id)?.setOnClickListener(null)
+            findViewById<View>(id)?.setOnClickListener(null)
         }
     }
 
     fun removeOnChildLongClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             longClickViews.remove(id)
-            findViewById<View?>(id)?.setOnLongClickListener(null)
+            findViewById<View>(id)?.setOnLongClickListener(null)
         }
     }
 
     fun setOnChildClickListener(clickListener: View.OnClickListener) {
-        clickViews.map { id -> findViewById<View?>(id) }.forEach {
+        clickViews.map { id -> findViewById<View>(id) }.forEach {
             it?.setOnClickListener(clickListener)
         }
     }
 
     fun setOnChildLongClickListener(longClickListener: View.OnLongClickListener) {
-        longClickViews.map { id -> findViewById<View?>(id) }.forEach {
+        longClickViews.map { id -> findViewById<View>(id) }.forEach {
             it?.setOnLongClickListener(longClickListener)
         }
     }
@@ -65,7 +65,7 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : View?> findViewById(@IdRes id: Int): T {
+    fun <T : View> findViewById(@IdRes id: Int): T? {
         var childView: View? = views.get(id)
         if (null == childView) {
             childView = itemView.findViewById(id)
@@ -73,7 +73,7 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 views.put(id, childView)
             }
         }
-        return childView as T
+        return childView as T?
     }
 
 }
