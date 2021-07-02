@@ -19,8 +19,8 @@ interface SqlWhereCondition {
 }
 
 private class SqlWhereConditionImpl(
-        override val whereClause: String,
-        vararg whereArgs: Any
+    override val whereClause: String,
+    vararg whereArgs: Any
 ) : SqlWhereCondition {
 
     override val whereArgs: Array<Any> = arrayOf(*whereArgs)
@@ -28,9 +28,8 @@ private class SqlWhereConditionImpl(
     override fun render(): String {
         val builder = StringBuilder(whereClause)
         var offset = builder.indexOf("?")
-        for (index in whereArgs.indices) {
-            val value = whereArgs[index].toEscapeString()
-            builder.replace(offset, offset + 1, value)
+        for (value in whereArgs) {
+            builder.replace(offset, offset + 1, value.toEscapeString())
             offset = builder.indexOf("?", offset)
         }
         return builder.toString()
@@ -41,8 +40,8 @@ private class SqlWhereConditionImpl(
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
-                "$whereClause AND ${condition.whereClause}",
-                *args.toTypedArray()
+            "$whereClause AND ${condition.whereClause}",
+            *args.toTypedArray()
         )
     }
 
@@ -51,8 +50,8 @@ private class SqlWhereConditionImpl(
         for (arg in whereArgs) args.add(arg)
         for (arg in condition.whereArgs) args.add(arg)
         return SqlWhereConditionImpl(
-                "$whereClause OR ${condition.whereClause}",
-                *args.toTypedArray()
+            "$whereClause OR ${condition.whereClause}",
+            *args.toTypedArray()
         )
     }
 
@@ -79,16 +78,16 @@ fun SqlColumnProperty.like(value: Any): SqlWhereCondition = SqlWhereConditionImp
 fun SqlColumnProperty.glob(value: Any): SqlWhereCondition = SqlWhereConditionImpl("${this.name} GLOB ?", value)
 
 fun SqlColumnProperty.between(value1: Any, value2: Any): SqlWhereCondition = SqlWhereConditionImpl(
-                "${this.name} BETWEEN ? AND ?",
-                value1,
-                value2
-        )
+    "${this.name} BETWEEN ? AND ?",
+    value1,
+    value2
+)
 
 fun SqlColumnProperty.notBetween(value1: Any, value2: Any): SqlWhereCondition = SqlWhereConditionImpl(
-                "${this.name} NOT BETWEEN ? AND ?",
-                value1,
-                value2
-        )
+    "${this.name} NOT BETWEEN ? AND ?",
+    value1,
+    value2
+)
 
 fun SqlColumnProperty.notNull(): SqlWhereCondition = SqlWhereConditionImpl("${this.name} IS NOT NULL")
 
@@ -102,8 +101,8 @@ fun SqlColumnProperty.any(vararg values: Any): SqlWhereCondition {
     }
     builder.append(")")
     return SqlWhereConditionImpl(
-            builder.toString(),
-            *values
+        builder.toString(),
+        *values
     )
 }
 
@@ -115,8 +114,8 @@ fun SqlColumnProperty.none(vararg values: Any): SqlWhereCondition {
     }
     builder.append(")")
     return SqlWhereConditionImpl(
-            builder.toString(),
-            *values
+        builder.toString(),
+        *values
     )
 }
 

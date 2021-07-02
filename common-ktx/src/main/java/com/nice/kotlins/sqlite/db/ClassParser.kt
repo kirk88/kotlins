@@ -34,8 +34,7 @@ private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean 
         java.lang.Byte::class.java, java.lang.Character::class.java,
         java.lang.Boolean::class.java, java.lang.Float::class.java,
         java.lang.Double::class.java, java.lang.Short::class.java,
-        ByteArray::class.java,
-        -> true
+        ByteArray::class.java -> true
         else -> false
     }
 }
@@ -47,12 +46,12 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
     init {
         val constructors = clazz.declaredConstructors
 
-        if (constructors.none { it.isAnnotationPresent(ClassParserConstructor::class.java) }) {
+        delegate = if (constructors.none { it.isAnnotationPresent(ClassParserConstructor::class.java) }) {
             val constructor = requireNotNull(constructors.find { it.parameterTypes.isEmpty() }) {
                 "Can't initialize object parser for ${clazz.canonicalName}, no empty constructor found"
             }
 
-            delegate = ClassFieldParser(constructor)
+            ClassFieldParser(constructor)
         } else {
             val applicableConstructors = constructors.filter { ctr ->
                 if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
@@ -76,14 +75,7 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
                 applicableConstructors[0]
             }
 
-            val parameterAnnotations = preferredConstructor.parameterAnnotations
-            val parameterTypes = preferredConstructor.parameterTypes
-
-            delegate = ClassConstructorParser(
-                preferredConstructor,
-                parameterAnnotations,
-                parameterTypes
-            )
+            ClassConstructorParser(preferredConstructor)
         }
     }
 
@@ -93,50 +85,54 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
 }
 
 internal class ClassConstructorParser<T>(
-    private val preferredConstructor: Constructor<*>,
-    private val parameterAnnotations: Array<Array<Annotation>>,
-    private val parameterTypes: Array<Class<*>>
+    private val constructor: Constructor<*>
 ) : MapRowParser<T> {
 
+    val parameters = constructor.parameterTypes.zip(constructor.parameterAnnotations) { type, annotations ->
+        type to annotations.filterIsInstance<Column>().singleOrNull()?.let {
+            ColumnConverters.get(it.converterClass)
+        }
+    }
+
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
-        if (parameterTypes.size != row.size) {
+        if (parameters.size != row.size) {
             val columnsRendered = row.values.joinToString(prefix = "[", postfix = "]")
-            val parameterTypesRendered = parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
+            val parameterTypesRendered = parameters.joinToString(prefix = "[", postfix = "]") { it.first.name }
             throw IllegalArgumentException(
-                "Class parser for ${preferredConstructor.name} " +
-                        "failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
+                "Class parser for ${constructor.name} failed to parse the row: $columnsRendered (constructor parameter types: $parameterTypesRendered)"
             )
         }
 
-        val args = arrayOfNulls<Any>(parameterTypes.size)
+        val args = arrayOfNulls<Any>(parameters.size)
 
-        for ((index, column) in row.values.withIndex()) {
-            val type = parameterTypes[index]
-            val annotations = parameterAnnotations[index]
-
-            val annotation = annotations.find { it is Column } as Column?
-            if (annotation != null) {
-                args[index] = ColumnConverters.get(annotation.converterClass).toPropertyValue(column.value)
+        for ((index, parameter) in parameters.withIndex()) {
+            val value = row.values.elementAt(index)
+            val type = parameter.first
+            val converter = parameter.second
+            if (converter == null) {
+                args[index] = value.asTyped(type)
             } else {
-                args[index] = column.asTyped(type)
+                args[index] = converter.toPropertyValue(value.value)
             }
         }
 
         @Suppress("UNCHECKED_CAST")
-        return preferredConstructor.newInstance(*args) as T
+        return constructor.newInstance(*args) as T
     }
 
 }
 
 internal class ClassFieldParser<T>(
-    private val converter: Constructor<*>
+    private val constructor: Constructor<*>
 ) : MapRowParser<T> {
 
+    val adapter = ClassReflections.getAdapter(constructor.declaringClass)
+
     override fun parseRow(row: Map<String, SqlColumnValue>): T {
-        val target = converter.newInstance()
-        ClassReflections.getAdapter(target.javaClass).write(target, row)
         @Suppress("UNCHECKED_CAST")
-        return target as T
+        return constructor.newInstance().also {
+            adapter.write(it, row)
+        } as T
     }
 
 }
@@ -146,10 +142,10 @@ internal object ClassParsers {
 
     private val parsers: MutableMap<Class<*>, ClassParser<*>> by lazy { mutableMapOf() }
 
-    fun <T> get(type: Class<T>): ClassParser<T> {
+    fun <T> get(clazz: Class<T>): ClassParser<T> {
         @Suppress("UNCHECKED_CAST")
-        return parsers.getOrPut(type) {
-            ClassParser(type)
+        return parsers.getOrPut(clazz) {
+            ClassParser(clazz)
         } as ClassParser<T>
     }
 

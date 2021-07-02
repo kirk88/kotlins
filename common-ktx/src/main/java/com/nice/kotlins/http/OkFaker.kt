@@ -435,8 +435,10 @@ class OkFaker<T> private constructor(
 
     companion object {
 
+        @JvmStatic
         private var CONFIG: OkConfig = OkConfig()
 
+        @JvmStatic
         val globalConfig: OkConfig get() = CONFIG
 
         @JvmStatic

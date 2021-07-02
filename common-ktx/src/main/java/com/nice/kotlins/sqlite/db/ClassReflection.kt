@@ -22,16 +22,16 @@ internal class FieldWrapper(private val field: Field) {
         values.add(
             SqlColumnElement.create(
                 name,
-                if (converter != null) converter.toDatabaseValue(value) else value
+                if (converter == null) value else converter.toDatabaseValue(value)
             )
         )
     }
 
     fun write(writer: Any, value: SqlColumnValue) {
-        if (converter != null) {
-            field.set(writer, converter.toPropertyValue(value.value))
-        } else {
+        if (converter == null) {
             field.set(writer, value.asTyped(field.type))
+        } else {
+            field.set(writer, converter.toPropertyValue(value.value))
         }
     }
 

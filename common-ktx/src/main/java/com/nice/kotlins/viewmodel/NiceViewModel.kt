@@ -40,39 +40,39 @@ private class DefaultViewModelController : ViewModelController {
 open class NiceViewModel : ViewModel(), ViewModelController by DefaultViewModelController()
 
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
-        ViewModelController by DefaultViewModelController()
+    ViewModelController by DefaultViewModelController()
 
 open class StatefulViewModel(val state: SavedStateHandle) : NiceViewModel()
 
 open class StatefulAndroidViewModel(application: Application, val state: SavedStateHandle) :
-        NiceAndroidViewModel(application)
+    NiceAndroidViewModel(application)
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.viewModel(
-        factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
     return ViewModelProvider(
-            viewModelStore, factoryProducer
-            ?: defaultViewModelProviderFactory
+        viewModelStore,
+        factoryProducer ?: defaultViewModelProviderFactory
     ).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> Fragment.activityViewModel(
-        factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
     return ViewModelProvider(
-            requireActivity().viewModelStore, factoryProducer
-            ?: requireActivity().defaultViewModelProviderFactory
+        requireActivity().viewModelStore,
+        factoryProducer ?: requireActivity().defaultViewModelProviderFactory
     ).get(VM::class.java)
 }
 
 @MainThread
 inline fun <reified VM : ViewModel> ComponentActivity.viewModel(
-        factoryProducer: ViewModelProvider.Factory? = null
+    factoryProducer: ViewModelProvider.Factory? = null
 ): VM {
     return ViewModelProvider(
-            viewModelStore, factoryProducer
-            ?: defaultViewModelProviderFactory
+        viewModelStore,
+        factoryProducer ?: defaultViewModelProviderFactory
     ).get(VM::class.java)
 }

@@ -27,7 +27,7 @@ object TestTable {
     val BOOL = "bool" of INTEGER + DEFAULT(1)
 }
 
-class Test(
+class Test constructor(
     @JvmField
     var id: Long = 0L,
     @JvmField
@@ -38,6 +38,7 @@ class Test(
     var number: Int = 0,
     @JvmField
     @field:Column("data", C::class)
+    @param:Column("data", C::class)
     var dataList: List<String>? = null,
     var tip: String = "",
     var pp: String? = null,
@@ -74,7 +75,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(9) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(10) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }

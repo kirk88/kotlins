@@ -201,8 +201,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
             java.lang.Short.TYPE, java.lang.Short::class.java -> return value.toShort()
             java.lang.Byte.TYPE, java.lang.Byte::class.java -> return value.toByte()
             java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> return value != 0L
-            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toInt()
-                    .toChar()
+            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toInt().toChar()
         }
     }
 

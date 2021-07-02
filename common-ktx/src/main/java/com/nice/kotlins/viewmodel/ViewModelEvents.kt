@@ -33,7 +33,6 @@ object ViewModelEvents {
             return
         }
 
-
         val fragment = owner.parentFragment
         if (fragment is EventLifecycleObserver
                 && fragment is ViewModelOwner<*>
