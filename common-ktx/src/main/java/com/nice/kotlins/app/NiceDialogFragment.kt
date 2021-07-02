@@ -12,7 +12,7 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.DialogFragment
 
 abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) : DialogFragment(),
-        NiceFragmentDelegate.Callback {
+    NiceFragmentDelegate.Callback {
 
     private val delegate: NiceFragmentDelegate by lazy {
         NiceFragmentDelegate(this, this)
@@ -30,9 +30,9 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
     }
 
     final override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         val decor = delegate.getSubDecor()
         decor.post {
@@ -53,7 +53,7 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
         return delegate.getView()
     }
 
-    fun <T : View?> findViewById(@IdRes id: Int): T {
+    fun <T : View> findViewById(@IdRes id: Int): T? {
         return delegate.findViewById(id)
     }
 
