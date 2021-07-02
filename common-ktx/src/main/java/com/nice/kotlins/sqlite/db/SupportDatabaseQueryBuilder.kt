@@ -8,8 +8,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteQueryBuilder
 
 class SupportDatabaseQueryBuilder(
-        private val database: SupportSQLiteDatabase,
-        table: String
+    private val database: SupportSQLiteDatabase,
+    table: String
 ) {
 
     private val delegate: SupportSQLiteQueryBuilder = SupportSQLiteQueryBuilder.builder(table)
@@ -35,8 +35,8 @@ class SupportDatabaseQueryBuilder(
     }
 
     fun orderBy(
-            vararg orderBy: SqlColumnProperty,
-            direction: SqlOrderDirection = SqlOrderDirection.ASC
+        vararg orderBy: SqlColumnProperty,
+        direction: SqlOrderDirection = SqlOrderDirection.ASC
     ) = apply {
         delegate.orderBy(orderBy.joinToString(", ") { it.name }.let {
             if (direction == SqlOrderDirection.DESC) "$it DESC" else it
@@ -44,8 +44,8 @@ class SupportDatabaseQueryBuilder(
     }
 
     fun orderBy(
-            orderBy: String,
-            direction: SqlOrderDirection = SqlOrderDirection.ASC
+        orderBy: String,
+        direction: SqlOrderDirection = SqlOrderDirection.ASC
     ) = apply {
         delegate.orderBy(if (direction == SqlOrderDirection.DESC) "$orderBy DESC" else orderBy)
     }
@@ -83,8 +83,8 @@ class SupportDatabaseQueryBuilder(
     }
 
     fun selection(
-            selection: String,
-            vararg selectionArgs: Pair<String, Any>
+        selection: String,
+        vararg selectionArgs: Pair<String, Any>
     ) = apply {
         delegate.selection(applyArguments(selection, *selectionArgs), null)
     }

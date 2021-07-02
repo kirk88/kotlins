@@ -49,7 +49,7 @@ interface SqlColumnProperty {
 }
 
 private open class SqlColumnElementImpl(override val name: String, override val value: Any?) :
-        SqlColumnElement {
+    SqlColumnElement {
 
     override fun toString(): String {
         return "SqlColumnElement(name='$name', value=$value)"
@@ -58,7 +58,7 @@ private open class SqlColumnElementImpl(override val name: String, override val 
 }
 
 private class SqlColumnPropertyImpl(override val name: String, override val type: SqlType) :
-        SqlColumnProperty {
+    SqlColumnProperty {
 
     override val counter: SqlColumnProperty = SqlFunctionPropertyImpl("count(${name})")
     override val maximum: SqlColumnProperty = SqlFunctionPropertyImpl("max(${name})")
@@ -81,7 +81,7 @@ private class SqlColumnPropertyImpl(override val name: String, override val type
 }
 
 private class SqlFunctionPropertyImpl(override val name: String) :
-        SqlColumnProperty {
+    SqlColumnProperty {
 
     override val type: SqlType = INTEGER
     override val counter: SqlColumnProperty
@@ -110,8 +110,4 @@ private class SqlFunctionPropertyImpl(override val name: String) :
 }
 
 infix fun String.of(type: SqlType): SqlColumnProperty = SqlColumnPropertyImpl(this, type)
-
-infix fun String.with(value: Number?): SqlColumnElement = SqlColumnElementImpl(this, value)
-infix fun String.with(value: Boolean?): SqlColumnElement = SqlColumnElementImpl(this, value)
-infix fun String.with(value: String?): SqlColumnElement = SqlColumnElementImpl(this, value)
-infix fun String.with(value: ByteArray?): SqlColumnElement = SqlColumnElementImpl(this, value)
+infix fun String.with(value: Any?): SqlColumnElement = SqlColumnElementImpl(this, value)

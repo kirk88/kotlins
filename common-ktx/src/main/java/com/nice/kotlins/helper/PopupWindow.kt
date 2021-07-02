@@ -8,6 +8,6 @@ import androidx.annotation.IdRes
 
 fun <T : View> PopupWindow.findViewById(@IdRes id: Int): T? = contentView?.findViewById(id)
 
-inline fun PopupWindow.doOnDismiss(crossinline onDismiss: ()-> Unit) = setOnDismissListener {
-    onDismiss()
+inline fun PopupWindow.doOnDismiss(crossinline action: ()-> Unit) = setOnDismissListener {
+    action()
 }

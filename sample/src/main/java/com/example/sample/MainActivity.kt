@@ -47,10 +47,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         title = "Home"
 
-        val titleBar = binding.titleBar
-        val fab = binding.fab
-
-        fab.doOnClick {
+        binding.fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
                 this,
                 "key" to "value"
@@ -76,7 +73,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         "jack$index",
                         20,
                         index,
-                        listOf("A", "B", "C", "D"),
                         "lalalalal",
                         "",
                         null,
@@ -95,7 +91,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 updateBuilder(TestTable.TABLE_NAME)
                     .values(TestTable.NAME + "jack100")
-                    .where(TestTable.NAME.equal("jack1") or TestTable.NAME.equal("jack2"))
+                    .where(TestTable.ID.lessThan(2000))
                     .execute()
 
                 updateBuilder(TestTable.TABLE_NAME)
@@ -107,13 +103,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 start = System.currentTimeMillis()
 
                 val result = queryBuilder(TestTable.TABLE_NAME)
-                    .selection(TestTable.ID.notBetween(3, 100))
-                    .groupBy(TestTable.NAME, TestTable.JJ)
                     .parseList<Test>()
 
                 Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
-
-                Log.e(TAG, "result: ${result.size}  " + result.toString())
             }
         }
 

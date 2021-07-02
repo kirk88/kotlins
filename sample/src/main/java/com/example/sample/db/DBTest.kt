@@ -16,7 +16,7 @@ object TestTable {
 
     val NUMBER = "number" of INTEGER + UNIQUE
 
-    val DATA = "data" of TEXT
+//    val DATA = "data" of TEXT
 
     val TIP = "tip" of TEXT + NOT_NULL + DEFAULT("wow")
 
@@ -36,10 +36,10 @@ class Test constructor(
     var age: Int = 0,
     @JvmField
     var number: Int = 0,
-    @JvmField
-    @field:Column("data", C::class)
-    @param:Column("data", C::class)
-    var dataList: List<String>? = null,
+//    @JvmField
+//    @field:Column("data", C::class)
+//    @param:Column("data", C::class)
+//    var dataList: List<String>? = null,
     var tip: String = "",
     var pp: String? = null,
     var jj: String? = null,
@@ -50,7 +50,7 @@ class Test constructor(
     var text: String = "2343"
 
     override fun toString(): String {
-        return "Test(id=$id, name=$name, age=$age, number=$number, dataList=$dataList, text=$text, tip=$tip, pp=$pp, jj=$jj, bool=$bool)"
+        return "Test(id=$id, name=$name, age=$age, number=$number, text=$text, tip=$tip, pp=$pp, jj=$jj, bool=$bool)"
     }
 
 
@@ -70,12 +70,12 @@ class C : ColumnValueConverter<List<String>, String> {
 
 object DB : ManagedSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("testdemo.db")
+        .name("newdb.db")
         .callback(Callback())
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(10) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(1) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }
@@ -88,7 +88,6 @@ object DB : ManagedSQLiteOpenHelper(
                 TestTable.NAME,
                 TestTable.AGE,
                 TestTable.NUMBER,
-                TestTable.DATA,
                 TestTable.TIP,
                 TestTable.PP,
                 TestTable.JJ,
