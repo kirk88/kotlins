@@ -204,7 +204,6 @@ fun SupportSQLiteDatabase.addColumns(
     }
 }
 
-
 fun SupportSQLiteDatabase.addColumns(
         table: String,
         vararg columns: SqlColumnProperty
