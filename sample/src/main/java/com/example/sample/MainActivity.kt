@@ -91,7 +91,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 updateBuilder(TestTable.TABLE_NAME)
                     .values(TestTable.NAME + "jack100")
-                    .where(TestTable.ID.lessThan(2000))
+                    .where(TestTable.ID.lessThan(10000))
                     .execute()
 
                 updateBuilder(TestTable.TABLE_NAME)
@@ -105,7 +105,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 val result = queryBuilder(TestTable.TABLE_NAME)
                     .parseList<Test>()
 
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}  size: ${result.size}" )
             }
         }
 

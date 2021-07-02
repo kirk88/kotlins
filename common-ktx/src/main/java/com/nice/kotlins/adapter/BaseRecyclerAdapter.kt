@@ -93,7 +93,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     }
 
     fun setItemAnimation(animation: ItemViewAnimation?) {
-        this.itemViewAnimation = animation
+        itemViewAnimation = animation
     }
 
     open fun getSpanSize(position: Int): Int {
