@@ -5,7 +5,6 @@ package com.nice.kotlins.helper
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
@@ -14,8 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.nice.kotlins.R
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
@@ -34,15 +31,6 @@ fun Context.getDimension(@DimenRes resId: Int): Float = resources.getDimension(r
 fun Context.getDimensionPixelOffset(@DimenRes resId: Int): Int = resources.getDimensionPixelOffset(resId)
 
 fun Context.getDimensionPixelSize(@DimenRes resId: Int): Int = resources.getDimensionPixelSize(resId)
-
-val Context.isTabletDevice: Boolean
-    get() {
-        val dm = Resources.getSystem().displayMetrics
-        val x = (dm.widthPixels / dm.xdpi).toDouble().pow(2.0)
-        val y = (dm.heightPixels / dm.ydpi).toDouble().pow(2.0)
-        val screenInches = sqrt(x + y)
-        return screenInches >= 7.0
-    }
 
 val Context.screenWidthPixels: Int
     get() = resources.displayMetrics.widthPixels

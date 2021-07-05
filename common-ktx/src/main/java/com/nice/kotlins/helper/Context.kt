@@ -4,9 +4,12 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Resources
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 val Context.application: Application?
     get() {
@@ -47,3 +50,12 @@ private tailrec fun scanCompatActivity(context: Context?): AppCompatActivity? {
 
 val Context.layoutInflater: LayoutInflater
     get() = LayoutInflater.from(this)
+
+val Context.isTabletDevice: Boolean
+    get() {
+        val dm = Resources.getSystem().displayMetrics
+        val x = (dm.widthPixels / dm.xdpi).toDouble().pow(2.0)
+        val y = (dm.heightPixels / dm.ydpi).toDouble().pow(2.0)
+        val screenInches = sqrt(x + y)
+        return screenInches >= 7.0
+    }

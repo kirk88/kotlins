@@ -31,11 +31,9 @@ class SecondFragment : NiceFragment() {
         setContentView(binding)
 
         binding.recyclerView.setHasFixedSize(true)
-
         binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.RED, 10))
 
         adapter.setItemAnimation(ScaleInAnimation(0.9f, 0.7f))
-
         adapter += listOf(
             "abcd",
             "abcde",

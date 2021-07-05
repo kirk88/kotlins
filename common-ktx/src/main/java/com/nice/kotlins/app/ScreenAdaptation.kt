@@ -5,24 +5,31 @@ import android.app.Application
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.os.Bundle
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
 import com.nice.kotlins.helper.statusBarHeight
 
 internal object ScreenAdaptation {
 
+    @JvmStatic
     fun init(application: Application) {
         application.registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks())
     }
 
-    private fun applyCustomDensityIfNeed(activity: Activity) {
+    private fun applyCustomDensityIfNeed(activity: Activity, target: Any) {
         val application = activity.application
 
         val appAdapter = application as? ScreenCompatAdapter
-        val activityAdapter = activity as? ScreenCompatAdapter
+        val targetAdapter = target as? ScreenCompatAdapter
 
-        val screenCompatStrategy = activityAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
-        val screenCompatWidth = activityAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
-        val screenCompatHeight = activityAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
-        val screenCompatUselessHeight = activityAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
+        val screenCompatStrategy =
+            targetAdapter?.screenCompatStrategy ?: appAdapter?.screenCompatStrategy
+        val screenCompatWidth = targetAdapter?.screenCompatWidth ?: appAdapter?.screenCompatWidth
+        val screenCompatHeight =
+            targetAdapter?.screenCompatHeight ?: appAdapter?.screenCompatHeight
+        val screenCompatUselessHeight =
+            targetAdapter?.screenCompatUselessHeight ?: appAdapter?.screenCompatUselessHeight
 
         if (screenCompatStrategy == null || screenCompatWidth == null
             || screenCompatHeight == null || screenCompatUselessHeight == null
@@ -51,32 +58,33 @@ internal object ScreenAdaptation {
         }
         val targetDensityDpi: Int = (targetDensity * 160).toInt()
 
-        setDensity(activity, targetDensity, targetScaledDensity, targetDensityDpi)
+        setDensity(activity.application.resources, targetDensity, targetScaledDensity, targetDensityDpi)
+        setDensity(activity.resources, targetDensity, targetScaledDensity, targetDensityDpi)
     }
 
     private fun setDensity(
-        activity: Activity,
+        resources: Resources,
         targetDensity: Float,
         targetScaledDensity: Float,
         targetDensityDpi: Int
     ) {
-        val appDisplayMetrics = activity.application.resources.displayMetrics
-        appDisplayMetrics.density = targetDensity
-        appDisplayMetrics.scaledDensity = targetScaledDensity
-        appDisplayMetrics.densityDpi = targetDensityDpi
-
-        val activityDisplayMetrics = activity.resources.displayMetrics
-        activityDisplayMetrics.density = targetDensity
-        activityDisplayMetrics.scaledDensity = targetScaledDensity
-        activityDisplayMetrics.densityDpi = targetDensityDpi
+        val displayMetrics = resources.displayMetrics
+        displayMetrics.density = targetDensity
+        displayMetrics.scaledDensity = targetScaledDensity
+        displayMetrics.densityDpi = targetDensityDpi
     }
 
     private class ActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            applyCustomDensityIfNeed(activity)
+            if (activity is FragmentActivity) {
+                activity.supportFragmentManager.registerFragmentLifecycleCallbacks(FragmentLifecycleCallbacks(), true)
+            }
+
+            applyCustomDensityIfNeed(activity, activity)
         }
 
         override fun onActivityStarted(activity: Activity) {
+            applyCustomDensityIfNeed(activity, activity)
         }
 
         override fun onActivityResumed(activity: Activity) {
@@ -93,6 +101,14 @@ internal object ScreenAdaptation {
 
         override fun onActivityDestroyed(activity: Activity) {
         }
+    }
+
+    private class FragmentLifecycleCallbacks : FragmentManager.FragmentLifecycleCallbacks() {
+
+        override fun onFragmentCreated(fm: FragmentManager, f: Fragment, savedInstanceState: Bundle?) {
+            applyCustomDensityIfNeed(f.requireActivity(), f)
+        }
+
     }
 
 }
