@@ -13,16 +13,14 @@ import kotlin.math.sqrt
 
 val Context.application: Application?
     get() {
-        var application: Application? = null
         var context = this.applicationContext
         while (context is ContextWrapper) {
             if (context is Application) {
-                application = context
-                break
+                return context
             }
             context = context.baseContext
         }
-        return application
+        return null
     }
 
 val Context.activity: Activity?
