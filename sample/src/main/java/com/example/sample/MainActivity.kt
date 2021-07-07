@@ -88,7 +88,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
                 start = System.currentTimeMillis()
-
                 updateBuilder(TestTable.TABLE_NAME)
                     .values(TestTable.NAME + "jack100")
                     .where(TestTable.ID.lessThan(10000))

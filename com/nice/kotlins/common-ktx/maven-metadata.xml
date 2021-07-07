@@ -3,7 +3,7 @@
   <groupId>com.nice.kotlins</groupId>
   <artifactId>common-ktx</artifactId>
   <versioning>
-    <release>1.3.97</release>
+    <release>1.3.98</release>
     <versions>
       <version>1.0.0</version>
       <version>1.0.1</version>
@@ -88,7 +88,8 @@
       <version>1.3.95</version>
       <version>1.3.96</version>
       <version>1.3.97</version>
+      <version>1.3.98</version>
     </versions>
-    <lastUpdated>20210702123529</lastUpdated>
+    <lastUpdated>20210707114900</lastUpdated>
   </versioning>
 </metadata>
