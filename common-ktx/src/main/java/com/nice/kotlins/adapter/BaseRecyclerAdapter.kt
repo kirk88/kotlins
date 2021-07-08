@@ -194,7 +194,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         this.recyclerView = recyclerView
 
         val manager = recyclerView.layoutManager
-        if (manager is GridLayoutManager) {
+        if (manager is GridLayoutManager && manager.spanSizeLookup == null) {
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     return this@BaseRecyclerAdapter.getSpanSize(position)
