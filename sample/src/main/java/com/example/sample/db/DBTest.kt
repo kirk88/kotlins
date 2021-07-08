@@ -6,7 +6,7 @@ import com.nice.kotlins.app.applicationContext
 import com.nice.kotlins.sqlite.db.*
 
 object TestTable {
-    val TABLE_NAME = "Test"
+    const val TABLE_NAME = "Test"
 
     val ID = "id" of INTEGER + PRIMARY_KEY
 
