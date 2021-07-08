@@ -3,8 +3,11 @@
 package com.nice.kotlins.adapter
 
 import android.content.Context
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.AdapterListUpdateCallback
+import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.AsyncListDiffer.ListListener
+import androidx.recyclerview.widget.DiffUtil
 
 abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapter<T, VH> {
 
@@ -13,7 +16,7 @@ abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapt
 
     val differ: AsyncListDiffer<T>
     private val changeListener = ListListener<T> { previousList, currentList ->
-        this@DifferRecyclerAdapter.onCurrentListChanged(
+        onCurrentListChanged(
             previousList,
             currentList
         )
@@ -47,6 +50,4 @@ abstract class DifferRecyclerAdapter<T, VH : ItemViewHolder> : BaseRecyclerAdapt
 
 }
 
-operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: List<T>) = submitList(items)
-
-operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: Array<T>) = submitList(items.toList())
+operator fun <T> DifferRecyclerAdapter<T, *>.plusAssign(items: List<T>?) = submitList(items)

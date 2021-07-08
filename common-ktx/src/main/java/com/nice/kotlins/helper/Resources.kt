@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.nice.kotlins.R
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 fun Context.getColorCompat(@ColorRes resId: Int): Int = ContextCompat.getColor(this, resId)
 
@@ -71,3 +73,12 @@ val Activity.actionBarHeight: Int
 
 val AppCompatActivity.actionBarHeight: Int
     get() = supportActionBar?.height.ifNullOrZero { defaultActionBarHeight }
+
+val Context.isTabletDevice: Boolean
+    get() {
+        val dm = resources.displayMetrics
+        val x = (dm.widthPixels / dm.xdpi).toDouble().pow(2.0)
+        val y = (dm.heightPixels / dm.ydpi).toDouble().pow(2.0)
+        val screenInches = sqrt(x + y)
+        return screenInches >= 7.0
+    }

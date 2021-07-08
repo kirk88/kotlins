@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.commit
 import com.google.android.material.snackbar.Snackbar
 import com.nice.kotlins.app.NiceViewModelFragment
 import com.nice.kotlins.event.Event
@@ -32,9 +31,7 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
 
         viewModel.event = event("hello world")
 
-        childFragmentManager.commit {
-            add<ChildFragment>(R.id.frame_container)
-        }
+        childFragmentManager.add<ChildFragment>(R.id.frame_container)
     }
 
     override fun dispatchViewModelEvent(event: Event): Boolean {

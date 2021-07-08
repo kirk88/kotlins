@@ -12,14 +12,16 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
     protected val modifiableItems: MutableList<T> = mutableListOf()
 
-    override val items: List<T> by lazy { Collections.unmodifiableList(modifiableItems) }
+    override val items: List<T> = Collections.unmodifiableList(modifiableItems)
 
-    fun setItems(items: List<T>) {
+    fun setItems(items: List<T>?) {
         synchronized(lock) {
             if (modifiableItems.isNotEmpty()) {
                 modifiableItems.clear()
             }
-            modifiableItems.addAll(items)
+            if (items != null) {
+                modifiableItems.addAll(items)
+            }
             notifyDataSetChanged()
         }
         itemAnimation?.setStartPosition(-1)
@@ -162,14 +164,12 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
 
 }
 
-operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(item: T) = addItem(item)
+operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: List<T>?) = setItems(items)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: List<T>) = setItems(items)
+operator fun <T> CommonRecyclerAdapter<T, *>.plus(item: T) = addItem(item)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.plusAssign(items: Array<T>) = setItems(items.toList())
+operator fun <T> CommonRecyclerAdapter<T, *>.plus(items: List<T>) = addItems(items)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(item: T) = removeItem(item)
+operator fun <T> CommonRecyclerAdapter<T, *>.minus(item: T) = removeItem(item)
 
-operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(items: List<T>) = removeItems(items)
-
-operator fun <T> CommonRecyclerAdapter<T, *>.minusAssign(items: Array<T>) = removeItems(items.toList())
+operator fun <T> CommonRecyclerAdapter<T, *>.minus(items: List<T>) = removeItems(items)

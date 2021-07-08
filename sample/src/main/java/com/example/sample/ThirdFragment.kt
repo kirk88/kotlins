@@ -71,7 +71,7 @@ class ThirdFragment : NiceFragment() {
 
         binding.recyclerView.doOnLoadMore {
             lifecycleScope.launch {
-                delay(4000)
+                delay(1000)
 
                 if(page == 3){
                     binding.recyclerView.setLoadMoreState(InfiniteState.STATE_FAILED)
@@ -88,7 +88,9 @@ class ThirdFragment : NiceFragment() {
 
                 page += 1
             }
+
         }
+
     }
 
 }

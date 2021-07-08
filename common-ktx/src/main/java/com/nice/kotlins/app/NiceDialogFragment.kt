@@ -53,7 +53,7 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
         return delegate.getView()
     }
 
-    fun <T : View> findViewById(@IdRes id: Int): T? {
+    fun <T : View?> findViewById(@IdRes id: Int): T {
         return delegate.findViewById(id)
     }
 

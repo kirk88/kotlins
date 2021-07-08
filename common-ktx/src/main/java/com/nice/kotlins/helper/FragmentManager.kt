@@ -10,61 +10,61 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 
-fun FragmentManager.createFragment(
-        classLoader: ClassLoader,
-        className: String,
-        args: Bundle? = null
-): Fragment = fragmentFactory.instantiate(classLoader, className).apply {
-    arguments = args
+interface FragmentProvider {
+
+    fun get(className: String, tag: String? = null, args: () -> Bundle? = { null }): Fragment
+
 }
+
+private class DefaultFragmentProvider(
+    private val manager: FragmentManager
+) : FragmentProvider {
+
+    override fun get(className: String, tag: String?, args: () -> Bundle?): Fragment {
+        val fragmentTag = tag ?: className
+        val fragment = manager.findFragmentByTag(fragmentTag)
+        if (fragment != null) {
+            return fragment
+        }
+        val classLoader = requireNotNull(Thread.currentThread().contextClassLoader) {
+            "Can not create fragment on current thread: ${Thread.currentThread().name}"
+        }
+        return manager.fragmentFactory.instantiate(classLoader, className).apply {
+            arguments = args()
+        }
+    }
+
+}
+
+val FragmentManager.fragmentProvider: FragmentProvider
+    get() = DefaultFragmentProvider(this)
 
 fun FragmentManager.loadFragment(
-        classLoader: ClassLoader,
-        className: String,
-        tag: String? = null,
-        args: () -> Bundle? = { null }
-): Fragment {
-    val fragmentTag = tag ?: className
-    val fragment = findFragmentByTag(fragmentTag)
-    if (fragment != null) {
-        return fragment
-    }
-    return createFragment(classLoader, className, args())
-}
-
-fun <T : Fragment> FragmentManager.loadFragment(
-        fragmentClass: Class<T>,
-        tag: String? = null,
-        args: () -> Bundle? = { null }
-): T {
-    val classLoader = fragmentClass.classLoader
-    check(classLoader != null) {
-        "Can not instantiate fragment for class: $fragmentClass"
-    }
-    @Suppress("UNCHECKED_CAST")
-    return loadFragment(classLoader, fragmentClass.name, tag, args) as T
-}
+    className: String,
+    tag: String? = null,
+    args: () -> Bundle? = { null }
+): Fragment = fragmentProvider.get(className, tag, args)
 
 inline fun <reified T : Fragment> FragmentManager.loadFragment(
-        tag: String? = null,
-        noinline args: () -> Bundle? = { null }
-): T = loadFragment(T::class.java, tag, args)
+    tag: String? = null,
+    noinline args: () -> Bundle? = { null }
+): T = fragmentProvider.get(T::class.java.name, tag, args) as T
 
 fun FragmentManager.show(
-        @IdRes containerViewId: Int,
-        fragment: Fragment,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false
+    @IdRes containerViewId: Int,
+    fragment: Fragment,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false
 ) {
     beginTransaction().run {
         setCustomAnimations(enter, exit)
 
         for (existingFragment in fragments) {
-            if (existingFragment == fragment ||
-                    (existingFragment.isAdded && existingFragment.id != containerViewId)
-            ) continue
+            if (existingFragment == fragment || (existingFragment.isAdded && existingFragment.id != containerViewId)) {
+                continue
+            }
 
             hide(existingFragment)
         }
@@ -84,137 +84,76 @@ fun FragmentManager.show(
 }
 
 fun FragmentManager.show(
-        @IdRes containerViewId: Int,
-        classLoader: ClassLoader,
-        className: String,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: () -> Bundle? = { null }
-): Fragment = loadFragment(classLoader, className, tag, args).also { fragment ->
-    show(containerViewId, fragment, tag, enter, exit, allowingStateLoss)
-}
-
-fun <T : Fragment> FragmentManager.show(
-        @IdRes containerViewId: Int,
-        fragmentClass: Class<T>,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: () -> Bundle? = { null }
-): T = loadFragment(fragmentClass, tag, args).also { fragment ->
+    @IdRes containerViewId: Int,
+    className: String,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: () -> Bundle? = { null }
+): Fragment = loadFragment(className, tag, args).also { fragment ->
     show(containerViewId, fragment, tag, enter, exit, allowingStateLoss)
 }
 
 inline fun <reified T : Fragment> FragmentManager.show(
-        @IdRes containerViewId: Int,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        noinline args: () -> Bundle? = { null }
-): T = show(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)
+    @IdRes containerViewId: Int,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    noinline args: () -> Bundle? = { null }
+): T = show(containerViewId, T::class.java.name, tag, enter, exit, allowingStateLoss, args) as T
 
 fun FragmentManager.add(
-        @IdRes containerViewId: Int,
-        classLoader: ClassLoader,
-        className: String,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): Fragment = createFragment(classLoader, className, args).also { fragment ->
+    @IdRes containerViewId: Int,
+    className: String,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: () -> Bundle? = { null }
+): Fragment = fragmentProvider.get(className, tag, args).also { fragment ->
+    if (fragment.isAdded) {
+        return@also
+    }
     commit(allowingStateLoss) {
         setCustomAnimations(enter, exit)
-        add(containerViewId, fragment, tag)
+        add(containerViewId, fragment, tag ?: className)
     }
-}
-
-fun <T : Fragment> FragmentManager.add(
-        @IdRes containerViewId: Int,
-        fragmentClass: Class<T>,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): T {
-    val classLoader = fragmentClass.classLoader
-    check(classLoader != null) {
-        "Can not instantiate fragment for class: $fragmentClass"
-    }
-    @Suppress("UNCHECKED_CAST")
-    return add(
-            containerViewId,
-            classLoader,
-            fragmentClass.name,
-            tag,
-            enter,
-            exit,
-            allowingStateLoss,
-            args
-    ) as T
 }
 
 inline fun <reified T : Fragment> FragmentManager.add(
-        @IdRes containerViewId: Int,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): T = add(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)
+    @IdRes containerViewId: Int,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    noinline args: () -> Bundle? = { null }
+): T = add(containerViewId, T::class.java.name, tag, enter, exit, allowingStateLoss, args) as T
 
 fun FragmentManager.replace(
-        @IdRes containerViewId: Int,
-        classLoader: ClassLoader,
-        className: String,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): Fragment = createFragment(classLoader, className, args).also { fragment ->
+    @IdRes containerViewId: Int,
+    className: String,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    args: () -> Bundle? = { null }
+): Fragment = fragmentProvider.get(className, tag, args).also { fragment ->
+    if (fragment.isAdded) {
+        return@also
+    }
     commit(allowingStateLoss) {
         setCustomAnimations(enter, exit)
-        replace(containerViewId, fragment, tag)
+        replace(containerViewId, fragment, tag ?: className)
     }
-}
-
-fun <T : Fragment> FragmentManager.replace(
-        @IdRes containerViewId: Int,
-        fragmentClass: Class<T>,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): T {
-    val classLoader = fragmentClass.classLoader
-    check(classLoader != null) {
-        "Can not instantiate fragment for class: $fragmentClass"
-    }
-    @Suppress("UNCHECKED_CAST")
-    return replace(
-            containerViewId,
-            classLoader,
-            fragmentClass.name,
-            tag,
-            enter,
-            exit,
-            allowingStateLoss,
-            args
-    ) as T
 }
 
 inline fun <reified T : Fragment> FragmentManager.replace(
-        @IdRes containerViewId: Int,
-        tag: String? = null,
-        @AnimatorRes @AnimRes enter: Int = 0,
-        @AnimatorRes @AnimRes exit: Int = 0,
-        allowingStateLoss: Boolean = false,
-        args: Bundle? = null
-): T = replace(containerViewId, T::class.java, tag, enter, exit, allowingStateLoss, args)
+    @IdRes containerViewId: Int,
+    tag: String? = null,
+    @AnimatorRes @AnimRes enter: Int = 0,
+    @AnimatorRes @AnimRes exit: Int = 0,
+    allowingStateLoss: Boolean = false,
+    noinline args: () -> Bundle? = { null }
+): T = replace(containerViewId, T::class.java.name, tag, enter, exit, allowingStateLoss, args) as T

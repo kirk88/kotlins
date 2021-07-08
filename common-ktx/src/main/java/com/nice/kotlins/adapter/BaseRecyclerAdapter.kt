@@ -34,7 +34,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     open val items: List<T>
         get() = emptyList()
 
-    open fun isEmpty(): Boolean = itemCount == 0
+    fun isEmpty(): Boolean = itemCount == 0
 
     fun getItem(position: Int): T = items[position]
 

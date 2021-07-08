@@ -1,8 +1,9 @@
+@file:Suppress("unused")
+
 package com.nice.kotlins.helper
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.text.Spannable
 import android.text.SpannableString
@@ -13,38 +14,21 @@ import androidx.core.text.toSpannable
 
 internal class CenterAlignImageSpan(drawable: Drawable) : ImageSpan(drawable) {
 
-    override fun draw(
-        canvas: Canvas,
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        x: Float,
-        top: Int,
-        y: Int,
-        bottom: Int,
-        paint: Paint
-    ) {
+    override fun draw(canvas: Canvas, text: CharSequence, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint) {
         val d = drawable
-        val transY = ((bottom - top) - d.bounds.bottom) / 2 + top
         canvas.save()
-        canvas.translate(x, transY.toFloat())
+        canvas.translate(x, (bottom - top - d.bounds.bottom) / 2.toFloat() + top)
         d.draw(canvas)
         canvas.restore()
     }
 
-    override fun getSize(
-        paint: Paint,
-        text: CharSequence?,
-        start: Int,
-        end: Int,
-        fm: Paint.FontMetricsInt?
-    ): Int {
+    override fun getSize(paint: Paint, text: CharSequence?, start: Int, end: Int, fm: Paint.FontMetricsInt?): Int {
         val d = drawable
-        val rect: Rect = d.bounds
+        val rect = d.bounds
         if (fm != null) {
-            val fmInt: Paint.FontMetricsInt = paint.fontMetricsInt
-            val fontHeight: Int = fmInt.bottom - fmInt.top
-            val drHeight: Int = rect.bottom - rect.top
+            val fmInt = paint.fontMetricsInt
+            val fontHeight = fmInt.bottom - fmInt.top
+            val drHeight = rect.bottom - rect.top
             val top = drHeight / 2 - fontHeight / 4
             val bottom = drHeight / 2 + fontHeight / 4
             fm.ascent = -bottom

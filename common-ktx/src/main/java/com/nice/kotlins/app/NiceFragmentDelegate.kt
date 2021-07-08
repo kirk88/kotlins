@@ -36,8 +36,8 @@ internal class NiceFragmentDelegate(
         return subDecor!!
     }
 
-    fun <T : View> findViewById(@IdRes id: Int): T? {
-        return subDecor?.findViewById(id) as T?
+    fun <T : View?> findViewById(@IdRes id: Int): T {
+        return subDecor?.findViewById(id) as T
     }
 
     fun setContentView(view: View) {

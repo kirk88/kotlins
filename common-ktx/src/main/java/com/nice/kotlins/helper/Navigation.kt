@@ -62,7 +62,6 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
         if (containerView is FragmentContainerView) {
             return NavigationController(
                 fragmentManager,
-                containerView.context.classLoader,
                 containerView.id
             )
         }
@@ -90,46 +89,43 @@ fun interface FragmentNavigator {
     fun navigate(
         fragmentManager: FragmentManager,
         @IdRes containerViewId: Int,
-        classLoader: ClassLoader,
         className: String,
         tag: String?,
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
         allowingStateLoss: Boolean,
-        args: Bundle?
+        args: () -> Bundle?
     )
 
 }
 
-internal object DefaultFragmentNavigator : FragmentNavigator {
+private object DefaultFragmentNavigator : FragmentNavigator {
 
     override fun navigate(
         fragmentManager: FragmentManager,
         containerViewId: Int,
-        classLoader: ClassLoader,
         className: String,
         tag: String?,
         enter: Int,
         exit: Int,
         allowingStateLoss: Boolean,
-        args: Bundle?
+        args: () -> Bundle?
     ) {
         fragmentManager.show(
             containerViewId,
-            classLoader,
             className,
             tag,
             enter,
             exit,
-            allowingStateLoss
-        ) { args }
+            allowingStateLoss,
+            args
+        )
     }
 
 }
 
 class NavigationController internal constructor(
     private val fragmentManager: FragmentManager,
-    private val classLoader: ClassLoader,
     @IdRes private val containerViewId: Int
 ) : Iterable<NavigationDestination> {
 
@@ -257,14 +253,12 @@ class NavigationController internal constructor(
         navigator.navigate(
             fragmentManager,
             containerViewId,
-            classLoader,
             destination.className,
             destination.tag,
             enter,
             exit,
-            allowingStateLoss,
-            destination.args
-        )
+            allowingStateLoss
+        ) { destination.args }
         return true
     }
 
@@ -581,7 +575,7 @@ private fun getTitleByDestination(destination: NavigationDestination?): CharSequ
                 "Could not find $argName in $arguments to fill label $label"
             }
             matcher.appendReplacement(title, "")
-            title.append(arguments.get(argName).toString())
+            title.append(arguments.get(argName))
         }
         matcher.appendTail(title)
         return title
