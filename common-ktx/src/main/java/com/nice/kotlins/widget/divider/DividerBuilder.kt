@@ -41,9 +41,7 @@ class DividerBuilder {
     }
 
 
-    fun left(
-            @Px offset: Int
-    ): DividerBuilder = apply {
+    fun left(@Px offset: Int): DividerBuilder = apply {
         leftSideLine = DividerSideLine(offset = offset)
     }
 
