@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import com.nice.kotlins.helper.putExtras
 
 class PocketActivityResultLauncher<I, O>(
-        private val activityResultContract: ActivityResultContract<I, O>
+    private val activityResultContract: ActivityResultContract<I, O>
 ) : ActivityResultLauncher<I>() {
 
     private val callbacks = mutableListOf<ActivityResultCallback<O>>()
@@ -35,8 +35,8 @@ class PocketActivityResultLauncher<I, O>(
     fun register(activity: ComponentActivity) {
         check(!isRegistered) { "Already registered" }
         delegate = activity.registerForActivityResult(
-                activityResultContract,
-                activityResultCallback
+            activityResultContract,
+            activityResultCallback
         )
         isRegistered = true
     }
@@ -44,8 +44,8 @@ class PocketActivityResultLauncher<I, O>(
     fun register(fragment: Fragment) {
         check(!isRegistered) { "Already registered" }
         delegate = fragment.registerForActivityResult(
-                activityResultContract,
-                activityResultCallback
+            activityResultContract,
+            activityResultCallback
         )
         isRegistered = true
     }
@@ -69,9 +69,9 @@ class PocketActivityResultLauncher<I, O>(
     }
 
     fun launch(
-            input: I,
-            options: ActivityOptionsCompat?,
-            callback: ActivityResultCallback<O>
+        input: I,
+        options: ActivityOptionsCompat?,
+        callback: ActivityResultCallback<O>
     ) {
         check(isRegistered) { "Not registered yet" }
         oneShotCallbacks.add(callback)
@@ -103,33 +103,25 @@ class PocketActivityResultLauncher<I, O>(
 }
 
 inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
-        context: Context,
-        vararg values: Pair<String, Any?>
-) = launch(
-        Intent(context, T::class.java).putExtras(*values)
-)
+    context: Context,
+    vararg values: Pair<String, Any?>
+) = launch(Intent(context, T::class.java).putExtras(*values))
 
 inline fun <reified T> PocketActivityResultLauncher<Intent, *>.launch(
-        context: Context,
-        options: ActivityOptionsCompat?,
-        vararg values: Pair<String, Any?>
-) = launch(
-        Intent(context, T::class.java).putExtras(*values), options
-)
+    context: Context,
+    options: ActivityOptionsCompat?,
+    vararg values: Pair<String, Any?>
+) = launch(Intent(context, T::class.java).putExtras(*values), options)
 
 inline fun <reified T, R> PocketActivityResultLauncher<Intent, R>.launch(
-        context: Context,
-        vararg values: Pair<String, Any?>,
-        callback: ActivityResultCallback<R>
-) = launch(
-        Intent(context, T::class.java).putExtras(*values), callback
-)
+    context: Context,
+    vararg values: Pair<String, Any?>,
+    callback: ActivityResultCallback<R>
+) = launch(Intent(context, T::class.java).putExtras(*values), callback)
 
 inline fun <reified T, R> PocketActivityResultLauncher<Intent, R>.launch(
-        context: Context,
-        options: ActivityOptionsCompat?,
-        vararg values: Pair<String, Any?>,
-        callback: ActivityResultCallback<R>
-) = launch(
-        Intent(context, T::class.java).putExtras(*values), options, callback
-)
+    context: Context,
+    options: ActivityOptionsCompat?,
+    vararg values: Pair<String, Any?>,
+    callback: ActivityResultCallback<R>
+) = launch(Intent(context, T::class.java).putExtras(*values), options, callback)

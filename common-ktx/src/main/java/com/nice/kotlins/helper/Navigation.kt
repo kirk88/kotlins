@@ -60,10 +60,7 @@ fun NavigationController(fragmentManager: FragmentManager, view: View): Navigati
     var containerView: View? = view
     while (containerView != null) {
         if (containerView is FragmentContainerView) {
-            return NavigationController(
-                fragmentManager,
-                containerView.id
-            )
+            return NavigationController(fragmentManager, containerView.id)
         }
         containerView = view.parent as? View
     }

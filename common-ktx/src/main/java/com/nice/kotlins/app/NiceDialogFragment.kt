@@ -74,7 +74,6 @@ abstract class NiceDialogFragment(@LayoutRes private val contentLayoutId: Int) :
     }
 
     override fun onContentChanged() {
-
     }
 
 }
