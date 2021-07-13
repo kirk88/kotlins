@@ -7,20 +7,17 @@ import com.nice.kotlins.viewmodel.NiceViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainViewModel:NiceViewModel() {
+class MainViewModel : NiceViewModel() {
 
-    fun start(){
-
+    fun start() {
         event = loadingShow()
 
 
         viewModelScope.launch {
             delay(500)
 
-
             event = errorShow()
         }
-
     }
 
 }

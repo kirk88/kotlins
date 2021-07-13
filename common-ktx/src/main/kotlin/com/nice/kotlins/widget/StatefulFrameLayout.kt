@@ -507,7 +507,7 @@ class StatefulFrameLayout @JvmOverloads constructor(
         }
 
         override fun toString(): String {
-            return ("LoaderLayout.SavedState{"
+            return ("StatefulFrameLayout.SavedState{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " viewType=" + viewType + "}")
         }

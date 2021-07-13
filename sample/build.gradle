@@ -43,4 +43,5 @@ android {
 
 dependencies {
     implementation project(':common-ktx')
+    implementation 'com.juul.kable:core:0.6.0'
 }
