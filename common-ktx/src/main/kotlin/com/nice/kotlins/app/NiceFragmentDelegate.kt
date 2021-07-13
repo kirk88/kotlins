@@ -2,7 +2,6 @@ package com.nice.kotlins.app
 
 import android.app.Activity
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -21,9 +20,6 @@ internal class NiceFragmentDelegate(
 
     private val activity: Activity?
         get() = fragment.activity
-
-    private val layoutInflater: LayoutInflater
-        get() = fragment.layoutInflater
 
     private var subDecor: ViewGroup? = null
 
@@ -53,7 +49,7 @@ internal class NiceFragmentDelegate(
         ensureSubDecor()
         subDecor!!.let { decor ->
             decor.removeAllViews()
-            layoutInflater.inflate(id, decor)
+            fragment.layoutInflater.inflate(id, decor)
         }
         callback.onContentChanged()
     }

@@ -51,6 +51,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
+
     }
 
 
@@ -71,7 +72,6 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
     companion object {
         private val TAG = SecondActivity::class.simpleName
-
     }
 
 }

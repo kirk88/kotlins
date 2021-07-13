@@ -26,25 +26,19 @@ class ThirdFragment : NiceFragment() {
         super.onCreate(savedInstanceState)
         setContentView(binding)
 
-        val heights = mutableMapOf<Int, Int>()
-
         val adapter = adapterBuilder<String, ItemViewHolder>(requireContext(),
             mutableListOf<String>().apply {
                 repeat(20) {
                     add("")
                 }
             })
-            .register(ViewHolderCreator { inflater, parent ->
+            .register { inflater, parent ->
                 ItemViewHolder(AppCompatTextView(requireContext()).apply {
                     layoutParams = ViewGroup.LayoutParams(-1, 200)
                 })
-            }).bind(ViewHolderBinder { holder, item, payloads ->
+            }.bind { holder, item, payloads ->
                 (holder.itemView as TextView).string = "TEXT${holder.layoutPosition}"
-//
-//                holder.itemView.layoutHeight = heights.getOrPut(holder.layoutPosition){
-//                    200.rangeTo(300).random()
-//                }
-            })
+            }
             .build()
 
         binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.BLUE, 8))
@@ -73,7 +67,7 @@ class ThirdFragment : NiceFragment() {
             lifecycleScope.launch {
                 delay(1000)
 
-                if(page == 3){
+                if (page == 3) {
                     binding.recyclerView.setLoadMoreState(InfiniteState.STATE_FAILED)
                     return@launch
                 }
@@ -85,7 +79,6 @@ class ThirdFragment : NiceFragment() {
                 })
 
                 binding.recyclerView.setLoadMoreState(InfiniteState.STATE_IDLE)
-
                 page += 1
             }
 
