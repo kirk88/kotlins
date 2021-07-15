@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import com.nice.kotlins.applicationContext
 import com.nice.kotlins.helper.statusBarHeight
 
 internal object ScreenAdaptation {

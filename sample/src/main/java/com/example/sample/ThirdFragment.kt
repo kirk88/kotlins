@@ -81,9 +81,10 @@ class ThirdFragment : NiceFragment() {
                 binding.recyclerView.setLoadMoreState(InfiniteState.STATE_IDLE)
                 page += 1
             }
-
         }
 
+
     }
+
 
 }
