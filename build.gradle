@@ -2,7 +2,7 @@ import com.github.benmanes.gradle.versions.VersionsPlugin
 
 buildscript {
     ext.versions = [
-            minSdk             : 21,
+            minSdk             : 19,
             targetSdk          : 30,
             compileSdk         : 30,
             buildTools         : "30.0.3",
@@ -13,15 +13,22 @@ buildscript {
             pluginVersions     : "0.38.0",
 
             pluginAndroid      : '4.2.2',
-            pluginKotlin       : "1.5.0",
+            pluginKotlin       : "1.5.20",
 
-            kotlinMain         : "1.5.0",
+            pluginAtomicfu     : "0.16.2",
+
+            atomicJvm          : "0.16.2",
+
+            kotlinLib          : "1.5.20",
+            kotlinMain         : "1.5.1",
 
             kotlinLifecycle    : "2.4.0-alpha02",
 
             coreKtx            : "1.7.0-alpha01",
-            activityKtx        : "1.3.0-rc01",
+            activityKtx        : "1.3.0-rc02",
             fragmentKtx        : "1.4.0-alpha04",
+
+            setup              : "1.1.0-beta01",
 
             sqlite             : "2.2.0-alpha01",
 
@@ -35,12 +42,12 @@ buildscript {
 
             multidex           : "2.0.1",
 
-            material           : "1.4.0",
+            material           : "1.5.0-alpha01",
 
             okhttp             : "5.0.0-alpha.2",
 
             gson               : "2.8.7",
-            coil               : "1.2.2",
+            coil               : "1.3.0",
     ]
 
     ext.publisher = [
@@ -54,10 +61,12 @@ buildscript {
 
             androidPlugin                     : "com.android.tools.build:gradle:${versions.pluginAndroid}",
             kotlinPlugin                      : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.pluginKotlin}",
+            atomicfuPlugin                    : "org.jetbrains.kotlinx:atomicfu-gradle-plugin:${versions.pluginAtomicfu}",
 
-            kotlinStdlib                      : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinMain}",
+            kotlinStdlib                      : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinLib}",
 
             kotlinxCoroutinesCore             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinMain}",
+            kotlinxCoroutinesCoreJvm          : "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${versions.kotlinMain}",
             kotlinxCoroutinesAndroid          : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinMain}",
 
             kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
@@ -69,6 +78,10 @@ buildscript {
 
             androidxActivityKtx               : "androidx.activity:activity-ktx:${versions.activityKtx}",
             androidxFragmentKtx               : "androidx.fragment:fragment-ktx:${versions.fragmentKtx}",
+
+            androidxSetup                     : "androidx.startup:startup-runtime:${versions.setup}",
+
+            atomicfuJvm                       : "org.jetbrains.kotlinx:atomicfu-jvm:${versions.atomicJvm}",
 
             sqliteKtx                         : "androidx.sqlite:sqlite-ktx:${versions.sqlite}",
             sqliteFramework                   : "androidx.sqlite:sqlite-framework:${versions.sqlite}",
@@ -103,6 +116,7 @@ buildscript {
     dependencies {
         classpath deps.androidPlugin
         classpath deps.kotlinPlugin
+        classpath deps.atomicfuPlugin
         classpath deps.versionsPlugin
     }
 }

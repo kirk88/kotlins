@@ -2,7 +2,7 @@ package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import com.nice.kotlins.app.applicationContext
+import com.nice.kotlins.applicationContext
 import com.nice.kotlins.sqlite.db.*
 
 object TestTable {

@@ -46,6 +46,7 @@ dependencies {
 
     api deps.kotlinStdlib
     api deps.kotlinxCoroutinesCore
+    api deps.kotlinxCoroutinesCoreJvm
     api deps.kotlinxCoroutinesAndroid
     api deps.kotlinLifecycleViewmodelKtx
     api deps.kotlinLifecycleViewmodelSavedstate
@@ -54,6 +55,7 @@ dependencies {
     api deps.androidxCoreKtx
     api deps.androidxActivityKtx
     api deps.androidxFragmentKtx
+    api deps.androidxSetup
     api deps.sqliteKtx
     api deps.sqliteFramework
     api deps.androidxAppcompat

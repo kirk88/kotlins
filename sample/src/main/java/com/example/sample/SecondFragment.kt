@@ -22,7 +22,7 @@ class SecondFragment : NiceFragment() {
             .register { inflater, parent ->
                 ItemViewHolder(inflater.inflate(R.layout.item_recycler_view, parent, false))
             }.bind { holder, item, _ ->
-                holder.findViewById<TextView>(R.id.title)?.text = item
+                holder.findViewById<TextView>(R.id.title).text = item
             }.into(binding.recyclerView)
     }
 

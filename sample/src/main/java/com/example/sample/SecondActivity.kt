@@ -51,9 +51,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
-
     }
-
 
     override fun dispatchViewModelEvent(event: Event): Boolean {
         Log.e(TAG, "dispatchViewModelEvent: " + event.message)

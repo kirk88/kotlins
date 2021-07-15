@@ -1,6 +1,7 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'kotlin-android'
+    id 'kotlinx-atomicfu'
 }
 
 android {
@@ -8,19 +9,12 @@ android {
     buildToolsVersion versions.buildTools
 
     defaultConfig {
-        applicationId "com.example.sample"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
         versionCode 1
         versionName "1.0"
 
-        multiDexEnabled true
-
-        ndkVersion = "22.1.7171670"
-    }
-
-    buildFeatures {
-        viewBinding = true
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -30,18 +24,22 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility versions.sourceCompatibility
-        targetCompatibility versions.targetCompatibility
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    aaptOptions {
-        noCompress "pdf"  //表示不让aapt压缩的文件后缀
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 }
 
 dependencies {
-    implementation project(':common-ktx')
-    implementation project(':bluetooth')
+    implementation deps.kotlinStdlib
+    implementation deps.kotlinxCoroutinesCore
+    implementation deps.kotlinxCoroutinesCoreJvm
+    implementation deps.kotlinxCoroutinesAndroid
+    implementation deps.androidxSetup
+    implementation deps.atomicfuJvm
 }
