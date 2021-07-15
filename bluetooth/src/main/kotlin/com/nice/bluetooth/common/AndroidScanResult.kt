@@ -1,5 +1,9 @@
 package com.nice.bluetooth.common
 
+import android.annotation.TargetApi
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.ScanResult
+import android.os.Build
 import android.os.ParcelUuid
 import android.util.ArrayMap
 import android.util.Log
@@ -332,3 +336,16 @@ class ScanRecord private constructor(
         }
     }
 }
+
+class AndroidScanResult(
+    val device: BluetoothDevice,
+    val rssi: Int,
+    scanRecord: ByteArray?
+) {
+
+    val scanRecord: ScanRecord? = ScanRecord.parseFromBytes(scanRecord)
+
+}
+
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+internal fun ScanResult.toAndroidScanResult() = AndroidScanResult(device, rssi, scanRecord?.bytes)
