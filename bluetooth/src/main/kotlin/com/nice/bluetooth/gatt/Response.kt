@@ -26,6 +26,29 @@ internal sealed class Response {
     ) : Response() {
         override fun toString(): String =
             "OnCharacteristicRead(characteristic=${characteristic.uuid}, value=${value?.size ?: 0} bytes, status=$status)"
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as OnCharacteristicRead
+
+            if (characteristic != other.characteristic) return false
+            if (value != null) {
+                if (other.value == null) return false
+                if (!value.contentEquals(other.value)) return false
+            } else if (other.value != null) return false
+            if (status != other.status) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = characteristic.hashCode()
+            result = 31 * result + (value?.contentHashCode() ?: 0)
+            result = 31 * result + status.hashCode()
+            return result
+        }
     }
 
     data class OnCharacteristicWrite(
@@ -43,6 +66,29 @@ internal sealed class Response {
     ) : Response() {
         override fun toString(): String =
             "OnDescriptorRead(descriptor=${descriptor.uuid}, value=${value?.size ?: 0} bytes, status=$status)"
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as OnDescriptorRead
+
+            if (descriptor != other.descriptor) return false
+            if (value != null) {
+                if (other.value == null) return false
+                if (!value.contentEquals(other.value)) return false
+            } else if (other.value != null) return false
+            if (status != other.status) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = descriptor.hashCode()
+            result = 31 * result + (value?.contentHashCode() ?: 0)
+            result = 31 * result + status.hashCode()
+            return result
+        }
     }
 
     data class OnDescriptorWrite(
@@ -73,7 +119,8 @@ internal data class OnMtuChanged(
  * - [BluetoothGatt.GATT_CONNECTION_CONGESTED]
  * - [BluetoothGatt.GATT_FAILURE]
  */
-internal inline class GattStatus(private val value: Int) {
+@JvmInline
+internal value class GattStatus(private val value: Int) {
     override fun toString(): String = when (value) {
         GATT_SUCCESS -> "GATT_SUCCESS"
         GATT_INVALID_HANDLE -> "GATT_INVALID_HANDLE"

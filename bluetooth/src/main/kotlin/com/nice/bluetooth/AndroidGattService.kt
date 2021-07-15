@@ -24,7 +24,7 @@ internal fun BluetoothGattService.toAndroidGattService(): AndroidGattService {
         serviceUuid = serviceUuid,
         characteristics = characteristics,
         bluetoothGattService = this
-)
+    )
 }
 
 /** @throws NoSuchElementException if service or characteristic is not found. */

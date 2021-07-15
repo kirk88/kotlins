@@ -4,7 +4,7 @@ import com.nice.bluetooth.common.*
 
 class AndroidServicesDiscoveredPeripheral internal constructor(
     private val peripheral: AndroidPeripheral
-): ServicesDiscoveredPeripheral {
+) : ServicesDiscoveredPeripheral {
 
     override suspend fun read(
         characteristic: Characteristic
@@ -18,23 +18,24 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
         characteristic: Characteristic,
         data: ByteArray,
         writeType: WriteType
-    ) {
-        peripheral.write(characteristic, data, writeType)
-    }
+    ) = peripheral.write(characteristic, data, writeType)
 
     override suspend fun write(
         descriptor: Descriptor,
         data: ByteArray
-    ) {
-        peripheral.write(descriptor, data)
-    }
+    ) = peripheral.write(descriptor, data)
+
+    override suspend fun requestConnectionPriority(
+        priority: Priority
+    ): Boolean = peripheral.requestConnectionPriority(priority)
 
     override suspend fun requestMtu(
         mtu: Int
     ): Int = peripheral.requestMtu(mtu)
+
 }
 
-class AndroidPeripheralBuilder internal constructor(): PeripheralBuilder {
+class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
 
     internal var onServicesDiscovered: ServicesDiscoveredAction = {}
     override fun onServicesDiscovered(action: ServicesDiscoveredAction) {

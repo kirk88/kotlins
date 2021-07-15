@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlinx-atomicfu'
+    id 'maven'
 }
 
 android {
@@ -11,8 +12,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode 1
-        versionName "1.0"
 
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -29,6 +28,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -42,4 +42,42 @@ dependencies {
     implementation deps.kotlinxCoroutinesAndroid
     implementation deps.androidxSetup
     implementation deps.atomicfuJvm
+}
+
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
+
+uploadArchives {
+    repositories.mavenDeployer {
+        def deployPath = file(getProperty('aar.deployPath'))
+        repository(url: "file://${deployPath.absolutePath}")
+        pom.project {
+            groupId "com.nice.kotlins"
+            artifactId "bluetooth"
+            version "${versionMajor}.${versionMinor}.${versionPatch}"
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.convention("sources")
+    archiveClassifier.set("sources")
+    from android.sourceSets.main.java.getSrcDirs()
+}
+
+artifacts {
+    archives androidSourcesJar
 }

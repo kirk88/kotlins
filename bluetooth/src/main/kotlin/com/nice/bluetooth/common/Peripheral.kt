@@ -3,6 +3,8 @@
 
 package com.nice.bluetooth.common
 
+import android.annotation.TargetApi
+import android.os.Build
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -11,7 +13,13 @@ internal typealias OnSubscriptionAction = suspend () -> Unit
 
 enum class WriteType {
     WithResponse,
-    WithoutResponse,
+    WithoutResponse
+}
+
+enum class Priority {
+    Low,
+    Balanced,
+    High
 }
 
 interface Peripheral {
@@ -41,6 +49,13 @@ interface Peripheral {
     val state: Flow<State>
 
     /**
+     * [Flow] of the most recently negotiated MTU. The MTU will change upon a successful request to change the MTU
+     * (via [requestMtu]), or if the peripheral initiates an MTU change. [Flow]'s `value` will be `null` until MTU
+     * is negotiated.
+     */
+    val mtu: Flow<Int?>
+
+    /**
      * Initiates a connection, suspending until connected, or failure occurs. Multiple concurrent invocations will all
      * suspend until connected (or failure occurs). If already connected, then returns immediately.
      *
@@ -68,7 +83,7 @@ interface Peripheral {
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun read(
         characteristic: Characteristic
-): ByteArray
+    ): ByteArray
 
     /** @throws NotReadyException if invoked without an established [connection][connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
@@ -76,20 +91,28 @@ interface Peripheral {
         characteristic: Characteristic,
         data: ByteArray,
         writeType: WriteType = WriteType.WithoutResponse
-): Unit
+    ): Unit
 
     /** @throws NotReadyException if invoked without an established [connection][connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun read(
         descriptor: Descriptor
-): ByteArray
+    ): ByteArray
 
     /** @throws NotReadyException if invoked without an established [connection][connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun write(
         descriptor: Descriptor,
         data: ByteArray
-): Unit
+    ): Unit
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestConnectionPriority(priority: Priority): Boolean
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestMtu(
+        mtu: Int
+    ): Int
 
     /**
      * Observes changes to the specified [Characteristic].
@@ -128,5 +151,5 @@ interface Peripheral {
     fun observe(
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction = {}
-): Flow<ByteArray>
+    ): Flow<ByteArray>
 }

@@ -6,7 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 
-private val bluetoothStateIntentFilter: IntentFilter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+private val bluetoothStateIntentFilter: IntentFilter =
+    IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
 
 private inline fun bluetoothStateBroadcastReceiver(
     crossinline action: (state: Int) -> Unit

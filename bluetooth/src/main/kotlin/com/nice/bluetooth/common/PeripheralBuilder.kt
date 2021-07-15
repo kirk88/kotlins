@@ -1,7 +1,9 @@
 package com.nice.bluetooth.common
 
-interface ServicesDiscoveredPeripheral {
+import android.annotation.TargetApi
+import android.os.Build
 
+interface ServicesDiscoveredPeripheral {
     suspend fun read(
         characteristic: Characteristic
     ): ByteArray
@@ -21,9 +23,11 @@ interface ServicesDiscoveredPeripheral {
         data: ByteArray
     )
 
-    suspend fun requestMtu(
-        mtu: Int
-    ): Int
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestConnectionPriority(priority: Priority): Boolean
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestMtu(mtu: Int): Int
 }
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit

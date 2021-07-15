@@ -50,12 +50,6 @@ buildscript {
             coil               : "1.3.0",
     ]
 
-    ext.publisher = [
-            groupId   : "com.nice.kotlins",
-            artifactId: "common-ktx",
-            version   : "1.3.99"
-    ]
-
     ext.deps = [
             versionsPlugin                    : "com.github.ben-manes:gradle-versions-plugin:${versions.pluginVersions}",
 

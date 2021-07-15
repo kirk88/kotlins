@@ -32,6 +32,24 @@ internal data class OnCharacteristicChanged(
 ) {
     override fun toString(): String =
         "OnCharacteristicChanged(characteristic=${characteristic.uuid}, value=${value.size} bytes)"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OnCharacteristicChanged
+
+        if (characteristic != other.characteristic) return false
+        if (!value.contentEquals(other.value)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = characteristic.hashCode()
+        result = 31 * result + value.contentHashCode()
+        return result
+    }
 }
 
 internal class Callback(

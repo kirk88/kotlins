@@ -4,9 +4,9 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.*
 import android.os.ParcelUuid
 import com.nice.bluetooth.common.Advertisement
+import com.nice.bluetooth.common.AndroidScanResult
 import com.nice.bluetooth.common.BondState
 import com.nice.bluetooth.common.ManufacturerData
-import com.nice.bluetooth.common.AndroidScanResult
 import java.util.*
 
 internal class AndroidAdvertisement(

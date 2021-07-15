@@ -32,7 +32,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
     }
 
     sourceSets {
@@ -72,14 +73,18 @@ dependencies {
     api deps.coil
 }
 
+def versionMajor = 1
+def versionMinor = 3
+def versionPatch = 99
+
 uploadArchives {
     repositories.mavenDeployer {
         def deployPath = file(getProperty('aar.deployPath'))
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
-            groupId publisher.groupId
-            artifactId publisher.artifactId
-            version publisher.version
+            groupId "com.nice.kotlins"
+            artifactId "common-ktx"
+            version "${versionMajor}.${versionMinor}.${versionPatch}"
 
             licenses {
                 license {

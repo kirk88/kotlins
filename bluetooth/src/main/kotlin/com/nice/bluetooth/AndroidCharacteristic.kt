@@ -30,7 +30,7 @@ internal fun BluetoothGattCharacteristic.toAndroidCharacteristic(): AndroidChara
         characteristicUuid = uuid,
         descriptors = platformDescriptors,
         bluetoothGattCharacteristic = this
-)
+    )
 }
 
 internal fun BluetoothGattCharacteristic.toLazyCharacteristic() = LazyCharacteristic(

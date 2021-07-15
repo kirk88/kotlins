@@ -40,6 +40,7 @@ internal sealed class AndroidObservationEvent {
         override val characteristic: Characteristic,
         val cause: Throwable
     ) : AndroidObservationEvent()
+
 }
 
 /**
@@ -86,7 +87,7 @@ internal class Observers(
                     it.characteristic.serviceUuid == characteristic.serviceUuid
         }
         .map {
-           when (it) {
+            when (it) {
                 is AndroidObservationEvent.CharacteristicChange -> it.data
                 is AndroidObservationEvent.Error -> throw it.cause
             }

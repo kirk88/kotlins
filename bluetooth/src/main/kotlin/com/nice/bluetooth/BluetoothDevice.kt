@@ -11,6 +11,7 @@ import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.common.State
 import com.nice.bluetooth.common.Transport
 import com.nice.bluetooth.gatt.Callback
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.newSingleThreadContext
@@ -36,6 +37,7 @@ internal fun BluetoothDevice.connect(
 /**
  * @param transport is only used on API level >= 23.
  */
+@OptIn(ObsoleteCoroutinesApi::class)
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 private fun BluetoothDevice.connectApi21(
     context: Context,

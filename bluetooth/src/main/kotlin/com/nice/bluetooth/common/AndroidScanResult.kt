@@ -232,9 +232,10 @@ class ScanRecord private constructor(
                             scanRecord, currentPos, dataLength,
                             BluetoothUuid.UUID_BYTES_128_BIT, serviceSolicitationUuids
                         )
-                        DATA_TYPE_LOCAL_NAME_SHORT, DATA_TYPE_LOCAL_NAME_COMPLETE -> localName = String(
-                            extractBytes(scanRecord, currentPos, dataLength)
-                        )
+                        DATA_TYPE_LOCAL_NAME_SHORT, DATA_TYPE_LOCAL_NAME_COMPLETE -> localName =
+                            String(
+                                extractBytes(scanRecord, currentPos, dataLength)
+                            )
                         DATA_TYPE_TX_POWER_LEVEL -> txPowerLevel = scanRecord[currentPos].toInt()
                         DATA_TYPE_SERVICE_DATA_16_BIT, DATA_TYPE_SERVICE_DATA_32_BIT, DATA_TYPE_SERVICE_DATA_128_BIT -> {
                             var serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT
@@ -259,8 +260,9 @@ class ScanRecord private constructor(
                         DATA_TYPE_MANUFACTURER_SPECIFIC_DATA -> {
                             // The first two bytes of the manufacturer specific data are
                             // manufacturer ids in little endian.
-                            val manufacturerId: Int = ((scanRecord[currentPos + 1].toInt() and 0xFF shl 8)
-                                    + (scanRecord[currentPos].toInt() and 0xFF))
+                            val manufacturerId: Int =
+                                ((scanRecord[currentPos + 1].toInt() and 0xFF shl 8)
+                                        + (scanRecord[currentPos].toInt() and 0xFF))
                             val manufacturerDataBytes = extractBytes(
                                 scanRecord, currentPos + 2,
                                 dataLength - 2

@@ -1,11 +1,15 @@
 package com.nice.bluetooth
 
+import android.annotation.TargetApi
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
+import android.bluetooth.BluetoothGattService
+import android.os.Build
 import com.nice.bluetooth.AndroidObservationEvent.CharacteristicChange
 import com.nice.bluetooth.common.ConnectionLostException
 import com.nice.bluetooth.common.GattRequestRejectedException
 import com.nice.bluetooth.common.GattStatusException
+import com.nice.bluetooth.common.Priority
 import com.nice.bluetooth.gatt.Callback
 import com.nice.bluetooth.gatt.GattStatus
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,7 +25,7 @@ class OutOfOrderGattCallbackException internal constructor(
 private val GattSuccess = GattStatus(GATT_SUCCESS)
 
 internal class Connection(
-    internal val bluetoothGatt: BluetoothGatt,
+    private val bluetoothGatt: BluetoothGatt,
     private val dispatcher: CoroutineDispatcher,
     private val callback: Callback,
     private val invokeOnClose: () -> Unit
@@ -35,6 +39,8 @@ internal class Connection(
         .map { (bluetoothGattCharacteristic, value) ->
             CharacteristicChange(bluetoothGattCharacteristic.toLazyCharacteristic(), value)
         }
+
+    val services: MutableList<BluetoothGattService> = bluetoothGatt.services
 
     private val lock = Mutex()
 
@@ -52,9 +58,9 @@ internal class Connection(
      * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
      * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
      */
-    suspend inline fun <reified T> execute(
+    suspend inline fun <reified T> operate(
         crossinline action: BluetoothGatt.() -> Boolean
-): T = lock.withLock {
+    ): T = lock.withLock {
         withContext(dispatcher) {
             action.invoke(bluetoothGatt) || throw GattRequestRejectedException()
         }
@@ -76,7 +82,7 @@ internal class Connection(
     }
 
     /**
-     * Mimics [execute] in order to uphold the same sequential execution behavior, while having a dedicated channel for
+     * Mimics [operate] in order to uphold the same sequential execution behavior, while having a dedicated channel for
      * receiving MTU change events (so that peripheral initiated MTU changes don't result in
      * [OutOfOrderGattCallbackException]).
      *
@@ -85,6 +91,7 @@ internal class Connection(
      * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
      * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int = lock.withLock {
         withContext(dispatcher) {
             if (!bluetoothGatt.requestMtu(mtu)) throw GattRequestRejectedException()
@@ -100,8 +107,33 @@ internal class Connection(
         response.mtu
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestConnectionPriority(priority: Priority): Boolean = lock.withLock {
+        withContext(dispatcher) {
+            bluetoothGatt.requestConnectionPriority(priority.intValue)
+        }
+    }
+
+    fun setCharacteristicNotification(
+        characteristic: AndroidCharacteristic,
+        enable: Boolean
+    ) = bluetoothGatt.setCharacteristicNotification(
+        characteristic.bluetoothGattCharacteristic,
+        enable
+    )
+
+    fun disconnect() = bluetoothGatt.disconnect()
+
     fun close() {
         bluetoothGatt.close()
         invokeOnClose.invoke()
     }
 }
+
+private val Priority.intValue: Int
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    get() = when (this) {
+        Priority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
+        Priority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+        Priority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
+    }
