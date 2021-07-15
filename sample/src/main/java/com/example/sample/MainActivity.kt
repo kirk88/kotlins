@@ -10,11 +10,11 @@ import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
+import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -25,11 +25,12 @@ import com.nice.kotlins.helper.setContentView
 import com.nice.kotlins.helper.string
 import com.nice.kotlins.helper.viewBindings
 import com.nice.kotlins.sqlite.db.*
-import com.nice.kotlins.widget.*
+import com.nice.kotlins.widget.ProgressView
+import com.nice.kotlins.widget.TipView
+import com.nice.kotlins.widget.progressViews
+import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
@@ -110,6 +111,11 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             binding.recyclerView.adapter = it
         }
 
+        lifecycleScope.launch {
+            Scanner().advertisements.collect {
+                adapter.addItem(it)
+            }
+        }
     }
 
     private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_1) {

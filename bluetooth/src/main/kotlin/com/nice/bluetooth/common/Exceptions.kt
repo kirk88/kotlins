@@ -1,6 +1,6 @@
 package com.nice.bluetooth.common
 
-import java.io.IOException
+typealias IOException = java.io.IOException
 
 /** Failure occurred with the underlying Bluetooth system. */
 open class BluetoothException internal constructor(

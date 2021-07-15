@@ -43,4 +43,5 @@ android {
 
 dependencies {
     implementation project(':common-ktx')
+    implementation project(':bluetooth')
 }

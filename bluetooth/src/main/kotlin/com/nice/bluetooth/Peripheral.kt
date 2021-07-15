@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattDescriptor.*
 import android.util.Log
-import com.juul.kable.launchIn
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.external.CLIENT_CHARACTERISTIC_CONFIG_UUID
 import com.nice.bluetooth.gatt.Response.*
