@@ -15,7 +15,7 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data  android:name="com.nice.bluetooth.KableInitializer"
+            <meta-data  android:name="com.nice.bluetooth.BluetoothInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>

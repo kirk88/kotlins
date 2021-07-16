@@ -3,8 +3,11 @@
 
 package com.nice.bluetooth.common
 
-import android.annotation.TargetApi
 import android.os.Build
+import androidx.annotation.RequiresApi
+import com.nice.bluetooth.Connection
+import com.nice.bluetooth.PhyOptions
+import com.nice.bluetooth.gatt.PreferredPhy
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -22,12 +25,47 @@ enum class Priority {
     High
 }
 
-interface Peripheral {
+interface Readable {
+
+    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun read(
+        characteristic: Characteristic
+    ): ByteArray
+
+    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun read(
+        descriptor: Descriptor
+    ): ByteArray
+
+}
+
+interface Writable {
+
+    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun write(
+        characteristic: Characteristic,
+        data: ByteArray,
+        writeType: WriteType = WriteType.WithoutResponse
+    )
+
+    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun write(
+        descriptor: Descriptor,
+        data: ByteArray
+    )
+
+}
+
+interface Peripheral : Readable, Writable {
 
     /**
-     * Provides a conflated [Flow] of the [Peripheral]'s [State].
+     * Provides a conflated [Flow] of the [Peripheral]'s [ConnectionState].
      *
-     * After [connect] is called, the [state] will typically transition through the following [states][State]:
+     * After [connect] is called, the [state] will typically transition through the following [states][ConnectionState]:
      *
      * ```
      *     connect()
@@ -46,14 +84,21 @@ interface Peripheral {
      *                      '---------------'       '--------------'
      * ```
      */
-    val state: Flow<State>
+    val state: Flow<ConnectionState>
 
     /**
      * [Flow] of the most recently negotiated MTU. The MTU will change upon a successful request to change the MTU
-     * (via [requestMtu]), or if the peripheral initiates an MTU change. [Flow]'s `value` will be `null` until MTU
+     * (via [requestMtu]), or if the peripheral initiates an Phy change. [Flow]'s `value` will be `null` until MTU
      * is negotiated.
      */
     val mtu: Flow<Int?>
+
+    /**
+     * [Flow] of the most recently negotiated PHY. The PHY will change upon a successful request to change the PHY
+     * (via [setPreferredPhy]), or if the peripheral initiates an PHY change. [Flow]'s `value` will be `null` until PHY
+     * is negotiated.
+     */
+    val phy: Flow<PreferredPhy?>
 
     /**
      * Initiates a connection, suspending until connected, or failure occurs. Multiple concurrent invocations will all
@@ -62,57 +107,52 @@ interface Peripheral {
      * @throws ConnectionRejectedException when a connection request is rejected by the system (e.g. bluetooth hardware unavailable).
      * @throws IllegalStateException if [Peripheral]'s Coroutine scope has been cancelled.
      */
-    suspend fun connect(): Unit
+    suspend fun connect()
 
     /**
      * Disconnects the active connection, or cancels an in-flight [connection][connect] attempt, suspending until
-     * [Peripheral] has settled on a [disconnected][State.Disconnected] state.
+     * [Peripheral] has settled on a [disconnected][ConnectionState.Disconnected] state.
      *
      * Multiple concurrent invocations will all suspend until disconnected (or failure occurs).
      */
-    suspend fun disconnect(): Unit
+    suspend fun disconnect()
 
     /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
-    val services: List<DiscoveredService>?
+    val services: List<DiscoveredService>
 
     /** @throws NotReadyException if invoked without an established [connection][connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun rssi(): Int
 
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
-    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun read(
-        characteristic: Characteristic
-    ): ByteArray
+    suspend fun reliableWrite(operation: suspend Writable.() -> Unit)
 
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
-    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun write(
-        characteristic: Characteristic,
-        data: ByteArray,
-        writeType: WriteType = WriteType.WithoutResponse
-    ): Unit
-
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
-    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun read(
-        descriptor: Descriptor
-    ): ByteArray
-
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
-    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun write(
-        descriptor: Descriptor,
-        data: ByteArray
-    ): Unit
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    /**
+     * Request a specific connection priority
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestConnectionPriority(priority: Priority): Boolean
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(
-        mtu: Int
-    ): Int
+    /**
+     * Requests that the current connection's MTU be changed. Suspends until the MTU changes, or failure occurs. The
+     * negotiated MTU value is returned, which may not be [mtu] value requested if the remote peripheral negotiated an
+     * alternate MTU.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestMtu(mtu: Int): Boolean
+
+    /**
+     * Read the current transmitter PHY and receiver PHY of the connection
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun readPhy(): Boolean
+
+    /**
+     * Set the preferred connection PHY for this app. Please note that this is just a
+     * recommendation, whether the PHY change will happen depends on other applications preferences,
+     * local and remote controller capabilities. Controller can override these settings.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean
 
     /**
      * Observes changes to the specified [Characteristic].

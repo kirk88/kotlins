@@ -1,18 +1,19 @@
 package com.nice.bluetooth
 
 import android.annotation.TargetApi
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
-import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.os.Build
 import com.nice.bluetooth.AndroidObservationEvent.CharacteristicChange
-import com.nice.bluetooth.common.ConnectionLostException
-import com.nice.bluetooth.common.GattRequestRejectedException
-import com.nice.bluetooth.common.GattStatusException
-import com.nice.bluetooth.common.Priority
+import com.nice.bluetooth.common.*
 import com.nice.bluetooth.gatt.Callback
 import com.nice.bluetooth.gatt.GattStatus
+import com.nice.bluetooth.gatt.Response
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -24,23 +25,32 @@ class OutOfOrderGattCallbackException internal constructor(
 
 private val GattSuccess = GattStatus(GATT_SUCCESS)
 
+enum class PhyOptions {
+    NoPreferred,
+    S2,
+    S8
+}
+
 internal class Connection(
     private val bluetoothGatt: BluetoothGatt,
     private val dispatcher: CoroutineDispatcher,
     private val callback: Callback,
     private val invokeOnClose: () -> Unit
-) {
+) : Readable, Writable {
 
     init {
         callback.invokeOnDisconnected(::close)
     }
 
-    val characteristicChanges = callback.onCharacteristicChanged
+    val characteristicChanges: Flow<CharacteristicChange> = callback.onCharacteristicChanged
         .map { (bluetoothGattCharacteristic, value) ->
             CharacteristicChange(bluetoothGattCharacteristic.toLazyCharacteristic(), value)
         }
 
-    val services: MutableList<BluetoothGattService> = bluetoothGatt.services
+    @Volatile
+    private var _services: List<AndroidGattService>? = null
+    val services: List<AndroidGattService>
+        get() = checkNotNull(_services) { "Services have not been discovered for $this" }
 
     private val lock = Mutex()
 
@@ -58,7 +68,7 @@ internal class Connection(
      * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
      * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
      */
-    suspend inline fun <reified T> operate(
+    private suspend inline fun <reified T> execute(
         crossinline action: BluetoothGatt.() -> Boolean
     ): T = lock.withLock {
         withContext(dispatcher) {
@@ -81,30 +91,82 @@ internal class Connection(
             )
     }
 
-    /**
-     * Mimics [operate] in order to uphold the same sequential execution behavior, while having a dedicated channel for
-     * receiving MTU change events (so that peripheral initiated MTU changes don't result in
-     * [OutOfOrderGattCallbackException]).
-     *
-     * See https://github.com/JuulLabs/kable/issues/86 for more details.
-     *
-     * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
-     * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
-     */
+    suspend fun rssi(): Int = execute<Response.OnReadRemoteRssi> {
+        readRemoteRssi()
+    }.rssi
+
+    suspend fun discoverServices() {
+        execute<Response.OnServicesDiscovered> {
+            discoverServices()
+        }
+
+        _services = bluetoothGatt.services.map { it.toAndroidGattService() }
+    }
+
+    override suspend fun write(
+        characteristic: Characteristic,
+        data: ByteArray,
+        writeType: WriteType
+    ) {
+        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
+        execute<Response.OnCharacteristicWrite> {
+            bluetoothGattCharacteristic.value = data
+            bluetoothGattCharacteristic.writeType = writeType.intValue
+            writeCharacteristic(bluetoothGattCharacteristic)
+        }
+    }
+
+    override suspend fun read(
+        characteristic: Characteristic
+    ): ByteArray {
+        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
+        return execute<Response.OnCharacteristicRead> {
+            readCharacteristic(bluetoothGattCharacteristic)
+        }.value!!
+    }
+
+    override suspend fun write(
+        descriptor: Descriptor,
+        data: ByteArray
+    ) {
+        write(bluetoothGattDescriptorFrom(descriptor), data)
+    }
+
+    suspend fun write(
+        bluetoothGattDescriptor: BluetoothGattDescriptor,
+        data: ByteArray
+    ) {
+        execute<Response.OnDescriptorWrite> {
+            bluetoothGattDescriptor.value = data
+            writeDescriptor(bluetoothGattDescriptor)
+        }
+    }
+
+    override suspend fun read(
+        descriptor: Descriptor
+    ): ByteArray {
+        val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
+        return execute<Response.OnDescriptorRead> {
+            readDescriptor(bluetoothGattDescriptor)
+        }.value!!
+    }
+
+    suspend fun reliableWrite(operation: suspend Writable.() -> Unit) {
+        try {
+            bluetoothGatt.beginReliableWrite()
+            operation()
+            bluetoothGatt.executeReliableWrite()
+        } catch (t: Throwable) {
+            bluetoothGatt.abortReliableWrite()
+            throw t
+        }
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int = lock.withLock {
+    suspend fun requestMtu(mtu: Int): Boolean = lock.withLock {
         withContext(dispatcher) {
-            if (!bluetoothGatt.requestMtu(mtu)) throw GattRequestRejectedException()
+            bluetoothGatt.requestMtu(mtu)
         }
-
-        val response = try {
-            callback.onMtuChanged.receive()
-        } catch (e: ConnectionLostException) {
-            throw ConnectionLostException(cause = e)
-        }
-
-        if (response.status != GattSuccess) throw GattStatusException(response.toString())
-        response.mtu
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -112,6 +174,36 @@ internal class Connection(
         withContext(dispatcher) {
             bluetoothGatt.requestConnectionPriority(priority.intValue)
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    suspend fun readPhy(): Boolean = lock.withLock {
+        withContext(dispatcher) {
+            bluetoothGatt.readPhy()
+        }
+
+        val response = try {
+            callback.onPhyRead.receive()
+        } catch (e: ConnectionLostException) {
+            throw ConnectionLostException(cause = e)
+        }
+
+        response.status == GattSuccess
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean = lock.withLock {
+        withContext(dispatcher) {
+            bluetoothGatt.setPreferredPhy(txPhy.intValue, rxPhy.intValue, options.intValue)
+        }
+
+        val response = try {
+            callback.onPhyUpdate.receive()
+        } catch (e: ConnectionLostException) {
+            throw ConnectionLostException(cause = e)
+        }
+
+        response.status == GattSuccess
     }
 
     fun setCharacteristicNotification(
@@ -128,7 +220,30 @@ internal class Connection(
         bluetoothGatt.close()
         invokeOnClose.invoke()
     }
+
+    private fun bluetoothGattCharacteristicFrom(
+        characteristic: Characteristic
+    ) = services.findCharacteristic(characteristic).bluetoothGattCharacteristic
+
+    private fun bluetoothGattDescriptorFrom(
+        descriptor: Descriptor
+    ) = services.findDescriptor(descriptor).bluetoothGattDescriptor
+
 }
+
+private val PhyOptions.intValue: Int
+    @TargetApi(Build.VERSION_CODES.O)
+    get() = when(this){
+        PhyOptions.NoPreferred -> BluetoothDevice.PHY_OPTION_NO_PREFERRED
+        PhyOptions.S2 -> BluetoothDevice.PHY_OPTION_S2
+        PhyOptions.S8 -> BluetoothDevice.PHY_OPTION_S8
+    }
+
+private val WriteType.intValue: Int
+    get() = when (this) {
+        WriteType.WithResponse -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        WriteType.WithoutResponse -> BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+    }
 
 private val Priority.intValue: Int
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

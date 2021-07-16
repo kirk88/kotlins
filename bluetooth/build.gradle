@@ -42,6 +42,7 @@ dependencies {
     implementation deps.kotlinxCoroutinesAndroid
     implementation deps.androidxSetup
     implementation deps.atomicfuJvm
+    implementation deps.androidxAnnotation
 }
 
 def versionMajor = 1

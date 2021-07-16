@@ -1,15 +1,13 @@
 package com.nice.bluetooth.gatt
 
-import android.bluetooth.BluetoothGatt
+import android.bluetooth.*
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
-import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile.*
 import android.util.Log
 import com.nice.bluetooth.TAG
+import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.ConnectionLostException
-import com.nice.bluetooth.common.State
+import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.external.GATT_CONN_CANCEL
 import com.nice.bluetooth.external.GATT_CONN_FAIL_ESTABLISH
 import com.nice.bluetooth.external.GATT_CONN_TERMINATE_PEER_USER
@@ -53,8 +51,9 @@ internal data class OnCharacteristicChanged(
 }
 
 internal class Callback(
-    private val state: MutableStateFlow<State>,
-    private val mtu: MutableStateFlow<Int?>
+    private val state: MutableStateFlow<ConnectionState>,
+    private val mtu: MutableStateFlow<Int?>,
+    private val phy: MutableStateFlow<PreferredPhy?>? = null
 ) : BluetoothGattCallback() {
 
     private var disconnectedAction: DisconnectedAction? = null
@@ -67,7 +66,9 @@ internal class Callback(
         _onCharacteristicChanged.consumeAsFlow()
 
     val onResponse = Channel<Response>(CONFLATED)
-    val onMtuChanged = Channel<OnMtuChanged>(CONFLATED)
+    val onPhyUpdate = Channel<OnPhyUpdate>(CONFLATED)
+    val onPhyRead = Channel<OnPhyRead>(CONFLATED)
+    val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
 
     override fun onPhyUpdate(
         gatt: BluetoothGatt,
@@ -75,7 +76,8 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        // todo
+        onPhyUpdate.trySendOrLog(OnPhyUpdate(txPhy.toPhy(), rxPhy.toPhy(), GattStatus(status)))
+        if(status == GATT_SUCCESS) phy?.value = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
     }
 
     override fun onPhyRead(
@@ -84,7 +86,7 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        // todo
+        onPhyRead.trySendOrLog(OnPhyRead(txPhy.toPhy(), rxPhy.toPhy(), GattStatus(status)))
     }
 
     override fun onConnectionStateChange(
@@ -98,10 +100,10 @@ internal class Callback(
         }
 
         when (newState) {
-            STATE_CONNECTING -> state.value = State.Connecting
-            STATE_CONNECTED -> state.value = State.Connected
-            STATE_DISCONNECTING -> state.value = State.Disconnecting
-            STATE_DISCONNECTED -> state.value = State.Disconnected(status.toStatus())
+            STATE_CONNECTING -> state.value = ConnectionState.Connecting
+            STATE_CONNECTED -> state.value = ConnectionState.Connected
+            STATE_DISCONNECTING -> state.value = ConnectionState.Disconnecting
+            STATE_DISCONNECTED -> state.value = ConnectionState.Disconnected(status.toStatus())
         }
 
         if (newState == STATE_DISCONNECTING || newState == STATE_DISCONNECTED) {
@@ -159,7 +161,7 @@ internal class Callback(
         gatt: BluetoothGatt,
         status: Int
     ) {
-        // todo
+        onReliableWriteCompleted.trySendOrLog(OnReliableWriteCompleted(GattStatus(status)))
     }
 
     override fun onReadRemoteRssi(
@@ -175,18 +177,24 @@ internal class Callback(
         mtu: Int,
         status: Int
     ) {
-        onMtuChanged.trySendOrLog(OnMtuChanged(mtu, GattStatus(status)))
         if (status == GATT_SUCCESS) this.mtu.value = mtu
     }
 }
 
-private fun Int.toStatus(): State.Disconnected.Status? = when (this) {
+private fun Int.toPhy(): Phy = when(this){
+    BluetoothDevice.PHY_LE_1M -> Phy.Le1M
+    BluetoothDevice.PHY_LE_2M -> Phy.Le2M
+    BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
+    else -> throw IllegalArgumentException("Unknown phy $this")
+}
+
+private fun Int.toStatus(): ConnectionState.Disconnected.Status? = when (this) {
     GATT_SUCCESS -> null
-    GATT_CONN_TIMEOUT -> State.Disconnected.Status.Timeout
-    GATT_CONN_TERMINATE_PEER_USER -> State.Disconnected.Status.PeripheralDisconnected
-    GATT_CONN_FAIL_ESTABLISH -> State.Disconnected.Status.Failed
-    GATT_CONN_CANCEL -> State.Disconnected.Status.Cancelled
-    else -> State.Disconnected.Status.Unknown(this)
+    GATT_CONN_TIMEOUT -> ConnectionState.Disconnected.Status.Timeout
+    GATT_CONN_TERMINATE_PEER_USER -> ConnectionState.Disconnected.Status.PeripheralDisconnected
+    GATT_CONN_FAIL_ESTABLISH -> ConnectionState.Disconnected.Status.Failed
+    GATT_CONN_CANCEL -> ConnectionState.Disconnected.Status.Cancelled
+    else -> ConnectionState.Disconnected.Status.Unknown(this)
 }
 
 private fun <E> SendChannel<E>.trySendOrLog(element: E) {

@@ -3,11 +3,11 @@ package com.nice.bluetooth
 import android.bluetooth.BluetoothAdapter.*
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic.*
-import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattDescriptor.*
 import android.util.Log
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.external.CLIENT_CHARACTERISTIC_CONFIG_UUID
+import com.nice.bluetooth.gatt.PreferredPhy
 import com.nice.bluetooth.gatt.Response.*
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.updateAndGet
@@ -22,7 +22,7 @@ private val clientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERIST
 
 fun CoroutineScope.peripheral(
     advertisement: Advertisement,
-    builderAction: PeripheralBuilderAction
+    builderAction: PeripheralBuilderAction = {}
 ): Peripheral = peripheral(advertisement.device, builderAction)
 
 fun CoroutineScope.peripheral(
@@ -43,15 +43,15 @@ fun CoroutineScope.peripheral(
 class AndroidPeripheral internal constructor(
     parentCoroutineContext: CoroutineContext,
     private val bluetoothDevice: BluetoothDevice,
-    private val transport: Transport,
-    private val phy: Phy,
+    private val defaultTransport: Transport,
+    private val defaultPhy: Phy,
     private val onServicesDiscovered: ServicesDiscoveredAction
 ) : Peripheral {
 
     private val receiver = registerBluetoothStateBroadcastReceiver { state ->
         if (state == STATE_OFF) {
             closeConnection()
-            _state.value = State.Disconnected()
+            _state.value = ConnectionState.Disconnected()
         }
     }
 
@@ -63,22 +63,21 @@ class AndroidPeripheral internal constructor(
     }
     private val scope = CoroutineScope(parentCoroutineContext + job)
 
-    private val _state = MutableStateFlow<State>(State.Disconnected())
-    override val state: Flow<State> = _state.asStateFlow()
+    private val _state = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected())
+    override val state: Flow<ConnectionState> = _state.asStateFlow()
 
     private val _mtu = MutableStateFlow<Int?>(null)
-
     override val mtu: Flow<Int?> = _mtu.asStateFlow()
+
+    private val _phy = MutableStateFlow<PreferredPhy?>(null)
+    override val phy: Flow<PreferredPhy?> = _phy.asStateFlow()
 
     private val observers = Observers(this)
 
-    @Volatile
-    private var _androidGattServices: List<AndroidGattService>? = null
     private val androidGattServices: List<AndroidGattService>
-        get() = checkNotNull(_androidGattServices) { "Services have not been discovered for $this" }
-
-    override val services: List<DiscoveredService>?
-        get() = _androidGattServices?.map { it.toDiscoveredService() }
+        get() = connection.services
+    override val services: List<DiscoveredService>
+        get() = androidGattServices.map { it.toDiscoveredService() }
 
     @Volatile
     private var _connection: Connection? = null
@@ -90,19 +89,20 @@ class AndroidPeripheral internal constructor(
     private val ready = MutableStateFlow(false)
     internal suspend fun suspendUntilReady() {
         // fast path
-        if (ready.value && _state.value == State.Connected) return
+        if (ready.value && _state.value == ConnectionState.Connected) return
 
         // slow path
-        combine(ready, state) { ready, state -> ready && state == State.Connected }.first { it }
+        combine(ready, state) { ready, state -> ready && state == ConnectionState.Connected }.first { it }
     }
 
     private fun establishConnection(): Connection =
         bluetoothDevice.connect(
             applicationContext,
-            transport,
-            phy,
+            defaultTransport,
+            defaultPhy,
             _state,
             _mtu,
+            _phy,
             invokeOnClose = { connectJob.value = null }
         ) ?: throw ConnectionRejectedException()
 
@@ -118,7 +118,7 @@ class AndroidPeripheral internal constructor(
 
         try {
             suspendUntilConnected()
-            discoverServices()
+            connection.discoverServices()
             onServicesDiscovered(AndroidServicesDiscoveredPeripheral(this@AndroidPeripheral))
             observers.rewire()
         } catch (t: Throwable) {
@@ -151,82 +151,40 @@ class AndroidPeripheral internal constructor(
         }
     }
 
-    override suspend fun rssi(): Int = connection.operate<OnReadRemoteRssi> {
-        readRemoteRssi()
-    }.rssi
+    override suspend fun rssi(): Int = connection.rssi()
 
-    private suspend fun discoverServices() {
-        connection.operate<OnServicesDiscovered> {
-            discoverServices()
-        }
-        _androidGattServices = connection
-            .services
-            .map { it.toAndroidGattService() }
-    }
-
-    /**
-     * Request a specific connection priority
-     */
     override suspend fun requestConnectionPriority(priority: Priority): Boolean =
         connection.requestConnectionPriority(priority)
 
-    /**
-     * Requests that the current connection's MTU be changed. Suspends until the MTU changes, or failure occurs. The
-     * negotiated MTU value is returned, which may not be [mtu] value requested if the remote peripheral negotiated an
-     * alternate MTU.
-     *
-     * @throws NotReadyException if invoked without an established [connection][Peripheral.connect].
-     * @throws GattRequestRejectedException if Android was unable to fulfill the MTU change request.
-     * @throws GattStatusException if MTU change request failed.
-     */
-    override suspend fun requestMtu(mtu: Int): Int = connection.requestMtu(mtu)
+    override suspend fun requestMtu(mtu: Int): Boolean = connection.requestMtu(mtu)
+
+    override suspend fun readPhy(): Boolean = connection.readPhy()
+
+    override suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean {
+        return connection.setPreferredPhy(txPhy, rxPhy, options)
+    }
 
     override suspend fun write(
         characteristic: Characteristic,
         data: ByteArray,
         writeType: WriteType
-    ) {
-        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        connection.operate<OnCharacteristicWrite> {
-            bluetoothGattCharacteristic.value = data
-            bluetoothGattCharacteristic.writeType = writeType.intValue
-            writeCharacteristic(bluetoothGattCharacteristic)
-        }
-    }
+    ) = connection.write(characteristic, data, writeType)
 
     override suspend fun read(
         characteristic: Characteristic
-    ): ByteArray {
-        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        return connection.operate<OnCharacteristicRead> {
-            readCharacteristic(bluetoothGattCharacteristic)
-        }.value!!
-    }
+    ): ByteArray = connection.read(characteristic)
 
     override suspend fun write(
         descriptor: Descriptor,
         data: ByteArray
-    ) {
-        write(bluetoothGattDescriptorFrom(descriptor), data)
-    }
-
-    private suspend fun write(
-        bluetoothGattDescriptor: BluetoothGattDescriptor,
-        data: ByteArray
-    ) {
-        connection.operate<OnDescriptorWrite> {
-            bluetoothGattDescriptor.value = data
-            writeDescriptor(bluetoothGattDescriptor)
-        }
-    }
+    ) = connection.write(descriptor, data)
 
     override suspend fun read(
         descriptor: Descriptor
-    ): ByteArray {
-        val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
-        return connection.operate<OnDescriptorRead> {
-            readDescriptor(bluetoothGattDescriptor)
-        }.value!!
+    ): ByteArray = connection.read(descriptor)
+
+    override suspend fun reliableWrite(operation: suspend Writable.() -> Unit) {
+        connection.reliableWrite(operation)
     }
 
     override fun observe(
@@ -260,11 +218,11 @@ class AndroidPeripheral internal constructor(
 
             if (enable) {
                 when {
-                    characteristic.supportsNotify -> write(
+                    characteristic.supportsNotify -> connection.write(
                         bluetoothGattDescriptor,
                         ENABLE_NOTIFICATION_VALUE
                     )
-                    characteristic.supportsIndicate -> write(
+                    characteristic.supportsIndicate -> connection.write(
                         bluetoothGattDescriptor,
                         ENABLE_INDICATION_VALUE
                     )
@@ -275,7 +233,7 @@ class AndroidPeripheral internal constructor(
                 }
             } else {
                 if (characteristic.supportsNotify || characteristic.supportsIndicate)
-                    write(bluetoothGattDescriptor, DISABLE_NOTIFICATION_VALUE)
+                    connection.write(bluetoothGattDescriptor, DISABLE_NOTIFICATION_VALUE)
             }
         } else {
             Log.w(
@@ -285,31 +243,17 @@ class AndroidPeripheral internal constructor(
         }
     }
 
-    private fun bluetoothGattCharacteristicFrom(
-        characteristic: Characteristic
-    ) = androidGattServices.findCharacteristic(characteristic).bluetoothGattCharacteristic
-
-    private fun bluetoothGattDescriptorFrom(
-        descriptor: Descriptor
-    ) = androidGattServices.findDescriptor(descriptor).bluetoothGattDescriptor
-
     override fun toString(): String = "Peripheral(bluetoothDevice=$bluetoothDevice)"
 }
 
 private suspend fun Peripheral.suspendUntilConnected() {
-    state.onEach { if (it is State.Disconnected) throw ConnectionLostException() }
-        .first { it == State.Connected }
+    state.onEach { if (it is ConnectionState.Disconnected) throw ConnectionLostException() }
+        .first { it == ConnectionState.Connected }
 }
 
 private suspend fun Peripheral.suspendUntilDisconnected() {
-    state.first { it is State.Disconnected }
+    state.first { it is ConnectionState.Disconnected }
 }
-
-private val WriteType.intValue: Int
-    get() = when (this) {
-        WriteType.WithResponse -> WRITE_TYPE_DEFAULT
-        WriteType.WithoutResponse -> WRITE_TYPE_NO_RESPONSE
-    }
 
 private val AndroidCharacteristic.configDescriptor: AndroidDescriptor?
     get() = descriptors.firstOrNull(clientCharacteristicConfigUuid)

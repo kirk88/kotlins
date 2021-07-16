@@ -8,17 +8,20 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.component1
 import androidx.activity.result.component2
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.Test
 import com.example.sample.db.TestTable
+import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
 import com.nice.kotlins.app.NiceViewModelActivity
+import com.nice.kotlins.app.PocketActivityResultLauncher
 import com.nice.kotlins.app.launch
 import com.nice.kotlins.helper.doOnClick
 import com.nice.kotlins.helper.setContentView
@@ -31,6 +34,8 @@ import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 
@@ -44,9 +49,12 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override val tipView: TipView by tipViews()
 
+    private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding)
+        permissionRequestLauncher.register(this)
 
         title = "Home"
 
@@ -110,12 +118,31 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         val adapter = BleAdapter(this).also {
             binding.recyclerView.adapter = it
         }
+        Bluetooth.state.onEach {
+            Log.e(TAG, "state: $it")
+        }.launchIn(lifecycleScope)
 
-        lifecycleScope.launch {
-            Scanner().advertisements.collect {
-                adapter.addItem(it)
+        if (!Bluetooth.isOpened) {
+            return
+        }
+
+        val scan = {
+            lifecycleScope.launch {
+                Scanner().advertisements.collect {
+                    adapter.addItem(it)
+                }
             }
         }
+
+        permissionRequestLauncher.launch(Bluetooth.permissions) {
+            if (it.all { entry -> entry.value }) {
+                scan()
+            } else {
+                tipView.show("没有权限")
+            }
+        }
+
+
     }
 
     private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_1) {

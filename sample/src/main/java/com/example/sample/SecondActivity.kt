@@ -3,11 +3,15 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.nice.bluetooth.Bluetooth
 import com.nice.kotlins.app.NiceViewModelActivity
 import com.nice.kotlins.event.Event
 import com.nice.kotlins.helper.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
@@ -51,6 +55,10 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
+
+        Bluetooth.state.onEach {
+            Log.e(TAG, "state: $it")
+        }.launchIn(lifecycleScope)
     }
 
     override fun dispatchViewModelEvent(event: Event): Boolean {

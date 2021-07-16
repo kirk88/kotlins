@@ -1,34 +1,10 @@
 package com.nice.bluetooth.common
 
 import android.annotation.TargetApi
+import android.bluetooth.BluetoothDevice
 import android.os.Build
 
-interface ServicesDiscoveredPeripheral {
-    suspend fun read(
-        characteristic: Characteristic
-    ): ByteArray
-
-    suspend fun write(
-        characteristic: Characteristic,
-        data: ByteArray,
-        writeType: WriteType = WriteType.WithoutResponse
-    )
-
-    suspend fun read(
-        descriptor: Descriptor
-    ): ByteArray
-
-    suspend fun write(
-        descriptor: Descriptor,
-        data: ByteArray
-    )
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Boolean
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int
-}
+interface ServicesDiscoveredPeripheral: Readable, Writable
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit
 
@@ -77,3 +53,19 @@ enum class Phy {
      */
     LeCoded,
 }
+
+internal val Transport.intValue: Int
+    @TargetApi(Build.VERSION_CODES.M)
+    get() = when (this) {
+        Transport.Auto -> BluetoothDevice.TRANSPORT_AUTO
+        Transport.BrEdr -> BluetoothDevice.TRANSPORT_BREDR
+        Transport.Le -> BluetoothDevice.TRANSPORT_LE
+    }
+
+internal val Phy.intValue: Int
+    @TargetApi(Build.VERSION_CODES.O)
+    get() = when (this) {
+        Phy.Le1M -> BluetoothDevice.PHY_LE_1M_MASK
+        Phy.Le2M -> BluetoothDevice.PHY_LE_2M_MASK
+        Phy.LeCoded -> BluetoothDevice.PHY_LE_CODED_MASK
+    }

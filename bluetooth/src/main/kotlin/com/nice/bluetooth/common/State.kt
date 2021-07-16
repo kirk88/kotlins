@@ -1,69 +1,92 @@
 package com.nice.bluetooth.common
 
-sealed class State {
+sealed class BluetoothState {
 
-    object Connecting : State()
+    object Opened : BluetoothState() {
+        override fun toString(): String = "Opened"
+    }
 
-    object Connected : State()
+    object Opening : BluetoothState() {
+        override fun toString(): String = "Opening"
+    }
 
-    object Disconnecting : State()
+    object Closed : BluetoothState() {
+        override fun toString(): String = "Closed"
+    }
+
+    object Closing : BluetoothState() {
+        override fun toString(): String = "Closing"
+    }
+
+}
+
+sealed class ConnectionState {
+
+    object Connecting : ConnectionState() {
+        override fun toString(): String = "Connecting"
+    }
+
+    object Connected : ConnectionState() {
+        override fun toString(): String = "Connected"
+    }
+
+    object Disconnecting : ConnectionState() {
+        override fun toString(): String = "Disconnecting"
+    }
 
     /**
      * Triggered either after an established connection has dropped or after a connection attempt has failed.
      *
-     * @param status represents status (cause) of [Disconnected] [State]. Always `null` for Javascript target.
+     * @param status represents status (cause) of [Disconnected] [ConnectionState]. Always `null` for Javascript target.
      */
-    data class Disconnected(val status: Status? = null) : State() {
+    data class Disconnected(val status: Status? = null) : ConnectionState() {
+
+        override fun toString(): String {
+            return "Disconnected.Status.$status"
+        }
 
         /**
          * State statuses translated from their respective platforms:
          *
          * - Android: https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/lollipop-release/stack/include/gatt_api.h#106
-         * - Apple: `CBError.h` from the Core Bluetooth framework headers
          */
         sealed class Status {
 
             /**
              * - Android: `GATT_CONN_TERMINATE_PEER_USER`
-             * - Apple: `CBErrorPeripheralDisconnected`
              */
-            object PeripheralDisconnected : Status()
+            object PeripheralDisconnected : Status() {
+                override fun toString(): String = "PeripheralDisconnected"
+            }
 
             /**
              * - Android: `GATT_CONN_FAIL_ESTABLISH`
-             * - Apple: `CBErrorConnectionFailed`
              */
-            object Failed : Status()
+            object Failed : Status() {
+                override fun toString(): String = "Failed"
+            }
 
             /**
              * - Android: `GATT_CONN_TIMEOUT`
-             * - Apple: `CBErrorConnectionTimeout`
              */
-            object Timeout : Status()
+            object Timeout : Status() {
+                override fun toString(): String = "Timeout"
+            }
 
-            /**
-             * - Apple: `CBErrorUnknownDevice`
-             */
-            object UnknownDevice : Status()
 
             /**
              * - Android: `GATT_CONN_CANCEL`
-             * - Apple: `CBErrorOperationCancelled`
              */
-            object Cancelled : Status()
+            object Cancelled : Status() {
+                override fun toString(): String = "Cancelled"
+            }
 
-            /**
-             * - Apple: `CBErrorConnectionLimitReached`
-             */
-            object ConnectionLimitReached : Status()
-
-            /**
-             * - Apple: `CBErrorEncryptionTimedOut`
-             */
-            object EncryptionTimedOut : Status()
 
             /** Catch-all for any statuses that are unknown for a platform. */
-            data class Unknown(val status: Int) : Status()
+            data class Unknown(val status: Int) : Status() {
+                override fun toString(): String = "Unknown($status)"
+            }
+
         }
     }
 }

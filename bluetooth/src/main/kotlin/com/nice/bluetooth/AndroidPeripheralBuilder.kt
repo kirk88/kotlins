@@ -25,14 +25,6 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
         data: ByteArray
     ) = peripheral.write(descriptor, data)
 
-    override suspend fun requestConnectionPriority(
-        priority: Priority
-    ): Boolean = peripheral.requestConnectionPriority(priority)
-
-    override suspend fun requestMtu(
-        mtu: Int
-    ): Int = peripheral.requestMtu(mtu)
-
 }
 
 class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {

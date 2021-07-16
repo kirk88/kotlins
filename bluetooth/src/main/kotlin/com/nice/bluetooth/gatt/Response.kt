@@ -4,11 +4,24 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGatt.*
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.external.*
 
 internal sealed class Response {
 
     abstract val status: GattStatus
+
+    data class OnPhyUpdate(
+        val txPhy: Phy,
+        val rxPhy: Phy,
+        override val status: GattStatus
+    ) : Response()
+
+    data class OnPhyRead(
+        val txPhy: Phy,
+        val rxPhy: Phy,
+        override val status: GattStatus
+    ) : Response()
 
     data class OnReadRemoteRssi(
         val rssi: Int,
@@ -98,12 +111,16 @@ internal sealed class Response {
         override fun toString(): String =
             "OnDescriptorWrite(descriptor=${descriptor.uuid}, status=$status)"
     }
+
+    data class OnReliableWriteCompleted(
+        override val status: GattStatus
+    ) : Response()
 }
 
-internal data class OnMtuChanged(
-    val mtu: Int,
-    override val status: GattStatus
-) : Response()
+data class PreferredPhy(
+    val txPhy: Phy,
+    val rxPhy: Phy
+)
 
 /**
  * Represents the possible GATT statuses as defined in [BluetoothGatt]:
