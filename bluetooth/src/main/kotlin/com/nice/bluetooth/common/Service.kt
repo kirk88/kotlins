@@ -12,6 +12,10 @@ data class DiscoveredService internal constructor(
     val characteristics: List<DiscoveredCharacteristic>
 ) : Service
 
+fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCharacteristic?{
+    return characteristics.find { it.characteristicUuid == characteristicUuid }
+}
+
 /** @throws IOException if service is not found. */
 internal fun <T : Service> List<T>.first(
     serviceUuid: UUID

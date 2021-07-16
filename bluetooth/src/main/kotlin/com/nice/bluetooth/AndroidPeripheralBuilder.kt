@@ -11,7 +11,7 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
     ): ByteArray = peripheral.read(characteristic)
 
     override suspend fun read(
-        descriptor: Descriptor
+        descriptor: DiscoveredDescriptor
     ): ByteArray = peripheral.read(descriptor)
 
     override suspend fun write(
@@ -21,7 +21,7 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
     ) = peripheral.write(characteristic, data, writeType)
 
     override suspend fun write(
-        descriptor: Descriptor,
+        descriptor: DiscoveredDescriptor,
         data: ByteArray
     ) = peripheral.write(descriptor, data)
 

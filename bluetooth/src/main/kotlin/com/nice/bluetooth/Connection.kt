@@ -126,7 +126,7 @@ internal class Connection(
     }
 
     override suspend fun write(
-        descriptor: Descriptor,
+        descriptor: DiscoveredDescriptor,
         data: ByteArray
     ) {
         write(bluetoothGattDescriptorFrom(descriptor), data)
@@ -143,7 +143,7 @@ internal class Connection(
     }
 
     override suspend fun read(
-        descriptor: Descriptor
+        descriptor: DiscoveredDescriptor
     ): ByteArray {
         val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
         return execute<Response.OnDescriptorRead> {
@@ -226,7 +226,7 @@ internal class Connection(
     ) = services.findCharacteristic(characteristic).bluetoothGattCharacteristic
 
     private fun bluetoothGattDescriptorFrom(
-        descriptor: Descriptor
+        descriptor: DiscoveredDescriptor
     ) = services.findDescriptor(descriptor).bluetoothGattDescriptor
 
 }

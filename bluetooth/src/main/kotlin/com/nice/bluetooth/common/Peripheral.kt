@@ -36,7 +36,7 @@ interface Readable {
     /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun read(
-        descriptor: Descriptor
+        descriptor: DiscoveredDescriptor
     ): ByteArray
 
 }
@@ -54,7 +54,7 @@ interface Writable {
     /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun write(
-        descriptor: Descriptor,
+        descriptor: DiscoveredDescriptor,
         data: ByteArray
     )
 

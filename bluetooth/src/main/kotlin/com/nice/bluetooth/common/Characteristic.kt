@@ -23,8 +23,12 @@ data class LazyCharacteristic internal constructor(
 data class DiscoveredCharacteristic internal constructor(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
-    val descriptors: List<Descriptor>
+    val descriptors: List<DiscoveredDescriptor>
 ) : Characteristic
+
+fun DiscoveredCharacteristic.findDescriptor(descriptorUuid: UUID): DiscoveredDescriptor? {
+    return descriptors.find { it.descriptorUuid == descriptorUuid }
+}
 
 internal fun <T : Characteristic> List<T>.first(
     characteristicUuid: UUID
