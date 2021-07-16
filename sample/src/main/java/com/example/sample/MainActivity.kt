@@ -141,6 +141,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         val peripheral = peripheral(it){
 
                             onServicesDiscovered {
+
                             }
 
                         }

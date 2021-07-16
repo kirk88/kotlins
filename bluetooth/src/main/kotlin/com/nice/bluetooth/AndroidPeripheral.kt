@@ -102,9 +102,8 @@ class AndroidPeripheral internal constructor(
             defaultPhy,
             _state,
             _mtu,
-            _phy,
-            invokeOnClose = { connectJob.value = null }
-        ) ?: throw ConnectionRejectedException()
+            _phy
+        ) { connectJob.value = null } ?: throw ConnectionRejectedException()
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
     private fun connectAsync() = scope.async(start = LAZY) {
