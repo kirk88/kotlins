@@ -10,7 +10,13 @@ interface Service {
 data class DiscoveredService internal constructor(
     override val serviceUuid: UUID,
     val characteristics: List<DiscoveredCharacteristic>
-) : Service
+) : Service, Iterable<DiscoveredCharacteristic>{
+
+    override fun iterator(): Iterator<DiscoveredCharacteristic> {
+        return characteristics.iterator()
+    }
+
+}
 
 fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCharacteristic?{
     return characteristics.find { it.characteristicUuid == characteristicUuid }

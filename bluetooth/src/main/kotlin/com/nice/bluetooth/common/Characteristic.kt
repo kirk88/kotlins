@@ -24,7 +24,13 @@ data class DiscoveredCharacteristic internal constructor(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
     val descriptors: List<DiscoveredDescriptor>
-) : Characteristic
+) : Characteristic, Iterable<DiscoveredDescriptor>{
+
+    override fun iterator(): Iterator<DiscoveredDescriptor> {
+        return descriptors.iterator()
+    }
+
+}
 
 fun DiscoveredCharacteristic.findDescriptor(descriptorUuid: UUID): DiscoveredDescriptor? {
     return descriptors.find { it.descriptorUuid == descriptorUuid }
