@@ -19,7 +19,8 @@ import java.util.concurrent.Executors
 
 /**
  * @param defaultTransport is only used on API level >= 23.
- * @param phy is only used on API level >= 26.
+ * @param defaultPhy is only used on API level >= 26.
+ * @param phy is only used on API level >= 26
  */
 internal fun BluetoothDevice.connect(
     context: Context,
