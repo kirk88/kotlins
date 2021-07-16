@@ -138,12 +138,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     adapter.addItem(it)
 
                     if(!isLoaded){
-                        val peripheral = peripheral(it)
-                        peripheral.connect()
+                        val peripheral = peripheral(it){
 
-                        peripheral.services.forEach { service ->
-                            Log.e(TAG, "service: $service")
+                            onServicesDiscovered {
+                            }
+
                         }
+                        peripheral.connect()
 
                         isLoaded = true
                     }

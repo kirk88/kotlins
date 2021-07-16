@@ -3,8 +3,21 @@ package com.nice.bluetooth.common
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
 import android.os.Build
+import androidx.annotation.RequiresApi
+import com.nice.bluetooth.PhyOptions
 
-interface ServicesDiscoveredPeripheral: Readable, Writable
+interface ServicesDiscoveredPeripheral: Readable, Writable{
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestConnectionPriority(priority: Priority): Boolean
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun requestMtu(mtu: Int): Boolean
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean
+
+}
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit
 

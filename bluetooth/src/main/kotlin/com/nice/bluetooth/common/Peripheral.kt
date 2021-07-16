@@ -9,6 +9,7 @@ import com.nice.bluetooth.Connection
 import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 import kotlin.coroutines.cancellation.CancellationException
 
 internal typealias PeripheralBuilderAction = PeripheralBuilder.() -> Unit
@@ -192,4 +193,8 @@ interface Peripheral : Readable, Writable {
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction = {}
     ): Flow<ByteArray>
+}
+
+fun Peripheral.findService(serviceUuid: UUID): DiscoveredService? {
+    return services.find { it.serviceUuid == serviceUuid }
 }
