@@ -174,12 +174,12 @@ class AndroidPeripheral internal constructor(
     ): ByteArray = connection.read(characteristic)
 
     override suspend fun write(
-        descriptor: DiscoveredDescriptor,
+        descriptor: Descriptor,
         data: ByteArray
     ) = connection.write(descriptor, data)
 
     override suspend fun read(
-        descriptor: DiscoveredDescriptor
+        descriptor: Descriptor
     ): ByteArray = connection.read(descriptor)
 
     override suspend fun reliableWrite(operation: suspend Writable.() -> Unit) {

@@ -18,6 +18,7 @@ import com.example.sample.db.TestTable
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
+import com.nice.bluetooth.common.findService
 import com.nice.bluetooth.peripheral
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -33,12 +34,8 @@ import com.nice.kotlins.widget.ProgressView
 import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -116,6 +113,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         initBle()
     }
 
+    @OptIn(FlowPreview::class)
     private fun initBle() {
         val adapter = BleAdapter(this).also {
             binding.recyclerView.adapter = it
@@ -124,21 +122,23 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             Log.e(TAG, "state: $it")
         }.launchIn(lifecycleScope)
 
-        if (!Bluetooth.isOpened) {
+        if (!Bluetooth.isEnabled) {
             return
         }
 
         val scan = {
-            lifecycleScope.launch(Dispatchers.Main.immediate + CoroutineExceptionHandler { coroutineContext, throwable ->
+            lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { coroutineContext, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
                 var isLoaded = false
 
                 Scanner().advertisements.collect {
-                    adapter.addItem(it)
+                    withContext(Dispatchers.Main){
+                        adapter.addItem(it)
+                    }
 
                     if(!isLoaded){
-                        val peripheral = peripheral(it){
+                        val peripheral = peripheral(it) {
 
                             onServicesDiscovered {
 
@@ -146,6 +146,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                         }
                         peripheral.connect()
+
+                        peripheral.services.forEach { service ->
+                            Log.e(TAG, "service: $service")
+                        }
 
                         isLoaded = true
                     }

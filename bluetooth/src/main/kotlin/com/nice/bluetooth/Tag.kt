@@ -1,3 +1,3 @@
 package com.nice.bluetooth
 
-internal const val TAG = "Kable"
+internal const val TAG = "Bluetooth"

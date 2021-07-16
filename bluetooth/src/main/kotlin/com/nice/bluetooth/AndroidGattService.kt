@@ -47,7 +47,7 @@ private fun List<AndroidGattService>.findCharacteristic(
 
 /** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
 internal fun List<AndroidGattService>.findDescriptor(
-    descriptor: DiscoveredDescriptor
+    descriptor: Descriptor
 ): AndroidDescriptor =
     findDescriptor(
         serviceUuid = descriptor.serviceUuid,

@@ -1,7 +1,7 @@
 package com.nice.bluetooth
 
 import android.bluetooth.BluetoothGattDescriptor
-import com.nice.bluetooth.common.DiscoveredDescriptor
+import com.nice.bluetooth.common.Descriptor
 import com.nice.bluetooth.common.LazyDescriptor
 import java.util.*
 
@@ -10,7 +10,7 @@ internal data class AndroidDescriptor(
     override val characteristicUuid: UUID,
     override val descriptorUuid: UUID,
     val bluetoothGattDescriptor: BluetoothGattDescriptor
-) : DiscoveredDescriptor
+) : Descriptor
 
 internal fun AndroidDescriptor.toLazyDescriptor() = LazyDescriptor(
     serviceUuid = serviceUuid,

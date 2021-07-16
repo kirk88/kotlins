@@ -59,7 +59,7 @@ private fun BluetoothDevice.connectApi21(
     // Disconnected before the connection request has kicked off the Connecting state (via Callback).
     state.value = ConnectionState.Connecting
 
-    val dispatcher = Executors.newScheduledThreadPool(1) { runnable ->
+    val dispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, threadName).apply { isDaemon = true }
     }.asCoroutineDispatcher()
     return Connection(

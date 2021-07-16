@@ -5,8 +5,6 @@ package com.nice.bluetooth
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Process
 import androidx.startup.Initializer
 import com.nice.bluetooth.common.BluetoothState
 import kotlinx.coroutines.flow.Flow
@@ -23,22 +21,26 @@ object Bluetooth {
     }
 
     private val bluetoothState = MutableStateFlow(
-        if (isOpened) BluetoothState.Opened else BluetoothState.Closed
+        if (isEnabled) BluetoothState.Opened else BluetoothState.Closed
     )
     val state: Flow<BluetoothState> = bluetoothState.asStateFlow()
 
     val isSupported: Boolean
         get() = BluetoothAdapter.getDefaultAdapter() != null
 
-    val isOpened: Boolean
+    var isEnabled: Boolean
         get() = BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
-
-    val permissions = arrayOf(Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_FINE_LOCATION)
-
-    val isPermissionsGranted: Boolean
-        get() = permissions.all {
-            applicationContext.checkPermission(it, Process.myPid(), Process.myUid()) == PackageManager.PERMISSION_GRANTED
+        set(value) {
+            BluetoothAdapter.getDefaultAdapter()?.apply {
+                if (value) enable() else disable()
+            }
         }
+
+    val permissions = arrayOf(
+        Manifest.permission.BLUETOOTH,
+        Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
 }
 

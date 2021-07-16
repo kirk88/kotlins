@@ -6,12 +6,11 @@ import com.nice.bluetooth.common.DiscoveredCharacteristic
 import com.nice.bluetooth.common.LazyCharacteristic
 import java.util.*
 
-@Suppress("PROPERTY_TYPE_MISMATCH_ON_OVERRIDE") // https://youtrack.jetbrains.com/issue/KTIJ-405
 internal data class AndroidCharacteristic(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
-    val bluetoothGattCharacteristic: BluetoothGattCharacteristic,
-    val descriptors: List<AndroidDescriptor>
+    val descriptors: List<AndroidDescriptor>,
+    val bluetoothGattCharacteristic: BluetoothGattCharacteristic
 ) : Characteristic
 
 internal fun AndroidCharacteristic.toDiscoveredCharacteristic() = DiscoveredCharacteristic(
