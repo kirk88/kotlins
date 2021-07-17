@@ -5,8 +5,8 @@ import android.bluetooth.BluetoothGatt.GATT_SUCCESS
 import android.bluetooth.BluetoothProfile.*
 import android.util.Log
 import com.nice.bluetooth.TAG
-import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.ConnectionLostException
+import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.external.GATT_CONN_CANCEL
 import com.nice.bluetooth.external.GATT_CONN_FAIL_ESTABLISH
@@ -18,9 +18,7 @@ import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.getOrElse
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 
 private typealias DisconnectedAction = () -> Unit
 
@@ -28,9 +26,6 @@ internal data class OnCharacteristicChanged(
     val characteristic: BluetoothGattCharacteristic,
     val value: ByteArray
 ) {
-    override fun toString(): String =
-        "OnCharacteristicChanged(characteristic=${characteristic.uuid}, value=${value.size} bytes)"
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -61,11 +56,10 @@ internal class Callback(
         disconnectedAction = action
     }
 
-    private val _onCharacteristicChanged = Channel<OnCharacteristicChanged>(UNLIMITED)
-    val onCharacteristicChanged: Flow<OnCharacteristicChanged> =
-        _onCharacteristicChanged.consumeAsFlow()
+    val onCharacteristicChanged = Channel<OnCharacteristicChanged>(UNLIMITED)
 
     val onResponse = Channel<Response>(CONFLATED)
+    val onMtuChanged = Channel<OnMtuChanged>(CONFLATED)
     val onPhyUpdate = Channel<OnPhyUpdate>(CONFLATED)
     val onPhyRead = Channel<OnPhyRead>(CONFLATED)
     val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
@@ -76,8 +70,9 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        onPhyUpdate.trySendOrLog(OnPhyUpdate(txPhy.toPhy(), rxPhy.toPhy(), GattStatus(status)))
-        if(status == GATT_SUCCESS) phy?.value = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        onPhyUpdate.trySendOrLog(OnPhyUpdate(preferredPhy, GattStatus(status)))
+        if (status == GATT_SUCCESS) phy?.value = preferredPhy
     }
 
     override fun onPhyRead(
@@ -86,7 +81,8 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        onPhyRead.trySendOrLog(OnPhyRead(txPhy.toPhy(), rxPhy.toPhy(), GattStatus(status)))
+        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        onResponse.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
     }
 
     override fun onConnectionStateChange(
@@ -107,7 +103,7 @@ internal class Callback(
         }
 
         if (newState == STATE_DISCONNECTING || newState == STATE_DISCONNECTED) {
-            _onCharacteristicChanged.close()
+            onCharacteristicChanged.close()
             onResponse.close(ConnectionLostException())
         }
     }
@@ -138,7 +134,7 @@ internal class Callback(
         characteristic: BluetoothGattCharacteristic
     ) {
         val event = OnCharacteristicChanged(characteristic, characteristic.value)
-        _onCharacteristicChanged.trySendOrLog(event)
+        onCharacteristicChanged.trySendOrLog(event)
     }
 
     override fun onDescriptorRead(
@@ -177,11 +173,12 @@ internal class Callback(
         mtu: Int,
         status: Int
     ) {
+        onMtuChanged.trySendOrLog(OnMtuChanged(mtu, GattStatus(status)))
         if (status == GATT_SUCCESS) this.mtu.value = mtu
     }
 }
 
-private fun Int.toPhy(): Phy = when(this){
+private fun Int.toPhy(): Phy = when (this) {
     BluetoothDevice.PHY_LE_1M -> Phy.Le1M
     BluetoothDevice.PHY_LE_2M -> Phy.Le2M
     BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded

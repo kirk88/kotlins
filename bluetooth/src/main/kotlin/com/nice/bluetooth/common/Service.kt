@@ -10,7 +10,7 @@ interface Service {
 data class DiscoveredService internal constructor(
     override val serviceUuid: UUID,
     val characteristics: List<DiscoveredCharacteristic>
-) : Service, Iterable<DiscoveredCharacteristic>{
+) : Service, Iterable<DiscoveredCharacteristic> {
 
     override fun iterator(): Iterator<DiscoveredCharacteristic> {
         return characteristics.iterator()
@@ -18,11 +18,22 @@ data class DiscoveredService internal constructor(
 
 }
 
-fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCharacteristic?{
+fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCharacteristic? {
     return characteristics.find { it.characteristicUuid == characteristicUuid }
 }
 
-/** @throws IOException if service is not found. */
+fun DiscoveredService.findDescriptor(characteristicUuid: UUID, descriptorUuid: UUID): Descriptor? {
+    return findCharacteristic(characteristicUuid)?.findDescriptor(descriptorUuid)
+}
+
+operator fun DiscoveredService.get(characteristicUuid: UUID): DiscoveredCharacteristic {
+    return characteristics.first(characteristicUuid)
+}
+
+operator fun DiscoveredService.get(characteristicUuid: UUID, descriptorUuid: UUID): Descriptor {
+    return get(characteristicUuid)[descriptorUuid]
+}
+
 internal fun <T : Service> List<T>.first(
     serviceUuid: UUID
 ): T = firstOrNull { it.serviceUuid == serviceUuid }

@@ -4,21 +4,16 @@ import android.bluetooth.BluetoothAdapter.*
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattDescriptor.*
-import android.util.Log
 import com.nice.bluetooth.common.*
-import com.nice.bluetooth.external.CLIENT_CHARACTERISTIC_CONFIG_UUID
 import com.nice.bluetooth.gatt.PreferredPhy
 import com.nice.bluetooth.gatt.Response.*
-import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.updateAndGet
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.flow.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
-
-private val clientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
 
 fun CoroutineScope.peripheral(
     advertisement: Advertisement,
@@ -74,17 +69,15 @@ class AndroidPeripheral internal constructor(
 
     private val observers = Observers(this)
 
-    private val androidGattServices: List<AndroidGattService>
-        get() = connection.services
     override val services: List<DiscoveredService>
-        get() = androidGattServices.map { it.toDiscoveredService() }
+        get() = connection.services.map { it.toDiscoveredService() }
 
     @Volatile
     private var _connection: Connection? = null
     private val connection: Connection
         inline get() = _connection ?: throw NotReadyException(toString())
 
-    private val connectJob = atomic<Deferred<Unit>?>(null)
+    private val connectJob = AtomicReference<Deferred<Unit>?>()
 
     private val ready = MutableStateFlow(false)
     internal suspend fun suspendUntilReady() {
@@ -103,15 +96,14 @@ class AndroidPeripheral internal constructor(
             _state,
             _mtu,
             _phy
-        ) { connectJob.value = null } ?: throw ConnectionRejectedException()
+        ) { connectJob.set(null) } ?: throw ConnectionRejectedException()
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
     private fun connectAsync() = scope.async(start = LAZY) {
         ready.value = false
 
         val connection = establishConnection().also { _connection = it }
-        connection
-            .characteristicChanges
+        connection.characteristicChanges
             .onEach(observers.characteristicChanges::emit)
             .launchIn(scope, UNDISPATCHED)
 
@@ -136,7 +128,7 @@ class AndroidPeripheral internal constructor(
     override suspend fun connect() {
         check(job.isNotCancelled) { "Cannot connect, scope is cancelled for $this" }
         checkBluetoothAdapterState(expected = STATE_ON)
-        connectJob.updateAndGet { it ?: connectAsync() }!!.await()
+        connectJob.updateThenGet { it ?: connectAsync() }.await()
     }
 
     override suspend fun disconnect() {
@@ -155,12 +147,12 @@ class AndroidPeripheral internal constructor(
     override suspend fun requestConnectionPriority(priority: Priority): Boolean =
         connection.requestConnectionPriority(priority)
 
-    override suspend fun requestMtu(mtu: Int): Boolean = connection.requestMtu(mtu)
+    override suspend fun requestMtu(mtu: Int): Int = connection.requestMtu(mtu)
 
-    override suspend fun readPhy(): Boolean = connection.readPhy()
+    override suspend fun readPhy(): PreferredPhy = connection.readPhy()
 
-    override suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean {
-        return connection.setPreferredPhy(txPhy, rxPhy, options)
+    override suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
+        return connection.setPreferredPhy(phy, options)
     }
 
     override suspend fun write(
@@ -192,54 +184,11 @@ class AndroidPeripheral internal constructor(
     ): Flow<ByteArray> = observers.acquire(characteristic, onSubscription)
 
     internal suspend fun startObservation(characteristic: Characteristic) {
-        val platformCharacteristic = androidGattServices.findCharacteristic(characteristic)
-        connection.setCharacteristicNotification(platformCharacteristic, true)
-        setConfigDescriptor(platformCharacteristic, enable = true)
+        connection.startObservation(characteristic)
     }
 
     internal suspend fun stopObservation(characteristic: Characteristic) {
-        val platformCharacteristic = androidGattServices.findCharacteristic(characteristic)
-
-        try {
-            setConfigDescriptor(platformCharacteristic, enable = false)
-        } finally {
-            connection.setCharacteristicNotification(platformCharacteristic, false)
-        }
-    }
-
-    private suspend fun setConfigDescriptor(
-        characteristic: AndroidCharacteristic,
-        enable: Boolean
-    ) {
-        val configDescriptor = characteristic.configDescriptor
-        if (configDescriptor != null) {
-            val bluetoothGattDescriptor = configDescriptor.bluetoothGattDescriptor
-
-            if (enable) {
-                when {
-                    characteristic.supportsNotify -> connection.write(
-                        bluetoothGattDescriptor,
-                        ENABLE_NOTIFICATION_VALUE
-                    )
-                    characteristic.supportsIndicate -> connection.write(
-                        bluetoothGattDescriptor,
-                        ENABLE_INDICATION_VALUE
-                    )
-                    else -> Log.w(
-                        TAG,
-                        "Characteristic ${characteristic.characteristicUuid} supports neither notification nor indication"
-                    )
-                }
-            } else {
-                if (characteristic.supportsNotify || characteristic.supportsIndicate)
-                    connection.write(bluetoothGattDescriptor, DISABLE_NOTIFICATION_VALUE)
-            }
-        } else {
-            Log.w(
-                TAG,
-                "Characteristic ${characteristic.characteristicUuid} is missing config descriptor."
-            )
-        }
+        connection.stopObservation(characteristic)
     }
 
     override fun toString(): String = "Peripheral(bluetoothDevice=$bluetoothDevice)"
@@ -254,20 +203,22 @@ private suspend fun Peripheral.suspendUntilDisconnected() {
     state.first { it is ConnectionState.Disconnected }
 }
 
-private val AndroidCharacteristic.configDescriptor: AndroidDescriptor?
-    get() = descriptors.firstOrNull(clientCharacteristicConfigUuid)
-
-private val AndroidCharacteristic.supportsNotify: Boolean
-    get() = bluetoothGattCharacteristic.properties and PROPERTY_NOTIFY != 0
-
-private val AndroidCharacteristic.supportsIndicate: Boolean
-    get() = bluetoothGattCharacteristic.properties and PROPERTY_INDICATE != 0
+private fun <T, R : T> AtomicReference<T>.updateThenGet(updateFunction: (T) -> R): R {
+    var prev: T?
+    var next: R
+    do {
+        prev = get()
+        next = updateFunction(prev)
+    } while (!compareAndSet(prev, next))
+    return next
+}
 
 /**
  * Explicitly check the adapter state before connecting in order to respect system settings.
  * Android doesn't actually turn bluetooth off when the setting is disabled, so without this
  * check we're able to reconnect the device illegally.
  */
+@Suppress("SameParameterValue")
 private fun checkBluetoothAdapterState(
     expected: Int
 ) {

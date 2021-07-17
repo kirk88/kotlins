@@ -12,14 +12,12 @@ internal sealed class Response {
     abstract val status: GattStatus
 
     data class OnPhyUpdate(
-        val txPhy: Phy,
-        val rxPhy: Phy,
+        val phy: PreferredPhy,
         override val status: GattStatus
     ) : Response()
 
     data class OnPhyRead(
-        val txPhy: Phy,
-        val rxPhy: Phy,
+        val phy: PreferredPhy,
         override val status: GattStatus
     ) : Response()
 
@@ -29,6 +27,11 @@ internal sealed class Response {
     ) : Response()
 
     data class OnServicesDiscovered(
+        override val status: GattStatus
+    ) : Response()
+
+    data class OnMtuChanged(
+        val mtu: Int,
         override val status: GattStatus
     ) : Response()
 

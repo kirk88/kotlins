@@ -17,8 +17,6 @@ buildscript {
 
             pluginAtomicfu     : "0.16.2",
 
-            atomicJvm          : "0.16.2",
-
             kotlinLib          : "1.5.20",
             kotlinMain         : "1.5.1",
 
@@ -64,8 +62,6 @@ buildscript {
             kotlinxCoroutinesCore             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinMain}",
             kotlinxCoroutinesCoreJvm          : "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${versions.kotlinMain}",
             kotlinxCoroutinesAndroid          : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinMain}",
-
-            atomicfuJvm                       : "org.jetbrains.kotlinx:atomicfu-jvm:${versions.atomicJvm}",
 
             kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
             kotlinLifecycleViewmodelSavedstate: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.kotlinLifecycle}",
@@ -114,7 +110,6 @@ buildscript {
     dependencies {
         classpath deps.androidPlugin
         classpath deps.kotlinPlugin
-        classpath deps.atomicfuPlugin
         classpath deps.versionsPlugin
     }
 }

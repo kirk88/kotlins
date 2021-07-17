@@ -139,13 +139,7 @@ interface Peripheral : Readable, Writable {
      * alternate MTU.
      */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Boolean
-
-    /**
-     * Read the current transmitter PHY and receiver PHY of the connection
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun readPhy(): Boolean
+    suspend fun requestMtu(mtu: Int): Int
 
     /**
      * Set the preferred connection PHY for this app. Please note that this is just a
@@ -153,7 +147,13 @@ interface Peripheral : Readable, Writable {
      * local and remote controller capabilities. Controller can override these settings.
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy
+
+    /**
+     * Read the current transmitter PHY and receiver PHY of the connection
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun readPhy(): PreferredPhy
 
     /**
      * Observes changes to the specified [Characteristic].

@@ -20,8 +20,6 @@ import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.*
 
 class ScanFailedException internal constructor(
@@ -50,11 +48,11 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 trySendBlocking(AndroidAdvertisement(result.toAndroidScanResult()))
                     .onFailure {
-                    Log.w(
-                        TAG,
-                        "Unable to deliver scan result due to failure in flow or premature closing."
-                    )
-                }
+                        Log.w(
+                            TAG,
+                            "Unable to deliver scan result due to failure in flow or premature closing."
+                        )
+                    }
             }
 
             override fun onBatchScanResults(results: MutableList<ScanResult>) {
@@ -75,10 +73,9 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
             }
         }
 
-        val scanFilter =
-            filterServices
-                ?.map { ScanFilter.Builder().setServiceUuid(ParcelUuid(it)).build() }
-                ?.toList()
+        val scanFilter = filterServices
+            ?.map { ScanFilter.Builder().setServiceUuid(ParcelUuid(it)).build() }
+            ?.toList()
         bluetoothAdapter.bluetoothLeScanner.startScan(
             scanFilter,
             ScanSettings.Builder().build(),

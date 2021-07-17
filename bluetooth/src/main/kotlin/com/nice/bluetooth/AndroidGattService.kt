@@ -7,7 +7,7 @@ import java.util.*
 internal data class AndroidGattService(
     override val serviceUuid: UUID,
     val bluetoothGattService: BluetoothGattService,
-    val characteristics: List<AndroidCharacteristic>
+    val characteristics: List<AndroidGattCharacteristic>
 ) : Service
 
 internal fun AndroidGattService.toDiscoveredService() = DiscoveredService(
@@ -18,7 +18,7 @@ internal fun AndroidGattService.toDiscoveredService() = DiscoveredService(
 internal fun BluetoothGattService.toAndroidGattService(): AndroidGattService {
     val serviceUuid = uuid
     val characteristics = characteristics
-        .map { characteristic -> characteristic.toAndroidCharacteristic() }
+        .map { characteristic -> characteristic.toAndroidGattCharacteristic() }
 
     return AndroidGattService(
         serviceUuid = serviceUuid,
@@ -28,40 +28,40 @@ internal fun BluetoothGattService.toAndroidGattService(): AndroidGattService {
 }
 
 /** @throws NoSuchElementException if service or characteristic is not found. */
-internal fun List<AndroidGattService>.findCharacteristic(
+internal fun List<AndroidGattService>.getCharacteristic(
     characteristic: Characteristic
-): AndroidCharacteristic =
-    findCharacteristic(
+): AndroidGattCharacteristic =
+    getCharacteristic(
         serviceUuid = characteristic.serviceUuid,
         characteristicUuid = characteristic.characteristicUuid
     )
 
 /** @throws NoSuchElementException if service or characteristic is not found. */
-private fun List<AndroidGattService>.findCharacteristic(
+private fun List<AndroidGattService>.getCharacteristic(
     serviceUuid: UUID,
     characteristicUuid: UUID
-): AndroidCharacteristic =
+): AndroidGattCharacteristic =
     first(serviceUuid)
         .characteristics
         .first(characteristicUuid)
 
 /** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
-internal fun List<AndroidGattService>.findDescriptor(
+internal fun List<AndroidGattService>.getDescriptor(
     descriptor: Descriptor
-): AndroidDescriptor =
-    findDescriptor(
+): AndroidGattDescriptor =
+    getDescriptor(
         serviceUuid = descriptor.serviceUuid,
         characteristicUuid = descriptor.characteristicUuid,
         descriptorUuid = descriptor.descriptorUuid
     )
 
 /** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
-private fun List<AndroidGattService>.findDescriptor(
+private fun List<AndroidGattService>.getDescriptor(
     serviceUuid: UUID,
     characteristicUuid: UUID,
     descriptorUuid: UUID
-): AndroidDescriptor =
-    findCharacteristic(
+): AndroidGattDescriptor =
+    getCharacteristic(
         serviceUuid = serviceUuid,
         characteristicUuid = characteristicUuid
     ).descriptors.first(descriptorUuid)

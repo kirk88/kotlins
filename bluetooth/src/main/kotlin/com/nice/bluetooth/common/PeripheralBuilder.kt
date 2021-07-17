@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.nice.bluetooth.PhyOptions
+import com.nice.bluetooth.gatt.PreferredPhy
 
 interface ServicesDiscoveredPeripheral: Readable, Writable{
 
@@ -12,10 +13,13 @@ interface ServicesDiscoveredPeripheral: Readable, Writable{
     suspend fun requestConnectionPriority(priority: Priority): Boolean
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Boolean
+    suspend fun requestMtu(mtu: Int): Int
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun readPhy(): PreferredPhy
 
 }
 

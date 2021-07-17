@@ -1,6 +1,7 @@
 package com.nice.bluetooth
 
 import com.nice.bluetooth.common.*
+import com.nice.bluetooth.gatt.PreferredPhy
 
 class AndroidServicesDiscoveredPeripheral internal constructor(
     private val peripheral: AndroidPeripheral
@@ -29,13 +30,18 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
         return peripheral.requestConnectionPriority(priority)
     }
 
-    override suspend fun requestMtu(mtu: Int): Boolean {
+    override suspend fun requestMtu(mtu: Int): Int {
         return peripheral.requestMtu(mtu)
     }
 
-    override suspend fun setPreferredPhy(txPhy: Phy, rxPhy: Phy, options: PhyOptions): Boolean {
-        return peripheral.setPreferredPhy(txPhy, rxPhy, options)
+    override suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
+        return peripheral.setPreferredPhy(phy, options)
     }
+
+    override suspend fun readPhy(): PreferredPhy {
+        return peripheral.readPhy()
+    }
+
 }
 
 class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {

@@ -30,8 +30,6 @@ interface Advertisement {
 
     /**
      * The received signal strength, in dBm, of the packet received.
-     *
-     * On JavaScript platform, returns `Int.MIN_VALUE` when RSSI is unavailable.
      */
     val rssi: Int
 
