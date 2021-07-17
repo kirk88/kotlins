@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.system.measureTimeMillis
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -48,7 +50,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
 
-    private  val mutex = Mutex()
+    private  val lock = Mutex()
+
+    private val owner1= Any()
+    private val owner2 = Any()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +115,38 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //            }
 //        }
 
+        var count = 0
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            massiveRun {
+                lock.withLock {
+                    count ++
+                }
+            }
+
+
+
+
+
+        }
+
         initBle()
+    }
+
+    suspend fun massiveRun(action: suspend () -> Unit) {
+        val n = 100  // 启动的协程数量
+        val k = 1000 // 每个协程重复执行同一动作的次数
+        val time = measureTimeMillis {
+            coroutineScope { // 协程的作用域
+                repeat(n) {
+                    launch {
+                        repeat(k) { action() }
+                    }
+                }
+            }
+        }
+        println("Completed ${n * k} actions in $time ms")
     }
 
     @OptIn(FlowPreview::class)

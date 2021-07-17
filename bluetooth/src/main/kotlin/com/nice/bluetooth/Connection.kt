@@ -30,15 +30,15 @@ class OutOfOrderGattCallbackException internal constructor(
     message: String
 ) : IllegalStateException(message)
 
-private val GattSuccess = GattStatus(GATT_SUCCESS)
-
-private val clientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
-
 enum class PhyOptions {
     NoPreferred,
     S2,
     S8
 }
+
+private val GattSuccess = GattStatus(GATT_SUCCESS)
+
+private val ClientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
 
 internal class Connection(
     private val bluetoothGatt: BluetoothGatt,
@@ -77,6 +77,7 @@ internal class Connection(
      *
      * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
      * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
+     * @throws OutOfOrderGattCallbackException if an Android `BluetoothGattCallback` method gets called out of order
      */
     private suspend inline fun <reified T> execute(
         crossinline action: BluetoothGatt.() -> Boolean
@@ -291,7 +292,7 @@ private suspend inline fun <reified T : Response> Channel<T>.tryReceiveOrThrow()
 }
 
 private val AndroidGattCharacteristic.configDescriptor: AndroidGattDescriptor?
-    get() = descriptors.find { it.descriptorUuid == clientCharacteristicConfigUuid }
+    get() = descriptors.find { it.descriptorUuid == ClientCharacteristicConfigUuid }
 
 private val AndroidGattCharacteristic.supportsNotify: Boolean
     get() = bluetoothGattCharacteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
