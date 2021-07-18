@@ -30,7 +30,9 @@ import com.nice.kotlins.widget.TipView
 import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
@@ -49,11 +51,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     override val tipView: TipView by tipViews()
 
     private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
-
-    private  val lock = Mutex()
-
-    private val owner1= Any()
-    private val owner2 = Any()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,39 +112,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //            }
 //        }
 
-        var count = 0
-
-        lifecycleScope.launch(Dispatchers.IO) {
-
-            massiveRun {
-                lock.withLock {
-                    count ++
-                }
-            }
-
-
-
-
-
-        }
-
         initBle()
     }
 
-    suspend fun massiveRun(action: suspend () -> Unit) {
-        val n = 100  // 启动的协程数量
-        val k = 1000 // 每个协程重复执行同一动作的次数
-        val time = measureTimeMillis {
-            coroutineScope { // 协程的作用域
-                repeat(n) {
-                    launch {
-                        repeat(k) { action() }
-                    }
-                }
-            }
-        }
-        println("Completed ${n * k} actions in $time ms")
-    }
 
     @OptIn(FlowPreview::class)
     private fun initBle() {
@@ -156,21 +123,31 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         }
 
         val scan = {
+            val channel = Channel<Advertisement>(Channel.UNLIMITED)
+
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-
                 Scanner().advertisements.collect {
                     withContext(Dispatchers.Main){
                         adapter.addItem(it)
                     }
 
+                    channel.send(it)
+                }
+            }
+
+            lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+                Log.e(TAG, throwable.message, throwable)
+            }){
+                channel.consumeAsFlow().collect {
                     val peripheral = peripheral(it) {
 
                         onServicesDiscovered {
                         }
 
                     }
+                    Log.e(TAG, "connecting")
                     peripheral.connect()
 
                     peripheral.services.forEach { service ->
