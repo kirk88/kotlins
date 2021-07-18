@@ -7,7 +7,9 @@ import androidx.annotation.RequiresApi
 import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 
-interface ServicesDiscoveredPeripheral: Readable, Writable{
+interface ServicesDiscoveredPeripheral: Readable, Writable
+
+interface ConnectedPeripheral{
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestConnectionPriority(priority: Priority): Boolean
@@ -24,11 +26,14 @@ interface ServicesDiscoveredPeripheral: Readable, Writable{
 }
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit
+internal typealias ConnectedAction = suspend ConnectedPeripheral.() -> Unit
 
 interface PeripheralBuilder {
     var transport: Transport
 
     var phy: Phy
+
+    fun onConnected(action: ConnectedAction)
 
     fun onServicesDiscovered(action: ServicesDiscoveredAction)
 }

@@ -31,6 +31,7 @@ fun CoroutineScope.peripheral(
         bluetoothDevice,
         builder.transport,
         builder.phy,
+        builder.onConnected,
         builder.onServicesDiscovered
     )
 }
@@ -40,6 +41,7 @@ class AndroidPeripheral internal constructor(
     private val bluetoothDevice: BluetoothDevice,
     private val defaultTransport: Transport,
     private val defaultPhy: Phy,
+    private val onConnected: ConnectedAction,
     private val onServicesDiscovered: ServicesDiscoveredAction
 ) : Peripheral {
 
@@ -85,7 +87,10 @@ class AndroidPeripheral internal constructor(
         if (ready.value && _state.value == ConnectionState.Connected) return
 
         // slow path
-        combine(ready, state) { ready, state -> ready && state == ConnectionState.Connected }.first { it }
+        combine(
+            ready,
+            state
+        ) { ready, state -> ready && state == ConnectionState.Connected }.first { it }
     }
 
     private fun establishConnection(): Connection =
@@ -109,6 +114,7 @@ class AndroidPeripheral internal constructor(
 
         try {
             suspendUntilConnected()
+            onConnected(AndroidConnectedPeripheral(this@AndroidPeripheral))
             connection.discoverServices()
             onServicesDiscovered(AndroidServicesDiscoveredPeripheral(this@AndroidPeripheral))
             observers.rewire()

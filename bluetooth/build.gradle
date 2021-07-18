@@ -45,7 +45,7 @@ dependencies {
 
 def versionMajor = 1
 def versionMinor = 0
-def versionPatch = 0
+def versionPatch = 1
 
 uploadArchives {
     repositories.mavenDeployer {

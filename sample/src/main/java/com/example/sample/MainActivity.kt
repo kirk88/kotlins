@@ -13,8 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
-import com.nice.bluetooth.common.Advertisement
-import com.nice.bluetooth.common.BluetoothState
+import com.nice.bluetooth.common.*
 import com.nice.bluetooth.peripheral
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -134,12 +133,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
 
                     channel.send(it)
+
+                    cancel()
                 }
             }
 
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }){
+
                 channel.consumeAsFlow().collect {
                     val peripheral = peripheral(it) {
 

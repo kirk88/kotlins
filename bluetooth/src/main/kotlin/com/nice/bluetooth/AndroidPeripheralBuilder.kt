@@ -26,6 +26,11 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
         data: ByteArray
     ) = peripheral.write(descriptor, data)
 
+}
+
+class AndroidConnectedPeripheral internal constructor(
+    private val peripheral: AndroidPeripheral
+): ConnectedPeripheral {
     override suspend fun requestConnectionPriority(priority: Priority): Boolean {
         return peripheral.requestConnectionPriority(priority)
     }
@@ -41,12 +46,17 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
     override suspend fun readPhy(): PreferredPhy {
         return peripheral.readPhy()
     }
-
 }
 
 class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
 
+    internal var onConnected: ConnectedAction = {}
     internal var onServicesDiscovered: ServicesDiscoveredAction = {}
+
+    override fun onConnected(action: ConnectedAction) {
+        onConnected = action
+    }
+
     override fun onServicesDiscovered(action: ServicesDiscoveredAction) {
         onServicesDiscovered = action
     }
