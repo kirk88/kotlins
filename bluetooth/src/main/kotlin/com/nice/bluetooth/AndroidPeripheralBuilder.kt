@@ -61,9 +61,6 @@ class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
     internal var onConnected: ConnectedAction = {}
     internal var onServicesDiscovered: ServicesDiscoveredAction = {}
 
-    internal var defaultTransport: Transport = Transport.Le
-    internal var defaultPhy: Phy = Phy.Le1M
-
 
     override fun onConnected(action: ConnectedAction) {
         onConnected = action
@@ -74,13 +71,9 @@ class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
     }
 
     /** Preferred transport for GATT connections to remote dual-mode devices. */
-    override fun setDefaultTransport(transport: Transport) {
-        defaultTransport = transport
-    }
+    override var defaultTransport: Transport = Transport.Le
 
     /** Preferred PHY for connections to remote LE device. */
-    override fun setDefaultPhy(phy: Phy) {
-        defaultPhy = phy
-    }
+    override var defaultPhy: Phy = Phy.Le1M
 
 }

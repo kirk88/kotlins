@@ -33,7 +33,7 @@ private data class DescriptorImpl(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
     override val descriptorUuid: UUID
-) : Descriptor{
+) : Descriptor {
     override fun toString(): String {
         return "Descriptor(serviceUuid=$serviceUuid, characteristicUuid=$characteristicUuid, descriptorUuid=$descriptorUuid)"
     }

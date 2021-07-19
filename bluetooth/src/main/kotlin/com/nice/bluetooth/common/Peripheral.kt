@@ -97,6 +97,9 @@ interface Peripheral : Readable, Writable {
      */
     val phy: Flow<PreferredPhy?>
 
+    /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
+    val services: List<DiscoveredService>
+
     /**
      * Initiates a connection, suspending until connected, or failure occurs. Multiple concurrent invocations will all
      * suspend until connected (or failure occurs). If already connected, then returns immediately.
@@ -113,9 +116,6 @@ interface Peripheral : Readable, Writable {
      * Multiple concurrent invocations will all suspend until disconnected (or failure occurs).
      */
     suspend fun disconnect()
-
-    /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
-    val services: List<DiscoveredService>
 
     /**
      * Executes a reliable write transaction.

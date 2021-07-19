@@ -28,7 +28,7 @@ interface Characteristic {
 private data class CharacteristicImpl(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID
-) : Characteristic{
+) : Characteristic {
     override fun toString(): String {
         return "Characteristic(serviceUuid=$serviceUuid, characteristicUuid=$characteristicUuid)"
     }

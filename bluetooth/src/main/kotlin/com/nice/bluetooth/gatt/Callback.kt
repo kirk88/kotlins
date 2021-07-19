@@ -58,10 +58,31 @@ internal class Callback(
 
     val onCharacteristicChanged = Channel<OnCharacteristicChanged>(UNLIMITED)
 
-    val onResponse = Channel<Response>(CONFLATED)
+    val onServicesDiscovered = Channel<OnServicesDiscovered>(CONFLATED)
+    val onCharacteristicRead = Channel<OnCharacteristicRead>(CONFLATED)
+    val onCharacteristicWrite = Channel<OnCharacteristicWrite>(CONFLATED)
+    val onDescriptorRead = Channel<OnDescriptorRead>(CONFLATED)
+    val onDescriptorWrite = Channel<OnDescriptorWrite>(CONFLATED)
     val onMtuChanged = Channel<OnMtuChanged>(CONFLATED)
     val onPhyUpdate = Channel<OnPhyUpdate>(CONFLATED)
+    val onPhyRead = Channel<OnPhyRead>(CONFLATED)
+    val onReadRemoteRssi = Channel<OnReadRemoteRssi>(CONFLATED)
     val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
+
+    private fun closeChannel() {
+        val cause = ConnectionLostException()
+        onCharacteristicChanged.close()
+        onServicesDiscovered.close(cause)
+        onCharacteristicRead.close(cause)
+        onCharacteristicWrite.close(cause)
+        onDescriptorRead.close(cause)
+        onDescriptorWrite.close(cause)
+        onMtuChanged.close(cause)
+        onPhyUpdate.close(cause)
+        onPhyRead.close(cause)
+        onReadRemoteRssi.close(cause)
+        onReliableWriteCompleted.close(cause)
+    }
 
     override fun onConnectionStateChange(
         gatt: BluetoothGatt,
@@ -71,6 +92,8 @@ internal class Callback(
         if (newState == STATE_DISCONNECTED) {
             gatt.close()
             disconnectedAction?.invoke()
+
+            closeChannel()
         }
 
         when (newState) {
@@ -79,15 +102,10 @@ internal class Callback(
             STATE_DISCONNECTING -> state.value = ConnectionState.Disconnecting
             STATE_DISCONNECTED -> state.value = ConnectionState.Disconnected(status.toStatus())
         }
-
-        if (newState == STATE_DISCONNECTING || newState == STATE_DISCONNECTED) {
-            onCharacteristicChanged.close()
-            onResponse.close(ConnectionLostException())
-        }
     }
 
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-        onResponse.trySendOrLog(OnServicesDiscovered(GattStatus(status)))
+        onServicesDiscovered.trySendOrLog(OnServicesDiscovered(GattStatus(status)))
     }
 
     override fun onCharacteristicRead(
@@ -96,7 +114,13 @@ internal class Callback(
         status: Int
     ) {
         val value = characteristic.value
-        onResponse.trySendOrLog(OnCharacteristicRead(characteristic, value, GattStatus(status)))
+        onCharacteristicRead.trySendOrLog(
+            OnCharacteristicRead(
+                characteristic,
+                value,
+                GattStatus(status)
+            )
+        )
     }
 
     override fun onCharacteristicWrite(
@@ -104,7 +128,12 @@ internal class Callback(
         characteristic: BluetoothGattCharacteristic,
         status: Int
     ) {
-        onResponse.trySendOrLog(OnCharacteristicWrite(characteristic, GattStatus(status)))
+        onCharacteristicWrite.trySendOrLog(
+            OnCharacteristicWrite(
+                characteristic,
+                GattStatus(status)
+            )
+        )
     }
 
     override fun onCharacteristicChanged(
@@ -120,7 +149,13 @@ internal class Callback(
         descriptor: BluetoothGattDescriptor,
         status: Int
     ) {
-        onResponse.trySendOrLog(OnDescriptorRead(descriptor, descriptor.value, GattStatus(status)))
+        onDescriptorRead.trySendOrLog(
+            OnDescriptorRead(
+                descriptor,
+                descriptor.value,
+                GattStatus(status)
+            )
+        )
     }
 
     override fun onDescriptorWrite(
@@ -128,7 +163,7 @@ internal class Callback(
         descriptor: BluetoothGattDescriptor,
         status: Int
     ) {
-        onResponse.trySendOrLog(OnDescriptorWrite(descriptor, GattStatus(status)))
+        onDescriptorWrite.trySendOrLog(OnDescriptorWrite(descriptor, GattStatus(status)))
     }
 
     override fun onReliableWriteCompleted(
@@ -137,7 +172,6 @@ internal class Callback(
     ) {
         onReliableWriteCompleted.trySendOrLog(OnReliableWriteCompleted(GattStatus(status)))
     }
-
 
     override fun onMtuChanged(
         gatt: BluetoothGatt,
@@ -166,7 +200,7 @@ internal class Callback(
         status: Int
     ) {
         val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
-        onResponse.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
+        onPhyRead.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
     }
 
     override fun onReadRemoteRssi(
@@ -174,7 +208,7 @@ internal class Callback(
         rssi: Int,
         status: Int
     ) {
-        onResponse.trySendOrLog(OnReadRemoteRssi(rssi, GattStatus(status)))
+        onReadRemoteRssi.trySendOrLog(OnReadRemoteRssi(rssi, GattStatus(status)))
     }
 
 }

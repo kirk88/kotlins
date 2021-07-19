@@ -10,12 +10,15 @@ import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
+import com.nice.bluetooth.AndroidPeripheral
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
+import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.peripheral
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -132,11 +135,17 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-                Scanner().advertisements.collect {
-                    withContext(Dispatchers.Main) {
-                        adapter.addItem(it)
+                val cached = mutableListOf<Advertisement>()
+
+                Scanner().advertisements.collect { advertment ->
+                    if(cached.none { it.address ==  advertment.address}) {
+                        cached.add(advertment)
+                        withContext(Dispatchers.Main) {
+                            adapter.addItem(advertment)
+                        }
+
+                        channel.send(advertment)
                     }
-                    channel.send(it)
                 }
             }
 
@@ -144,38 +153,29 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, throwable.message, throwable)
             }) {
                 channel.consumeAsFlow().collect {
-                    val peripheral = peripheral(it) {
 
-                        onConnected {
-                            val rssi = readRssi()
+                    launch {
+                        val peripheral = peripheral(it)
 
-                            Log.e(TAG, "rssi: $rssi")
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                val phy = readPhy()
-                                Log.e(TAG, "phy: $phy")
-                            }
+                        (peripheral as AndroidPeripheral).mtu.collect {
 
                         }
+                        Log.e(TAG, "connecting")
+                        peripheral.connect()
 
-                        onServicesDiscovered {
-                        }
+                        peripheral.services.forEach { service ->
+                            Log.e(TAG, "service: $service")
 
-
-                    }
-                    Log.e(TAG, "connecting")
-                    peripheral.connect()
-
-                    peripheral.services.forEach { service ->
-                        Log.e(TAG, "service: $service")
-
-                        service.forEach { c ->
-                            peripheral.observe(c).collect { b ->
-                                Log.e(TAG, "observe: $b")
+                            service.forEach { c ->
+                                peripheral.observe(c).collect { b ->
+                                    Log.e(TAG, "observe: $b")
+                                }
                             }
                         }
                     }
+
                 }
+
             }
         }
 

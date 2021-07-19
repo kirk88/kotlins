@@ -8,7 +8,7 @@ import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 import kotlin.coroutines.cancellation.CancellationException
 
-interface ServicesDiscoveredPeripheral : Readable, Writable{
+interface ServicesDiscoveredPeripheral : Readable, Writable {
 
     /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
@@ -38,15 +38,15 @@ internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripher
 internal typealias ConnectedAction = suspend ConnectedPeripheral.() -> Unit
 
 interface PeripheralBuilder {
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun setDefaultTransport(transport: Transport)
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun setDefaultPhy(phy: Phy)
 
     fun onConnected(action: ConnectedAction)
 
     fun onServicesDiscovered(action: ServicesDiscoveredAction)
+
+    var defaultTransport: Transport
+
+    var defaultPhy: Phy
+
 }
 
 /** Preferred transport for GATT connections to remote dual-mode devices. */
