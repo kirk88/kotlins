@@ -6,13 +6,20 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
+import kotlin.coroutines.cancellation.CancellationException
 
-interface ServicesDiscoveredPeripheral: Readable, Writable
+interface ServicesDiscoveredPeripheral : Readable, Writable{
 
-interface ConnectedPeripheral{
+    /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun reliableWrite(action: suspend Writable.() -> Unit)
+
+}
+
+interface ConnectedPeripheral {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Boolean
+    suspend fun requestConnectionPriority(priority: Priority): Priority
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int
@@ -23,15 +30,19 @@ interface ConnectedPeripheral{
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun readPhy(): PreferredPhy
 
+    suspend fun readRssi(): Int
+
 }
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit
 internal typealias ConnectedAction = suspend ConnectedPeripheral.() -> Unit
 
 interface PeripheralBuilder {
-    var transport: Transport
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setDefaultTransport(transport: Transport)
 
-    var phy: Phy
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setDefaultPhy(phy: Phy)
 
     fun onConnected(action: ConnectedAction)
 

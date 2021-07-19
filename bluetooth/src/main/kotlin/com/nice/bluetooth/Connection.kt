@@ -62,7 +62,11 @@ internal class Connection(
         }
 
     private val lock = Mutex()
-    private val reliableWriteLock = Mutex()
+
+    private val operationLocked = Any()
+    private val transactionLocked = Any()
+
+    private suspend inline fun <T> withLock(owner: Any = operationLocked, action: () -> T) = lock.withLock(owner, action)
 
     /**
      * Executes specified [BluetoothGatt] [action].
@@ -80,25 +84,26 @@ internal class Connection(
      * @throws OutOfOrderGattCallbackException if an Android `BluetoothGattCallback` method gets called out of order
      */
     private suspend inline fun <reified T> execute(
+        noinline response: suspend () -> T = { callback.onResponse.tryReceiveOrderlyOrThrow() },
         crossinline action: BluetoothGatt.() -> Boolean
-    ): T = lock.withLock {
+    ): T = withLock {
         withContext(dispatcher) {
-            action.invoke(bluetoothGatt) || throw GattRequestRejectedException()
+            bluetoothGatt.execute(action)
         }
 
-        val response = callback.onResponse.tryReceiveOrThrow()
-
-        // `lock` should always enforce a 1:1 matching of request to response, but if an Android `BluetoothGattCallback`
-        // method gets called out of order then we'll cast to the wrong response type.
-        response as? T
-            ?: throw OutOfOrderGattCallbackException(
-                "Unexpected response type ${response.javaClass.simpleName} received"
-            )
+        response()
     }
 
-    suspend fun rssi(): Int = execute<Response.OnReadRemoteRssi> {
-        readRemoteRssi()
-    }.rssi
+    private suspend inline fun <reified T> tryExecute(
+        noinline response: suspend () -> T = { callback.onResponse.tryReceiveOrderlyOrThrow() },
+        crossinline action: BluetoothGatt.() -> Unit
+    ): T = withLock {
+        withContext(dispatcher) {
+            bluetoothGatt.tryExecute(action)
+        }
+
+        response()
+    }
 
     suspend fun discoverServices() {
         execute<Response.OnServicesDiscovered> {
@@ -156,15 +161,14 @@ internal class Connection(
         }.value!!
     }
 
-    suspend fun reliableWrite(operation: suspend Writable.() -> Unit) {
-        reliableWriteLock.withLock {
-            try {
-                bluetoothGatt.beginReliableWrite()
-                operation()
-                bluetoothGatt.executeReliableWrite()
-            } catch (t: Throwable) {
-                bluetoothGatt.abortReliableWrite()
-                throw t
+    suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
+        withLock(transactionLocked) {
+            withContext(dispatcher) {
+                bluetoothGatt.execute { beginReliableWrite() }
+                action()
+                if (!bluetoothGatt.execute { executeReliableWrite() }) {
+                    bluetoothGatt.tryExecute { abortReliableWrite() }
+                }
             }
 
             callback.onReliableWriteCompleted.tryReceiveOrThrow()
@@ -172,38 +176,34 @@ internal class Connection(
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Boolean = lock.withLock {
-        withContext(dispatcher) {
-            bluetoothGatt.requestConnectionPriority(priority.intValue)
-        }
+    suspend fun requestConnectionPriority(priority: Priority): Priority = execute(
+        response = { priority }
+    ) {
+        requestConnectionPriority(priority.intValue)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int = lock.withLock {
-        withContext(dispatcher) {
-            bluetoothGatt.requestMtu(mtu)
-        }
-
-        callback.onMtuChanged.tryReceiveOrThrow().mtu
-    }
+    suspend fun requestMtu(mtu: Int): Int = execute(
+        response = { callback.onMtuChanged.tryReceiveOrThrow() }
+    ) {
+        requestMtu(mtu)
+    }.mtu
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = lock.withLock {
-        withContext(dispatcher) {
-            bluetoothGatt.setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
-        }
-
-        callback.onPhyUpdate.tryReceiveOrThrow().phy
-    }
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = tryExecute(
+        response = { callback.onPhyUpdate.tryReceiveOrThrow() }
+    ) {
+        setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
+    }.phy
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun readPhy(): PreferredPhy = lock.withLock {
-        withContext(dispatcher) {
-            bluetoothGatt.readPhy()
-        }
+    suspend fun readPhy(): PreferredPhy = tryExecute<Response.OnPhyRead> {
+        readPhy()
+    }.phy
 
-        callback.onPhyRead.tryReceiveOrThrow().phy
-    }
+    suspend fun readRssi(): Int = execute<Response.OnReadRemoteRssi> {
+        readRemoteRssi()
+    }.rssi
 
     suspend fun startObservation(characteristic: Characteristic) {
         val androidCharacteristic = services.getCharacteristic(characteristic)
@@ -279,7 +279,7 @@ internal class Connection(
 
 }
 
-private suspend inline fun <reified T : Response> Channel<T>.tryReceiveOrThrow(): T {
+private suspend inline fun <reified T : Response> Channel<out T>.tryReceiveOrThrow(): T {
     val response = try {
         receive()
     } catch (e: ConnectionLostException) {
@@ -289,6 +289,33 @@ private suspend inline fun <reified T : Response> Channel<T>.tryReceiveOrThrow()
     if (response.status != GattSuccess) throw GattStatusException(response.toString())
 
     return response
+}
+
+private suspend inline fun <reified T : Response> Channel<out Response>.tryReceiveOrderlyOrThrow(): T {
+    val response = tryReceiveOrThrow()
+
+    // `lock` should always enforce a 1:1 matching of request to response, but if an Android `BluetoothGattCallback`
+    // method gets called out of order then we'll cast to the wrong response type.
+    return response as? T
+        ?: throw OutOfOrderGattCallbackException(
+            "Unexpected response type ${response.javaClass.simpleName} received"
+        )
+}
+
+private inline fun BluetoothGatt.execute(crossinline action: BluetoothGatt.() -> Boolean): Boolean {
+    if (action()) {
+        return true
+    }
+    throw GattRequestRejectedException()
+}
+
+private inline fun BluetoothGatt.tryExecute(crossinline action: BluetoothGatt.() -> Unit): Boolean {
+    try {
+        action()
+        return true
+    } catch (t: Throwable) {
+        throw GattRequestRejectedException(cause = t)
+    }
 }
 
 private val AndroidGattCharacteristic.configDescriptor: AndroidGattDescriptor?

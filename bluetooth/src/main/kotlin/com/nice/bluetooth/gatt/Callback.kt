@@ -61,29 +61,7 @@ internal class Callback(
     val onResponse = Channel<Response>(CONFLATED)
     val onMtuChanged = Channel<OnMtuChanged>(CONFLATED)
     val onPhyUpdate = Channel<OnPhyUpdate>(CONFLATED)
-    val onPhyRead = Channel<OnPhyRead>(CONFLATED)
     val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
-
-    override fun onPhyUpdate(
-        gatt: BluetoothGatt,
-        txPhy: Int,
-        rxPhy: Int,
-        status: Int
-    ) {
-        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
-        onPhyUpdate.trySendOrLog(OnPhyUpdate(preferredPhy, GattStatus(status)))
-        if (status == GATT_SUCCESS) phy?.value = preferredPhy
-    }
-
-    override fun onPhyRead(
-        gatt: BluetoothGatt,
-        txPhy: Int,
-        rxPhy: Int,
-        status: Int
-    ) {
-        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
-        onResponse.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
-    }
 
     override fun onConnectionStateChange(
         gatt: BluetoothGatt,
@@ -160,13 +138,6 @@ internal class Callback(
         onReliableWriteCompleted.trySendOrLog(OnReliableWriteCompleted(GattStatus(status)))
     }
 
-    override fun onReadRemoteRssi(
-        gatt: BluetoothGatt,
-        rssi: Int,
-        status: Int
-    ) {
-        onResponse.trySendOrLog(OnReadRemoteRssi(rssi, GattStatus(status)))
-    }
 
     override fun onMtuChanged(
         gatt: BluetoothGatt,
@@ -176,6 +147,36 @@ internal class Callback(
         onMtuChanged.trySendOrLog(OnMtuChanged(mtu, GattStatus(status)))
         if (status == GATT_SUCCESS) this.mtu.value = mtu
     }
+
+    override fun onPhyUpdate(
+        gatt: BluetoothGatt,
+        txPhy: Int,
+        rxPhy: Int,
+        status: Int
+    ) {
+        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        onPhyUpdate.trySendOrLog(OnPhyUpdate(preferredPhy, GattStatus(status)))
+        if (status == GATT_SUCCESS) phy?.value = preferredPhy
+    }
+
+    override fun onPhyRead(
+        gatt: BluetoothGatt,
+        txPhy: Int,
+        rxPhy: Int,
+        status: Int
+    ) {
+        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        onResponse.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
+    }
+
+    override fun onReadRemoteRssi(
+        gatt: BluetoothGatt,
+        rssi: Int,
+        status: Int
+    ) {
+        onResponse.trySendOrLog(OnReadRemoteRssi(rssi, GattStatus(status)))
+    }
+
 }
 
 private fun Int.toPhy(): Phy = when (this) {

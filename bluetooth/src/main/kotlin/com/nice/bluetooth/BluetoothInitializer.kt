@@ -5,6 +5,7 @@ package com.nice.bluetooth
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.os.Build
 import androidx.startup.Initializer
 import com.nice.bluetooth.common.BluetoothState
 import kotlinx.coroutines.flow.Flow
@@ -36,12 +37,18 @@ object Bluetooth {
             }
         }
 
-    val permissions = arrayOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
+    val permissions: Array<String> by lazy {
+        mutableListOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+        }.toTypedArray()
+    }
 
 }
 

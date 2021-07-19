@@ -29,8 +29,8 @@ fun CoroutineScope.peripheral(
     return AndroidPeripheral(
         coroutineContext,
         bluetoothDevice,
-        builder.transport,
-        builder.phy,
+        builder.defaultTransport,
+        builder.defaultPhy,
         builder.onConnected,
         builder.onServicesDiscovered
     )
@@ -133,7 +133,7 @@ class AndroidPeripheral internal constructor(
 
     override suspend fun connect() {
         check(job.isNotCancelled) { "Cannot connect, scope is cancelled for $this" }
-        checkBluetoothAdapterState(expected = STATE_ON)
+        check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
         connectJob.updateThenGet { it ?: connectAsync() }.await()
     }
 
@@ -148,9 +148,9 @@ class AndroidPeripheral internal constructor(
         }
     }
 
-    override suspend fun rssi(): Int = connection.rssi()
+    override suspend fun readRssi(): Int = connection.readRssi()
 
-    override suspend fun requestConnectionPriority(priority: Priority): Boolean =
+    override suspend fun requestConnectionPriority(priority: Priority): Priority =
         connection.requestConnectionPriority(priority)
 
     override suspend fun requestMtu(mtu: Int): Int = connection.requestMtu(mtu)
@@ -180,8 +180,8 @@ class AndroidPeripheral internal constructor(
         descriptor: Descriptor
     ): ByteArray = connection.read(descriptor)
 
-    override suspend fun reliableWrite(operation: suspend Writable.() -> Unit) {
-        connection.reliableWrite(operation)
+    override suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
+        connection.reliableWrite(action)
     }
 
     override fun observe(
@@ -217,29 +217,4 @@ private fun <T, R : T> AtomicReference<T>.updateThenGet(updateFunction: (T) -> R
         next = updateFunction(prev)
     } while (!compareAndSet(prev, next))
     return next
-}
-
-/**
- * Explicitly check the adapter state before connecting in order to respect system settings.
- * Android doesn't actually turn bluetooth off when the setting is disabled, so without this
- * check we're able to reconnect the device illegally.
- */
-@Suppress("SameParameterValue")
-private fun checkBluetoothAdapterState(
-    expected: Int
-) {
-    fun nameFor(value: Int) = when (value) {
-        STATE_OFF -> "Off"
-        STATE_ON -> "On"
-        STATE_TURNING_OFF -> "TurningOff"
-        STATE_TURNING_ON -> "TurningOn"
-        else -> "Unknown"
-    }
-
-    val actual = getDefaultAdapter().state
-    if (expected != actual) {
-        val actualName = nameFor(actual)
-        val expectedName = nameFor(expected)
-        throw BluetoothDisabledException("Bluetooth adapter state is $actualName ($actual), but $expectedName ($expected) was required.")
-    }
 }

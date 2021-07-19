@@ -1,6 +1,7 @@
 package com.example.sample
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -13,7 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
-import com.nice.bluetooth.common.*
+import com.nice.bluetooth.common.Advertisement
+import com.nice.bluetooth.common.BluetoothState
 import com.nice.bluetooth.peripheral
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -35,8 +37,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlin.system.measureTimeMillis
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -50,6 +50,11 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     override val tipView: TipView by tipViews()
 
     private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
+
+    private val lock = Mutex()
+
+    private val owner1 = Any()
+    private val owner2 = Any()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,25 +133,34 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, throwable.message, throwable)
             }) {
                 Scanner().advertisements.collect {
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         adapter.addItem(it)
                     }
-
                     channel.send(it)
-
-                    cancel()
                 }
             }
 
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
-            }){
-
+            }) {
                 channel.consumeAsFlow().collect {
                     val peripheral = peripheral(it) {
 
+                        onConnected {
+                            val rssi = readRssi()
+
+                            Log.e(TAG, "rssi: $rssi")
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                val phy = readPhy()
+                                Log.e(TAG, "phy: $phy")
+                            }
+
+                        }
+
                         onServicesDiscovered {
                         }
+
 
                     }
                     Log.e(TAG, "connecting")
@@ -180,7 +194,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             Bluetooth.state.onEach {
                 Log.e(TAG, "state: $it")
-                if(it == BluetoothState.Opened){
+                if (it == BluetoothState.Opened) {
                     startScan()
                 }
             }.launchIn(lifecycleScope)

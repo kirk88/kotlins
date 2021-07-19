@@ -26,12 +26,16 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
         data: ByteArray
     ) = peripheral.write(descriptor, data)
 
+    override suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
+        peripheral.reliableWrite(action)
+    }
+
 }
 
 class AndroidConnectedPeripheral internal constructor(
     private val peripheral: AndroidPeripheral
-): ConnectedPeripheral {
-    override suspend fun requestConnectionPriority(priority: Priority): Boolean {
+) : ConnectedPeripheral {
+    override suspend fun requestConnectionPriority(priority: Priority): Priority {
         return peripheral.requestConnectionPriority(priority)
     }
 
@@ -46,12 +50,20 @@ class AndroidConnectedPeripheral internal constructor(
     override suspend fun readPhy(): PreferredPhy {
         return peripheral.readPhy()
     }
+
+    override suspend fun readRssi(): Int {
+        return peripheral.readRssi()
+    }
 }
 
 class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
 
     internal var onConnected: ConnectedAction = {}
     internal var onServicesDiscovered: ServicesDiscoveredAction = {}
+
+    internal var defaultTransport: Transport = Transport.Le
+    internal var defaultPhy: Phy = Phy.Le1M
+
 
     override fun onConnected(action: ConnectedAction) {
         onConnected = action
@@ -62,9 +74,13 @@ class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
     }
 
     /** Preferred transport for GATT connections to remote dual-mode devices. */
-    override var transport: Transport = Transport.Le
+    override fun setDefaultTransport(transport: Transport) {
+        defaultTransport = transport
+    }
 
     /** Preferred PHY for connections to remote LE device. */
-    override var phy: Phy = Phy.Le1M
+    override fun setDefaultPhy(phy: Phy) {
+        defaultPhy = phy
+    }
 
 }

@@ -1,11 +1,7 @@
-@file:JvmName("PeripheralCommon")
-@file:Suppress("RedundantUnitReturnType")
-
 package com.nice.bluetooth.common
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.nice.bluetooth.Connection
 import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 import kotlinx.coroutines.flow.Flow
@@ -28,13 +24,13 @@ enum class Priority {
 
 interface Readable {
 
-    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun read(
         characteristic: Characteristic
     ): ByteArray
 
-    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun read(
         descriptor: Descriptor
@@ -44,7 +40,7 @@ interface Readable {
 
 interface Writable {
 
-    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun write(
         characteristic: Characteristic,
@@ -52,7 +48,7 @@ interface Writable {
         writeType: WriteType = WriteType.WithoutResponse
     )
 
-    /** @throws NotReadyException if invoked without an established [Connection] [Peripheral.connect]. */
+    /** @throws NotReadyException if invoked without an established [connection][Peripheral.connect]. */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun write(
         descriptor: Descriptor,
@@ -121,23 +117,31 @@ interface Peripheral : Readable, Writable {
     /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
     val services: List<DiscoveredService>
 
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
+    /**
+     * Executes a reliable write transaction.
+     *
+     * @throws NotReadyException if invoked without an established [connection][connect].
+     */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun rssi(): Int
-
-    suspend fun reliableWrite(operation: suspend Writable.() -> Unit)
+    suspend fun reliableWrite(action: suspend Writable.() -> Unit)
 
     /**
      * Request a specific connection priority
+     *
+     * @throws NotReadyException if invoked without an established [connection][connect].
      */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Boolean
+    suspend fun requestConnectionPriority(priority: Priority): Priority
 
     /**
      * Requests that the current connection's MTU be changed. Suspends until the MTU changes, or failure occurs. The
      * negotiated MTU value is returned, which may not be [mtu] value requested if the remote peripheral negotiated an
      * alternate MTU.
+     *
+     * @throws NotReadyException if invoked without an established [connection][connect].
      */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int
 
@@ -145,15 +149,25 @@ interface Peripheral : Readable, Writable {
      * Set the preferred connection PHY for this app. Please note that this is just a
      * recommendation, whether the PHY change will happen depends on other applications preferences,
      * local and remote controller capabilities. Controller can override these settings.
+     *
+     * @throws NotReadyException if invoked without an established [connection][connect].
      */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy
 
     /**
      * Read the current transmitter PHY and receiver PHY of the connection
+     *
+     * @throws NotReadyException if invoked without an established [connection][connect].
      */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun readPhy(): PreferredPhy
+
+    /** @throws NotReadyException if invoked without an established [connection][connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun readRssi(): Int
 
     /**
      * Observes changes to the specified [Characteristic].
