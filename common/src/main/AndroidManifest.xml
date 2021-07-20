@@ -12,7 +12,7 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data  android:name="com.nice.common.KotlinsInitializer"
+            <meta-data  android:name="com.nice.common.CommonInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>
