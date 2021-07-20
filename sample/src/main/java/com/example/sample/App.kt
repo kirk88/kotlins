@@ -1,9 +1,9 @@
 package com.example.sample
 
 import androidx.multidex.MultiDexApplication
-import com.nice.kotlins.app.ScreenCompatAdapter
-import com.nice.kotlins.app.ScreenCompatStrategy
-import com.nice.kotlins.helper.isTabletDevice
+import com.nice.common.app.ScreenCompatAdapter
+import com.nice.common.app.ScreenCompatStrategy
+import com.nice.common.helper.isTabletDevice
 
 
 class App : MultiDexApplication(), ScreenCompatAdapter {

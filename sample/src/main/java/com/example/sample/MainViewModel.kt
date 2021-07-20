@@ -1,9 +1,9 @@
 package com.example.sample
 
 import androidx.lifecycle.viewModelScope
-import com.nice.kotlins.event.errorShow
-import com.nice.kotlins.event.loadingShow
-import com.nice.kotlins.viewmodel.NiceViewModel
+import com.nice.common.event.errorShow
+import com.nice.common.event.loadingShow
+import com.nice.common.viewmodel.NiceViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

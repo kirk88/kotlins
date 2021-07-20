@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
-    implementation project(':common-ktx')
+    implementation project(':common')
+    implementation project(':sqlite')
     implementation project(':bluetooth')
 }

@@ -1,6 +1,6 @@
 package com.example.sample
 
-import com.nice.kotlins.viewmodel.NiceViewModel
+import com.nice.common.viewmodel.NiceViewModel
 
 class TestViewModel : NiceViewModel() {
 

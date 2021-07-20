@@ -1,7 +1,7 @@
 package com.example.sample
 
 import android.os.Bundle
-import com.nice.kotlins.app.NiceFragment
+import com.nice.common.app.NiceFragment
 
 class ChildFragment : NiceFragment() {
 

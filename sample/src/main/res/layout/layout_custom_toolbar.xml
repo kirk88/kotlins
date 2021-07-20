@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.nice.kotlins.widget.TitleToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+<com.nice.common.widget.TitleToolbar xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -10,4 +10,4 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-</com.nice.kotlins.widget.TitleToolbar>
+</com.nice.common.widget.TitleToolbar>

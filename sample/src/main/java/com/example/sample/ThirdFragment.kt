@@ -7,12 +7,12 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.FragmentThirdBinding
-import com.nice.kotlins.adapter.ItemViewHolder
-import com.nice.kotlins.app.NiceFragment
-import com.nice.kotlins.helper.*
-import com.nice.kotlins.widget.InfiniteState
-import com.nice.kotlins.widget.adapter
-import com.nice.kotlins.widget.divider.GridDividerItemDecoration
+import com.nice.common.adapter.ItemViewHolder
+import com.nice.common.app.NiceFragment
+import com.nice.common.helper.*
+import com.nice.common.widget.InfiniteState
+import com.nice.common.widget.adapter
+import com.nice.common.widget.divider.GridDividerItemDecoration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

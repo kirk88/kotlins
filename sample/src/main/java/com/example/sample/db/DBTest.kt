@@ -2,29 +2,31 @@ package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import com.nice.kotlins.applicationContext
-import com.nice.kotlins.sqlite.db.*
+import com.nice.common.applicationContext
+import com.nice.sqlite.addColumn
+import com.nice.sqlite.createTable
+import com.nice.sqlite.of
 
 object TestTable {
     const val TABLE_NAME = "Test"
 
-    val ID = "id" of INTEGER + PRIMARY_KEY
+    val ID = "id" of com.nice.sqlite.INTEGER + com.nice.sqlite.PRIMARY_KEY
 
-    val NAME = "name" of TEXT
+    val NAME = "name" of com.nice.sqlite.TEXT
 
-    val AGE = "age" of INTEGER
+    val AGE = "age" of com.nice.sqlite.INTEGER
 
-    val NUMBER = "number" of INTEGER + UNIQUE
+    val NUMBER = "number" of com.nice.sqlite.INTEGER + com.nice.sqlite.UNIQUE
 
 //    val DATA = "data" of TEXT
 
-    val TIP = "tip" of TEXT + NOT_NULL + DEFAULT("wow")
+    val TIP = "tip" of com.nice.sqlite.TEXT + com.nice.sqlite.NOT_NULL + com.nice.sqlite.DEFAULT("wow")
 
-    val PP = "pp" of TEXT
+    val PP = "pp" of com.nice.sqlite.TEXT
 
-    val JJ = "jj" of TEXT + DEFAULT("heheheheh")
+    val JJ = "jj" of com.nice.sqlite.TEXT + com.nice.sqlite.DEFAULT("heheheheh")
 
-    val BOOL = "bool" of INTEGER + DEFAULT(1)
+    val BOOL = "bool" of com.nice.sqlite.INTEGER + com.nice.sqlite.DEFAULT(1)
 }
 
 class Test constructor(
@@ -46,7 +48,7 @@ class Test constructor(
     var bool: Boolean = false
 ) {
 
-    @IgnoreOnTable
+    @com.nice.sqlite.IgnoreOnTable
     var text: String = "2343"
 
     override fun toString(): String {
@@ -56,7 +58,7 @@ class Test constructor(
 
 }
 
-class C : ColumnValueConverter<List<String>, String> {
+class C : com.nice.sqlite.ColumnValueConverter<List<String>, String> {
 
     override fun toDatabaseValue(value: List<String>?): String? {
         return value?.joinToString(",")
@@ -68,7 +70,7 @@ class C : ColumnValueConverter<List<String>, String> {
 
 }
 
-object DB : ManagedSQLiteOpenHelper(
+object DB : com.nice.sqlite.ManagedSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
         .name("newdb.db")
         .callback(Callback())

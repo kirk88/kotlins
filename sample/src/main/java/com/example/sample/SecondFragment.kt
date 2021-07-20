@@ -4,14 +4,14 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
 import com.example.sample.databinding.FragmentSecondBinding
-import com.nice.kotlins.adapter.ItemViewHolder
-import com.nice.kotlins.adapter.anim.ScaleInAnimation
-import com.nice.kotlins.adapter.plusAssign
-import com.nice.kotlins.app.NiceFragment
-import com.nice.kotlins.helper.adapterBuilder
-import com.nice.kotlins.helper.setContentView
-import com.nice.kotlins.helper.viewBindings
-import com.nice.kotlins.widget.divider.GridDividerItemDecoration
+import com.nice.common.adapter.ItemViewHolder
+import com.nice.common.adapter.anim.ScaleInAnimation
+import com.nice.common.adapter.plusAssign
+import com.nice.common.app.NiceFragment
+import com.nice.common.helper.adapterBuilder
+import com.nice.common.helper.setContentView
+import com.nice.common.helper.viewBindings
+import com.nice.common.widget.divider.GridDividerItemDecoration
 
 class SecondFragment : NiceFragment() {
 

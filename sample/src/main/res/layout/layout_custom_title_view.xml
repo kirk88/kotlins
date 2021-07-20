@@ -16,7 +16,7 @@
         app:layout_collapseMode="pin"
         app:layout_collapseParallaxMultiplier="0.5" />
 
-    <com.nice.kotlins.widget.TitleToolbar
+    <com.nice.common.widget.TitleToolbar
         android:id="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -29,6 +29,6 @@
             app:fabSize="mini"
             app:tint="@null" />
 
-    </com.nice.kotlins.widget.TitleToolbar>
+    </com.nice.common.widget.TitleToolbar>
 
 </com.google.android.material.appbar.CollapsingToolbarLayout>

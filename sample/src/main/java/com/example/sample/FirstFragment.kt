@@ -6,13 +6,13 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
-import com.nice.kotlins.app.NiceViewModelFragment
-import com.nice.kotlins.event.Event
-import com.nice.kotlins.event.event
-import com.nice.kotlins.helper.add
-import com.nice.kotlins.helper.doOnClick
-import com.nice.kotlins.helper.showIme
-import com.nice.kotlins.helper.showSnackBar
+import com.nice.common.app.NiceViewModelFragment
+import com.nice.common.event.Event
+import com.nice.common.event.event
+import com.nice.common.helper.add
+import com.nice.common.helper.doOnClick
+import com.nice.common.helper.showIme
+import com.nice.common.helper.showSnackBar
 
 class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first) {
 

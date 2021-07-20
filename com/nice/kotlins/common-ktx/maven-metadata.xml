@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-  <groupId>com.nice.kotlins</groupId>
+  <groupId>com.nice.common</groupId>
   <artifactId>common-ktx</artifactId>
   <versioning>
     <release>1.3.99</release>

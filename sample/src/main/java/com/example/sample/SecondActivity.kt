@@ -7,9 +7,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.bluetooth.Bluetooth
-import com.nice.kotlins.app.NiceViewModelActivity
-import com.nice.kotlins.event.Event
-import com.nice.kotlins.helper.*
+import com.nice.common.app.NiceViewModelActivity
+import com.nice.common.event.Event
+import com.nice.common.helper.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
