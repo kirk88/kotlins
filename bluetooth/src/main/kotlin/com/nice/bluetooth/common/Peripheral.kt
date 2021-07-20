@@ -2,7 +2,6 @@ package com.nice.bluetooth.common
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 import kotlinx.coroutines.flow.Flow
 import java.util.*
@@ -11,12 +10,18 @@ import kotlin.coroutines.cancellation.CancellationException
 internal typealias PeripheralBuilderAction = PeripheralBuilder.() -> Unit
 internal typealias OnSubscriptionAction = suspend () -> Unit
 
+enum class PhyOptions {
+    NoPreferred,
+    S2,
+    S8
+}
+
 enum class WriteType {
     WithResponse,
     WithoutResponse
 }
 
-enum class Priority {
+enum class ConnectionPriority {
     Low,
     Balanced,
     High
@@ -95,6 +100,7 @@ interface Peripheral : Readable, Writable {
      * (via [setPreferredPhy]), or if the peripheral initiates an PHY change. [Flow]'s `value` will be `null` until PHY
      * is negotiated.
      */
+    @get:RequiresApi(Build.VERSION_CODES.O)
     val phy: Flow<PreferredPhy?>
 
     /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
@@ -132,7 +138,7 @@ interface Peripheral : Readable, Writable {
      */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Priority
+    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority
 
     /**
      * Requests that the current connection's MTU be changed. Suspends until the MTU changes, or failure occurs. The
@@ -170,7 +176,7 @@ interface Peripheral : Readable, Writable {
     suspend fun readRssi(): Int
 
     /**
-     * Observes changes to the specified [Characteristic].
+     * Observes changes to the specified [characteristicOf].
      *
      * Observations can be setup ([observe] can be called) prior to a [connection][connect] being established. Once
      * connected, the observation will automatically start emitting changes. If connection is lost, [Flow] will remain

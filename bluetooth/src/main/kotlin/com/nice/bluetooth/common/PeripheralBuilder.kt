@@ -4,7 +4,6 @@ import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.nice.bluetooth.PhyOptions
 import com.nice.bluetooth.gatt.PreferredPhy
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -19,7 +18,7 @@ interface ServicesDiscoveredPeripheral : Readable, Writable {
 interface ConnectedPeripheral {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Priority
+    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int

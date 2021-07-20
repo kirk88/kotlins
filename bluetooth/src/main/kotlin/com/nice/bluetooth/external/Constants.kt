@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.bluetooth.external
 
 // https://android.googlesource.com/platform/external/libnfc-nci/+/lollipop-release/src/include/hcidefs.h#447

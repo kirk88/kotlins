@@ -57,7 +57,6 @@ internal class Callback(
     }
 
     val onCharacteristicChanged = Channel<OnCharacteristicChanged>(UNLIMITED)
-
     val onServicesDiscovered = Channel<OnServicesDiscovered>(CONFLATED)
     val onCharacteristicRead = Channel<OnCharacteristicRead>(CONFLATED)
     val onCharacteristicWrite = Channel<OnCharacteristicWrite>(CONFLATED)
@@ -69,7 +68,7 @@ internal class Callback(
     val onReadRemoteRssi = Channel<OnReadRemoteRssi>(CONFLATED)
     val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
 
-    private fun closeChannel() {
+    private fun disconnected() {
         val cause = ConnectionLostException()
         onCharacteristicChanged.close()
         onServicesDiscovered.close(cause)
@@ -82,6 +81,8 @@ internal class Callback(
         onPhyRead.close(cause)
         onReadRemoteRssi.close(cause)
         onReliableWriteCompleted.close(cause)
+
+        disconnectedAction?.invoke()
     }
 
     override fun onConnectionStateChange(
@@ -91,9 +92,7 @@ internal class Callback(
     ) {
         if (newState == STATE_DISCONNECTED) {
             gatt.close()
-            disconnectedAction?.invoke()
-
-            closeChannel()
+            disconnected()
         }
 
         when (newState) {
@@ -217,7 +216,7 @@ private fun Int.toPhy(): Phy = when (this) {
     BluetoothDevice.PHY_LE_1M -> Phy.Le1M
     BluetoothDevice.PHY_LE_2M -> Phy.Le2M
     BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
-    else -> throw IllegalArgumentException("Unknown phy $this")
+    else -> error("Unknown phy: $this")
 }
 
 private fun Int.toStatus(): ConnectionState.Disconnected.Status? = when (this) {

@@ -25,12 +25,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.*
 
-enum class PhyOptions {
-    NoPreferred,
-    S2,
-    S8
-}
-
 private val GattSuccess = GattStatus(GATT_SUCCESS)
 
 private val ClientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
@@ -39,7 +33,7 @@ internal class Connection(
     private val bluetoothGatt: BluetoothGatt,
     private val dispatcher: CoroutineDispatcher,
     private val callback: Callback,
-    private val invokeOnClose: () -> Unit
+    private val onClose: () -> Unit
 ) : Readable, Writable {
 
     init {
@@ -47,8 +41,8 @@ internal class Connection(
     }
 
     @Volatile
-    private var _services: List<AndroidGattService>? = null
-    val services: List<AndroidGattService>
+    private var _services: List<DiscoveredService>? = null
+    val services: List<DiscoveredService>
         get() = checkNotNull(_services) { "Services have not been discovered for $this" }
 
     val characteristicChanges: Flow<CharacteristicChange> = callback.onCharacteristicChanged.consumeAsFlow()
@@ -61,53 +55,50 @@ internal class Connection(
     private val operationLocked = Any()
     private val transactionLocked = Any()
 
-    private suspend inline fun <T> withLock(owner: Any = operationLocked, action: () -> T) =
-        lock.withLock(owner, action)
-
     /**
-     * Executes specified [BluetoothGatt] [action].
+     * Executes specified [BluetoothGatt] action.
      *
      * Android Bluetooth Low Energy has strict requirements: all I/O must be executed sequentially. In other words, the
-     * response for an [action] must be received before another [action] can be performed. Additionally, the Android BLE
+     * response for an action must be received before another action can be performed. Additionally, the Android BLE
      * stack can be unstable if I/O isn't performed on a dedicated thread.
      *
-     * These requirements are fulfilled by ensuring that all [action]s are performed behind a [Mutex]. On Android pre-O
+     * These requirements are fulfilled by ensuring that all action's are performed behind a [Mutex]. On Android pre-O
      * a single threaded [CoroutineDispatcher] is used, Android O and newer a [CoroutineDispatcher] backed by an Android
      * `Handler` is used (and is also used in the Android BLE [Callback]).
      *
      * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
      * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
      */
-    private suspend inline fun <reified T> execute(
-        noinline response: suspend () -> T,
-        crossinline action: BluetoothGatt.() -> Boolean
-    ): T = withLock {
+    private suspend inline fun <T> execute(
+        owner: Any = operationLocked,
+        noinline action: (suspend BluetoothGatt.() -> Unit)? = null,
+        noinline actionWithResult: (suspend BluetoothGatt.() -> Boolean)? = null,
+        noinline actionWithoutResult: (suspend BluetoothGatt.() -> Unit)? = null,
+        noinline response: suspend () -> T
+    ): T = lock.withLock(owner) {
         withContext(dispatcher) {
-            bluetoothGatt.execute(action)
-        }
-
-        response()
-    }
-
-    private suspend inline fun <reified T> tryExecute(
-        noinline response: suspend () -> T,
-        crossinline action: BluetoothGatt.() -> Unit
-    ): T = withLock {
-        withContext(dispatcher) {
-            bluetoothGatt.tryExecute(action)
+            if (action != null) {
+                bluetoothGatt.action()
+            }
+            if (actionWithResult != null) {
+                bluetoothGatt.execute(actionWithResult)
+            }
+            if (actionWithoutResult != null) {
+                bluetoothGatt.tryExecute(actionWithoutResult)
+            }
         }
 
         response()
     }
 
     suspend fun discoverServices() {
-        execute(response = {
-            callback.onServicesDiscovered.getOrThrow()
-        }) {
+        execute(actionWithResult = {
             discoverServices()
+        }) {
+            callback.onServicesDiscovered.getOrThrow()
         }
 
-        _services = bluetoothGatt.services.map { it.toAndroidGattService() }
+        _services = bluetoothGatt.services.map { it.toDiscoveredService() }
     }
 
     override suspend fun write(
@@ -116,12 +107,12 @@ internal class Connection(
         writeType: WriteType
     ) {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        execute(response = {
-            callback.onCharacteristicWrite.getOrThrow()
-        }) {
+        execute(actionWithResult = {
             bluetoothGattCharacteristic.value = data
             bluetoothGattCharacteristic.writeType = writeType.intValue
             writeCharacteristic(bluetoothGattCharacteristic)
+        }) {
+            callback.onCharacteristicWrite.getOrThrow()
         }
     }
 
@@ -129,10 +120,10 @@ internal class Connection(
         characteristic: Characteristic
     ): ByteArray {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        return execute(response = {
-            callback.onCharacteristicRead.getOrThrow()
-        }) {
+        return execute(actionWithResult = {
             readCharacteristic(bluetoothGattCharacteristic)
+        }) {
+            callback.onCharacteristicRead.getOrThrow()
         }.value!!
     }
 
@@ -147,11 +138,11 @@ internal class Connection(
         bluetoothGattDescriptor: BluetoothGattDescriptor,
         data: ByteArray
     ) {
-        execute(response = {
-            callback.onDescriptorWrite.getOrThrow()
-        }) {
+        execute(actionWithResult = {
             bluetoothGattDescriptor.value = data
             writeDescriptor(bluetoothGattDescriptor)
+        }) {
+            callback.onDescriptorWrite.getOrThrow()
         }
     }
 
@@ -159,58 +150,57 @@ internal class Connection(
         descriptor: Descriptor
     ): ByteArray {
         val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
-        return execute(response = {
-            callback.onDescriptorRead.getOrThrow()
-        }) {
+        return execute(actionWithResult = {
             readDescriptor(bluetoothGattDescriptor)
+        }) {
+            callback.onDescriptorRead.getOrThrow()
         }.value!!
     }
 
     suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
-        withLock(transactionLocked) {
-            withContext(dispatcher) {
-                bluetoothGatt.execute { beginReliableWrite() }
-                action()
-                if (!bluetoothGatt.execute { executeReliableWrite() }) {
-                    bluetoothGatt.tryExecute { abortReliableWrite() }
-                }
+        execute(transactionLocked, action = {
+            bluetoothGatt.execute { beginReliableWrite() }
+            action()
+            if (!bluetoothGatt.execute { executeReliableWrite() }) {
+                bluetoothGatt.tryExecute { abortReliableWrite() }
             }
+        }) {
             callback.onReliableWriteCompleted.getOrThrow()
         }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: Priority): Priority = execute(response = {
-        priority
-    }) {
+    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority = execute(actionWithResult = {
         requestConnectionPriority(priority.intValue)
+    }) {
+        priority
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int = execute(response = {
-        callback.onMtuChanged.getOrThrow()
-    }) {
+    suspend fun requestMtu(mtu: Int): Int = execute(actionWithResult = {
         requestMtu(mtu)
+    }) {
+        callback.onMtuChanged.getOrThrow()
     }.mtu
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = tryExecute(response = {
-        callback.onPhyUpdate.getOrThrow()
-    }) {
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = execute(actionWithoutResult = {
         setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
+    }) {
+        callback.onPhyUpdate.getOrThrow()
     }.phy
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun readPhy(): PreferredPhy = tryExecute(response = {
-        callback.onPhyRead.getOrThrow()
-    }) {
+    suspend fun readPhy(): PreferredPhy = execute(actionWithoutResult = {
         readPhy()
+    }) {
+        callback.onPhyRead.getOrThrow()
     }.phy
 
-    suspend fun readRssi(): Int = execute(response = {
-        callback.onReadRemoteRssi.getOrThrow()
-    }) {
+    suspend fun readRssi(): Int = execute(actionWithResult = {
         readRemoteRssi()
+    }) {
+        callback.onReadRemoteRssi.getOrThrow()
     }.rssi
 
     suspend fun startObservation(characteristic: Characteristic) {
@@ -229,7 +219,7 @@ internal class Connection(
     }
 
     private fun setCharacteristicNotification(
-        characteristic: AndroidGattCharacteristic,
+        characteristic: DiscoveredCharacteristic,
         enable: Boolean
     ) = bluetoothGatt.setCharacteristicNotification(
         characteristic.bluetoothGattCharacteristic,
@@ -237,7 +227,7 @@ internal class Connection(
     )
 
     private suspend fun setConfigDescriptor(
-        characteristic: AndroidGattCharacteristic,
+        characteristic: DiscoveredCharacteristic,
         enable: Boolean
     ) {
         val configDescriptor = characteristic.configDescriptor
@@ -277,7 +267,7 @@ internal class Connection(
 
     fun close() {
         bluetoothGatt.close()
-        invokeOnClose.invoke()
+        onClose.invoke()
     }
 
     private fun bluetoothGattCharacteristicFrom(
@@ -290,7 +280,7 @@ internal class Connection(
 
 }
 
-private suspend inline fun <reified T : Response> Channel<out T>.getOrThrow(): T {
+private suspend inline fun <T : Response> Channel<out T>.getOrThrow(): T {
     val response = try {
         receive()
     } catch (e: ConnectionLostException) {
@@ -300,14 +290,14 @@ private suspend inline fun <reified T : Response> Channel<out T>.getOrThrow(): T
     return response
 }
 
-private inline fun BluetoothGatt.execute(crossinline action: BluetoothGatt.() -> Boolean): Boolean {
+private suspend inline fun BluetoothGatt.execute(crossinline action: suspend BluetoothGatt.() -> Boolean): Boolean {
     if (action()) {
         return true
     }
     throw GattRequestRejectedException()
 }
 
-private inline fun BluetoothGatt.tryExecute(crossinline action: BluetoothGatt.() -> Unit): Boolean {
+private suspend inline fun BluetoothGatt.tryExecute(crossinline action: suspend BluetoothGatt.() -> Unit): Boolean {
     try {
         action()
         return true
@@ -316,14 +306,14 @@ private inline fun BluetoothGatt.tryExecute(crossinline action: BluetoothGatt.()
     }
 }
 
-private val AndroidGattCharacteristic.configDescriptor: AndroidGattDescriptor?
-    get() = descriptors.find { it.descriptorUuid == ClientCharacteristicConfigUuid }
+private val DiscoveredCharacteristic.configDescriptor: DiscoveredDescriptor?
+    get() = findDescriptor(ClientCharacteristicConfigUuid)
 
-private val AndroidGattCharacteristic.supportsNotify: Boolean
-    get() = bluetoothGattCharacteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+private val DiscoveredCharacteristic.supportsNotify: Boolean
+    get() = hasProperty(CharacteristicProperty.Notify)
 
-private val AndroidGattCharacteristic.supportsIndicate: Boolean
-    get() = bluetoothGattCharacteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
+private val DiscoveredCharacteristic.supportsIndicate: Boolean
+    get() = hasProperty(CharacteristicProperty.Indicate)
 
 private val PhyOptions.intValue: Int
     @TargetApi(Build.VERSION_CODES.O)
@@ -339,10 +329,10 @@ private val WriteType.intValue: Int
         WriteType.WithoutResponse -> BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
     }
 
-private val Priority.intValue: Int
+private val ConnectionPriority.intValue: Int
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     get() = when (this) {
-        Priority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
-        Priority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
-        Priority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
+        ConnectionPriority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
+        ConnectionPriority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+        ConnectionPriority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
     }

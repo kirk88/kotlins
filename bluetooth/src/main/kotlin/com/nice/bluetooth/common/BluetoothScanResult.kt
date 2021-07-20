@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.bluetooth.common
 
 import android.annotation.TargetApi
@@ -5,9 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
 import android.os.Build
 import android.os.ParcelUuid
-import android.util.ArrayMap
 import android.util.Log
-import android.util.SparseArray
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
@@ -39,7 +39,7 @@ internal object BluetoothUuid {
      * @return [ParcelUuid] parsed from bytes.
      * @throws IllegalArgumentException If the `uuidBytes` cannot be parsed.
      */
-    fun parseUuidFrom(uuidBytes: ByteArray?): ParcelUuid {
+    fun parseUuidFrom(uuidBytes: ByteArray?): UUID {
         requireNotNull(uuidBytes) { "uuidBytes cannot be null" }
         val length = uuidBytes.size
         require(!(length != UUID_BYTES_16_BIT && length != UUID_BYTES_32_BIT && length != UUID_BYTES_128_BIT)) {
@@ -51,7 +51,7 @@ internal object BluetoothUuid {
             val buf = ByteBuffer.wrap(uuidBytes).order(ByteOrder.LITTLE_ENDIAN)
             val msb = buf.getLong(8)
             val lsb = buf.getLong(0)
-            return ParcelUuid(UUID(msb, lsb))
+            return UUID(msb, lsb)
         }
 
         // For 16 bit and 32 bit UUID we need to convert them to 128 bit value.
@@ -68,87 +68,68 @@ internal object BluetoothUuid {
         }
         val msb = BASE_UUID.uuid.mostSignificantBits + (shortUuid shl 32)
         val lsb = BASE_UUID.uuid.leastSignificantBits
-        return ParcelUuid(UUID(msb, lsb))
+        return UUID(msb, lsb)
     }
 }
 
+class ManufacturerData(
+    /**
+     * Two-octet [Company Identifier Code][https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers/]
+     */
+    val code: Int,
+
+    /**
+     * the Manufacturer Data (not including the leading two identifier octets)
+     */
+    val data: ByteArray
+)
+
+class ServiceData(
+    /**
+     * Service Data Uuid
+     */
+    val uuid: UUID,
+
+    /**
+     * The Service Data
+     */
+    val data: ByteArray
+)
+
 class ScanRecord private constructor(
-    /**
-     * Returns a list of service UUIDs within the advertisement that are used to identify the
-     * bluetooth GATT services.
-     */
-    val serviceUuids: List<ParcelUuid>?,
-    /**
-     * Returns a list of service solicitation UUIDs within the advertisement that are used to
-     * identify the Bluetooth GATT services.
-     */
-    val serviceSolicitationUuids: List<ParcelUuid>?,
-    /**
-     * Returns a sparse array of manufacturer identifier and its corresponding manufacturer specific
-     * data.
-     */
-    val manufacturerSpecificData: SparseArray<ByteArray>?,
-    /**
-     * Returns a map of service UUID and its corresponding service data.
-     */
-    val serviceData: Map<ParcelUuid, ByteArray>?,
-    /**
-     * Returns the advertising flags indicating the discoverable mode and capability of the device.
-     * Returns -1 if the flag field is not set.
-     */
+    val serviceUuids: List<UUID>?,
+    val serviceSolicitationUuids: List<UUID>?,
+    val manufacturerSpecificData: List<ManufacturerData>?,
+    val serviceData: List<ServiceData>?,
     // Flags of the advertising data.
     val advertiseFlags: Int,
-    /**
-     * Returns the transmission power level of the packet in dBm. Returns [Integer.MIN_VALUE]
-     * if the field is not set. This value can be used to calculate the path loss of a received
-     * packet using the following equation:
-     *
-     *
-     * `pathloss = txPowerLevel - rssi`
-     */
     // Transmission power level(in dB).
     val txPowerLevel: Int,
-    /**
-     * Returns the local name of the BLE device. This is a UTF-8 encoded string.
-     */
     // Local name of the Bluetooth LE device.
     val deviceName: String?,
-    /**
-     * Returns raw bytes of scan record.
-     */
     // Raw bytes of scan record.
     val bytes: ByteArray
 ) {
 
-    /**
-     * Returns the manufacturer specific data associated with the manufacturer id. Returns
-     * `null` if the `manufacturerId` is not found.
-     */
-    fun getManufacturerSpecificData(manufacturerId: Int): ByteArray? {
-        return if (manufacturerSpecificData == null) {
-            null
-        } else manufacturerSpecificData[manufacturerId]
+    fun getManufacturerSpecificData(manufacturerId: Int): ManufacturerData? {
+        return manufacturerSpecificData?.find { it.code == manufacturerId }
     }
 
-    /**
-     * Returns the service data byte array associated with the `serviceUuid`. Returns
-     * `null` if the `serviceDataUuid` is not found.
-     */
-    fun getServiceData(serviceDataUuid: ParcelUuid?): ByteArray? {
-        return if (serviceDataUuid == null || serviceData == null) {
-            null
-        } else serviceData[serviceDataUuid]
+    fun getServiceData(serviceDataUuid: UUID): ServiceData? {
+        return serviceData?.find { it.uuid == serviceDataUuid }
     }
 
     override fun toString(): String {
-        return ("ScanRecord [mAdvertiseFlags=" + advertiseFlags + ", mServiceUuids=" + serviceUuids
+        return ("ScanRecord [mAdvertiseFlags=" + advertiseFlags
+                + ", mServiceUuids=" + serviceUuids
                 + ", mServiceSolicitationUuids=" + serviceSolicitationUuids
                 + ", mManufacturerSpecificData=" + manufacturerSpecificData
                 + ", mServiceData=" + serviceData
-                + ", mTxPowerLevel=" + txPowerLevel + ", mDeviceName=" + deviceName + "]")
+                + ", mTxPowerLevel=" + txPowerLevel
+                + ", mDeviceName=" + deviceName + "]")
     }
 
-    companion object {
+    internal companion object {
         private const val TAG = "ScanRecord"
 
         // The following data type values are assigned by Bluetooth SIG.
@@ -171,30 +152,18 @@ class ScanRecord private constructor(
         private const val DATA_TYPE_SERVICE_SOLICITATION_UUIDS_128_BIT = 0x15
         private const val DATA_TYPE_MANUFACTURER_SPECIFIC_DATA = 0xFF
 
-        /**
-         * Parse scan record bytes to [ScanRecord].
-         *
-         *
-         * The format is defined in Bluetooth 4.1 specification, Volume 3, Part C, Section 11 and 18.
-         *
-         *
-         * All numerical multi-byte entities and values shall use little-endian **byte**
-         * order.
-         *
-         * @param scanRecord The scan record of Bluetooth LE advertisement and/or scan response.
-         */
-        internal fun parseFromBytes(scanRecord: ByteArray?): ScanRecord? {
+        fun parseFromBytes(scanRecord: ByteArray?): ScanRecord? {
             if (scanRecord == null) {
                 return null
             }
             var currentPos = 0
             var advertiseFlag = -1
-            var serviceUuids: MutableList<ParcelUuid>? = ArrayList()
-            val serviceSolicitationUuids: MutableList<ParcelUuid> = ArrayList()
             var localName: String? = null
             var txPowerLevel = Int.MIN_VALUE
-            val manufacturerData = SparseArray<ByteArray>()
-            val serviceData: MutableMap<ParcelUuid, ByteArray> = ArrayMap()
+            var serviceUuids: MutableList<UUID>? = mutableListOf()
+            val serviceSolicitationUuids: MutableList<UUID> = mutableListOf()
+            val serviceData: MutableList<ServiceData> = mutableListOf()
+            val manufacturerData: MutableList<ManufacturerData> = mutableListOf()
             return try {
                 while (currentPos < scanRecord.size) {
                     // length is unsigned int.
@@ -205,8 +174,7 @@ class ScanRecord private constructor(
                     // Note the length includes the length of the field type itself.
                     val dataLength = length - 1
                     // fieldType is unsigned int.
-                    val fieldType: Int = scanRecord[currentPos++].toInt() and 0xFF
-                    when (fieldType) {
+                    when (val fieldType: Int = scanRecord[currentPos++].toInt() and 0xFF) {
                         DATA_TYPE_FLAGS -> advertiseFlag = scanRecord[currentPos].toInt() and 0xFF
                         DATA_TYPE_SERVICE_UUIDS_16_BIT_PARTIAL, DATA_TYPE_SERVICE_UUIDS_16_BIT_COMPLETE -> parseServiceUuid(
                             scanRecord, currentPos,
@@ -255,7 +223,7 @@ class ScanRecord private constructor(
                                 scanRecord,
                                 currentPos + serviceUuidLength, dataLength - serviceUuidLength
                             )
-                            serviceData[serviceDataUuid] = serviceDataArray
+                            serviceData.add(ServiceData(serviceDataUuid, serviceDataArray))
                         }
                         DATA_TYPE_MANUFACTURER_SPECIFIC_DATA -> {
                             // The first two bytes of the manufacturer specific data are
@@ -267,7 +235,7 @@ class ScanRecord private constructor(
                                 scanRecord, currentPos + 2,
                                 dataLength - 2
                             )
-                            manufacturerData.put(manufacturerId, manufacturerDataBytes)
+                            manufacturerData.add(ManufacturerData(manufacturerId, manufacturerDataBytes))
                         }
                         else -> {
                         }
@@ -283,7 +251,10 @@ class ScanRecord private constructor(
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "unable to parse scan record: " + Arrays.toString(scanRecord))
-                ScanRecord(null, null, null, null, -1, Int.MIN_VALUE, null, scanRecord)
+                ScanRecord(
+                    null, null, null,
+                    null, -1, Int.MIN_VALUE, null, scanRecord
+                )
             }
         }
 
@@ -293,7 +264,7 @@ class ScanRecord private constructor(
             currentPos: Int,
             dataLength: Int,
             uuidLength: Int,
-            serviceUuids: MutableList<ParcelUuid>?
+            serviceUuids: MutableList<UUID>?
         ): Int {
             var position = currentPos
             var length = dataLength
@@ -317,7 +288,7 @@ class ScanRecord private constructor(
             currentPos: Int,
             dataLength: Int,
             uuidLength: Int,
-            serviceSolicitationUuids: MutableList<ParcelUuid>
+            serviceSolicitationUuids: MutableList<UUID>
         ): Int {
             var position = currentPos
             var length = dataLength
@@ -339,15 +310,19 @@ class ScanRecord private constructor(
     }
 }
 
-class AndroidScanResult(
+internal data class BluetoothScanResult(
     val device: BluetoothDevice,
     val rssi: Int,
+    val scanRecord: ScanRecord?
+)
+
+internal fun BluetoothScanResult(
+    device: BluetoothDevice,
+    rssi: Int,
     scanRecord: ByteArray?
-) {
-
-    val scanRecord: ScanRecord? = ScanRecord.parseFromBytes(scanRecord)
-
-}
+) = BluetoothScanResult(device, rssi, ScanRecord.parseFromBytes(scanRecord))
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-internal fun ScanResult.toAndroidScanResult() = AndroidScanResult(device, rssi, scanRecord?.bytes)
+internal fun BluetoothScanResult(
+    scanResult: ScanResult
+) = BluetoothScanResult(scanResult.device, scanResult.rssi, scanResult.scanRecord?.bytes)

@@ -1,7 +1,6 @@
 package com.example.sample
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -10,15 +9,12 @@ import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.nice.bluetooth.AndroidPeripheral
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
-import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.peripheral
 import com.nice.kotlins.adapter.ItemViewHolder
 import com.nice.kotlins.adapter.SimpleRecyclerAdapter
@@ -35,11 +31,7 @@ import com.nice.kotlins.widget.progressViews
 import com.nice.kotlins.widget.tipViews
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.flow.*
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -53,11 +45,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     override val tipView: TipView by tipViews()
 
     private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
-
-    private val lock = Mutex()
-
-    private val owner1 = Any()
-    private val owner2 = Any()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,7 +110,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     }
 
 
-    @OptIn(FlowPreview::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun initBle() {
         val adapter = BleAdapter(this).also {
             binding.recyclerView.adapter = it
@@ -135,31 +122,24 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-                val cached = mutableListOf<Advertisement>()
-
-                Scanner().advertisements.collect { advertment ->
-                    if(cached.none { it.address ==  advertment.address}) {
-                        cached.add(advertment)
+                Scanner().advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
+                    if (accumulator.add(value)) {
                         withContext(Dispatchers.Main) {
-                            adapter.addItem(advertment)
+                            adapter.addItem(value)
                         }
-
-                        channel.send(advertment)
+                        channel.send(value)
                     }
-                }
+                    accumulator
+                }.collect()
             }
 
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
                 channel.consumeAsFlow().collect {
-
                     launch {
                         val peripheral = peripheral(it)
 
-                        (peripheral as AndroidPeripheral).mtu.collect {
-
-                        }
                         Log.e(TAG, "connecting")
                         peripheral.connect()
 
@@ -173,7 +153,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                             }
                         }
                     }
-
                 }
 
             }
@@ -189,22 +168,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
+        Bluetooth.state.onEach {
+            Log.e(TAG, "state: $it")
+            if (it == BluetoothState.Opened) {
+                startScan()
+            }
+        }.launchIn(lifecycleScope)
+
         if (!Bluetooth.isEnabled) {
             Bluetooth.isEnabled = true
-
-            Bluetooth.state.onEach {
-                Log.e(TAG, "state: $it")
-                if (it == BluetoothState.Opened) {
-                    startScan()
-                }
-            }.launchIn(lifecycleScope)
-
-            return
         }
-
-        startScan()
-
-
     }
 
     private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_1) {

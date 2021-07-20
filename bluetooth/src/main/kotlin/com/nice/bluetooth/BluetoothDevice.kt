@@ -29,12 +29,12 @@ internal fun BluetoothDevice.connect(
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
-    invokeOnClose: () -> Unit
+    onClose: () -> Unit
 ): Connection? =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        connectApi26(context, defaultTransport, defaultPhy, state, mtu, phy, invokeOnClose)
+        connectApi26(context, defaultTransport, defaultPhy, state, mtu, phy, onClose)
     } else {
-        connectApi21(context, defaultTransport, state, mtu, invokeOnClose)
+        connectApi21(context, defaultTransport, state, mtu, onClose)
     }
 
 /**
@@ -46,7 +46,7 @@ private fun BluetoothDevice.connectApi21(
     defaultTransport: Transport,
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
-    invokeOnClose: () -> Unit
+    onClose: () -> Unit
 ): Connection? {
     val callback = Callback(state, mtu)
     val bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -68,7 +68,7 @@ private fun BluetoothDevice.connectApi21(
         callback
     ) {
         dispatcher.close()
-        invokeOnClose.invoke()
+        onClose.invoke()
     }
 }
 
@@ -80,7 +80,7 @@ private fun BluetoothDevice.connectApi26(
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
-    invokeOnClose: () -> Unit
+    onClose: () -> Unit
 ): Connection? {
     val thread = HandlerThread(threadName).apply { start() }
     try {
@@ -102,7 +102,7 @@ private fun BluetoothDevice.connectApi26(
             callback
         ) {
             thread.quit()
-            invokeOnClose.invoke()
+            onClose.invoke()
         }
     } catch (t: Throwable) {
         thread.quit()

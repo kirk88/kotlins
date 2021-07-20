@@ -68,5 +68,5 @@ private fun Int.toBluetoothState(): BluetoothState = when (this) {
     BluetoothAdapter.STATE_TURNING_ON -> BluetoothState.Opening
     BluetoothAdapter.STATE_OFF -> BluetoothState.Closed
     BluetoothAdapter.STATE_TURNING_OFF -> BluetoothState.Closing
-    else -> throw IllegalArgumentException("Unknown state $this")
+    else -> error("Unknown bluetooth state: $this")
 }

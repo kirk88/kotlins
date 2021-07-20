@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 fun CoroutineScope.peripheral(
     advertisement: Advertisement,
     builderAction: PeripheralBuilderAction = {}
-): Peripheral = peripheral(advertisement.device, builderAction)
+): Peripheral = peripheral(advertisement.bluetoothDevice, builderAction)
 
 fun CoroutineScope.peripheral(
     bluetoothDevice: BluetoothDevice,
@@ -72,7 +72,7 @@ class AndroidPeripheral internal constructor(
     private val observers = Observers(this)
 
     override val services: List<DiscoveredService>
-        get() = connection.services.map { it.toDiscoveredService() }
+        get() = connection.services
 
     @Volatile
     private var _connection: Connection? = null
@@ -150,7 +150,7 @@ class AndroidPeripheral internal constructor(
 
     override suspend fun readRssi(): Int = connection.readRssi()
 
-    override suspend fun requestConnectionPriority(priority: Priority): Priority =
+    override suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority =
         connection.requestConnectionPriority(priority)
 
     override suspend fun requestMtu(mtu: Int): Int = connection.requestMtu(mtu)

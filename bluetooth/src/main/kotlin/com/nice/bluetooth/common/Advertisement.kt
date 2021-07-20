@@ -10,7 +10,7 @@ enum class BondState {
 }
 
 interface Advertisement {
-    val device: BluetoothDevice
+    val bluetoothDevice: BluetoothDevice
 
     /**
      * The name in the Advertisement.
@@ -57,7 +57,7 @@ interface Advertisement {
      * @param uuid the Service UUID
      * @return the data associated with the service or `null` if not found
      */
-    fun serviceData(uuid: UUID): ByteArray?
+    fun serviceData(uuid: UUID): ServiceData?
 
     /**
      * Lookup the Manufacturer Specific Data by
@@ -67,6 +67,6 @@ interface Advertisement {
      * @return the Manufacturer Data for the given code (does not include the leading two identifier octets),
      * or `null` if not found
      */
-    fun manufacturerData(companyIdentifierCode: Int): ByteArray?
+    fun manufacturerData(companyIdentifierCode: Int): ManufacturerData?
 
 }

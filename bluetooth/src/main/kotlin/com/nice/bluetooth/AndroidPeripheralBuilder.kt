@@ -35,7 +35,7 @@ class AndroidServicesDiscoveredPeripheral internal constructor(
 class AndroidConnectedPeripheral internal constructor(
     private val peripheral: AndroidPeripheral
 ) : ConnectedPeripheral {
-    override suspend fun requestConnectionPriority(priority: Priority): Priority {
+    override suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
         return peripheral.requestConnectionPriority(priority)
     }
 

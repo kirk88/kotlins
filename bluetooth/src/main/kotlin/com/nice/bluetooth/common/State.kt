@@ -1,23 +1,10 @@
 package com.nice.bluetooth.common
 
-sealed class BluetoothState {
-
-    object Opened : BluetoothState() {
-        override fun toString(): String = "Opened"
-    }
-
-    object Opening : BluetoothState() {
-        override fun toString(): String = "Opening"
-    }
-
-    object Closed : BluetoothState() {
-        override fun toString(): String = "Closed"
-    }
-
-    object Closing : BluetoothState() {
-        override fun toString(): String = "Closing"
-    }
-
+enum class BluetoothState {
+    Opened,
+    Opening,
+    Closed,
+    Closing
 }
 
 sealed class ConnectionState {
@@ -48,26 +35,26 @@ sealed class ConnectionState {
         /**
          * State statuses translated from their respective platforms:
          *
-         * - Android: https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/lollipop-release/stack/include/gatt_api.h#106
+         * https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/lollipop-release/stack/include/gatt_api.h#106
          */
         sealed class Status {
 
             /**
-             * - Android: `GATT_CONN_TERMINATE_PEER_USER`
+             *  `GATT_CONN_TERMINATE_PEER_USER`
              */
             object PeripheralDisconnected : Status() {
                 override fun toString(): String = "PeripheralDisconnected"
             }
 
             /**
-             * - Android: `GATT_CONN_FAIL_ESTABLISH`
+             *  `GATT_CONN_FAIL_ESTABLISH`
              */
             object Failed : Status() {
                 override fun toString(): String = "Failed"
             }
 
             /**
-             * - Android: `GATT_CONN_TIMEOUT`
+             *  `GATT_CONN_TIMEOUT`
              */
             object Timeout : Status() {
                 override fun toString(): String = "Timeout"
@@ -75,14 +62,14 @@ sealed class ConnectionState {
 
 
             /**
-             * - Android: `GATT_CONN_CANCEL`
+             *  `GATT_CONN_CANCEL`
              */
             object Cancelled : Status() {
                 override fun toString(): String = "Cancelled"
             }
 
 
-            /** Catch-all for any statuses that are unknown for a platform. */
+            /** Catch-all for any statuses that are unknown. */
             data class Unknown(val status: Int) : Status() {
                 override fun toString(): String = "Unknown($status)"
             }

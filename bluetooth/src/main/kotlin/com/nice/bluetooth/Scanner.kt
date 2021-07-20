@@ -10,9 +10,8 @@ import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
 import com.nice.bluetooth.common.Advertisement
-import com.nice.bluetooth.common.AndroidScanResult
+import com.nice.bluetooth.common.BluetoothScanResult
 import com.nice.bluetooth.common.Scanner
-import com.nice.bluetooth.common.toAndroidScanResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -46,7 +45,7 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
 
         val callback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                trySendBlocking(AndroidAdvertisement(result.toAndroidScanResult()))
+                trySendBlocking(AndroidAdvertisement(BluetoothScanResult(result)))
                     .onFailure {
                         Log.w(
                             TAG,
@@ -58,7 +57,7 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
             override fun onBatchScanResults(results: MutableList<ScanResult>) {
                 runCatching {
                     results.forEach {
-                        trySendBlocking(AndroidAdvertisement(it.toAndroidScanResult())).getOrThrow()
+                        trySendBlocking(AndroidAdvertisement(BluetoothScanResult(it))).getOrThrow()
                     }
                 }.onFailure {
                     Log.w(
@@ -98,7 +97,7 @@ class AndroidScanner internal constructor(private val filterServices: List<UUID>
         check(bluetoothAdapter.isEnabled) { "Bluetooth is disabled" }
 
         val callback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
-            trySendBlocking(AndroidAdvertisement(AndroidScanResult(device, rssi, scanRecord)))
+            trySendBlocking(AndroidAdvertisement(BluetoothScanResult(device, rssi, scanRecord)))
                 .onFailure {
                     Log.w(
                         TAG,
@@ -118,4 +117,3 @@ class AndroidScanner internal constructor(private val filterServices: List<UUID>
         }
     }
 }
-

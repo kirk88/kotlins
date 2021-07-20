@@ -2,58 +2,67 @@ package com.nice.bluetooth
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.*
-import android.os.ParcelUuid
-import com.nice.bluetooth.common.Advertisement
-import com.nice.bluetooth.common.AndroidScanResult
-import com.nice.bluetooth.common.BondState
-import com.nice.bluetooth.common.ManufacturerData
+import com.nice.bluetooth.common.*
 import java.util.*
 
 internal class AndroidAdvertisement(
-    private val scanResult: AndroidScanResult
+    private val scanResult: BluetoothScanResult
 ) : Advertisement {
 
-    override val device: BluetoothDevice
+    private val scanRecord: ScanRecord?
+        get() = scanResult.scanRecord
+
+    override val bluetoothDevice: BluetoothDevice
         get() = scanResult.device
 
     override val name: String
-        get() = device.name.orEmpty()
+        get() = bluetoothDevice.name.orEmpty()
 
     override val address: String
-        get() = device.address.orEmpty()
+        get() = bluetoothDevice.address.orEmpty()
 
     override val bondState: BondState
-        get() = when (device.bondState) {
+        get() = when (bluetoothDevice.bondState) {
             BOND_NONE -> BondState.None
             BOND_BONDING -> BondState.Bonding
             BOND_BONDED -> BondState.Bonded
-            else -> error("Unknown bond state: ${device.bondState}")
+            else -> error("Unknown bond state: ${bluetoothDevice.bondState}")
         }
 
     override val rssi: Int
         get() = scanResult.rssi
 
     override val txPower: Int?
-        get() = scanResult.scanRecord?.txPowerLevel
+        get() = scanRecord?.txPowerLevel
 
     override val uuids: List<UUID>
-        get() = scanResult.scanRecord?.serviceUuids?.map { it.uuid } ?: emptyList()
+        get() = scanRecord?.serviceUuids.orEmpty()
 
     override val manufacturerData: ManufacturerData?
-        get() = scanResult.scanRecord?.manufacturerSpecificData?.takeIf { it.size() > 0 }?.let {
-            ManufacturerData(
-                it.keyAt(0),
-                it.valueAt(0)
-            )
-        }
+        get() = scanRecord?.manufacturerSpecificData?.find { it.data.isNotEmpty() }
 
-    override fun serviceData(uuid: UUID): ByteArray? =
-        scanResult.scanRecord?.getServiceData(ParcelUuid(uuid))
+    override fun serviceData(uuid: UUID): ServiceData? =
+        scanRecord?.getServiceData(uuid)
 
-    override fun manufacturerData(companyIdentifierCode: Int): ByteArray? =
-        scanResult.scanRecord?.getManufacturerSpecificData(companyIdentifierCode)
+    override fun manufacturerData(companyIdentifierCode: Int): ManufacturerData? =
+        scanRecord?.getManufacturerSpecificData(companyIdentifierCode)
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AndroidAdvertisement
+
+        if (bluetoothDevice != other.bluetoothDevice) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return bluetoothDevice.hashCode()
+    }
 
     override fun toString(): String =
-        "Advertisement(name=$name, bluetoothDevice=$device, rssi=$rssi, txPower=$txPower)"
+        "Advertisement(name=$name, address=$address, rssi=$rssi, txPower=$txPower)"
+
 }
