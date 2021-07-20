@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-  <groupId>com.nice.common</groupId>
+  <groupId>com.nice.kotlins</groupId>
   <artifactId>bluetooth</artifactId>
   <versioning>
     <release>1.0.3</release>
@@ -10,6 +10,6 @@
       <version>1.0.2</version>
       <version>1.0.3</version>
     </versions>
-    <lastUpdated>20210720082410</lastUpdated>
+    <lastUpdated>20210720085240</lastUpdated>
   </versioning>
 </metadata>
