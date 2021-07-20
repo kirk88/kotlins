@@ -65,9 +65,6 @@ dependencies {
     api deps.androidxDatastoreCore
     api deps.androidxMultidex
     api deps.material
-    api deps.okhttp3
-    api deps.okhttp3Logging
-    api deps.gson
     api deps.coil
 }
 

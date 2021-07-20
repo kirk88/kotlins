@@ -1,9 +1,11 @@
 package com.nice.common.viewmodel
 
-abstract class ViewModelRepository<SOURCE : ViewModelDataSource>(val dataSource: SOURCE) {
+import java.io.Closeable
 
-    open fun clear() {
-        dataSource.clear()
+abstract class ViewModelRepository<SOURCE : ViewModelDataSource>(val dataSource: SOURCE): Closeable {
+
+    override fun close() {
+        dataSource.close()
     }
 
 }

@@ -10,6 +10,7 @@ import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
@@ -29,9 +30,12 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
+import com.nice.okfaker.OkFaker
+import com.nice.okfaker.asFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import okhttp3.OkHttpClient
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -61,6 +65,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
         }
+
+
+        OkFaker.get<String>().client(OkHttpClient()).url("https://www.baidu.com").build().asFlow().onEach {
+
+            Log.e("TAGTAG", it)
+
+        }.launchIn(lifecycleScope)
 
 //        lifecycleScope.launch(Dispatchers.IO) {
 //            DB.use(true) {
