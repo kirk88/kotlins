@@ -100,7 +100,6 @@ interface Peripheral : Readable, Writable {
      * (via [setPreferredPhy]), or if the peripheral initiates an PHY change. [Flow]'s `value` will be `null` until PHY
      * is negotiated.
      */
-    @get:RequiresApi(Build.VERSION_CODES.O)
     val phy: Flow<PreferredPhy?>
 
     /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
