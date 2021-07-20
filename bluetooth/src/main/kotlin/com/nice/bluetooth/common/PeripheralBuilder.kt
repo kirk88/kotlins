@@ -35,12 +35,15 @@ interface ConnectedPeripheral {
 
 internal typealias ServicesDiscoveredAction = suspend ServicesDiscoveredPeripheral.() -> Unit
 internal typealias ConnectedAction = suspend ConnectedPeripheral.() -> Unit
+internal typealias DisconnectedAction = () -> Unit
 
 interface PeripheralBuilder {
 
     fun onConnected(action: ConnectedAction)
 
     fun onServicesDiscovered(action: ServicesDiscoveredAction)
+
+    fun onDisconnected(action: DisconnectedAction)
 
     var defaultTransport: Transport
 
