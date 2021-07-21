@@ -29,7 +29,11 @@ sealed class ConnectionState {
     data class Disconnected(val status: Status? = null) : ConnectionState() {
 
         override fun toString(): String {
-            return "Disconnected.Status.$status"
+            return if (status != null) {
+                "Disconnected.Status.$status"
+            } else {
+                "Disconnected"
+            }
         }
 
         /**
