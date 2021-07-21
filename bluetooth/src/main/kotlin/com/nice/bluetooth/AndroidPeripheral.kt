@@ -32,8 +32,7 @@ fun CoroutineScope.peripheral(
         builder.defaultTransport,
         builder.defaultPhy,
         builder.onConnected,
-        builder.onServicesDiscovered,
-        builder.onDisconnected
+        builder.onServicesDiscovered
     )
 }
 
@@ -43,8 +42,7 @@ class AndroidPeripheral internal constructor(
     private val defaultTransport: Transport,
     private val defaultPhy: Phy,
     private val onConnected: ConnectedAction,
-    private val onServicesDiscovered: ServicesDiscoveredAction,
-    private val onDisconnected: DisconnectedAction
+    private val onServicesDiscovered: ServicesDiscoveredAction
 ) : Peripheral {
 
     private val receiver = registerBluetoothStateBroadcastReceiver { state ->
@@ -131,7 +129,6 @@ class AndroidPeripheral internal constructor(
     private fun closeConnection() {
         _connection?.close()
         _connection = null
-        onDisconnected.invoke()
     }
 
     override suspend fun connect() {
