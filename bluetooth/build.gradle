@@ -37,7 +37,6 @@ android {
 dependencies {
     implementation deps.kotlinStdlib
     implementation deps.kotlinxCoroutinesCore
-    implementation deps.kotlinxCoroutinesCoreJvm
     implementation deps.kotlinxCoroutinesAndroid
     implementation deps.androidxSetup
     implementation deps.androidxAnnotation

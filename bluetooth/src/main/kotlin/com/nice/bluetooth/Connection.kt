@@ -25,9 +25,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.*
 
-private val GattSuccess = GattStatus(GATT_SUCCESS)
+private val STATUS_SUCCESS = GattStatus(GATT_SUCCESS)
 
-private val ClientCharacteristicConfigUuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
+private val CHARACTERISTIC_CONFIG_UUID = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG_UUID)
 
 internal class Connection(
     private val bluetoothGatt: BluetoothGatt,
@@ -286,7 +286,7 @@ private suspend inline fun <T : Response> Channel<out T>.getOrThrow(): T {
     } catch (e: ConnectionLostException) {
         throw ConnectionLostException(cause = e)
     }
-    if (response.status != GattSuccess) throw GattStatusException(response.toString())
+    if (response.status != STATUS_SUCCESS) throw GattStatusException(response.toString())
     return response
 }
 
@@ -307,7 +307,7 @@ private suspend inline fun BluetoothGatt.tryExecute(crossinline action: suspend 
 }
 
 private val DiscoveredCharacteristic.configDescriptor: DiscoveredDescriptor?
-    get() = findDescriptor(ClientCharacteristicConfigUuid)
+    get() = findDescriptor(CHARACTERISTIC_CONFIG_UUID)
 
 private val DiscoveredCharacteristic.supportsNotify: Boolean
     get() = hasProperty(CharacteristicProperty.Notify)

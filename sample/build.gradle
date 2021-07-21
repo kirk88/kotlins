@@ -47,4 +47,5 @@ dependencies {
     implementation project(':sqlite')
     implementation project(':bluetooth')
     implementation project(':okfaker')
+    implementation project(':atomic')
 }

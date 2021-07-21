@@ -2,20 +2,11 @@
 
 package com.nice.okfaker
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import com.google.gson.reflect.TypeToken
-import com.nice.jsonparser.toJson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import okhttp3.*
 import java.io.File
 import java.lang.reflect.Type
 import kotlin.collections.set
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 class OkFaker<T> private constructor(
     private val request: OkRequest,
@@ -514,7 +505,7 @@ class RequestPairs<K, V>(
     }
 
     override fun toString(): String {
-        return pairs.toJson()
+        return GSON.toJson(pairs)
     }
 
     override fun iterator(): Iterator<Map.Entry<K, V>> {
@@ -536,22 +527,5 @@ inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -
 }
 
 fun requestPairsOf(vararg pairs: Pair<String, Any?>): RequestPairs<String, Any?> = RequestPairs(pairs.toMap())
-
-fun <T : Any> OkFaker<T>.asFlow(): Flow<T> = flow {
-    val result = withContext(Dispatchers.IO) {
-        execute()
-    }
-    emit(result)
-}
-
-fun <T : Any> OkFaker<T>.asLiveData(
-    context: CoroutineContext = EmptyCoroutineContext,
-    timeoutInMillis: Long = 5000L
-): LiveData<T> = liveData(context, timeoutInMillis) {
-    val result = withContext(Dispatchers.IO) {
-        execute()
-    }
-    emit(result)
-}
 
 private fun Any?.toStringOrEmpty() = (this ?: "").toString()

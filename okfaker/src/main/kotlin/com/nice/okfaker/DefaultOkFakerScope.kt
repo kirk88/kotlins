@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.okfaker
 
 class DefaultOkFakerScope : OkFakerScope {

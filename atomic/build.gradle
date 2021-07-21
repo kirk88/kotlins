@@ -11,14 +11,11 @@ java {
 
 dependencies {
     implementation deps.kotlinStdlib
-    implementation deps.gson
-    api deps.okhttp3
-    api deps.okhttp3Logging
 }
 
 def versionMajor = 1
 def versionMinor = 0
-def versionPatch = 0
+def versionPatch = 3
 
 uploadArchives {
     repositories.mavenDeployer {
@@ -26,7 +23,7 @@ uploadArchives {
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
             groupId "com.nice.kotlins"
-            artifactId "kotson"
+            artifactId "atomic"
             version "${versionMajor}.${versionMinor}.${versionPatch}"
 
             licenses {

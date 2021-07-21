@@ -1,6 +1,5 @@
 package com.nice.okfaker
 
-import com.nice.jsonparser.parseAsJson
 import okhttp3.Response
 import java.lang.reflect.Type
 
@@ -46,8 +45,9 @@ internal class OkTransformer<T> {
         override fun map(value: Response): T = when (type) {
             Response::class.java -> value as T
             String::class.java -> value.body!!.string() as T
-            else -> value.body!!.string().parseAsJson(type)
+            else -> GSON.fromJson(value.body!!.string(), type)
         }
 
     }
+
 }

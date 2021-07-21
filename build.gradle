@@ -10,12 +10,10 @@ buildscript {
             sourceCompatibility: JavaVersion.VERSION_1_8,
             targetCompatibility: JavaVersion.VERSION_1_8,
 
-            pluginVersions     : "0.38.0",
+            pluginVersions     : "0.39.0",
 
             pluginAndroid      : '4.2.2',
             pluginKotlin       : "1.5.20",
-
-            pluginAtomicfu     : "0.16.2",
 
             kotlinLib          : "1.5.20",
             kotlinMain         : "1.5.1",
@@ -55,12 +53,10 @@ buildscript {
 
             androidPlugin                     : "com.android.tools.build:gradle:${versions.pluginAndroid}",
             kotlinPlugin                      : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.pluginKotlin}",
-            atomicfuPlugin                    : "org.jetbrains.kotlinx:atomicfu-gradle-plugin:${versions.pluginAtomicfu}",
 
             kotlinStdlib                      : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinLib}",
 
             kotlinxCoroutinesCore             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinMain}",
-            kotlinxCoroutinesCoreJvm          : "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${versions.kotlinMain}",
             kotlinxCoroutinesAndroid          : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinMain}",
 
             kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",

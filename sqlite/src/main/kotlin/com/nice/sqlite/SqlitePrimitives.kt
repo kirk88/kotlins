@@ -1,25 +1,20 @@
-package com.nice.sqlite;
+package com.nice.sqlite
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*
 
-class JavaSqlitePrimitives {
-    static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
+internal object SqlitePrimitives {
+    val PRIMITIVES_TO_WRAPPERS: MutableMap<Class<*>?, Class<*>>
 
-    static {
-        PRIMITIVES_TO_WRAPPERS = new HashMap<>();
-        PRIMITIVES_TO_WRAPPERS.put(boolean.class, Boolean.class);
-        PRIMITIVES_TO_WRAPPERS.put(byte.class, Byte.class);
-        PRIMITIVES_TO_WRAPPERS.put(char.class, Character.class);
-        PRIMITIVES_TO_WRAPPERS.put(double.class, Double.class);
-        PRIMITIVES_TO_WRAPPERS.put(float.class, Float.class);
-        PRIMITIVES_TO_WRAPPERS.put(int.class, Integer.class);
-        PRIMITIVES_TO_WRAPPERS.put(long.class, Long.class);
-        PRIMITIVES_TO_WRAPPERS.put(short.class, Short.class);
-        PRIMITIVES_TO_WRAPPERS.put(void.class, Void.class);
+    init {
+        PRIMITIVES_TO_WRAPPERS = HashMap()
+        PRIMITIVES_TO_WRAPPERS[Boolean::class.javaPrimitiveType] = Boolean::class.java
+        PRIMITIVES_TO_WRAPPERS[Byte::class.javaPrimitiveType] = Byte::class.java
+        PRIMITIVES_TO_WRAPPERS[Char::class.javaPrimitiveType] = Char::class.java
+        PRIMITIVES_TO_WRAPPERS[Double::class.javaPrimitiveType] = Double::class.java
+        PRIMITIVES_TO_WRAPPERS[Float::class.javaPrimitiveType] = Float::class.java
+        PRIMITIVES_TO_WRAPPERS[Int::class.javaPrimitiveType] = Int::class.java
+        PRIMITIVES_TO_WRAPPERS[Long::class.javaPrimitiveType] = Long::class.java
+        PRIMITIVES_TO_WRAPPERS[Short::class.javaPrimitiveType] = Short::class.java
+        PRIMITIVES_TO_WRAPPERS[Void.TYPE] = Void::class.java
     }
-
-    private JavaSqlitePrimitives() {
-    }
-
 }

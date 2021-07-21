@@ -270,11 +270,11 @@ fun Any.toColumnElements(destination: MutableList<SqlColumnElement>): List<SqlCo
     return destination
 }
 
-val AndroidSQLiteOpenHelperFactory = FrameworkSQLiteOpenHelperFactory()
+private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
 open class ManagedSQLiteOpenHelper(
     configuration: SupportSQLiteOpenHelper.Configuration,
-    factory: SupportSQLiteOpenHelper.Factory = AndroidSQLiteOpenHelperFactory
+    factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
 ) {
 
     private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)

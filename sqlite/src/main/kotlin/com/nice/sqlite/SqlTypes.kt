@@ -48,15 +48,15 @@ fun ON_DELETE(constraintActions: ConstraintActions): SqlTypeModifier {
 }
 
 fun FOREIGN_KEY(
-        columnName: String,
-        referenceTable: String,
-        referenceColumn: String,
-        vararg actions: SqlTypeModifier
+    columnName: String,
+    referenceTable: String,
+    referenceColumn: String,
+    vararg actions: SqlTypeModifier
 ): SqlColumnProperty {
     return "" of SqlTypeImpl(
-            "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${
-                actions.map { it.modifier }.joinToString("") { " $it" }
-            }"
+        "FOREIGN KEY($columnName) REFERENCES $referenceTable($referenceColumn)${
+            actions.map { it.modifier }.joinToString("") { " $it" }
+        }"
     )
 }
 

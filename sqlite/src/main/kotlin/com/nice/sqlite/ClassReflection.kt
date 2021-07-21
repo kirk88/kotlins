@@ -12,7 +12,7 @@ internal class FieldWrapper(private val field: Field) {
         field.isAccessible = true
 
         val annotation = field.getAnnotation(Column::class.java)
-        name = annotation?.name.let { if(it.isNullOrEmpty()) field.name else it }
+        name = annotation?.name.let { if (it.isNullOrEmpty()) field.name else it }
         converter = annotation?.let { ColumnConverters.get(it.converterClass) }
     }
 
