@@ -3,7 +3,7 @@ package com.nice.atomic
 import java.util.concurrent.atomic.AtomicIntegerArray
 
 fun atomicIntArrayOf(array: IntArray): KAtomicIntArray = KAtomicIntArray(array)
-fun atomicIntArrayOfNulls(size: Int): KAtomicIntArray = KAtomicIntArray(size)
+fun atomicIntArrayOf(size: Int): KAtomicIntArray = KAtomicIntArray(size)
 
 class KAtomicIntArray : KAtomicNumberArray<Int> {
 

@@ -6,7 +6,7 @@ fun <V> atomic(initial: V): KAtomicReference<V> = KAtomicReference(initial)
 
 class KAtomicReference<V> internal constructor(initial: V) : KAtomic<V> {
 
-    private val delegate = AtomicReference<V>(initial)
+    private val delegate = AtomicReference(initial)
 
     override var value: V
         get() = delegate.get()

@@ -3,7 +3,7 @@ package com.nice.atomic
 import java.util.concurrent.atomic.AtomicLongArray
 
 fun atomicLongArrayOf(array: LongArray): KAtomicLongArray = KAtomicLongArray(array)
-fun atomicLongArrayOfNulls(size: Int): KAtomicLongArray = KAtomicLongArray(size)
+fun atomicLongArrayOf(size: Int): KAtomicLongArray = KAtomicLongArray(size)
 
 class KAtomicLongArray : KAtomicNumberArray<Long> {
 
