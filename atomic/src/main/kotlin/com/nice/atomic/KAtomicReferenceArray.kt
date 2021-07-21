@@ -1,36 +1,54 @@
 package com.nice.atomic
 
-import java.util.concurrent.atomic.AtomicReferenceArray
+fun <E> atomicArrayOf(array: Array<E>): KAtomicArray<E> = KAtomicReferenceArray(array)
+fun <E> atomicArrayOfNulls(size: Int): KAtomicArray<E?> = NullableKAtomicReferenceArray(size)
 
-fun <E> atomicArrayOf(array: Array<E>): KAtomicReferenceArray<E> = KAtomicReferenceArray(array)
-fun <E> atomicArrayOfNulls(size: Int): KAtomicReferenceArray<E?> = KAtomicReferenceArray(size)
+class KAtomicReferenceArray<E> internal constructor(array: Array<E>) : KAtomicArray<E> {
 
-class KAtomicReferenceArray<E> : KAtomicArray<E> {
-
-    private val delegate: AtomicReferenceArray<E>
-
-    internal constructor(array: Array<E>) {
-        delegate = AtomicReferenceArray(array)
-    }
-
-    internal constructor(size: Int) {
-        delegate = AtomicReferenceArray(size)
-    }
+    private val delegate: Array<KAtomic<E>> = Array(array.size) { atomic(array[it]) }
 
     override val size: Int
-        get() = delegate.length()
+        get() = delegate.size
 
-    override fun get(index: Int): E = delegate.get(index)
-    override fun set(index: Int, newValue: E) = delegate.set(index, newValue)
-    override fun lazySet(index: Int, newValue: E) = delegate.lazySet(index, newValue)
-    override fun getAndSet(index: Int, newValue: E): E = delegate.getAndSet(index, newValue)
-    override fun compareAndSet(index: Int, expect: E, update: E): Boolean = delegate.compareAndSet(index, expect, update)
-    override fun weakCompareAndSet(index: Int, expect: E, update: E): Boolean = delegate.weakCompareAndSet(index, expect, update)
-    override fun getAndUpdate(index: Int, operation: UnaryOperator<E>): E = delegate.getAndUpdate(index, operation)
-    override fun updateAndGet(index: Int, operation: UnaryOperator<E>): E = delegate.updateAndGet(index, operation)
-    override fun getAndAccumulate(index: Int, newValue: E, operation: BinaryOperator<E>): E = delegate.getAndAccumulate(index, newValue, operation)
-    override fun accumulateAndGet(index: Int, newValue: E, operation: BinaryOperator<E>): E = delegate.accumulateAndGet(index, newValue, operation)
+    override fun get(index: Int): E = delegate[index].value
+    override fun set(index: Int, newValue: E) {
+        delegate[index].value = newValue
+    }
 
-    override fun toString(): String = delegate.toString()
+    override fun lazySet(index: Int, newValue: E) = delegate[index].lazySet(newValue)
+    override fun getAndSet(index: Int, newValue: E): E = delegate[index].getAndSet(newValue)
+    override fun compareAndSet(index: Int, expect: E, update: E): Boolean = delegate[index].compareAndSet(expect, update)
+    override fun weakCompareAndSet(index: Int, expect: E, update: E): Boolean = delegate[index].weakCompareAndSet(expect, update)
+    override fun getAndUpdate(index: Int, operation: UnaryOperator<E>): E = delegate[index].getAndUpdate(operation)
+    override fun updateAndGet(index: Int, operation: UnaryOperator<E>): E = delegate[index].updateAndGet(operation)
+    override fun getAndAccumulate(index: Int, newValue: E, operation: BinaryOperator<E>): E = delegate[index].getAndAccumulate(newValue, operation)
+    override fun accumulateAndGet(index: Int, newValue: E, operation: BinaryOperator<E>): E = delegate[index].accumulateAndGet(newValue, operation)
+
+    override fun toString(): String = delegate.contentToString()
+
+}
+
+class NullableKAtomicReferenceArray<E> internal constructor(size: Int) : KAtomicArray<E?> {
+
+    private val delegate: Array<KAtomic<E?>> = Array(size) { atomic(null) }
+
+    override val size: Int
+        get() = delegate.size
+
+    override fun get(index: Int): E? = delegate[index].value
+    override fun set(index: Int, newValue: E?) {
+        delegate[index].value = newValue
+    }
+
+    override fun lazySet(index: Int, newValue: E?) = delegate[index].lazySet(newValue)
+    override fun getAndSet(index: Int, newValue: E?): E? = delegate[index].getAndSet(newValue)
+    override fun compareAndSet(index: Int, expect: E?, update: E?): Boolean = delegate[index].compareAndSet(expect, update)
+    override fun weakCompareAndSet(index: Int, expect: E?, update: E?): Boolean = delegate[index].weakCompareAndSet(expect, update)
+    override fun getAndUpdate(index: Int, operation: UnaryOperator<E?>): E? = delegate[index].getAndUpdate(operation)
+    override fun updateAndGet(index: Int, operation: UnaryOperator<E?>): E? = delegate[index].updateAndGet(operation)
+    override fun getAndAccumulate(index: Int, newValue: E?, operation: BinaryOperator<E?>): E? = delegate[index].getAndAccumulate(newValue, operation)
+    override fun accumulateAndGet(index: Int, newValue: E?, operation: BinaryOperator<E?>): E? = delegate[index].accumulateAndGet(newValue, operation)
+
+    override fun toString(): String = delegate.contentToString()
 
 }
