@@ -1,9 +1,9 @@
 package com.nice.atomic
 
-fun <E> atomicArrayOf(array: Array<E>): KAtomicArray<E> = KAtomicReferenceArray(array)
+fun <E> atomicArrayOf(vararg values: E): KAtomicArray<E> = KAtomicReferenceArray(values)
 fun <E> atomicArrayOfNulls(size: Int): KAtomicArray<E?> = NullableKAtomicReferenceArray(size)
 
-class KAtomicReferenceArray<E> internal constructor(array: Array<E>) : KAtomicArray<E> {
+class KAtomicReferenceArray<E> internal constructor(array: Array<out E>) : KAtomicArray<E> {
 
     private val delegate: Array<KAtomic<E>> = Array(array.size) { atomic(array[it]) }
 

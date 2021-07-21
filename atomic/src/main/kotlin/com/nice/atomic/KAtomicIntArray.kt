@@ -1,6 +1,7 @@
 package com.nice.atomic
 
-fun atomicIntArrayOf(array: IntArray): KAtomicIntArray = KAtomicIntArray(array)
+fun atomicIntArrayOf(array: Array<Int>): KAtomicIntArray = KAtomicIntArray(array.toIntArray())
+fun atomicIntArrayOf(vararg values: Int): KAtomicIntArray = KAtomicIntArray(intArrayOf(*values))
 fun atomicIntArrayOf(size: Int): KAtomicIntArray = KAtomicIntArray(size)
 
 class KAtomicIntArray : KAtomicNumberArray<Int> {

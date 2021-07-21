@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.nice.atomic.atomic
+import com.nice.atomic.atomicLongArrayOf
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
@@ -44,8 +44,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     private val binding: ActivityMainBinding by viewBindings()
 
     override val tipView: TipView by tipViews()
-
-    val ref = atomic("")
 
     private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
 
