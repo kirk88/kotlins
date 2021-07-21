@@ -2,6 +2,16 @@
 
 package com.nice.atomic
 
+import kotlin.reflect.KProperty
+
+operator fun <T> KAtomic<T>.getValue(thisRef: Any?, property: KProperty<*>): T {
+    return this.value
+}
+
+operator fun <T> KAtomic<T>.setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+    this.value = value
+}
+
 interface KAtomic<V> {
 
     var value: V
@@ -56,7 +66,7 @@ interface KAtomic<V> {
 
 }
 
-abstract class KAtomicNumber<V: Number> : Number(), KAtomic<V> {
+abstract class KAtomicNumber<V : Number> : Number(), KAtomic<V> {
 
     abstract fun getAndAdd(delta: V): V
 

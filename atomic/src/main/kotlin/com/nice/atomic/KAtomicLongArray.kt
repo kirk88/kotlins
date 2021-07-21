@@ -1,6 +1,7 @@
 package com.nice.atomic
 
-fun atomicLongArrayOf(array: LongArray): KAtomicLongArray = KAtomicLongArray(array)
+fun atomicLongArrayOf(array: Array<Long>): KAtomicLongArray = KAtomicLongArray(array.toLongArray())
+fun atomicLongArrayOf(vararg values: Long): KAtomicLongArray = KAtomicLongArray(longArrayOf(*values))
 fun atomicLongArrayOf(size: Int): KAtomicLongArray = KAtomicLongArray(size)
 
 class KAtomicLongArray : KAtomicNumberArray<Long> {
