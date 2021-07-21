@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter.*
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattDescriptor.*
-import com.nice.atomic.atomic
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.gatt.PreferredPhy
 import com.nice.bluetooth.gatt.Response.*
@@ -13,6 +12,7 @@ import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.flow.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
 fun CoroutineScope.peripheral(
@@ -81,7 +81,7 @@ class AndroidPeripheral internal constructor(
     private val connection: Connection
         inline get() = _connection ?: throw NotReadyException(toString())
 
-    private val connectJob = atomic<Deferred<Unit>?>(null)
+    private val connectJob = AtomicReference<Deferred<Unit>?>()
 
     private val ready = MutableStateFlow(false)
     internal suspend fun suspendUntilReady() {
@@ -103,7 +103,7 @@ class AndroidPeripheral internal constructor(
             _state,
             _mtu,
             _phy
-        ) { connectJob.value = null } ?: throw ConnectionRejectedException()
+        ) { connectJob.set(null) } ?: throw ConnectionRejectedException()
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
     private fun connectAsync() = scope.async(start = LAZY) {
@@ -137,7 +137,7 @@ class AndroidPeripheral internal constructor(
     override suspend fun connect() {
         check(job.isNotCancelled) { "Cannot connect, scope is cancelled for $this" }
         check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
-        connectJob.updateAndGet { it ?: connectAsync() }!!.await()
+        connectJob.updateAndGetCompat { it ?: connectAsync() }.await()
     }
 
     override suspend fun disconnect() {
@@ -210,4 +210,14 @@ private suspend fun Peripheral.suspendUntilConnected() {
 
 private suspend fun Peripheral.suspendUntilDisconnected() {
     state.first { it is ConnectionState.Disconnected }
+}
+
+private fun <T, R : T> AtomicReference<T>.updateAndGetCompat(updateFunction: (T) -> R): R {
+    var prev: T?
+    var next: R
+    do {
+        prev = get()
+        next = updateFunction(prev)
+    } while (!compareAndSet(prev, next))
+    return next
 }
