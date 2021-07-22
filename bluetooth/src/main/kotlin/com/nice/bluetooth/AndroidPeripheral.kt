@@ -32,8 +32,7 @@ fun CoroutineScope.peripheral(
         builder.defaultTransport,
         builder.defaultPhy,
         builder.onConnected,
-        builder.onServicesDiscovered,
-        builder.onDisconnected
+        builder.onServicesDiscovered
     )
 }
 
@@ -43,8 +42,7 @@ class AndroidPeripheral internal constructor(
     private val defaultTransport: Transport,
     private val defaultPhy: Phy,
     private val onConnected: ConnectedAction,
-    private val onServicesDiscovered: ServicesDiscoveredAction,
-    private val onDisconnected: DisconnectedAction
+    private val onServicesDiscovered: ServicesDiscoveredAction
 ) : Peripheral {
 
     private val receiver = registerBluetoothStateBroadcastReceiver { state ->
@@ -131,13 +129,12 @@ class AndroidPeripheral internal constructor(
     private fun closeConnection() {
         _connection?.close()
         _connection = null
-        onDisconnected.invoke()
     }
 
     override suspend fun connect() {
         check(job.isNotCancelled) { "Cannot connect, scope is cancelled for $this" }
         check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
-        connectJob.updateThenGet { it ?: connectAsync() }.await()
+        connectJob.updateAndGetCompat { it ?: connectAsync() }.await()
     }
 
     override suspend fun disconnect() {
@@ -212,7 +209,7 @@ private suspend fun Peripheral.suspendUntilDisconnected() {
     state.first { it is ConnectionState.Disconnected }
 }
 
-private fun <T, R : T> AtomicReference<T>.updateThenGet(updateFunction: (T) -> R): R {
+private fun <T, R : T> AtomicReference<T>.updateAndGetCompat(updateFunction: (T) -> R): R {
     var prev: T?
     var next: R
     do {

@@ -60,8 +60,6 @@ class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
 
     internal var onConnected: ConnectedAction = {}
     internal var onServicesDiscovered: ServicesDiscoveredAction = {}
-    internal var onDisconnected: DisconnectedAction = {}
-
 
     override fun onConnected(action: ConnectedAction) {
         onConnected = action
@@ -69,10 +67,6 @@ class AndroidPeripheralBuilder internal constructor() : PeripheralBuilder {
 
     override fun onServicesDiscovered(action: ServicesDiscoveredAction) {
         onServicesDiscovered = action
-    }
-
-    override fun onDisconnected(action: DisconnectedAction) {
-        onDisconnected = action
     }
 
     /** Preferred transport for GATT connections to remote dual-mode devices. */
