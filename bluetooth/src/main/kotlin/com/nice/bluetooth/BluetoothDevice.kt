@@ -13,12 +13,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 
 internal class ConnectionClient(
-    val bluetoothGatt: BluetoothGatt,
-    val dispatcher: CoroutineDispatcher,
-    val callback: Callback,
+    private val bluetoothGatt: BluetoothGatt,
+    private val dispatcher: CoroutineDispatcher,
+    private val callback: Callback,
     onClose: () -> Unit
 ) {
 
@@ -26,9 +32,98 @@ internal class ConnectionClient(
         callback.invokeOnDisconnected(onClose)
     }
 
+    val services: List<DiscoveredService>
+        get() = bluetoothGatt.services.map { it.toDiscoveredService() }
+
+    private val lock = Mutex()
+    private val operationLocked = Any()
+    private val transactionLocked = Any()
+
+    fun connect() = bluetoothGatt.connect()
+
     fun disconnect() = bluetoothGatt.disconnect()
 
-    fun close() = bluetoothGatt.disconnect()
+    fun close() = bluetoothGatt.close()
+
+    /**
+     * Executes specified [BluetoothGatt] action.
+     *
+     * Android Bluetooth Low Energy has strict requirements: all I/O must be executed sequentially. In other words, the
+     * response for an action must be received before another action can be performed. Additionally, the Android BLE
+     * stack can be unstable if I/O isn't performed on a dedicated thread.
+     *
+     * These requirements are fulfilled by ensuring that all action's are performed behind a [Mutex]. On Android pre-O
+     * a single threaded [CoroutineDispatcher] is used, Android O and newer a [CoroutineDispatcher] backed by an Android
+     * `Handler` is used (and is also used in the Android BLE [Callback]).
+     *
+     * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
+     */
+    suspend inline fun <T> execute(
+        crossinline action: suspend BluetoothGatt.() -> Boolean,
+        crossinline response: suspend Callback.() -> T
+    ): T = lock.withLock(operationLocked) {
+        withContext(dispatcher) {
+            bluetoothGatt.action() || throw GattRequestRejectedException()
+        }
+
+        callback.response()
+    }
+
+
+    /**
+     * Executes specified [BluetoothGatt] action.
+     *
+     * @throws GattRequestRejectedException if [action] cause an exception.
+     */
+    suspend inline fun <T> tryExecute(
+        crossinline action: suspend BluetoothGatt.() -> Unit,
+        crossinline response: suspend Callback.() -> T
+    ): T = lock.withLock(operationLocked) {
+        withContext(dispatcher) {
+            try {
+                bluetoothGatt.action()
+            } catch (t: Throwable) {
+                throw GattRequestRejectedException(cause = t)
+            }
+        }
+
+        callback.response()
+    }
+
+    /**
+     * Executes a [BluetoothGatt] transaction.
+     *
+     * @throws GattRequestRejectedException if [action] cause an exception.
+     */
+    suspend inline fun <T> transaction(
+        crossinline action: suspend BluetoothGatt.() -> Unit,
+        crossinline response: suspend Callback.() -> T
+    ): T = lock.withLock(transactionLocked) {
+        withContext(dispatcher) {
+            try {
+                bluetoothGatt.action()
+            } catch (t: Throwable) {
+                throw GattRequestRejectedException(cause = t)
+            }
+        }
+
+        callback.response()
+    }
+
+    suspend fun collectCharacteristicChanges(observers: PeripheralObservers) {
+        callback.onCharacteristicChanged.consumeAsFlow().map { (bluetoothGattCharacteristic, value) ->
+            PeripheralEvent.CharacteristicChange(bluetoothGattCharacteristic.toCharacteristic(), value)
+        }.collect {
+            observers.send(it)
+        }
+    }
+
+    fun setCharacteristicNotification(characteristic: DiscoveredCharacteristic, enabled: Boolean) {
+        bluetoothGatt.setCharacteristicNotification(
+            characteristic.bluetoothGattCharacteristic,
+            enabled
+        )
+    }
 
 }
 
