@@ -10,7 +10,7 @@ enum class BondState {
 }
 
 interface Advertisement {
-    val bluetoothDevice: BluetoothDevice
+    val device: BluetoothDevice
 
     /**
      * The name in the Advertisement.

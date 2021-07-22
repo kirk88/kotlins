@@ -54,16 +54,15 @@ data class DiscoveredDescriptor(
     val bluetoothGattDescriptor: BluetoothGattDescriptor
 ) : Descriptor {
 
-    val value: ByteArray?
-        get() = bluetoothGattDescriptor.value
-
     val permissions: Array<DescriptorPermission> = mutableListOf<DescriptorPermission>().apply {
         for (permission in DescriptorPermission.values()) {
             if (hasPermission(permission)) add(permission)
         }
     }.toTypedArray()
 
-    fun hasPermission(permission: DescriptorPermission) = bluetoothGattDescriptor.permissions and permission.value != 0
+    fun hasPermission(permission: DescriptorPermission): Boolean {
+        return bluetoothGattDescriptor.permissions and permission.value != 0
+    }
 
     override fun toString(): String =
         "DiscoveredDescriptor(serviceUuid=$serviceUuid, characteristicUuid=$characteristicUuid, descriptorUuid=$descriptorUuid)"

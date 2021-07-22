@@ -1,58 +1,55 @@
 package com.nice.bluetooth
 
 import com.nice.bluetooth.common.*
-import com.nice.bluetooth.gatt.PreferredPhy
 
-class AndroidServicesDiscoveredPeripheral internal constructor(
-    private val peripheral: AndroidPeripheral
+internal class AndroidServicesDiscoveredPeripheral(
+    private val connection: PeripheralConnection
 ) : ServicesDiscoveredPeripheral {
-
     override suspend fun read(
         characteristic: Characteristic
-    ): ByteArray = peripheral.read(characteristic)
+    ): ByteArray = connection.read(characteristic)
 
     override suspend fun read(
         descriptor: Descriptor
-    ): ByteArray = peripheral.read(descriptor)
+    ): ByteArray = connection.read(descriptor)
 
     override suspend fun write(
         characteristic: Characteristic,
         data: ByteArray,
         writeType: WriteType
-    ) = peripheral.write(characteristic, data, writeType)
+    ) = connection.write(characteristic, data, writeType)
 
     override suspend fun write(
         descriptor: Descriptor,
         data: ByteArray
-    ) = peripheral.write(descriptor, data)
+    ) = connection.write(descriptor, data)
 
     override suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
-        peripheral.reliableWrite(action)
+        connection.reliableWrite(action)
     }
-
 }
 
-class AndroidConnectedPeripheral internal constructor(
-    private val peripheral: AndroidPeripheral
+internal class AndroidConnectedPeripheral(
+    private val connection: PeripheralConnection
 ) : ConnectedPeripheral {
     override suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
-        return peripheral.requestConnectionPriority(priority)
+        return connection.requestConnectionPriority(priority)
     }
 
     override suspend fun requestMtu(mtu: Int): Int {
-        return peripheral.requestMtu(mtu)
+        return connection.requestMtu(mtu)
     }
 
     override suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
-        return peripheral.setPreferredPhy(phy, options)
+        return connection.setPreferredPhy(phy, options)
     }
 
     override suspend fun readPhy(): PreferredPhy {
-        return peripheral.readPhy()
+        return connection.readPhy()
     }
 
     override suspend fun readRssi(): Int {
-        return peripheral.readRssi()
+        return connection.readRssi()
     }
 }
 

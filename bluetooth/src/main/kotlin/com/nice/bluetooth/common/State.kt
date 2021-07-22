@@ -24,7 +24,7 @@ sealed class ConnectionState {
     /**
      * Triggered either after an established connection has dropped or after a connection attempt has failed.
      *
-     * @param status represents status (cause) of [Disconnected] [ConnectionState]. Always `null` for Javascript target.
+     * @param status represents status (cause) of [Disconnected].
      */
     data class Disconnected(val status: Status? = null) : ConnectionState() {
 

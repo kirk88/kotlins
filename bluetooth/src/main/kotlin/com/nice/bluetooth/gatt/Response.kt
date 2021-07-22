@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGatt.*
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
-import com.nice.bluetooth.common.Phy
+import com.nice.bluetooth.common.PreferredPhy
 import com.nice.bluetooth.external.*
 
 internal sealed class Response {
@@ -120,10 +120,28 @@ internal sealed class Response {
     ) : Response()
 }
 
-data class PreferredPhy(
-    val txPhy: Phy,
-    val rxPhy: Phy
-)
+internal data class OnCharacteristicChanged(
+    val characteristic: BluetoothGattCharacteristic,
+    val value: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OnCharacteristicChanged
+
+        if (characteristic != other.characteristic) return false
+        if (!value.contentEquals(other.value)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = characteristic.hashCode()
+        result = 31 * result + value.contentHashCode()
+        return result
+    }
+}
 
 /**
  * Represents the possible GATT statuses as defined in [BluetoothGatt]:

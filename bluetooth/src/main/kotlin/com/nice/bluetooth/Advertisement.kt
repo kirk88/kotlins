@@ -12,21 +12,21 @@ internal class AndroidAdvertisement(
     private val scanRecord: ScanRecord?
         get() = scanResult.scanRecord
 
-    override val bluetoothDevice: BluetoothDevice
+    override val device: BluetoothDevice
         get() = scanResult.device
 
     override val name: String
-        get() = bluetoothDevice.name.orEmpty()
+        get() = device.name.orEmpty()
 
     override val address: String
-        get() = bluetoothDevice.address.orEmpty()
+        get() = device.address.orEmpty()
 
     override val bondState: BondState
-        get() = when (bluetoothDevice.bondState) {
+        get() = when (device.bondState) {
             BOND_NONE -> BondState.None
             BOND_BONDING -> BondState.Bonding
             BOND_BONDED -> BondState.Bonded
-            else -> error("Unknown bond state: ${bluetoothDevice.bondState}")
+            else -> error("Unknown bond state: ${device.bondState}")
         }
 
     override val rssi: Int
@@ -53,13 +53,13 @@ internal class AndroidAdvertisement(
 
         other as AndroidAdvertisement
 
-        if (bluetoothDevice != other.bluetoothDevice) return false
+        if (device != other.device) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return bluetoothDevice.hashCode()
+        return device.hashCode()
     }
 
     override fun toString(): String =

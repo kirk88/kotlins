@@ -11,11 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.nice.atomic.atomicLongArrayOf
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
+import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
 import com.nice.common.adapter.SimpleRecyclerAdapter
@@ -107,6 +107,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //            }
 //        }
 
+
         initBle()
     }
 
@@ -135,11 +136,17 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
 
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-                Log.e(TAG, throwable.message, throwable)
+                Log.e(TAG, "connect error", throwable)
             }) {
                 channel.consumeAsFlow().collect {
                     launch {
                         val peripheral = peripheral(it)
+
+
+                        launch {
+                            val state = peripheral.state.drop(1).first { it is ConnectionState.Disconnected }
+                            Log.e(TAG, "disconnected: $state")
+                        }
 
                         Log.e(TAG, "connecting")
                         peripheral.connect()

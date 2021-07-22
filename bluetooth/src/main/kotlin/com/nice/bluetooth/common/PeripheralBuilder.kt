@@ -4,7 +4,6 @@ import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.nice.bluetooth.gatt.PreferredPhy
 import kotlin.coroutines.cancellation.CancellationException
 
 interface ServicesDiscoveredPeripheral : Readable, Writable {

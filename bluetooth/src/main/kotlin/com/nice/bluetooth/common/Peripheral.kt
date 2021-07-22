@@ -1,14 +1,19 @@
 package com.nice.bluetooth.common
 
+import android.bluetooth.BluetoothDevice
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.nice.bluetooth.gatt.PreferredPhy
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 import kotlin.coroutines.cancellation.CancellationException
 
 internal typealias PeripheralBuilderAction = PeripheralBuilder.() -> Unit
 internal typealias OnSubscriptionAction = suspend () -> Unit
+
+data class PreferredPhy(
+    val txPhy: Phy,
+    val rxPhy: Phy
+)
 
 enum class PhyOptions {
     NoPreferred,
@@ -63,6 +68,8 @@ interface Writable {
 }
 
 interface Peripheral : Readable, Writable {
+
+    val device: BluetoothDevice
 
     /**
      * Provides a conflated [Flow] of the [Peripheral]'s [ConnectionState].

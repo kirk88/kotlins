@@ -8,6 +8,7 @@ import com.nice.bluetooth.TAG
 import com.nice.bluetooth.common.ConnectionLostException
 import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.Phy
+import com.nice.bluetooth.common.PreferredPhy
 import com.nice.bluetooth.external.GATT_CONN_CANCEL
 import com.nice.bluetooth.external.GATT_CONN_FAIL_ESTABLISH
 import com.nice.bluetooth.external.GATT_CONN_TERMINATE_PEER_USER
@@ -21,29 +22,6 @@ import kotlinx.coroutines.channels.getOrElse
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private typealias DisconnectedAction = () -> Unit
-
-internal data class OnCharacteristicChanged(
-    val characteristic: BluetoothGattCharacteristic,
-    val value: ByteArray
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as OnCharacteristicChanged
-
-        if (characteristic != other.characteristic) return false
-        if (!value.contentEquals(other.value)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = characteristic.hashCode()
-        result = 31 * result + value.contentHashCode()
-        return result
-    }
-}
 
 internal class Callback(
     private val state: MutableStateFlow<ConnectionState>,
@@ -68,7 +46,7 @@ internal class Callback(
     val onReadRemoteRssi = Channel<OnReadRemoteRssi>(CONFLATED)
     val onReliableWriteCompleted = Channel<OnReliableWriteCompleted>(CONFLATED)
 
-    private fun disconnected() {
+    private fun close() {
         val cause = ConnectionLostException()
         onCharacteristicChanged.close()
         onServicesDiscovered.close(cause)
@@ -92,7 +70,7 @@ internal class Callback(
     ) {
         if (newState == STATE_DISCONNECTED) {
             gatt.close()
-            disconnected()
+            close()
         }
 
         when (newState) {

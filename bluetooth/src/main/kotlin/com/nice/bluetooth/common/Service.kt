@@ -16,12 +16,6 @@ data class DiscoveredService internal constructor(
     val bluetoothGattService: BluetoothGattService
 ) : Service, Iterable<DiscoveredCharacteristic> {
 
-    val id: Int
-        get() = bluetoothGattService.instanceId
-
-    val type: Int
-        get() = bluetoothGattService.type
-
     override fun iterator(): Iterator<DiscoveredCharacteristic> {
         return characteristics.iterator()
     }

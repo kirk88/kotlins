@@ -60,7 +60,6 @@ internal fun removeTypeWildcards(type: Type): Type {
             .toTypedArray()
         return TypeToken.getParameterized(type.rawType, *arguments).type
     }
-
     return type
 }
 

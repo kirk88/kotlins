@@ -43,8 +43,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-
     api deps.kotlinStdlib
     api deps.kotlinxCoroutinesCore
     api deps.kotlinxCoroutinesAndroid

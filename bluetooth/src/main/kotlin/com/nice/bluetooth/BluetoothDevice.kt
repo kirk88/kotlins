@@ -2,20 +2,35 @@ package com.nice.bluetooth
 
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
-import com.nice.bluetooth.common.ConnectionState
-import com.nice.bluetooth.common.Phy
-import com.nice.bluetooth.common.Transport
-import com.nice.bluetooth.common.intValue
+import com.nice.bluetooth.common.*
 import com.nice.bluetooth.gatt.Callback
-import com.nice.bluetooth.gatt.PreferredPhy
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.Executors
+
+internal class ConnectionClient(
+    val bluetoothGatt: BluetoothGatt,
+    val dispatcher: CoroutineDispatcher,
+    val callback: Callback,
+    onClose: () -> Unit
+) {
+
+    init {
+        callback.invokeOnDisconnected(onClose)
+    }
+
+    fun disconnect() = bluetoothGatt.disconnect()
+
+    fun close() = bluetoothGatt.disconnect()
+
+}
 
 /**
  * @param defaultTransport is only used on API level >= 23.
@@ -30,24 +45,23 @@ internal fun BluetoothDevice.connect(
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
     onClose: () -> Unit
-): Connection? =
+): ConnectionClient? =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         connectApi26(context, defaultTransport, defaultPhy, state, mtu, phy, onClose)
     } else {
-        connectApi21(context, defaultTransport, state, mtu, onClose)
+        connectDefault(context, defaultTransport, state, mtu, onClose)
     }
 
 /**
  * @param defaultTransport is only used on API level >= 23.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-private fun BluetoothDevice.connectApi21(
+private fun BluetoothDevice.connectDefault(
     context: Context,
     defaultTransport: Transport,
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
     onClose: () -> Unit
-): Connection? {
+): ConnectionClient? {
     val callback = Callback(state, mtu)
     val bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         connectGatt(context, false, callback, defaultTransport.intValue)
@@ -62,7 +76,7 @@ private fun BluetoothDevice.connectApi21(
     val dispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, threadName).apply { isDaemon = true }
     }.asCoroutineDispatcher()
-    return Connection(
+    return ConnectionClient(
         bluetoothGatt,
         dispatcher,
         callback
@@ -81,7 +95,7 @@ private fun BluetoothDevice.connectApi26(
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
     onClose: () -> Unit
-): Connection? {
+): ConnectionClient? {
     val thread = HandlerThread(threadName).apply { start() }
     try {
         val handler = Handler(thread.looper)
@@ -96,7 +110,7 @@ private fun BluetoothDevice.connectApi26(
         // Disconnected before the connection request has kicked off the Connecting state (via Callback).
         state.value = ConnectionState.Connecting
 
-        return Connection(
+        return ConnectionClient(
             bluetoothGatt,
             dispatcher,
             callback

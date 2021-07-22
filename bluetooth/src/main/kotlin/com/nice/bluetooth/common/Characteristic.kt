@@ -60,12 +60,6 @@ data class DiscoveredCharacteristic internal constructor(
     val bluetoothGattCharacteristic: BluetoothGattCharacteristic
 ) : Characteristic, Iterable<DiscoveredDescriptor> {
 
-    val id: Int
-        get() = bluetoothGattCharacteristic.instanceId
-
-    val value: ByteArray?
-        get() = bluetoothGattCharacteristic.value
-
     val properties: Array<CharacteristicProperty> = mutableListOf<CharacteristicProperty>().apply {
         for (property in CharacteristicProperty.values()) {
             if (hasProperty(property)) add(property)
@@ -78,9 +72,13 @@ data class DiscoveredCharacteristic internal constructor(
         }
     }.toTypedArray()
 
-    fun hasProperty(property: CharacteristicProperty) = bluetoothGattCharacteristic.properties and property.value != 0
+    fun hasProperty(property: CharacteristicProperty): Boolean {
+        return bluetoothGattCharacteristic.properties and property.value != 0
+    }
 
-    fun hasPermission(permission: CharacteristicPermission) = bluetoothGattCharacteristic.permissions and permission.value != 0
+    fun hasPermission(permission: CharacteristicPermission): Boolean {
+        return bluetoothGattCharacteristic.permissions and permission.value != 0
+    }
 
     override fun iterator(): Iterator<DiscoveredDescriptor> {
         return descriptors.iterator()

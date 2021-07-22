@@ -1,12 +1,44 @@
 plugins {
-    id 'java-library'
+    id 'com.android.library'
+    id 'kotlin-android'
     id 'maven'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    sourceSets.main.java.srcDirs += 'src/main/kotlin'
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility versions.sourceCompatibility
+        targetCompatibility versions.targetCompatibility
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
 }
 
 dependencies {
@@ -26,7 +58,7 @@ uploadArchives {
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
             groupId "com.nice.kotlins"
-            artifactId "kotson"
+            artifactId "okfaker"
             version "${versionMajor}.${versionMinor}.${versionPatch}"
 
             licenses {
@@ -44,12 +76,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-task javaSourcesJar(type: Jar) {
+task androidSourcesJar(type: Jar) {
     archiveClassifier.convention("sources")
     archiveClassifier.set("sources")
-    from sourceSets.main.java.getSrcDirs()
+    from android.sourceSets.main.java.getSrcDirs()
 }
 
 artifacts {
-    archives javaSourcesJar
+    archives androidSourcesJar
 }

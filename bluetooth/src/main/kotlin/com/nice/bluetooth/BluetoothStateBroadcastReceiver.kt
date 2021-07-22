@@ -9,17 +9,26 @@ import android.content.IntentFilter
 private val bluetoothStateIntentFilter: IntentFilter =
     IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
 
-private inline fun bluetoothStateBroadcastReceiver(
-    crossinline action: (state: Int) -> Unit
-): BroadcastReceiver = object : BroadcastReceiver() {
+internal class BluetoothStateBroadcastReceiver(private val action: (state: Int) -> Unit) : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
         val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
         action.invoke(state)
     }
+
+    fun register() {
+        applicationContext.registerReceiver(this, bluetoothStateIntentFilter)
+    }
+
+    fun unregister() {
+        applicationContext.unregisterReceiver(this)
+    }
+
 }
 
+
 internal inline fun registerBluetoothStateBroadcastReceiver(
-    context: Context = applicationContext,
     crossinline action: (state: Int) -> Unit
-): BroadcastReceiver = bluetoothStateBroadcastReceiver(action)
-    .also { context.registerReceiver(it, bluetoothStateIntentFilter) }
+): BluetoothStateBroadcastReceiver = BluetoothStateBroadcastReceiver {
+    action.invoke(it)
+}.also { it.register() }
