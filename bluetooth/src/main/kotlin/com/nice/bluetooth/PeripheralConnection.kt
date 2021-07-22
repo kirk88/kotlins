@@ -29,7 +29,7 @@ internal class PeripheralConnection(
     private val defaultTransport: Transport,
     private val defaultPhy: Phy,
     private val onConnected: ConnectedAction,
-    private val onServicesDiscovered: ServicesDiscoveredAction,
+    private val onServicesDiscovered: ServicesDiscoveredAction
 ) : Readable, Writable {
 
     @Volatile
