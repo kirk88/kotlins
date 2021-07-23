@@ -42,9 +42,9 @@ open class NiceViewModel : ViewModel(), ViewModelController by DefaultViewModelC
 open class NiceAndroidViewModel(application: Application) : AndroidViewModel(application),
     ViewModelController by DefaultViewModelController()
 
-open class StatefulViewModel(val state: SavedStateHandle) : NiceViewModel()
+open class SavedStateViewModel(val state: SavedStateHandle) : NiceViewModel()
 
-open class StatefulAndroidViewModel(application: Application, val state: SavedStateHandle) :
+open class SavedStateAndroidViewModel(application: Application, val state: SavedStateHandle) :
     NiceAndroidViewModel(application)
 
 @MainThread
