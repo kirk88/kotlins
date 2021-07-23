@@ -7,14 +7,11 @@ import android.os.Build
 import android.util.Log
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.external.CLIENT_CHARACTERISTIC_CONFIG_UUID
-import com.nice.bluetooth.gatt.Callback
 import com.nice.bluetooth.gatt.GattStatus
 import com.nice.bluetooth.gatt.Response
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
@@ -36,12 +33,6 @@ internal class PeripheralConnection(
     private var _connectionClient: ConnectionClient? = null
     private val connectionClient: ConnectionClient
         inline get() = _connectionClient ?: throw NotReadyException(toString())
-    private val bluetoothGatt: BluetoothGatt
-        inline get() = connectionClient.bluetoothGatt
-    private val dispatcher: CoroutineDispatcher
-        inline get() = connectionClient.dispatcher
-    private val callback: Callback
-        inline get() = connectionClient.callback
 
     private val receiver = registerBluetoothStateBroadcastReceiver {
         if (it == BluetoothAdapter.STATE_OFF) {
@@ -58,7 +49,7 @@ internal class PeripheralConnection(
     }
 
     private val scope = CoroutineScope(parentCoroutineContext + job)
-    private val connectJob = AtomicReference<Job?>()
+    private val connectJob = AtomicReference<Deferred<Throwable?>?>()
 
     private val ready = MutableStateFlow(false)
 
@@ -73,14 +64,12 @@ internal class PeripheralConnection(
 
     private val observers = PeripheralObservers(this)
 
-    private val lock = Mutex()
-    private val operationLocked = Any()
-    private val transactionLocked = Any()
-
     suspend fun connect() {
         check(!job.isCancelled) { "Cannot connect, scope is cancelled for $this" }
         check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
-        connectJob.updateAndGetCompat { it ?: connectAsync() }!!.join()
+        connectJob.updateAndGetCompat { it ?: connectAsync() }!!.await()?.let {
+            throw it
+        }
     }
 
     suspend fun disconnect() {
@@ -99,14 +88,20 @@ internal class PeripheralConnection(
     }
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
-    private fun connectAsync() = scope.launch(start = CoroutineStart.LAZY) {
+    private fun connectAsync() = scope.async(start = CoroutineStart.LAZY) {
         ready.value = false
 
-        _connectionClient = bluetoothDevice.connect(applicationContext, defaultTransport, defaultPhy, state, mtu, phy) {
-            connectJob.getAndUpdateCompat { null }?.cancel()
-        } ?: throw ConnectionRejectedException()
+        var exception: Throwable? = null
 
         try {
+            val connectionClient = bluetoothDevice.connect(applicationContext, defaultTransport, defaultPhy, state, mtu, phy) {
+                connectJob.getAndUpdateCompat { null }?.cancel()
+            }?.also { _connectionClient = it } ?: throw ConnectionRejectedException()
+
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                connectionClient.collectCharacteristicChanges(observers)
+            }
+
             suspendUntilConnected()
             onConnected(AndroidConnectedPeripheral(this@PeripheralConnection))
             discoverServices()
@@ -114,31 +109,22 @@ internal class PeripheralConnection(
             observers.rewire()
         } catch (t: Throwable) {
             close()
-            throw t
-        }
-        launch(start = CoroutineStart.UNDISPATCHED) {
-            collectCharacteristicChanges(observers)
+            exception = t
         }
 
         ready.value = true
-    }
 
-    private suspend fun collectCharacteristicChanges(observers: PeripheralObservers) {
-        callback.onCharacteristicChanged.consumeAsFlow().map { (bluetoothGattCharacteristic, value) ->
-            PeripheralEvent.CharacteristicChange(bluetoothGattCharacteristic.toCharacteristic(), value)
-        }.collect {
-            observers.send(it)
-        }
+        exception
     }
 
     private suspend fun discoverServices() {
-        execute(actionWithResult = {
+        connectionClient.execute({
             discoverServices()
         }) {
-            callback.onServicesDiscovered.getOrThrow()
+            onServicesDiscovered.getOrThrow()
         }
 
-        _services = bluetoothGatt.services.map { it.toDiscoveredService() }
+        _services = connectionClient.services
     }
 
     private suspend fun suspendUntilConnected() {
@@ -161,55 +147,18 @@ internal class PeripheralConnection(
         ) { ready, state -> ready && state == ConnectionState.Connected }.first { it }
     }
 
-    /**
-     * Executes specified [BluetoothGatt] action.
-     *
-     * Android Bluetooth Low Energy has strict requirements: all I/O must be executed sequentially. In other words, the
-     * response for an action must be received before another action can be performed. Additionally, the Android BLE
-     * stack can be unstable if I/O isn't performed on a dedicated thread.
-     *
-     * These requirements are fulfilled by ensuring that all action's are performed behind a [Mutex]. On Android pre-O
-     * a single threaded [CoroutineDispatcher] is used, Android O and newer a [CoroutineDispatcher] backed by an Android
-     * `Handler` is used (and is also used in the Android BLE [Callback]).
-     *
-     * @throws GattRequestRejectedException if underlying `BluetoothGatt` method call returns `false`.
-     * @throws GattStatusException if response has a non-`GATT_SUCCESS` status.
-     */
-    private suspend inline fun <T> execute(
-        owner: Any = operationLocked,
-        noinline actionWithResult: (suspend BluetoothGatt.() -> Boolean)? = null,
-        noinline actionWithoutResult: (suspend BluetoothGatt.() -> Unit)? = null,
-        crossinline response: suspend () -> T
-    ): T = lock.withLock(owner) {
-        withContext(dispatcher) {
-            if (actionWithResult != null) {
-                bluetoothGatt.actionWithResult() || throw GattRequestRejectedException()
-            }
-
-            if (actionWithoutResult != null) {
-                try {
-                    bluetoothGatt.actionWithoutResult()
-                } catch (t: Throwable) {
-                    throw GattRequestRejectedException(cause = t)
-                }
-            }
-        }
-
-        response()
-    }
-
     override suspend fun write(
         characteristic: Characteristic,
         data: ByteArray,
         writeType: WriteType
     ) {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        execute(actionWithResult = {
+        connectionClient.execute({
             bluetoothGattCharacteristic.value = data
             bluetoothGattCharacteristic.writeType = writeType.intValue
             writeCharacteristic(bluetoothGattCharacteristic)
         }) {
-            callback.onCharacteristicWrite.getOrThrow()
+            onCharacteristicWrite.getOrThrow()
         }
     }
 
@@ -217,10 +166,10 @@ internal class PeripheralConnection(
         characteristic: Characteristic
     ): ByteArray {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        return execute(actionWithResult = {
+        return connectionClient.execute({
             readCharacteristic(bluetoothGattCharacteristic)
         }) {
-            callback.onCharacteristicRead.getOrThrow()
+            onCharacteristicRead.getOrThrow()
         }.value!!
     }
 
@@ -235,11 +184,11 @@ internal class PeripheralConnection(
         bluetoothGattDescriptor: BluetoothGattDescriptor,
         data: ByteArray
     ) {
-        execute(actionWithResult = {
+        connectionClient.execute({
             bluetoothGattDescriptor.value = data
             writeDescriptor(bluetoothGattDescriptor)
         }) {
-            callback.onDescriptorWrite.getOrThrow()
+            onDescriptorWrite.getOrThrow()
         }
     }
 
@@ -247,60 +196,60 @@ internal class PeripheralConnection(
         descriptor: Descriptor
     ): ByteArray {
         val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
-        return execute(actionWithResult = {
+        return connectionClient.execute({
             readDescriptor(bluetoothGattDescriptor)
         }) {
-            callback.onDescriptorRead.getOrThrow()
+            onDescriptorRead.getOrThrow()
         }.value!!
     }
 
     suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
-        execute(transactionLocked, actionWithResult = {
+        connectionClient.transaction({
             try {
-                bluetoothGatt.beginReliableWrite()
+                beginReliableWrite()
                 action()
-                bluetoothGatt.executeReliableWrite()
+                executeReliableWrite()
             } catch (t: Throwable) {
-                bluetoothGatt.abortReliableWrite()
+                abortReliableWrite()
                 throw t
             }
         }) {
-            callback.onReliableWriteCompleted.getOrThrow()
+            onReliableWriteCompleted.getOrThrow()
         }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority = execute(actionWithResult = {
+    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority = connectionClient.execute({
         requestConnectionPriority(priority.intValue)
     }) {
         priority
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int = execute(actionWithResult = {
+    suspend fun requestMtu(mtu: Int): Int = connectionClient.execute({
         requestMtu(mtu)
     }) {
-        callback.onMtuChanged.getOrThrow()
+        onMtuChanged.getOrThrow()
     }.mtu
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = execute(actionWithoutResult = {
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = connectionClient.tryExecute({
         setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
     }) {
-        callback.onPhyUpdate.getOrThrow()
+        onPhyUpdate.getOrThrow()
     }.phy
 
     @TargetApi(Build.VERSION_CODES.O)
-    suspend fun readPhy(): PreferredPhy = execute(actionWithoutResult = {
+    suspend fun readPhy(): PreferredPhy = connectionClient.tryExecute({
         readPhy()
     }) {
-        callback.onPhyRead.getOrThrow()
+        onPhyRead.getOrThrow()
     }.phy
 
-    suspend fun readRssi(): Int = execute(actionWithResult = {
+    suspend fun readRssi(): Int = connectionClient.execute({
         readRemoteRssi()
     }) {
-        callback.onReadRemoteRssi.getOrThrow()
+        onReadRemoteRssi.getOrThrow()
     }.rssi
 
     fun observe(
@@ -329,8 +278,8 @@ internal class PeripheralConnection(
     private fun setCharacteristicNotification(
         characteristic: DiscoveredCharacteristic,
         enable: Boolean
-    ) = bluetoothGatt.setCharacteristicNotification(
-        characteristic.bluetoothGattCharacteristic,
+    ) = connectionClient.setCharacteristicNotification(
+        characteristic,
         enable
     )
 
@@ -381,26 +330,7 @@ internal class PeripheralConnection(
 
 }
 
-private fun <T> AtomicReference<T>.updateAndGetCompat(operation: (T) -> T?): T? {
-    var prev: T?
-    var next: T?
-    do {
-        prev = get()
-        next = operation(prev)
-    } while (!compareAndSet(prev, next))
-    return next
-}
-
-private fun <T> AtomicReference<T>.getAndUpdateCompat(operation: (T) -> T?): T? {
-    var prev: T?
-    var next: T?
-    do {
-        prev = get()
-        next = operation(prev)
-    } while (!compareAndSet(prev, next))
-    return prev
-}
-
+/** @throws GattStatusException if response has a non-`GATT_SUCCESS` status. */
 private suspend inline fun <T : Response> Channel<out T>.getOrThrow(): T {
     val response = try {
         receive()
@@ -441,3 +371,23 @@ private val ConnectionPriority.intValue: Int
         ConnectionPriority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
         ConnectionPriority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
     }
+
+private fun <T> AtomicReference<T>.updateAndGetCompat(operation: (T) -> T?): T? {
+    var prev: T?
+    var next: T?
+    do {
+        prev = get()
+        next = operation(prev)
+    } while (!compareAndSet(prev, next))
+    return next
+}
+
+private fun <T> AtomicReference<T>.getAndUpdateCompat(operation: (T) -> T?): T? {
+    var prev: T?
+    var next: T?
+    do {
+        prev = get()
+        next = operation(prev)
+    } while (!compareAndSet(prev, next))
+    return prev
+}

@@ -174,7 +174,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         peripheral.connect()
 
                         peripheral.services.forEach { service ->
-                            Log.e(TAG, "service: $service")
+                            Log.e(TAG, "${it.address}  service: $service")
 
                             service.forEach { c ->
                                 peripheral.observe(c).collect { b ->
