@@ -34,3 +34,6 @@ class KAtomicLong(initial: Long) : KAtomicNumber<Long>() {
     override fun toString(): String = delegate.toString()
 
 }
+
+operator fun KAtomicLong.plus(value: Long): Long = addAndGet(value)
+operator fun KAtomicLong.minus(value: Long): Long = addAndGet(-value)

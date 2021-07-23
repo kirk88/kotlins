@@ -140,7 +140,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }) {
                 channel.consumeAsFlow().collect {
                     launch {
-                        val peripheral = peripheral(it){
+                        val peripheral = peripheral(it) {
                             onConnected {
                             }
                         }
@@ -161,10 +161,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                                 Log.e(TAG, "${it.address}  properties: " + c.properties.contentToString())
 
-                                if(c.hasProperty(CharacteristicProperty.Read)){
+                                if (c.hasProperty(CharacteristicProperty.Read)) {
                                     val data = peripheral.read(c)
                                     Log.e(TAG, "${it.address}  read: ${data.decodeToString()}")
-                                }else {
+                                } else {
 
                                     peripheral.observe(c).collect { b ->
                                         Log.e(TAG, "${it.address}  observe: $b")
@@ -198,12 +198,14 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         if (!Bluetooth.isEnabled) {
             Bluetooth.isEnabled = true
         }
+
     }
 
-    private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_1) {
+    private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_2) {
 
         override fun onBindItemViewHolder(holder: ItemViewHolder, item: Advertisement, payloads: MutableList<Any>) {
-            holder.findViewById<TextView>(android.R.id.text1).string = item.name + "\n" + item.address
+            holder.findViewById<TextView>(android.R.id.text1).string = item.name
+            holder.findViewById<TextView>(android.R.id.text2).string = item.address
         }
 
     }

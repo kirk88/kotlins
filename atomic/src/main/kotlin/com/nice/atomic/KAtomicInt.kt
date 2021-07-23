@@ -34,3 +34,6 @@ class KAtomicInt internal constructor(initial: Int) : KAtomicNumber<Int>() {
     override fun toString(): String = delegate.toString()
 
 }
+
+operator fun KAtomicInt.plus(value: Int): Int = addAndGet(value)
+operator fun KAtomicInt.minus(value: Int): Int = addAndGet(-value)
