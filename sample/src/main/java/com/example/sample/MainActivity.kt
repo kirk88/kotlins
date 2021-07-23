@@ -165,7 +165,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                                     val data = peripheral.read(c)
                                     Log.e(TAG, "${it.address}  read: ${data.decodeToString()}")
                                 } else {
-
+                                    Log.e(TAG, "${it.address}  observe...")
                                     peripheral.observe(c).collect { b ->
                                         Log.e(TAG, "${it.address}  observe: $b")
                                     }

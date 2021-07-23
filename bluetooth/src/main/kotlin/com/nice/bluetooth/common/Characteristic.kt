@@ -69,6 +69,7 @@ data class DiscoveredCharacteristic internal constructor(
     }
 
     fun hasPermission(permission: CharacteristicPermission): Boolean {
+        bluetoothGattCharacteristic.permissions
         return bluetoothGattCharacteristic.permissions and permission.value != 0
     }
 
