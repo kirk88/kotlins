@@ -107,6 +107,28 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //            }
 //        }
 
+        val job = lifecycleScope.launch(start = CoroutineStart.LAZY){
+
+
+            launch {
+                delay(2000)
+
+                Log.e("TAGTAG", "what....1")
+            }
+
+
+            Log.e("TAGTAG", "what....")
+
+
+        }
+
+        lifecycleScope.launch {
+
+            job.join()
+
+
+            Log.e("TAGTAG", "what....2")
+        }
 
         initBle()
     }

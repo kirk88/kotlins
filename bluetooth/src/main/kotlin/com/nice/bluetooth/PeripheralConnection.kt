@@ -116,8 +116,7 @@ internal class PeripheralConnection(
             close()
             throw t
         }
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+        launch(start = CoroutineStart.UNDISPATCHED) {
             collectCharacteristicChanges(observers)
         }
 
