@@ -1,8 +1,6 @@
 package com.nice.bluetooth.common
 
 import android.bluetooth.BluetoothDevice
-import android.os.Build
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -137,13 +135,16 @@ interface Peripheral : Readable, Writable {
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
     suspend fun reliableWrite(action: suspend Writable.() -> Unit)
 
+    /** @throws NotReadyException if invoked without an established [connection][connect]. */
+    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
+    suspend fun readRssi(): Int
+
     /**
      * Request a specific connection priority
      *
      * @throws NotReadyException if invoked without an established [connection][connect].
      */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority
 
     /**
@@ -154,7 +155,6 @@ interface Peripheral : Readable, Writable {
      * @throws NotReadyException if invoked without an established [connection][connect].
      */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int
 
     /**
@@ -165,7 +165,6 @@ interface Peripheral : Readable, Writable {
      * @throws NotReadyException if invoked without an established [connection][connect].
      */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy
 
     /**
@@ -174,12 +173,7 @@ interface Peripheral : Readable, Writable {
      * @throws NotReadyException if invoked without an established [connection][connect].
      */
     @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun readPhy(): PreferredPhy
-
-    /** @throws NotReadyException if invoked without an established [connection][connect]. */
-    @Throws(CancellationException::class, IOException::class, NotReadyException::class)
-    suspend fun readRssi(): Int
 
     /**
      * Observes changes to the specified [characteristicOf].

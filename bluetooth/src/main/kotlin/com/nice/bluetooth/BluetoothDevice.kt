@@ -114,7 +114,7 @@ internal class ConnectionClient(
         callback.onCharacteristicChanged.consumeAsFlow().map { (bluetoothGattCharacteristic, value) ->
             PeripheralEvent.CharacteristicChange(bluetoothGattCharacteristic.toCharacteristic(), value)
         }.collect {
-            observers.send(it)
+            observers.emit(it)
         }
     }
 

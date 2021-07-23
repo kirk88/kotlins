@@ -82,7 +82,7 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
         )
 
         awaitClose {
-            bluetoothAdapter.bluetoothLeScanner.stopScan(callback)
+            bluetoothAdapter.bluetoothLeScanner?.stopScan(callback)
         }
     }
 }

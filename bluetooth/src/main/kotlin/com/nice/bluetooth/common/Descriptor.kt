@@ -54,11 +54,7 @@ data class DiscoveredDescriptor(
     val bluetoothGattDescriptor: BluetoothGattDescriptor
 ) : Descriptor {
 
-    val permissions: Array<DescriptorPermission> = mutableListOf<DescriptorPermission>().apply {
-        for (permission in DescriptorPermission.values()) {
-            if (hasPermission(permission)) add(permission)
-        }
-    }.toTypedArray()
+    val permissions: Array<DescriptorPermission> = DescriptorPermission.values().filter { hasPermission(it) }.toTypedArray()
 
     fun hasPermission(permission: DescriptorPermission): Boolean {
         return bluetoothGattDescriptor.permissions and permission.value != 0

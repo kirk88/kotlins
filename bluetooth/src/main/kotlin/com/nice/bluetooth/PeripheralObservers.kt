@@ -71,7 +71,7 @@ internal class PeripheralObservers(
     private val characteristicChanges = MutableSharedFlow<PeripheralEvent>()
     private val observations = Observations()
 
-    suspend fun send(event: PeripheralEvent) {
+    suspend fun emit(event: PeripheralEvent) {
         characteristicChanges.emit(event)
     }
 

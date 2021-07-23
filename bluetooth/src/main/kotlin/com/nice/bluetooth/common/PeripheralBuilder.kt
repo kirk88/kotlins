@@ -3,7 +3,6 @@ package com.nice.bluetooth.common
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
 import android.os.Build
-import androidx.annotation.RequiresApi
 import kotlin.coroutines.cancellation.CancellationException
 
 interface ServicesDiscoveredPeripheral : Readable, Writable {
@@ -16,19 +15,15 @@ interface ServicesDiscoveredPeripheral : Readable, Writable {
 
 interface ConnectedPeripheral {
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    suspend fun readRssi(): Int
+
     suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun requestMtu(mtu: Int): Int
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun readPhy(): PreferredPhy
-
-    suspend fun readRssi(): Int
 
 }
 
@@ -96,7 +91,7 @@ internal val Transport.intValue: Int
 internal val Phy.intValue: Int
     @TargetApi(Build.VERSION_CODES.O)
     get() = when (this) {
-        Phy.Le1M -> BluetoothDevice.PHY_LE_1M_MASK
-        Phy.Le2M -> BluetoothDevice.PHY_LE_2M_MASK
-        Phy.LeCoded -> BluetoothDevice.PHY_LE_CODED_MASK
+        Phy.Le1M -> BluetoothDevice.PHY_LE_1M
+        Phy.Le2M -> BluetoothDevice.PHY_LE_2M
+        Phy.LeCoded -> BluetoothDevice.PHY_LE_CODED
     }

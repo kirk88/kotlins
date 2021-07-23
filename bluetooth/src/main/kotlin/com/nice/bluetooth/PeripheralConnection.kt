@@ -218,39 +218,75 @@ internal class PeripheralConnection(
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority = connectionClient.execute({
-        requestConnectionPriority(priority.intValue)
-    }) {
-        priority
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    suspend fun requestMtu(mtu: Int): Int = connectionClient.execute({
-        requestMtu(mtu)
-    }) {
-        onMtuChanged.getOrThrow()
-    }.mtu
-
-    @TargetApi(Build.VERSION_CODES.O)
-    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy = connectionClient.tryExecute({
-        setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
-    }) {
-        onPhyUpdate.getOrThrow()
-    }.phy
-
-    @TargetApi(Build.VERSION_CODES.O)
-    suspend fun readPhy(): PreferredPhy = connectionClient.tryExecute({
-        readPhy()
-    }) {
-        onPhyRead.getOrThrow()
-    }.phy
-
     suspend fun readRssi(): Int = connectionClient.execute({
         readRemoteRssi()
     }) {
         onReadRemoteRssi.getOrThrow()
     }.rssi
+
+    suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectionClient.execute({
+                requestConnectionPriority(priority.intValue)
+            }) {
+                priority
+            }
+        } else {
+            Log.w(
+                TAG,
+                "Unable to request connection priority on a device below android5.0."
+            )
+            priority
+        }
+    }
+
+    suspend fun requestMtu(mtu: Int): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectionClient.execute({
+                requestMtu(mtu)
+            }) {
+                onMtuChanged.getOrThrow()
+            }.mtu
+        } else {
+            Log.w(
+                TAG,
+                "Unable to request mtu on a device below android5.0."
+            )
+            mtu
+        }
+    }
+
+    suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            connectionClient.tryExecute({
+                setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
+            }) {
+                onPhyUpdate.getOrThrow()
+            }.phy
+        } else {
+            Log.w(
+                TAG,
+                "Unable to set preferred phy on a device below android8.0."
+            )
+            phy
+        }
+    }
+
+    suspend fun readPhy(): PreferredPhy {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            connectionClient.tryExecute({
+                readPhy()
+            }) {
+                onPhyRead.getOrThrow()
+            }.phy
+        } else {
+            Log.w(
+                TAG,
+                "Unable to read phy on a device below android8.0."
+            )
+            PreferredPhy(Phy.Le1M, Phy.Le1M)
+        }
+    }
 
     fun observe(
         characteristic: Characteristic,
@@ -258,20 +294,20 @@ internal class PeripheralConnection(
     ): Flow<ByteArray> = observers.acquire(characteristic, onSubscription)
 
     suspend fun startObservation(characteristic: Characteristic) {
-        val androidCharacteristic = services.getCharacteristic(characteristic)
+        val discoveredCharacteristic = services.getCharacteristic(characteristic)
         try {
-            setConfigDescriptor(androidCharacteristic, enable = true)
+            setConfigDescriptor(discoveredCharacteristic, enable = true)
         } finally {
-            setCharacteristicNotification(androidCharacteristic, true)
+            setCharacteristicNotification(discoveredCharacteristic, true)
         }
     }
 
     suspend fun stopObservation(characteristic: Characteristic) {
-        val androidCharacteristic = services.getCharacteristic(characteristic)
+        val discoveredCharacteristic = services.getCharacteristic(characteristic)
         try {
-            setConfigDescriptor(androidCharacteristic, enable = false)
+            setConfigDescriptor(discoveredCharacteristic, enable = false)
         } finally {
-            setCharacteristicNotification(androidCharacteristic, false)
+            setCharacteristicNotification(discoveredCharacteristic, false)
         }
     }
 

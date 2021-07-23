@@ -39,7 +39,6 @@ dependencies {
     implementation deps.kotlinxCoroutinesCore
     implementation deps.kotlinxCoroutinesAndroid
     implementation deps.androidxSetup
-    implementation deps.androidxAnnotation
 }
 
 def versionMajor = 1

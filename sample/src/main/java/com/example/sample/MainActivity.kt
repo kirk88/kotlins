@@ -15,6 +15,7 @@ import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
+import com.nice.bluetooth.common.CharacteristicProperty
 import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
@@ -107,29 +108,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //            }
 //        }
 
-        val job = lifecycleScope.launch(start = CoroutineStart.LAZY){
-
-
-            launch {
-                delay(2000)
-
-                Log.e("TAGTAG", "what....1")
-            }
-
-
-            Log.e("TAGTAG", "what....")
-
-
-        }
-
-        lifecycleScope.launch {
-
-            job.join()
-
-
-            Log.e("TAGTAG", "what....2")
-        }
-
         initBle()
     }
 
@@ -162,23 +140,35 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }) {
                 channel.consumeAsFlow().collect {
                     launch {
-                        val peripheral = peripheral(it)
+                        val peripheral = peripheral(it){
+                            onConnected {
+                            }
+                        }
 
 
                         launch {
                             val state = peripheral.state.drop(1).first { it is ConnectionState.Disconnected }
-                            Log.e(TAG, "disconnected: $state")
+                            Log.e(TAG, "${it.address}  disconnected: $state")
                         }
 
-                        Log.e(TAG, "connecting")
+                        Log.e(TAG, "${it.address}  connecting")
                         peripheral.connect()
 
                         peripheral.services.forEach { service ->
                             Log.e(TAG, "${it.address}  service: $service")
 
                             service.forEach { c ->
-                                peripheral.observe(c).collect { b ->
-                                    Log.e(TAG, "observe: $b")
+
+                                Log.e(TAG, "${it.address}  properties: " + c.properties.contentToString())
+
+                                if(c.hasProperty(CharacteristicProperty.Read)){
+                                    val data = peripheral.read(c)
+                                    Log.e(TAG, "${it.address}  read: ${data.decodeToString()}")
+                                }else {
+
+                                    peripheral.observe(c).collect { b ->
+                                        Log.e(TAG, "${it.address}  observe: $b")
+                                    }
                                 }
                             }
                         }
