@@ -42,7 +42,6 @@ android {
 }
 
 dependencies {
-    implementation deps.kotlinStdlib
     implementation deps.gson
     api deps.okhttp3
     api deps.okhttp3Logging

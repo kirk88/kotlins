@@ -43,7 +43,7 @@ dependencies {
 
 def versionMajor = 1
 def versionMinor = 0
-def versionPatch = 6
+def versionPatch = 7
 
 uploadArchives {
     repositories.mavenDeployer {
