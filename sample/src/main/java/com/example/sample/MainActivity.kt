@@ -145,30 +145,32 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                             }
                         }
 
+                        if(it.name.startsWith("SimpleBLE")) {
+                            launch {
+                                val state = peripheral.state.drop(1).first { it is ConnectionState.Disconnected }
+                                Log.e(TAG, "${it.address}  disconnected: $state")
+                            }
 
-                        launch {
-                            val state = peripheral.state.drop(1).first { it is ConnectionState.Disconnected }
-                            Log.e(TAG, "${it.address}  disconnected: $state")
-                        }
+                            Log.e(TAG, "${it.address}  connecting")
+                            peripheral.connect()
 
-                        Log.e(TAG, "${it.address}  connecting")
-                        peripheral.connect()
+                            Log.e(TAG, "${it.address}  connected")
 
-                        peripheral.services.forEach { service ->
-                            Log.e(TAG, "${it.address}  service: $service")
+                            val service = peripheral.services.find { service ->
+                                service.serviceUuid.toString().contains("ffe0", true)
+                            }
 
-                            service.forEach { c ->
+                            val characteristic = service?.characteristics?.find { characteristic ->
+                                characteristic.characteristicUuid.toString().contains("ffe1", true)
+                            }
 
-                                Log.e(TAG, "${it.address}  properties: " + c.properties.contentToString())
+                            if(characteristic != null){
+                                Log.e(TAG, "observe...")
 
-                                if (c.hasProperty(CharacteristicProperty.Read)) {
-                                    val data = peripheral.read(c)
-                                    Log.e(TAG, "${it.address}  read: ${data.decodeToString()}")
-                                } else {
-                                    Log.e(TAG, "${it.address}  observe...")
-                                    peripheral.observe(c).collect { b ->
-                                        Log.e(TAG, "${it.address}  observe: $b")
-                                    }
+                                peripheral.observe(characteristic){
+                                    Log.e(TAG, "onSubscription")
+                                }.collect {
+                                    Log.e(TAG, "data : ${it.contentToString()}")
                                 }
                             }
                         }

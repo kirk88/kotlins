@@ -295,11 +295,8 @@ internal class PeripheralConnection(
 
     suspend fun startObservation(characteristic: Characteristic) {
         val discoveredCharacteristic = services.getCharacteristic(characteristic)
-        try {
-            setConfigDescriptor(discoveredCharacteristic, enable = true)
-        } finally {
-            setCharacteristicNotification(discoveredCharacteristic, true)
-        }
+        setCharacteristicNotification(discoveredCharacteristic, true)
+        setConfigDescriptor(discoveredCharacteristic, enable = true)
     }
 
     suspend fun stopObservation(characteristic: Characteristic) {
