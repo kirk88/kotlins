@@ -68,16 +68,16 @@ internal class Callback(
         status: Int,
         newState: Int
     ) {
-        if (newState == STATE_DISCONNECTED) {
-            gatt.close()
-            close()
-        }
-
         when (newState) {
             STATE_CONNECTING -> state.value = ConnectionState.Connecting
             STATE_CONNECTED -> state.value = ConnectionState.Connected
             STATE_DISCONNECTING -> state.value = ConnectionState.Disconnecting
             STATE_DISCONNECTED -> state.value = ConnectionState.Disconnected(status.toStatus())
+        }
+
+        if (newState == STATE_DISCONNECTED) {
+            gatt.close()
+            close()
         }
     }
 
