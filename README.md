@@ -12,7 +12,7 @@ kotlin一些通用的工具
 # bluetooth
 Kotlin中低能耗蓝牙的使用api，支持最低版本Android4.4
 
-kable[https://github.com/JuulLabs/kable]的纯android版
+Kable的纯android版[https://github.com/JuulLabs/kable]
 ***
 # atomic
 Kotlin中使用原子操作的api
