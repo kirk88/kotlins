@@ -2,7 +2,7 @@ package com.nice.sqlite
 
 import java.util.*
 
-internal object SqlitePrimitives {
+internal object SQLitePrimitives {
     val PRIMITIVES_TO_WRAPPERS: MutableMap<Class<*>?, Class<*>>
 
     init {

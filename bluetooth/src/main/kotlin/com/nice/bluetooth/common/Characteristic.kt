@@ -86,6 +86,10 @@ fun DiscoveredCharacteristic.findDescriptor(descriptorUuid: UUID): DiscoveredDes
     return descriptors.find { it.descriptorUuid == descriptorUuid }
 }
 
+fun DiscoveredCharacteristic.findDescriptor(predicate: (DiscoveredDescriptor) -> Boolean): DiscoveredDescriptor? {
+    return descriptors.find(predicate)
+}
+
 operator fun DiscoveredCharacteristic.get(descriptorUuid: UUID): DiscoveredDescriptor {
     return descriptors.first(descriptorUuid)
 }

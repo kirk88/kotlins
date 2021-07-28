@@ -179,7 +179,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
         return value
     }
 
-    if (type.isPrimitive && SqlitePrimitives.PRIMITIVES_TO_WRAPPERS[type] == value::class.java) {
+    if (type.isPrimitive && SQLitePrimitives.PRIMITIVES_TO_WRAPPERS[type] == value::class.java) {
         return value
     }
 

@@ -29,6 +29,10 @@ fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCh
     return characteristics.find { it.characteristicUuid == characteristicUuid }
 }
 
+fun DiscoveredService.findCharacteristic(predicate: (DiscoveredCharacteristic) -> Boolean): DiscoveredCharacteristic? {
+    return characteristics.find(predicate)
+}
+
 fun DiscoveredService.findDescriptor(characteristicUuid: UUID, descriptorUuid: UUID): DiscoveredDescriptor? {
     return findCharacteristic(characteristicUuid)?.findDescriptor(descriptorUuid)
 }

@@ -11,12 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
+import com.example.sample.db.DB
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
-import com.nice.bluetooth.common.Advertisement
-import com.nice.bluetooth.common.BluetoothState
-import com.nice.bluetooth.common.CharacteristicProperty
-import com.nice.bluetooth.common.ConnectionState
+import com.nice.bluetooth.common.*
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
 import com.nice.common.adapter.SimpleRecyclerAdapter
@@ -62,6 +60,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             ) {
                 Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
+        }
+
+        DB.use {
+            execSQL("""CREATE TABLE "test"("id" INTEGER PRIMARY KEY AUTOINCREMENT, "name" TEXT NOT NULL, "flag" INTEGER DEFAULT 0, "number" INTEGER DEFAULT 0)""")
+            execSQL("""INSERT  INTO "test" ("id", "name", "flag", "number") VALUES (1, 'jack', 1, 30)""")
+            execSQL("""UPDATE "test" SET "name" = 'tom', "flag" = 0""")
+            execSQL("""SELECT "id", "name", "flag" FROM "test" WHERE (("id" != 1) AND ("name" = 'jack')) AND ("flag" = 1) ORDER BY "name" ASC, "flag" DESC""")
         }
 
 //        lifecycleScope.launch(Dispatchers.IO) {
@@ -155,18 +160,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                         Log.e(TAG, "${it.address}  connected")
 
-                        val service = peripheral.services.find { service ->
+                        val characteristic = peripheral.findService { service ->
                             service.serviceUuid.toString().contains("ffe0", true)
-                        }
-
-                        val characteristic = service?.characteristics?.find { characteristic ->
+                        }?.findCharacteristic { characteristic ->
                             characteristic.characteristicUuid.toString().contains("ffe1", true)
                         }
 
-                        if(characteristic != null){
+                        if (characteristic != null) {
                             Log.e(TAG, "observe...")
 
-                            peripheral.observe(characteristic){
+                            peripheral.observe(characteristic) {
                                 Log.e(TAG, "onSubscription")
                             }.collect {
                                 Log.e(TAG, "data : ${it.contentToString()}")

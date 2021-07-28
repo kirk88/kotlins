@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.bluetooth.common
 
 import android.bluetooth.BluetoothDevice
@@ -217,4 +219,20 @@ interface Peripheral : Readable, Writable {
 
 fun Peripheral.findService(serviceUuid: UUID): DiscoveredService? {
     return services.find { it.serviceUuid == serviceUuid }
+}
+
+fun Peripheral.findService(predicate: (DiscoveredService) -> Boolean): DiscoveredService? {
+    return services.find(predicate)
+}
+
+fun Peripheral.findCharacteristic(serviceUuid: UUID, characteristicUuid: UUID): DiscoveredCharacteristic? {
+    return findService(serviceUuid)?.findCharacteristic(characteristicUuid)
+}
+
+operator fun Peripheral.get(serviceUuid: UUID): DiscoveredService {
+    return services.first(serviceUuid)
+}
+
+operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID): DiscoveredCharacteristic {
+    return get(serviceUuid)[characteristicUuid]
 }
