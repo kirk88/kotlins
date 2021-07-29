@@ -9,9 +9,15 @@ import com.nice.sqlite.core.ddl.CreateTableStatement
 import com.nice.sqlite.core.ddl.DropTableStatement
 import com.nice.sqlite.core.dml.*
 
-open class Subject<T : Table>(val table: T) {
+interface Subject<T : Table> {
 
-    class Over<T : Table>(table: T) : Subject<T>(table) {
+    val table: T
+
+}
+
+sealed class StatementSubject<T : Table>(override val table: T) : Subject<T> {
+
+    class Over<T : Table>(table: T) : StatementSubject<T>(table) {
         inline fun create(action: SQLiteDefinitionBuilder.(T) -> Unit): CreateTableStatement<T> {
             return CreateTableStatement(SQLiteDefinitionBuilder().apply {
                 action(table)
@@ -31,7 +37,7 @@ open class Subject<T : Table>(val table: T) {
         }
     }
 
-    class From<T : Table>(table: T) : Subject<T>(table) {
+    class From<T : Table>(table: T) : StatementSubject<T>(table) {
         fun <T2 : Table> join(table2: T2): Join2Clause<T, T2> {
             return Join2Clause(this, table2)
         }
@@ -108,7 +114,7 @@ open class Subject<T : Table>(val table: T) {
         }
     }
 
-    class Into<T : Table>(table: T) : Subject<T>(table) {
+    class Into<T : Table>(table: T) : StatementSubject<T>(table) {
         inline fun insert(
             conflict: Conflict = Conflict.None,
             values: (T) -> Sequence<Assignment>
@@ -116,16 +122,17 @@ open class Subject<T : Table>(val table: T) {
             return InsertStatement(values(table), this, conflict)
         }
     }
+
 }
 
-fun <T : Table> over(table: T): Subject.Over<T> {
-    return Subject.Over(table)
+fun <T : Table> over(table: T): StatementSubject.Over<T> {
+    return StatementSubject.Over(table)
 }
 
-fun <T : Table> from(table: T): Subject.From<T> {
-    return Subject.From(table)
+fun <T : Table> from(table: T): StatementSubject.From<T> {
+    return StatementSubject.From(table)
 }
 
-fun <T : Table> into(table: T): Subject.Into<T> {
-    return Subject.Into(table)
+fun <T : Table> into(table: T): StatementSubject.Into<T> {
+    return StatementSubject.Into(table)
 }

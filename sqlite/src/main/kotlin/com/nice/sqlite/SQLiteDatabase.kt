@@ -8,6 +8,8 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
 import com.nice.sqlite.core.Database
+import com.nice.sqlite.core.Subject
+import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.dml.Statement
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -36,6 +38,8 @@ class AndroidDatabase(private val database: SupportSQLiteDatabase) : Database {
     }
 
 }
+
+sealed class SQLiteDatabaseSubject<T: Table>(override val table: T): Subject<T>
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
