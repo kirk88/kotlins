@@ -6,33 +6,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import com.nice.sqlite.core.dml.Projection
 import java.util.concurrent.atomic.AtomicInteger
 
-fun SupportSQLiteDatabase.createIndex(
-    table: String,
-    unique: Boolean,
-    name: String,
-    vararg columns: Projection.Column
-) {
-    val escapedTableName = table.replace("`", "``")
-    val escapedIndexName = name.replace("`", "``")
-    val uniqueText = if (unique) "UNIQUE" else ""
-    execSQL(columns.joinToString(
-        separator = ",",
-        prefix = "CREATE $uniqueText INDEX IF NOT EXISTS `$escapedIndexName` ON `$escapedTableName`(",
-        postfix = ")"
-    ))
-}
 
-fun SupportSQLiteDatabase.dropIndex(
-    table: String,
-    name: String
-) {
-    val escapedTableName = table.replace("`", "``")
-    val escapedIndexName = name.replace("`", "``")
-    execSQL("DROP INDEX IF EXISTS `$escapedIndexName` ON `$escapedTableName`")
-}
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 

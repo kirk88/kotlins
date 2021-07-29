@@ -8,6 +8,8 @@ interface Projection : Sequence<Projection> {
 
     override fun iterator(): Iterator<Projection> = OnceIterator(this)
 
+    fun render(fullFormat: Boolean = false): String
+
     abstract class Column(
         val name: String,
         val table: Table
@@ -37,6 +39,10 @@ interface Projection : Sequence<Projection> {
 
         val desc: Ordering
             get() = Ordering.By(this, SqlOrderDirection.DESC)
+
+        override fun render(fullFormat: Boolean): String {
+            return if (fullFormat) "${table.render()}.\"$this\"" else "\"$this\""
+        }
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -80,6 +86,10 @@ interface Projection : Sequence<Projection> {
             var result = name.hashCode()
             result = 31 * result + column.hashCode()
             return result
+        }
+
+        override fun render(fullFormat: Boolean): String {
+            return "$name(${column.render(fullFormat)})"
         }
 
         override fun toString(): String = "$name(${column.name})"

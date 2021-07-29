@@ -3,13 +3,19 @@ package com.nice.sqlite.core.dml
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class LimitClause<T : Table>(
-    val limit: Int,
-    val subject: Subject<T>,
-    val whereClause: WhereClause<T>?,
-    val orderClause: OrderClause<T>?,
-    val groupClause: GroupClause<T>?,
-    val havingClause: HavingClause<T>?
+class LimitClause<T : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val limit: Int,
+    @PublishedApi
+    internal val subject: Subject<T>,
+    @PublishedApi
+    internal val whereClause: WhereClause<T>?,
+    @PublishedApi
+    internal val orderClause: OrderClause<T>?,
+    @PublishedApi
+    internal val groupClause: GroupClause<T>?,
+    @PublishedApi
+    internal val havingClause: HavingClause<T>?
 ) {
 
     inline fun offset(offset: () -> Int): OffsetClause<T> {
@@ -24,7 +30,7 @@ class LimitClause<T : Table>(
         )
     }
 
-    inline fun select(selection: (T) -> Sequence<Projection>): SelectStatement<T> {
+    inline fun select(selection: (T) -> Sequence<Projection> = { emptySequence() }): SelectStatement<T> {
         return SelectStatement(
             selection(
                 subject.table
@@ -40,13 +46,19 @@ class LimitClause<T : Table>(
     }
 }
 
-class Limit2Clause<T : Table, T2 : Table>(
-    val limit: Int,
-    val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val where2Clause: Where2Clause<T, T2>?,
-    val order2Clause: Order2Clause<T, T2>?,
-    val group2Clause: Group2Clause<T, T2>?,
-    val having2Clause: Having2Clause<T, T2>?
+class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val limit: Int,
+    @PublishedApi
+    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
+    @PublishedApi
+    internal val where2Clause: Where2Clause<T, T2>?,
+    @PublishedApi
+    internal val order2Clause: Order2Clause<T, T2>?,
+    @PublishedApi
+    internal val group2Clause: Group2Clause<T, T2>?,
+    @PublishedApi
+    internal val having2Clause: Having2Clause<T, T2>?
 ) {
 
     inline fun offset(offset: () -> Int): Offset2Clause<T, T2> {
@@ -61,7 +73,7 @@ class Limit2Clause<T : Table, T2 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2) -> Sequence<Projection>): Select2Statement<T, T2> {
+    inline fun select(selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }): Select2Statement<T, T2> {
         return Select2Statement(
             selection(
                 joinOn2Clause.subject.table,
@@ -79,13 +91,19 @@ class Limit2Clause<T : Table, T2 : Table>(
 
 }
 
-class Limit3Clause<T : Table, T2 : Table, T3 : Table>(
-    val limit: Int,
-    val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val where3Clause: Where3Clause<T, T2, T3>?,
-    val order3Clause: Order3Clause<T, T2, T3>?,
-    val group3Clause: Group3Clause<T, T2, T3>?,
-    val having3Clause: Having3Clause<T, T2, T3>?
+class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val limit: Int,
+    @PublishedApi
+    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
+    @PublishedApi
+    internal val where3Clause: Where3Clause<T, T2, T3>?,
+    @PublishedApi
+    internal val order3Clause: Order3Clause<T, T2, T3>?,
+    @PublishedApi
+    internal val group3Clause: Group3Clause<T, T2, T3>?,
+    @PublishedApi
+    internal val having3Clause: Having3Clause<T, T2, T3>?
 ) {
 
     inline fun offset(offset: () -> Int): Offset3Clause<T, T2, T3> {
@@ -100,7 +118,7 @@ class Limit3Clause<T : Table, T2 : Table, T3 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3) -> Sequence<Projection>): Select3Statement<T, T2, T3> {
+    inline fun select(selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }): Select3Statement<T, T2, T3> {
         return Select3Statement(
             selection(
                 joinOn3Clause.joinOn2Clause.subject.table,
@@ -118,13 +136,19 @@ class Limit3Clause<T : Table, T2 : Table, T3 : Table>(
     }
 }
 
-class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val limit: Int,
-    val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
-    val where4Clause: Where4Clause<T, T2, T3, T4>?,
-    val order4Clause: Order4Clause<T, T2, T3, T4>?,
-    val group4Clause: Group4Clause<T, T2, T3, T4>?,
-    val having4Clause: Having4Clause<T, T2, T3, T4>?
+class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val limit: Int,
+    @PublishedApi
+    internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
+    @PublishedApi
+    internal val where4Clause: Where4Clause<T, T2, T3, T4>?,
+    @PublishedApi
+    internal val order4Clause: Order4Clause<T, T2, T3, T4>?,
+    @PublishedApi
+    internal val group4Clause: Group4Clause<T, T2, T3, T4>?,
+    @PublishedApi
+    internal val having4Clause: Having4Clause<T, T2, T3, T4>?
 ) {
 
     inline fun offset(offset: () -> Int): Offset4Clause<T, T2, T3, T4> {
@@ -139,7 +163,7 @@ class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection>): Select4Statement<T, T2, T3, T4> {
+    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }): Select4Statement<T, T2, T3, T4> {
         return Select4Statement(
             selection(
                 joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table,

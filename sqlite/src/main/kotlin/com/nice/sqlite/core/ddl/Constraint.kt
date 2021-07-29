@@ -2,32 +2,76 @@ package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.dml.Projection
 
-sealed class ConstraintAction(
+sealed class ColumnConstraintAction(
     private val name: String
 ) {
-    object SetNull : ConstraintAction("SET NULL")
+    object SetNull : ColumnConstraintAction("SET NULL")
 
-    object SetDefault : ConstraintAction("SET DEFAULT")
+    object SetDefault : ColumnConstraintAction("SET DEFAULT")
 
-    object SetRestrict : ConstraintAction("SET DEFAULT")
+    object SetRestrict : ColumnConstraintAction("SET DEFAULT")
 
-    object Cascade : ConstraintAction("CASCADE")
+    object Cascade : ColumnConstraintAction("CASCADE")
 
-    object NoAction : ConstraintAction("NO ACTION")
+    object NoAction : ColumnConstraintAction("NO ACTION")
 
     override fun toString(): String {
         return name
     }
 }
 
-sealed class Constraint {
+sealed class ColumnConstraint {
 
-    class PrimaryKey(val autoIncrement: Boolean) : Constraint()
+    class PrimaryKey(val autoIncrement: Boolean) : ColumnConstraint() {
 
-    class ForeignKey(val references: Projection.Column) : Constraint()
+        override fun toString(): String = buildString {
+            append("PRIMARY KEY")
+            if (autoIncrement) {
+                append(" AUTOINCREMENT")
+            }
+        }
 
-    class Unique(val conflict: Conflict) : Constraint()
+    }
 
-    object NotNull : Constraint()
+    class ForeignKey(val references: Projection.Column) : ColumnConstraint() {
+
+        override fun toString(): String = buildString {
+            append("REFERENCES ")
+            append(references.render(true))
+        }
+
+    }
+
+    class Unique(val conflict: Conflict) : ColumnConstraint() {
+
+        override fun toString(): String = buildString {
+            append("UNIQUE")
+            if (conflict != Conflict.None) {
+                append(" ON CONFLICT ")
+                append(conflict)
+            }
+        }
+
+    }
+
+    object NotNull : ColumnConstraint() {
+        override fun toString(): String = "NOT NULL"
+    }
+
+}
+
+sealed class IndexConstraint{
+
+    object Unique: IndexConstraint(){
+        override fun toString(): String = "UNIQUE"
+    }
+
+    object IfNotExists: IndexConstraint(){
+        override fun toString(): String = "IF NOT EXISTS"
+    }
+
+    object IfExists: IndexConstraint(){
+        override fun toString(): String = "IF EXISTS"
+    }
 
 }

@@ -10,9 +10,9 @@ class UpdateStatement<T : Table>(
     val subject: Subject<T>,
     val whereClause: WhereClause<T>?,
     val conflict: Conflict
-) {
+): Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }

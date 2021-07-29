@@ -9,6 +9,8 @@ interface Ordering : Sequence<Ordering> {
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
 
+    fun render(fullFormat: Boolean = false): String = "${column.render(fullFormat)} $direction"
+
     class By(override val column: Projection.Column, override val direction: SqlOrderDirection) :
         Ordering {
 
@@ -29,6 +31,8 @@ interface Ordering : Sequence<Ordering> {
             result = 31 * result + direction.hashCode()
             return result
         }
+
+        override fun toString(): String = "$column $direction"
 
     }
 

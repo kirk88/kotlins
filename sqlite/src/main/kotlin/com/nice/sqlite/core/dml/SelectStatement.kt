@@ -4,7 +4,7 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class SelectStatement<T: Table>(
+class SelectStatement<T : Table>(
     val projections: Sequence<Projection>,
     val subject: Subject<T>,
     val whereClause: WhereClause<T>?,
@@ -12,14 +12,15 @@ class SelectStatement<T: Table>(
     val limitClause: LimitClause<T>?,
     val offsetClause: OffsetClause<T>?,
     val groupClause: GroupClause<T>?,
-    val havingClause: HavingClause<T>?) {
+    val havingClause: HavingClause<T>?
+) : Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }
 
-class Select2Statement<T: Table, T2: Table>(
+class Select2Statement<T : Table, T2 : Table>(
     val projections: Sequence<Projection>,
     val joinOn2Clause: JoinOn2Clause<T, T2>,
     val where2Clause: Where2Clause<T, T2>?,
@@ -27,14 +28,15 @@ class Select2Statement<T: Table, T2: Table>(
     val limit2Clause: Limit2Clause<T, T2>?,
     val offset2Clause: Offset2Clause<T, T2>?,
     val group2Clause: Group2Clause<T, T2>?,
-    val having2Clause: Having2Clause<T, T2>?) {
+    val having2Clause: Having2Clause<T, T2>?
+) : Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }
 
-class Select3Statement<T: Table, T2: Table, T3: Table>(
+class Select3Statement<T : Table, T2 : Table, T3 : Table>(
     val projections: Sequence<Projection>,
     val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     val where3Clause: Where3Clause<T, T2, T3>?,
@@ -42,15 +44,16 @@ class Select3Statement<T: Table, T2: Table, T3: Table>(
     val limit3Clause: Limit3Clause<T, T2, T3>?,
     val offset3Clause: Offset3Clause<T, T2, T3>?,
     val group3Clause: Group3Clause<T, T2, T3>?,
-    val having3Clause: Having3Clause<T, T2, T3>?) {
+    val having3Clause: Having3Clause<T, T2, T3>?
+) : Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }
 
 
-class Select4Statement<T: Table, T2: Table, T3: Table, T4: Table>(
+class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
     val projections: Sequence<Projection>,
     val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
     val where4Clause: Where4Clause<T, T2, T3, T4>?,
@@ -58,9 +61,10 @@ class Select4Statement<T: Table, T2: Table, T3: Table, T4: Table>(
     val limit4Clause: Limit4Clause<T, T2, T3, T4>?,
     val offset4Clause: Offset4Clause<T, T2, T3, T4>?,
     val group4Clause: Group4Clause<T, T2, T3, T4>?,
-    val having4Clause: Having4Clause<T, T2, T3, T4>?) {
+    val having4Clause: Having4Clause<T, T2, T3, T4>?
+) : Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }

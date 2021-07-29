@@ -4,6 +4,7 @@ import com.nice.sqlite.core.dml.Assignment
 import com.nice.sqlite.core.dml.Projection.Column
 
 open class Table(private val name: String) {
+
     inner class BooleanColumn(name: String) : Column(name, this)
     inner class IntColumn(name: String) : Column(name, this)
     inner class LongColumn(name: String) : Column(name, this)
@@ -13,6 +14,8 @@ open class Table(private val name: String) {
     inner class DoubleColumn(name: String) : Column(name, this)
     inner class StringColumn(name: String) : Column(name, this)
     inner class BlobColumn(name: String) : Column(name, this)
+
+    fun render(): String = "\"$name\""
 
     override fun toString(): String {
         return name
@@ -32,6 +35,7 @@ open class Table(private val name: String) {
     override fun hashCode(): Int {
         return name.hashCode()
     }
+
 }
 
 operator fun Table.IntColumn.invoke(value: Int): Assignment {

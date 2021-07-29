@@ -6,28 +6,35 @@ import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class Join2Clause<T : Table, T2 : Table>(
-    val subject: Subject<T>,
-    val table2: T2,
-    val type: JoinType = JoinType.INNER
+class Join2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val subject: Subject<T>,
+    @PublishedApi
+    internal val table2: T2,
+    @PublishedApi
+    internal val type: JoinType = JoinType.INNER
 ) {
 
-    inline fun on(condition: (T, T2) -> Predicate): JoinOn2Clause<T, T2> {
+    inline fun on(predicate: (T, T2) -> Predicate): JoinOn2Clause<T, T2> {
         return JoinOn2Clause(
             subject,
             table2,
             type,
-            condition(subject.table, table2)
+            predicate(subject.table, table2)
         )
     }
 
 }
 
-class JoinOn2Clause<T : Table, T2 : Table>(
-    val subject: Subject<T>,
-    val table2: T2,
-    val type: JoinType,
-    val condition: Predicate
+class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val subject: Subject<T>,
+    @PublishedApi
+    internal val table2: T2,
+    @PublishedApi
+    internal val type: JoinType,
+    @PublishedApi
+    internal val predicate: Predicate
 ) {
 
     fun <T3 : Table> join(table3: T3): Join3Clause<T, T2, T3> {
@@ -73,7 +80,7 @@ class JoinOn2Clause<T : Table, T2 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2) -> Sequence<Projection>): Select2Statement<T, T2> {
+    inline fun select(selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }): Select2Statement<T, T2> {
         return Select2Statement(
             selection(
                 subject.table,
@@ -91,27 +98,34 @@ class JoinOn2Clause<T : Table, T2 : Table>(
 
 }
 
-class Join3Clause<T : Table, T2 : Table, T3 : Table>(
-    val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val table3: T3,
-    val type: JoinType = JoinType.INNER
+class Join3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
+    @PublishedApi
+    internal val table3: T3,
+    @PublishedApi
+    internal val type: JoinType = JoinType.INNER
 ) {
 
-    inline fun on(condition: (T, T2, T3) -> Predicate): JoinOn3Clause<T, T2, T3> {
+    inline fun on(predicate: (T, T2, T3) -> Predicate): JoinOn3Clause<T, T2, T3> {
         return JoinOn3Clause(
             joinOn2Clause,
             table3,
             type,
-            condition(joinOn2Clause.subject.table, joinOn2Clause.table2, table3)
+            predicate(joinOn2Clause.subject.table, joinOn2Clause.table2, table3)
         )
     }
 }
 
-class JoinOn3Clause<T : Table, T2 : Table, T3 : Table>(
-    val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val table3: T3,
-    val type: JoinType,
-    val condition: Predicate
+class JoinOn3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
+    @PublishedApi
+    internal val table3: T3,
+    @PublishedApi
+    internal val type: JoinType,
+    @PublishedApi
+    internal val predicate: Predicate
 ) {
 
     fun <T4 : Table> join(table4: T4): Join4Clause<T, T2, T3, T4> {
@@ -170,7 +184,7 @@ class JoinOn3Clause<T : Table, T2 : Table, T3 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3) -> Sequence<Projection>): Select3Statement<T, T2, T3> {
+    inline fun select(selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }): Select3Statement<T, T2, T3> {
         return Select3Statement(
             selection(
                 joinOn2Clause.subject.table,
@@ -189,18 +203,21 @@ class JoinOn3Clause<T : Table, T2 : Table, T3 : Table>(
 
 }
 
-class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val table4: T4,
-    val type: JoinType = JoinType.INNER
+class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
+    @PublishedApi
+    internal val table4: T4,
+    @PublishedApi
+    internal val type: JoinType = JoinType.INNER
 ) {
 
-    inline fun on(condition: (T, T2, T3, T4) -> Predicate): JoinOn4Clause<T, T2, T3, T4> {
+    inline fun on(predicate: (T, T2, T3, T4) -> Predicate): JoinOn4Clause<T, T2, T3, T4> {
         return JoinOn4Clause(
             joinOn3Clause,
             table4,
             type,
-            condition(
+            predicate(
                 joinOn3Clause.joinOn2Clause.subject.table,
                 joinOn3Clause.joinOn2Clause.table2,
                 joinOn3Clause.table3,
@@ -210,11 +227,15 @@ class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
     }
 }
 
-class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val table4: T4,
-    val type: JoinType,
-    val condition: Predicate
+class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
+    @PublishedApi
+    internal val table4: T4,
+    @PublishedApi
+    internal val type: JoinType,
+    @PublishedApi
+    internal val predicate: Predicate
 ) {
 
     inline fun where(predicate: (T, T2, T3, T4) -> Predicate): Where4Clause<T, T2, T3, T4> {
@@ -280,7 +301,7 @@ class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection>): Select4Statement<T, T2, T3, T4> {
+    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }): Select4Statement<T, T2, T3, T4> {
         return Select4Statement(
             selection(
                 joinOn3Clause.joinOn2Clause.subject.table,

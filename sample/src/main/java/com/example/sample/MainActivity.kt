@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.DB
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.common.*
@@ -44,7 +43,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override val tipView: TipView by tipViews()
 
-    private val permissionRequestLauncher = PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
+    private val permissionRequestLauncher =
+        PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,12 +62,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        DB.use {
-            execSQL("""CREATE TABLE "test"("id" INTEGER PRIMARY KEY AUTOINCREMENT, "name" TEXT NOT NULL, "flag" INTEGER DEFAULT 0, "number" INTEGER DEFAULT 0)""")
-            execSQL("""INSERT  INTO "test" ("id", "name", "flag", "number") VALUES (1, 'jack', 1, 30)""")
-            execSQL("""UPDATE "test" SET "name" = 'tom', "flag" = 0""")
-            execSQL("""SELECT "id", "name", "flag" FROM "test" WHERE (("id" != 1) AND ("name" = 'jack')) AND ("flag" = 1) ORDER BY "name" ASC, "flag" DESC""")
-        }
 
 //        lifecycleScope.launch(Dispatchers.IO) {
 //            DB.use(true) {
@@ -151,7 +145,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         }
 
                         launch {
-                            val state = peripheral.state.drop(1).first { it is ConnectionState.Disconnected }
+                            val state = peripheral.state.drop(1)
+                                .first { it is ConnectionState.Disconnected }
                             Log.e(TAG, "${it.address}  disconnected: $state")
                         }
 
@@ -204,9 +199,14 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     }
 
-    private class BleAdapter(context: Context) : SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_2) {
+    private class BleAdapter(context: Context) :
+        SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_2) {
 
-        override fun onBindItemViewHolder(holder: ItemViewHolder, item: Advertisement, payloads: MutableList<Any>) {
+        override fun onBindItemViewHolder(
+            holder: ItemViewHolder,
+            item: Advertisement,
+            payloads: MutableList<Any>
+        ) {
             holder.findViewById<TextView>(android.R.id.text1).string = item.name
             holder.findViewById<TextView>(android.R.id.text2).string = item.address
         }

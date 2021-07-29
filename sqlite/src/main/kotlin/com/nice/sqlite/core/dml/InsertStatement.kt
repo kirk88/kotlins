@@ -9,9 +9,9 @@ class InsertStatement<T: Table>(
     val assignments: Sequence<Assignment>,
     val subject: Subject<T>,
     val conflict: Conflict
-) {
+): Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 

@@ -6,10 +6,13 @@ import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class GroupClause<T : Table>(
-    val projections: Sequence<Projection>,
-    val subject: Subject<T>,
-    val whereClause: WhereClause<T>?
+class GroupClause<T : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val projections: Sequence<Projection>,
+    @PublishedApi
+    internal val subject: Subject<T>,
+    @PublishedApi
+    internal val whereClause: WhereClause<T>?
 ) {
 
     inline fun having(predicate: (T) -> Predicate): HavingClause<T> {
@@ -43,7 +46,7 @@ class GroupClause<T : Table>(
         )
     }
 
-    inline fun select(selection: (T) -> Sequence<Projection>): SelectStatement<T> {
+    inline fun select(selection: (T) -> Sequence<Projection> = { emptySequence() }): SelectStatement<T> {
         return SelectStatement(
             selection(subject.table),
             subject,
@@ -58,10 +61,13 @@ class GroupClause<T : Table>(
 
 }
 
-class Group2Clause<T : Table, T2 : Table>(
-    val projections: Sequence<Projection>,
-    val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val where2Clause: Where2Clause<T, T2>?
+class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val projections: Sequence<Projection>,
+    @PublishedApi
+    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
+    @PublishedApi
+    internal val where2Clause: Where2Clause<T, T2>?
 ) {
 
     inline fun having(predicate: (T, T2) -> Predicate): Having2Clause<T, T2> {
@@ -112,7 +118,7 @@ class Group2Clause<T : Table, T2 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2) -> Sequence<Projection>): Select2Statement<T, T2> {
+    inline fun select(selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }): Select2Statement<T, T2> {
         return Select2Statement(
             selection(
                 joinOn2Clause.subject.table,
@@ -130,10 +136,13 @@ class Group2Clause<T : Table, T2 : Table>(
 
 }
 
-class Group3Clause<T : Table, T2 : Table, T3 : Table>(
-    val projections: Sequence<Projection>,
-    val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val where3Clause: Where3Clause<T, T2, T3>?
+class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val projections: Sequence<Projection>,
+    @PublishedApi
+    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
+    @PublishedApi
+    internal val where3Clause: Where3Clause<T, T2, T3>?
 ) {
 
     inline fun having(predicate: (T, T2, T3) -> Predicate): Having3Clause<T, T2, T3> {
@@ -186,7 +195,7 @@ class Group3Clause<T : Table, T2 : Table, T3 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3) -> Sequence<Projection>): Select3Statement<T, T2, T3> {
+    inline fun select(selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }): Select3Statement<T, T2, T3> {
         return Select3Statement(
             selection(
                 joinOn3Clause.joinOn2Clause.subject.table,
@@ -205,10 +214,13 @@ class Group3Clause<T : Table, T2 : Table, T3 : Table>(
 
 }
 
-class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val projections: Sequence<Projection>,
-    val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
-    val where4Clause: Where4Clause<T, T2, T3, T4>?
+class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val projections: Sequence<Projection>,
+    @PublishedApi
+    internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
+    @PublishedApi
+    internal val where4Clause: Where4Clause<T, T2, T3, T4>?
 ) {
 
     inline fun having(predicate: (T, T2, T3, T4) -> Predicate): Having4Clause<T, T2, T3, T4> {
@@ -263,7 +275,7 @@ class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection>): Select4Statement<T, T2, T3, T4> {
+    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }): Select4Statement<T, T2, T3, T4> {
         return Select4Statement(
             selection(
                 joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table,

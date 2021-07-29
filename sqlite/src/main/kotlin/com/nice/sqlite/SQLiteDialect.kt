@@ -1,74 +1,119 @@
 package com.nice.sqlite
 
-import com.nice.sqlite.core.*
-import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.core.Dialect
+import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ddl.AlertTableStatement
+import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.ddl.CreateTableStatement
+import com.nice.sqlite.core.ddl.DropTableStatement
 import com.nice.sqlite.core.dml.*
+import com.nice.sqlite.core.escapedSQLString
 
 object SQLiteDialect : Dialect {
 
     override fun <T : Table> build(statement: CreateTableStatement<T>): String {
         val builder = StringBuilder()
 
-        builder.append("CREATE TABLE ")
-        builder.appendTableName(statement.subject.table)
-        builder.append('(')
+        val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
+        if (!columns.none()) {
+            builder.append("CREATE TABLE")
+            builder.append(statement.subject.table.render())
+            builder.append(" (")
 
-        builder.appendSequence(statement.definitions) {
-            appendDefinition(it)
+            columns.joinTo(builder, postfix = ")") {
+                compileColumnSql(it)
+            }
         }
 
-        builder.append(")")
-
+        val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
+        if (!indexes.none()) {
+            indexes.joinTo(builder, separator = ";", prefix = ";") {
+                compileCreateIndexSql(it, statement.subject.table)
+            }
+        }
         return builder.toString()
     }
 
     override fun <T : Table> build(statement: AlertTableStatement<T>): String {
         val builder = StringBuilder()
 
-        builder.appendSequence(statement.definitions, delimiter = ";"){
-            append("ALERT TABLE ")
-            appendTableName(statement.subject.table)
-            append(" ADD COLUMN ")
-            appendDefinition(it)
+        val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
+        if (!columns.none()) {
+            columns.joinTo(builder, ";") {
+                "ALERT TABLE ${statement.subject.table.render()} ADD COLUMN ${compileColumnSql(it)}"
+            }
+        }
+
+        val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
+        if (!indexes.none()) {
+            indexes.joinTo(builder, separator = ";", prefix = ";") {
+                compileCreateIndexSql(it, statement.subject.table)
+            }
         }
 
         return builder.toString()
     }
 
     override fun <T : Table> build(statement: DropTableStatement<T>): String {
-        return "DROP TABLE \"${statement.subject.table}\""
+        val builder = StringBuilder()
+
+        if (statement.definitions.none()) {
+            builder.append("DROP TABLE ")
+            builder.append(statement.subject.table.render())
+        } else {
+            check(statement.definitions.none {
+                it is SQLiteColumn
+            }) { "Drop columns are not supported yet" }
+
+            val indexes = statement.definitions.map { it as SQLiteIndex }
+            indexes.joinTo(builder, separator = ";") {
+                compileDropIndexSql(it, statement.subject.table)
+            }
+        }
+
+        return builder.toString()
     }
 
     override fun <T : Table> build(statement: SelectStatement<T>): String {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        builder.appendProjection(statement.projections, false, "*")
+        if (statement.projections.none()) {
+            builder.append('*')
+        } else {
+            statement.projections.joinTo(builder) {
+                it.render()
+            }
+        }
         builder.append(" FROM ")
-        builder.appendTableName(statement.subject.table)
+        builder.append(statement.subject.table.render())
 
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, false)
+            builder.append(where.predicate.render())
         }
 
         val group = statement.groupClause
         if (group != null) {
             builder.append(" GROUP BY ")
-            builder.appendProjection(group.projections, false)
+            group.projections.joinTo(builder) {
+                it.render()
+            }
         }
 
         val having = statement.havingClause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.appendPredicate(having.predicate, false)
+            builder.append(having.predicate.render())
         }
 
         val order = statement.orderClause
         if (order != null) {
             builder.append(" ORDER BY ")
-            builder.appendOrdering(order.orderings, false)
+            order.orderings.joinTo(builder) {
+                it.render()
+            }
         }
 
         val limit = statement.limitClause
@@ -90,38 +135,48 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        builder.appendProjection(statement.projections, true, "*")
+        if (statement.projections.none()) {
+            builder.append('*')
+        } else {
+            statement.projections.joinTo(builder) {
+                it.render(true)
+            }
+        }
         builder.append(" FROM ")
-        builder.appendTableName(statement.joinOn2Clause.subject.table)
+        builder.append(statement.joinOn2Clause.subject.table.render())
 
         if (statement.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn2Clause.table2)
+        builder.append(statement.joinOn2Clause.table2.render())
         builder.append(" ON ")
-        builder.appendPredicate(statement.joinOn2Clause.condition, true)
+        builder.append(statement.joinOn2Clause.predicate.render(true))
 
         val where = statement.where2Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, true)
+            builder.append(where.predicate.render(true))
         }
 
         val group = statement.group2Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            builder.appendProjection(group.projections, true)
+            group.projections.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val having = statement.having2Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.appendPredicate(having.predicate, true)
+            builder.append(having.predicate.render(true))
         }
 
         val order = statement.order2Clause
         if (order != null) {
             builder.append(" ORDER BY ")
-            builder.appendOrdering(order.orderings, true)
+            order.orderings.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val limit = statement.limit2Clause
@@ -143,44 +198,54 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        builder.appendProjection(statement.projections, true, "*")
+        if (statement.projections.none()) {
+            builder.append('*')
+        } else {
+            statement.projections.joinTo(builder) {
+                it.render(true)
+            }
+        }
         builder.append(" FROM ")
-        builder.appendTableName(statement.joinOn3Clause.joinOn2Clause.subject.table)
+        builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.render())
 
         if (statement.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn3Clause.joinOn2Clause.table2)
+        builder.append(statement.joinOn3Clause.joinOn2Clause.table2.render())
         builder.append(" ON ")
-        builder.appendPredicate(statement.joinOn3Clause.joinOn2Clause.condition, true)
+        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.render(true))
 
         if (statement.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn3Clause.table3)
+        builder.append(statement.joinOn3Clause.table3.render())
         builder.append(" ON ")
-        builder.appendPredicate(statement.joinOn3Clause.condition, true)
+        builder.append(statement.joinOn3Clause.predicate.render(true))
 
         val where = statement.where3Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, true)
+            builder.append(where.predicate.render(true))
         }
 
         val group = statement.group3Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            builder.appendProjection(group.projections, true)
+            group.projections.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val having = statement.having3Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.appendPredicate(having.predicate, true)
+            builder.append(having.predicate.render(true))
         }
 
         val order = statement.order3Clause
         if (order != null) {
             builder.append(" ORDER BY ")
-            builder.appendOrdering(order.orderings, true)
+            order.orderings.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val limit = statement.limit3Clause
@@ -202,53 +267,64 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        builder.appendProjection(statement.projections, true, "*")
+        if (statement.projections.none()) {
+            builder.append('*')
+        } else {
+            statement.projections.joinTo(builder) {
+                it.render(true)
+            }
+        }
         builder.append(" FROM ")
-        builder.appendTableName(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table)
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.render())
 
-        if (statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        if (statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(
+            " OUTER"
+        )
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2)
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.render())
         builder.append(" ON ")
-        builder.appendPredicate(
-            statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.condition,
-            true
+        builder.append(
+            statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.render(true)
         )
 
         if (statement.joinOn4Clause.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn4Clause.joinOn3Clause.table3)
+        builder.append(statement.joinOn4Clause.joinOn3Clause.table3.render())
         builder.append(" ON ")
-        builder.appendPredicate(statement.joinOn4Clause.joinOn3Clause.condition, true)
+        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.render(true))
 
         if (statement.joinOn4Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.appendTableName(statement.joinOn4Clause.table4)
+        builder.append(statement.joinOn4Clause.table4.render())
         builder.append(" ON ")
-        builder.appendPredicate(statement.joinOn4Clause.condition, true)
+        builder.append(statement.joinOn4Clause.predicate.render(true))
 
         val where = statement.where4Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, true)
+            builder.append(where.predicate.render(true))
         }
 
         val group = statement.group4Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            builder.appendProjection(group.projections, true)
+            group.projections.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val having = statement.having4Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.appendPredicate(having.predicate, true)
+            builder.append(having.predicate.render(true))
         }
 
         val order = statement.order4Clause
         if (order != null) {
             builder.append(" ORDER BY ")
-            builder.appendOrdering(order.orderings, true)
+            order.orderings.joinTo(builder) {
+                it.render(true)
+            }
         }
 
         val limit = statement.limit4Clause
@@ -268,20 +344,24 @@ object SQLiteDialect : Dialect {
 
     override fun <T : Table> build(statement: InsertStatement<T>): String {
         val builder = StringBuilder()
-        builder.append("INSERT")
-        builder.appendConflict(statement.conflict)
+        builder.append("INSERT ")
+        if (statement.conflict != Conflict.None) {
+            builder.append("OR ")
+            builder.append(statement.conflict)
+            builder.append(' ')
+        }
         builder.append("INTO ")
-        builder.appendTableName(statement.subject.table)
-        builder.append("(")
+        builder.append(statement.subject.table.render())
+        builder.append(" (")
 
-        builder.appendSequence(statement.assignments) {
-            appendShortColumnName(it.column)
+        statement.assignments.joinTo(builder) {
+            it.column.render()
         }
 
         builder.append(") VALUES (")
 
-        builder.appendSequence(statement.assignments) {
-            appendValue(it.value)
+        statement.assignments.joinTo(builder) {
+            it.value.escapedSQLString()
         }
 
         builder.append(")")
@@ -291,21 +371,23 @@ object SQLiteDialect : Dialect {
 
     override fun <T : Table> build(statement: UpdateStatement<T>): String {
         val builder = StringBuilder()
-        builder.append("UPDATE")
-        builder.appendConflict(statement.conflict)
-        builder.appendTableName(statement.subject.table)
+        builder.append("UPDATE ")
+        if (statement.conflict != Conflict.None) {
+            builder.append("OR ")
+            builder.append(statement.conflict)
+            builder.append(' ')
+        }
+        builder.append(statement.subject.table.render())
         builder.append(" SET ")
 
-        builder.appendSequence(statement.assignments) {
-            appendShortColumnName(it.column)
-            append(" = ")
-            appendValue(it.value)
+        statement.assignments.joinTo(builder) {
+            it.render()
         }
 
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, false)
+            builder.append(where.predicate.render())
         }
 
         return builder.toString()
@@ -314,219 +396,90 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: DeleteStatement<T>): String {
         val builder = StringBuilder()
         builder.append("DELETE FROM ")
-        builder.appendTableName(statement.subject.table)
+        builder.append(statement.subject.table.render())
 
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.appendPredicate(where.predicate, false)
+            builder.append(where.predicate.render())
         }
 
         return builder.toString()
     }
 
-    private fun StringBuilder.appendPredicate(value: Any?, fullFormat: Boolean = true) {
-        when (value) {
-            is Projection.Column -> if (fullFormat) appendFullColumnName(value)
-            else appendShortColumnName(value)
+    private fun compileColumnSql(column: SQLiteColumn): String = buildString {
+        append(column.render())
 
-            is NotExpression -> {
-                append("(NOT ")
-                appendPredicate(value.param, fullFormat)
-                append(")")
+        with(column.meta) {
+            if (primaryKey != null) {
+                append(' ')
+                append(primaryKey)
             }
 
-            is AndExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" AND ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
+            if (foreignKey != null) {
+                append(' ')
+                append(foreignKey)
             }
 
-            is OrExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" OR ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
+            if (unique != null) {
+                append(' ')
+                append(unique)
             }
 
-            is EqExpression -> {
-                append('(')
-                if (value.right != null) {
-                    appendPredicate(value.left, fullFormat)
-                    append(" = ")
-                    appendPredicate(value.right, fullFormat)
-                } else {
-                    appendPredicate(value.left, fullFormat)
-                    append(" IS NULL")
-                }
-                append(')')
+            if (notNull != null) {
+                append(' ')
+                append(notNull)
             }
 
-            is NeExpression -> {
-                append('(')
-                if (value.right != null) {
-                    appendPredicate(value.left, fullFormat)
-                    append(" != ")
-                    appendPredicate(value.right, fullFormat)
-                } else {
-                    appendPredicate(value.left, fullFormat)
-                    append(" IS NOT NULL")
-                }
-                append(')')
+            if (onUpdateAction != null) {
+                append(" ON UPDATE ")
+                append(onUpdateAction)
             }
 
-            is LtExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" < ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
+            if (onDeleteAction != null) {
+                append(" ON DELETE ")
+                append(onDeleteAction)
             }
-
-            is LteExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" <= ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
-            }
-
-            is GtExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" > ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
-            }
-
-            is GteExpression -> {
-                append('(')
-                appendPredicate(value.left, fullFormat)
-                append(" >= ")
-                appendPredicate(value.right, fullFormat)
-                append(')')
-            }
-
-            else -> appendValue(value)
         }
     }
 
-    private fun StringBuilder.appendDefinition(definition: Definition) = apply {
-        appendShortColumnName(definition.column)
+    private fun compileCreateIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+        with(index.meta) {
+            append("CREATE")
+
+            if (unique != null) {
+                append(' ')
+                append(unique)
+            }
+
+            append(" INDEX")
+
+            if (ifNotExists != null) {
+                append(' ')
+                append(ifNotExists)
+            }
+        }
+
+        append(" \"${index.name}\"")
+        append(" ON ")
+        append(table.render())
         append(' ')
-        append(definition.type)
-
-        if (definition.defaultValue != null) {
-            append(" DEFAULT ")
-            appendValue(definition.defaultValue)
-        }
-
-        (definition as? SQLiteDefinition)?.meta?.apply {
-            if (primaryKeyConstraint != null) {
-                append(" PRIMARY KEY")
-                if (primaryKeyConstraint.autoIncrement) append(" AUTOINCREMENT")
-            }
-
-            if (foreignKeyConstraint != null) {
-                append(" REFERENCES ")
-                appendFullColumnName(foreignKeyConstraint.references)
-            }
-
-            if (uniqueConstraint != null) {
-                if (uniqueConstraint.conflict == Conflict.None) {
-                    append(" UNIQUE")
-                } else {
-                    append(" UNIQUE ON CONFLICT ${uniqueConstraint.conflict}")
-                }
-            }
-
-            if (notNullConstraint != null) {
-                append(" NOT NULL")
-            }
-
-            if (updateConstraintAction != null) {
-                append(" ON UPDATE $updateConstraintAction")
-            }
-
-            if (deleteConstraintAction != null) {
-                append(" ON DELETE $deleteConstraintAction")
-            }
-        }
+        append(index.render())
     }
 
-    private fun StringBuilder.appendProjection(
-        projections: Sequence<Projection>,
-        fullFormat: Boolean,
-        placeholder: String = ""
-    ) = appendSequence(projections, placeholder = placeholder) {
-        if (it is Projection.Column) {
-            if (fullFormat) {
-                appendFullColumnName(it)
-            } else {
-                appendShortColumnName(it)
-            }
-        } else {
-            append(it)
-        }
-    }
+    private fun compileDropIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+        with(index.meta) {
+            append("DROP INDEX")
 
-    private fun StringBuilder.appendOrdering(
-        orderings: Sequence<Ordering>,
-        fullFormat: Boolean
-    ) = appendSequence(orderings) {
-        if (fullFormat) {
-            appendFullColumnName(it.column)
-        } else {
-            appendShortColumnName(it.column)
-        }
-        append(' ')
-        append(it.direction)
-    }
-
-    private fun <T> StringBuilder.appendSequence(
-        sequence: Sequence<T>,
-        delimiter: String = ", ",
-        placeholder: String = "",
-        action: StringBuilder.(element: T) -> Unit
-    ) = apply {
-        if (none()) {
-            append(placeholder)
-        } else {
-            var count = 0
-            for (element in sequence) {
-                if (++count > 1) append(delimiter)
-                action(element)
+            if (ifExists != null) {
+                append(' ')
+                append(ifExists)
             }
         }
+
+        append(" \"${index.name}\"")
+        append(" ON ")
+        append(table.render())
     }
-
-    private fun StringBuilder.appendTableName(table: Table) = append("\"$table\"")
-
-    private fun StringBuilder.appendShortColumnName(column: Projection.Column) =
-        append("\"$column\"")
-
-    private fun StringBuilder.appendFullColumnName(column: Projection.Column) =
-        append("\"${column.table}\".\"$column\"")
-
-    private fun StringBuilder.appendConflict(conflict: Conflict) = apply {
-        append(' ')
-        if (conflict != Conflict.None) {
-            append("OR $conflict ")
-        }
-    }
-
-    private fun StringBuilder.appendValue(value: Any?) = append(
-        when (value) {
-            null -> "NULL"
-            is Number -> value
-            is Boolean -> if (value) 1 else 0
-            else -> value.toString().escapedSQLString()
-        }
-    )
-
-    private fun String.escapedSQLString(): String = "\'${replace("'", "''")}\'"
 
 }

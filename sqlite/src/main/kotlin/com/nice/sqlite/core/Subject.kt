@@ -11,10 +11,6 @@ import com.nice.sqlite.core.dml.*
 
 open class Subject<T : Table>(val table: T) {
 
-    override fun toString(): String {
-        return table.toString()
-    }
-
     class Over<T : Table>(table: T) : Subject<T>(table) {
         inline fun create(action: SQLiteDefinitionBuilder.(T) -> Unit): CreateTableStatement<T> {
             return CreateTableStatement(SQLiteDefinitionBuilder().apply {
@@ -28,8 +24,10 @@ open class Subject<T : Table>(val table: T) {
             }.build(), this)
         }
 
-        fun drop(): DropTableStatement<T> {
-            return DropTableStatement(this)
+        fun drop(action: SQLiteDefinitionBuilder.(T) -> Unit = {}): DropTableStatement<T> {
+            return DropTableStatement(SQLiteDefinitionBuilder().apply {
+                action(table)
+            }.build(), this)
         }
     }
 
@@ -77,7 +75,7 @@ open class Subject<T : Table>(val table: T) {
             )
         }
 
-        inline fun select(selection: (T) -> Sequence<Projection>): SelectStatement<T> {
+        inline fun select(selection: (T) -> Sequence<Projection> = { emptySequence() }): SelectStatement<T> {
             return SelectStatement(
                 selection(table),
                 this,
@@ -90,20 +88,10 @@ open class Subject<T : Table>(val table: T) {
             )
         }
 
-        fun select(): SelectStatement<T> {
-            return SelectStatement(
-                emptySequence(),
-                this,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            )
-        }
-
-        inline fun update(conflict: Conflict = Conflict.None, values: (T) -> Sequence<Assignment>): UpdateStatement<T> {
+        inline fun update(
+            conflict: Conflict = Conflict.None,
+            values: (T) -> Sequence<Assignment>
+        ): UpdateStatement<T> {
             return UpdateStatement(
                 values(table),
                 this,
@@ -121,7 +109,10 @@ open class Subject<T : Table>(val table: T) {
     }
 
     class Into<T : Table>(table: T) : Subject<T>(table) {
-        inline fun insert(conflict: Conflict = Conflict.None, values: (T) -> Sequence<Assignment>): InsertStatement<T> {
+        inline fun insert(
+            conflict: Conflict = Conflict.None,
+            values: (T) -> Sequence<Assignment>
+        ): InsertStatement<T> {
             return InsertStatement(values(table), this, conflict)
         }
     }

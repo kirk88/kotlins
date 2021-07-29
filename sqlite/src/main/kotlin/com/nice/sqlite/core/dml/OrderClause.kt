@@ -3,12 +3,17 @@ package com.nice.sqlite.core.dml
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class OrderClause<T : Table>(
-    val orderings: Sequence<Ordering>,
-    val subject: Subject<T>,
-    val whereClause: WhereClause<T>?,
-    val groupClause: GroupClause<T>?,
-    val havingClause: HavingClause<T>?
+class OrderClause<T : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val orderings: Sequence<Ordering>,
+    @PublishedApi
+    internal val subject: Subject<T>,
+    @PublishedApi
+    internal val whereClause: WhereClause<T>?,
+    @PublishedApi
+    internal val groupClause: GroupClause<T>?,
+    @PublishedApi
+    internal val havingClause: HavingClause<T>?
 ) {
 
     inline fun limit(limit: () -> Int): LimitClause<T> {
@@ -34,7 +39,7 @@ class OrderClause<T : Table>(
         )
     }
 
-    inline fun select(selection: (T) -> Sequence<Projection>): SelectStatement<T> {
+    inline fun select(selection: (T) -> Sequence<Projection> = { emptySequence() }): SelectStatement<T> {
         return SelectStatement(
             selection(
                 subject.table
@@ -51,12 +56,17 @@ class OrderClause<T : Table>(
 
 }
 
-class Order2Clause<T : Table, T2 : Table>(
-    val orderings: Sequence<Ordering>,
-    val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val where2Clause: Where2Clause<T, T2>?,
-    val group2Clause: Group2Clause<T, T2>?,
-    val having2Clause: Having2Clause<T, T2>?
+class Order2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val orderings: Sequence<Ordering>,
+    @PublishedApi
+    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
+    @PublishedApi
+    internal val where2Clause: Where2Clause<T, T2>?,
+    @PublishedApi
+    internal val group2Clause: Group2Clause<T, T2>?,
+    @PublishedApi
+    internal val having2Clause: Having2Clause<T, T2>?
 ) {
 
     inline fun limit(limit: () -> Int): Limit2Clause<T, T2> {
@@ -82,7 +92,7 @@ class Order2Clause<T : Table, T2 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2) -> Sequence<Projection>): Select2Statement<T, T2> {
+    inline fun select(selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }): Select2Statement<T, T2> {
         return Select2Statement(
             selection(
                 joinOn2Clause.subject.table,
@@ -100,12 +110,17 @@ class Order2Clause<T : Table, T2 : Table>(
 
 }
 
-class Order3Clause<T : Table, T2 : Table, T3 : Table>(
-    val orderings: Sequence<Ordering>,
-    val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val where3Clause: Where3Clause<T, T2, T3>?,
-    val group3Clause: Group3Clause<T, T2, T3>?,
-    val having3Clause: Having3Clause<T, T2, T3>?
+class Order3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val orderings: Sequence<Ordering>,
+    @PublishedApi
+    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
+    @PublishedApi
+    internal val where3Clause: Where3Clause<T, T2, T3>?,
+    @PublishedApi
+    internal val group3Clause: Group3Clause<T, T2, T3>?,
+    @PublishedApi
+    internal val having3Clause: Having3Clause<T, T2, T3>?
 ) {
 
     inline fun limit(limit: () -> Int): Limit3Clause<T, T2, T3> {
@@ -131,7 +146,7 @@ class Order3Clause<T : Table, T2 : Table, T3 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3) -> Sequence<Projection>): Select3Statement<T, T2, T3> {
+    inline fun select(selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }): Select3Statement<T, T2, T3> {
         return Select3Statement(
             selection(
                 joinOn3Clause.joinOn2Clause.subject.table,
@@ -150,12 +165,17 @@ class Order3Clause<T : Table, T2 : Table, T3 : Table>(
 
 }
 
-class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val orderings: Sequence<Ordering>,
-    val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
-    val where4Clause: Where4Clause<T, T2, T3, T4>?,
-    val group4Clause: Group4Clause<T, T2, T3, T4>?,
-    val having4Clause: Having4Clause<T, T2, T3, T4>?
+class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+    @PublishedApi
+    internal val orderings: Sequence<Ordering>,
+    @PublishedApi
+    internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
+    @PublishedApi
+    internal val where4Clause: Where4Clause<T, T2, T3, T4>?,
+    @PublishedApi
+    internal val group4Clause: Group4Clause<T, T2, T3, T4>?,
+    @PublishedApi
+    internal val having4Clause: Having4Clause<T, T2, T3, T4>?
 ) {
 
     inline fun limit(limit: () -> Int): Limit4Clause<T, T2, T3, T4> {
@@ -181,7 +201,7 @@ class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table>(
         )
     }
 
-    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection>): Select4Statement<T, T2, T3, T4> {
+    inline fun select(selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }): Select4Statement<T, T2, T3, T4> {
         return Select4Statement(
             selection(
                 joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table,

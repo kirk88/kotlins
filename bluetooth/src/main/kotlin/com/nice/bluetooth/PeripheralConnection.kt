@@ -34,7 +34,7 @@ internal class PeripheralConnection(
     private val connectionClient: ConnectionClient
         inline get() = _connectionClient ?: throw NotReadyException(toString())
 
-    private val receiver = registerBluetoothStateBroadcastReceiver {
+    private val receiver = registerBluetoothStateReceiver {
         if (it == BluetoothAdapter.STATE_OFF) {
             close()
             state.value = ConnectionState.Disconnected()

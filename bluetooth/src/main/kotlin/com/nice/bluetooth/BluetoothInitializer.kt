@@ -17,7 +17,7 @@ internal lateinit var applicationContext: Context
 
 object Bluetooth {
 
-    private val receiver = registerBluetoothStateBroadcastReceiver {
+    private val receiver = registerBluetoothStateReceiver {
         bluetoothState.value = it.toBluetoothState()
     }
 

@@ -4,11 +4,12 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class DeleteStatement<T: Table>(
+class DeleteStatement<T : Table>(
     val subject: Subject<T>,
-    val whereClause: WhereClause<T>?) {
+    val whereClause: WhereClause<T>?
+): Statement {
 
-    fun toString(dialect: Dialect): String {
+    override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
 }

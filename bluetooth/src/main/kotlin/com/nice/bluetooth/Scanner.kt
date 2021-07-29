@@ -22,18 +22,19 @@ import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
 class ScanFailedException internal constructor(
-    val errorCode: Int
+    errorCode: Int
 ) : IllegalStateException("Bluetooth scan failed with error code $errorCode")
 
 fun Scanner(services: List<UUID>? = null): Scanner =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        AndroidScannerV21(services)
+        HighBluetoothScanner(services)
     } else {
-        AndroidScanner(services)
+        LowBluetoothScanner(services)
     }
 
+
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-class AndroidScannerV21 internal constructor(private val filterServices: List<UUID>?) : Scanner {
+class HighBluetoothScanner(private val filterServices: List<UUID>? = null) : Scanner {
 
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         ?: error("Bluetooth not supported")
@@ -87,7 +88,7 @@ class AndroidScannerV21 internal constructor(private val filterServices: List<UU
     }
 }
 
-class AndroidScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
+class LowBluetoothScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
 
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         ?: error("Bluetooth not supported")
