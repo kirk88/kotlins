@@ -21,14 +21,14 @@ object SQLiteDialect : Dialect {
             builder.append(" (")
 
             columns.joinTo(builder, postfix = ")") {
-                compileColumnSql(it)
+                decompileColumnSql(it)
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                compileCreateIndexSql(it, statement.subject.table)
+                decompileCreateIndexSql(it, statement.subject.table)
             }
         }
         return builder.toString()
@@ -40,14 +40,14 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
         if (!columns.none()) {
             columns.joinTo(builder, ";") {
-                "ALERT TABLE ${statement.subject.table.render()} ADD COLUMN ${compileColumnSql(it)}"
+                "ALERT TABLE ${statement.subject.table.render()} ADD COLUMN ${decompileColumnSql(it)}"
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                compileCreateIndexSql(it, statement.subject.table)
+                decompileCreateIndexSql(it, statement.subject.table)
             }
         }
 
@@ -67,7 +67,7 @@ object SQLiteDialect : Dialect {
 
             val indexes = statement.definitions.map { it as SQLiteIndex }
             indexes.joinTo(builder, separator = ";") {
-                compileDropIndexSql(it, statement.subject.table)
+                decompileDropIndexSql(it, statement.subject.table)
             }
         }
 
@@ -407,7 +407,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    private fun compileColumnSql(column: SQLiteColumn): String = buildString {
+    private fun decompileColumnSql(column: SQLiteColumn): String = buildString {
         append(column.render())
 
         with(column.meta) {
@@ -443,7 +443,7 @@ object SQLiteDialect : Dialect {
         }
     }
 
-    private fun compileCreateIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+    private fun decompileCreateIndexSql(index: SQLiteIndex, table: Table): String = buildString {
         with(index.meta) {
             append("CREATE")
 
@@ -467,7 +467,7 @@ object SQLiteDialect : Dialect {
         append(index.render())
     }
 
-    private fun compileDropIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+    private fun decompileDropIndexSql(index: SQLiteIndex, table: Table): String = buildString {
         with(index.meta) {
             append("DROP INDEX")
 

@@ -2,13 +2,40 @@
 
 package com.nice.sqlite
 
+import android.database.Cursor
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
+import com.nice.sqlite.core.Database
+import com.nice.sqlite.core.dml.Statement
 import java.util.concurrent.atomic.AtomicInteger
 
+class AndroidDatabase(private val database: SupportSQLiteDatabase) : Database {
 
+    override fun execute(statement: Statement) {
+        database.compileStatement(statement.toString(SQLiteDialect)).use {
+            it.execute()
+        }
+    }
+
+    override fun executeUpdateDelete(statement: Statement): Int {
+        return database.compileStatement(statement.toString(SQLiteDialect)).use {
+            it.executeUpdateDelete()
+        }
+    }
+
+    override fun executeInsert(statement: Statement): Long {
+        return database.compileStatement(statement.toString(SQLiteDialect)).use {
+            it.executeInsert()
+        }
+    }
+
+    override fun query(statement: Statement): Cursor {
+        return database.query(statement.toString(SQLiteDialect))
+    }
+
+}
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
