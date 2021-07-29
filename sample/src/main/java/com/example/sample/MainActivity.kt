@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
+import com.nice.bluetooth.ScannerType
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
@@ -123,7 +124,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-                Scanner().advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
+                Scanner(ScannerType.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
                     if (accumulator.add(value)) {
                         withContext(Dispatchers.Main) {
                             adapter.addItem(value)

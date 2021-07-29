@@ -319,7 +319,7 @@ internal data class BluetoothScanResult(
 internal fun BluetoothScanResult(
     device: BluetoothDevice,
     rssi: Int,
-    scanRecord: ByteArray?
+    scanRecord: ByteArray? = null
 ) = BluetoothScanResult(device, rssi, ScanRecord.parseFromBytes(scanRecord))
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)

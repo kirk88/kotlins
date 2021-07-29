@@ -16,7 +16,7 @@ object SQLiteDialect : Dialect {
 
         val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
         if (!columns.none()) {
-            builder.append("CREATE TABLE")
+            builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.render())
             builder.append(" (")
 

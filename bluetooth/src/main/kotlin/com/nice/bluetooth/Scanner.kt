@@ -1,5 +1,6 @@
 package com.nice.bluetooth
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
@@ -9,6 +10,7 @@ import android.bluetooth.le.ScanSettings
 import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothScanResult
 import com.nice.bluetooth.common.Scanner
@@ -21,20 +23,63 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
+enum class ScannerType {
+    System,
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    High,
+    Low
+}
+
 class ScanFailedException internal constructor(
     errorCode: Int
 ) : IllegalStateException("Bluetooth scan failed with error code $errorCode")
 
-fun Scanner(services: List<UUID>? = null): Scanner =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        HighBluetoothScanner(services)
-    } else {
-        LowBluetoothScanner(services)
+@SuppressLint("NewApi")
+fun Scanner(type: ScannerType = ScannerType.Low, services: List<UUID>? = null): Scanner =
+    when (type) {
+        ScannerType.System -> AndroidSystemScanner()
+        ScannerType.High -> HighVersionBleScanner(services)
+        ScannerType.Low -> LowVersionBleScanner(services)
     }
 
 
+internal class AndroidSystemScanner : Scanner {
+
+    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        ?: error("Bluetooth not supported")
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val advertisements: Flow<Advertisement> = callbackFlow {
+        check(bluetoothAdapter.isEnabled) { "Bluetooth is disabled" }
+
+        val receiver = registerBluetoothScannerReceiver(
+            onScanResult = { device, rssi ->
+                trySendBlocking(AndroidAdvertisement(BluetoothScanResult(device, rssi)))
+                    .onFailure {
+                        Log.w(
+                            TAG,
+                            "Unable to deliver scan result due to failure in flow or premature closing."
+                        )
+                    }
+            },
+            onScanFinished = {
+                cancel()
+            }
+        )
+
+        bluetoothAdapter.startDiscovery()
+
+        awaitClose {
+            receiver.unregister()
+            bluetoothAdapter.cancelDiscovery()
+        }
+    }
+
+}
+
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-class HighBluetoothScanner(private val filterServices: List<UUID>? = null) : Scanner {
+internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : Scanner {
 
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         ?: error("Bluetooth not supported")
@@ -88,7 +133,7 @@ class HighBluetoothScanner(private val filterServices: List<UUID>? = null) : Sca
     }
 }
 
-class LowBluetoothScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
+internal class LowVersionBleScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
 
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         ?: error("Bluetooth not supported")
