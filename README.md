@@ -45,7 +45,7 @@ SQLite的kotlin封装（直接生成sql语句，性能比SQLiteDatabase中的增
 
 ```kotlin
 object TestTable : Table("test") {
-    val id = IntColumn("id")
+    val id = LongColumn("id")
     val name = StringColumn("name")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
@@ -124,9 +124,24 @@ offer(TestTable).where {
 }
 
 //or
+data class TestBean @ClassParserConstructor constructor(
+    val id: Long,
+    val name: String,
+    val age: Int,
+    val flag: Boolean
+)
+
 DB.use {
     val cursor = offer(TestTable).where {
-        (it.name like "%jack%") and (it.id gt 100)
+        it.flag eq true
+    }.groupBy {
+        it.id + it.name
+    }.having {
+        it.age gt 20
+    }.orderBy {
+        it.id.desc
+    }.select(statementExecutor) {
+        it.id + it.name + it.age + it.flag
     }.select(statementExecutor) {
         it.id + it.name + it.age + it.flag
     }
@@ -137,13 +152,6 @@ DB.use {
     }
 
     //直接解析为bean
-    data class TestBean @ClassParserConstructor constructor(
-        val id: Long,
-        val name: String,
-        val age: Int,
-        val flag: Boolean
-    )
-
     for (bean in cursor.parseList(classParser<TestBean>())) {
         //do something
     }

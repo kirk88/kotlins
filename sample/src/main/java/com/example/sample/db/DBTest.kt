@@ -18,7 +18,7 @@ data class DBTest @ClassParserConstructor constructor(
 )
 
 object TestTable : Table("test2") {
-    val id = IntColumn("id")
+    val id = LongColumn("id")
     val name = StringColumn("name")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
