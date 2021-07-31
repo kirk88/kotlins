@@ -14,7 +14,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: CreateTableStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
+        val columns = statement.definitions.filterIsInstance<SQLiteColumn<*>>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.render())
@@ -37,7 +37,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: AlertTableStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<SQLiteColumn>()
+        val columns = statement.definitions.filterIsInstance<SQLiteColumn<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, ";") {
                 "ALERT TABLE ${statement.subject.table.render()} ADD COLUMN ${decompileColumnSql(it)}"
@@ -62,7 +62,7 @@ object SQLiteDialect : Dialect {
             builder.append(statement.subject.table.render())
         } else {
             check(statement.definitions.none {
-                it is SQLiteColumn
+                it is SQLiteColumn<*>
             }) { "Drop columns are not supported yet" }
 
             val indexes = statement.definitions.map { it as SQLiteIndex }
@@ -407,28 +407,33 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    private fun decompileColumnSql(column: SQLiteColumn): String = buildString {
+    private fun decompileColumnSql(column: SQLiteColumn<*>): String = buildString {
         append(column.render())
 
         with(column.meta) {
-            if (primaryKey != null) {
+            if (defaultConstraint != null) {
                 append(' ')
-                append(primaryKey)
+                append(defaultConstraint)
             }
 
-            if (foreignKey != null) {
+            if (primaryKeyConstraint != null) {
                 append(' ')
-                append(foreignKey)
+                append(primaryKeyConstraint)
             }
 
-            if (unique != null) {
+            if (foreignKeyConstraint != null) {
                 append(' ')
-                append(unique)
+                append(foreignKeyConstraint)
             }
 
-            if (notNull != null) {
+            if (uniqueConstraint != null) {
                 append(' ')
-                append(notNull)
+                append(uniqueConstraint)
+            }
+
+            if (notNullConstraint != null) {
+                append(' ')
+                append(notNullConstraint)
             }
 
             if (onUpdateAction != null) {

@@ -8,6 +8,9 @@ interface Projection : Sequence<Projection> {
 
     override fun iterator(): Iterator<Projection> = OnceIterator(this)
 
+    operator fun plus(projection: Projection): MutableSequence<Projection> =
+        mutableSequenceOf(this, projection)
+
     fun render(fullFormat: Boolean = false): String
 
     abstract class Column(
@@ -15,7 +18,7 @@ interface Projection : Sequence<Projection> {
         val table: Table
     ) : Projection {
 
-        val counter: Projection
+        val count: Projection
             get() = Function("count", this)
         val maximum: Projection
             get() = Function("max", this)
@@ -97,14 +100,3 @@ interface Projection : Sequence<Projection> {
     }
 
 }
-
-operator fun MutableSequence<Projection>.plus(projection: Projection): MutableSequence<Projection> =
-    apply {
-        add(projection)
-    }
-
-operator fun Projection.plus(projection: Projection): MutableSequence<Projection> =
-    LinkedSequence<Projection>().also {
-        it.add(this)
-        it.add(projection)
-    }

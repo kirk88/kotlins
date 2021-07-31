@@ -7,7 +7,7 @@ import com.nice.sqlite.core.ddl.Statement
 
 class DeleteStatement<T : Table>(
     val subject: Subject<T>,
-    val whereClause: WhereClause<T>?
+    val whereClause: WhereClause<T>? = null
 ): Statement {
 
     override fun toString(dialect: Dialect): String {

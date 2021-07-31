@@ -31,7 +31,7 @@ private class ConditionImpl(
 ) : Condition {
 
     override fun render(fullFormat: Boolean): String {
-        return "${predicateLeft.render(fullFormat)} $connector ${predicateRight.render(fullFormat)}"
+        return "(${predicateLeft.render(fullFormat)} $connector ${predicateRight.render(fullFormat)})"
     }
 
 }

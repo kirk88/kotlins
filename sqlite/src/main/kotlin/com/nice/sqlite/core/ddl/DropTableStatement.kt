@@ -12,4 +12,5 @@ class DropTableStatement<T : Table>(
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }

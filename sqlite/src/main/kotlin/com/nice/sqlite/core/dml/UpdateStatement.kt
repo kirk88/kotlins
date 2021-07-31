@@ -9,8 +9,8 @@ import com.nice.sqlite.core.ddl.Statement
 class UpdateStatement<T : Table>(
     val assignments: Sequence<Assignment>,
     val subject: Subject<T>,
-    val whereClause: WhereClause<T>?,
-    val conflict: Conflict
+    val conflict: Conflict,
+    val whereClause: WhereClause<T>? = null
 ): Statement {
 
     override fun toString(dialect: Dialect): String {

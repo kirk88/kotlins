@@ -9,6 +9,9 @@ interface Ordering : Sequence<Ordering> {
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
 
+    operator fun plus(ordering: Ordering): MutableSequence<Ordering> =
+        mutableSequenceOf(this, ordering)
+
     fun render(fullFormat: Boolean = false): String = "${column.render(fullFormat)} $direction"
 
     class By(override val column: Projection.Column, override val direction: SqlOrderDirection) :
@@ -37,14 +40,3 @@ interface Ordering : Sequence<Ordering> {
     }
 
 }
-
-operator fun MutableSequence<Ordering>.plus(ordering: Ordering): MutableSequence<Ordering> =
-    apply {
-        add(ordering)
-    }
-
-operator fun Ordering.plus(ordering: Ordering): MutableSequence<Ordering> =
-    LinkedSequence<Ordering>().also {
-        it.add(this)
-        it.add(ordering)
-    }

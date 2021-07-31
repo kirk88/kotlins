@@ -6,15 +6,15 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteException
 
 fun interface RowParser<out T> {
-    fun parseRow(row: Array<SqlColumnValue>): T
+    fun parseRow(row: Array<ColumnValue>): T
 }
 
 fun interface MapRowParser<out T> {
-    fun parseRow(row: Map<String, SqlColumnValue>): T
+    fun parseRow(row: Map<String, ColumnValue>): T
 }
 
-private class SingleColumnParser<out T>(val modifier: (SqlColumnValue) -> T) : RowParser<T> {
-    override fun parseRow(row: Array<SqlColumnValue>): T {
+private class SingleColumnParser<out T>(val modifier: (ColumnValue) -> T) : RowParser<T> {
+    override fun parseRow(row: Array<ColumnValue>): T {
         if (row.size != 1)
             throw SQLiteException("Invalid row: row for SingleColumnParser must contain exactly one column")
         @Suppress("UNCHECKED_CAST")
@@ -22,13 +22,13 @@ private class SingleColumnParser<out T>(val modifier: (SqlColumnValue) -> T) : R
     }
 }
 
-val ShortParser: RowParser<Short> = SingleColumnParser(modifier = SqlColumnValue::asShort)
-val IntParser: RowParser<Int> = SingleColumnParser(modifier = SqlColumnValue::asInt)
-val LongParser: RowParser<Long> = SingleColumnParser(modifier = SqlColumnValue::asLong)
-val FloatParser: RowParser<Float> = SingleColumnParser(modifier = SqlColumnValue::asFloat)
-val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = SqlColumnValue::asDouble)
-val StringParser: RowParser<String> = SingleColumnParser(modifier = SqlColumnValue::asString)
-val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = SqlColumnValue::asBlob)
+val ShortParser: RowParser<Short> = SingleColumnParser(modifier = ColumnValue::asShort)
+val IntParser: RowParser<Int> = SingleColumnParser(modifier = ColumnValue::asInt)
+val LongParser: RowParser<Long> = SingleColumnParser(modifier = ColumnValue::asLong)
+val FloatParser: RowParser<Float> = SingleColumnParser(modifier = ColumnValue::asFloat)
+val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = ColumnValue::asDouble)
+val StringParser: RowParser<String> = SingleColumnParser(modifier = ColumnValue::asString)
+val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = ColumnValue::asBlob)
 
 fun <T : Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
     if (count != 1)
@@ -82,15 +82,15 @@ fun <T : Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
     return list
 }
 
-fun Cursor.asSequence(): Sequence<Array<SqlColumnValue>> {
+fun Cursor.asSequence(): Sequence<Array<ColumnValue>> {
     return CursorSequence(this)
 }
 
-fun Cursor.asMapSequence(): Sequence<Map<String, SqlColumnValue>> {
+fun Cursor.asMapSequence(): Sequence<Map<String, ColumnValue>> {
     return CursorMapSequence(this)
 }
 
-fun Cursor.getColumnValue(index: Int): SqlColumnValue {
+fun Cursor.getColumnValue(index: Int): ColumnValue {
     val value = if (isNull(index)) null
     else when (getType(index)) {
         Cursor.FIELD_TYPE_INTEGER -> getLong(index)
@@ -99,50 +99,50 @@ fun Cursor.getColumnValue(index: Int): SqlColumnValue {
         Cursor.FIELD_TYPE_BLOB -> getBlob(index)
         else -> null
     }
-    return SqlColumnValue(value)
+    return ColumnValue(value)
 }
 
-private fun readColumnsArray(cursor: Cursor): Array<SqlColumnValue> {
+private fun readColumnsArray(cursor: Cursor): Array<ColumnValue> {
     val count = cursor.columnCount
-    val list = ArrayList<SqlColumnValue>(count)
+    val list = ArrayList<ColumnValue>(count)
     for (index in 0 until count) {
         list.add(cursor.getColumnValue(index))
     }
     return list.toTypedArray()
 }
 
-private fun readColumnsMap(cursor: Cursor): Map<String, SqlColumnValue> {
+private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
-    val map = mutableMapOf<String, SqlColumnValue>()
+    val map = mutableMapOf<String, ColumnValue>()
     for (index in 0 until count) {
         map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
     }
     return map
 }
 
-private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, SqlColumnValue>> {
-    override fun iterator() = object : Iterator<Map<String, SqlColumnValue>> {
+private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, ColumnValue>> {
+    override fun iterator() = object : Iterator<Map<String, ColumnValue>> {
         override fun hasNext() = cursor.position < cursor.count - 1
 
-        override fun next(): Map<String, SqlColumnValue> {
+        override fun next(): Map<String, ColumnValue> {
             cursor.moveToNext()
             return readColumnsMap(cursor)
         }
     }
 }
 
-private class CursorSequence(val cursor: Cursor) : Sequence<Array<SqlColumnValue>> {
-    override fun iterator() = object : Iterator<Array<SqlColumnValue>> {
+private class CursorSequence(val cursor: Cursor) : Sequence<Array<ColumnValue>> {
+    override fun iterator() = object : Iterator<Array<ColumnValue>> {
         override fun hasNext() = cursor.position < cursor.count - 1
 
-        override fun next(): Array<SqlColumnValue> {
+        override fun next(): Array<ColumnValue> {
             cursor.moveToNext()
             return readColumnsArray(cursor)
         }
     }
 }
 
-class SqlColumnValue internal constructor(internal val value: Any?) {
+class ColumnValue internal constructor(internal val value: Any?) {
     fun isNull(): Boolean = value == null
 
     @Suppress("UNCHECKED_CAST")
@@ -163,11 +163,11 @@ class SqlColumnValue internal constructor(internal val value: Any?) {
     fun asFloat(defaultValue: Float = 0.toFloat()) = (value as? Double)?.toFloat() ?: defaultValue
 
     override fun toString(): String {
-        return "SqlColumnValue(value=$value)"
+        return value.toString()
     }
 }
 
-inline fun <reified T : Any> SqlColumnValue.asTyped(): T? = asTyped(T::class.java)
+inline fun <reified T : Any> ColumnValue.asTyped(): T? = asTyped(T::class.java)
 
 @Suppress("RemoveRedundantQualifierName")
 private fun castValue(value: Any?, type: Class<*>): Any? {
@@ -201,7 +201,8 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
             java.lang.Short.TYPE, java.lang.Short::class.java -> return value.toShort()
             java.lang.Byte.TYPE, java.lang.Byte::class.java -> return value.toByte()
             java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> return value != 0L
-            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toInt().toChar()
+            java.lang.Character.TYPE, java.lang.Character::class.java -> return value.toInt()
+                .toChar()
         }
     }
 

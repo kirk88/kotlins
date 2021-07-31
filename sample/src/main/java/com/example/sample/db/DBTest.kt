@@ -3,7 +3,11 @@ package com.example.sample.db
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
+import com.nice.sqlite.ManagedSQLiteOpenHelper
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.create
+import com.nice.sqlite.core.offer
+import com.nice.sqlite.statementExecutor
 
 object TestTable : Table("test2") {
     val id = IntColumn("id")
@@ -12,9 +16,9 @@ object TestTable : Table("test2") {
     val flag = BooleanColumn("flag")
 }
 
-object DB : com.nice.sqlite.ManagedSQLiteOpenHelper(
+object DB : ManagedSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("newdb.db")
+        .name("test_db.db")
         .callback(Callback())
         .build()
 ) {
@@ -25,6 +29,14 @@ object DB : com.nice.sqlite.ManagedSQLiteOpenHelper(
         }
 
         override fun onCreate(db: SupportSQLiteDatabase) {
+            offer(TestTable).create(db.statementExecutor) {
+                define(it.id).primaryKey()
+                define(it.name)
+                define(it.age)
+                define(it.flag)
+
+                define(it.id, it.name).ifNotExists()
+            }
         }
 
         override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {

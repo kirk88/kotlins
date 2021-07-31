@@ -4,38 +4,40 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.LinkedSequence
 import com.nice.sqlite.core.dml.Projection
-import com.nice.sqlite.core.escapedSQLString
 
-class SQLiteColumn internal constructor(
+class SQLiteColumn<T> internal constructor(
     val column: Projection.Column,
-    val type: SqlType,
-    val defaultValue: Any?
+    val type: SqlType
 ) : Definition {
 
-    private var _meta = Meta()
-    val meta: Meta get() = _meta
+    private var _meta = Meta<T>()
+    val meta: Meta<T> get() = _meta
 
-    fun primaryKey(autoIncrement: Boolean = false): SQLiteColumn = apply {
-        _meta = _meta.copy(primaryKey = ColumnConstraint.PrimaryKey(autoIncrement))
+    fun default(defaultValue: T): SQLiteColumn<T> = apply {
+        _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(defaultValue))
     }
 
-    fun foreignKey(references: Projection.Column): SQLiteColumn = apply {
-        _meta = _meta.copy(foreignKey = ColumnConstraint.ForeignKey(references))
+    fun primaryKey(autoIncrement: Boolean = false): SQLiteColumn<T> = apply {
+        _meta = _meta.copy(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
     }
 
-    fun unique(conflict: Conflict = Conflict.None): SQLiteColumn = apply {
-        _meta = _meta.copy(unique = ColumnConstraint.Unique(conflict))
+    fun foreignKey(references: Projection.Column): SQLiteColumn<T> = apply {
+        _meta = _meta.copy(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
     }
 
-    fun notNull(): SQLiteColumn = apply {
-        _meta = _meta.copy(notNull = ColumnConstraint.NotNull)
+    fun unique(conflict: Conflict = Conflict.None): SQLiteColumn<T> = apply {
+        _meta = _meta.copy(uniqueConstraint = ColumnConstraint.Unique(conflict))
     }
 
-    fun onUpdate(actionColumn: ColumnConstraintAction): SQLiteColumn = apply {
+    fun notNull(): SQLiteColumn<T> = apply {
+        _meta = _meta.copy(notNullConstraint = ColumnConstraint.NotNull)
+    }
+
+    fun onUpdate(actionColumn: ColumnConstraintAction): SQLiteColumn<T> = apply {
         _meta = _meta.copy(onUpdateAction = actionColumn)
     }
 
-    fun onDelete(actionColumn: ColumnConstraintAction): SQLiteColumn = apply {
+    fun onDelete(actionColumn: ColumnConstraintAction): SQLiteColumn<T> = apply {
         _meta = _meta.copy(onDeleteAction = actionColumn)
     }
 
@@ -44,11 +46,6 @@ class SQLiteColumn internal constructor(
             append(column.render())
             append(' ')
             append(type)
-
-            if (defaultValue != null) {
-                append(" DEFAULT ")
-                append(defaultValue.escapedSQLString())
-            }
         }
     }
 
@@ -56,11 +53,12 @@ class SQLiteColumn internal constructor(
         return column.toString()
     }
 
-    data class Meta(
-        val primaryKey: ColumnConstraint.PrimaryKey? = null,
-        val foreignKey: ColumnConstraint.ForeignKey? = null,
-        val unique: ColumnConstraint.Unique? = null,
-        val notNull: ColumnConstraint.NotNull? = null,
+    data class Meta<T>(
+        val defaultConstraint: ColumnConstraint.Default<T>? = null,
+        val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
+        val foreignKeyConstraint: ColumnConstraint.ForeignKey? = null,
+        val uniqueConstraint: ColumnConstraint.Unique? = null,
+        val notNullConstraint: ColumnConstraint.NotNull? = null,
         val onUpdateAction: ColumnConstraintAction? = null,
         val onDeleteAction: ColumnConstraintAction? = null
     )
@@ -112,40 +110,40 @@ class SQLiteDefinitionBuilder @PublishedApi internal constructor() {
 
     private val definitions = LinkedSequence<Definition>()
 
-    fun define(column: Table.IntColumn, defaultValue: Int? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.INTEGER, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.IntColumn): SQLiteColumn<Int> {
+        return SQLiteColumn<Int>(column, SqlType.INTEGER).also { definitions.add(it) }
     }
 
-    fun define(column: Table.LongColumn, defaultValue: Long? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.INTEGER, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.LongColumn): SQLiteColumn<Long> {
+        return SQLiteColumn<Long>(column, SqlType.INTEGER).also { definitions.add(it) }
     }
 
-    fun define(column: Table.ShortColumn, defaultValue: Short? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.INTEGER, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.ShortColumn): SQLiteColumn<Short> {
+        return SQLiteColumn<Short>(column, SqlType.INTEGER).also { definitions.add(it) }
     }
 
-    fun define(column: Table.ByteColumn, defaultValue: Byte? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.INTEGER, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.ByteColumn): SQLiteColumn<Byte> {
+        return SQLiteColumn<Byte>(column, SqlType.INTEGER).also { definitions.add(it) }
     }
 
-    fun define(column: Table.BooleanColumn, defaultValue: Boolean? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.INTEGER, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.BooleanColumn): SQLiteColumn<Boolean> {
+        return SQLiteColumn<Boolean>(column, SqlType.INTEGER).also { definitions.add(it) }
     }
 
-    fun define(column: Table.FloatColumn, defaultValue: Float? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.REAL, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.FloatColumn): SQLiteColumn<Float> {
+        return SQLiteColumn<Float>(column, SqlType.REAL).also { definitions.add(it) }
     }
 
-    fun define(column: Table.DoubleColumn, defaultValue: Double? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.REAL, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.DoubleColumn): SQLiteColumn<Double> {
+        return SQLiteColumn<Double>(column, SqlType.REAL).also { definitions.add(it) }
     }
 
-    fun define(column: Table.StringColumn, defaultValue: String? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.TEXT, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.StringColumn): SQLiteColumn<String> {
+        return SQLiteColumn<String>(column, SqlType.TEXT).also { definitions.add(it) }
     }
 
-    fun define(column: Table.BlobColumn, defaultValue: ByteArray? = null): SQLiteColumn {
-        return SQLiteColumn(column, SqlType.BLOB, defaultValue).also { definitions.add(it) }
+    fun define(column: Table.BlobColumn): SQLiteColumn<ByteArray> {
+        return SQLiteColumn<ByteArray>(column, SqlType.BLOB).also { definitions.add(it) }
     }
 
     fun define(

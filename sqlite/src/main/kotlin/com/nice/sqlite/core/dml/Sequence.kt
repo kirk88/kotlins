@@ -6,6 +6,10 @@ interface MutableSequence<T> : Sequence<T> {
 
     fun remove(element: T): Boolean
 
+    operator fun plus(element: T): MutableSequence<T> = apply {
+        add(element)
+    }
+
 }
 
 internal class LinkedSequence<T> : MutableSequence<T> {
@@ -18,6 +22,12 @@ internal class LinkedSequence<T> : MutableSequence<T> {
 
     override fun iterator(): Iterator<T> = delegate.iterator()
 
+}
+
+internal fun <T> mutableSequenceOf(vararg elements: T) = LinkedSequence<T>().apply {
+    for (element in elements) {
+        add(element)
+    }
 }
 
 internal class OnceIterator<T>(private val value: T) : Iterator<T> {

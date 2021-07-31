@@ -1,6 +1,7 @@
 package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.dml.Projection
+import com.nice.sqlite.core.escapedSQLString
 
 sealed class ColumnConstraintAction(
     private val name: String
@@ -21,6 +22,13 @@ sealed class ColumnConstraintAction(
 }
 
 sealed class ColumnConstraint {
+
+    class Default<T>(val value: T) : ColumnConstraint() {
+        override fun toString(): String = buildString {
+            append("DEFAULT ")
+            append(value.escapedSQLString())
+        }
+    }
 
     class PrimaryKey(val autoIncrement: Boolean) : ColumnConstraint() {
 
@@ -60,17 +68,17 @@ sealed class ColumnConstraint {
 
 }
 
-sealed class IndexConstraint{
+sealed class IndexConstraint {
 
-    object Unique: IndexConstraint(){
+    object Unique : IndexConstraint() {
         override fun toString(): String = "UNIQUE"
     }
 
-    object IfNotExists: IndexConstraint(){
+    object IfNotExists : IndexConstraint() {
         override fun toString(): String = "IF NOT EXISTS"
     }
 
-    object IfExists: IndexConstraint(){
+    object IfExists : IndexConstraint() {
         override fun toString(): String = "IF EXISTS"
     }
 

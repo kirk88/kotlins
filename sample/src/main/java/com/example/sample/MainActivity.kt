@@ -11,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
+import com.example.sample.db.DB
+import com.example.sample.db.TestTable
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -29,6 +31,11 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
+import com.nice.sqlite.asMapSequence
+import com.nice.sqlite.core.*
+import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.dml.select
+import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -63,52 +70,58 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            DB.use(true) {
+                var start = System.currentTimeMillis()
+                repeat(10000) { index ->
+                    offer(TestTable).insert(statementExecutor) {
+                        it.name("jack") + it.age(index) + it.flag(true)
+                    }
+                }
+                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            DB.use(true) {
-//                var start = System.currentTimeMillis()
-//                for (index in 0..1400) {
-//                    val test = Test(
-//                        index.toLong(),
-//                        "jack$index",
-//                        20,
-//                        index,
-//                        "lalalalal",
-//                        "",
-//                        null,
-//                        true
-//                    )
-//
-//                    insert(
-//                        TestTable.TABLE_NAME,
-//                        SQLiteDatabase.CONFLICT_REPLACE,
-//                        test.toColumnElements()
-//                    )
-//                }
-//
-//                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
-//                start = System.currentTimeMillis()
-//                updateBuilder(TestTable.TABLE_NAME)
-//                    .values(TestTable.NAME + "jack100")
-//                    .where(TestTable.ID.lessThan(10000))
-//                    .execute()
-//
-//                updateBuilder(TestTable.TABLE_NAME)
-//                    .values(TestTable.NAME + "jack101")
-//                    .where(TestTable.NAME.equal("jack3") or TestTable.NAME.equal("jack4"))
-//                    .execute()
-//
-//                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
-//                start = System.currentTimeMillis()
-//
-//                val result = queryBuilder(TestTable.TABLE_NAME)
-//                    .parseList<Test>()
-//
-//                Log.e(TAG, "query: ${System.currentTimeMillis() - start}  size: ${result.size}")
-//            }
-//        }
+                start = System.currentTimeMillis()
+                var count = 0
+                for (row in offer(TestTable).orderBy {
+                    it.id.desc
+                }.select(statementExecutor) {
+                    it.id + it.name + it.age + it.flag
+                }.asMapSequence()) {
+                    if (count <= 10) {
+                        Log.e(TAG, row.toString())
+                    } else {
+                        break
+                    }
+                    count++
+                }
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
-        initBle()
+                start = System.currentTimeMillis()
+                offer(TestTable).update(statementExecutor, Conflict.Replace) {
+                    it.name("tom") + it.age(30) + it.flag(false)
+                }
+                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
+
+                start = System.currentTimeMillis()
+                count = 0
+                for (row in offer(TestTable).orderBy {
+                    it.id.desc
+                }.select(statementExecutor) {
+                    it.id + it.name + it.age + it.flag
+                }.asMapSequence()) {
+                    if (count <= 10) {
+                        Log.e(TAG, row.toString())
+                    } else {
+                        break
+                    }
+                    count++
+                }
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
+            }
+
+        }
+
+//        initBle()
     }
 
 

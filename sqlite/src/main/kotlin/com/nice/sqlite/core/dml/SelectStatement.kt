@@ -8,12 +8,12 @@ import com.nice.sqlite.core.ddl.Statement
 class SelectStatement<T : Table>(
     val projections: Sequence<Projection>,
     val subject: Subject<T>,
-    val whereClause: WhereClause<T>?,
-    val orderClause: OrderClause<T>?,
-    val limitClause: LimitClause<T>?,
-    val offsetClause: OffsetClause<T>?,
-    val groupClause: GroupClause<T>?,
-    val havingClause: HavingClause<T>?
+    val whereClause: WhereClause<T>? = null,
+    val orderClause: OrderClause<T>? = null,
+    val limitClause: LimitClause<T>? = null,
+    val offsetClause: OffsetClause<T>? = null,
+    val groupClause: GroupClause<T>? = null,
+    val havingClause: HavingClause<T>? = null
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -24,12 +24,12 @@ class SelectStatement<T : Table>(
 class Select2Statement<T : Table, T2 : Table>(
     val projections: Sequence<Projection>,
     val joinOn2Clause: JoinOn2Clause<T, T2>,
-    val where2Clause: Where2Clause<T, T2>?,
-    val order2Clause: Order2Clause<T, T2>?,
-    val limit2Clause: Limit2Clause<T, T2>?,
-    val offset2Clause: Offset2Clause<T, T2>?,
-    val group2Clause: Group2Clause<T, T2>?,
-    val having2Clause: Having2Clause<T, T2>?
+    val where2Clause: Where2Clause<T, T2>? = null,
+    val order2Clause: Order2Clause<T, T2>? = null,
+    val limit2Clause: Limit2Clause<T, T2>? = null,
+    val offset2Clause: Offset2Clause<T, T2>? = null,
+    val group2Clause: Group2Clause<T, T2>? = null,
+    val having2Clause: Having2Clause<T, T2>? = null
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -40,12 +40,12 @@ class Select2Statement<T : Table, T2 : Table>(
 class Select3Statement<T : Table, T2 : Table, T3 : Table>(
     val projections: Sequence<Projection>,
     val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    val where3Clause: Where3Clause<T, T2, T3>?,
-    val order3Clause: Order3Clause<T, T2, T3>?,
-    val limit3Clause: Limit3Clause<T, T2, T3>?,
-    val offset3Clause: Offset3Clause<T, T2, T3>?,
-    val group3Clause: Group3Clause<T, T2, T3>?,
-    val having3Clause: Having3Clause<T, T2, T3>?
+    val where3Clause: Where3Clause<T, T2, T3>? = null,
+    val order3Clause: Order3Clause<T, T2, T3>? = null,
+    val limit3Clause: Limit3Clause<T, T2, T3>? = null,
+    val offset3Clause: Offset3Clause<T, T2, T3>? = null,
+    val group3Clause: Group3Clause<T, T2, T3>? = null,
+    val having3Clause: Having3Clause<T, T2, T3>? = null
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -57,12 +57,12 @@ class Select3Statement<T : Table, T2 : Table, T3 : Table>(
 class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
     val projections: Sequence<Projection>,
     val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
-    val where4Clause: Where4Clause<T, T2, T3, T4>?,
-    val order4Clause: Order4Clause<T, T2, T3, T4>?,
-    val limit4Clause: Limit4Clause<T, T2, T3, T4>?,
-    val offset4Clause: Offset4Clause<T, T2, T3, T4>?,
-    val group4Clause: Group4Clause<T, T2, T3, T4>?,
-    val having4Clause: Having4Clause<T, T2, T3, T4>?
+    val where4Clause: Where4Clause<T, T2, T3, T4>? = null,
+    val order4Clause: Order4Clause<T, T2, T3, T4>? = null,
+    val limit4Clause: Limit4Clause<T, T2, T3, T4>? = null,
+    val offset4Clause: Offset4Clause<T, T2, T3, T4>? = null,
+    val group4Clause: Group4Clause<T, T2, T3, T4>? = null,
+    val having4Clause: Having4Clause<T, T2, T3, T4>? = null
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {

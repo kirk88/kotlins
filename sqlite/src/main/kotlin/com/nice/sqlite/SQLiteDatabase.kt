@@ -7,35 +7,35 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import com.nice.sqlite.core.Database
+import com.nice.sqlite.core.StatementExecutor
 import com.nice.sqlite.core.ddl.Statement
 import java.util.concurrent.atomic.AtomicInteger
 
-internal class AndroidDatabase(private val database: SupportSQLiteDatabase) : Database {
+internal class SQLiteStatementExecutor(private val database: SupportSQLiteDatabase) :
+    StatementExecutor {
 
     override fun execute(statement: Statement) {
-        database.compileStatement(statement.toString(SQLiteDialect)).use {
-            it.execute()
+        for (sql in statement.toString(SQLiteDialect).split(";")) {
+            database.compileStatement(sql).execute()
         }
     }
 
     override fun executeUpdateDelete(statement: Statement): Int {
-        return database.compileStatement(statement.toString(SQLiteDialect)).use {
-            it.executeUpdateDelete()
-        }
+        return database.compileStatement(statement.toString(SQLiteDialect)).executeUpdateDelete()
     }
 
     override fun executeInsert(statement: Statement): Long {
-        return database.compileStatement(statement.toString(SQLiteDialect)).use {
-            it.executeInsert()
-        }
+        return database.compileStatement(statement.toString(SQLiteDialect)).executeInsert()
     }
 
-    override fun query(statement: Statement): Cursor {
+    override fun queryForCursor(statement: Statement): Cursor {
         return database.query(statement.toString(SQLiteDialect))
     }
 
 }
+
+val SupportSQLiteDatabase.statementExecutor: StatementExecutor
+    get() = SQLiteStatementExecutor(this)
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 

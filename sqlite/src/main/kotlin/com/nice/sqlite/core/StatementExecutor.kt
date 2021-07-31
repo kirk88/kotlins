@@ -3,7 +3,7 @@ package com.nice.sqlite.core
 import android.database.Cursor
 import com.nice.sqlite.core.ddl.Statement
 
-interface Database {
+interface StatementExecutor {
 
     fun execute(statement: Statement)
 
@@ -11,6 +11,6 @@ interface Database {
 
     fun executeInsert(statement: Statement): Long
 
-    fun query(statement: Statement): Cursor
+    fun queryForCursor(statement: Statement): Cursor
 
 }
