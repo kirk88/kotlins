@@ -7,8 +7,10 @@ import com.nice.sqlite.core.Table
 class AlertTableStatement<T : Table>(
     val definitions: Sequence<Definition>,
     val subject: Subject<T>
-): Statement {
+) : Statement {
+
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }

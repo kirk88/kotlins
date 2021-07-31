@@ -3,11 +3,19 @@ package com.example.sample.db
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
+import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.create
 import com.nice.sqlite.core.offer
 import com.nice.sqlite.statementExecutor
+
+data class DBTest @ClassParserConstructor constructor(
+    val id: Long,
+    val name: String,
+    val age: Int,
+    val flag: Boolean
+)
 
 object TestTable : Table("test2") {
     val id = IntColumn("id")

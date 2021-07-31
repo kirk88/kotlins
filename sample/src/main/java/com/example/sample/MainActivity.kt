@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
+import com.example.sample.db.DBTest
 import com.example.sample.db.TestTable
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
@@ -32,9 +33,11 @@ import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
 import com.nice.sqlite.asMapSequence
+import com.nice.sqlite.classParser
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.dml.select
+import com.nice.sqlite.parseList
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -81,6 +84,14 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
                 start = System.currentTimeMillis()
+                val list = offer(TestTable).orderBy {
+                    it.id.desc
+                }.select(statementExecutor) {
+                    it.id + it.name + it.age + it.flag
+                }.parseList(classParser<DBTest>())
+
+                Log.e(TAG, "first: ${list.first()} size: ${list.size}")
+
                 var count = 0
                 for (row in offer(TestTable).orderBy {
                     it.id.desc

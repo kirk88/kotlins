@@ -3,8 +3,8 @@
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
-import com.nice.sqlite.core.StatementExecutor
 import com.nice.sqlite.core.Predicate
+import com.nice.sqlite.core.StatementExecutor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 

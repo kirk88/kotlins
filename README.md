@@ -55,13 +55,30 @@ object TestTable : Table("test") {
 ## 创建表
 
 ```kotlin
-offer(TestTable).create(db.statementExecutor) {
-    define(it.id).primaryKey()
-    define(it.name).default("jack")
-    define(it.age)
-    define(it.flag)
+object DB : ManagedSQLiteOpenHelper(
+    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
+        .name("test_db.db")
+        .callback(Callback())
+        .build()
+) {
 
-    define(it.id, it.name, name = "indexName").unique().ifNotExists() //索引，索引名称默认为id_name
+    private class Callback : SupportSQLiteOpenHelper.Callback(1) {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            offer(TestTable).create(db.statementExecutor) {
+                define(it.id).primaryKey()
+                define(it.name).default("jack")
+                define(it.age)
+                define(it.flag)
+
+                define(it.id, it.name, name = "indexName").unique()
+                    .ifNotExists() //索引，索引名称默认为id_name
+            }
+        }
+
+        override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        }
+    }
+
 }
 ```
 
@@ -104,6 +121,32 @@ offer(TestTable).where {
     (it.name like "%jack%") and (it.id gt 100)
 }.select {
     it.id + it.name + it.age + it.flag
+}
+
+//or
+DB.use {
+    val cursor = offer(TestTable).where {
+        (it.name like "%jack%") and (it.id gt 100)
+    }.select(statementExecutor) {
+        it.id + it.name + it.age + it.flag
+    }
+
+    //Sequence<Map<String, ColumnValue>>
+    for (row in cursor.asMapSequence()) {
+        //do something
+    }
+
+    //直接解析为bean
+    data class TestBean @ClassParserConstructor constructor(
+        val id: Long,
+        val name: String,
+        val age: Int,
+        val flag: Boolean
+    )
+
+    for (bean in cursor.parseList(classParser<TestBean>())) {
+        //do something
+    }
 }
 ```
 

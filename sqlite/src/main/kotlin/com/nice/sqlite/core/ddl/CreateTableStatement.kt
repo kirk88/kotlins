@@ -7,7 +7,7 @@ import com.nice.sqlite.core.Table
 class CreateTableStatement<T : Table>(
     val definitions: Sequence<Definition>,
     val subject: Subject<T>
-): Statement {
+) : Statement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)

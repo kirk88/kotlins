@@ -6,11 +6,11 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.Statement
 
-class InsertStatement<T: Table>(
+class InsertStatement<T : Table>(
     val assignments: Sequence<Assignment>,
     val subject: Subject<T>,
     val conflict: Conflict
-): Statement {
+) : Statement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
