@@ -36,6 +36,7 @@ import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.classParser
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.parseList
 import com.nice.sqlite.statementExecutor
@@ -86,7 +87,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 start = System.currentTimeMillis()
                 val list = offer(TestTable).orderBy {
                     it.id.desc
-                }.select(statementExecutor) {
+                }.limit { 10 }.select(statementExecutor) {
                     it.id + it.name + it.age + it.flag
                 }.parseList(classParser<DBTest>())
 

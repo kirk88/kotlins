@@ -152,6 +152,10 @@ DB.use {
         it.age gt 20
     }.orderBy {
         it.id.desc
+    }.limit{
+        10
+    }.offset{
+        10
     }.select(statementExecutor) {
         it.id + it.name + it.age + it.flag
     }.select(statementExecutor) {
