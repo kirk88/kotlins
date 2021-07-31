@@ -1,7 +1,7 @@
 package com.nice.sqlite.core
 
 import android.database.Cursor
-import com.nice.sqlite.core.dml.Statement
+import com.nice.sqlite.core.ddl.Statement
 
 interface Database {
 

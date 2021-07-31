@@ -1,4 +1,4 @@
-package com.nice.sqlite.core.dml
+package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Dialect
 

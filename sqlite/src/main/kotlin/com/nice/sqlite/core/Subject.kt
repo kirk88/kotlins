@@ -15,6 +15,12 @@ interface Subject<T : Table> {
 
 }
 
+interface DatabaseSubject<T : Table> {
+
+    val database: Database
+
+}
+
 sealed class StatementSubject<T : Table>(override val table: T) : Subject<T> {
 
     class Over<T : Table>(table: T) : StatementSubject<T>(table) {
