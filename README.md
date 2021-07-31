@@ -49,9 +49,9 @@ object TestTable : Table("test") {
     val name = StringColumn("name")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
-    
+
     //新增列
-    val number =IntColumn("number")
+    val number = IntColumn("number")
 }
 ```
 
@@ -81,9 +81,9 @@ object DB : ManagedSQLiteOpenHelper(
 
         override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
             //添加列
-            offer(TestTable).alert(db.statementExecutor){
+            offer(TestTable).alert(db.statementExecutor) {
                 define(it.number).notNull()
-                
+
                 //此时仍可以添加索引
                 define(it.age, it.number, name = "indexName").unique()
                     .ifNotExists()
@@ -144,23 +144,16 @@ data class TestBean @ClassParserConstructor constructor(
 )
 
 DB.use {
-    val cursor = offer(TestTable).where {
-        it.flag eq true
-    }.groupBy {
-        it.id + it.name
-    }.having {
-        it.age gt 20
-    }.orderBy {
-        it.id.desc
-    }.limit{
-        10
-    }.offset{
-        10
-    }.select(statementExecutor) {
-        it.id + it.name + it.age + it.flag
-    }.select(statementExecutor) {
-        it.id + it.name + it.age + it.flag
-    }
+    val cursor = offer(TestTable)
+        .where { it.flag eq true }
+        .groupBy { it.id + it.name }
+        .having { it.age gt 20 }
+        .orderBy { it.id.desc }
+        .limit { 10 }
+        .offset { 10 }
+        .select(statementExecutor) {
+            it.id + it.name + it.age + it.flag
+        }
 
     //Sequence<Map<String, ColumnValue>>
     for (row in cursor.asMapSequence()) {
