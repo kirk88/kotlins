@@ -49,6 +49,9 @@ object TestTable : Table("test") {
     val name = StringColumn("name")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
+    
+    //新增列
+    val number =IntColumn("number")
 }
 ```
 
@@ -64,6 +67,7 @@ object DB : ManagedSQLiteOpenHelper(
 
     private class Callback : SupportSQLiteOpenHelper.Callback(1) {
         override fun onCreate(db: SupportSQLiteDatabase) {
+            //创建表
             offer(TestTable).create(db.statementExecutor) {
                 define(it.id).primaryKey()
                 define(it.name).default("jack")
@@ -76,6 +80,14 @@ object DB : ManagedSQLiteOpenHelper(
         }
 
         override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            //添加列
+            offer(TestTable).alert(db.statementExecutor){
+                define(it.number).notNull()
+                
+                //此时仍可以添加索引
+                define(it.age, it.number, name = "indexName").unique()
+                    .ifNotExists()
+            }
         }
     }
 
