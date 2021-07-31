@@ -1,12 +1,13 @@
 package com.nice.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 
-private val bluetoothStateIntentFilter: IntentFilter =
+private val BLUETOOTH_STATE_INTENT_FILTER: IntentFilter =
     IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
 
 internal class BluetoothStateReceiver(private val action: (state: Int) -> Unit) : BroadcastReceiver() {
@@ -17,7 +18,7 @@ internal class BluetoothStateReceiver(private val action: (state: Int) -> Unit) 
     }
 
     fun register() {
-        applicationContext.registerReceiver(this, bluetoothStateIntentFilter)
+        applicationContext.registerReceiver(this, BLUETOOTH_STATE_INTENT_FILTER)
     }
 
     fun unregister() {
@@ -34,8 +35,49 @@ internal inline fun registerBluetoothStateReceiver(
 }.also { it.register() }
 
 
-internal class BluetoothScannerReceiver(): BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-
+private val BLUETOOTH_SCANNER_INTENT_FILTER: IntentFilter =
+    IntentFilter().apply {
+        addAction(BluetoothDevice.ACTION_FOUND)
+        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
     }
+
+internal class BluetoothScannerReceiver(
+    private val onScanResult: (device: BluetoothDevice, rssi: Int) -> Unit,
+    private val onScanFinished: () -> Unit
+) : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            BluetoothDevice.ACTION_FOUND -> {
+                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE) ?: return
+                val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                onScanResult.invoke(device, rssi.toInt())
+            }
+
+            BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                onScanFinished.invoke()
+            }
+        }
+    }
+
+
+    fun register() {
+        applicationContext.registerReceiver(this, BLUETOOTH_SCANNER_INTENT_FILTER)
+    }
+
+    fun unregister() {
+        applicationContext.unregisterReceiver(this)
+    }
+
 }
+
+internal inline fun registerBluetoothScannerReceiver(
+    crossinline onScanResult: (device: BluetoothDevice, rssi: Int) -> Unit,
+    crossinline onScanFinished: () -> Unit
+): BluetoothScannerReceiver = BluetoothScannerReceiver(
+    onScanResult = { device, rssi ->
+        onScanResult.invoke(device, rssi)
+    },
+    onScanFinished = {
+        onScanFinished.invoke()
+    }
+).also { it.register() }
