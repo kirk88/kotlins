@@ -30,6 +30,12 @@ abstract class Column<T>(
     val table: Table
 ) : Definition {
 
+    val shortName: String
+        get() = name.render()
+
+    val fullName: String
+        get() = "${table.render()}.${name.render()}"
+
     private var _meta = Meta<T>()
     val meta: Meta<T> get() = _meta
 
