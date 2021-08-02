@@ -3,12 +3,10 @@
 package com.nice.sqlite
 
 import android.database.Cursor
-import android.util.Log
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import com.nice.sqlite.core.ddl.AlterStatement
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.StatementExecutor
 import java.util.concurrent.atomic.AtomicInteger
@@ -18,17 +16,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun execute(statement: Statement) {
         for (sql in statement.toString(SQLiteDialect).split(";")) {
-            val execution = { database.compileStatement(sql).execute() }
-            //SQLite doesn't support an IF NOT EXISTS clause on ALTER TABLE.
-            if (statement is AlterStatement<*>
-                && sql.startsWith("alter", true)
-            ) {
-                runCatching(execution).onFailure {
-                    Log.w(TAG, "Altering ${statement.subject.table}: ${it.message}")
-                }
-            } else {
-                execution.invoke()
-            }
+            database.compileStatement(sql).execute()
         }
     }
 
