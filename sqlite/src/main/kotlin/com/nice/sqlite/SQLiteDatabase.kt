@@ -3,6 +3,7 @@
 package com.nice.sqlite
 
 import android.database.Cursor
+import android.util.Log
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
@@ -16,7 +17,14 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun execute(statement: Statement) {
         for (sql in statement.toString(SQLiteDialect).split(";")) {
-            database.compileStatement(sql).execute()
+            val executeSql = { database.compileStatement(sql).execute() }
+            if (sql.startsWith("alter", true)) {
+                runCatching(executeSql).onFailure {
+                    Log.w(TAG, "Alter table failed: ${it.message}")
+                }
+            } else {
+                executeSql()
+            }
         }
     }
 

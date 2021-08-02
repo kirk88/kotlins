@@ -7,8 +7,8 @@ import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Statement
 
 class SelectStatement<T : Table>(
-    val definitions: Sequence<Definition>,
     val subject: Subject<T>,
+    val definitions: Sequence<Definition>,
     val whereClause: WhereClause<T>? = null,
     val orderClause: OrderClause<T>? = null,
     val limitClause: LimitClause<T>? = null,

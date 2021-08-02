@@ -56,10 +56,8 @@ inline fun <T : Table> HavingClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(
-        selection(
-            subject.table
-        ),
         subject,
+        selection(subject.table),
         whereClause = whereClause,
         groupClause = groupClause,
         havingClause = this

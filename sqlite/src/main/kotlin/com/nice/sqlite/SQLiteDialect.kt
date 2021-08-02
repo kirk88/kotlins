@@ -4,8 +4,6 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
-import com.nice.sqlite.core.render
-import com.nice.sqlite.core.toSqlString
 
 object SQLiteDialect : Dialect {
 
@@ -15,7 +13,7 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
-            builder.append(statement.subject.table.render())
+            builder.append(statement.subject.table.renderedName)
             builder.append(" (")
 
             columns.joinTo(builder, postfix = ")") {
@@ -38,7 +36,7 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, ";") {
-                "ALTER TABLE ${statement.subject.table.render()} ADD COLUMN ${decompileColumnSql(it)}"
+                "ALTER TABLE ${statement.subject.table.renderedName} ADD COLUMN ${decompileColumnSql(it)}"
             }
         }
 
@@ -57,7 +55,7 @@ object SQLiteDialect : Dialect {
 
         if (statement.definitions.none()) {
             builder.append("DROP TABLE ")
-            builder.append(statement.subject.table.render())
+            builder.append(statement.subject.table.renderedName)
         } else {
             check(statement.definitions.none {
                 it is Column<*>
@@ -84,7 +82,7 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.subject.table.render())
+        builder.append(statement.subject.table.renderedName)
 
         val where = statement.whereClause
         if (where != null) {
@@ -141,11 +139,11 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn2Clause.subject.table.render())
+        builder.append(statement.joinOn2Clause.subject.table.renderedName)
 
         if (statement.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.append(statement.joinOn2Clause.table2.render())
+        builder.append(statement.joinOn2Clause.table2.renderedName)
         builder.append(" ON ")
         builder.append(statement.joinOn2Clause.predicate.fullRender())
 
@@ -204,17 +202,17 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.render())
+        builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
 
         if (statement.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.table2.render())
+        builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
         builder.append(" ON ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender())
 
         if (statement.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.append(statement.joinOn3Clause.table3.render())
+        builder.append(statement.joinOn3Clause.table3.renderedName)
         builder.append(" ON ")
         builder.append(statement.joinOn3Clause.predicate.fullRender())
 
@@ -273,13 +271,13 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.render())
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
 
         if (statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(
             " OUTER"
         )
         builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.render())
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
         builder.append(" ON ")
         builder.append(
             statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender()
@@ -287,13 +285,13 @@ object SQLiteDialect : Dialect {
 
         if (statement.joinOn4Clause.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.table3.render())
+        builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender())
 
         if (statement.joinOn4Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.table4.render())
+        builder.append(statement.joinOn4Clause.table4.renderedName)
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.predicate.fullRender())
 
@@ -349,11 +347,11 @@ object SQLiteDialect : Dialect {
             builder.append(' ')
         }
         builder.append("INTO ")
-        builder.append(statement.subject.table.render())
+        builder.append(statement.subject.table.renderedName)
         builder.append(" (")
 
         statement.assignments.joinTo(builder) {
-            it.column.name.render()
+            it.column.renderedName
         }
 
         builder.append(") VALUES (")
@@ -375,7 +373,7 @@ object SQLiteDialect : Dialect {
             builder.append(statement.conflict)
             builder.append(' ')
         }
-        builder.append(statement.subject.table.render())
+        builder.append(statement.subject.table.renderedName)
         builder.append(" SET ")
 
         statement.assignments.joinTo(builder) {
@@ -394,7 +392,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: DeleteStatement<T>): String {
         val builder = StringBuilder()
         builder.append("DELETE FROM ")
-        builder.append(statement.subject.table.render())
+        builder.append(statement.subject.table.renderedName)
 
         val where = statement.whereClause
         if (where != null) {
@@ -464,9 +462,9 @@ object SQLiteDialect : Dialect {
         }
 
         append(' ')
-        append(index.name.render())
+        append(index.renderedName)
         append(" ON ")
-        append(table.render())
+        append(table.renderedName)
         append(' ')
         append(index.render())
     }
@@ -482,9 +480,9 @@ object SQLiteDialect : Dialect {
         }
 
         append(' ')
-        append(index.name.render())
+        append(index.renderedName)
         append(" ON ")
-        append(table.render())
+        append(table.renderedName)
     }
 
 }

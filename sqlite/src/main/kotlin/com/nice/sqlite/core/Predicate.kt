@@ -4,6 +4,7 @@ package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Renderer
+import com.nice.sqlite.core.ddl.toSqlString
 
 interface Predicate : Renderer
 

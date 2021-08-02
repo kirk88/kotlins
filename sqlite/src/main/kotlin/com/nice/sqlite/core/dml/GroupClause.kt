@@ -60,8 +60,8 @@ inline fun <T : Table> GroupClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(
-        selection(subject.table),
         subject,
+        selection(subject.table),
         whereClause = whereClause,
         groupClause = this
     )

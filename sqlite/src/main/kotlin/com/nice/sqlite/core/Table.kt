@@ -5,7 +5,9 @@ import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.SqlType
 
-open class Table(private val name: String) : Renderer {
+open class Table(private val name: String) {
+
+    internal val renderedName: String = "\"$name\""
 
     inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.INTEGER, this)
     inner class IntColumn(name: String) : Column<Int>(name, SqlType.INTEGER, this)
@@ -15,8 +17,6 @@ open class Table(private val name: String) : Renderer {
     inner class DoubleColumn(name: String) : Column<Double>(name, SqlType.REAL, this)
     inner class StringColumn(name: String) : Column<String>(name, SqlType.TEXT, this)
     inner class BlobColumn(name: String) : Column<ByteArray>(name, SqlType.BLOB, this)
-
-    override fun render(): String = name.render()
 
     override fun toString(): String {
         return name

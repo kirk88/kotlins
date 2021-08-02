@@ -37,10 +37,10 @@ inline fun <T : Table> LimitClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(
+        subject,
         selection(
             subject.table
         ),
-        subject,
         whereClause = whereClause,
         orderClause = orderClause,
         groupClause = groupClause,

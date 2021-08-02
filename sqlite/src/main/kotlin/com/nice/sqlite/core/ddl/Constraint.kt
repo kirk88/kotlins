@@ -2,8 +2,6 @@
 
 package com.nice.sqlite.core.ddl
 
-import com.nice.sqlite.core.toSqlString
-
 sealed class ColumnConstraintAction(
     private val name: String
 ) {

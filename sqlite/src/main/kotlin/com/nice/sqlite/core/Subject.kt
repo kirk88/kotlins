@@ -19,7 +19,7 @@ inline fun <T : Table> offer(table: T): StatementSubject<T> {
 }
 
 inline fun <T : Table> StatementSubject<T>.create(definitions: (T) -> Sequence<Definition>): CreateStatement<T> {
-    return CreateStatement(definitions(table), this)
+    return CreateStatement(this, definitions(table))
 }
 
 inline fun <T : Table> StatementSubject<T>.create(
@@ -30,7 +30,7 @@ inline fun <T : Table> StatementSubject<T>.create(
 }
 
 inline fun <T : Table> StatementSubject<T>.alter(definitions: (T) -> Sequence<Definition>): AlterStatement<T> {
-    return AlterStatement(definitions(table), this)
+    return AlterStatement(this, definitions(table))
 }
 
 inline fun <T : Table> StatementSubject<T>.alter(
@@ -43,7 +43,7 @@ inline fun <T : Table> StatementSubject<T>.alter(
 inline fun <T : Table> StatementSubject<T>.drop(
     definitions: (T) -> Sequence<Definition> = { emptySequence() }
 ): DropStatement<T> {
-    return DropStatement(definitions(table), this)
+    return DropStatement(this, definitions(table))
 }
 
 inline fun <T : Table> StatementSubject<T>.drop(
@@ -84,7 +84,7 @@ inline fun <T : Table> StatementSubject<T>.offset(offset: () -> Int): OffsetClau
 inline fun <T : Table> StatementSubject<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
-    return SelectStatement(selection(table), this)
+    return SelectStatement(this, selection(table))
 }
 
 inline fun <T : Table> StatementSubject<T>.select(
@@ -121,7 +121,7 @@ inline fun <T : Table> StatementSubject<T>.insert(
     conflict: Conflict = Conflict.None,
     values: (T) -> Sequence<Assignment>
 ): InsertStatement<T> {
-    return InsertStatement(values(table), this, conflict)
+    return InsertStatement(this, values(table), conflict)
 }
 
 

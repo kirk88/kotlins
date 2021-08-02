@@ -5,8 +5,8 @@ import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
 class DropStatement<T : Table>(
-    val definitions: Sequence<Definition>,
-    val subject: Subject<T>
+    val subject: Subject<T>,
+    val definitions: Sequence<Definition>
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {

@@ -35,7 +35,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(4) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(6) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }
@@ -48,7 +48,7 @@ object DB : ManagedSQLiteOpenHelper(
 
         override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
             offer(TestTable).alter(db.statementExecutor) {
-                it.number + index(it.id, it.name)
+                it.number + index(it.id, it.name).ifNotExists()
             }
         }
     }

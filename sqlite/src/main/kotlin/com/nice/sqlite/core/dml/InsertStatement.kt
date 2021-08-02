@@ -8,8 +8,8 @@ import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.Statement
 
 class InsertStatement<T : Table>(
-    val assignments: Sequence<Assignment>,
     val subject: Subject<T>,
+    val assignments: Sequence<Assignment>,
     val conflict: Conflict
 ) : Statement {
 

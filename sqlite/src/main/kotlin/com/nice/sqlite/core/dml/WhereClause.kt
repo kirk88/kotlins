@@ -44,10 +44,8 @@ inline fun <T : Table> WhereClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(
-        selection(
-            subject.table
-        ),
         subject,
+        selection(subject.table),
         whereClause = this
     )
 }

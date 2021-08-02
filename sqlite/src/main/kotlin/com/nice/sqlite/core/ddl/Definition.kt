@@ -6,7 +6,6 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.dml.MutableSequence
 import com.nice.sqlite.core.dml.OnceIterator
 import com.nice.sqlite.core.dml.mutableSequenceOf
-import com.nice.sqlite.core.render
 
 enum class SqlType {
     INTEGER,
@@ -30,11 +29,8 @@ abstract class Column<T>(
     val table: Table
 ) : Definition {
 
-    val shortName: String
-        get() = name.render()
-
-    val fullName: String
-        get() = "${table.render()}.${name.render()}"
+    internal val renderedName: String = "\"$name\""
+    internal val fullRenderedName: String = "${table.renderedName}.\"$name\""
 
     private var _meta = Meta<T>()
     val meta: Meta<T> get() = _meta
@@ -67,19 +63,9 @@ abstract class Column<T>(
         _meta = _meta.copy(onDeleteAction = actionColumn)
     }
 
-    override fun render(): String = buildString {
-        append(name.render())
-        append(' ')
-        append(type)
-    }
+    override fun render(): String = "$renderedName $type"
 
-    override fun fullRender(): String = buildString {
-        append(table.render())
-        append('.')
-        append(name.render())
-        append(' ')
-        append(type)
-    }
+    override fun fullRender(): String = "$fullRenderedName $type"
 
     override fun toString(): String {
         return name
@@ -121,6 +107,8 @@ class Index internal constructor(
     val name: String
 ) : Definition, Renderer {
 
+    internal val renderedName: String = "\"$name\""
+
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
@@ -141,7 +129,7 @@ class Index internal constructor(
             "At least 1 column is required to create an index"
         }
         return columns.joinToString(prefix = "(", postfix = ")") {
-            it.name.render()
+            it.renderedName
         }
     }
 
@@ -201,21 +189,9 @@ class Function(private val name: String, private val column: Column<*>) : Defini
         return result
     }
 
-    override fun render(): String = buildString {
-        append(name)
-        append('(')
-        append(column.name.render())
-        append(')')
-    }
+    override fun render(): String = "$name(${column.renderedName})"
 
-    override fun fullRender(): String = buildString {
-        append(name)
-        append('(')
-        append(column.table.render())
-        append('.')
-        append(column.name.render())
-        append(')')
-    }
+    override fun fullRender(): String = "$name(${column.fullRenderedName})"
 
     override fun toString(): String = "$name(${column.name})"
 
