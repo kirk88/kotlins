@@ -1,10 +1,16 @@
-package com.nice.sqlite.core.dml
+@file:Suppress("unused")
+
+package com.nice.sqlite.core.ddl
+
+import com.nice.sqlite.core.dml.MutableSequence
+import com.nice.sqlite.core.dml.OnceIterator
+import com.nice.sqlite.core.dml.mutableSequenceOf
 
 enum class SqlOrderDirection { ASC, DESC }
 
-interface Ordering : Sequence<Ordering> {
+interface Ordering : Sequence<Ordering>, Renderer {
 
-    val column: Projection.Column
+    val column: Column<*>
     val direction: SqlOrderDirection
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
@@ -12,9 +18,11 @@ interface Ordering : Sequence<Ordering> {
     operator fun plus(ordering: Ordering): MutableSequence<Ordering> =
         mutableSequenceOf(this, ordering)
 
-    fun render(fullFormat: Boolean = false): String = "${column.render(fullFormat)} $direction"
+    override fun render(): String = "${column.render()} $direction"
 
-    class By(override val column: Projection.Column, override val direction: SqlOrderDirection) :
+    override fun fullRender(): String = "${column.fullRender()} $direction"
+
+    class By(override val column: Column<*>, override val direction: SqlOrderDirection) :
         Ordering {
 
         override fun equals(other: Any?): Boolean {
@@ -40,3 +48,6 @@ interface Ordering : Sequence<Ordering> {
     }
 
 }
+
+fun asc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.ASC)
+fun desc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.DESC)

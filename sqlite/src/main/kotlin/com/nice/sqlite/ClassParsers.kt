@@ -1,17 +1,16 @@
 package com.nice.sqlite
 
-import com.nice.sqlite.core.dml.Projection
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 inline fun <reified T : Any> classParser(): MapRowParser<T> = ClassParsers.get(T::class.java)
 
-private fun hasApplicableType(type: Pair<Class<*>, Array<Annotation>>): Boolean {
-    if (type.first.isPrimitive || type.second.any { it is Projection.Column }) {
+private fun isApplicableType(type: Class<*>): Boolean {
+    if (type.isPrimitive) {
         return true
     }
 
-    return when (type.first) {
+    return when (type) {
         java.lang.String::class.java, java.lang.CharSequence::class.java,
         java.lang.Long::class.java, java.lang.Integer::class.java,
         java.lang.Byte::class.java, java.lang.Character::class.java,
@@ -40,11 +39,8 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
             } else {
                 val applicableConstructors = constructors.filter { ctr ->
                     if (ctr.isVarArgs || !Modifier.isPublic(ctr.modifiers)) return@filter false
-                    val types =
-                        ctr.parameterTypes.zip(ctr.parameterAnnotations) { type, annotations ->
-                            type to annotations
-                        }
-                    return@filter types.isNotEmpty() && types.all(::hasApplicableType)
+                    val types = ctr.parameterTypes
+                    return@filter types.isNotEmpty() && types.all(::isApplicableType)
                 }
 
                 check(applicableConstructors.isNotEmpty()) {

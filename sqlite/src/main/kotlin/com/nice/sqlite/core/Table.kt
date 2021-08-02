@@ -1,21 +1,22 @@
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.dml.Assignment
-import com.nice.sqlite.core.dml.Projection.Column
+import com.nice.sqlite.core.ddl.Assignment
+import com.nice.sqlite.core.ddl.Column
+import com.nice.sqlite.core.ddl.Renderer
+import com.nice.sqlite.core.ddl.SqlType
 
-open class Table(private val name: String) {
+open class Table(private val name: String) : Renderer {
 
-    inner class BooleanColumn(name: String) : Column(name, this)
-    inner class IntColumn(name: String) : Column(name, this)
-    inner class LongColumn(name: String) : Column(name, this)
-    inner class ShortColumn(name: String) : Column(name, this)
-    inner class ByteColumn(name: String) : Column(name, this)
-    inner class FloatColumn(name: String) : Column(name, this)
-    inner class DoubleColumn(name: String) : Column(name, this)
-    inner class StringColumn(name: String) : Column(name, this)
-    inner class BlobColumn(name: String) : Column(name, this)
+    inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.INTEGER, this)
+    inner class IntColumn(name: String) : Column<Int>(name, SqlType.INTEGER, this)
+    inner class LongColumn(name: String) : Column<Long>(name, SqlType.INTEGER, this)
+    inner class ShortColumn(name: String) : Column<Short>(name, SqlType.INTEGER, this)
+    inner class FloatColumn(name: String) : Column<Float>(name, SqlType.REAL, this)
+    inner class DoubleColumn(name: String) : Column<Double>(name, SqlType.REAL, this)
+    inner class StringColumn(name: String) : Column<String>(name, SqlType.TEXT, this)
+    inner class BlobColumn(name: String) : Column<ByteArray>(name, SqlType.BLOB, this)
 
-    fun render(): String = "\"$name\""
+    override fun render(): String = name.render()
 
     override fun toString(): String {
         return name
@@ -38,38 +39,34 @@ open class Table(private val name: String) {
 
 }
 
-operator fun Table.IntColumn.invoke(value: Int): Assignment {
+operator fun Column<Int>.invoke(value: Int): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.LongColumn.invoke(value: Long): Assignment {
+operator fun Column<Long>.invoke(value: Long): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.ShortColumn.invoke(value: Short): Assignment {
+operator fun Column<Short>.invoke(value: Short): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.ByteColumn.invoke(value: Byte): Assignment {
+operator fun Column<Float>.invoke(value: Float): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.FloatColumn.invoke(value: Float): Assignment {
+operator fun Column<Double>.invoke(value: Double): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.DoubleColumn.invoke(value: Double): Assignment {
+operator fun Column<Boolean>.invoke(value: Boolean): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.BooleanColumn.invoke(value: Boolean): Assignment {
+operator fun Column<String>.invoke(value: String?): Assignment {
     return Assignment.Value(this, value)
 }
 
-operator fun Table.StringColumn.invoke(value: String?): Assignment {
-    return Assignment.Value(this, value)
-}
-
-operator fun Table.BlobColumn.invoke(value: ByteArray?): Assignment {
+operator fun Column<ByteArray>.invoke(value: ByteArray?): Assignment {
     return Assignment.Value(this, value)
 }

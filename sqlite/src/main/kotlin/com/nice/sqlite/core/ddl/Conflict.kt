@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.ddl
 
 sealed class Conflict(

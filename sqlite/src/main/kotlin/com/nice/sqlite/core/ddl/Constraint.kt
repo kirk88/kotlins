@@ -1,7 +1,8 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.ddl
 
-import com.nice.sqlite.core.dml.Projection
-import com.nice.sqlite.core.escapedSQLString
+import com.nice.sqlite.core.toSqlString
 
 sealed class ColumnConstraintAction(
     private val name: String
@@ -26,7 +27,7 @@ sealed class ColumnConstraint {
     class Default<T>(val value: T) : ColumnConstraint() {
         override fun toString(): String = buildString {
             append("DEFAULT ")
-            append(value.escapedSQLString())
+            append(value.toSqlString())
         }
     }
 
@@ -41,11 +42,11 @@ sealed class ColumnConstraint {
 
     }
 
-    class ForeignKey(val references: Projection.Column) : ColumnConstraint() {
+    class ForeignKey(val references: Column<*>) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
             append("REFERENCES ")
-            append(references.render(true))
+            append(references.fullRender())
         }
 
     }

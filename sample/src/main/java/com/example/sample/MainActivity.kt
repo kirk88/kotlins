@@ -36,6 +36,8 @@ import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.classParser
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.ddl.count
+import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.parseList
@@ -86,18 +88,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 start = System.currentTimeMillis()
                 val list = offer(TestTable).orderBy {
-                    it.id.desc
-                }.limit { 10 }.select(statementExecutor) {
-                    it.id + it.name + it.age + it.flag
-                }.parseList(classParser<DBTest>())
+                    desc(it.id)
+                }.limit { 10 }.select(statementExecutor).parseList(classParser<DBTest>())
 
                 Log.e(TAG, "first: ${list.first()} size: ${list.size}")
 
                 var count = 0
                 for (row in offer(TestTable).orderBy {
-                    it.id.desc
-                }.select(statementExecutor) {
-                    it.id + it.name + it.age + it.flag
+                    desc(it.id)
+                }.select(statementExecutor){
+                    count(it.id)
                 }.asMapSequence()) {
                     if (count <= 10) {
                         Log.e(TAG, row.toString())
@@ -117,10 +117,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 start = System.currentTimeMillis()
                 count = 0
                 for (row in offer(TestTable).orderBy {
-                    it.id.desc
-                }.select(statementExecutor) {
-                    it.id + it.name + it.age + it.flag
-                }.asMapSequence()) {
+                    desc(it.id)
+                }.select(statementExecutor).asMapSequence()) {
                     if (count <= 10) {
                         Log.e(TAG, row.toString())
                     } else {

@@ -3,11 +3,7 @@
 package com.nice.sqlite.core
 
 import android.database.Cursor
-import com.nice.sqlite.SQLiteDefinitionBuilder
-import com.nice.sqlite.core.ddl.AlertTableStatement
-import com.nice.sqlite.core.ddl.Conflict
-import com.nice.sqlite.core.ddl.CreateTableStatement
-import com.nice.sqlite.core.ddl.DropTableStatement
+import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
 
 interface Subject<T : Table> {
@@ -22,43 +18,39 @@ inline fun <T : Table> offer(table: T): StatementSubject<T> {
     return StatementSubject(table)
 }
 
-inline fun <T : Table> StatementSubject<T>.create(action: SQLiteDefinitionBuilder.(T) -> Unit): CreateTableStatement<T> {
-    return CreateTableStatement(SQLiteDefinitionBuilder().apply {
-        action(table)
-    }.build(), this)
+inline fun <T : Table> StatementSubject<T>.create(definitions: (T) -> Sequence<Definition>): CreateStatement<T> {
+    return CreateStatement(definitions(table), this)
 }
 
 inline fun <T : Table> StatementSubject<T>.create(
     executor: StatementExecutor,
-    action: SQLiteDefinitionBuilder.(T) -> Unit
+    definitions: (T) -> Sequence<Definition>
 ) {
-    executor.execute(create(action))
+    executor.execute(create(definitions))
 }
 
-inline fun <T : Table> StatementSubject<T>.alert(action: SQLiteDefinitionBuilder.(T) -> Unit): AlertTableStatement<T> {
-    return AlertTableStatement(SQLiteDefinitionBuilder().apply {
-        action(table)
-    }.build(), this)
+inline fun <T : Table> StatementSubject<T>.alter(definitions: (T) -> Sequence<Definition>): AlterStatement<T> {
+    return AlterStatement(definitions(table), this)
 }
 
-inline fun <T : Table> StatementSubject<T>.alert(
+inline fun <T : Table> StatementSubject<T>.alter(
     executor: StatementExecutor,
-    action: SQLiteDefinitionBuilder.(T) -> Unit
+    definitions: (T) -> Sequence<Definition>
 ) {
-    executor.execute(alert(action))
+    executor.execute(alter(definitions))
 }
 
-inline fun <T : Table> StatementSubject<T>.drop(action: SQLiteDefinitionBuilder.(T) -> Unit = {}): DropTableStatement<T> {
-    return DropTableStatement(SQLiteDefinitionBuilder().apply {
-        action(table)
-    }.build(), this)
+inline fun <T : Table> StatementSubject<T>.drop(
+    definitions: (T) -> Sequence<Definition> = { emptySequence() }
+): DropStatement<T> {
+    return DropStatement(definitions(table), this)
 }
 
 inline fun <T : Table> StatementSubject<T>.drop(
     executor: StatementExecutor,
-    action: SQLiteDefinitionBuilder.(T) -> Unit = {}
+    definitions: (T) -> Sequence<Definition> = { emptySequence() }
 ) {
-    executor.execute(drop(action))
+    executor.execute(drop(definitions))
 }
 
 inline fun <T : Table, T2 : Table> StatementSubject<T>.join(table2: T2): Join2Clause<T, T2> {
@@ -73,7 +65,7 @@ inline fun <T : Table> StatementSubject<T>.where(predicate: (T) -> Predicate): W
     return WhereClause(predicate(table), this)
 }
 
-inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Projection>): GroupClause<T> {
+inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Definition>): GroupClause<T> {
     return GroupClause(group(table), this)
 }
 
@@ -90,16 +82,16 @@ inline fun <T : Table> StatementSubject<T>.offset(offset: () -> Int): OffsetClau
 }
 
 inline fun <T : Table> StatementSubject<T>.select(
-    selection: (T) -> Sequence<Projection> = { emptySequence() }
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(selection(table), this)
 }
 
 inline fun <T : Table> StatementSubject<T>.select(
     executor: StatementExecutor,
-    selection: (T) -> Sequence<Projection> = { emptySequence() }
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return executor.queryForCursor(select(selection))
+    return executor.executeQuery(select(selection))
 }
 
 inline fun <T : Table> StatementSubject<T>.update(

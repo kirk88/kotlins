@@ -45,13 +45,11 @@ SQLite的kotlin封装（直接生成sql语句，性能比SQLiteDatabase中的增
 
 ```kotlin
 object TestTable : Table("test") {
-    val id = LongColumn("id")
-    val name = StringColumn("name")
+    val id = LongColumn("id").primaryKey()
+    val name = StringColumn("name").default("jack")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
-
-    //新增列
-    val number = IntColumn("number")
+    val number = IntColumn("number").default(10)
 }
 ```
 
@@ -69,24 +67,14 @@ object DB : ManagedSQLiteOpenHelper(
         override fun onCreate(db: SupportSQLiteDatabase) {
             //创建表
             offer(TestTable).create(db.statementExecutor) {
-                define(it.id).primaryKey()
-                define(it.name).default("jack")
-                define(it.age)
-                define(it.flag)
-
-                define(it.id, it.name, name = "indexName").unique()
-                    .ifNotExists() //索引，索引名称默认为id_name
+                it.id + it.name + it.age + it.flag + it.number + index(it.id, it.name, name = "indexName")
             }
         }
 
         override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            //添加列
-            offer(TestTable).alert(db.statementExecutor) {
-                define(it.number).notNull()
-
-                //此时仍可以添加索引
-                define(it.age, it.number, name = "indexName").unique()
-                    .ifNotExists()
+            //添加列 或者 索引
+            offer(TestTable).alter(db.statementExecutor) {
+                it.number + index(it.id, it.name)
             }
         }
     }
@@ -100,13 +88,13 @@ object DB : ManagedSQLiteOpenHelper(
 offer(TestTable).drop()
 ```
 
-如果要删除索引
+如果要删除索引 (不支持删除列)
 
 ```kotlin
 offer(TestTable).drop {
-    define(it.id, it.name).ifExists()
+    index(it.id, it.name).ifExists()
     //or
-    define(name = "indexName").ifExists()
+    index(name = "indexName").ifExists()
 }
 ```
 
@@ -148,7 +136,7 @@ DB.use {
         .where { it.flag eq true }
         .groupBy { it.id + it.name }
         .having { it.age gt 20 }
-        .orderBy { it.id.desc }
+        .orderBy { desc(it.id) }
         .limit { 10 }
         .offset { 10 }
         .select(statementExecutor) {

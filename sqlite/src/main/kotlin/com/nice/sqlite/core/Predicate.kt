@@ -2,13 +2,10 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.dml.Projection
+import com.nice.sqlite.core.ddl.Column
+import com.nice.sqlite.core.ddl.Renderer
 
-interface Predicate {
-
-    fun render(fullFormat: Boolean = false): String
-
-}
+interface Predicate : Renderer
 
 interface Condition : Predicate {
 
@@ -20,7 +17,11 @@ interface Condition : Predicate {
 
 private fun Predicate(render: (Boolean) -> String): Predicate {
     return object : Predicate {
-        override fun render(fullFormat: Boolean): String = render(fullFormat)
+
+        override fun render(): String = render(false)
+
+        override fun fullRender(): String = render(true)
+
     }
 }
 
@@ -30,9 +31,9 @@ private class ConditionImpl(
     override val predicateRight: Predicate
 ) : Condition {
 
-    override fun render(fullFormat: Boolean): String {
-        return "(${predicateLeft.render(fullFormat)} $connector ${predicateRight.render(fullFormat)})"
-    }
+    override fun render(): String = "(${predicateLeft.render()} $connector ${predicateRight.render()})"
+
+    override fun fullRender(): String = "(${predicateLeft.fullRender()} $connector ${predicateRight.fullRender()})"
 
 }
 
@@ -44,63 +45,56 @@ infix fun Predicate.or(predicate: Predicate): Predicate {
     return ConditionImpl(this, "OR", predicate)
 }
 
-infix fun Projection.Column.eq(value: Any): Predicate =
-    Predicate { "${render(it)} = ${value.escapedSQLString()}" }
+infix fun Column<*>.eq(value: Any): Predicate =
+    Predicate { "${render(it)} = ${value.toSqlString()}" }
 
-infix fun Projection.Column.ne(value: Any): Predicate =
-    Predicate { "${render(it)} <> ${value.escapedSQLString()}" }
+infix fun Column<*>.ne(value: Any): Predicate =
+    Predicate { "${render(it)} <> ${value.toSqlString()}" }
 
-infix fun Projection.Column.gt(value: Any): Predicate =
-    Predicate { "${render(it)} > ${value.escapedSQLString()}" }
+infix fun Column<*>.gt(value: Any): Predicate =
+    Predicate { "${render(it)} > ${value.toSqlString()}" }
 
-infix fun Projection.Column.lt(value: Any): Predicate =
-    Predicate { "${render(it)} < ${value.escapedSQLString()}" }
+infix fun Column<*>.lt(value: Any): Predicate =
+    Predicate { "${render(it)} < ${value.toSqlString()}" }
 
-infix fun Projection.Column.gte(value: Any): Predicate =
-    Predicate { "${render(it)} >= ${value.escapedSQLString()}" }
+infix fun Column<*>.gte(value: Any): Predicate =
+    Predicate { "${render(it)} >= ${value.toSqlString()}" }
 
-infix fun Projection.Column.lte(value: Any): Predicate =
-    Predicate { "${render(it)} <= ${value.escapedSQLString()}" }
+infix fun Column<*>.lte(value: Any): Predicate =
+    Predicate { "${render(it)} <= ${value.toSqlString()}" }
 
-infix fun Projection.Column.like(value: Any): Predicate =
-    Predicate { "${render(it)} LIKE ${value.escapedSQLString()}" }
+infix fun Column<*>.like(value: Any): Predicate =
+    Predicate { "${render(it)} LIKE ${value.toSqlString()}" }
 
-infix fun Projection.Column.glob(value: Any): Predicate =
-    Predicate { "${render(it)} GLOB ${value.escapedSQLString()}" }
+infix fun Column<*>.glob(value: Any): Predicate =
+    Predicate { "${render(it)} GLOB ${value.toSqlString()}" }
 
-fun Projection.Column.notNull(): Predicate =
+fun Column<*>.isNotNull(): Predicate =
     Predicate { "${render(it)} IS NOT NULL" }
 
-fun Projection.Column.isNull(): Predicate =
+fun Column<*>.isNull(): Predicate =
     Predicate { "${render(it)} IS NULL" }
 
-fun Projection.Column.between(value1: Any, value2: Any): Predicate =
-    Predicate { "${render(it)} BETWEEN ${value1.escapedSQLString()} AND ${value2.escapedSQLString()}" }
+fun Column<*>.between(value1: Any, value2: Any): Predicate =
+    Predicate { "${render(it)} BETWEEN ${value1.toSqlString()} AND ${value2.toSqlString()}" }
 
-fun Projection.Column.notBetween(value1: Any, value2: Any): Predicate =
-    Predicate { "${render(it)} NOT BETWEEN ${value1.escapedSQLString()} AND ${value2.escapedSQLString()}" }
+fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
+    Predicate { "${render(it)} NOT BETWEEN ${value1.toSqlString()} AND ${value2.toSqlString()}" }
 
-fun Projection.Column.any(vararg values: Any): Predicate =
+fun Column<*>.any(vararg values: Any): Predicate =
     Predicate {
         values.joinToString(
             prefix = "${render(it)} IN (",
             postfix = ")"
-        ) { value -> value.escapedSQLString() }
+        ) { value -> value.toSqlString() }
     }
 
-fun Projection.Column.none(vararg values: Any): Predicate =
+fun Column<*>.none(vararg values: Any): Predicate =
     Predicate {
         values.joinToString(
             prefix = "${render(it)} NOT IN (",
             postfix = ")"
-        ) { value -> value.escapedSQLString() }
+        ) { value -> value.toSqlString() }
     }
 
-internal fun Any?.escapedSQLString(): String {
-    return when (this) {
-        null -> "NULL"
-        is Number -> toString()
-        is Boolean -> if (this) "1" else "0"
-        else -> "'${toString().replace("'", "''")}'"
-    }
-}
+private fun Column<*>.render(full: Boolean) = if (full) fullRender() else render()

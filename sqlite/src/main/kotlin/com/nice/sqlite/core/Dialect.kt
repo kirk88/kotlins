@@ -1,15 +1,15 @@
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.AlertTableStatement
-import com.nice.sqlite.core.ddl.CreateTableStatement
-import com.nice.sqlite.core.ddl.DropTableStatement
+import com.nice.sqlite.core.ddl.AlterStatement
+import com.nice.sqlite.core.ddl.CreateStatement
+import com.nice.sqlite.core.ddl.DropStatement
 import com.nice.sqlite.core.dml.*
 
 interface Dialect {
 
-    fun <T : Table> build(statement: CreateTableStatement<T>): String
-    fun <T : Table> build(statement: AlertTableStatement<T>): String
-    fun <T : Table> build(statement: DropTableStatement<T>): String
+    fun <T : Table> build(statement: CreateStatement<T>): String
+    fun <T : Table> build(statement: AlterStatement<T>): String
+    fun <T : Table> build(statement: DropStatement<T>): String
 
     fun <T : Table> build(statement: SelectStatement<T>): String
     fun <T : Table, T2 : Table> build(statement: Select2Statement<T, T2>): String

@@ -1,9 +1,10 @@
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
-import com.nice.sqlite.core.StatementExecutor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ddl.Definition
+import com.nice.sqlite.core.ddl.StatementExecutor
 
 class LimitClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -33,7 +34,7 @@ inline fun <T : Table> LimitClause<T>.offset(offset: () -> Int): OffsetClause<T>
 }
 
 inline fun <T : Table> LimitClause<T>.select(
-    selection: (T) -> Sequence<Projection> = { emptySequence() }
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): SelectStatement<T> {
     return SelectStatement(
         selection(
@@ -50,9 +51,9 @@ inline fun <T : Table> LimitClause<T>.select(
 
 inline fun <T : Table> LimitClause<T>.select(
     executor: StatementExecutor,
-    selection: (T) -> Sequence<Projection> = { emptySequence() }
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return executor.queryForCursor(select(selection))
+    return executor.executeQuery(select(selection))
 }
 
 class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -83,7 +84,7 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.offset(offset: () -> Int)
 }
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
-    selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Select2Statement<T, T2> {
     return Select2Statement(
         selection(
@@ -101,9 +102,9 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
     executor: StatementExecutor,
-    selection: (T, T2) -> Sequence<Projection> = { _, _ -> emptySequence() }
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return executor.queryForCursor(select(selection))
+    return executor.executeQuery(select(selection))
 }
 
 class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -134,7 +135,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.offset(of
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
-    selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Select3Statement<T, T2, T3> {
     return Select3Statement(
         selection(
@@ -153,9 +154,9 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
     executor: StatementExecutor,
-    selection: (T, T2, T3) -> Sequence<Projection> = { _, _, _ -> emptySequence() }
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.queryForCursor(select(selection))
+    return executor.executeQuery(select(selection))
 }
 
 class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -186,7 +187,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
-    selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Select4Statement<T, T2, T3, T4> {
     return Select4Statement(
         selection(
@@ -206,7 +207,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
     executor: StatementExecutor,
-    selection: (T, T2, T3, T4) -> Sequence<Projection> = { _, _, _, _ -> emptySequence() }
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.queryForCursor(select(selection))
+    return executor.executeQuery(select(selection))
 }

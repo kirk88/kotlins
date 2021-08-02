@@ -2,19 +2,17 @@ package com.nice.sqlite
 
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.AlertTableStatement
-import com.nice.sqlite.core.ddl.Conflict
-import com.nice.sqlite.core.ddl.CreateTableStatement
-import com.nice.sqlite.core.ddl.DropTableStatement
+import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
-import com.nice.sqlite.core.escapedSQLString
+import com.nice.sqlite.core.render
+import com.nice.sqlite.core.toSqlString
 
 object SQLiteDialect : Dialect {
 
-    override fun <T : Table> build(statement: CreateTableStatement<T>): String {
+    override fun <T : Table> build(statement: CreateStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<SQLiteColumn<*>>()
+        val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.render())
@@ -25,7 +23,7 @@ object SQLiteDialect : Dialect {
             }
         }
 
-        val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
+        val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
                 decompileCreateIndexSql(it, statement.subject.table)
@@ -34,17 +32,17 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun <T : Table> build(statement: AlertTableStatement<T>): String {
+    override fun <T : Table> build(statement: AlterStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<SQLiteColumn<*>>()
+        val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, ";") {
-                "ALERT TABLE ${statement.subject.table.render()} ADD COLUMN ${decompileColumnSql(it)}"
+                "ALTER TABLE ${statement.subject.table.render()} ADD COLUMN ${decompileColumnSql(it)}"
             }
         }
 
-        val indexes = statement.definitions.filterIsInstance<SQLiteIndex>()
+        val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
                 decompileCreateIndexSql(it, statement.subject.table)
@@ -54,7 +52,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun <T : Table> build(statement: DropTableStatement<T>): String {
+    override fun <T : Table> build(statement: DropStatement<T>): String {
         val builder = StringBuilder()
 
         if (statement.definitions.none()) {
@@ -62,10 +60,10 @@ object SQLiteDialect : Dialect {
             builder.append(statement.subject.table.render())
         } else {
             check(statement.definitions.none {
-                it is SQLiteColumn<*>
+                it is Column<*>
             }) { "Drop columns are not supported yet" }
 
-            val indexes = statement.definitions.map { it as SQLiteIndex }
+            val indexes = statement.definitions.map { it as Index }
             indexes.joinTo(builder, separator = ";") {
                 decompileDropIndexSql(it, statement.subject.table)
             }
@@ -78,10 +76,10 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        if (statement.projections.none()) {
+        if (statement.definitions.none()) {
             builder.append('*')
         } else {
-            statement.projections.joinTo(builder) {
+            statement.definitions.joinTo(builder) {
                 it.render()
             }
         }
@@ -97,7 +95,7 @@ object SQLiteDialect : Dialect {
         val group = statement.groupClause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.projections.joinTo(builder) {
+            group.definitions.joinTo(builder) {
                 it.render()
             }
         }
@@ -135,11 +133,11 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        if (statement.projections.none()) {
+        if (statement.definitions.none()) {
             builder.append('*')
         } else {
-            statement.projections.joinTo(builder) {
-                it.render(true)
+            statement.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
@@ -149,33 +147,33 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn2Clause.table2.render())
         builder.append(" ON ")
-        builder.append(statement.joinOn2Clause.predicate.render(true))
+        builder.append(statement.joinOn2Clause.predicate.fullRender())
 
         val where = statement.where2Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render(true))
+            builder.append(where.predicate.fullRender())
         }
 
         val group = statement.group2Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.projections.joinTo(builder) {
-                it.render(true)
+            group.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
 
         val having = statement.having2Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.render(true))
+            builder.append(having.predicate.fullRender())
         }
 
         val order = statement.order2Clause
         if (order != null) {
             builder.append(" ORDER BY ")
             order.orderings.joinTo(builder) {
-                it.render(true)
+                it.fullRender()
             }
         }
 
@@ -198,11 +196,11 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        if (statement.projections.none()) {
+        if (statement.definitions.none()) {
             builder.append('*')
         } else {
-            statement.projections.joinTo(builder) {
-                it.render(true)
+            statement.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
@@ -212,39 +210,39 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.table2.render())
         builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.render(true))
+        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender())
 
         if (statement.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.table3.render())
         builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.predicate.render(true))
+        builder.append(statement.joinOn3Clause.predicate.fullRender())
 
         val where = statement.where3Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render(true))
+            builder.append(where.predicate.fullRender())
         }
 
         val group = statement.group3Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.projections.joinTo(builder) {
-                it.render(true)
+            group.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
 
         val having = statement.having3Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.render(true))
+            builder.append(having.predicate.fullRender())
         }
 
         val order = statement.order3Clause
         if (order != null) {
             builder.append(" ORDER BY ")
             order.orderings.joinTo(builder) {
-                it.render(true)
+                it.fullRender()
             }
         }
 
@@ -267,11 +265,11 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
-        if (statement.projections.none()) {
+        if (statement.definitions.none()) {
             builder.append('*')
         } else {
-            statement.projections.joinTo(builder) {
-                it.render(true)
+            statement.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
@@ -284,46 +282,46 @@ object SQLiteDialect : Dialect {
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.render())
         builder.append(" ON ")
         builder.append(
-            statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.render(true)
+            statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender()
         )
 
         if (statement.joinOn4Clause.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.table3.render())
         builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.render(true))
+        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender())
 
         if (statement.joinOn4Clause.type == JoinType.OUTER) builder.append(" OUTER")
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.table4.render())
         builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.predicate.render(true))
+        builder.append(statement.joinOn4Clause.predicate.fullRender())
 
         val where = statement.where4Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render(true))
+            builder.append(where.predicate.fullRender())
         }
 
         val group = statement.group4Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.projections.joinTo(builder) {
-                it.render(true)
+            group.definitions.joinTo(builder) {
+                it.fullRender()
             }
         }
 
         val having = statement.having4Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.render(true))
+            builder.append(having.predicate.fullRender())
         }
 
         val order = statement.order4Clause
         if (order != null) {
             builder.append(" ORDER BY ")
             order.orderings.joinTo(builder) {
-                it.render(true)
+                it.fullRender()
             }
         }
 
@@ -355,13 +353,13 @@ object SQLiteDialect : Dialect {
         builder.append(" (")
 
         statement.assignments.joinTo(builder) {
-            it.column.render()
+            it.column.name.render()
         }
 
         builder.append(") VALUES (")
 
         statement.assignments.joinTo(builder) {
-            it.value.escapedSQLString()
+            it.value.toSqlString()
         }
 
         builder.append(")")
@@ -407,7 +405,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    private fun decompileColumnSql(column: SQLiteColumn<*>): String = buildString {
+    private fun decompileColumnSql(column: Column<*>): String = buildString {
         append(column.render())
 
         with(column.meta) {
@@ -448,7 +446,7 @@ object SQLiteDialect : Dialect {
         }
     }
 
-    private fun decompileCreateIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+    private fun decompileCreateIndexSql(index: Index, table: Table): String = buildString {
         with(index.meta) {
             append("CREATE")
 
@@ -465,14 +463,15 @@ object SQLiteDialect : Dialect {
             }
         }
 
-        append(" \"${index.name}\"")
+        append(' ')
+        append(index.name.render())
         append(" ON ")
         append(table.render())
         append(' ')
         append(index.render())
     }
 
-    private fun decompileDropIndexSql(index: SQLiteIndex, table: Table): String = buildString {
+    private fun decompileDropIndexSql(index: Index, table: Table): String = buildString {
         with(index.meta) {
             append("DROP INDEX")
 
@@ -482,7 +481,8 @@ object SQLiteDialect : Dialect {
             }
         }
 
-        append(" \"${index.name}\"")
+        append(' ')
+        append(index.name.render())
         append(" ON ")
         append(table.render())
     }

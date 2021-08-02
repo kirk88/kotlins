@@ -4,7 +4,7 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class CreateTableStatement<T : Table>(
+class CreateStatement<T : Table>(
     val definitions: Sequence<Definition>,
     val subject: Subject<T>
 ) : Statement {

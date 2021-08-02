@@ -4,7 +4,7 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 
-class DropTableStatement<T : Table>(
+class DropStatement<T : Table>(
     val definitions: Sequence<Definition>,
     val subject: Subject<T>
 ) : Statement {
