@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.Assignment
