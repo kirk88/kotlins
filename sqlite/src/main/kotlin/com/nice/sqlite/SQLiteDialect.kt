@@ -35,7 +35,7 @@ object SQLiteDialect : Dialect {
 
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
-            columns.joinTo(builder, ";") {
+            columns.joinTo(builder, separator = ";") {
                 "ALTER TABLE ${statement.subject.table.renderedName} ADD COLUMN ${decompileColumnSql(it)}"
             }
         }
@@ -358,6 +358,36 @@ object SQLiteDialect : Dialect {
 
         statement.assignments.joinTo(builder) {
             it.value.toSqlString()
+        }
+
+        builder.append(")")
+
+        return builder.toString()
+    }
+
+    override fun <T : Table> build(statement: BatchInsertStatement<T>): String {
+        val assignments = statement.currentAssignments
+
+        val builder = StringBuilder()
+
+        builder.append("INSERT ")
+        if (statement.conflict != Conflict.None) {
+            builder.append("OR ")
+            builder.append(statement.conflict)
+            builder.append(' ')
+        }
+        builder.append("INTO ")
+        builder.append(statement.subject.table.renderedName)
+        builder.append(" (")
+
+        assignments.joinTo(builder) {
+            it.column.renderedName
+        }
+
+        builder.append(") VALUES (")
+
+        assignments.joinTo(builder) {
+            "?"
         }
 
         builder.append(")")

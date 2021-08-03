@@ -6,10 +6,13 @@ import android.database.Cursor
 import android.util.Log
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
+import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.StatementExecutor
+import com.nice.sqlite.core.dml.BatchInsertStatement
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SQLiteStatementExecutor(private val database: SupportSQLiteDatabase) :
@@ -36,8 +39,38 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         return database.compileStatement(statement.toString(SQLiteDialect)).executeInsert()
     }
 
+    override fun executeBatchInsert(statement: Statement): Long {
+        return if (statement is BatchInsertStatement<*>) {
+            var lastRowId: Long = -1
+            for (assignments in statement) {
+                val sql = statement.toString(SQLiteDialect)
+                lastRowId = database.compileStatement(sql).apply {
+                    bindAssignments(assignments)
+                }.executeInsert()
+            }
+            lastRowId
+        } else {
+            executeInsert(statement)
+        }
+    }
+
     override fun executeQuery(statement: Statement): Cursor {
         return database.query(statement.toString(SQLiteDialect))
+    }
+
+    private fun SupportSQLiteStatement.bindAssignments(assignments: Sequence<Assignment>) {
+        for ((index, assignment) in assignments.withIndex()) {
+            when (val value = assignment.value) {
+                null -> bindNull(index + 1)
+                is String -> bindString(index + 1, value)
+                is Long -> bindLong(index + 1, value)
+                is Int -> bindLong(index + 1, value.toLong())
+                is Short -> bindLong(index + 1, value.toLong())
+                is Boolean -> bindLong(index + 1, if (value) 1 else 0)
+                is Double -> bindDouble(index + 1, value)
+                is Float -> bindDouble(index + 1, value.toDouble())
+            }
+        }
     }
 
 }

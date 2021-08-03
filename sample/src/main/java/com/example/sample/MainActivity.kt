@@ -35,10 +35,12 @@ import com.nice.common.widget.tipViews
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.classParser
 import com.nice.sqlite.core.*
+import com.nice.sqlite.core.ddl.Assignments
 import com.nice.sqlite.core.ddl.Conflict
-import com.nice.sqlite.core.ddl.count
+import com.nice.sqlite.core.ddl.assignments
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.dml.limit
+import com.nice.sqlite.core.dml.mutableSequenceOf
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.parseList
 import com.nice.sqlite.statementExecutor
@@ -77,16 +79,28 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            DB.use(true) {
-                var start = System.currentTimeMillis()
-                repeat(10000) { index ->
-                    offer(TestTable).insert(statementExecutor) {
-                        it.name("jack") + it.age(index) + it.flag(true)
-                    }
-                }
-                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
-                start = System.currentTimeMillis()
+            DB.use(true) {
+                val beans = mutableListOf<DBTest>()
+                repeat(10000) { index ->
+                    val bean = DBTest(id = index.toLong(), name = "jack", age = index, flag = true, number = -index)
+                    beans.add(bean)
+                }
+
+                var start = System.nanoTime()
+                offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
+                    val acc = mutableSequenceOf<Assignments>()
+                    for (bean in beans) {
+                        acc + assignments {
+                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                    it.flag(bean.flag) + it.number(bean.number)
+                        }
+                    }
+                    acc
+                }
+                Log.e(TAG, "insert: ${System.nanoTime() - start}")
+
+                start = System.nanoTime()
                 val list = offer(TestTable).orderBy {
                     desc(it.id)
                 }.limit { 10 }.select(statementExecutor).parseList(classParser<DBTest>())
@@ -96,8 +110,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 var count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
-                }.select(statementExecutor){
-                    count(it.id)
+                }.select(statementExecutor) {
+                    it.name + it.age + it.number
                 }.asMapSequence()) {
                     if (count <= 10) {
                         Log.e(TAG, row.toString())
@@ -106,15 +120,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
                     count++
                 }
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "query: ${System.nanoTime() - start}")
 
-                start = System.currentTimeMillis()
+                start = System.nanoTime()
                 offer(TestTable).update(statementExecutor, Conflict.Replace) {
                     it.name("tom") + it.age(30) + it.flag(false)
                 }
-                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "update: ${System.nanoTime() - start}")
 
-                start = System.currentTimeMillis()
+                start = System.nanoTime()
                 count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
@@ -126,7 +140,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
                     count++
                 }
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
+                Log.e(TAG, "query: ${System.nanoTime() - start}")
             }
 
         }

@@ -1,8 +1,9 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.SqlType
 
 open class Table(private val name: String) {

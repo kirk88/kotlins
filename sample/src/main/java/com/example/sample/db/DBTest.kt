@@ -13,7 +13,7 @@ import com.nice.sqlite.core.offer
 import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
-    val id: Long,
+    val id: Long = 0,
     val name: String,
     val age: Int,
     val flag: Boolean,
@@ -35,7 +35,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(6) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(1) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }
