@@ -1,5 +1,6 @@
 package com.nice.sqlite.core.ddl
 
+import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.dml.MutableSequence
 import com.nice.sqlite.core.dml.OnceIterator
 import com.nice.sqlite.core.dml.mutableSequenceOf
@@ -24,7 +25,9 @@ interface Assignment : Sequence<Assignment>, Renderer {
 
 }
 
-class Assignments @PublishedApi internal constructor(private val assignments: Sequence<Assignment>) : Sequence<Assignment> by assignments {
+class Assignments @PublishedApi internal constructor(
+    private val assignments: Sequence<Assignment>
+) : Sequence<Assignment> by assignments {
 
     val id: Int = toString().hashCode()
 
@@ -34,7 +37,15 @@ class Assignments @PublishedApi internal constructor(private val assignments: Se
 
 }
 
-inline fun assignments(assignments: () -> Sequence<Assignment>): Assignments = Assignments(assignments())
+class BatchAssignmentsBuilder<T : Table> @PublishedApi internal constructor(
+    @PublishedApi internal val table: T
+) : MutableSequence<Assignments> by mutableSequenceOf() {
+
+    inline fun assignments(assignments: (T) -> Sequence<Assignment>): Assignments =
+        Assignments(assignments(table)).also { add(it) }
+
+}
+
 
 internal fun Any?.toSqlString(): String {
     return when (this) {

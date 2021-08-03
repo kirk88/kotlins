@@ -24,7 +24,7 @@ object SQLiteDialect : Dialect {
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(it, statement.subject.table)
+                decompileCreateIndexSql(statement.subject.table, it)
             }
         }
         return builder.toString()
@@ -36,14 +36,18 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
-                "ALTER TABLE ${statement.subject.table.renderedName} ADD COLUMN ${decompileColumnSql(it)}"
+                "ALTER TABLE ${statement.subject.table.renderedName} ADD COLUMN ${
+                    decompileColumnSql(
+                        it
+                    )
+                }"
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(it, statement.subject.table)
+                decompileCreateIndexSql(statement.subject.table, it)
             }
         }
 
@@ -63,7 +67,7 @@ object SQLiteDialect : Dialect {
 
             val indexes = statement.definitions.map { it as Index }
             indexes.joinTo(builder, separator = ";") {
-                decompileDropIndexSql(it, statement.subject.table)
+                decompileDropIndexSql(statement.subject.table, it)
             }
         }
 
@@ -75,10 +79,14 @@ object SQLiteDialect : Dialect {
 
         builder.append("SELECT ")
         if (statement.definitions.none()) {
-            builder.append('*')
+            builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                it.render()
+                if (it is Column<*>) {
+                    it.renderedName
+                } else {
+                    it.render()
+                }
             }
         }
         builder.append(" FROM ")
@@ -93,8 +101,8 @@ object SQLiteDialect : Dialect {
         val group = statement.groupClause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.definitions.joinTo(builder) {
-                it.render()
+            group.columns.joinTo(builder) {
+                it.renderedName
             }
         }
 
@@ -132,10 +140,14 @@ object SQLiteDialect : Dialect {
 
         builder.append("SELECT ")
         if (statement.definitions.none()) {
-            builder.append('*')
+            builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                it.fullRender()
+                if (it is Column<*>) {
+                    it.fullRenderedName
+                } else {
+                    it.fullRender()
+                }
             }
         }
         builder.append(" FROM ")
@@ -156,8 +168,8 @@ object SQLiteDialect : Dialect {
         val group = statement.group2Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.definitions.joinTo(builder) {
-                it.fullRender()
+            group.columns.joinTo(builder) {
+                it.fullRenderedName
             }
         }
 
@@ -195,10 +207,14 @@ object SQLiteDialect : Dialect {
 
         builder.append("SELECT ")
         if (statement.definitions.none()) {
-            builder.append('*')
+            builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                it.fullRender()
+                if (it is Column<*>) {
+                    it.fullRenderedName
+                } else {
+                    it.fullRender()
+                }
             }
         }
         builder.append(" FROM ")
@@ -225,8 +241,8 @@ object SQLiteDialect : Dialect {
         val group = statement.group3Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.definitions.joinTo(builder) {
-                it.fullRender()
+            group.columns.joinTo(builder) {
+                it.fullRenderedName
             }
         }
 
@@ -264,10 +280,14 @@ object SQLiteDialect : Dialect {
 
         builder.append("SELECT ")
         if (statement.definitions.none()) {
-            builder.append('*')
+            builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                it.fullRender()
+                if (it is Column<*>) {
+                    it.fullRenderedName
+                } else {
+                    it.fullRender()
+                }
             }
         }
         builder.append(" FROM ")
@@ -304,8 +324,8 @@ object SQLiteDialect : Dialect {
         val group = statement.group4Clause
         if (group != null) {
             builder.append(" GROUP BY ")
-            group.definitions.joinTo(builder) {
-                it.fullRender()
+            group.columns.joinTo(builder) {
+                it.fullRenderedName
             }
         }
 
@@ -340,14 +360,9 @@ object SQLiteDialect : Dialect {
 
     override fun <T : Table> build(statement: InsertStatement<T>): String {
         val builder = StringBuilder()
-        builder.append("INSERT ")
-        if (statement.conflict != Conflict.None) {
-            builder.append("OR ")
-            builder.append(statement.conflict)
-            builder.append(' ')
-        }
-        builder.append("INTO ")
-        builder.append(statement.subject.table.renderedName)
+
+        builder.append(decompileInsertSql(statement.subject.table, statement.conflict))
+
         builder.append(" (")
 
         statement.assignments.joinTo(builder) {
@@ -366,18 +381,12 @@ object SQLiteDialect : Dialect {
     }
 
     override fun <T : Table> build(statement: BatchInsertStatement<T>): String {
-        val assignments = statement.currentAssignments
+        val assignments = statement.assignments
 
         val builder = StringBuilder()
 
-        builder.append("INSERT ")
-        if (statement.conflict != Conflict.None) {
-            builder.append("OR ")
-            builder.append(statement.conflict)
-            builder.append(' ')
-        }
-        builder.append("INTO ")
-        builder.append(statement.subject.table.renderedName)
+        builder.append(decompileInsertSql(statement.subject.table, statement.conflict))
+
         builder.append(" (")
 
         assignments.joinTo(builder) {
@@ -401,7 +410,7 @@ object SQLiteDialect : Dialect {
         if (statement.conflict != Conflict.None) {
             builder.append("OR ")
             builder.append(statement.conflict)
-            builder.append(' ')
+            builder.append(" ")
         }
         builder.append(statement.subject.table.renderedName)
         builder.append(" SET ")
@@ -438,27 +447,27 @@ object SQLiteDialect : Dialect {
 
         with(column.meta) {
             if (defaultConstraint != null) {
-                append(' ')
+                append(" ")
                 append(defaultConstraint)
             }
 
             if (primaryKeyConstraint != null) {
-                append(' ')
+                append(" ")
                 append(primaryKeyConstraint)
             }
 
             if (foreignKeyConstraint != null) {
-                append(' ')
+                append(" ")
                 append(foreignKeyConstraint)
             }
 
             if (uniqueConstraint != null) {
-                append(' ')
+                append(" ")
                 append(uniqueConstraint)
             }
 
             if (notNullConstraint != null) {
-                append(' ')
+                append(" ")
                 append(notNullConstraint)
             }
 
@@ -474,44 +483,55 @@ object SQLiteDialect : Dialect {
         }
     }
 
-    private fun decompileCreateIndexSql(index: Index, table: Table): String = buildString {
+    private fun decompileCreateIndexSql(table: Table, index: Index): String = buildString {
         with(index.meta) {
             append("CREATE")
 
             if (unique != null) {
-                append(' ')
+                append(" ")
                 append(unique)
             }
 
             append(" INDEX")
 
             if (ifNotExists != null) {
-                append(' ')
+                append(" ")
                 append(ifNotExists)
             }
         }
 
-        append(' ')
+        append(" ")
         append(index.renderedName)
         append(" ON ")
         append(table.renderedName)
-        append(' ')
+        append(" ")
         append(index.render())
     }
 
-    private fun decompileDropIndexSql(index: Index, table: Table): String = buildString {
+    private fun decompileDropIndexSql(table: Table, index: Index): String = buildString {
         with(index.meta) {
             append("DROP INDEX")
 
             if (ifExists != null) {
-                append(' ')
+                append(" ")
                 append(ifExists)
             }
         }
 
-        append(' ')
+        append(" ")
         append(index.renderedName)
         append(" ON ")
+        append(table.renderedName)
+    }
+
+    private fun decompileInsertSql(table: Table, conflict: Conflict): String = buildString {
+        append("INSERT ")
+        if (conflict != Conflict.None) {
+            append("OR ")
+            append(conflict)
+            append(" ")
+        }
+        append("INTO ")
         append(table.renderedName)
     }
 

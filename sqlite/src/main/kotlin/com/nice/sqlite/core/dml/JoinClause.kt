@@ -6,6 +6,7 @@ import android.database.Cursor
 import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
@@ -51,7 +52,7 @@ inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.where(predicate: (T, T2)
     return Where2Clause(predicate(subject.table, table2), joinOn2Clause = this)
 }
 
-inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.groupBy(group: (T, T2) -> Sequence<Definition>): Group2Clause<T, T2> {
+inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.groupBy(group: (T, T2) -> Sequence<Column<*>>): Group2Clause<T, T2> {
     return Group2Clause(group(subject.table, table2), joinOn2Clause = this)
 }
 
@@ -137,7 +138,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.where(pr
     )
 }
 
-inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.groupBy(group: (T, T2, T3) -> Sequence<Definition>): Group3Clause<T, T2, T3> {
+inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.groupBy(group: (T, T2, T3) -> Sequence<Column<*>>): Group3Clause<T, T2, T3> {
     return Group3Clause(
         group(joinOn2Clause.subject.table, joinOn2Clause.table2, table3),
         joinOn3Clause = this
@@ -235,7 +236,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, 
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.groupBy(
-    group: (T, T2, T3, T4) -> Sequence<Definition>
+    group: (T, T2, T3, T4) -> Sequence<Column<*>>
 ): Group4Clause<T, T2, T3, T4> {
     return Group4Clause(
         group(

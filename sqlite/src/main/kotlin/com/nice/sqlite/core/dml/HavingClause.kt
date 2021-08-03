@@ -6,6 +6,7 @@ import android.database.Cursor
 import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
@@ -127,6 +128,13 @@ inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.select(selection: (T, T2
         group2Clause = group2Clause,
         having2Clause = this
     )
+}
+
+inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.select(
+    executor: StatementExecutor,
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(select(selection))
 }
 
 class Having3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(

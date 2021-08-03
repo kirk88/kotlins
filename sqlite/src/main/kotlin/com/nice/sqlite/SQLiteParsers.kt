@@ -4,6 +4,7 @@ package com.nice.sqlite
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
+import android.util.Log
 
 fun interface RowParser<out T> {
     fun parseRow(row: Array<ColumnValue>): T
@@ -115,6 +116,7 @@ private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
     val map = mutableMapOf<String, ColumnValue>()
     for (index in 0 until count) {
+        Log.e("TAGTAG", "name: ${cursor.getColumnName(index)}")
         map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
     }
     return map

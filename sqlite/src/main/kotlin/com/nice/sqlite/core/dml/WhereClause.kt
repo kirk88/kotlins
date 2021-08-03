@@ -15,7 +15,7 @@ class WhereClause<T : Table> @PublishedApi internal constructor(
     internal val subject: Subject<T>
 )
 
-inline fun <T : Table> WhereClause<T>.groupBy(group: (T) -> Sequence<Definition>): GroupClause<T> {
+inline fun <T : Table> WhereClause<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> {
     return GroupClause(group(subject.table), subject, whereClause = this)
 }
 
@@ -61,7 +61,7 @@ inline fun <T : Table> WhereClause<T>.update(
     conflict: Conflict = Conflict.None,
     values: (T) -> Sequence<Assignment>
 ): UpdateStatement<T> {
-    return UpdateStatement(values(subject.table), subject, conflict, whereClause = this)
+    return UpdateStatement(subject, values(subject.table), conflict, whereClause = this)
 }
 
 inline fun <T : Table> WhereClause<T>.update(
@@ -87,7 +87,7 @@ class Where2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     internal val joinOn2Clause: JoinOn2Clause<T, T2>
 )
 
-inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.groupBy(group: (T, T2) -> Sequence<Definition>): Group2Clause<T, T2> {
+inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.groupBy(group: (T, T2) -> Sequence<Column<*>>): Group2Clause<T, T2> {
     return Group2Clause(
         group(joinOn2Clause.subject.table, joinOn2Clause.table2),
         joinOn2Clause,
@@ -147,7 +147,7 @@ class Where3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal con
     internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>
 )
 
-inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.groupBy(group: (T, T2, T3) -> Sequence<Definition>): Group3Clause<T, T2, T3> {
+inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.groupBy(group: (T, T2, T3) -> Sequence<Column<*>>): Group3Clause<T, T2, T3> {
     return Group3Clause(
         group(
             joinOn3Clause.joinOn2Clause.subject.table,
@@ -215,7 +215,7 @@ class Where4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi 
     internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>
 )
 
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Where4Clause<T, T2, T3, T4>.groupBy(group: (T, T2, T3, T4) -> Sequence<Definition>): Group4Clause<T, T2, T3, T4> {
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Where4Clause<T, T2, T3, T4>.groupBy(group: (T, T2, T3, T4) -> Sequence<Column<*>>): Group4Clause<T, T2, T3, T4> {
     return Group4Clause(
         group(
             joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table,

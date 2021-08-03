@@ -6,13 +6,14 @@ import android.database.Cursor
 import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
 class GroupClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val definitions: Sequence<Definition>,
+    internal val columns: Sequence<Column<*>>,
     @PublishedApi
     internal val subject: Subject<T>,
     @PublishedApi
@@ -76,7 +77,7 @@ inline fun <T : Table> GroupClause<T>.select(
 
 class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val definitions: Sequence<Definition>,
+    internal val columns: Sequence<Column<*>>,
     @PublishedApi
     internal val joinOn2Clause: JoinOn2Clause<T, T2>,
     @PublishedApi
@@ -147,7 +148,7 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
 
 class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val definitions: Sequence<Definition>,
+    internal val columns: Sequence<Column<*>>,
     @PublishedApi
     internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     @PublishedApi
@@ -223,7 +224,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
 
 class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val definitions: Sequence<Definition>,
+    internal val columns: Sequence<Column<*>>,
     @PublishedApi
     internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
     @PublishedApi

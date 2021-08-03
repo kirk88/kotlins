@@ -32,18 +32,12 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
-import com.nice.sqlite.asMapSequence
-import com.nice.sqlite.classParser
+import com.nice.sqlite.*
 import com.nice.sqlite.core.*
-import com.nice.sqlite.core.ddl.Assignments
 import com.nice.sqlite.core.ddl.Conflict
-import com.nice.sqlite.core.ddl.assignments
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.dml.limit
-import com.nice.sqlite.core.dml.mutableSequenceOf
 import com.nice.sqlite.core.dml.select
-import com.nice.sqlite.parseList
-import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -87,25 +81,27 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     beans.add(bean)
                 }
 
-                var start = System.nanoTime()
+                var start = System.currentTimeMillis()
                 offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
-                    val acc = mutableSequenceOf<Assignments>()
-                    for (bean in beans) {
-                        acc + assignments {
-                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                    it.flag(bean.flag) + it.number(bean.number)
-                        }
+                    assignments {
+                        val bean = beans.first()
+                        it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                it.flag(bean.flag) + it.number(bean.number)
                     }
-                    acc
+
+                    assignments {
+                        val bean = beans.last()
+                        it.id(bean.id) + it.name(bean.name) + it.age(1000) +
+                                it.flag(false)
+                    }
                 }
-                Log.e(TAG, "insert: ${System.nanoTime() - start}")
+                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
-                start = System.nanoTime()
-                val list = offer(TestTable).orderBy {
+                Log.e(TAG, offer(TestTable).orderBy {
                     desc(it.id)
-                }.limit { 10 }.select(statementExecutor).parseList(classParser<DBTest>())
-
-                Log.e(TAG, "first: ${list.first()} size: ${list.size}")
+                }.select {
+                    it.name + it.age + it.number
+                }.toString(SQLiteDialect))
 
                 var count = 0
                 for (row in offer(TestTable).orderBy {
@@ -120,15 +116,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
                     count++
                 }
-                Log.e(TAG, "query: ${System.nanoTime() - start}")
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
-                start = System.nanoTime()
-                offer(TestTable).update(statementExecutor, Conflict.Replace) {
-                    it.name("tom") + it.age(30) + it.flag(false)
-                }
-                Log.e(TAG, "update: ${System.nanoTime() - start}")
+//                start = System.currentTimeMillis()
+//                offer(TestTable).update(statementExecutor, Conflict.Replace) {
+//                    it.name("tom") + it.age(30) + it.flag(false)
+//                }
+//                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
 
-                start = System.nanoTime()
+                start = System.currentTimeMillis()
                 count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
@@ -140,7 +136,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
                     count++
                 }
-                Log.e(TAG, "query: ${System.nanoTime() - start}")
+                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
             }
 
         }

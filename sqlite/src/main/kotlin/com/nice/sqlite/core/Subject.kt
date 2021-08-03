@@ -65,7 +65,7 @@ inline fun <T : Table> StatementSubject<T>.where(predicate: (T) -> Predicate): W
     return WhereClause(predicate(table), this)
 }
 
-inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Definition>): GroupClause<T> {
+inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> {
     return GroupClause(group(table), this)
 }
 
@@ -98,7 +98,7 @@ inline fun <T : Table> StatementSubject<T>.update(
     conflict: Conflict = Conflict.None,
     values: (T) -> Sequence<Assignment>
 ): UpdateStatement<T> {
-    return UpdateStatement(values(table), this, conflict)
+    return UpdateStatement(this, values(table), conflict)
 }
 
 inline fun <T : Table> StatementSubject<T>.update(
@@ -134,9 +134,16 @@ inline fun <T : Table> StatementSubject<T>.insert(
 }
 
 inline fun <T : Table> StatementSubject<T>.batchInsert(
+    conflict: Conflict = Conflict.None,
+    buildAction: BatchAssignmentsBuilder<T>.() -> Unit
+): BatchInsertStatement<T> {
+    return BatchInsertStatement(this, BatchAssignmentsBuilder(table).apply(buildAction), conflict)
+}
+
+inline fun <T : Table> StatementSubject<T>.batchInsert(
     executor: StatementExecutor,
     conflict: Conflict = Conflict.None,
-    values: (T) -> Sequence<Assignments>
+    buildAction: BatchAssignmentsBuilder<T>.() -> Unit
 ): Long {
-    return executor.executeBatchInsert(BatchInsertStatement(this, values(table), conflict))
+    return executor.executeBatchInsert(batchInsert(conflict, buildAction))
 }

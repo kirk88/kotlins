@@ -8,7 +8,7 @@ import com.nice.sqlite.core.ddl.SqlType
 
 open class Table(private val name: String) {
 
-    internal val renderedName: String = "\"$name\""
+    val renderedName: String = "\"$name\""
 
     inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.INTEGER, this)
     inner class IntColumn(name: String) : Column<Int>(name, SqlType.INTEGER, this)

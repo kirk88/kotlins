@@ -32,9 +32,11 @@ private class ConditionImpl(
     override val predicateRight: Predicate
 ) : Condition {
 
-    override fun render(): String = "(${predicateLeft.render()} $connector ${predicateRight.render()})"
+    override fun render(): String =
+        "(${predicateLeft.render()} $connector ${predicateRight.render()})"
 
-    override fun fullRender(): String = "(${predicateLeft.fullRender()} $connector ${predicateRight.fullRender()})"
+    override fun fullRender(): String =
+        "(${predicateLeft.fullRender()} $connector ${predicateRight.fullRender()})"
 
 }
 

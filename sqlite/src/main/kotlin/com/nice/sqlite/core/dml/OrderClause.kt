@@ -3,8 +3,9 @@ package com.nice.sqlite.core.dml
 import android.database.Cursor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Ordering
+import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
+import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
 class OrderClause<T : Table> @PublishedApi internal constructor(

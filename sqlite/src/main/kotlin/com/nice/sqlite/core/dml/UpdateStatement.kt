@@ -8,8 +8,8 @@ import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.Statement
 
 class UpdateStatement<T : Table>(
-    val assignments: Sequence<Assignment>,
     val subject: Subject<T>,
+    val assignments: Sequence<Assignment>,
     val conflict: Conflict,
     val whereClause: WhereClause<T>? = null
 ) : Statement {

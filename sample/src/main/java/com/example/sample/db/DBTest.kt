@@ -35,7 +35,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(1) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(6) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }

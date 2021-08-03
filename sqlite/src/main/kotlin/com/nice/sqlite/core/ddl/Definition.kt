@@ -29,8 +29,8 @@ abstract class Column<T>(
     val table: Table
 ) : Definition {
 
-    internal val renderedName: String = "\"$name\""
-    internal val fullRenderedName: String = "${table.renderedName}.\"$name\""
+    val renderedName: String = "\"$name\""
+    val fullRenderedName: String = "${table.renderedName}.\"$name\""
 
     private var _meta = Meta<T>()
     val meta: Meta<T> get() = _meta
@@ -89,7 +89,6 @@ abstract class Column<T>(
         return result
     }
 
-
     data class Meta<T>(
         val defaultConstraint: ColumnConstraint.Default<T>? = null,
         val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
@@ -107,7 +106,7 @@ class Index internal constructor(
     val name: String
 ) : Definition, Renderer {
 
-    internal val renderedName: String = "\"$name\""
+    val renderedName: String = "\"$name\""
 
     private var _meta = Meta()
     val meta: Meta get() = _meta
