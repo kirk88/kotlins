@@ -39,7 +39,7 @@ OkHttp的kotlin封装
 
 # sqlite
 
-SQLite的kotlin封装（直接生成sql语句，性能比SQLiteDatabase中的增删查改略好）
+SQLite的kotlin封装
 
 ## 定义表
 

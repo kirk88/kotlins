@@ -1,33 +1,51 @@
 package com.nice.sqlite.core.dml
 
-interface MutableSequence<T> : Sequence<T> {
+interface MutableSequence<E> : Sequence<E> {
 
-    fun add(element: T): Boolean
+    fun add(element: E): Boolean
 
-    fun remove(element: T): Boolean
+    fun remove(element: E): Boolean
 
-    operator fun plus(element: T): MutableSequence<T> = apply {
+    operator fun plus(element: E): MutableSequence<E> = apply {
         add(element)
     }
 
 }
 
-internal class LinkedSequence<T> : MutableSequence<T> {
+internal class LinkedSequence<E> : MutableSequence<E> {
 
-    private val delegate = linkedSetOf<T>()
+    private val delegate = linkedSetOf<E>()
 
-    override fun add(element: T): Boolean = delegate.add(element)
+    override fun add(element: E): Boolean = delegate.add(element)
 
-    override fun remove(element: T): Boolean = delegate.remove(element)
+    override fun remove(element: E): Boolean = delegate.remove(element)
 
-    override fun iterator(): Iterator<T> = delegate.iterator()
+    override fun iterator(): Iterator<E> = delegate.iterator()
 
 }
 
-internal fun <T> mutableSequenceOf(vararg elements: T) = LinkedSequence<T>().apply {
+fun <E> mutableSequenceOf(): MutableSequence<E> = LinkedSequence()
+
+fun <E> mutableSequenceOf(vararg elements: E): MutableSequence<E> = LinkedSequence<E>().apply {
     for (element in elements) {
         add(element)
     }
+}
+
+internal inline fun <T> Sequence<T>.joinTo(
+    builder: StringBuilder,
+    separator: String = ", ",
+    prefix: String = "",
+    postfix: String = "",
+    transform: (T) -> String = { it.toString() }
+) {
+    builder.append(prefix)
+    var count = 0
+    for (element in this) {
+        if (++count > 1) builder.append(separator)
+        builder.append(transform(element))
+    }
+    builder.append(postfix)
 }
 
 internal class OnceIterator<T>(private val value: T) : Iterator<T> {

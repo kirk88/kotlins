@@ -132,3 +132,11 @@ inline fun <T : Table> StatementSubject<T>.insert(
 ): Long {
     return executor.executeInsert(insert(conflict, values))
 }
+
+inline fun <T : Table> StatementSubject<T>.batchInsert(
+    executor: StatementExecutor,
+    conflict: Conflict = Conflict.None,
+    values: (T) -> Sequence<Assignments>
+): Long {
+    return executor.executeBatchInsert(BatchInsertStatement(this, values(table), conflict))
+}

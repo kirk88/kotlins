@@ -24,6 +24,18 @@ interface Assignment : Sequence<Assignment>, Renderer {
 
 }
 
+class Assignments @PublishedApi internal constructor(private val assignments: Sequence<Assignment>) : Sequence<Assignment> by assignments {
+
+    val id: Int = toString().hashCode()
+
+    override fun toString(): String = assignments.joinToString {
+        it.column.name
+    }
+
+}
+
+inline fun assignments(assignments: () -> Sequence<Assignment>): Assignments = Assignments(assignments())
+
 internal fun Any?.toSqlString(): String {
     return when (this) {
         null -> "NULL"

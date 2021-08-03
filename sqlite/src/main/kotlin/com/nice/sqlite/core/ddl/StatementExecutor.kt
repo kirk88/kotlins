@@ -10,6 +10,8 @@ interface StatementExecutor {
 
     fun executeInsert(statement: Statement): Long
 
+    fun executeBatchInsert(statement: Statement): Long
+
     fun executeQuery(statement: Statement): Cursor
 
 }
