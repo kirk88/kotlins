@@ -42,7 +42,8 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
     override fun executeBatchInsert(statement: Statement): Long {
         return if (statement is BatchInsertStatement<*>) {
             var lastRowId: Long = -1
-            for (assignments in statement) {
+            while (statement.moveToNext()) {
+                val assignments = statement.currentAssignments
                 val sql = statement.toString(SQLiteDialect)
                 lastRowId = database.compileStatement(sql).apply {
                     bindAssignments(assignments)
