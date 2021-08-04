@@ -152,8 +152,10 @@ class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal co
     internal val having3Clause: Having3Clause<T, T2, T3>? = null
 )
 
-inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
+    distinct: Boolean,
+    selection: (T, T2, T3) -> Sequence<Definition>
 ): Select3Statement<T, T2, T3> {
     return Select3Statement(
         selection(
@@ -167,8 +169,15 @@ inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
         limit3Clause = limit3Clause,
         group3Clause = group3Clause,
         having3Clause = having3Clause,
-        offset3Clause = this
+        offset3Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Select3Statement<T, T2, T3> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
@@ -176,6 +185,19 @@ inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectDistinct(
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Select3Statement<T, T2, T3> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -195,8 +217,10 @@ class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi
     internal val having4Clause: Having4Clause<T, T2, T3, T4>? = null
 )
 
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
+    distinct: Boolean,
+    selection: (T, T2, T3, T4) -> Sequence<Definition>
 ): Select4Statement<T, T2, T3, T4> {
     return Select4Statement(
         selection(
@@ -211,8 +235,15 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, 
         limit4Clause = limit4Clause,
         group4Clause = group4Clause,
         having4Clause = having4Clause,
-        offset4Clause = this
+        offset4Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Select4Statement<T, T2, T3, T4> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
@@ -220,4 +251,17 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, 
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.selectDistinct(
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Select4Statement<T, T2, T3, T4> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
