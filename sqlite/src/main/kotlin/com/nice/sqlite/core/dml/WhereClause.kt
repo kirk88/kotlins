@@ -57,6 +57,24 @@ inline fun <T : Table> WhereClause<T>.select(
     return executor.executeQuery(select(selection))
 }
 
+inline fun <T : Table> WhereClause<T>.selectDistinct(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return SelectStatement(
+        subject,
+        selection(subject.table),
+        whereClause = this,
+        distinct = true
+    )
+}
+
+inline fun <T : Table> WhereClause<T>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
+}
+
 inline fun <T : Table> WhereClause<T>.update(
     conflict: Conflict = Conflict.None,
     values: (T) -> Sequence<Assignment>

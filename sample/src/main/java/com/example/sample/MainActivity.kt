@@ -32,12 +32,15 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
-import com.nice.sqlite.*
-import com.nice.sqlite.core.*
+import com.nice.sqlite.asMapSequence
+import com.nice.sqlite.core.batchInsert
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.select
+import com.nice.sqlite.core.invoke
+import com.nice.sqlite.core.offer
+import com.nice.sqlite.core.orderBy
+import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -83,49 +86,17 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 var start = System.currentTimeMillis()
                 offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
-                    assignments {
-                        val bean = beans.first()
-                        it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                it.flag(bean.flag) + it.number(bean.number)
-                    }
-
-                    assignments {
-                        val bean = beans.last()
-                        it.id(bean.id) + it.name(bean.name) + it.age(1000) +
-                                it.flag(false)
-                    }
+                   for (bean in beans){
+                       assignments {
+                           it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                   it.flag(bean.flag) + it.number(bean.number)
+                       }
+                   }
                 }
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
-                Log.e(TAG, offer(TestTable).orderBy {
-                    desc(it.id)
-                }.select {
-                    it.name + it.age + it.number
-                }.toString(SQLiteDialect))
-
-                var count = 0
-                for (row in offer(TestTable).orderBy {
-                    desc(it.id)
-                }.select(statementExecutor) {
-                    it.name + it.age + it.number
-                }.asMapSequence()) {
-                    if (count <= 10) {
-                        Log.e(TAG, row.toString())
-                    } else {
-                        break
-                    }
-                    count++
-                }
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
-
-//                start = System.currentTimeMillis()
-//                offer(TestTable).update(statementExecutor, Conflict.Replace) {
-//                    it.name("tom") + it.age(30) + it.flag(false)
-//                }
-//                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
-
                 start = System.currentTimeMillis()
-                count = 0
+                var count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
                 }.select(statementExecutor).asMapSequence()) {
@@ -137,6 +108,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     count++
                 }
                 Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
+
             }
 
         }

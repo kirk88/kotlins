@@ -106,6 +106,19 @@ offer(TestTable).insert {
 }
 ```
 
+批量插入
+
+```kotlin
+offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
+    for (bean in beans){
+        assignments {
+            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                    it.flag(bean.flag) + it.number(bean.number)
+        }
+    }
+}
+```
+
 ## 删除数据
 
 ```kotlin

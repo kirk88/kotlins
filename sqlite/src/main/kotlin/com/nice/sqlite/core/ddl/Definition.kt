@@ -29,9 +29,6 @@ abstract class Column<T>(
     val table: Table
 ) : Definition {
 
-    val renderedName: String = "\"$name\""
-    val fullRenderedName: String = "${table.renderedName}.\"$name\""
-
     private var _meta = Meta<T>()
     val meta: Meta<T> get() = _meta
 
@@ -63,9 +60,9 @@ abstract class Column<T>(
         _meta = _meta.copy(onDeleteAction = actionColumn)
     }
 
-    override fun render(): String = "$renderedName $type"
+    override fun render(): String = "\"$name\""
 
-    override fun fullRender(): String = "$fullRenderedName $type"
+    override fun fullRender(): String = "${table.renderedName}.\"$name\""
 
     override fun toString(): String {
         return name
@@ -106,8 +103,6 @@ class Index internal constructor(
     val name: String
 ) : Definition, Renderer {
 
-    val renderedName: String = "\"$name\""
-
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
@@ -123,12 +118,21 @@ class Index internal constructor(
         _meta = _meta.copy(ifExists = IndexConstraint.IfExists)
     }
 
-    override fun render(): String {
-        check(columns.isNotEmpty()) {
-            "At least 1 column is required to create an index"
-        }
-        return columns.joinToString(prefix = "(", postfix = ")") {
-            it.renderedName
+    override fun render(): String = buildString {
+        val table = columns.first().table
+        append("\"$name\"")
+        append(" ON ")
+        append(table.renderedName)
+    }
+
+    override fun fullRender(): String = buildString {
+        val table = columns.first().table
+        append("\"$name\"")
+        append(" ON ")
+        append(table.renderedName)
+        append(" ")
+        columns.joinTo(this, prefix = "(", postfix = ")") {
+            it.render()
         }
     }
 
@@ -188,9 +192,9 @@ class Function(private val name: String, private val column: Column<*>) : Defini
         return result
     }
 
-    override fun render(): String = "$name(${column.renderedName})"
+    override fun render(): String = "$name(${column.render()})"
 
-    override fun fullRender(): String = "$name(${column.fullRenderedName})"
+    override fun fullRender(): String = "$name(${column.fullRender()})"
 
     override fun toString(): String = "$name(${column.name})"
 

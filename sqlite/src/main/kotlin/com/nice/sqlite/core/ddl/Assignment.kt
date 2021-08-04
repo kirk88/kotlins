@@ -15,9 +15,9 @@ interface Assignment : Sequence<Assignment>, Renderer {
     operator fun plus(assignment: Assignment): MutableSequence<Assignment> =
         mutableSequenceOf(this, assignment)
 
-    override fun render(): String = "${column.renderedName} = ${value.toSqlString()}"
+    override fun render(): String = "${column.render()} = ${value.toSqlString()}"
 
-    override fun fullRender(): String = "${column.fullRenderedName} = ${value.toSqlString()}"
+    override fun fullRender(): String = "${column.fullRender()} = ${value.toSqlString()}"
 
     class Value(override val column: Column<*>, override val value: Any?) : Assignment {
         override fun toString(): String = "$column = $value"

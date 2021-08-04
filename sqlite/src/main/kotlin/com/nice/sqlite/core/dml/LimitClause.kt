@@ -1,9 +1,10 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.StatementExecutor
 
@@ -34,8 +35,10 @@ inline fun <T : Table> LimitClause<T>.offset(offset: () -> Int): OffsetClause<T>
     )
 }
 
-inline fun <T : Table> LimitClause<T>.select(
-    selection: (T) -> Sequence<Definition> = { emptySequence() }
+@PublishedApi
+internal inline fun <T : Table> LimitClause<T>.select(
+    distinct: Boolean,
+    selection: (T) -> Sequence<Definition>
 ): SelectStatement<T> {
     return SelectStatement(
         subject,
@@ -46,8 +49,15 @@ inline fun <T : Table> LimitClause<T>.select(
         orderClause = orderClause,
         groupClause = groupClause,
         havingClause = havingClause,
-        limitClause = this
+        limitClause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table> LimitClause<T>.select(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return select(false, selection)
 }
 
 inline fun <T : Table> LimitClause<T>.select(
@@ -55,6 +65,19 @@ inline fun <T : Table> LimitClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table> LimitClause<T>.selectDistinct(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return select(true, selection)
+}
+
+inline fun <T : Table> LimitClause<T>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -84,8 +107,10 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.offset(offset: () -> Int)
     )
 }
 
-inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
+    distinct: Boolean,
+    selection: (T, T2) -> Sequence<Definition>
 ): Select2Statement<T, T2> {
     return Select2Statement(
         selection(
@@ -97,8 +122,15 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
         order2Clause = order2Clause,
         group2Clause = group2Clause,
         having2Clause = having2Clause,
-        limit2Clause = this
+        limit2Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Select2Statement<T, T2> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
@@ -106,6 +138,19 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.selectDistinct(
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Select2Statement<T, T2> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -135,8 +180,10 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.offset(of
     )
 }
 
-inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
+    distinct: Boolean,
+    selection: (T, T2, T3) -> Sequence<Definition>
 ): Select3Statement<T, T2, T3> {
     return Select3Statement(
         selection(
@@ -149,8 +196,15 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
         order3Clause = order3Clause,
         group3Clause = group3Clause,
         having3Clause = having3Clause,
-        limit3Clause = this
+        limit3Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Select3Statement<T, T2, T3> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
@@ -158,6 +212,19 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.selectDistinct(
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Select3Statement<T, T2, T3> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -187,8 +254,10 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
     )
 }
 
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
+    distinct: Boolean,
+    selection: (T, T2, T3, T4) -> Sequence<Definition>
 ): Select4Statement<T, T2, T3, T4> {
     return Select4Statement(
         selection(
@@ -202,8 +271,15 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
         order4Clause = order4Clause,
         group4Clause = group4Clause,
         having4Clause = having4Clause,
-        limit4Clause = this
+        limit4Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Select4Statement<T, T2, T3, T4> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
@@ -211,4 +287,17 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.selectDistinct(
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Select4Statement<T, T2, T3, T4> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }

@@ -24,7 +24,7 @@ object SQLiteDialect : Dialect {
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(statement.subject.table, it)
+                decompileCreateIndexSql(it)
             }
         }
         return builder.toString()
@@ -47,7 +47,7 @@ object SQLiteDialect : Dialect {
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(statement.subject.table, it)
+                decompileCreateIndexSql(it)
             }
         }
 
@@ -67,7 +67,7 @@ object SQLiteDialect : Dialect {
 
             val indexes = statement.definitions.map { it as Index }
             indexes.joinTo(builder, separator = ";") {
-                decompileDropIndexSql(statement.subject.table, it)
+                decompileDropIndexSql(it)
             }
         }
 
@@ -78,15 +78,14 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
+        if (statement.distinct) {
+            builder.append("DISTINCT ")
+        }
         if (statement.definitions.none()) {
             builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                if (it is Column<*>) {
-                    it.renderedName
-                } else {
-                    it.render()
-                }
+                it.render()
             }
         }
         builder.append(" FROM ")
@@ -102,7 +101,7 @@ object SQLiteDialect : Dialect {
         if (group != null) {
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
-                it.renderedName
+                it.render()
             }
         }
 
@@ -139,23 +138,27 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
+        if (statement.distinct) {
+            builder.append("DISTINCT ")
+        }
         if (statement.definitions.none()) {
             builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                if (it is Column<*>) {
-                    it.fullRenderedName
-                } else {
-                    it.fullRender()
-                }
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn2Clause.subject.table.renderedName)
-
-        if (statement.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        builder.append(" ")
+        builder.append(statement.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn2Clause.table2.renderedName)
+
+        statement.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
         builder.append(" ON ")
         builder.append(statement.joinOn2Clause.predicate.fullRender())
 
@@ -169,7 +172,7 @@ object SQLiteDialect : Dialect {
         if (group != null) {
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
-                it.fullRenderedName
+                it.fullRender()
             }
         }
 
@@ -206,29 +209,38 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
+        if (statement.distinct) {
+            builder.append("DISTINCT ")
+        }
         if (statement.definitions.none()) {
             builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                if (it is Column<*>) {
-                    it.fullRenderedName
-                } else {
-                    it.fullRender()
-                }
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
-
-        if (statement.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        builder.append(" ")
+        builder.append(statement.joinOn3Clause.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
+
+        statement.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
         builder.append(" ON ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender())
-
-        if (statement.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        builder.append(" ")
+        builder.append(statement.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.table3.renderedName)
+
+        statement.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
         builder.append(" ON ")
         builder.append(statement.joinOn3Clause.predicate.fullRender())
 
@@ -242,7 +254,7 @@ object SQLiteDialect : Dialect {
         if (group != null) {
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
-                it.fullRenderedName
+                it.fullRender()
             }
         }
 
@@ -279,39 +291,49 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         builder.append("SELECT ")
+        if (statement.distinct) {
+            builder.append("DISTINCT ")
+        }
         if (statement.definitions.none()) {
             builder.append("*")
         } else {
             statement.definitions.joinTo(builder) {
-                if (it is Column<*>) {
-                    it.fullRenderedName
-                } else {
-                    it.fullRender()
-                }
+                it.fullRender()
             }
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
-
-        if (statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type == JoinType.OUTER) builder.append(
-            " OUTER"
-        )
+        builder.append(" ")
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
-        builder.append(" ON ")
-        builder.append(
-            statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender()
-        )
 
-        if (statement.joinOn4Clause.joinOn3Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
+        builder.append(" ON ")
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender())
+        builder.append(" ")
+        builder.append(statement.joinOn4Clause.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
+
+        statement.joinOn4Clause.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender())
-
-        if (statement.joinOn4Clause.type == JoinType.OUTER) builder.append(" OUTER")
+        builder.append(" ")
+        builder.append(statement.joinOn4Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.table4.renderedName)
+
+        statement.joinOn4Clause.joinUsing4Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+            it.fullRender()
+        }
+
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.predicate.fullRender())
 
@@ -325,7 +347,7 @@ object SQLiteDialect : Dialect {
         if (group != null) {
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
-                it.fullRenderedName
+                it.fullRender()
             }
         }
 
@@ -366,7 +388,7 @@ object SQLiteDialect : Dialect {
         builder.append(" (")
 
         statement.assignments.joinTo(builder) {
-            it.column.renderedName
+            it.column.render()
         }
 
         builder.append(") VALUES (")
@@ -390,7 +412,7 @@ object SQLiteDialect : Dialect {
         builder.append(" (")
 
         assignments.joinTo(builder) {
-            it.column.renderedName
+            it.column.render()
         }
 
         builder.append(") VALUES (")
@@ -444,6 +466,8 @@ object SQLiteDialect : Dialect {
 
     private fun decompileColumnSql(column: Column<*>): String = buildString {
         append(column.render())
+        append(" ")
+        append(column.type)
 
         with(column.meta) {
             if (defaultConstraint != null) {
@@ -483,7 +507,7 @@ object SQLiteDialect : Dialect {
         }
     }
 
-    private fun decompileCreateIndexSql(table: Table, index: Index): String = buildString {
+    private fun decompileCreateIndexSql(index: Index): String = buildString {
         with(index.meta) {
             append("CREATE")
 
@@ -501,14 +525,10 @@ object SQLiteDialect : Dialect {
         }
 
         append(" ")
-        append(index.renderedName)
-        append(" ON ")
-        append(table.renderedName)
-        append(" ")
-        append(index.render())
+        append(index.fullRender())
     }
 
-    private fun decompileDropIndexSql(table: Table, index: Index): String = buildString {
+    private fun decompileDropIndexSql(index: Index): String = buildString {
         with(index.meta) {
             append("DROP INDEX")
 
@@ -519,9 +539,7 @@ object SQLiteDialect : Dialect {
         }
 
         append(" ")
-        append(index.renderedName)
-        append(" ON ")
-        append(table.renderedName)
+        append(index.render())
     }
 
     private fun decompileInsertSql(table: Table, conflict: Conflict): String = buildString {

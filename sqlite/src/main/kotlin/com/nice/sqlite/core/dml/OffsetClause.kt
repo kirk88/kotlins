@@ -1,9 +1,10 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.StatementExecutor
 
@@ -24,8 +25,10 @@ class OffsetClause<T : Table> @PublishedApi internal constructor(
     internal val havingClause: HavingClause<T>? = null
 )
 
-inline fun <T : Table> OffsetClause<T>.select(
-    selection: (T) -> Sequence<Definition> = { emptySequence() }
+@PublishedApi
+internal inline fun <T : Table> OffsetClause<T>.select(
+    distinct: Boolean,
+    selection: (T) -> Sequence<Definition>
 ): SelectStatement<T> {
     return SelectStatement(
         subject,
@@ -37,8 +40,15 @@ inline fun <T : Table> OffsetClause<T>.select(
         limitClause = limitClause,
         groupClause = groupClause,
         havingClause = havingClause,
-        offsetClause = this
+        offsetClause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table> OffsetClause<T>.select(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return select(false, selection)
 }
 
 inline fun <T : Table> OffsetClause<T>.select(
@@ -46,6 +56,19 @@ inline fun <T : Table> OffsetClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table> OffsetClause<T>.selectDistinct(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return select(true, selection)
+}
+
+inline fun <T : Table> OffsetClause<T>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -65,8 +88,10 @@ class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     internal val having2Clause: Having2Clause<T, T2>? = null
 )
 
-inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+@PublishedApi
+internal inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
+    distinct: Boolean,
+    selection: (T, T2) -> Sequence<Definition>
 ): Select2Statement<T, T2> {
     return Select2Statement(
         selection(
@@ -79,8 +104,15 @@ inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
         limit2Clause = limit2Clause,
         group2Clause = group2Clause,
         having2Clause = having2Clause,
-        offset2Clause = this
+        offset2Clause = this,
+        distinct = distinct
     )
+}
+
+inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Select2Statement<T, T2> {
+    return select(false, selection)
 }
 
 inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
@@ -88,6 +120,19 @@ inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectDistinct(
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Select2Statement<T, T2> {
+    return select(true, selection)
+}
+
+inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(

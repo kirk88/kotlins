@@ -54,11 +54,15 @@ inline fun <T : Table> StatementSubject<T>.drop(
 }
 
 inline fun <T : Table, T2 : Table> StatementSubject<T>.join(table2: T2): Join2Clause<T, T2> {
-    return Join2Clause(this, table2, JoinType.INNER)
+    return Join2Clause(this, table2, JoinType.Inner)
 }
 
 inline fun <T : Table, T2 : Table> StatementSubject<T>.outerJoin(table2: T2): Join2Clause<T, T2> {
-    return Join2Clause(this, table2, JoinType.OUTER)
+    return Join2Clause(this, table2, JoinType.Outer)
+}
+
+inline fun <T : Table, T2 : Table> StatementSubject<T>.crossJoin(table2: T2): Join2Clause<T, T2> {
+    return Join2Clause(this, table2, JoinType.Cross)
 }
 
 inline fun <T : Table> StatementSubject<T>.where(predicate: (T) -> Predicate): WhereClause<T> {
@@ -92,6 +96,19 @@ inline fun <T : Table> StatementSubject<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table> StatementSubject<T>.selectDistinct(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return SelectStatement(this, selection(table), distinct = true)
+}
+
+inline fun <T : Table> StatementSubject<T>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 inline fun <T : Table> StatementSubject<T>.update(

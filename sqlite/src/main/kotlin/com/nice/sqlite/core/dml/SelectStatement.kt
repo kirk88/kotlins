@@ -3,7 +3,6 @@ package com.nice.sqlite.core.dml
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Statement
 
@@ -15,7 +14,8 @@ class SelectStatement<T : Table>(
     val limitClause: LimitClause<T>? = null,
     val offsetClause: OffsetClause<T>? = null,
     val groupClause: GroupClause<T>? = null,
-    val havingClause: HavingClause<T>? = null
+    val havingClause: HavingClause<T>? = null,
+    val distinct: Boolean = false
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -31,7 +31,8 @@ class Select2Statement<T : Table, T2 : Table>(
     val limit2Clause: Limit2Clause<T, T2>? = null,
     val offset2Clause: Offset2Clause<T, T2>? = null,
     val group2Clause: Group2Clause<T, T2>? = null,
-    val having2Clause: Having2Clause<T, T2>? = null
+    val having2Clause: Having2Clause<T, T2>? = null,
+    val distinct: Boolean = false
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -47,7 +48,8 @@ class Select3Statement<T : Table, T2 : Table, T3 : Table>(
     val limit3Clause: Limit3Clause<T, T2, T3>? = null,
     val offset3Clause: Offset3Clause<T, T2, T3>? = null,
     val group3Clause: Group3Clause<T, T2, T3>? = null,
-    val having3Clause: Having3Clause<T, T2, T3>? = null
+    val having3Clause: Having3Clause<T, T2, T3>? = null,
+    val distinct: Boolean = false
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -64,7 +66,8 @@ class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
     val limit4Clause: Limit4Clause<T, T2, T3, T4>? = null,
     val offset4Clause: Offset4Clause<T, T2, T3, T4>? = null,
     val group4Clause: Group4Clause<T, T2, T3, T4>? = null,
-    val having4Clause: Having4Clause<T, T2, T3, T4>? = null
+    val having4Clause: Having4Clause<T, T2, T3, T4>? = null,
+    val distinct: Boolean = false
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {

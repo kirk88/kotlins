@@ -1,9 +1,10 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
@@ -62,6 +63,27 @@ inline fun <T : Table> OrderClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
     return executor.executeQuery(select(selection))
+}
+
+inline fun <T : Table> OrderClause<T>.selectDistinct(
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): SelectStatement<T> {
+    return SelectStatement(
+        subject,
+        selection(subject.table),
+        whereClause = whereClause,
+        groupClause = groupClause,
+        havingClause = havingClause,
+        orderClause = this,
+        distinct = true
+    )
+}
+
+inline fun <T : Table> OrderClause<T>.selectDistinct(
+    executor: StatementExecutor,
+    selection: (T) -> Sequence<Definition> = { emptySequence() }
+): Cursor {
+    return executor.executeQuery(selectDistinct(selection))
 }
 
 class Order2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(

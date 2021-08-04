@@ -18,9 +18,9 @@ interface Ordering : Sequence<Ordering>, Renderer {
     operator fun plus(ordering: Ordering): MutableSequence<Ordering> =
         mutableSequenceOf(this, ordering)
 
-    override fun render(): String = "${column.renderedName} $direction"
+    override fun render(): String = "${column.render()} $direction"
 
-    override fun fullRender(): String = "${column.fullRenderedName} $direction"
+    override fun fullRender(): String = "${column.fullRender()} $direction"
 
     class By(override val column: Column<*>, override val direction: SqlOrderDirection) :
         Ordering {
