@@ -36,7 +36,7 @@ import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.batchInsert
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.dml.select
+import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.core.invoke
 import com.nice.sqlite.core.offer
 import com.nice.sqlite.core.orderBy
@@ -99,7 +99,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 var count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
-                }.select(statementExecutor).asMapSequence()) {
+                }.selectDistinct(statementExecutor){
+                    it.name
+                }.asMapSequence()) {
                     if (count <= 10) {
                         Log.e(TAG, row.toString())
                     } else {
