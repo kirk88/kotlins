@@ -32,15 +32,14 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
-import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.asMapSequence
-import com.nice.sqlite.core.*
+import com.nice.sqlite.core.insertBatch
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.dml.on
-import com.nice.sqlite.core.dml.orderBy
 import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.core.dml.using
+import com.nice.sqlite.core.invoke
+import com.nice.sqlite.core.offer
+import com.nice.sqlite.core.orderBy
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -86,7 +85,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 }
 
                 var start = System.currentTimeMillis()
-                offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
+                offer(TestTable).insertBatch(statementExecutor, Conflict.Replace) {
                    for (bean in beans){
                        assignments {
                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
@@ -226,16 +225,4 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         private val TAG = MainActivity::class.simpleName
     }
 
-}
-
-fun main() {
-    println(offer(TestTable).join(TestTable).using { testTable, testTable2 ->
-        testTable.id + testTable2.name
-    }.on { testTable, testTable2 ->
-        testTable.name eq "jkack"
-    }.orderBy {
-        desc(it.id)
-    }.selectDistinct{
-        it.name
-    }.toString(SQLiteDialect))
 }

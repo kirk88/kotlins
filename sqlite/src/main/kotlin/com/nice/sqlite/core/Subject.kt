@@ -150,17 +150,17 @@ inline fun <T : Table> StatementSubject<T>.insert(
     return executor.executeInsert(insert(conflict, values))
 }
 
-inline fun <T : Table> StatementSubject<T>.batchInsert(
+inline fun <T : Table> StatementSubject<T>.insertBatch(
     conflict: Conflict = Conflict.None,
     buildAction: BatchAssignmentsBuilder<T>.() -> Unit
 ): BatchInsertStatement<T> {
     return BatchInsertStatement(this, BatchAssignmentsBuilder(table).apply(buildAction), conflict)
 }
 
-inline fun <T : Table> StatementSubject<T>.batchInsert(
+inline fun <T : Table> StatementSubject<T>.insertBatch(
     executor: StatementExecutor,
     conflict: Conflict = Conflict.None,
     buildAction: BatchAssignmentsBuilder<T>.() -> Unit
 ): Long {
-    return executor.executeBatchInsert(batchInsert(conflict, buildAction))
+    return executor.executeBatchInsert(insertBatch(conflict, buildAction))
 }
