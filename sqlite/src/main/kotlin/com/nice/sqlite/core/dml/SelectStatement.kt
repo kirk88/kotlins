@@ -1,10 +1,16 @@
+@file:Suppress("unused")
+
 package com.nice.sqlite.core.dml
 
+import android.database.Cursor
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Statement
+import com.nice.sqlite.core.ddl.StatementExecutor
+
+interface QueryStatement : Statement
 
 class SelectStatement<T : Table>(
     val subject: Subject<T>,
@@ -16,11 +22,12 @@ class SelectStatement<T : Table>(
     val groupClause: GroupClause<T>? = null,
     val havingClause: HavingClause<T>? = null,
     val distinct: Boolean = false
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }
 
 class Select2Statement<T : Table, T2 : Table>(
@@ -33,11 +40,12 @@ class Select2Statement<T : Table, T2 : Table>(
     val group2Clause: Group2Clause<T, T2>? = null,
     val having2Clause: Having2Clause<T, T2>? = null,
     val distinct: Boolean = false
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }
 
 class Select3Statement<T : Table, T2 : Table, T3 : Table>(
@@ -50,11 +58,12 @@ class Select3Statement<T : Table, T2 : Table, T3 : Table>(
     val group3Clause: Group3Clause<T, T2, T3>? = null,
     val having3Clause: Having3Clause<T, T2, T3>? = null,
     val distinct: Boolean = false
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }
 
 
@@ -68,9 +77,51 @@ class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
     val group4Clause: Group4Clause<T, T2, T3, T4>? = null,
     val having4Clause: Having4Clause<T, T2, T3, T4>? = null,
     val distinct: Boolean = false
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
+}
+
+class UnionStatement(
+    private val queryStatement1: QueryStatement,
+    private val queryStatement2: QueryStatement,
+    private val all: Boolean
+) : Statement {
+
+    override fun toString(dialect: Dialect): String = buildString {
+        append(queryStatement1.toString(dialect))
+        append('\n')
+        append("UNION")
+        if (all) {
+            append(" ALL")
+        }
+        append('\n')
+        append(queryStatement2.toString(dialect))
+    }
+
+}
+
+inline fun QueryStatement.union(other: () -> QueryStatement): UnionStatement {
+    return UnionStatement(this, other(), false)
+}
+
+inline fun QueryStatement.union(
+    executor: StatementExecutor,
+    other: () -> QueryStatement
+): Cursor {
+    return executor.executeQuery(union(other))
+}
+
+inline fun QueryStatement.unionAll(other: () -> QueryStatement): UnionStatement {
+    return UnionStatement(this, other(), false)
+}
+
+inline fun QueryStatement.unionAll(
+    executor: StatementExecutor,
+    other: () -> QueryStatement
+): Cursor {
+    return executor.executeQuery(unionAll(other))
 }
