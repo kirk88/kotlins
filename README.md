@@ -35,7 +35,133 @@ Gson的kotlin扩展
 # okfaker
 
 OkHttp的kotlin封装
+
+## 使用方式
+
+初始化
+
+```kotlin
+OkFaker.setGlobalConfig(
+    OkConfig.Builder()
+        .baseUrl("https://www.baidu.com")
+        .client(OkHttpClient())
+        .build()
+)
+```
+
+GET请求
+
+```kotlin
+OkFaker.get<String>{
+
+    url("/s")
+
+    queryParameters {
+        "wd" and "hello word"
+    }
+
+    onSuccess { str ->
+        //TODO
+    }
+    
+    onError{ error->
+        //TODO
+    }
+    
+}.enqueue()
+```
+
+POST请求
+
+```kotlin
+OkFaker.post<String>{
+
+    url("/s")
+
+    formParameters {
+        "wd" and "hello word"
+    }
+
+    onSuccess { str ->
+        //TODO
+    }
+
+    onError{ error->
+        //TODO
+    }
+
+}.enqueue()
+```
+
+转换成任意数据格式
+
+```kotlin
+OkFaker.get<JSONObject>{
+
+    url("/s")
+
+    mapResponse { response ->
+        //转换成任意格式 （可进行耗时操作）
+       JSONObject(response.body!!.string())
+    }
+    
+    queryParameters {
+        "wd" and "hello word"
+    }
+
+    onSuccess { jsonObject ->
+        //TODO
+    }
+
+    onError{ error->
+        //TODO
+    }
+    
+}.enqueue()
+```
+
+同步请求
+
+```kotlin
+val result = OkFaker.post<String>{
+
+    url("/s")
+
+    formParameters {
+        "wd" and "hello word"
+    }
+
+}.executeOrNull()
+```
+
+下载
+
+```kotlin
+OkFaker.get<File>{
+
+    client {
+        //注意 HttpLoggingInterceptor.Level < BODY
+        OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+            .build()
+    }
+
+    url("http://www.baidu.com")
+
+    mapResponse(DefaultOkDownloadMapper("../path.html", true){ readBytes, totalBytes ->
+        //Main Thread
+    })
+
+    onSuccess{ file ->
+        //TODO
+    }
+    
+}.enqueue()
+```
+
 ***
+
+
 
 # sqlite
 
