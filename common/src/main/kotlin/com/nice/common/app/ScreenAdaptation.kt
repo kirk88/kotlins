@@ -44,10 +44,13 @@ internal object ScreenAdaptation {
             ScreenCompatStrategy.BASE_ON_WIDTH -> systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
             ScreenCompatStrategy.BASE_ON_HEIGHT -> (systemDisplayMetrics.heightPixels - screenCompatUselessHeight) / screenCompatHeight.toFloat()
             ScreenCompatStrategy.AUTO -> {
-                if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
-                } else {
+                val orientation = activity.requestedOrientation
+                if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    || orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                ) {
                     (systemDisplayMetrics.heightPixels - screenCompatUselessHeight) / screenCompatHeight.toFloat()
+                } else {
+                    systemDisplayMetrics.widthPixels / screenCompatWidth.toFloat()
                 }
             }
             else -> systemDisplayMetrics.density
