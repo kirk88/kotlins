@@ -11,17 +11,13 @@ import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-sealed class JoinType {
-    object Inner : JoinType() {
-        override fun toString(): String = "INNER"
-    }
+enum class JoinType {
+    Inner,
+    Outer,
+    Cross;
 
-    object Outer : JoinType() {
-        override fun toString(): String = "OUTER"
-    }
-
-    object Cross : JoinType() {
-        override fun toString(): String = "CROSS"
+    override fun toString(): String {
+        return name.uppercase()
     }
 }
 
@@ -369,7 +365,9 @@ class JoinUsing4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @Published
     internal val type: JoinType
 )
 
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinUsing4Clause<T, T2, T3, T4>.on(predicate: (T, T2, T3, T4) -> Predicate): JoinOn4Clause<T, T2, T3, T4> {
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinUsing4Clause<T, T2, T3, T4>.on(
+    predicate: (T, T2, T3, T4) -> Predicate
+): JoinOn4Clause<T, T2, T3, T4> {
     return JoinOn4Clause(
         joinOn3Clause,
         table4,

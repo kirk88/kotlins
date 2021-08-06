@@ -82,7 +82,7 @@ object SQLiteDialect : Dialect {
             builder.append("DISTINCT ")
         }
         if (statement.definitions.none()) {
-            builder.append("*")
+            builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
                 it.render()
@@ -142,7 +142,7 @@ object SQLiteDialect : Dialect {
             builder.append("DISTINCT ")
         }
         if (statement.definitions.none()) {
-            builder.append("*")
+            builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
                 it.fullRender()
@@ -150,7 +150,7 @@ object SQLiteDialect : Dialect {
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn2Clause.subject.table.renderedName)
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn2Clause.table2.renderedName)
@@ -213,7 +213,7 @@ object SQLiteDialect : Dialect {
             builder.append("DISTINCT ")
         }
         if (statement.definitions.none()) {
-            builder.append("*")
+            builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
                 it.fullRender()
@@ -221,7 +221,7 @@ object SQLiteDialect : Dialect {
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn3Clause.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
@@ -232,7 +232,7 @@ object SQLiteDialect : Dialect {
 
         builder.append(" ON ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender())
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.table3.renderedName)
@@ -295,7 +295,7 @@ object SQLiteDialect : Dialect {
             builder.append("DISTINCT ")
         }
         if (statement.definitions.none()) {
-            builder.append("*")
+            builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
                 it.fullRender()
@@ -303,7 +303,7 @@ object SQLiteDialect : Dialect {
         }
         builder.append(" FROM ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
@@ -314,7 +314,7 @@ object SQLiteDialect : Dialect {
 
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender())
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
@@ -325,7 +325,7 @@ object SQLiteDialect : Dialect {
 
         builder.append(" ON ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender())
-        builder.append(" ")
+        builder.append(' ')
         builder.append(statement.joinOn4Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.table4.renderedName)
@@ -397,7 +397,7 @@ object SQLiteDialect : Dialect {
             it.value.toSqlString()
         }
 
-        builder.append(")")
+        builder.append(')')
 
         return builder.toString()
     }
@@ -421,7 +421,7 @@ object SQLiteDialect : Dialect {
             "?"
         }
 
-        builder.append(")")
+        builder.append(')')
 
         return builder.toString()
     }
@@ -432,7 +432,7 @@ object SQLiteDialect : Dialect {
         if (statement.conflict != Conflict.None) {
             builder.append("OR ")
             builder.append(statement.conflict)
-            builder.append(" ")
+            builder.append(' ')
         }
         builder.append(statement.subject.table.renderedName)
         builder.append(" SET ")
@@ -466,32 +466,32 @@ object SQLiteDialect : Dialect {
 
     private fun decompileColumnSql(column: Column<*>): String = buildString {
         append(column.render())
-        append(" ")
+        append(' ')
         append(column.type)
 
         with(column.meta) {
             if (defaultConstraint != null) {
-                append(" ")
+                append(' ')
                 append(defaultConstraint)
             }
 
             if (primaryKeyConstraint != null) {
-                append(" ")
+                append(' ')
                 append(primaryKeyConstraint)
             }
 
             if (foreignKeyConstraint != null) {
-                append(" ")
+                append(' ')
                 append(foreignKeyConstraint)
             }
 
             if (uniqueConstraint != null) {
-                append(" ")
+                append(' ')
                 append(uniqueConstraint)
             }
 
             if (notNullConstraint != null) {
-                append(" ")
+                append(' ')
                 append(notNullConstraint)
             }
 
@@ -512,19 +512,19 @@ object SQLiteDialect : Dialect {
             append("CREATE")
 
             if (unique != null) {
-                append(" ")
+                append(' ')
                 append(unique)
             }
 
             append(" INDEX")
 
             if (ifNotExists != null) {
-                append(" ")
+                append(' ')
                 append(ifNotExists)
             }
         }
 
-        append(" ")
+        append(' ')
         append(index.fullRender())
     }
 
@@ -533,12 +533,12 @@ object SQLiteDialect : Dialect {
             append("DROP INDEX")
 
             if (ifExists != null) {
-                append(" ")
+                append(' ')
                 append(ifExists)
             }
         }
 
-        append(" ")
+        append(' ')
         append(index.render())
     }
 
@@ -547,7 +547,7 @@ object SQLiteDialect : Dialect {
         if (conflict != Conflict.None) {
             append("OR ")
             append(conflict)
-            append(" ")
+            append(' ')
         }
         append("INTO ")
         append(table.renderedName)
