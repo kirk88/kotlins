@@ -50,23 +50,18 @@ enum class ViewType {
     }
 }
 
-class View internal constructor(
+abstract class View(
     private val name: String,
-    val type: ViewType,
-    val statement: QueryStatement
 ) {
+
+    open val type: ViewType = ViewType.None
+    abstract val statement: QueryStatement
 
     val renderedName: String = name.surrounding()
 
     override fun toString(): String = name
 
 }
-
-fun view(
-    name: String,
-    type: ViewType = ViewType.None,
-    statement: () -> QueryStatement
-): View = View(name, type, statement())
 
 operator fun Column<Int>.invoke(value: Int): Assignment {
     return Assignment.Value(this, value)
