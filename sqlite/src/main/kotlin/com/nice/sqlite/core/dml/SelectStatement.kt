@@ -86,20 +86,20 @@ class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
 }
 
 class UnionStatement(
-    private val queryStatement1: QueryStatement,
-    private val queryStatement2: QueryStatement,
+    private val statement1: QueryStatement,
+    private val statement2: QueryStatement,
     private val all: Boolean
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String = buildString {
-        append(queryStatement1.toString(dialect))
+        append(statement1.toString(dialect))
         append('\n')
         append("UNION")
         if (all) {
             append(" ALL")
         }
         append('\n')
-        append(queryStatement2.toString(dialect))
+        append(statement2.toString(dialect))
     }
 
 }

@@ -8,10 +8,15 @@ import com.nice.sqlite.core.dml.OnceIterator
 import com.nice.sqlite.core.dml.mutableSequenceOf
 
 enum class SqlType {
-    INTEGER,
-    REAL,
-    TEXT,
-    BLOB
+    Integer,
+    Real,
+    Text,
+    Blob,
+    Null;
+
+    override fun toString(): String {
+        return name.uppercase()
+    }
 }
 
 interface Definition : Sequence<Definition>, Renderer {
@@ -60,13 +65,9 @@ abstract class Column<T>(
         _meta = _meta.copy(onDeleteAction = actionColumn)
     }
 
-    override fun render(): String = "\"$name\""
+    override fun render(): String = name.surrounding()
 
-    override fun fullRender(): String = "${table.renderedName}.\"$name\""
-
-    override fun toString(): String {
-        return name
-    }
+    override fun fullRender(): String = "${table.renderedName}.${name.surrounding()}"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -86,6 +87,8 @@ abstract class Column<T>(
         return result
     }
 
+    override fun toString(): String = name
+
     data class Meta<T>(
         val defaultConstraint: ColumnConstraint.Default<T>? = null,
         val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
@@ -98,10 +101,41 @@ abstract class Column<T>(
 
 }
 
+class UColumn internal constructor(
+    val name: String,
+    val type: SqlType
+) : Definition {
+
+    override fun render(): String = "${SqlType.Null} AS ${name.surrounding()}"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UColumn
+
+        if (name != other.name) return false
+        if (type != other.type) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
+    }
+
+    override fun toString(): String = name
+
+}
+
+fun column(name: String, type: SqlType = SqlType.Null): UColumn = UColumn(name, type)
+
 class Index internal constructor(
-    val columns: Array<out Column<*>>,
-    val name: String
-) : Definition, Renderer {
+    val name: String,
+    val columns: Array<out Column<*>>
+) : Definition {
 
     private var _meta = Meta()
     val meta: Meta get() = _meta
@@ -120,17 +154,17 @@ class Index internal constructor(
 
     override fun render(): String = buildString {
         val table = columns.first().table
-        append("\"$name\"")
+        append(name.surrounding())
         append(" ON ")
         append(table.renderedName)
     }
 
     override fun fullRender(): String = buildString {
         val table = columns.first().table
-        append("\"$name\"")
+        append(name.surrounding())
         append(" ON ")
         append(table.renderedName)
-        append(" ")
+        append(' ')
         columns.joinTo(this, prefix = "(", postfix = ")") {
             it.render()
         }
@@ -170,9 +204,9 @@ class Index internal constructor(
 fun index(
     vararg columns: Column<*>,
     name: String = columns.joinToString("_")
-): Index = Index(columns, name)
+): Index = Index(name, columns)
 
-class Function(private val name: String, private val column: Column<*>) : Definition {
+class Function internal constructor(private val name: String, private val column: Column<*>) : Definition {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

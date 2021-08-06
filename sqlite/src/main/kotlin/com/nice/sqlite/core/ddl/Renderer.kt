@@ -7,3 +7,5 @@ interface Renderer {
     fun fullRender(): String = render()
 
 }
+
+internal fun String.surrounding() = "\"$this\""
