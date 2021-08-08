@@ -12,7 +12,32 @@ interface Subject<T : Table> {
 
 }
 
-class StatementSubject<T : Table>(override val table: T) : Subject<T>
+interface ViewSubject {
+
+    val view: View
+
+}
+
+class StatementSubject<T : Table> @PublishedApi internal constructor(override val table: T) :
+    Subject<T>
+
+class StatementViewSubject @PublishedApi internal constructor(override val view: View) : ViewSubject
+
+inline fun offer(view: View): StatementViewSubject {
+    return StatementViewSubject(view)
+}
+
+inline fun StatementViewSubject.create(statement: () -> QueryStatement): CreateViewStatement {
+    return CreateViewStatement(this, statement())
+}
+
+inline fun StatementViewSubject.select(): SelectViewStatement {
+    return SelectViewStatement(this)
+}
+
+inline fun StatementViewSubject.select(executor: StatementExecutor): Cursor {
+    return executor.executeQuery(select())
+}
 
 inline fun <T : Table> offer(table: T): StatementSubject<T> {
     return StatementSubject(table)

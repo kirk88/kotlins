@@ -6,7 +6,6 @@ import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.SqlType
 import com.nice.sqlite.core.ddl.surrounding
-import com.nice.sqlite.core.dml.QueryStatement
 
 open class Table(private val name: String) {
 
@@ -35,29 +34,6 @@ open class Table(private val name: String) {
     override fun hashCode(): Int {
         return name.hashCode()
     }
-
-    override fun toString(): String = name
-
-}
-
-enum class ViewType {
-    None,
-    Temp,
-    Temporary;
-
-    override fun toString(): String {
-        return if (this == None) "" else name.uppercase()
-    }
-}
-
-abstract class View(
-    private val name: String,
-) {
-
-    open val type: ViewType = ViewType.None
-    abstract val statement: QueryStatement
-
-    val renderedName: String = name.surrounding()
 
     override fun toString(): String = name
 

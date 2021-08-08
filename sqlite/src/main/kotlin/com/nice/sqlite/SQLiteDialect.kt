@@ -2,6 +2,7 @@ package com.nice.sqlite
 
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Table
+import com.nice.sqlite.core.ViewType
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
 
@@ -27,6 +28,7 @@ object SQLiteDialect : Dialect {
                 decompileCreateIndexSql(it)
             }
         }
+
         return builder.toString()
     }
 
@@ -36,11 +38,7 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
-                "ALTER TABLE ${statement.subject.table.renderedName} ADD COLUMN ${
-                    decompileColumnSql(
-                        it
-                    )
-                }"
+                "ALTER TABLE ${statement.subject.table.renderedName} ADD ${decompileColumnSql(it)}"
             }
         }
 
@@ -94,7 +92,7 @@ object SQLiteDialect : Dialect {
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render())
+            builder.append(where.predicate.render(this))
         }
 
         val group = statement.groupClause
@@ -108,7 +106,7 @@ object SQLiteDialect : Dialect {
         val having = statement.havingClause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.render())
+            builder.append(having.predicate.render(this))
         }
 
         val order = statement.orderClause
@@ -155,17 +153,21 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn2Clause.predicate.fullRender())
+        builder.append(statement.joinOn2Clause.predicate.fullRender(this))
 
         val where = statement.where2Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.fullRender())
+            builder.append(where.predicate.fullRender(this))
         }
 
         val group = statement.group2Clause
@@ -179,7 +181,7 @@ object SQLiteDialect : Dialect {
         val having = statement.having2Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.fullRender())
+            builder.append(having.predicate.fullRender(this))
         }
 
         val order = statement.order2Clause
@@ -226,28 +228,36 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender())
+        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender(this))
         builder.append(' ')
         builder.append(statement.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.table3.renderedName)
 
-        statement.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.predicate.fullRender())
+        builder.append(statement.joinOn3Clause.predicate.fullRender(this))
 
         val where = statement.where3Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.fullRender())
+            builder.append(where.predicate.fullRender(this))
         }
 
         val group = statement.group3Clause
@@ -261,7 +271,7 @@ object SQLiteDialect : Dialect {
         val having = statement.having3Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.fullRender())
+            builder.append(having.predicate.fullRender(this))
         }
 
         val order = statement.order3Clause
@@ -308,39 +318,51 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender())
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender(this))
         builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
 
-        statement.joinOn4Clause.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn4Clause.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender())
+        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender(this))
         builder.append(' ')
         builder.append(statement.joinOn4Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.table4.renderedName)
 
-        statement.joinOn4Clause.joinUsing4Clause?.definitions?.joinTo(builder, prefix = " USING (", postfix = ")") {
+        statement.joinOn4Clause.joinUsing4Clause?.definitions?.joinTo(
+            builder,
+            prefix = " USING (",
+            postfix = ")"
+        ) {
             it.fullRender()
         }
 
         builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.predicate.fullRender())
+        builder.append(statement.joinOn4Clause.predicate.fullRender(this))
 
         val where = statement.where4Clause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.fullRender())
+            builder.append(where.predicate.fullRender(this))
         }
 
         val group = statement.group4Clause
@@ -354,7 +376,7 @@ object SQLiteDialect : Dialect {
         val having = statement.having4Clause
         if (having != null) {
             builder.append(" HAVING ")
-            builder.append(having.predicate.fullRender())
+            builder.append(having.predicate.fullRender(this))
         }
 
         val order = statement.order4Clause
@@ -444,7 +466,7 @@ object SQLiteDialect : Dialect {
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render())
+            builder.append(where.predicate.render(this))
         }
 
         return builder.toString()
@@ -458,10 +480,45 @@ object SQLiteDialect : Dialect {
         val where = statement.whereClause
         if (where != null) {
             builder.append(" WHERE ")
-            builder.append(where.predicate.render())
+            builder.append(where.predicate.render(this))
         }
 
         return builder.toString()
+    }
+
+    override fun build(statement: UnionStatement): String {
+        val builder = StringBuilder()
+
+        builder.append(statement.statement1.toString(this))
+        builder.append("UNION")
+        if (statement.all) {
+            builder.append(" ALL")
+        }
+        builder.append(statement.statement2.toString(this))
+
+        return builder.toString()
+    }
+
+    override fun build(statement: CreateViewStatement): String {
+        val builder = StringBuilder()
+
+        builder.append("CREATE ")
+        val type = statement.subject.view.type
+        if (type != ViewType.None) {
+            builder.append(type)
+            builder.append(' ')
+        }
+        builder.append("VIEW ")
+        builder.append(statement.subject.view.renderedName)
+        builder.append(' ')
+        builder.append("AS ")
+        builder.append(statement.statement.toString(this))
+
+        return builder.toString()
+    }
+
+    override fun build(statement: SelectViewStatement): String {
+        return "SELECT * FROM ${statement.subject.view.renderedName}"
     }
 
     private fun decompileColumnSql(column: Column<*>): String = buildString {

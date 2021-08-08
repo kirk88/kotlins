@@ -3,101 +3,119 @@
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.Renderer
+import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.toSqlString
+import com.nice.sqlite.core.dml.QueryStatement
 
-interface Predicate : Renderer
+interface Predicate {
 
-interface Condition : Predicate {
+    fun render(dialect: Dialect): String
 
-    val predicateLeft: Predicate
-    val connector: String
-    val predicateRight: Predicate
+    fun fullRender(dialect: Dialect): String
 
 }
 
-private fun Predicate(render: (Boolean) -> String): Predicate {
-    return object : Predicate {
+private class WhereCause(
+    private vararg val values: Any,
+    private val whereCase: (Boolean) -> String
+) : Predicate {
 
-        override fun render(): String = render(false)
+    override fun render(dialect: Dialect): String =
+        whereCase(false).format(dialect, values)
 
-        override fun fullRender(): String = render(true)
-
-    }
+    override fun fullRender(dialect: Dialect): String =
+        whereCase(true).format(dialect, values)
 }
 
-private class ConditionImpl(
-    override val predicateLeft: Predicate,
-    override val connector: String,
-    override val predicateRight: Predicate
-) : Condition {
+private class Condition(
+    private val predicateLeft: Predicate,
+    private val connector: String,
+    private val predicateRight: Predicate
+) : Predicate {
 
-    override fun render(): String =
-        "(${predicateLeft.render()} $connector ${predicateRight.render()})"
+    override fun render(dialect: Dialect): String =
+        "(${predicateLeft.render(dialect)} $connector ${predicateRight.render(dialect)})"
 
-    override fun fullRender(): String =
-        "(${predicateLeft.fullRender()} $connector ${predicateRight.fullRender()})"
+    override fun fullRender(dialect: Dialect): String =
+        "(${predicateLeft.fullRender(dialect)} $connector ${predicateRight.fullRender(dialect)})"
 
 }
 
 infix fun Predicate.and(predicate: Predicate): Predicate {
-    return ConditionImpl(this, "AND", predicate)
+    return Condition(this, "AND", predicate)
 }
 
 infix fun Predicate.or(predicate: Predicate): Predicate {
-    return ConditionImpl(this, "OR", predicate)
+    return Condition(this, "OR", predicate)
 }
 
 infix fun Column<*>.eq(value: Any): Predicate =
-    Predicate { "${render(it)} = ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} = ?" }
 
 infix fun Column<*>.ne(value: Any): Predicate =
-    Predicate { "${render(it)} <> ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} <> ?" }
 
 infix fun Column<*>.gt(value: Any): Predicate =
-    Predicate { "${render(it)} > ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} > ?" }
 
 infix fun Column<*>.lt(value: Any): Predicate =
-    Predicate { "${render(it)} < ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} < ?" }
 
 infix fun Column<*>.gte(value: Any): Predicate =
-    Predicate { "${render(it)} >= ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} >= ?" }
 
 infix fun Column<*>.lte(value: Any): Predicate =
-    Predicate { "${render(it)} <= ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} <= ?" }
 
 infix fun Column<*>.like(value: Any): Predicate =
-    Predicate { "${render(it)} LIKE ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} LIKE ?" }
 
 infix fun Column<*>.glob(value: Any): Predicate =
-    Predicate { "${render(it)} GLOB ${value.toSqlString()}" }
+    WhereCause(value) { "${render(it)} GLOB ?" }
 
 fun Column<*>.isNotNull(): Predicate =
-    Predicate { "${render(it)} IS NOT NULL" }
+    WhereCause { "${render(it)} IS NOT NULL" }
 
 fun Column<*>.isNull(): Predicate =
-    Predicate { "${render(it)} IS NULL" }
+    WhereCause { "${render(it)} IS NULL" }
 
 fun Column<*>.between(value1: Any, value2: Any): Predicate =
-    Predicate { "${render(it)} BETWEEN ${value1.toSqlString()} AND ${value2.toSqlString()}" }
+    WhereCause(value1, value2) { "${render(it)} BETWEEN ? AND ?" }
 
 fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
-    Predicate { "${render(it)} NOT BETWEEN ${value1.toSqlString()} AND ${value2.toSqlString()}" }
+    WhereCause(value1, value2) { "${render(it)} NOT BETWEEN ? AND ?" }
 
 fun Column<*>.any(vararg values: Any): Predicate =
-    Predicate {
+    WhereCause(*values) {
         values.joinToString(
             prefix = "${render(it)} IN (",
             postfix = ")"
-        ) { value -> value.toSqlString() }
+        ) { "?" }
     }
 
 fun Column<*>.none(vararg values: Any): Predicate =
-    Predicate {
+    WhereCause(*values) {
         values.joinToString(
             prefix = "${render(it)} NOT IN (",
             postfix = ")"
-        ) { value -> value.toSqlString() }
+        ) { "?" }
     }
 
-private fun Column<*>.render(full: Boolean) = if (full) fullRender() else render()
+fun exists(statement: QueryStatement): Predicate =
+    WhereCause(statement) { "EXISTS ?" }
+
+private fun Column<*>.render(full: Boolean) =
+    if (full) fullRender() else render()
+
+private fun Any.render(dialect: Dialect) =
+    if (this is Statement) "(${toString(dialect)})" else toSqlString()
+
+private fun String.format(dialect: Dialect, args: Array<out Any>): String {
+    val builder = StringBuilder(this)
+    var offset = builder.indexOf("?")
+    for (value in args) {
+        builder.replace(offset, offset + 1, value.render(dialect))
+        offset = builder.indexOf("?", offset)
+    }
+    return builder.toString()
+}

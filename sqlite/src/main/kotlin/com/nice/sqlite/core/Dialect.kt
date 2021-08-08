@@ -1,8 +1,6 @@
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.AlterStatement
-import com.nice.sqlite.core.ddl.CreateStatement
-import com.nice.sqlite.core.ddl.DropStatement
+import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
 
 interface Dialect {
@@ -20,5 +18,10 @@ interface Dialect {
     fun <T : Table> build(statement: BatchInsertStatement<T>): String
     fun <T : Table> build(statement: UpdateStatement<T>): String
     fun <T : Table> build(statement: DeleteStatement<T>): String
+
+    fun build(statement: UnionStatement): String
+
+    fun build(statement: CreateViewStatement): String
+    fun build(statement: SelectViewStatement): String
 
 }

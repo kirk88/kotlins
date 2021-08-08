@@ -11,8 +11,7 @@ enum class SqlType {
     Integer,
     Real,
     Text,
-    Blob,
-    Null;
+    Blob;
 
     override fun toString(): String {
         return name.uppercase()
@@ -77,6 +76,7 @@ abstract class Column<T>(
 
         if (name != other.name) return false
         if (type != other.type) return false
+        if (table != other.table) return false
 
         return true
     }
@@ -84,6 +84,7 @@ abstract class Column<T>(
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + table.hashCode()
         return result
     }
 
@@ -102,11 +103,13 @@ abstract class Column<T>(
 }
 
 class UColumn internal constructor(
-    val name: String,
-    val type: SqlType
+    val column: Column<*>,
+    val alias: String
 ) : Definition {
 
-    override fun render(): String = "${SqlType.Null} AS ${name.surrounding()}"
+    override fun render(): String = "${column.render()} AS ${alias.surrounding()}"
+
+    override fun fullRender(): String = "${column.fullRender()} AS ${alias.surrounding()}"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -114,23 +117,23 @@ class UColumn internal constructor(
 
         other as UColumn
 
-        if (name != other.name) return false
-        if (type != other.type) return false
+        if (column != other.column) return false
+        if (alias != other.alias) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + type.hashCode()
+        var result = column.hashCode()
+        result = 31 * result + alias.hashCode()
         return result
     }
 
-    override fun toString(): String = name
+    override fun toString(): String = alias
 
 }
 
-fun column(name: String, type: SqlType = SqlType.Null): UColumn = UColumn(name, type)
+fun column(column: Column<*>, alias: String): UColumn = UColumn(column, alias)
 
 class Index internal constructor(
     val name: String,
@@ -206,7 +209,8 @@ fun index(
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
 
-class Function internal constructor(private val name: String, private val column: Column<*>) : Definition {
+class Function internal constructor(private val name: String, private val column: Column<*>) :
+    Definition {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
