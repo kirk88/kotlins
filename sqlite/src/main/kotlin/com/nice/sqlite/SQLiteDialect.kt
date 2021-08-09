@@ -11,7 +11,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: CreateStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<Column<*>>()
+        val columns = statement.definitions.filterIsInstance<Column>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.renderedName)
@@ -35,7 +35,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: AlterStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<Column<*>>()
+        val columns = statement.definitions.filterIsInstance<Column>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
                 "ALTER TABLE ${statement.subject.table.renderedName} ADD ${decompileColumnSql(it)}"
@@ -60,7 +60,7 @@ object SQLiteDialect : Dialect {
             builder.append(statement.subject.table.renderedName)
         } else {
             check(statement.definitions.none {
-                it is Column<*>
+                it is Column
             }) { "Drop columns are not supported yet" }
 
             val indexes = statement.definitions.map { it as Index }
@@ -405,7 +405,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: InsertStatement<T>): String {
         val builder = StringBuilder()
 
-        builder.append(decompileInsertSql(statement.subject.table, statement.conflict))
+        builder.append(decompileInsertSql(statement.subject.table, statement.conflictAlgorithm))
 
         builder.append(" (")
 
@@ -429,7 +429,7 @@ object SQLiteDialect : Dialect {
 
         val builder = StringBuilder()
 
-        builder.append(decompileInsertSql(statement.subject.table, statement.conflict))
+        builder.append(decompileInsertSql(statement.subject.table, statement.conflictAlgorithm))
 
         builder.append(" (")
 
@@ -451,9 +451,9 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: UpdateStatement<T>): String {
         val builder = StringBuilder()
         builder.append("UPDATE ")
-        if (statement.conflict != Conflict.None) {
+        if (statement.conflictAlgorithm != ConflictAlgorithm.None) {
             builder.append("OR ")
-            builder.append(statement.conflict)
+            builder.append(statement.conflictAlgorithm)
             builder.append(' ')
         }
         builder.append(statement.subject.table.renderedName)
@@ -521,7 +521,7 @@ object SQLiteDialect : Dialect {
         return "SELECT * FROM ${statement.subject.view.renderedName}"
     }
 
-    private fun decompileColumnSql(column: Column<*>): String = buildString {
+    private fun decompileColumnSql(column: Column): String = buildString {
         append(column.render())
         append(' ')
         append(column.type)
@@ -599,11 +599,11 @@ object SQLiteDialect : Dialect {
         append(index.render())
     }
 
-    private fun decompileInsertSql(table: Table, conflict: Conflict): String = buildString {
+    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String = buildString {
         append("INSERT ")
-        if (conflict != Conflict.None) {
+        if (conflictAlgorithm != ConflictAlgorithm.None) {
             append("OR ")
-            append(conflict)
+            append(conflictAlgorithm)
             append(' ')
         }
         append("INTO ")

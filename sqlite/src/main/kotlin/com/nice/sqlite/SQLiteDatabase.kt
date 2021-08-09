@@ -43,10 +43,9 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         return if (statement is BatchInsertStatement<*>) {
             var lastRowId: Long = -1
             while (statement.moveToNext()) {
-                val assignments = statement.assignments
-                val sql = statement.toString(SQLiteDialect)
-                lastRowId = database.compileStatement(sql).also {
-                    it.bindAssignments(assignments)
+                val executable = statement.next(SQLiteDialect)
+                lastRowId = database.compileStatement(executable.first).also {
+                    it.bindAssignments(executable.second)
                 }.executeInsert()
             }
             lastRowId
@@ -81,6 +80,12 @@ val SupportSQLiteDatabase.statementExecutor: StatementExecutor
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
+enum class Transaction {
+    None,
+    Immediate,
+    Exclusive
+}
+
 open class ManagedSQLiteOpenHelper(
     configuration: SupportSQLiteOpenHelper.Configuration,
     factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
@@ -91,11 +96,14 @@ open class ManagedSQLiteOpenHelper(
     private val counter = AtomicInteger()
     private var db: SupportSQLiteDatabase? = null
 
-    fun <T> use(inTransaction: Boolean = false, action: SupportSQLiteDatabase.() -> T): T {
+    fun <T> use(transaction: Transaction = Transaction.None, action: SupportSQLiteDatabase.() -> T): T {
         try {
-            return openDatabase().let {
-                if (inTransaction) it.transaction { action() }
-                else it.action()
+            return openDatabase().run {
+                if (transaction == Transaction.None) {
+                    action()
+                } else {
+                    transaction(transaction == Transaction.Exclusive, action)
+                }
             }
         } finally {
             closeDatabase()

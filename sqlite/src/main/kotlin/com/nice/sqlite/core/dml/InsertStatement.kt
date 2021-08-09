@@ -5,13 +5,13 @@ import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Assignments
-import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.ddl.ConflictAlgorithm
 import com.nice.sqlite.core.ddl.Statement
 
 class InsertStatement<T : Table>(
     val subject: Subject<T>,
     val assignments: Sequence<Assignment>,
-    val conflict: Conflict
+    val conflictAlgorithm: ConflictAlgorithm
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -23,13 +23,13 @@ class InsertStatement<T : Table>(
 class BatchInsertStatement<T : Table>(
     val subject: Subject<T>,
     val batchAssignments: Sequence<Assignments>,
-    val conflict: Conflict
+    val conflictAlgorithm: ConflictAlgorithm
 ) : Statement {
 
     private val iterator = batchAssignments.iterator()
     private val sqlCaches = mutableMapOf<Int, String>()
 
-    private var nextAssignments: Assignments = batchAssignments.first()
+    private lateinit var nextAssignments: Assignments
     val assignments: Assignments
         get() = nextAssignments
 
@@ -45,6 +45,10 @@ class BatchInsertStatement<T : Table>(
             nextAssignments = iterator.next()
         }
         return hasNext
+    }
+
+    fun next(dialect: Dialect): Pair<String, Assignments> {
+        return toString(dialect) to nextAssignments
     }
 
 }

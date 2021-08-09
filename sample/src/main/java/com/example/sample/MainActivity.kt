@@ -32,8 +32,9 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
+import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
-import com.nice.sqlite.core.ddl.Conflict
+import com.nice.sqlite.core.ddl.ConflictAlgorithm
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.core.insertBatch
@@ -76,8 +77,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
-
-            DB.use(true) {
+            DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
                 repeat(10000) { index ->
                     val bean = DBTest(id = index.toLong(), name = "jack", age = index, flag = true, number = -index)
@@ -85,7 +85,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 }
 
                 var start = System.currentTimeMillis()
-                offer(TestTable).insertBatch(statementExecutor, Conflict.Replace) {
+                offer(TestTable).insertBatch(statementExecutor, ConflictAlgorithm.Replace) {
                    for (bean in beans){
                        assignments {
                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +

@@ -2,27 +2,23 @@
 
 package com.nice.sqlite.core.ddl
 
-sealed class ColumnConstraintAction(
-    private val name: String
+enum class ColumnConstraintAction(
+    private val value: String
 ) {
-    object SetNull : ColumnConstraintAction("SET NULL")
-
-    object SetDefault : ColumnConstraintAction("SET DEFAULT")
-
-    object SetRestrict : ColumnConstraintAction("SET DEFAULT")
-
-    object Cascade : ColumnConstraintAction("CASCADE")
-
-    object NoAction : ColumnConstraintAction("NO ACTION")
+    SetNull("SET NULL"),
+    SetDefault("SET DEFAULT"),
+    SetRestrict("SET DEFAULT"),
+    Cascade("CASCADE"),
+    NoAction("NO ACTION");
 
     override fun toString(): String {
-        return name
+        return value
     }
 }
 
 sealed class ColumnConstraint {
 
-    class Default<T>(val value: T) : ColumnConstraint() {
+    class Default(val value: Any) : ColumnConstraint() {
         override fun toString(): String = buildString {
             append("DEFAULT ")
             append(value.toSqlString())
@@ -40,7 +36,7 @@ sealed class ColumnConstraint {
 
     }
 
-    class ForeignKey(val references: Column<*>) : ColumnConstraint() {
+    class ForeignKey(val references: Column) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
             append("REFERENCES ")
@@ -49,13 +45,13 @@ sealed class ColumnConstraint {
 
     }
 
-    class Unique(val conflict: Conflict) : ColumnConstraint() {
+    class Unique(val conflictAlgorithm: ConflictAlgorithm) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
             append("UNIQUE")
-            if (conflict != Conflict.None) {
+            if (conflictAlgorithm != ConflictAlgorithm.None) {
                 append(" ON CONFLICT ")
-                append(conflict)
+                append(conflictAlgorithm)
             }
         }
 

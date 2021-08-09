@@ -10,7 +10,7 @@ enum class SqlOrderDirection { ASC, DESC }
 
 interface Ordering : Sequence<Ordering>, Renderer {
 
-    val column: Column<*>
+    val column: Column
     val direction: SqlOrderDirection
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
@@ -22,7 +22,7 @@ interface Ordering : Sequence<Ordering>, Renderer {
 
     override fun fullRender(): String = "${column.fullRender()} $direction"
 
-    class By(override val column: Column<*>, override val direction: SqlOrderDirection) :
+    class By(override val column: Column, override val direction: SqlOrderDirection) :
         Ordering {
 
         override fun equals(other: Any?): Boolean {
@@ -49,5 +49,5 @@ interface Ordering : Sequence<Ordering>, Renderer {
 
 }
 
-fun asc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.ASC)
-fun desc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.DESC)
+fun asc(column: Column): Ordering = Ordering.By(column, SqlOrderDirection.ASC)
+fun desc(column: Column): Ordering = Ordering.By(column, SqlOrderDirection.DESC)

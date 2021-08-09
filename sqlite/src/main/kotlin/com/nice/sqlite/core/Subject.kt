@@ -94,7 +94,7 @@ inline fun <T : Table> StatementSubject<T>.where(predicate: (T) -> Predicate): W
     return WhereClause(predicate(table), this)
 }
 
-inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> {
+inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Column>): GroupClause<T> {
     return GroupClause(group(table), this)
 }
 
@@ -137,18 +137,18 @@ inline fun <T : Table> StatementSubject<T>.selectDistinct(
 }
 
 inline fun <T : Table> StatementSubject<T>.update(
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): UpdateStatement<T> {
-    return UpdateStatement(this, values(table), conflict)
+    return UpdateStatement(this, values(table), conflictAlgorithm)
 }
 
 inline fun <T : Table> StatementSubject<T>.update(
     executor: StatementExecutor,
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): Int {
-    return executor.executeUpdateDelete(update(conflict, values))
+    return executor.executeUpdateDelete(update(conflictAlgorithm, values))
 }
 
 inline fun <T : Table> StatementSubject<T>.delete(): DeleteStatement<T> {
@@ -160,32 +160,32 @@ inline fun <T : Table> StatementSubject<T>.delete(executor: StatementExecutor): 
 }
 
 inline fun <T : Table> StatementSubject<T>.insert(
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): InsertStatement<T> {
-    return InsertStatement(this, values(table), conflict)
+    return InsertStatement(this, values(table), conflictAlgorithm)
 }
 
 
 inline fun <T : Table> StatementSubject<T>.insert(
     executor: StatementExecutor,
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): Long {
-    return executor.executeInsert(insert(conflict, values))
+    return executor.executeInsert(insert(conflictAlgorithm, values))
 }
 
 inline fun <T : Table> StatementSubject<T>.insertBatch(
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     buildAction: BatchAssignmentsBuilder<T>.() -> Unit
 ): BatchInsertStatement<T> {
-    return BatchInsertStatement(this, BatchAssignmentsBuilder(table).apply(buildAction), conflict)
+    return BatchInsertStatement(this, BatchAssignmentsBuilder(table).apply(buildAction), conflictAlgorithm)
 }
 
 inline fun <T : Table> StatementSubject<T>.insertBatch(
     executor: StatementExecutor,
-    conflict: Conflict = Conflict.None,
+    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     buildAction: BatchAssignmentsBuilder<T>.() -> Unit
 ): Long {
-    return executor.executeBatchInsert(insertBatch(conflict, buildAction))
+    return executor.executeBatchInsert(insertBatch(conflictAlgorithm, buildAction))
 }
