@@ -416,31 +416,7 @@ object SQLiteDialect : Dialect {
         builder.append(") VALUES (")
 
         statement.assignments.joinTo(builder) {
-            it.value.toSqlString()
-        }
-
-        builder.append(')')
-
-        return builder.toString()
-    }
-
-    override fun <T : Table> build(statement: BatchInsertStatement<T>): String {
-        val assignments = statement.assignments
-
-        val builder = StringBuilder()
-
-        builder.append(decompileInsertSql(statement.subject.table, statement.conflictAlgorithm))
-
-        builder.append(" (")
-
-        assignments.joinTo(builder) {
-            it.column.render()
-        }
-
-        builder.append(") VALUES (")
-
-        assignments.joinTo(builder) {
-            "?"
+            if (statement.bindValues) it.value.toSqlString() else "?"
         }
 
         builder.append(')')

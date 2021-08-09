@@ -11,7 +11,8 @@ import com.nice.sqlite.core.ddl.Statement
 class InsertStatement<T : Table>(
     val subject: Subject<T>,
     val assignments: Sequence<Assignment>,
-    val conflictAlgorithm: ConflictAlgorithm
+    val conflictAlgorithm: ConflictAlgorithm,
+    val bindValues: Boolean = true
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -30,25 +31,29 @@ class BatchInsertStatement<T : Table>(
     private val sqlCaches = mutableMapOf<Int, String>()
 
     private lateinit var nextAssignments: Assignments
-    val assignments: Assignments
-        get() = nextAssignments
+    private lateinit var nextSql: String
 
     override fun toString(dialect: Dialect): String {
         return sqlCaches.getOrPut(nextAssignments.id) {
-            dialect.build(this)
+            val nextStatement = InsertStatement(subject, nextAssignments, conflictAlgorithm, false)
+            dialect.build(nextStatement)
         }
     }
 
-    fun moveToNext(): Boolean {
+    fun moveToNext(dialect: Dialect): Boolean {
         val hasNext = iterator.hasNext()
         if (hasNext) {
             nextAssignments = iterator.next()
+            nextSql = toString(dialect)
         }
         return hasNext
     }
 
-    fun next(dialect: Dialect): Pair<String, Assignments> {
-        return toString(dialect) to nextAssignments
-    }
+    fun next(): InsertExecutable = InsertExecutable(nextSql, nextAssignments)
 
 }
+
+class InsertExecutable(
+    val sql: String,
+    val assignments: Sequence<Assignment>
+)

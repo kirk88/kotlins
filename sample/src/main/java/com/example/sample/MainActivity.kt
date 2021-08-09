@@ -86,12 +86,12 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 var start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor, ConflictAlgorithm.Replace) {
-                   for (bean in beans){
-                       assignments {
-                           it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                   it.flag(bean.flag) + it.number(bean.number)
-                       }
-                   }
+                    for (bean in beans) {
+                        assignments {
+                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                    it.flag(bean.flag) + it.number(bean.number)
+                        }
+                    }
                 }
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
@@ -99,7 +99,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 var count = 0
                 for (row in offer(TestTable).orderBy {
                     desc(it.id)
-                }.selectDistinct(statementExecutor){
+                }.selectDistinct(statementExecutor) {
                     it.name
                 }.asMapSequence()) {
                     if (count <= 10) {

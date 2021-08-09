@@ -15,7 +15,6 @@ interface Dialect {
     fun <T : Table, T2 : Table, T3 : Table, T4 : Table> build(statement: Select4Statement<T, T2, T3, T4>): String
 
     fun <T : Table> build(statement: InsertStatement<T>): String
-    fun <T : Table> build(statement: BatchInsertStatement<T>): String
     fun <T : Table> build(statement: UpdateStatement<T>): String
     fun <T : Table> build(statement: DeleteStatement<T>): String
 
