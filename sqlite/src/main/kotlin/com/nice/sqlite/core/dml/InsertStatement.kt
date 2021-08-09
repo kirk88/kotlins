@@ -25,7 +25,7 @@ class BatchInsertStatement<T : Table>(
     val subject: Subject<T>,
     val batchAssignments: Sequence<Assignments>,
     val conflictAlgorithm: ConflictAlgorithm
-) {
+) : Statement {
 
     private val iterator = batchAssignments.iterator()
     private val sqlCaches = mutableMapOf<Int, String>()
@@ -33,13 +33,17 @@ class BatchInsertStatement<T : Table>(
     private lateinit var nextAssignments: Assignments
     private lateinit var nextSql: String
 
+    override fun toString(dialect: Dialect): String {
+        val nextStatement = InsertStatement(subject, nextAssignments, conflictAlgorithm, false)
+        return dialect.build(nextStatement)
+    }
+
     fun moveToNext(dialect: Dialect): Boolean {
         val hasNext = iterator.hasNext()
         if (hasNext) {
             nextAssignments = iterator.next()
             nextSql = sqlCaches.getOrPut(nextAssignments.id) {
-                val nextStatement = InsertStatement(subject, nextAssignments, conflictAlgorithm, false)
-                dialect.build(nextStatement)
+                toString(dialect)
             }
         }
         return hasNext
