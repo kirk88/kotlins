@@ -13,9 +13,7 @@ enum class SqlType {
     Text,
     Blob;
 
-    override fun toString(): String {
-        return name.uppercase()
-    }
+    override fun toString(): String = name.uppercase()
 }
 
 interface Definition : Sequence<Definition>, Renderer {

@@ -9,9 +9,8 @@ enum class ViewType {
     Temp,
     Temporary;
 
-    override fun toString(): String {
-        return if (this == None) "" else name.uppercase()
-    }
+    override fun toString(): String =
+        if (this == None) "" else name.uppercase()
 }
 
 class View(

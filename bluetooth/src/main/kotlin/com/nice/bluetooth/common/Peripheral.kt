@@ -118,8 +118,12 @@ interface Peripheral : Readable, Writable {
      *
      * @throws ConnectionRejectedException when a connection request is rejected by the system (e.g. bluetooth hardware unavailable).
      * @throws IllegalStateException if [Peripheral]'s Coroutine scope has been cancelled.
+     *
+     * @param autoConnect Whether to directly connect to the remote device (false) or to
+     * automatically connect as soon as the remote device becomes available (true).
+     *
      */
-    suspend fun connect()
+    suspend fun connect(autoConnect: Boolean = false)
 
     /**
      * Disconnects the active connection, or cancels an in-flight [connection][connect] attempt, suspending until

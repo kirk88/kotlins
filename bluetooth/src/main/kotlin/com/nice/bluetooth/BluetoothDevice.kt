@@ -134,6 +134,7 @@ internal class ConnectionClient(
  */
 internal fun BluetoothDevice.connect(
     context: Context,
+    autoConnect: Boolean,
     defaultTransport: Transport,
     defaultPhy: Phy,
     state: MutableStateFlow<ConnectionState>,
@@ -142,16 +143,17 @@ internal fun BluetoothDevice.connect(
     onClose: () -> Unit
 ): ConnectionClient? =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        connectApi26(context, defaultTransport, defaultPhy, state, mtu, phy, onClose)
+        connectApi26(context, autoConnect, defaultTransport, defaultPhy, state, mtu, phy, onClose)
     } else {
-        connectDefault(context, defaultTransport, state, mtu, onClose)
+        connectApi23(context, autoConnect, defaultTransport, state, mtu, onClose)
     }
 
 /**
  * @param defaultTransport is only used on API level >= 23.
  */
-private fun BluetoothDevice.connectDefault(
+private fun BluetoothDevice.connectApi23(
     context: Context,
+    autoConnect: Boolean,
     defaultTransport: Transport,
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
@@ -159,9 +161,9 @@ private fun BluetoothDevice.connectDefault(
 ): ConnectionClient? {
     val callback = Callback(state, mtu)
     val bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        connectGatt(context, false, callback, defaultTransport.intValue)
+        connectGatt(context, autoConnect, callback, defaultTransport.intValue)
     } else {
-        connectGatt(context, false, callback)
+        connectGatt(context, autoConnect, callback)
     } ?: return null
 
     // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see
@@ -184,6 +186,7 @@ private fun BluetoothDevice.connectDefault(
 @TargetApi(Build.VERSION_CODES.O)
 private fun BluetoothDevice.connectApi26(
     context: Context,
+    autoConnect: Boolean,
     defaultTransport: Transport,
     defaultPhy: Phy,
     state: MutableStateFlow<ConnectionState>,
@@ -198,7 +201,7 @@ private fun BluetoothDevice.connectApi26(
         val callback = Callback(state, mtu, phy)
 
         val bluetoothGatt =
-            connectGatt(context, false, callback, defaultTransport.intValue, defaultPhy.intValue, handler)
+            connectGatt(context, autoConnect, callback, defaultTransport.intValue, defaultPhy.intValue, handler)
                 ?: return null
 
         // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see

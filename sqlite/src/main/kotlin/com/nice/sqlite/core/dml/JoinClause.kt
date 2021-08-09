@@ -16,9 +16,7 @@ enum class JoinType {
     Outer,
     Cross;
 
-    override fun toString(): String {
-        return name.uppercase()
-    }
+    override fun toString() = name.uppercase()
 }
 
 class Join2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(

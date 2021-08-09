@@ -29,7 +29,7 @@ class Assignments @PublishedApi internal constructor(
     private val assignments: Sequence<Assignment>
 ) : Sequence<Assignment> by assignments {
 
-    val id: Int = toString().hashCode()
+    internal val id: Int = toString().hashCode()
 
     override fun toString(): String = assignments.joinToString {
         it.column.name

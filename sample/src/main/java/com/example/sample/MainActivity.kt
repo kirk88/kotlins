@@ -33,10 +33,10 @@ import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
 import com.nice.sqlite.asMapSequence
-import com.nice.sqlite.core.insertBatch
 import com.nice.sqlite.core.ddl.Conflict
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.dml.selectDistinct
+import com.nice.sqlite.core.insertBatch
 import com.nice.sqlite.core.invoke
 import com.nice.sqlite.core.offer
 import com.nice.sqlite.core.orderBy
@@ -217,6 +217,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         ) {
             holder.findViewById<TextView>(android.R.id.text1).string = item.name
             holder.findViewById<TextView>(android.R.id.text2).string = item.address
+
         }
 
     }

@@ -64,10 +64,10 @@ internal class PeripheralConnection(
 
     private val observers = PeripheralObservers(this)
 
-    suspend fun connect() {
+    suspend fun connect(autoConnect: Boolean) {
         check(!job.isCancelled) { "Cannot connect, scope is cancelled for $this" }
         check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
-        connectJob.updateAndGetCompat { it ?: connectAsync() }!!.await()?.let {
+        connectJob.updateAndGetCompat { it ?: connectAsync(autoConnect) }!!.await()?.let {
             throw it
         }
     }
@@ -88,13 +88,13 @@ internal class PeripheralConnection(
     }
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
-    private fun connectAsync() = scope.async(start = CoroutineStart.LAZY) {
+    private fun connectAsync(autoConnect: Boolean) = scope.async(start = CoroutineStart.LAZY) {
         ready.value = false
 
         var exception: Throwable? = null
 
         try {
-            val connectionClient = bluetoothDevice.connect(applicationContext, defaultTransport, defaultPhy, state, mtu, phy) {
+            val connectionClient = bluetoothDevice.connect(applicationContext, autoConnect, defaultTransport, defaultPhy, state, mtu, phy) {
                 connectJob.getAndUpdateCompat { null }?.cancel()
             }?.also { _connectionClient = it } ?: throw ConnectionRejectedException()
 

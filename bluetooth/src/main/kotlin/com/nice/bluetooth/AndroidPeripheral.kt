@@ -57,8 +57,8 @@ class AndroidPeripheral internal constructor(
     override val services: List<DiscoveredService>
         get() = connection.services
 
-    override suspend fun connect() {
-        connection.connect()
+    override suspend fun connect(autoConnect: Boolean) {
+        connection.connect(autoConnect)
     }
 
     override suspend fun disconnect() {

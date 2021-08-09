@@ -5,11 +5,8 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
-import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.alter
-import com.nice.sqlite.core.create
+import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.index
-import com.nice.sqlite.core.offer
 import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
@@ -19,6 +16,8 @@ data class DBTest @ClassParserConstructor constructor(
     val flag: Boolean,
     val number: Int
 )
+
+val TestView = View("test_view")
 
 object TestTable : Table("test") {
     val id = LongColumn("id").primaryKey()
