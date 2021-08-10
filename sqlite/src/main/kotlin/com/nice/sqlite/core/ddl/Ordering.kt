@@ -22,29 +22,8 @@ interface Ordering : Sequence<Ordering>, Renderer {
 
     override fun fullRender(): String = "${column.fullRender()} $direction"
 
-    class By(override val column: Column, override val direction: SqlOrderDirection) :
-        Ordering {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as By
-
-            if (column != other.column) return false
-            if (direction != other.direction) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = column.hashCode()
-            result = 31 * result + direction.hashCode()
-            return result
-        }
-
+    data class By(override val column: Column, override val direction: SqlOrderDirection) : Ordering {
         override fun toString(): String = "$column $direction"
-
     }
 
 }

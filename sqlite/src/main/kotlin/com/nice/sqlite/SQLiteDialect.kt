@@ -416,7 +416,7 @@ object SQLiteDialect : Dialect {
         builder.append(") VALUES (")
 
         statement.assignments.joinTo(builder) {
-            if (statement.bindValues) it.value.toSqlString() else "?"
+            "?"
         }
 
         builder.append(')')
@@ -436,7 +436,7 @@ object SQLiteDialect : Dialect {
         builder.append(" SET ")
 
         statement.assignments.joinTo(builder) {
-            it.render()
+            "${it.column.render()} = ?"
         }
 
         val where = statement.whereClause

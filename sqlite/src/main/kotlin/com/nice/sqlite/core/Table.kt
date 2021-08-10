@@ -2,23 +2,59 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.Assignment
-import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.SqlType
-import com.nice.sqlite.core.ddl.surrounding
+import com.nice.sqlite.core.ddl.*
 
 open class Table(private val name: String) {
 
     val renderedName: String = name.surrounding()
 
-    inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.Integer, this)
-    inner class IntColumn(name: String) : Column<Int>(name, SqlType.Integer, this)
-    inner class LongColumn(name: String) : Column<Long>(name, SqlType.Integer, this)
-    inner class ShortColumn(name: String) : Column<Short>(name, SqlType.Integer, this)
-    inner class FloatColumn(name: String) : Column<Float>(name, SqlType.Real, this)
-    inner class DoubleColumn(name: String) : Column<Double>(name, SqlType.Real, this)
-    inner class StringColumn(name: String) : Column<String>(name, SqlType.Text, this)
-    inner class BlobColumn(name: String) : Column<ByteArray>(name, SqlType.Blob, this)
+    inner class BooleanColumn(name: String) : Column(this, name, SqlType.Integer) {
+        operator fun invoke(value: Boolean): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class IntColumn(name: String) : Column(this, name, SqlType.Integer) {
+        operator fun invoke(value: Int): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class LongColumn(name: String) : Column(this, name, SqlType.Integer) {
+        operator fun invoke(value: Long): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class ShortColumn(name: String) : Column(this, name, SqlType.Integer) {
+        operator fun invoke(value: Short): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class FloatColumn(name: String) : Column(this, name, SqlType.Real) {
+        operator fun invoke(value: Float): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class DoubleColumn(name: String) : Column(this, name, SqlType.Real) {
+        operator fun invoke(value: Double): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class StringColumn(name: String) : Column(this, name, SqlType.Text) {
+        operator fun invoke(value: String?): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
+
+    inner class BlobColumn(name: String) : Column(this, name, SqlType.Blob) {
+        operator fun invoke(value: ByteArray?): Assignment {
+            return Assignment.Value(this, value)
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -39,34 +75,34 @@ open class Table(private val name: String) {
 
 }
 
-operator fun Column<Int>.invoke(value: Int): Assignment {
-    return Assignment.Value(this, value)
+fun Table.IntColumn.default(value: Int): Table.IntColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<Long>.invoke(value: Long): Assignment {
-    return Assignment.Value(this, value)
+fun Table.LongColumn.default(value: Long): Table.LongColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<Short>.invoke(value: Short): Assignment {
-    return Assignment.Value(this, value)
+fun Table.ShortColumn.default(value: Short): Table.ShortColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<Float>.invoke(value: Float): Assignment {
-    return Assignment.Value(this, value)
+fun Table.FloatColumn.default(value: Float): Table.FloatColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<Double>.invoke(value: Double): Assignment {
-    return Assignment.Value(this, value)
+fun Table.DoubleColumn.default(value: Double): Table.DoubleColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<Boolean>.invoke(value: Boolean): Assignment {
-    return Assignment.Value(this, value)
+fun Table.BooleanColumn.default(value: Boolean): Table.BooleanColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<String>.invoke(value: String?): Assignment {
-    return Assignment.Value(this, value)
+fun Table.StringColumn.default(value: String): Table.StringColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun Column<ByteArray>.invoke(value: ByteArray?): Assignment {
-    return Assignment.Value(this, value)
+fun Table.BlobColumn.default(value: ByteArray): Table.BlobColumn = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }

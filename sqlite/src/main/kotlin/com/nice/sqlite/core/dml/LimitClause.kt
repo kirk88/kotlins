@@ -8,7 +8,7 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-class LimitClause<T : Table> @PublishedApi internal constructor(
+data class LimitClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val limit: Int,
     @PublishedApi
@@ -80,7 +80,7 @@ inline fun <T : Table> LimitClause<T>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val limit: Int,
     @PublishedApi
@@ -153,7 +153,7 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val limit: Int,
     @PublishedApi
@@ -227,7 +227,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.selectDis
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val limit: Int,
     @PublishedApi

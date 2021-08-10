@@ -18,10 +18,9 @@ interface ViewSubject {
 
 }
 
-class StatementSubject<T : Table> @PublishedApi internal constructor(override val table: T) :
-    Subject<T>
+data class StatementSubject<T : Table> @PublishedApi internal constructor(override val table: T) : Subject<T>
 
-class StatementViewSubject @PublishedApi internal constructor(override val view: View) : ViewSubject
+data class StatementViewSubject @PublishedApi internal constructor(override val view: View) : ViewSubject
 
 inline fun offer(view: View): StatementViewSubject {
     return StatementViewSubject(view)
@@ -29,6 +28,13 @@ inline fun offer(view: View): StatementViewSubject {
 
 inline fun StatementViewSubject.create(statement: () -> QueryStatement): CreateViewStatement {
     return CreateViewStatement(this, statement())
+}
+
+inline fun StatementViewSubject.create(
+    executor: StatementExecutor,
+    statement: () -> QueryStatement
+) {
+   executor.execute(create(statement))
 }
 
 inline fun StatementViewSubject.select(): SelectViewStatement {
@@ -140,7 +146,7 @@ inline fun <T : Table> StatementSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): UpdateStatement<T> {
-    return UpdateStatement(this, values(table), conflictAlgorithm)
+    return UpdateStatement(this, conflictAlgorithm, values(table))
 }
 
 inline fun <T : Table> StatementSubject<T>.update(
@@ -148,7 +154,20 @@ inline fun <T : Table> StatementSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): Int {
-    return executor.executeUpdateDelete(update(conflictAlgorithm, values))
+    return executor.executeUpdate(update(conflictAlgorithm, values))
+}
+
+inline fun <T : Table> StatementSubject<T>.updateBatch(
+    buildAction: UpdateBatchBuilder<T>.() -> Unit
+): UpdateBatchStatement<T> {
+    return UpdateBatchStatement(this, UpdateBatchBuilder(this).apply(buildAction))
+}
+
+inline fun <T : Table> StatementSubject<T>.updateBatch(
+    executor: StatementExecutor,
+    buildAction: UpdateBatchBuilder<T>.() -> Unit
+): Int {
+    return executor.executeUpdateBatch(updateBatch(buildAction))
 }
 
 inline fun <T : Table> StatementSubject<T>.delete(): DeleteStatement<T> {
@@ -156,14 +175,14 @@ inline fun <T : Table> StatementSubject<T>.delete(): DeleteStatement<T> {
 }
 
 inline fun <T : Table> StatementSubject<T>.delete(executor: StatementExecutor): Int {
-    return executor.executeUpdateDelete(delete())
+    return executor.executeDelete(delete())
 }
 
 inline fun <T : Table> StatementSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): InsertStatement<T> {
-    return InsertStatement(this, values(table), conflictAlgorithm)
+    return InsertStatement(this, conflictAlgorithm, values(table))
 }
 
 
@@ -176,16 +195,14 @@ inline fun <T : Table> StatementSubject<T>.insert(
 }
 
 inline fun <T : Table> StatementSubject<T>.insertBatch(
-    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    buildAction: BatchAssignmentsBuilder<T>.() -> Unit
-): BatchInsertStatement<T> {
-    return BatchInsertStatement(this, BatchAssignmentsBuilder(table).apply(buildAction), conflictAlgorithm)
+    buildAction: InsertBatchBuilder<T>.() -> Unit
+): InsertBatchStatement<T> {
+    return InsertBatchStatement(this, InsertBatchBuilder(this).apply(buildAction))
 }
 
 inline fun <T : Table> StatementSubject<T>.insertBatch(
     executor: StatementExecutor,
-    conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    buildAction: BatchAssignmentsBuilder<T>.() -> Unit
+    buildAction: InsertBatchBuilder<T>.() -> Unit
 ): Long {
-    return executor.executeBatchInsert(insertBatch(conflictAlgorithm, buildAction))
+    return executor.executeInsertBatch(insertBatch(buildAction))
 }

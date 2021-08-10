@@ -17,7 +17,7 @@ class CreateViewStatement(
 
 class SelectViewStatement(
     val subject: StatementViewSubject
-) : Statement {
+) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)

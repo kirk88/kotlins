@@ -28,35 +28,30 @@ interface Definition : Sequence<Definition>, Renderer {
 abstract class Column(
     val table: Table,
     val name: String,
-    val type: SqlType,
-    val defaultValue: Any?
+    val type: SqlType
 ) : Definition {
 
-    private var _meta = Meta(defaultConstraint = if (defaultValue == null) null else ColumnConstraint.Default(defaultValue))
+    private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    fun primaryKey(autoIncrement: Boolean = false): Column = apply {
-        _meta = _meta.copy(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
-    }
-
-    fun foreignKey(references: Column): Column = apply {
-        _meta = _meta.copy(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
-    }
-
-    fun unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None): Column = apply {
-        _meta = _meta.copy(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
-    }
-
-    fun notNull(): Column = apply {
-        _meta = _meta.copy(notNullConstraint = ColumnConstraint.NotNull)
-    }
-
-    fun onUpdate(action: ColumnConstraintAction): Column = apply {
-        _meta = _meta.copy(onUpdateAction = action)
-    }
-
-    fun onDelete(action: ColumnConstraintAction): Column = apply {
-        _meta = _meta.copy(onDeleteAction = action)
+    internal fun setMeta(
+        defaultConstraint: ColumnConstraint.Default? = null,
+        primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
+        foreignKeyConstraint: ColumnConstraint.ForeignKey? = null,
+        uniqueConstraint: ColumnConstraint.Unique? = null,
+        notNullConstraint: ColumnConstraint.NotNull? = null,
+        onUpdateAction: ColumnConstraintAction? = null,
+        onDeleteAction: ColumnConstraintAction? = null
+    ) {
+        _meta = _meta.copy(
+            defaultConstraint = defaultConstraint ?: _meta.defaultConstraint,
+            primaryKeyConstraint = primaryKeyConstraint ?: _meta.primaryKeyConstraint,
+            foreignKeyConstraint = foreignKeyConstraint ?: _meta.foreignKeyConstraint,
+            uniqueConstraint = uniqueConstraint ?: _meta.uniqueConstraint,
+            notNullConstraint = notNullConstraint ?: _meta.notNullConstraint,
+            onUpdateAction = onUpdateAction ?: _meta.onUpdateAction,
+            onDeleteAction = onDeleteAction ?: _meta.onDeleteAction,
+        )
     }
 
     override fun render(): String = name.surrounding()
@@ -95,6 +90,30 @@ abstract class Column(
         val onDeleteAction: ColumnConstraintAction? = null
     )
 
+}
+
+fun <T : Column> T.primaryKey(autoIncrement: Boolean = false): T = apply {
+    setMeta(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
+}
+
+fun <T : Column> T.foreignKey(references: Column): T = apply {
+    setMeta(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
+}
+
+fun <T : Column> T.unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None): T = apply {
+    setMeta(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
+}
+
+fun <T : Column> T.notNull(): T = apply {
+    setMeta(notNullConstraint = ColumnConstraint.NotNull)
+}
+
+fun <T : Column> T.onUpdate(action: ColumnConstraintAction): T = apply {
+    setMeta(onUpdateAction = action)
+}
+
+fun <T : Column> T.onDelete(action: ColumnConstraintAction): T = apply {
+    setMeta(onDeleteAction = action)
 }
 
 class UColumn internal constructor(
@@ -138,16 +157,16 @@ class Index internal constructor(
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    fun unique(): Index = apply {
-        _meta = _meta.copy(unique = IndexConstraint.Unique)
-    }
-
-    fun ifNotExists(): Index = apply {
-        _meta = _meta.copy(ifNotExists = IndexConstraint.IfNotExists)
-    }
-
-    fun ifExists(): Index = apply {
-        _meta = _meta.copy(ifExists = IndexConstraint.IfExists)
+    internal fun setMeta(
+        unique: IndexConstraint.Unique? = null,
+        ifNotExists: IndexConstraint.IfNotExists? = null,
+        ifExists: IndexConstraint.IfExists? = null
+    ) {
+        _meta = _meta.copy(
+            unique = unique ?: _meta.unique,
+            ifNotExists = ifNotExists ?: _meta.ifNotExists,
+            ifExists = ifExists ?: _meta.ifExists
+        )
     }
 
     override fun render(): String = buildString {
@@ -203,6 +222,18 @@ fun index(
     vararg columns: Column,
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
+
+fun Index.unique(): Index = apply {
+    setMeta(unique = IndexConstraint.Unique)
+}
+
+fun Index.ifNotExists(): Index = apply {
+    setMeta(ifNotExists = IndexConstraint.IfNotExists)
+}
+
+fun Index.ifExists(): Index = apply {
+    setMeta(ifExists = IndexConstraint.IfExists)
+}
 
 class Function internal constructor(private val name: String, private val column: Column) :
     Definition {

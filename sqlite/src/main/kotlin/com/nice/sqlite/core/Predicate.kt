@@ -20,11 +20,32 @@ private class WhereCause(
     private val whereCase: (Boolean) -> String
 ) : Predicate {
 
+    private val id: Int by lazy { whereCase(true).hashCode() }
+
     override fun render(dialect: Dialect): String =
         whereCase(false).format(dialect, values)
 
     override fun fullRender(dialect: Dialect): String =
         whereCase(true).format(dialect, values)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WhereCause
+
+        if (!values.contentEquals(other.values)) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = values.contentHashCode()
+        result = 31 * result + id
+        return result
+    }
+
 }
 
 private class Condition(
@@ -38,6 +59,26 @@ private class Condition(
 
     override fun fullRender(dialect: Dialect): String =
         "(${predicateLeft.fullRender(dialect)} $connector ${predicateRight.fullRender(dialect)})"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Condition
+
+        if (predicateLeft != other.predicateLeft) return false
+        if (connector != other.connector) return false
+        if (predicateRight != other.predicateRight) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = predicateLeft.hashCode()
+        result = 31 * result + connector.hashCode()
+        result = 31 * result + predicateRight.hashCode()
+        return result
+    }
 
 }
 

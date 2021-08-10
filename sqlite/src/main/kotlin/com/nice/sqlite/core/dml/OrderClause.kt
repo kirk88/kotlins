@@ -9,7 +9,7 @@ import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-class OrderClause<T : Table> @PublishedApi internal constructor(
+data class OrderClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val orderings: Sequence<Ordering>,
     @PublishedApi
@@ -86,7 +86,7 @@ inline fun <T : Table> OrderClause<T>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Order2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Order2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val orderings: Sequence<Ordering>,
     @PublishedApi
@@ -167,7 +167,7 @@ inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Order3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Order3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val orderings: Sequence<Ordering>,
     @PublishedApi
@@ -249,7 +249,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.selectDis
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val orderings: Sequence<Ordering>,
     @PublishedApi

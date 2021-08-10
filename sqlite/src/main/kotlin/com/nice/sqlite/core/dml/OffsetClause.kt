@@ -8,7 +8,7 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-class OffsetClause<T : Table> @PublishedApi internal constructor(
+data class OffsetClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val offset: Int,
     @PublishedApi
@@ -71,7 +71,7 @@ inline fun <T : Table> OffsetClause<T>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val offset: Int,
     @PublishedApi
@@ -135,7 +135,7 @@ inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val offset: Int,
     @PublishedApi
@@ -200,7 +200,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectDi
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val offset: Int,
     @PublishedApi

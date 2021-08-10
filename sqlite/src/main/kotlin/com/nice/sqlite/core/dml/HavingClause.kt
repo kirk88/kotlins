@@ -10,7 +10,7 @@ import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-class HavingClause<T : Table> @PublishedApi internal constructor(
+data class HavingClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -94,7 +94,7 @@ inline fun <T : Table> HavingClause<T>.selectDistinct(
 }
 
 
-class Having2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Having2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -181,7 +181,7 @@ inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Having3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Having3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -272,7 +272,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.selectDi
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Having4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Having4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi

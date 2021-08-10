@@ -19,7 +19,7 @@ enum class JoinType {
     override fun toString() = name.uppercase()
 }
 
-class Join2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Join2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val subject: Subject<T>,
     @PublishedApi
@@ -47,7 +47,7 @@ inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.using(using: (T, T2) -> Se
 }
 
 
-class JoinUsing2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class JoinUsing2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val definitions: Sequence<Definition>,
     @PublishedApi
@@ -68,7 +68,7 @@ inline fun <T : Table, T2 : Table> JoinUsing2Clause<T, T2>.on(predicate: (T, T2)
     )
 }
 
-class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val subject: Subject<T>,
     @PublishedApi
@@ -163,7 +163,7 @@ inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Join3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Join3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val joinOn2Clause: JoinOn2Clause<T, T2>,
     @PublishedApi
@@ -191,7 +191,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.using(usin
 }
 
 
-class JoinUsing3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class JoinUsing3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val definitions: Sequence<Definition>,
     @PublishedApi
@@ -212,7 +212,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinUsing3Clause<T, T2, T3>.on(pr
     )
 }
 
-class JoinOn3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class JoinOn3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val joinOn2Clause: JoinOn2Clause<T, T2>,
     @PublishedApi
@@ -315,7 +315,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectDi
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     @PublishedApi
@@ -352,7 +352,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3
     )
 }
 
-class JoinUsing4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class JoinUsing4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val definitions: Sequence<Definition>,
     @PublishedApi
@@ -380,7 +380,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinUsing4Clause<T, T
     )
 }
 
-class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     @PublishedApi

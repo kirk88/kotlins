@@ -1,17 +1,22 @@
 package com.nice.sqlite.core.ddl
 
 import android.database.Cursor
+import com.nice.sqlite.core.dml.*
 
 interface StatementExecutor {
 
     fun execute(statement: Statement)
 
-    fun executeUpdateDelete(statement: Statement): Int
+    fun executeUpdate(statement: UpdateStatement<*>): Int
 
-    fun executeInsert(statement: Statement): Long
+    fun executeUpdateBatch(statement: UpdateBatchStatement<*>): Int
 
-    fun executeBatchInsert(statement: Statement): Long
+    fun executeDelete(statement: DeleteStatement<*>): Int
 
-    fun executeQuery(statement: Statement): Cursor
+    fun executeInsert(statement: InsertStatement<*>): Long
+
+    fun executeInsertBatch(statement: InsertBatchStatement<*>): Long
+
+    fun executeQuery(statement: QueryStatement): Cursor
 
 }

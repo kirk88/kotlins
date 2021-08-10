@@ -172,7 +172,7 @@ SQLite的kotlin封装
 ```kotlin
 object TestTable : Table("test") {
     val id = LongColumn("id").primaryKey()
-    val name = StringColumn("name").default("jack")
+    val name = StringColumn("name", "jack")
     val age = IntColumn("age")
     val flag = BooleanColumn("flag")
     val number = IntColumn("number").default(10)

@@ -4,7 +4,6 @@ package com.nice.sqlite
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
-import android.util.Log
 
 fun interface RowParser<out T> {
     fun parseRow(row: Array<ColumnValue>): T
@@ -116,7 +115,6 @@ private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
     val count = cursor.columnCount
     val map = mutableMapOf<String, ColumnValue>()
     for (index in 0 until count) {
-        Log.e("TAGTAG", "name: ${cursor.getColumnName(index)}")
         map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
     }
     return map
@@ -150,19 +148,19 @@ class ColumnValue internal constructor(internal val value: Any?) {
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> asTyped(type: Class<T>): T? = castValue(value, type) as T?
 
-    fun asString(defaultValue: String = ""): String = value?.toString() ?: defaultValue
-
-    fun asBlob(defaultValue: ByteArray = byteArrayOf()) = value as? ByteArray ?: defaultValue
+    fun asInt(defaultValue: Int = 0) = (value as? Long)?.toInt() ?: defaultValue
 
     fun asLong(defaultValue: Long = 0.toLong()) = value as? Long ?: defaultValue
 
     fun asShort(defaultValue: Short = 0.toShort()) = (value as? Long)?.toShort() ?: defaultValue
 
-    fun asInt(defaultValue: Int = 0) = (value as? Long)?.toInt() ?: defaultValue
-
     fun asDouble(defaultValue: Double = 0.toDouble()) = value as? Double ?: defaultValue
 
     fun asFloat(defaultValue: Float = 0.toFloat()) = (value as? Double)?.toFloat() ?: defaultValue
+
+    fun asString(defaultValue: String = ""): String = value?.toString() ?: defaultValue
+
+    fun asBlob(defaultValue: ByteArray = byteArrayOf()) = value as? ByteArray ?: defaultValue
 
     override fun toString(): String {
         return value.toString()
@@ -226,6 +224,10 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
 
     if (value is ByteArray && (type == ByteArray::class.java)) {
         return value
+    }
+
+    if (value is String && (type == ByteArray::class.java)) {
+        return value.encodeToByteArray()
     }
 
     throw IllegalArgumentException("Value $value of type ${value::class.java} can't be cast to ${type.canonicalName}")

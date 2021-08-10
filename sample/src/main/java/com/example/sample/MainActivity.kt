@@ -14,6 +14,7 @@ import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.DBTest
 import com.example.sample.db.TestTable
+import com.example.sample.db.TestView
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -34,13 +35,8 @@ import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
+import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.core.insertBatch
-import com.nice.sqlite.core.invoke
-import com.nice.sqlite.core.offer
-import com.nice.sqlite.core.orderBy
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -80,28 +76,51 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
                 repeat(10000) { index ->
-                    val bean = DBTest(id = index.toLong(), name = "jack", age = index, flag = true, number = -index)
+                    val bean = DBTest(id = index.toLong(), name = "jack", age = index, flag = true, number = -index, data = byteArrayOf(1, 2, 3))
                     beans.add(bean)
                 }
 
                 var start = System.currentTimeMillis()
-                offer(TestTable).insertBatch(statementExecutor, ConflictAlgorithm.Replace) {
+                offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
-                        assignments {
-                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                    it.flag(bean.flag) + it.number(bean.number)
+                        item {
+                            conflictAlgorithm = ConflictAlgorithm.Replace
+
+                            assignments {
+                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
+                            }
                         }
                     }
+                }.also {
+                    Log.e(TAG, "insert last row id: $it")
                 }
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
                 start = System.currentTimeMillis()
+                offer(TestTable).updateBatch(statementExecutor){
+                    for (bean in beans){
+                        item {
+                            conflictAlgorithm = ConflictAlgorithm.Replace
+
+                            where {
+                                it.id eq bean.id
+                            }
+
+                            assignments {
+                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
+                            }
+                        }
+                    }
+                }.also {
+                    Log.e(TAG, "update number of rows: $it")
+                }
+                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
+
+                start = System.currentTimeMillis()
                 var count = 0
-                for (row in offer(TestTable).orderBy {
-                    desc(it.id)
-                }.selectDistinct(statementExecutor) {
-                    it.name
-                }.asMapSequence()) {
+                for (row in offer(TestView).select(statementExecutor).asMapSequence()) {
                     if (count <= 10) {
                         Log.e(TAG, row.toString())
                     } else {

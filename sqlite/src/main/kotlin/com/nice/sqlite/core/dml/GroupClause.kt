@@ -11,7 +11,7 @@ import com.nice.sqlite.core.ddl.Definition
 import com.nice.sqlite.core.ddl.Ordering
 import com.nice.sqlite.core.ddl.StatementExecutor
 
-class GroupClause<T : Table> @PublishedApi internal constructor(
+data class GroupClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val columns: Sequence<Column>,
     @PublishedApi
@@ -97,7 +97,7 @@ inline fun <T : Table> GroupClause<T>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val columns: Sequence<Column>,
     @PublishedApi
@@ -192,7 +192,7 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val columns: Sequence<Column>,
     @PublishedApi
@@ -290,7 +290,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDis
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val columns: Sequence<Column>,
     @PublishedApi

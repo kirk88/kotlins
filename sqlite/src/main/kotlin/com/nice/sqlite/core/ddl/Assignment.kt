@@ -1,11 +1,10 @@
 package com.nice.sqlite.core.ddl
 
-import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.dml.MutableSequence
 import com.nice.sqlite.core.dml.OnceIterator
 import com.nice.sqlite.core.dml.mutableSequenceOf
 
-interface Assignment : Sequence<Assignment>, Renderer {
+interface Assignment : Sequence<Assignment> {
 
     val column: Column
     val value: Any?
@@ -15,11 +14,7 @@ interface Assignment : Sequence<Assignment>, Renderer {
     operator fun plus(assignment: Assignment): MutableSequence<Assignment> =
         mutableSequenceOf(this, assignment)
 
-    override fun render(): String = "${column.render()} = ${value.toSqlString()}"
-
-    override fun fullRender(): String = "${column.fullRender()} = ${value.toSqlString()}"
-
-    class Value(override val column: Column, override val value: Any?) : Assignment {
+    data class Value(override val column: Column, override val value: Any?) : Assignment {
         override fun toString(): String = "$column = $value"
     }
 
@@ -31,21 +26,26 @@ class Assignments @PublishedApi internal constructor(
 
     internal val id: Int = toString().hashCode()
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Assignments
+
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+
     override fun toString(): String = assignments.joinToString {
         it.column.name
     }
 
 }
-
-class BatchAssignmentsBuilder<T : Table> @PublishedApi internal constructor(
-    @PublishedApi internal val table: T
-) : MutableSequence<Assignments> by mutableSequenceOf() {
-
-    inline fun assignments(assignments: (T) -> Sequence<Assignment>): Assignments =
-        Assignments(assignments(table)).also { add(it) }
-
-}
-
 
 internal fun Any?.toSqlString(): String {
     return when (this) {

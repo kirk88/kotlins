@@ -12,7 +12,7 @@ import androidx.sqlite.db.transaction
 import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.StatementExecutor
-import com.nice.sqlite.core.dml.BatchInsertStatement
+import com.nice.sqlite.core.dml.*
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SQLiteStatementExecutor(private val database: SupportSQLiteDatabase) :
@@ -31,30 +31,45 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         }
     }
 
-    override fun executeUpdateDelete(statement: Statement): Int {
+    override fun executeUpdate(statement: UpdateStatement<*>): Int {
+        return database.compileStatement(statement.toString(SQLiteDialect)).also {
+            it.bindAssignments(statement.assignments)
+        }.executeUpdateDelete()
+    }
+
+    override fun executeUpdateBatch(statement: UpdateBatchStatement<*>): Int {
+        var numberOfRows = 0
+        while (statement.moveToNext(SQLiteDialect)) {
+            val executable = statement.next()
+            numberOfRows += database.compileStatement(executable.sql).also {
+                it.bindAssignments(executable.assignments)
+            }.executeUpdateDelete()
+        }
+        return numberOfRows
+    }
+
+    override fun executeDelete(statement: DeleteStatement<*>): Int {
         return database.compileStatement(statement.toString(SQLiteDialect)).executeUpdateDelete()
     }
 
-    override fun executeInsert(statement: Statement): Long {
-        return database.compileStatement(statement.toString(SQLiteDialect)).executeInsert()
+    override fun executeInsert(statement: InsertStatement<*>): Long {
+        return database.compileStatement(statement.toString(SQLiteDialect)).also {
+            it.bindAssignments(statement.assignments)
+        }.executeInsert()
     }
 
-    override fun executeBatchInsert(statement: Statement): Long {
-        return if (statement is BatchInsertStatement<*>) {
-            var lastRowId: Long = -1
-            while (statement.moveToNext(SQLiteDialect)) {
-                val executable = statement.next()
-                lastRowId = database.compileStatement(executable.sql).also {
-                    it.bindAssignments(executable.assignments)
-                }.executeInsert()
-            }
-            lastRowId
-        } else {
-            executeInsert(statement)
+    override fun executeInsertBatch(statement: InsertBatchStatement<*>): Long {
+        var lastRowId = (-1).toLong()
+        while (statement.moveToNext(SQLiteDialect)) {
+            val executable = statement.next()
+            lastRowId = database.compileStatement(executable.sql).also {
+                it.bindAssignments(executable.assignments)
+            }.executeInsert()
         }
+        return lastRowId
     }
 
-    override fun executeQuery(statement: Statement): Cursor {
+    override fun executeQuery(statement: QueryStatement): Cursor {
         return database.query(statement.toString(SQLiteDialect))
     }
 

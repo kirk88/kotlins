@@ -8,7 +8,7 @@ import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ddl.*
 
-class WhereClause<T : Table> @PublishedApi internal constructor(
+data class WhereClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -83,7 +83,7 @@ inline fun <T : Table> WhereClause<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): UpdateStatement<T> {
-    return UpdateStatement(subject, values(subject.table), conflictAlgorithm, whereClause = this)
+    return UpdateStatement(subject, conflictAlgorithm, values(subject.table), whereClause = this)
 }
 
 inline fun <T : Table> WhereClause<T>.update(
@@ -91,7 +91,20 @@ inline fun <T : Table> WhereClause<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Assignment>
 ): Int {
-    return executor.executeUpdateDelete(update(conflictAlgorithm, values))
+    return executor.executeUpdate(update(conflictAlgorithm, values))
+}
+
+inline fun <T : Table> WhereClause<T>.updateBatch(
+    buildAction: UpdateBatchBuilder<T>.() -> Unit
+): UpdateBatchStatement<T> {
+    return UpdateBatchStatement(subject, UpdateBatchBuilder(subject).apply(buildAction))
+}
+
+inline fun <T : Table> WhereClause<T>.updateBatch(
+    executor: StatementExecutor,
+    buildAction: UpdateBatchBuilder<T>.() -> Unit
+): Int {
+    return executor.executeUpdateBatch(updateBatch(buildAction))
 }
 
 inline fun <T : Table> WhereClause<T>.delete(): DeleteStatement<T> {
@@ -99,10 +112,10 @@ inline fun <T : Table> WhereClause<T>.delete(): DeleteStatement<T> {
 }
 
 inline fun <T : Table> WhereClause<T>.delete(executor: StatementExecutor): Int {
-    return executor.executeUpdateDelete(delete())
+    return executor.executeDelete(delete())
 }
 
-class Where2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
+data class Where2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -184,7 +197,7 @@ inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.selectDistinct(
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Where3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
+data class Where3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
@@ -274,7 +287,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.selectDis
     return executor.executeQuery(selectDistinct(selection))
 }
 
-class Where4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
+data class Where4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val predicate: Predicate,
     @PublishedApi
