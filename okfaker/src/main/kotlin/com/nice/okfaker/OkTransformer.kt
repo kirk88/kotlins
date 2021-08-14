@@ -1,53 +1,32 @@
 package com.nice.okfaker
 
 import okhttp3.Response
-import java.lang.reflect.Type
 
 internal class OkTransformer<T> {
 
-    private var responseMapper: OkMapper<Response, T>? = null
-    private var errorMapper: OkMapper<Throwable, T>? = null
+    private var responseMapper: OkResponseMapper<T>? = null
+    private var errorMapper: OkErrorMapper<T>? = null
 
-    fun mapResponse(mapper: OkMapper<Response, T>) {
+    fun mapResponse(mapper: OkResponseMapper<T>) {
         responseMapper = mapper
     }
 
-    fun mapResponse(clazz: Class<T>) {
-        responseMapper = OkMapperImpl(clazz)
-    }
-
-    fun mapResponse(type: Type) {
-        responseMapper = OkMapperImpl(type)
-    }
-
-    fun mapError(mapper: OkMapper<Throwable, T>) {
+    fun mapError(mapper: OkErrorMapper<T>) {
         errorMapper = mapper
     }
 
     fun transformResponse(response: Response): T {
         return try {
-            val mapper = requireNotNull(responseMapper) {
-                "Response Mapper must not be null"
-            }
-            mapper.map(response)
+            requireNotNull(responseMapper) {
+                "OkResponseMapper must not be null"
+            }.invoke(response)
         } catch (error: Throwable) {
             transformError(error)
         }
     }
 
     fun transformError(error: Throwable): T {
-        return errorMapper?.map(error) ?: throw error
-    }
-
-    private class OkMapperImpl<T>(private val type: Type) : OkMapper<Response, T> {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun map(value: Response): T = when (type) {
-            Response::class.java -> value as T
-            String::class.java -> value.body!!.string() as T
-            else -> GSON.fromJson(value.body!!.string(), type)
-        }
-
+        return errorMapper?.invoke(error) ?: throw error
     }
 
 }

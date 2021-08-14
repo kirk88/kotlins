@@ -8,7 +8,7 @@ internal interface OkCallback<T> {
 
     fun onError(error: Throwable)
 
-    fun onCompletion()
+    fun onComplete()
 
     fun onCancel()
 

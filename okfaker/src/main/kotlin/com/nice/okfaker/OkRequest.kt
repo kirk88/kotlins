@@ -2,15 +2,15 @@ package com.nice.okfaker
 
 import okhttp3.*
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
 
-internal class OkRequest(
-        private val client: OkHttpClient,
-        private val request: Request,
-        private val requestInterceptors: List<OkRequestInterceptor>,
-        private val responseInterceptors: List<OkResponseInterceptor>
+internal class OkRequest<T>(
+    private val client: OkHttpClient,
+    private val request: Request,
+    private val requestInterceptors: List<OkRequestInterceptor>,
+    private val responseInterceptors: List<OkResponseInterceptor>,
+    private val transformer: OkTransformer<T>
 ) {
 
     private var call: Call? = null
@@ -18,8 +18,10 @@ internal class OkRequest(
 
     @Volatile
     private var canceled = false
+
     @Volatile
     private var executed = false
+
 
     val isExecuted: Boolean
         get() {
@@ -43,11 +45,12 @@ internal class OkRequest(
         synchronized(this) { call?.cancel() }
     }
 
-    fun execute(): Response {
-        return processResponse(createCall().execute())
+    fun execute(): T {
+        val response = createCall().execute()
+        return transformer.transformResponse(processResponse(response))
     }
 
-    fun enqueue(callback: OkCallback<Response>) {
+    fun enqueue(callback: OkCallback<T>) {
         var call: Call? = null
         var failure: Throwable? = null
         try {
@@ -74,38 +77,42 @@ internal class OkRequest(
         })
     }
 
-    private fun dispatchOnStart(callback: OkCallback<Response>) {
+    private fun dispatchOnStart(callback: OkCallback<T>) {
         callback.onStart()
     }
 
-    private fun dispatchOnFailure(callback: OkCallback<Response>, error: Throwable) {
+    private fun dispatchOnFailure(callback: OkCallback<T>, error: Throwable) {
         if (dispatchOnCancel(callback)) {
             return
         }
 
         try {
-            callback.onError(error)
-        } finally {
-            callback.onCompletion()
-        }
-    }
-
-    private fun dispatchOnResponse(callback: OkCallback<Response>, response: Response) {
-        if (dispatchOnCancel(callback)) {
-            return
-        }
-
-        try {
-            callback.onSuccess(processResponse(response))
+            transformer.transformError(error).let {
+                callback.onSuccess(it)
+            }
         } catch (error: Throwable) {
             callback.onError(error)
         } finally {
-            callback.onCompletion()
+            callback.onComplete()
         }
     }
 
-    private fun dispatchOnCancel(callback: OkCallback<Response>): Boolean {
-        if (canceled) {
+    private fun dispatchOnResponse(callback: OkCallback<T>, response: Response) {
+        try {
+            transformer.transformResponse(processResponse(response)).let {
+                callback.onSuccess(it)
+            }
+        } catch (error: Throwable) {
+            if (!dispatchOnCancel(callback)) {
+                callback.onError(error)
+            }
+        } finally {
+            callback.onComplete()
+        }
+    }
+
+    private fun dispatchOnCancel(callback: OkCallback<T>): Boolean {
+        if (isCanceled) {
             callback.onCancel()
             return true
         }
@@ -138,7 +145,7 @@ internal class OkRequest(
     private fun processRequest(request: Request): Request {
         var handledRequest = request
         for (interceptor in requestInterceptors) {
-            handledRequest = interceptor.intercept(handledRequest)
+            handledRequest = interceptor.invoke(handledRequest)
         }
         return handledRequest
     }
@@ -146,12 +153,12 @@ internal class OkRequest(
     private fun processResponse(response: Response): Response {
         var handledResponse = response
         for (interceptor in responseInterceptors) {
-            handledResponse = interceptor.intercept(handledResponse)
+            handledResponse = interceptor.invoke(handledResponse)
         }
         return handledResponse
     }
 
-    class Builder(private val method: OkRequestMethod) {
+    class Builder<T>(private val method: OkRequestMethod) {
 
         private var client: OkHttpClient? = null
 
@@ -195,14 +202,16 @@ internal class OkRequest(
         private val requestInterceptors = mutableListOf<OkRequestInterceptor>()
         private val responseInterceptors = mutableListOf<OkResponseInterceptor>()
 
+        private val transformer = OkTransformer<T>()
+
         fun client(client: OkHttpClient) = apply {
             this.client = client
         }
 
         fun url(url: HttpUrl) = apply {
             urlBuilder.scheme(url.scheme)
-                    .host(url.host)
-                    .port(url.port)
+                .host(url.host)
+                .port(url.port)
 
             val username = url.username
             val password = url.password
@@ -292,11 +301,7 @@ internal class OkRequest(
         }
 
         fun addFormDataPart(name: String, contentType: MediaType?, file: File) = apply {
-            multipartBodyBuilder!!.addFormDataPart(
-                    name,
-                    file.name,
-                    file.asRequestBody(contentType)
-            )
+            multipartBodyBuilder!!.addFormDataPart(name, file.name, file.asRequestBody(contentType))
         }
 
         fun addPart(part: MultipartBody.Part) = apply {
@@ -305,14 +310,6 @@ internal class OkRequest(
 
         fun addPart(body: RequestBody) = apply {
             multipartBodyBuilder!!.addPart(body)
-        }
-
-        fun stringBody(contentType: MediaType?, body: String) = apply {
-            requestBody = body.toRequestBody(contentType)
-        }
-
-        fun fileBody(contentType: MediaType?, file: File) = apply {
-            requestBody = file.asRequestBody(contentType)
         }
 
         fun requestBody(body: RequestBody) = apply {
@@ -335,7 +332,15 @@ internal class OkRequest(
             responseInterceptors.add(interceptor)
         }
 
-        fun build(): OkRequest {
+        fun mapResponse(mapper: OkResponseMapper<T>) = apply {
+            transformer.mapResponse(mapper)
+        }
+
+        fun mapError(mapper: OkErrorMapper<T>) = apply {
+            transformer.mapError(mapper)
+        }
+
+        fun build(): OkRequest<T> {
             val body = when {
                 requestBodyApplied -> requestBody
                 formBodyApplied -> formBodyBuilder!!.build()
@@ -344,14 +349,15 @@ internal class OkRequest(
             }
 
             val request = requestBuilder.url(urlBuilder.build())
-                    .method(method.name, body)
-                    .build()
+                .method(method.name, body)
+                .build()
 
             return OkRequest(
-                    requireNotNull(client) { "OkHttpClient must not be null" },
-                    request,
-                    requestInterceptors,
-                    responseInterceptors
+                requireNotNull(client) { "OkHttpClient must not be null" },
+                request,
+                requestInterceptors,
+                responseInterceptors,
+                transformer
             )
         }
 

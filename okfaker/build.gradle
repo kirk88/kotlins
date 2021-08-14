@@ -28,6 +28,7 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
     }
 
     sourceSets {
@@ -40,6 +41,8 @@ dependencies {
     implementation deps.gson
     api deps.okhttp3
     api deps.okhttp3Logging
+    api deps.kotlinxCoroutinesCore
+    api deps.kotlinxCoroutinesAndroid
 }
 
 def versionMajor = 1

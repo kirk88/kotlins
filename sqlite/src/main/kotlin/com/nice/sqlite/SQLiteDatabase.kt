@@ -33,7 +33,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun executeUpdate(statement: UpdateStatement<*>): Int {
         return database.compileStatement(statement.toString(SQLiteDialect)).also {
-            it.bindAssignments(statement.assignments)
+            it.bindAll(statement.assignments)
         }.executeUpdateDelete()
     }
 
@@ -42,7 +42,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         while (statement.moveToNext(SQLiteDialect)) {
             val executable = statement.next()
             numberOfRows += database.compileStatement(executable.sql).also {
-                it.bindAssignments(executable.assignments)
+                it.bindAll(executable.assignments)
             }.executeUpdateDelete()
         }
         return numberOfRows
@@ -54,16 +54,16 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun executeInsert(statement: InsertStatement<*>): Long {
         return database.compileStatement(statement.toString(SQLiteDialect)).also {
-            it.bindAssignments(statement.assignments)
+            it.bindAll(statement.assignments)
         }.executeInsert()
     }
 
     override fun executeInsertBatch(statement: InsertBatchStatement<*>): Long {
-        var lastRowId = (-1).toLong()
+        var lastRowId = -1L
         while (statement.moveToNext(SQLiteDialect)) {
             val executable = statement.next()
             lastRowId = database.compileStatement(executable.sql).also {
-                it.bindAssignments(executable.assignments)
+                it.bindAll(executable.assignments)
             }.executeInsert()
         }
         return lastRowId
@@ -73,7 +73,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun SupportSQLiteStatement.bindAssignments(assignments: Sequence<Assignment>) {
+    private fun SupportSQLiteStatement.bindAll(assignments: Sequence<Assignment>) {
         for ((index, assignment) in assignments.withIndex()) {
             when (val value = assignment.value) {
                 null -> bindNull(index + 1)

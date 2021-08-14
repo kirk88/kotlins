@@ -2,19 +2,16 @@
 
 package com.nice.okfaker
 
-import com.google.gson.reflect.TypeToken
 import okhttp3.*
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import java.lang.reflect.Type
-import kotlin.collections.set
 
 class OkFaker<T> private constructor(
-    private val request: OkRequest,
-    private val transformer: OkTransformer<T>,
+    private val request: OkRequest<T>,
     private val onStartActions: List<SimpleAction>?,
     private val onSuccessActions: List<Action<T>>?,
     private val onErrorActions: List<Action<Throwable>>?,
-    private val onCompletionActions: List<SimpleAction>?,
+    private val onCompleteActions: List<SimpleAction>?,
     private val onCancelActions: List<SimpleAction>?
 ) {
 
@@ -30,64 +27,53 @@ class OkFaker<T> private constructor(
 
     fun cancel() = request.cancel()
 
-    fun execute(): T = transformer.transformResponse(request.execute())
+    fun execute(): T = request.execute()
 
     fun executeOrElse(onError: (Throwable) -> T): T = runCatching { execute() }.getOrElse(onError)
 
     fun executeOrNull(): T? = runCatching { execute() }.getOrNull()
 
     fun enqueue() = apply {
-        request.enqueue(OkCallbackWrapper(transformer, object : OkCallback<T> {
+        request.enqueue(OkCallbackWrapper(object : OkCallback<T> {
             override fun onStart() {
-                onStartActions?.forEach { action -> action.onAction() }
+                onStartActions?.forEach { it.invoke() }
             }
 
             override fun onSuccess(result: T) {
-                onSuccessActions?.forEach { action -> action.onAction(result) }
+                onSuccessActions?.forEach { it.invoke(result) }
             }
 
             override fun onError(error: Throwable) {
-                onErrorActions?.forEach { action -> action.onAction(error) }
+                onErrorActions?.forEach { it.invoke(error) }
             }
 
-            override fun onCompletion() {
-                onCompletionActions?.forEach { action -> action.onAction() }
+            override fun onComplete() {
+                onCompleteActions?.forEach { it.invoke() }
             }
 
             override fun onCancel() {
-                onCancelActions?.forEach { action -> action.onAction() }
+                onCancelActions?.forEach { it.invoke() }
             }
         }))
     }
 
     private class OkCallbackWrapper<T>(
-        private val transformer: OkTransformer<T>,
         private val callback: OkCallback<T>
-    ) : OkCallback<Response> {
+    ) : OkCallback<T> {
         override fun onStart() {
             OkCallbacks.onStart(callback)
         }
 
-        override fun onSuccess(result: Response) {
-            runCatching { transformer.transformResponse(result) }
-                .onSuccess {
-                    OkCallbacks.onSuccess(callback, it)
-                }.onFailure {
-                    OkCallbacks.onError(callback, it)
-                }
+        override fun onSuccess(result: T) {
+            OkCallbacks.onSuccess(callback, result)
         }
 
         override fun onError(error: Throwable) {
-            runCatching { transformer.transformError(error) }
-                .onSuccess {
-                    OkCallbacks.onSuccess(callback, it)
-                }.onFailure {
-                    OkCallbacks.onError(callback, it)
-                }
+            OkCallbacks.onError(callback, error)
         }
 
-        override fun onCompletion() {
-            OkCallbacks.onCompletion(callback)
+        override fun onComplete() {
+            OkCallbacks.onComplete(callback)
         }
 
         override fun onCancel() {
@@ -97,11 +83,7 @@ class OkFaker<T> private constructor(
 
     class Builder<T> {
 
-        private val config: OkConfig?
-
-        private val builder: OkRequest.Builder
-
-        private val transformer = OkTransformer<T>()
+        private val builder: OkRequest.Builder<T>
 
         private var onStartApplied = false
         private val onStartActions: MutableList<SimpleAction> by lazy { mutableListOf() }
@@ -112,11 +94,13 @@ class OkFaker<T> private constructor(
         private var onErrorApplied = false
         private val onErrorActions: MutableList<Action<Throwable>> by lazy { mutableListOf() }
 
-        private var onCompletionApplied = false
-        private val onCompletionActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+        private var onCompleteApplied = false
+        private val onCompleteActions: MutableList<SimpleAction> by lazy { mutableListOf() }
 
         private var onCancelApplied = false
         private val onCancelActions: MutableList<SimpleAction> by lazy { mutableListOf() }
+
+        private val config: OkConfig?
 
         @PublishedApi
         internal constructor(method: OkRequestMethod) {
@@ -133,9 +117,15 @@ class OkFaker<T> private constructor(
             config.cacheControl?.let { cacheControl(it) }
             config.username?.let { username(it) }
             config.password?.let { password(it) }
-            config.headers?.let { headers(it) }
-            config.queryParameters?.let { queryParameters(it) }
-            config.formParameters?.let { formParameters(it) }
+            config.headers?.forEach {
+                builder.header(it.key, it.value)
+            }
+            config.queryParameters?.forEach {
+                builder.setQueryParameter(it.key, it.value)
+            }
+            config.formParameters?.forEach {
+                builder.addFormParameter(it.key, it.value)
+            }
         }
 
         fun client(client: OkHttpClient) = apply {
@@ -178,160 +168,36 @@ class OkFaker<T> private constructor(
             builder.password(password())
         }
 
-        fun headers(headers: Map<String, Any?>) = apply {
-            headers.forEach {
-                builder.header(it.key, it.value.toStringOrEmpty())
-            }
+        fun tag(tag: Any?) = apply {
+            builder.tag(tag)
         }
 
-        fun headers(vararg headers: Pair<String, Any?>) = headers(mapOf(*headers))
-
-        fun headers(operation: RequestPairs<String, Any?>.() -> Unit) = headers(requestPairsOf(operation).toMap())
-
-        fun addHeaders(headers: Map<String, Any?>) = apply {
-            headers.forEach {
-                builder.addHeader(it.key, it.value.toStringOrEmpty())
-            }
+        fun tag(tag: () -> Any) = apply {
+            builder.tag(tag)
         }
 
-        fun addHeaders(vararg headers: Pair<String, Any?>) = addHeaders(mapOf(*headers))
-
-        fun addHeaders(operation: RequestPairs<String, Any?>.() -> Unit) = addHeaders(requestPairsOf(operation).toMap())
-
-        fun removeHeaders(name: String) = apply {
-            builder.removeHeaders(name)
+        fun <T> tag(type: Class<in T>, tag: T?) = apply {
+            builder.tag(type, tag)
         }
 
-        fun queryParameters(queryParameters: Map<String, Any?>) = apply {
-            queryParameters.forEach {
-                builder.setQueryParameter(it.key, it.value.toStringOrEmpty())
-            }
+        fun <T> tag(type: Class<in T>, tag: () -> T) = apply {
+            builder.tag(type, tag())
         }
 
-        fun queryParameters(vararg queryParameters: Pair<String, Any?>) = queryParameters(mapOf(*queryParameters))
-
-        fun queryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = queryParameters(requestPairsOf(operation).toMap())
-
-        fun addQueryParameters(queryParameters: Map<String, Any?>) = apply {
-            queryParameters.forEach {
-                builder.addQueryParameter(it.key, it.value.toStringOrEmpty())
-            }
+        fun headers(buildAction: HeadersBuilder.() -> Unit) = apply {
+            HeadersBuilder().apply(buildAction)
         }
 
-        fun addQueryParameters(vararg queryParameters: Pair<String, Any?>) = addQueryParameters(mapOf(*queryParameters))
-
-        fun addQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addQueryParameters(requestPairsOf(operation).toMap())
-
-        fun encodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
-            encodedQueryParameters.forEach {
-                builder.setEncodedQueryParameter(it.key, it.value.toStringOrEmpty())
-            }
+        fun queryParameters(buildAction: QueryParametersBuilder.() -> Unit) = apply {
+            QueryParametersBuilder().apply(buildAction)
         }
 
-        fun encodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = encodedQueryParameters(mapOf(*encodedQueryParameters))
-
-        fun encodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedQueryParameters(requestPairsOf(operation).toMap())
-
-        fun addEncodedQueryParameters(encodedQueryParameters: Map<String, Any?>) = apply {
-            encodedQueryParameters.forEach {
-                builder.addEncodedQueryParameter(it.key, it.value.toStringOrEmpty())
-            }
+        fun formParameters(buildAction: FormParametersBuilder.() -> Unit) = apply {
+            FormParametersBuilder().apply(buildAction)
         }
 
-        fun addEncodedQueryParameters(vararg encodedQueryParameters: Pair<String, Any?>) = addEncodedQueryParameters(mapOf(*encodedQueryParameters))
-
-        fun addEncodedQueryParameters(operation: RequestPairs<String, Any?>.() -> Unit) = addEncodedQueryParameters(requestPairsOf(operation).toMap())
-
-        fun removeQueryParameters(name: String) = apply {
-            builder.removeQueryParameters(name)
-        }
-
-        fun removeEncodedQueryParameters(name: String) = apply {
-            builder.removeEncodedQueryParameters(name)
-        }
-
-        fun formParameters(formParameters: Map<String, Any?>) = apply {
-            formParameters.forEach {
-                builder.addFormParameter(it.key, it.value.toStringOrEmpty())
-            }
-        }
-
-        fun formParameters(vararg formParameters: Pair<String, Any?>) = formParameters(mapOf(*formParameters))
-
-        fun formParameters(operation: RequestPairs<String, Any?>.() -> Unit) = formParameters(requestPairsOf(operation).toMap())
-
-        fun encodedFormParameters(encodedFormParameters: Map<String, Any?>) = apply {
-            encodedFormParameters.forEach {
-                builder.addEncodedFormParameter(it.key, it.value.toStringOrEmpty())
-            }
-        }
-
-        fun encodedFormParameters(vararg encodedFormParameters: Pair<String, Any?>) = encodedFormParameters(mapOf(*encodedFormParameters))
-
-        fun encodedFormParameters(operation: RequestPairs<String, Any?>.() -> Unit) = encodedFormParameters(requestPairsOf(operation).toMap())
-
-        fun formDataParts(formDataParts: Map<String, Any?>) = apply {
-            formDataParts.forEach {
-                it.value.let { value ->
-                    when (value) {
-                        is BodyFormDataPart -> builder.addFormDataPart(
-                            it.key,
-                            value.filename,
-                            value.body
-                        )
-                        is FileFormDataPart -> builder.addFormDataPart(
-                            it.key,
-                            value.contentType,
-                            value.file
-                        )
-                        else -> builder.addFormDataPart(it.key, value.toStringOrEmpty())
-                    }
-                }
-            }
-        }
-
-        fun formDataParts(vararg formDataParts: Pair<String, Any?>) = formDataParts(mapOf(*formDataParts))
-
-        fun formDataParts(operation: RequestPairs<String, Any?>.() -> Unit) = formDataParts(requestPairsOf(operation).toMap())
-
-        fun parts(bodies: Collection<RequestBody>) = apply {
-            bodies.forEach {
-                builder.addPart(it)
-            }
-        }
-
-        fun parts(vararg bodies: RequestBody) = apply {
-            bodies.forEach {
-                builder.addPart(it)
-            }
-        }
-
-        fun multiparts(multiparts: Collection<MultipartBody.Part>) = apply {
-            multiparts.forEach {
-                builder.addPart(it)
-            }
-        }
-
-        fun multiparts(vararg parts: MultipartBody.Part) = apply {
-            parts.forEach {
-                builder.addPart(it)
-            }
-        }
-
-        fun stringBody(contentType: MediaType? = null, body: String) = apply {
-            builder.stringBody(contentType, body)
-        }
-
-        fun stringBody(contentType: MediaType? = null, body: () -> String) = apply {
-            builder.stringBody(contentType, body())
-        }
-
-        fun fileBody(contentType: MediaType? = null, file: File) = apply {
-            builder.fileBody(contentType, file)
-        }
-
-        fun fileBody(contentType: MediaType? = null, file: () -> File) = apply {
-            builder.fileBody(contentType, file())
+        fun multipartBody(buildAction: MultipartBodyBuilder.() -> Unit) = apply {
+            MultipartBodyBuilder().apply(buildAction)
         }
 
         fun requestBody(body: RequestBody) = apply {
@@ -342,40 +208,32 @@ class OkFaker<T> private constructor(
             builder.requestBody(body())
         }
 
-        fun tag(tag: Any?) = apply {
-            builder.tag(tag)
-        }
-
-        fun <T> tag(type: Class<in T>, tag: T?) = apply {
-            builder.tag(type, tag)
-        }
-
-        fun addRequestInterceptor(interceptor: OkRequestInterceptor) = apply {
+        fun interceptRequest(interceptor: OkRequestInterceptor) = apply {
             builder.addRequestInterceptor(interceptor)
         }
 
-        fun addResponseInterceptor(interceptor: OkResponseInterceptor) = apply {
+        fun interceptResponse(interceptor: OkResponseInterceptor) = apply {
             builder.addResponseInterceptor(interceptor)
         }
 
-        fun mapResponse(mapper: OkMapper<Response, T>) = apply {
-            if (mapper is OkDownloadMapper) {
-                builder.addRequestInterceptor(mapper.requestInterceptor)
-                builder.addResponseInterceptor(mapper.responseInterceptor)
+        fun mapResponse(mapper: OkResponseMapper<T>) = apply {
+            builder.mapResponse(mapper)
+        }
+
+        fun mapError(mapper: OkErrorMapper<T>) = apply {
+            builder.mapError(mapper)
+        }
+
+        fun extension(extension: OkExtension<T>) {
+            builder.addRequestInterceptor {
+                extension.shouldInterceptRequest(it)
             }
-            transformer.mapResponse(mapper)
-        }
-
-        fun mapResponse(clazz: Class<T>) = apply {
-            transformer.mapResponse(clazz)
-        }
-
-        fun mapResponse(type: Type) = apply {
-            transformer.mapResponse(type)
-        }
-
-        fun mapError(mapper: OkMapper<Throwable, T>) = apply {
-            transformer.mapError(mapper)
+            builder.addResponseInterceptor {
+                extension.shouldInterceptResponse(it)
+            }
+            builder.mapResponse {
+                extension.map(it)
+            }
         }
 
         fun onStart(action: SimpleAction) = apply {
@@ -394,8 +252,8 @@ class OkFaker<T> private constructor(
         }
 
         fun onComplete(action: SimpleAction) = apply {
-            onCompletionApplied = true
-            onCompletionActions.add(action)
+            onCompleteApplied = true
+            onCompleteActions.add(action)
         }
 
         fun onCancel(action: SimpleAction) = apply {
@@ -405,11 +263,10 @@ class OkFaker<T> private constructor(
 
         fun build(): OkFaker<T> = OkFaker(
             builder.build(),
-            transformer,
             if (onStartApplied) onStartActions else null,
             if (onSuccessApplied) onSuccessActions else null,
             if (onErrorApplied) onErrorActions else null,
-            if (onCompletionApplied) onCompletionActions else null,
+            if (onCompleteApplied) onCompleteActions else null,
             if (onCancelApplied) onCancelActions else null
         )
 
@@ -420,6 +277,86 @@ class OkFaker<T> private constructor(
         fun executeOrNull(): T? = build().executeOrNull()
 
         fun enqueue(): OkFaker<T> = build().enqueue()
+
+        inner class HeadersBuilder internal constructor() {
+
+            fun add(name: String, value: Any?) {
+                builder.addHeader(name, value.toStringOrEmpty())
+            }
+
+            fun set(name: String, value: Any?) {
+                builder.header(name, value.toStringOrEmpty())
+            }
+
+            fun remove(name: String) {
+                builder.removeHeaders(name)
+            }
+
+        }
+
+        inner class QueryParametersBuilder internal constructor() {
+
+            fun add(name: String, value: Any?) {
+                builder.addQueryParameter(name, value.toStringOrEmpty())
+            }
+
+            fun addEncoded(name: String, value: Any?) {
+                builder.addEncodedQueryParameter(name, value.toStringOrEmpty())
+            }
+
+            fun set(name: String, value: Any?) {
+                builder.setQueryParameter(name, value.toStringOrEmpty())
+            }
+
+            fun setEncoded(name: String, value: Any?) {
+                builder.setEncodedQueryParameter(name, value.toStringOrEmpty())
+            }
+
+            fun remove(name: String) {
+                builder.removeQueryParameters(name)
+            }
+
+            fun removeEncoded(name: String) {
+                builder.removeEncodedQueryParameters(name)
+            }
+
+        }
+
+        inner class FormParametersBuilder internal constructor() {
+
+            fun add(name: String, value: Any?) {
+                builder.addFormParameter(name, value.toStringOrEmpty())
+            }
+
+            fun addEncoded(name: String, value: Any?) {
+                builder.addEncodedFormParameter(name, value.toStringOrEmpty())
+            }
+
+        }
+
+        inner class MultipartBodyBuilder internal constructor() {
+
+            fun add(name: String, value: Any?) {
+                builder.addFormDataPart(name, value.toStringOrEmpty())
+            }
+
+            fun add(name: String, filename: String?, body: RequestBody) {
+                builder.addFormDataPart(name, filename, body)
+            }
+
+            fun add(name: String, contentType: MediaType?, file: File) {
+                builder.addFormDataPart(name, file.name, file.asRequestBody(contentType))
+            }
+
+            fun add(part: MultipartBody.Part) {
+                builder.addPart(part)
+            }
+
+            fun add(body: RequestBody) {
+                builder.addPart(body)
+            }
+
+        }
 
     }
 
@@ -432,100 +369,46 @@ class OkFaker<T> private constructor(
 
         val globalConfig: OkConfig get() = config
 
-        fun <T> builder(
+        inline fun <T> builder(
             method: OkRequestMethod,
             config: OkConfig,
             block: Builder<T>.() -> Unit = {}
         ): Builder<T> = Builder<T>(method, config).apply(block)
 
-        fun <T> builder(
+        inline fun <T> builder(
             method: OkRequestMethod,
             block: Builder<T>.() -> Unit = {}
         ): Builder<T> = Builder<T>(method).apply(block)
 
         inline fun <reified T> get(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.GET, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
         inline fun <reified T> post(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.POST, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
         inline fun <reified T> delete(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.DELETE, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
         inline fun <reified T> put(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PUT, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
         inline fun <reified T> head(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.HEAD, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
         inline fun <reified T> patch(block: Builder<T>.() -> Unit = {}): Builder<T> = Builder<T>(OkRequestMethod.PATCH, globalConfig)
-            .mapResponse(object : TypeToken<T>() {}.type)
+            .mapResponse(typeMapper())
             .apply(block)
 
     }
 
 }
 
-fun interface Action<T> {
-    fun onAction(value: T)
-}
-
-fun interface SimpleAction {
-    fun onAction()
-}
-
-data class BodyFormDataPart(val body: RequestBody, val filename: String? = null)
-data class FileFormDataPart(val file: File, val contentType: MediaType? = null)
-
-class RequestPairs<K, V>(
-    pairs: Map<K, V> = mutableMapOf()
-) : Iterable<Map.Entry<K, V>> {
-
-    private val pairs: MutableMap<K, V> = pairs.toMutableMap()
-
-    infix fun K.and(value: V) {
-        pairs[this] = value
-    }
-
-    fun put(key: K, value: V): V? {
-        return pairs.put(key, value)
-    }
-
-    fun putAll(pairsForm: RequestPairs<out K, V>) {
-        pairs.putAll(pairsForm.pairs)
-    }
-
-    fun remove(key: K): V? {
-        return pairs.remove(key)
-    }
-
-    override fun toString(): String {
-        return GSON.toJson(pairs)
-    }
-
-    override fun iterator(): Iterator<Map.Entry<K, V>> {
-        return pairs.iterator()
-    }
-
-}
-
-fun <K, V> RequestPairs<K, V>.putAll(pairsFrom: Map<out K, V>) = putAll(RequestPairs(pairsFrom))
-
-fun <K, V> RequestPairs<K, V>.putAll(vararg pairsFrom: Pair<K, V>) = putAll(pairsFrom.toMap())
-
-fun <K, V> RequestPairs<K, V>.toMap(): Map<K, V> = map { it.key to it.value }.toMap()
-
-fun <K, V, M : MutableMap<in K, in V>> RequestPairs<K, V>.toMap(destination: M): M = map { it.key to it.value }.toMap(destination)
-
-inline fun requestPairsOf(crossinline operation: RequestPairs<String, Any?>.() -> Unit): RequestPairs<String, Any?> {
-    return RequestPairs<String, Any?>().apply(operation)
-}
-
-fun requestPairsOf(vararg pairs: Pair<String, Any?>): RequestPairs<String, Any?> = RequestPairs(pairs.toMap())
+typealias Action<T> = (T) -> Unit
+typealias SimpleAction = () -> Unit
 
 private fun Any?.toStringOrEmpty() = (this ?: "").toString()
