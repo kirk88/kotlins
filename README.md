@@ -41,6 +41,7 @@ OkHttp的kotlin封装
 初始化
 
 ```kotlin
+//不是必需操作
 OkFaker.setGlobalConfig(
     OkConfig.Builder()
         .baseUrl("https://www.baidu.com")
@@ -57,7 +58,7 @@ okFakerFlow<String> {
     url("/s")
 
     queryParameters {
-        add("wd", "hello word")
+        "wd" and "hello word"
     }
 
 }.onStart {
@@ -81,7 +82,7 @@ okFakerFlow<String> {
     url("/s")
 
     queryParameters {
-        add("wd", "hello word")
+        "wd" and "hello word"
     }
 
 }.onStart {
@@ -105,7 +106,7 @@ buildOkFaker<String> {
     url("/s")
 
     queryParameters {
-        add("wd", "hello word")
+        "wd" and "hello word"
     }
 
     mapResponse { response ->

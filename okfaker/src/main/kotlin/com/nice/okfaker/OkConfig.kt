@@ -50,40 +50,20 @@ class OkConfig internal constructor(
             this.client = client
         }
 
-        fun client(client: () -> OkHttpClient) = apply {
-            this.client = client()
-        }
-
         fun baseUrl(baseUrl: String) = apply {
             this.baseUrl = baseUrl
-        }
-
-        fun baseUrl(baseUrl: () -> String) = apply {
-            this.baseUrl = baseUrl()
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
             this.cacheControl = cacheControl
         }
 
-        fun cacheControl(cacheControl: () -> CacheControl) = apply {
-            this.cacheControl = cacheControl()
-        }
-
         fun username(username: String) = apply {
             this.username = username
         }
 
-        fun username(username: () -> String) = apply {
-            this.username = username()
-        }
-
         fun password(password: String) = apply {
             this.password = password
-        }
-
-        fun password(password: () -> String) = apply {
-            this.password = password()
         }
 
         fun headers(parameters: Map<String, String>) = apply {
@@ -148,5 +128,7 @@ internal fun String.toHttpUrl(config: OkConfig?): HttpUrl {
     }.toHttpUrl()
 }
 
-private fun String.isNetworkUrl() = startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)
+private fun String.isNetworkUrl() =
+    startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)
+
 private fun URL.resolve(spec: String): String = URL(this, spec).toString()

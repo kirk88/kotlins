@@ -169,6 +169,8 @@ class HeadersBuilder internal constructor(private val builder: OkRequest.Builder
         builder.removeHeaders(name)
     }
 
+    infix fun String.and(value: Any?) = add(this, value)
+
 }
 
 class QueryParametersBuilder internal constructor(private val builder: OkRequest.Builder<*>) {
@@ -197,6 +199,8 @@ class QueryParametersBuilder internal constructor(private val builder: OkRequest
         builder.removeEncodedQueryParameters(name)
     }
 
+    infix fun String.and(value: Any?) = add(this, value)
+
 }
 
 class FormParametersBuilder internal constructor(private val builder: OkRequest.Builder<*>) {
@@ -208,6 +212,8 @@ class FormParametersBuilder internal constructor(private val builder: OkRequest.
     fun addEncoded(name: String, value: Any?) {
         builder.addEncodedFormParameter(name, value.toStringOrEmpty())
     }
+
+    infix fun String.and(value: Any?) = add(this, value)
 
 }
 
@@ -232,6 +238,8 @@ class MultipartBodyBuilder internal constructor(private val builder: OkRequest.B
     fun add(body: RequestBody) {
         builder.addPart(body)
     }
+
+    infix fun String.and(value: Any?) = add(this, value)
 
 }
 

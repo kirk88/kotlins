@@ -86,6 +86,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             method(OkRequestMethod.GET)
 
             url("https://www.baidu.com")
+
+            queryParameters {
+                "wd" and "keywords"
+            }
         }.onStart {
             Log.e("OkFaker", "onStart")
         }.onEach {
