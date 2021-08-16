@@ -33,6 +33,10 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
+import com.nice.okfaker.DefaultOkDownloadExtension
+import com.nice.okfaker.OkRequestMethod
+import com.nice.okfaker.asFlow
+import com.nice.okfaker.okFaker
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -41,6 +45,8 @@ import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import okhttp3.OkHttpClient
+import java.io.File
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -72,6 +78,32 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
+        okFaker<File> {
+            client(OkHttpClient())
+            method(OkRequestMethod.HEAD)
+            url("http://www.baidu.com")
+            queryParameters {
+
+            }
+            formParameters {
+
+            }
+            multipartBody {
+
+            }
+            extension(DefaultOkDownloadExtension(""){ readBytes, totalBytes ->
+
+            })
+        }.asFlow().onStart {
+            Log.e("TAGTAG", "onStart")
+        }.onEach {
+            Log.e("TAGTAG", "onEach")
+        }.onCompletion {
+            Log.e("TAGTAG", "onCompletion")
+        }.catch {
+            Log.e("TAGTAG", "onError")
+        }.launchIn(lifecycleScope)
+
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
@@ -98,8 +130,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
                 start = System.currentTimeMillis()
-                offer(TestTable).updateBatch(statementExecutor){
-                    for (bean in beans){
+                offer(TestTable).updateBatch(statementExecutor) {
+                    for (bean in beans) {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
 
@@ -236,7 +268,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         ) {
             holder.findViewById<TextView>(android.R.id.text1).string = item.name
             holder.findViewById<TextView>(android.R.id.text2).string = item.address
-
         }
 
     }

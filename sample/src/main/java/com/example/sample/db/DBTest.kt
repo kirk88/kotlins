@@ -66,7 +66,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(9) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(10) {
         override fun onConfigure(db: SupportSQLiteDatabase) {
             db.pageSize = 1024 * 32
         }
@@ -74,6 +74,12 @@ object DB : ManagedSQLiteOpenHelper(
         override fun onCreate(db: SupportSQLiteDatabase) {
             offer(TestTable).create(db.statementExecutor) {
                 it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
+            }
+
+            offer(TestView).create(db.statementExecutor) {
+                offer(TestTable).orderBy {
+                    desc(it.id)
+                }.selectDistinct()
             }
         }
 

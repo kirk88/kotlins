@@ -1,9 +1,11 @@
 package com.nice.okfaker
 
 import okhttp3.*
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.IOException
+import okhttp3.logging.HttpLoggingInterceptor
+
+private val DEFAULT_CLIENT = OkHttpClient.Builder()
+    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+    .build()
 
 internal class OkRequest<T>(
     private val client: OkHttpClient,
@@ -50,75 +52,6 @@ internal class OkRequest<T>(
         return transformer.transformResponse(processResponse(response))
     }
 
-    fun enqueue(callback: OkCallback<T>) {
-        var call: Call? = null
-        var failure: Throwable? = null
-        try {
-            call = createCall()
-        } catch (error: Throwable) {
-            failure = error
-        }
-
-        if (failure != null) {
-            dispatchOnFailure(callback, failure)
-            return
-        }
-
-        dispatchOnStart(callback)
-
-        call!!.enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                dispatchOnFailure(callback, e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                dispatchOnResponse(callback, response)
-            }
-        })
-    }
-
-    private fun dispatchOnStart(callback: OkCallback<T>) {
-        callback.onStart()
-    }
-
-    private fun dispatchOnFailure(callback: OkCallback<T>, error: Throwable) {
-        if (dispatchOnCancel(callback)) {
-            return
-        }
-
-        try {
-            transformer.transformError(error).let {
-                callback.onSuccess(it)
-            }
-        } catch (error: Throwable) {
-            callback.onError(error)
-        } finally {
-            callback.onComplete()
-        }
-    }
-
-    private fun dispatchOnResponse(callback: OkCallback<T>, response: Response) {
-        try {
-            transformer.transformResponse(processResponse(response)).let {
-                callback.onSuccess(it)
-            }
-        } catch (error: Throwable) {
-            if (!dispatchOnCancel(callback)) {
-                callback.onError(error)
-            }
-        } finally {
-            callback.onComplete()
-        }
-    }
-
-    private fun dispatchOnCancel(callback: OkCallback<T>): Boolean {
-        if (isCanceled) {
-            callback.onCancel()
-            return true
-        }
-        return false
-    }
-
     private fun createCall(): Call {
         var realCall: Call?
         synchronized(this) {
@@ -158,9 +91,11 @@ internal class OkRequest<T>(
         return handledResponse
     }
 
-    class Builder<T>(private val method: OkRequestMethod) {
+    class Builder<T> {
 
-        private var client: OkHttpClient? = null
+        private var client: OkHttpClient = DEFAULT_CLIENT
+
+        private var method: OkRequestMethod = OkRequestMethod.GET
 
         private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
 
@@ -206,6 +141,10 @@ internal class OkRequest<T>(
 
         fun client(client: OkHttpClient) = apply {
             this.client = client
+        }
+
+        fun method(method: OkRequestMethod) = apply {
+            this.method = method
         }
 
         fun url(url: HttpUrl) = apply {
@@ -300,10 +239,6 @@ internal class OkRequest<T>(
             multipartBodyBuilder!!.addFormDataPart(name, filename, body)
         }
 
-        fun addFormDataPart(name: String, contentType: MediaType?, file: File) = apply {
-            multipartBodyBuilder!!.addFormDataPart(name, file.name, file.asRequestBody(contentType))
-        }
-
         fun addPart(part: MultipartBody.Part) = apply {
             multipartBodyBuilder!!.addPart(part)
         }
@@ -353,7 +288,7 @@ internal class OkRequest<T>(
                 .build()
 
             return OkRequest(
-                requireNotNull(client) { "OkHttpClient must not be null" },
+                client,
                 request,
                 requestInterceptors,
                 responseInterceptors,
