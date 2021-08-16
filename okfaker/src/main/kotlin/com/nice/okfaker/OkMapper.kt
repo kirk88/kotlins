@@ -7,8 +7,8 @@ import okhttp3.Response
 import okio.ByteString
 import java.io.InputStream
 
-typealias OkResponseMapper<T> = (Response) -> T
-typealias OkErrorMapper<T> = (Throwable) -> T
+typealias OkResponseMapper<T> = suspend (Response) -> T
+typealias OkErrorMapper<T> = suspend (Throwable) -> T
 
 @PublishedApi
 internal val GSON: Gson = GsonBuilder()

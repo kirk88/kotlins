@@ -2,10 +2,6 @@
 
 package com.nice.okfaker
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.*
@@ -26,13 +22,13 @@ class OkFaker<T> internal constructor(private val request: OkRequest<T>) {
 
     fun cancel() = request.cancel()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun execute(): T = coroutineScope {
-        val deferred = async(Dispatchers.IO) {
-            request.execute()
-        }
-        deferred.await()
-    }
+    suspend fun execute(): T = request.execute()
+
+    suspend fun executeOrNull(): T? =
+        kotlin.runCatching { request.execute() }.getOrNull()
+
+    suspend fun executeOrElse(onFailure: (Throwable) -> T): T =
+        kotlin.runCatching { request.execute() }.getOrElse(onFailure)
 
     companion object {
 
@@ -53,6 +49,94 @@ class OkFakerBuilder<T> @PublishedApi internal constructor() {
 
     private val builder: OkRequest.Builder<T> = OkRequest.Builder()
 
+    fun client(client: OkHttpClient) = apply {
+        builder.client(client)
+    }
+
+    fun method(method: OkRequestMethod) = apply {
+        builder.method(method)
+    }
+
+    fun url(url: String) = apply {
+        builder.url(url.toHttpUrl(config))
+    }
+
+    fun cacheControl(cacheControl: CacheControl) = apply {
+        builder.cacheControl(cacheControl)
+    }
+
+    fun username(username: String) = apply {
+        builder.username(username)
+    }
+
+    fun password(password: String) = apply {
+        builder.password(password)
+    }
+
+    fun tag(tag: Any?) {
+        builder.tag(tag)
+    }
+
+    fun <T> tag(type: Class<in T>, tag: T?) = apply {
+        builder.tag(type, tag)
+    }
+
+    fun headers(buildAction: HeadersBuilder.() -> Unit) = apply {
+        HeadersBuilder(builder).apply(buildAction)
+    }
+
+    fun queryParameters(buildAction: QueryParametersBuilder.() -> Unit) = apply {
+        QueryParametersBuilder(builder).apply(buildAction)
+    }
+
+    fun formParameters(buildAction: FormParametersBuilder.() -> Unit) = apply {
+        FormParametersBuilder(builder).apply(buildAction)
+    }
+
+    fun multipartBody(buildAction: MultipartBodyBuilder.() -> Unit) = apply {
+        MultipartBodyBuilder(builder).apply(buildAction)
+    }
+
+    fun requestBody(body: RequestBody) = apply {
+        builder.requestBody(body)
+    }
+
+    fun interceptRequest(interceptor: OkRequestInterceptor) = apply {
+        builder.addRequestInterceptor(interceptor)
+    }
+
+    fun interceptResponse(interceptor: OkResponseInterceptor) = apply {
+        builder.addResponseInterceptor(interceptor)
+    }
+
+    fun mapResponse(mapper: OkResponseMapper<T>) = apply {
+        builder.mapResponse(mapper)
+    }
+
+    fun mapError(mapper: OkErrorMapper<T>) = apply {
+        builder.mapError(mapper)
+    }
+
+    fun extension(extension: OkExtension<T>) = apply {
+        builder.addRequestInterceptor {
+            extension.shouldInterceptRequest(it)
+        }
+        builder.addResponseInterceptor {
+            extension.shouldInterceptResponse(it)
+        }
+        builder.mapResponse {
+            extension.map(it)
+        }
+    }
+
+    fun build(): OkFaker<T> = OkFaker(builder.build())
+
+    suspend fun execute(): T = build().execute()
+
+    suspend fun executeOrNull(): T? = build().executeOrNull()
+
+    suspend fun executeOrElse(onFailure: (Throwable) -> T): T = build().executeOrElse(onFailure)
+
     init {
         config.client?.let { client(it) }
         config.cacheControl?.let { cacheControl(it) }
@@ -68,89 +152,6 @@ class OkFakerBuilder<T> @PublishedApi internal constructor() {
             builder.addFormParameter(it.key, it.value)
         }
     }
-
-    fun client(client: OkHttpClient) {
-        builder.client(client)
-    }
-
-    fun method(method: OkRequestMethod) {
-        builder.method(method)
-    }
-
-    fun url(url: String) {
-        builder.url(url.toHttpUrl(config))
-    }
-
-    fun cacheControl(cacheControl: CacheControl) {
-        builder.cacheControl(cacheControl)
-    }
-
-    fun username(username: String) {
-        builder.username(username)
-    }
-
-    fun password(password: String) {
-        builder.password(password)
-    }
-
-    fun tag(tag: Any?) {
-        builder.tag(tag)
-    }
-
-    fun <T> tag(type: Class<in T>, tag: T?) {
-        builder.tag(type, tag)
-    }
-
-    fun headers(buildAction: HeadersBuilder.() -> Unit) {
-        HeadersBuilder(builder).apply(buildAction)
-    }
-
-    fun queryParameters(buildAction: QueryParametersBuilder.() -> Unit) {
-        QueryParametersBuilder(builder).apply(buildAction)
-    }
-
-    fun formParameters(buildAction: FormParametersBuilder.() -> Unit) {
-        FormParametersBuilder(builder).apply(buildAction)
-    }
-
-    fun multipartBody(buildAction: MultipartBodyBuilder.() -> Unit) {
-        MultipartBodyBuilder(builder).apply(buildAction)
-    }
-
-    fun requestBody(body: RequestBody) {
-        builder.requestBody(body)
-    }
-
-    fun interceptRequest(interceptor: OkRequestInterceptor) {
-        builder.addRequestInterceptor(interceptor)
-    }
-
-    fun interceptResponse(interceptor: OkResponseInterceptor) {
-        builder.addResponseInterceptor(interceptor)
-    }
-
-    fun mapResponse(mapper: OkResponseMapper<T>) {
-        builder.mapResponse(mapper)
-    }
-
-    fun mapError(mapper: OkErrorMapper<T>) {
-        builder.mapError(mapper)
-    }
-
-    fun extension(extension: OkExtension<T>) {
-        builder.addRequestInterceptor {
-            extension.shouldInterceptRequest(it)
-        }
-        builder.addResponseInterceptor {
-            extension.shouldInterceptResponse(it)
-        }
-        builder.mapResponse {
-            extension.map(it)
-        }
-    }
-
-    @PublishedApi
-    internal fun build(): OkFaker<T> = OkFaker(builder.build())
 
 }
 
@@ -236,13 +237,19 @@ class MultipartBodyBuilder internal constructor(private val builder: OkRequest.B
 
 private fun Any?.toStringOrEmpty() = (this ?: "").toString()
 
-inline fun <reified T> okFaker(buildAction: OkFakerBuilder<T>.() -> Unit): OkFaker<T> {
-    val builder = OkFakerBuilder<T>()
-    builder.mapResponse(typeMapper())
-    builder.buildAction()
-    return builder.build()
-}
+inline fun <reified T> okFakerBuilder() = OkFakerBuilder<T>().mapResponse(typeMapper())
+
+inline fun <reified T> buildOkFaker(buildAction: OkFakerBuilder<T>.() -> Unit): OkFaker<T> = okFakerBuilder<T>()
+    .apply(buildAction)
+    .build()
+
+inline fun <reified T> okFakerFlow(buildAction: OkFakerBuilder<T>.() -> Unit): Flow<T> = okFakerBuilder<T>()
+    .apply(buildAction)
+    .build()
+    .asFlow()
 
 fun <T> OkFaker<T>.asFlow(): Flow<T> = flow {
     emit(execute())
 }
+
+

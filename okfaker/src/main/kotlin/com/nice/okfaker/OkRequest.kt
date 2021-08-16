@@ -1,7 +1,11 @@
 package com.nice.okfaker
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import kotlin.coroutines.resume
 
 private val DEFAULT_CLIENT = OkHttpClient.Builder()
     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
@@ -18,64 +22,48 @@ internal class OkRequest<T>(
     private var call: Call? = null
     private var creationFailure: Throwable? = null
 
-    @Volatile
-    private var canceled = false
-
-    @Volatile
-    private var executed = false
-
-
     val isExecuted: Boolean
-        get() {
-            if (executed) return true
-            synchronized(this) { return call?.isExecuted() == true }
-        }
+        get() = call?.isExecuted() == true
 
     val isCanceled: Boolean
-        get() {
-            if (canceled) return true
-            synchronized(this) { return call?.isCanceled() == true }
-        }
+        get() = call?.isCanceled() == true
 
     fun tag(): Any? = request.tag()
 
     fun <T> tag(type: Class<out T>): T? = request.tag(type)
 
-    fun cancel() {
-        if (canceled) return
-        canceled = true
-        synchronized(this) { call?.cancel() }
-    }
+    fun cancel() = call?.cancel()
 
-    fun execute(): T {
-        val response = createCall().execute()
-        return transformer.transformResponse(processResponse(response))
-    }
-
-    private fun createCall(): Call {
-        var realCall: Call?
-        synchronized(this) {
-            check(!canceled) { "Already canceled" }
-            check(!executed) { "Already executed" }
-            executed = true
-            realCall = this.call
-            if (creationFailure != null) {
-                throw creationFailure!!
+    suspend fun execute(): T = withContext(Dispatchers.IO) {
+        val call = createCall()
+        val response = suspendCancellableCoroutine<Response> { con ->
+            con.invokeOnCancellation {
+                cancel()
             }
-            if (realCall == null) {
-                try {
-                    this.call = client.newCall(processRequest(request))
-                    realCall = this.call
-                } catch (error: Throwable) {
-                    creationFailure = error
-                    throw error
-                }
+            val response = call.execute()
+            con.resume(response)
+        }
+        transformer.transformResponse(processResponse(response))
+    }
+
+    private suspend fun createCall(): Call {
+        var realCall: Call? = this.call
+        if (creationFailure != null) {
+            throw creationFailure!!
+        }
+        if (realCall == null) {
+            try {
+                this.call = client.newCall(processRequest(request))
+                realCall = this.call
+            } catch (error: Throwable) {
+                creationFailure = error
+                throw error
             }
         }
         return realCall!!
     }
 
-    private fun processRequest(request: Request): Request {
+    private suspend fun processRequest(request: Request): Request {
         var handledRequest = request
         for (interceptor in requestInterceptors) {
             handledRequest = interceptor.invoke(handledRequest)
@@ -83,7 +71,7 @@ internal class OkRequest<T>(
         return handledRequest
     }
 
-    private fun processResponse(response: Response): Response {
+    private suspend fun processResponse(response: Response): Response {
         var handledResponse = response
         for (interceptor in responseInterceptors) {
             handledResponse = interceptor.invoke(handledResponse)

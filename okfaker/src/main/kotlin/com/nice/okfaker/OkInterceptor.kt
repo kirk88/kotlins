@@ -3,6 +3,6 @@ package com.nice.okfaker
 import okhttp3.Request
 import okhttp3.Response
 
-typealias OkRequestInterceptor = (Request) -> Request
+typealias OkRequestInterceptor = suspend (Request) -> Request
 
-typealias OkResponseInterceptor = (response: Response) -> Response
+typealias OkResponseInterceptor = suspend (response: Response) -> Response

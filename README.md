@@ -52,78 +52,74 @@ OkFaker.setGlobalConfig(
 GET请求
 
 ```kotlin
-OkFaker.get<String>{
+okFakerFlow<String> {
 
     url("/s")
 
     queryParameters {
-        "wd" and "hello word"
+        add("wd", "hello word")
     }
 
-    onSuccess { str ->
-        //TODO
-    }
-    
-    onError{ error->
-        //TODO
-    }
-    
-}.enqueue()
+}.onStart {
+    Log.e("OkFaker", "onStart")
+}.onEach {
+    Log.e("OkFaker", "onEach: $it")
+}.onCompletion {
+    Log.e("OkFaker", "onCompletion")
+}.catch {
+    Log.e("OkFaker", "onError: $it")
+}.launchIn(lifecycleScope)
 ```
 
 POST请求
 
 ```kotlin
-OkFaker.post<String>{
+okFakerFlow<String> {
 
+    method(OkRequestMethod.POST)
+    
     url("/s")
 
-    formParameters {
-        "wd" and "hello word"
+    queryParameters {
+        add("wd", "hello word")
     }
 
-    onSuccess { str ->
-        //TODO
-    }
-
-    onError{ error->
-        //TODO
-    }
-
-}.enqueue()
+}.onStart {
+    Log.e("OkFaker", "onStart")
+}.onEach {
+    Log.e("OkFaker", "onEach: $it")
+}.onCompletion {
+    Log.e("OkFaker", "onCompletion")
+}.catch {
+    Log.e("OkFaker", "onError: $it")
+}.launchIn(lifecycleScope)
 ```
 
 转换成任意数据格式
 
 ```kotlin
-OkFaker.get<JSONObject>{
+buildOkFaker<String> {
+
+    method(OkRequestMethod.POST)
 
     url("/s")
 
-    mapResponse { response ->
-        //转换成任意格式 （可进行耗时操作）
-       JSONObject(response.body!!.string())
-    }
-    
     queryParameters {
-        "wd" and "hello word"
+        add("wd", "hello word")
     }
 
-    onSuccess { jsonObject ->
-        //TODO
+    mapResponse { response ->
+        //转换成任意格式
+        JSONObject(response.body!!.string())
     }
 
-    onError{ error->
-        //TODO
-    }
-    
-}.enqueue()
+}
 ```
 
 同步请求
 
 ```kotlin
-val result = OkFaker.post<String>{
+val result : String = buildOkFaker<String> {
 
     url("/s")
 
@@ -131,37 +127,32 @@ val result = OkFaker.post<String>{
         "wd" and "hello word"
     }
 
-}.executeOrNull()
+}.execute()
 ```
 
 下载
 
 ```kotlin
-OkFaker.get<File>{
+buildOkFaker<File> {
 
-    client {
+    client (
         //注意 HttpLoggingInterceptor.Level < BODY
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
             .build()
-    }
+    )
 
     url("http://www.baidu.com")
 
-    mapResponse(DefaultOkDownloadMapper("../path.html", true){ readBytes, totalBytes ->
+    extension(DefaultOkDownloadExtension("../path.html", true) { readBytes, totalBytes ->
         //Main Thread
     })
-
-    onSuccess{ file ->
-        //TODO
-    }
+}.asFlow().collect { file ->
     
-}.enqueue()
+}
 ```
 
 ***
-
-
 
 # sqlite
 
@@ -193,7 +184,11 @@ object DB : ManagedSQLiteOpenHelper(
         override fun onCreate(db: SupportSQLiteDatabase) {
             //创建表
             offer(TestTable).create(db.statementExecutor) {
-                it.id + it.name + it.age + it.flag + it.number + index(it.id, it.name, name = "indexName")
+                it.id + it.name + it.age + it.flag + it.number + index(
+                    it.id,
+                    it.name,
+                    name = "indexName"
+                )
             }
         }
 
@@ -236,7 +231,7 @@ offer(TestTable).insert {
 
 ```kotlin
 offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
-    for (bean in beans){
+    for (bean in beans) {
         assignments {
             it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                     it.flag(bean.flag) + it.number(bean.number)

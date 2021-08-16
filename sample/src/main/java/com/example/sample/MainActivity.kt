@@ -33,10 +33,8 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
-import com.nice.okfaker.DefaultOkDownloadExtension
 import com.nice.okfaker.OkRequestMethod
-import com.nice.okfaker.asFlow
-import com.nice.okfaker.okFaker
+import com.nice.okfaker.okFakerFlow
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -46,7 +44,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
-import java.io.File
+import okhttp3.logging.HttpLoggingInterceptor
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -78,37 +76,38 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        okFaker<File> {
-            client(OkHttpClient())
-            method(OkRequestMethod.HEAD)
-            url("http://www.baidu.com")
-            queryParameters {
+        okFakerFlow<String> {
+            client(
+                OkHttpClient.Builder()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                    .build()
+            )
 
-            }
-            formParameters {
+            method(OkRequestMethod.GET)
 
-            }
-            multipartBody {
-
-            }
-            extension(DefaultOkDownloadExtension(""){ readBytes, totalBytes ->
-
-            })
-        }.asFlow().onStart {
-            Log.e("TAGTAG", "onStart")
+            url("https://www.baidu.com")
+        }.onStart {
+            Log.e("OkFaker", "onStart")
         }.onEach {
-            Log.e("TAGTAG", "onEach")
+            Log.e("OkFaker", "onEach: $it")
         }.onCompletion {
-            Log.e("TAGTAG", "onCompletion")
+            Log.e("OkFaker", "onCompletion")
         }.catch {
-            Log.e("TAGTAG", "onError")
+            Log.e("OkFaker", "onError: $it")
         }.launchIn(lifecycleScope)
 
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
                 repeat(10000) { index ->
-                    val bean = DBTest(id = index.toLong(), name = "jack", age = index, flag = true, number = -index, data = byteArrayOf(1, 2, 3))
+                    val bean = DBTest(
+                        id = index.toLong(),
+                        name = "jack",
+                        age = index,
+                        flag = true,
+                        number = -index,
+                        data = byteArrayOf(1, 2, 3)
+                    )
                     beans.add(bean)
                 }
 

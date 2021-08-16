@@ -27,11 +27,7 @@ suspend fun <T> suspendBlocking(
     block: () -> T
 ): T = suspendCancellableCoroutine { con ->
     dispatcher.dispatch {
-        runCatching(block).onSuccess {
-            if (!con.isCancelled) con.resumeWith(Result.success(it))
-        }.onFailure {
-            if (!con.isCompleted) con.resumeWith(Result.failure(it))
-        }
+        con.resumeWith(runCatching(block))
     }
 }
 

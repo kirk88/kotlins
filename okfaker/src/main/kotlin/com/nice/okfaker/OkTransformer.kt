@@ -15,7 +15,7 @@ internal class OkTransformer<T> {
         errorMapper = mapper
     }
 
-    fun transformResponse(response: Response): T {
+    suspend fun transformResponse(response: Response): T {
         return try {
             requireNotNull(responseMapper) {
                 "OkResponseMapper must not be null"
@@ -25,7 +25,7 @@ internal class OkTransformer<T> {
         }
     }
 
-    fun transformError(error: Throwable): T {
+    suspend fun transformError(error: Throwable): T {
         return errorMapper?.invoke(error) ?: throw error
     }
 
