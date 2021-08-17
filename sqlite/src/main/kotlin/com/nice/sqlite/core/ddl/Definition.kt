@@ -25,7 +25,7 @@ interface Definition : Sequence<Definition>, Renderer {
 
 }
 
-abstract class Column(
+abstract class Column<T : Any>(
     val table: Table,
     val name: String,
     val type: SqlType
@@ -34,24 +34,32 @@ abstract class Column(
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    internal fun setMeta(
-        defaultConstraint: ColumnConstraint.Default? = null,
-        primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
-        foreignKeyConstraint: ColumnConstraint.ForeignKey? = null,
-        uniqueConstraint: ColumnConstraint.Unique? = null,
-        notNullConstraint: ColumnConstraint.NotNull? = null,
-        onUpdateAction: ColumnConstraintAction? = null,
-        onDeleteAction: ColumnConstraintAction? = null
-    ) {
-        _meta = _meta.copy(
-            defaultConstraint = defaultConstraint ?: _meta.defaultConstraint,
-            primaryKeyConstraint = primaryKeyConstraint ?: _meta.primaryKeyConstraint,
-            foreignKeyConstraint = foreignKeyConstraint ?: _meta.foreignKeyConstraint,
-            uniqueConstraint = uniqueConstraint ?: _meta.uniqueConstraint,
-            notNullConstraint = notNullConstraint ?: _meta.notNullConstraint,
-            onUpdateAction = onUpdateAction ?: _meta.onUpdateAction,
-            onDeleteAction = onDeleteAction ?: _meta.onDeleteAction,
-        )
+    fun default(value: T) = apply {
+        _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
+    }
+
+    fun primaryKey(autoIncrement: Boolean = false) = apply {
+        _meta = _meta.copy(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
+    }
+
+    fun foreignKey(references: Column<*>) = apply {
+        _meta = _meta.copy(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
+    }
+
+    fun unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) = apply {
+        _meta = _meta.copy(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
+    }
+
+    fun notNull() = apply {
+        _meta = _meta.copy(notNullConstraint = ColumnConstraint.NotNull)
+    }
+
+    fun onUpdate(action: ColumnConstraintAction) = apply {
+        _meta = _meta.copy(onUpdateAction = action)
+    }
+
+    fun onDelete(action: ColumnConstraintAction) = apply {
+        _meta = _meta.copy(onDeleteAction = action)
     }
 
     override fun render(): String = name.surrounding()
@@ -62,7 +70,7 @@ abstract class Column(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Column
+        other as Column<*>
 
         if (name != other.name) return false
         if (type != other.type) return false
@@ -92,32 +100,8 @@ abstract class Column(
 
 }
 
-fun <T : Column> T.primaryKey(autoIncrement: Boolean = false): T = apply {
-    setMeta(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
-}
-
-fun <T : Column> T.foreignKey(references: Column): T = apply {
-    setMeta(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
-}
-
-fun <T : Column> T.unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None): T = apply {
-    setMeta(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
-}
-
-fun <T : Column> T.notNull(): T = apply {
-    setMeta(notNullConstraint = ColumnConstraint.NotNull)
-}
-
-fun <T : Column> T.onUpdate(action: ColumnConstraintAction): T = apply {
-    setMeta(onUpdateAction = action)
-}
-
-fun <T : Column> T.onDelete(action: ColumnConstraintAction): T = apply {
-    setMeta(onDeleteAction = action)
-}
-
 class UColumn internal constructor(
-    val column: Column,
+    val column: Column<*>,
     val alias: String
 ) : Definition {
 
@@ -147,26 +131,26 @@ class UColumn internal constructor(
 
 }
 
-fun column(column: Column, alias: String): UColumn = UColumn(column, alias)
+fun column(column: Column<*>, alias: String): UColumn = UColumn(column, alias)
 
 class Index internal constructor(
     val name: String,
-    val columns: Array<out Column>
+    val columns: Array<out Column<*>>
 ) : Definition {
 
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    internal fun setMeta(
-        unique: IndexConstraint.Unique? = null,
-        ifNotExists: IndexConstraint.IfNotExists? = null,
-        ifExists: IndexConstraint.IfExists? = null
-    ) {
-        _meta = _meta.copy(
-            unique = unique ?: _meta.unique,
-            ifNotExists = ifNotExists ?: _meta.ifNotExists,
-            ifExists = ifExists ?: _meta.ifExists
-        )
+    fun unique() = apply {
+        _meta = _meta.copy(unique = IndexConstraint.Unique)
+    }
+
+    fun ifNotExists() = apply {
+        _meta = _meta.copy(ifNotExists = IndexConstraint.IfNotExists)
+    }
+
+    fun ifExists() = apply {
+        _meta = _meta.copy(ifExists = IndexConstraint.IfExists)
     }
 
     override fun render(): String = buildString {
@@ -219,23 +203,11 @@ class Index internal constructor(
 }
 
 fun index(
-    vararg columns: Column,
+    vararg columns: Column<*>,
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
 
-fun Index.unique(): Index = apply {
-    setMeta(unique = IndexConstraint.Unique)
-}
-
-fun Index.ifNotExists(): Index = apply {
-    setMeta(ifNotExists = IndexConstraint.IfNotExists)
-}
-
-fun Index.ifExists(): Index = apply {
-    setMeta(ifExists = IndexConstraint.IfExists)
-}
-
-class Function internal constructor(private val name: String, private val column: Column) :
+class Function internal constructor(private val name: String, private val column: Column<*>) :
     Definition {
 
     override fun equals(other: Any?): Boolean {
@@ -264,12 +236,12 @@ class Function internal constructor(private val name: String, private val column
 
 }
 
-fun count(column: Column): Definition = Function("count", column)
-fun max(column: Column): Definition = Function("max", column)
-fun min(column: Column): Definition = Function("min", column)
-fun avg(column: Column): Definition = Function("avg", column)
-fun sum(column: Column): Definition = Function("sum", column)
-fun abs(column: Column): Definition = Function("abs", column)
-fun upper(column: Column): Definition = Function("upper", column)
-fun lower(column: Column): Definition = Function("lower", column)
-fun length(column: Column): Definition = Function("length", column)
+fun count(column: Column<*>): Definition = Function("count", column)
+fun max(column: Column<*>): Definition = Function("max", column)
+fun min(column: Column<*>): Definition = Function("min", column)
+fun avg(column: Column<*>): Definition = Function("avg", column)
+fun sum(column: Column<*>): Definition = Function("sum", column)
+fun abs(column: Column<*>): Definition = Function("abs", column)
+fun upper(column: Column<*>): Definition = Function("upper", column)
+fun lower(column: Column<*>): Definition = Function("lower", column)
+fun length(column: Column<*>): Definition = Function("length", column)

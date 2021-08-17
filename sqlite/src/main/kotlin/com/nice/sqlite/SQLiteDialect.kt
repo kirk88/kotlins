@@ -11,7 +11,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: CreateStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<Column>()
+        val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.renderedName)
@@ -35,7 +35,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: AlterStatement<T>): String {
         val builder = StringBuilder()
 
-        val columns = statement.definitions.filterIsInstance<Column>()
+        val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
                 "ALTER TABLE ${statement.subject.table.renderedName} ADD ${decompileColumnSql(it)}"
@@ -60,7 +60,7 @@ object SQLiteDialect : Dialect {
             builder.append(statement.subject.table.renderedName)
         } else {
             check(statement.definitions.none {
-                it is Column
+                it is Column<*>
             }) { "Drop columns are not supported yet" }
 
             val indexes = statement.definitions.map { it as Index }
@@ -497,7 +497,7 @@ object SQLiteDialect : Dialect {
         return "SELECT * FROM ${statement.subject.view.renderedName}"
     }
 
-    private fun decompileColumnSql(column: Column): String = buildString {
+    private fun decompileColumnSql(column: Column<*>): String = buildString {
         append(column.render())
         append(' ')
         append(column.type)

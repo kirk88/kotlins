@@ -24,9 +24,7 @@ internal class LinkedSequence<E> : MutableSequence<E> {
 
 }
 
-fun <E> mutableSequenceOf(): MutableSequence<E> = LinkedSequence()
-
-fun <E> mutableSequenceOf(vararg elements: E): MutableSequence<E> = LinkedSequence<E>().apply {
+internal fun <E> mutableSequenceOf(vararg elements: E): MutableSequence<E> = LinkedSequence<E>().apply {
     for (element in elements) {
         add(element)
     }

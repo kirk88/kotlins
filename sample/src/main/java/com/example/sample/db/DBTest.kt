@@ -7,9 +7,7 @@ import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.ddl.ifNotExists
 import com.nice.sqlite.core.ddl.index
-import com.nice.sqlite.core.ddl.primaryKey
 import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.statementExecutor
 

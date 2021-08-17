@@ -36,7 +36,7 @@ sealed class ColumnConstraint {
 
     }
 
-    class ForeignKey(val references: Column) : ColumnConstraint() {
+    class ForeignKey(val references: Column<*>) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
             append("REFERENCES ")

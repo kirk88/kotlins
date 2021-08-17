@@ -6,7 +6,7 @@ import com.nice.sqlite.core.dml.mutableSequenceOf
 
 interface Assignment : Sequence<Assignment> {
 
-    val column: Column
+    val column: Column<*>
     val value: Any?
 
     override fun iterator(): Iterator<Assignment> = OnceIterator(this)
@@ -14,7 +14,7 @@ interface Assignment : Sequence<Assignment> {
     operator fun plus(assignment: Assignment): MutableSequence<Assignment> =
         mutableSequenceOf(this, assignment)
 
-    data class Value(override val column: Column, override val value: Any?) : Assignment {
+    data class Value(override val column: Column<*>, override val value: Any?) : Assignment {
         override fun toString(): String = "$column = $value"
     }
 

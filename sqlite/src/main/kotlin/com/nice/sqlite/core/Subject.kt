@@ -100,7 +100,7 @@ inline fun <T : Table> StatementSubject<T>.where(predicate: (T) -> Predicate): W
     return WhereClause(predicate(table), this)
 }
 
-inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Column>): GroupClause<T> {
+inline fun <T : Table> StatementSubject<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> {
     return GroupClause(group(table), this)
 }
 
