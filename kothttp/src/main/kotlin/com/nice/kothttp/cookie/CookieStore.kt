@@ -1,4 +1,4 @@
-package com.nice.okfaker.cookie
+package com.nice.kothttp.cookie
 
 import okhttp3.Cookie
 import okhttp3.HttpUrl

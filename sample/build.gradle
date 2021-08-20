@@ -40,6 +40,6 @@ dependencies {
     implementation project(':common')
     implementation project(':sqlite')
     implementation project(':bluetooth')
-    implementation project(':okfaker')
+    implementation project(':kothttp')
     implementation project(':atomic')
 }

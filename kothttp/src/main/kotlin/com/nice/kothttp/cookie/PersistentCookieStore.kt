@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.nice.okfaker.cookie
+package com.nice.kothttp.cookie
 
 import android.content.Context
 import android.content.SharedPreferences

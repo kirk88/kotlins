@@ -55,7 +55,7 @@ uploadArchives {
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
             groupId "com.nice.kotlins"
-            artifactId "okfaker"
+            artifactId "kothttp"
             version "${versionMajor}.${versionMinor}.${versionPatch}"
 
             licenses {

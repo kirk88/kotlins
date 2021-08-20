@@ -55,3 +55,35 @@ internal fun Any?.toSqlString(): String {
         else -> "'${toString().replace("'", "''")}'"
     }
 }
+
+operator fun Column<Int>.invoke(value: Int): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<Long>.invoke(value: Long): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<Short>.invoke(value: Short): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<Float>.invoke(value: Float): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<Double>.invoke(value: Double): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<Boolean>.invoke(value: Boolean): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<String>.invoke(value: String?): Assignment {
+    return Assignment.Value(this, value)
+}
+
+operator fun Column<ByteArray>.invoke(value: ByteArray?): Assignment {
+    return Assignment.Value(this, value)
+}

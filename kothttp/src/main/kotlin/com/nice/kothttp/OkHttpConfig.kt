@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.nice.okfaker
+package com.nice.kothttp
 
 import okhttp3.CacheControl
 import okhttp3.HttpUrl
@@ -8,9 +8,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.net.URL
 
-class OkConfig internal constructor(
+class OkHttpConfig internal constructor(
     internal val client: OkHttpClient? = null,
-    internal val baseUrl: String? = null,
+    internal val domain: String? = null,
     internal val cacheControl: CacheControl? = null,
     internal val username: String? = null,
     internal val password: String? = null,
@@ -24,7 +24,7 @@ class OkConfig internal constructor(
     class Builder {
 
         private var client: OkHttpClient? = null
-        private var baseUrl: String? = null
+        private var domain: String? = null
         private var cacheControl: CacheControl? = null
         private var username: String? = null
         private var password: String? = null
@@ -35,23 +35,23 @@ class OkConfig internal constructor(
 
         constructor()
 
-        internal constructor(config: OkConfig) {
-            this.client = config.client
-            this.baseUrl = config.baseUrl
-            this.cacheControl = config.cacheControl
-            this.username = config.username
-            this.password = config.password
-            this.headers = config.headers?.toMutableMap()
-            this.queryParameters = config.queryParameters?.toMutableMap()
-            this.formParameters = config.formParameters?.toMutableMap()
+        internal constructor(httpConfig: OkHttpConfig) {
+            this.client = httpConfig.client
+            this.domain = httpConfig.domain
+            this.cacheControl = httpConfig.cacheControl
+            this.username = httpConfig.username
+            this.password = httpConfig.password
+            this.headers = httpConfig.headers?.toMutableMap()
+            this.queryParameters = httpConfig.queryParameters?.toMutableMap()
+            this.formParameters = httpConfig.formParameters?.toMutableMap()
         }
 
         fun client(client: OkHttpClient) = apply {
             this.client = client
         }
 
-        fun baseUrl(baseUrl: String) = apply {
-            this.baseUrl = baseUrl
+        fun domain(domain: String) = apply {
+            this.domain = domain
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
@@ -105,9 +105,9 @@ class OkConfig internal constructor(
             this.formParameters?.remove(name)
         }
 
-        fun build(): OkConfig = OkConfig(
+        fun build(): OkHttpConfig = OkHttpConfig(
             client,
-            baseUrl,
+            domain,
             cacheControl,
             username,
             password,
@@ -119,11 +119,11 @@ class OkConfig internal constructor(
 
 }
 
-internal fun String.toHttpUrl(config: OkConfig?): HttpUrl {
-    val baseUrl = config?.baseUrl
+internal fun String.toHttpUrl(config: OkHttpConfig?): HttpUrl {
+    val domain = config?.domain
     return when {
         this.isNetworkUrl() -> this
-        !baseUrl.isNullOrEmpty() -> URL(baseUrl).resolve(this)
+        !domain.isNullOrEmpty() -> URL(domain).resolve(this)
         else -> throw IllegalArgumentException("Invalid url: $this")
     }.toHttpUrl()
 }

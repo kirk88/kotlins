@@ -18,7 +18,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
@@ -55,7 +54,7 @@ internal class AndroidSystemScanner : Scanner {
 
         val receiver = registerBluetoothScannerReceiver(
             onScanResult = { device, rssi ->
-                trySendBlocking(AndroidAdvertisement(BluetoothScanResult(device, rssi)))
+                trySend(AndroidAdvertisement(BluetoothScanResult(device, rssi)))
                     .onFailure {
                         Log.w(
                             TAG,
@@ -91,7 +90,7 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
 
         val callback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                trySendBlocking(AndroidAdvertisement(BluetoothScanResult(result)))
+                trySend(AndroidAdvertisement(BluetoothScanResult(result)))
                     .onFailure {
                         Log.w(
                             TAG,
@@ -103,7 +102,7 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
             override fun onBatchScanResults(results: MutableList<ScanResult>) {
                 runCatching {
                     results.forEach {
-                        trySendBlocking(AndroidAdvertisement(BluetoothScanResult(it))).getOrThrow()
+                        trySend(AndroidAdvertisement(BluetoothScanResult(it))).getOrThrow()
                     }
                 }.onFailure {
                     Log.w(
@@ -143,7 +142,7 @@ internal class LowVersionBleScanner internal constructor(private val filterServi
         check(bluetoothAdapter.isEnabled) { "Bluetooth is disabled" }
 
         val callback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
-            trySendBlocking(AndroidAdvertisement(BluetoothScanResult(device, rssi, scanRecord)))
+            trySend(AndroidAdvertisement(BluetoothScanResult(device, rssi, scanRecord)))
                 .onFailure {
                     Log.w(
                         TAG,

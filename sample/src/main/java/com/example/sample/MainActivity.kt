@@ -33,12 +33,13 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
-import com.nice.okfaker.OkRequestMethod
-import com.nice.okfaker.okFakerFlow
+import com.nice.kothttp.HttpMethod
+import com.nice.kothttp.OkHttpRequest
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
+import com.nice.sqlite.core.ddl.invoke
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -76,19 +77,19 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        okFakerFlow<String> {
+        OkHttpRequest.execute<String> {
             client(
                 OkHttpClient.Builder()
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                     .build()
             )
 
-            method(OkRequestMethod.GET)
+            method(HttpMethod.GET)
 
             url("https://www.baidu.com")
 
             queryParameters {
-                "wd" and "keywords"
+                "wd" += "keywords"
             }
         }.onStart {
             Log.e("OkFaker", "onStart")

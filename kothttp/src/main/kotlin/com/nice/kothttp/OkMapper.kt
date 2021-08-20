@@ -1,4 +1,4 @@
-package com.nice.okfaker
+package com.nice.kothttp
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

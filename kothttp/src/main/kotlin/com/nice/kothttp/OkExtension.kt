@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.nice.okfaker
+package com.nice.kothttp
 
 import android.os.Handler
 import android.os.Looper

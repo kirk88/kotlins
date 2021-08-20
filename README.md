@@ -53,12 +53,12 @@ OkFaker.setGlobalConfig(
 GET请求
 
 ```kotlin
-okFakerFlow<String> {
+OkHttpRequest.execute<String> {
 
     url("/s")
 
     queryParameters {
-        "wd" and "hello word"
+        "wd" += "hello word"
     }
 
 }.onStart {
@@ -75,14 +75,14 @@ okFakerFlow<String> {
 POST请求
 
 ```kotlin
-okFakerFlow<String> {
+OkHttpRequest.execute<String> {
 
     method(OkRequestMethod.POST)
     
     url("/s")
 
     queryParameters {
-        "wd" and "hello word"
+        "wd" += "hello word"
     }
 
 }.onStart {
@@ -99,14 +99,14 @@ okFakerFlow<String> {
 转换成任意数据格式
 
 ```kotlin
-buildOkFaker<String> {
+OkHttpRequest.build<String> {
 
     method(OkRequestMethod.POST)
 
     url("/s")
 
     queryParameters {
-        "wd" and "hello word"
+        "wd" += "hello word"
     }
 
     mapResponse { response ->
@@ -120,12 +120,12 @@ buildOkFaker<String> {
 同步请求
 
 ```kotlin
-val result : String = buildOkFaker<String> {
+val result : String = OkHttpRequest.execute<String> {
 
     url("/s")
 
     formParameters {
-        "wd" and "hello word"
+        "wd" += "hello word"
     }
 
 }.execute()
@@ -134,8 +134,7 @@ val result : String = buildOkFaker<String> {
 下载
 
 ```kotlin
-buildOkFaker<File> {
-
+OkHttpRequest.execute<File> {
     client (
         //注意 HttpLoggingInterceptor.Level < BODY
         OkHttpClient.Builder()

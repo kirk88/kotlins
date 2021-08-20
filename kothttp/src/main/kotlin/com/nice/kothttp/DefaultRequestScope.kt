@@ -1,12 +1,12 @@
 @file:Suppress("unused")
 
-package com.nice.okfaker
+package com.nice.kothttp
 
-class DefaultOkFakerScope : OkFakerScope {
+class DefaultRequestScope : RequestScope {
 
-    private var resources: MutableList<OkFaker<*>>? = null
+    private var resources: MutableList<OkRequest<*>>? = null
 
-    override fun add(manager: OkFaker<*>) {
+    override fun add(request: OkRequest<*>) {
         synchronized(this) {
             var list = resources
 
@@ -15,21 +15,21 @@ class DefaultOkFakerScope : OkFakerScope {
                 resources = list
             }
 
-            list.add(manager)
+            list.add(request)
         }
     }
 
-    override fun delete(manager: OkFaker<*>): Boolean {
+    override fun delete(request: OkRequest<*>): Boolean {
         synchronized(this) {
             val list = resources ?: return false
 
-            return list.remove(manager)
+            return list.remove(request)
         }
     }
 
-    override fun remove(manager: OkFaker<*>): Boolean {
-        if (delete(manager)) {
-            manager.cancel()
+    override fun remove(request: OkRequest<*>): Boolean {
+        if (delete(request)) {
+            request.cancel()
             return true
         }
         return false
@@ -47,15 +47,15 @@ class DefaultOkFakerScope : OkFakerScope {
     }
 
     override fun size(): Int {
-        var list: List<OkFaker<*>>?
+        var list: List<OkRequest<*>>?
         synchronized(this) {
             list = resources
         }
         return list?.size ?: 0
     }
 
-    override fun iterator(): Iterator<OkFaker<*>> {
-        val list: List<OkFaker<*>> = resources ?: emptyList()
+    override fun iterator(): Iterator<OkRequest<*>> {
+        val list: List<OkRequest<*>> = resources ?: emptyList()
         return list.iterator()
     }
 
