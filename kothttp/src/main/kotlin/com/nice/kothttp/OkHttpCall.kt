@@ -101,7 +101,7 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
     private val config: OkHttpConfig = OkHttpCall.globalConfig
 
     private var client: OkHttpClient = DEFAULT_CLIENT
-    private var method: HttpMethod = HttpMethod.GET
+    private var method: OkHttpMethod = OkHttpMethod.Get
 
     private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
     private val requestBuilder: Request.Builder = Request.Builder()
@@ -138,7 +138,7 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
         this.client = client
     }
 
-    fun method(method: HttpMethod) = apply {
+    fun method(method: OkHttpMethod) = apply {
         this.method = method
     }
 

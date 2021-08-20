@@ -90,43 +90,43 @@ infix fun Predicate.or(predicate: Predicate): Predicate {
     return Condition(this, "OR", predicate)
 }
 
-infix fun Column.eq(value: Any): Predicate =
+infix fun Column<*>.eq(value: Any): Predicate =
     WhereCause(value) { "${render(it)} = ?" }
 
-infix fun Column.ne(value: Any): Predicate =
+infix fun Column<*>.ne(value: Any): Predicate =
     WhereCause(value) { "${render(it)} <> ?" }
 
-infix fun Column.gt(value: Any): Predicate =
+infix fun Column<*>.gt(value: Any): Predicate =
     WhereCause(value) { "${render(it)} > ?" }
 
-infix fun Column.lt(value: Any): Predicate =
+infix fun Column<*>.lt(value: Any): Predicate =
     WhereCause(value) { "${render(it)} < ?" }
 
-infix fun Column.gte(value: Any): Predicate =
+infix fun Column<*>.gte(value: Any): Predicate =
     WhereCause(value) { "${render(it)} >= ?" }
 
-infix fun Column.lte(value: Any): Predicate =
+infix fun Column<*>.lte(value: Any): Predicate =
     WhereCause(value) { "${render(it)} <= ?" }
 
-infix fun Column.like(value: Any): Predicate =
+infix fun Column<*>.like(value: Any): Predicate =
     WhereCause(value) { "${render(it)} LIKE ?" }
 
-infix fun Column.glob(value: Any): Predicate =
+infix fun Column<*>.glob(value: Any): Predicate =
     WhereCause(value) { "${render(it)} GLOB ?" }
 
-fun Column.isNotNull(): Predicate =
+fun Column<*>.isNotNull(): Predicate =
     WhereCause { "${render(it)} IS NOT NULL" }
 
-fun Column.isNull(): Predicate =
+fun Column<*>.isNull(): Predicate =
     WhereCause { "${render(it)} IS NULL" }
 
-fun Column.between(value1: Any, value2: Any): Predicate =
+fun Column<*>.between(value1: Any, value2: Any): Predicate =
     WhereCause(value1, value2) { "${render(it)} BETWEEN ? AND ?" }
 
-fun Column.notBetween(value1: Any, value2: Any): Predicate =
+fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
     WhereCause(value1, value2) { "${render(it)} NOT BETWEEN ? AND ?" }
 
-fun Column.any(vararg values: Any): Predicate =
+fun Column<*>.any(vararg values: Any): Predicate =
     WhereCause(*values) {
         values.joinToString(
             prefix = "${render(it)} IN (",
@@ -134,7 +134,7 @@ fun Column.any(vararg values: Any): Predicate =
         ) { "?" }
     }
 
-fun Column.none(vararg values: Any): Predicate =
+fun Column<*>.none(vararg values: Any): Predicate =
     WhereCause(*values) {
         values.joinToString(
             prefix = "${render(it)} NOT IN (",
@@ -145,7 +145,7 @@ fun Column.none(vararg values: Any): Predicate =
 fun exists(statement: QueryStatement): Predicate =
     WhereCause(statement) { "EXISTS ?" }
 
-private fun Column.render(full: Boolean) =
+private fun Column<*>.render(full: Boolean) =
     if (full) fullRender() else render()
 
 private fun Any.render(dialect: Dialect) =

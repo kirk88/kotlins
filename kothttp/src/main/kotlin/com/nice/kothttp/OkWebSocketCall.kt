@@ -38,7 +38,6 @@ class OkWebSocketCall(
         check(executed.compareAndSet(false, true)) { "Already Executed" }
 
         return callbackFlow {
-
             val listener = OkWebSocketListener(this@OkWebSocketCall, this)
 
             connectWebSocket(listener)
@@ -46,7 +45,6 @@ class OkWebSocketCall(
             invokeOnClose {
                 cancel()
             }
-
         }
     }
 

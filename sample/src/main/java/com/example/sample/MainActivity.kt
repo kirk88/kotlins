@@ -33,8 +33,8 @@ import com.nice.common.widget.ProgressView
 import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
+import com.nice.kothttp.OkHttpMethod
 import com.nice.kothttp.httpCallFlow
-import com.nice.kothttp.webSocketCallFlow
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -46,6 +46,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.Executors
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -77,18 +78,17 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        webSocketCallFlow {
-
-        }.onEach {
-
-        }
-
         httpCallFlow<String> {
             client(
                 OkHttpClient.Builder()
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                    .addInterceptor(
+                        HttpLoggingInterceptor()
+                            .setLevel(HttpLoggingInterceptor.Level.BASIC)
+                    )
                     .build()
             )
+
+            method(OkHttpMethod.Put)
 
             url("https://www.baidu.com")
 
@@ -284,4 +284,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         private val TAG = MainActivity::class.simpleName
     }
 
+}
+
+fun main() {
+
+    val scope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+
+    httpCallFlow<String> {
+        url("http://www.baidu.com/s")
+        queryParameters {
+            "wd" += "Android"
+        }
+    }.launchIn(scope)
 }
