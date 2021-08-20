@@ -10,10 +10,10 @@ import okhttp3.*
 import okio.ByteString
 import java.util.concurrent.atomic.AtomicBoolean
 
-class OkWebSocketRequest(
+class OkWebSocketCall(
     private val client: OkHttpClient,
     private val request: Request
-) : OkRequest<OkWebSocketResponse> {
+) : OkCall<OkWebSocketResponse> {
 
     private var webSocket: WebSocket? = null
     private var connectionFailure: Throwable? = null
@@ -21,7 +21,7 @@ class OkWebSocketRequest(
     private val executed = AtomicBoolean()
 
     @Volatile
-    var canceled: Boolean = false
+    private var canceled: Boolean = false
 
     override val isExecuted: Boolean
         get() = executed.get()
@@ -39,7 +39,7 @@ class OkWebSocketRequest(
 
         return callbackFlow {
 
-            val listener = OkWebSocketListener(this@OkWebSocketRequest, this)
+            val listener = OkWebSocketListener(this@OkWebSocketCall, this)
 
             connectWebSocket(listener)
 
@@ -82,51 +82,37 @@ class OkWebSocketRequest(
     }
 
     private class OkWebSocketListener(
-        private val request: OkWebSocketRequest,
+        private val call: OkWebSocketCall,
         private val channel: SendChannel<OkWebSocketResponse>
     ) : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            channel.trySend(OkWebSocketResponse.Open(request, response))
+            channel.trySend(OkWebSocketResponse.Open(call, response))
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            channel.trySend(OkWebSocketResponse.StringMessage(request, text))
+            channel.trySend(OkWebSocketResponse.StringMessage(call, text))
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            channel.trySend(OkWebSocketResponse.ByteStringMessage(request, bytes))
+            channel.trySend(OkWebSocketResponse.ByteStringMessage(call, bytes))
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closing(request, code, reason))
+            channel.trySend(OkWebSocketResponse.Closing(call, code, reason))
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closed(request, code, reason))
+            channel.trySend(OkWebSocketResponse.Closed(call, code, reason))
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            channel.trySend(OkWebSocketResponse.Failure(request, t, response))
+            channel.trySend(OkWebSocketResponse.Failure(call, t, response))
         }
     }
 
-    companion object {
-
-        fun builder() = OkWebSocketRequestBuilder()
-
-        fun build(buildAction: OkWebSocketRequestBuilder.() -> Unit): OkWebSocketRequest =
-            builder()
-                .apply(buildAction)
-                .build()
-
-        fun execute(buildAction: OkWebSocketRequestBuilder.() -> Unit): Flow<OkWebSocketResponse> =
-            build(buildAction)
-                .execute()
-
-    }
 }
 
-class OkWebSocketRequestBuilder internal constructor() {
+class OkWebSocketCallBuilder internal constructor() {
 
     private var client: OkHttpClient = DEFAULT_CLIENT
 
@@ -148,11 +134,22 @@ class OkWebSocketRequestBuilder internal constructor() {
         requestBuilder.tag(type, tag)
     }
 
-    fun build(): OkWebSocketRequest {
+    fun build(): OkWebSocketCall {
         val request = requestBuilder.get().build()
-        return OkWebSocketRequest(client, request)
+        return OkWebSocketCall(client, request)
     }
 
     fun execute(): Flow<OkWebSocketResponse> = build().execute()
 
 }
+
+fun webSocketCallBuilder() = OkWebSocketCallBuilder()
+
+fun buildWebSocketCall(buildAction: OkWebSocketCallBuilder.() -> Unit): OkWebSocketCall =
+    webSocketCallBuilder()
+        .apply(buildAction)
+        .build()
+
+fun webSocketCallFlow(buildAction: OkWebSocketCallBuilder.() -> Unit): Flow<OkWebSocketResponse> =
+    buildWebSocketCall(buildAction)
+        .execute()

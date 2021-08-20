@@ -8,7 +8,7 @@ internal val DEFAULT_CLIENT = OkHttpClient.Builder()
     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
     .build()
 
-interface OkRequest<T> {
+interface OkCall<T> {
 
     val isExecuted: Boolean
 

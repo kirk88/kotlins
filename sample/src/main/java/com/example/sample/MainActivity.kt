@@ -34,7 +34,7 @@ import com.nice.common.widget.TipView
 import com.nice.common.widget.progressViews
 import com.nice.common.widget.tipViews
 import com.nice.kothttp.HttpMethod
-import com.nice.kothttp.OkHttpRequest
+import com.nice.kothttp.httpCallFlow
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -77,7 +77,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        OkHttpRequest.execute<String> {
+        httpCallFlow<String> {
             client(
                 OkHttpClient.Builder()
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))

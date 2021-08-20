@@ -4,9 +4,9 @@ package com.nice.kothttp
 
 class DefaultRequestScope : RequestScope {
 
-    private var resources: MutableList<OkRequest<*>>? = null
+    private var resources: MutableList<OkCall<*>>? = null
 
-    override fun add(request: OkRequest<*>) {
+    override fun add(call: OkCall<*>) {
         synchronized(this) {
             var list = resources
 
@@ -15,21 +15,21 @@ class DefaultRequestScope : RequestScope {
                 resources = list
             }
 
-            list.add(request)
+            list.add(call)
         }
     }
 
-    override fun delete(request: OkRequest<*>): Boolean {
+    override fun delete(call: OkCall<*>): Boolean {
         synchronized(this) {
             val list = resources ?: return false
 
-            return list.remove(request)
+            return list.remove(call)
         }
     }
 
-    override fun remove(request: OkRequest<*>): Boolean {
-        if (delete(request)) {
-            request.cancel()
+    override fun remove(call: OkCall<*>): Boolean {
+        if (delete(call)) {
+            call.cancel()
             return true
         }
         return false
@@ -47,15 +47,15 @@ class DefaultRequestScope : RequestScope {
     }
 
     override fun size(): Int {
-        var list: List<OkRequest<*>>?
+        var list: List<OkCall<*>>?
         synchronized(this) {
             list = resources
         }
         return list?.size ?: 0
     }
 
-    override fun iterator(): Iterator<OkRequest<*>> {
-        val list: List<OkRequest<*>> = resources ?: emptyList()
+    override fun iterator(): Iterator<OkCall<*>> {
+        val list: List<OkCall<*>> = resources ?: emptyList()
         return list.iterator()
     }
 

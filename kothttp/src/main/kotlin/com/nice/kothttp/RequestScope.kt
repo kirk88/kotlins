@@ -1,12 +1,12 @@
 package com.nice.kothttp
 
-interface RequestScope : Iterable<OkRequest<*>> {
+interface RequestScope : Iterable<OkCall<*>> {
 
-    fun add(request: OkRequest<*>)
+    fun add(call: OkCall<*>)
 
-    fun delete(request: OkRequest<*>): Boolean
+    fun delete(call: OkCall<*>): Boolean
 
-    fun remove(request: OkRequest<*>): Boolean
+    fun remove(call: OkCall<*>): Boolean
 
     fun clear()
 

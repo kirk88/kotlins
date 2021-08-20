@@ -2,21 +2,21 @@
 
 package com.nice.kothttp
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import okhttp3.*
-import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
-class OkHttpRequest<T> internal constructor(
+class OkHttpCall<T> internal constructor(
     private val client: OkHttpClient,
     private val request: Request,
     private val requestInterceptors: List<OkRequestInterceptor>,
     private val responseInterceptors: List<OkResponseInterceptor>,
     private val transformer: OkTransformer<T>
-) : OkRequest<T> {
+) : OkCall<T> {
 
     private var call: Call? = null
     private var creationFailure: Throwable? = null
@@ -92,25 +92,13 @@ class OkHttpRequest<T> internal constructor(
 
         val globalConfig: OkHttpConfig get() = config
 
-
-        inline fun <reified T> builder() = OkHttpRequestBuilder<T>().mapResponse(typeMapper())
-
-        inline fun <reified T> build(buildAction: OkHttpRequestBuilder<T>.() -> Unit): OkHttpRequest<T> =
-            builder<T>()
-                .apply(buildAction)
-                .build()
-
-        inline fun <reified T> execute(buildAction: OkHttpRequestBuilder<T>.() -> Unit): Flow<T> =
-            build(buildAction)
-                .execute()
-
     }
 
 }
 
-class OkHttpRequestBuilder<T> @PublishedApi internal constructor() {
+class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
 
-    private val config: OkHttpConfig = OkHttpRequest.globalConfig
+    private val config: OkHttpConfig = OkHttpCall.globalConfig
 
     private var client: OkHttpClient = DEFAULT_CLIENT
     private var method: HttpMethod = HttpMethod.GET
@@ -239,7 +227,7 @@ class OkHttpRequestBuilder<T> @PublishedApi internal constructor() {
         transformer.mapError(mapper)
     }
 
-    fun build(): OkHttpRequest<T> {
+    fun build(): OkHttpCall<T> {
         val body = requestBody
             ?: _formBodyBuilder?.build()
             ?: _multipartBodyBuilder?.build()
@@ -248,7 +236,7 @@ class OkHttpRequestBuilder<T> @PublishedApi internal constructor() {
             .method(method.name, body)
             .build()
 
-        return OkHttpRequest(
+        return OkHttpCall(
             client,
             request,
             requestInterceptors,
@@ -367,19 +355,13 @@ class MultipartBodyBuilder internal constructor(private val builder: MultipartBo
 
 private fun Any?.toStringOrEmpty() = (this ?: "").toString()
 
-fun main() {
-    OkHttpRequest.setGlobalConfig(
-        OkHttpConfig.Builder()
-            .domain("http://www.baidu.com/s")
-            .build()
-    )
+inline fun <reified T> httpCallBuilder() = OkHttpCallBuilder<T>().mapResponse(typeMapper())
 
-    val scope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+inline fun <reified T> buildHttpCall(buildAction: OkHttpCallBuilder<T>.() -> Unit): OkHttpCall<T> =
+    httpCallBuilder<T>()
+        .apply(buildAction)
+        .build()
 
-    OkHttpRequest.execute<String> {
-
-    }.onStart {
-
-    }
-
-}
+inline fun <reified T> httpCallFlow(buildAction: OkHttpCallBuilder<T>.() -> Unit): Flow<T> =
+    buildHttpCall(buildAction)
+        .execute()
