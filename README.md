@@ -53,7 +53,7 @@ OkFaker.setGlobalConfig(
 GET请求
 
 ```kotlin
-httpRequestFlow<String> {
+httpCallFlow<String> {
 
     url("/s")
 
@@ -75,7 +75,7 @@ httpRequestFlow<String> {
 POST请求
 
 ```kotlin
-httpRequestFlow<String> {
+httpCallFlow<String> {
 
     method(OkRequestMethod.POST)
     
@@ -99,7 +99,7 @@ httpRequestFlow<String> {
 转换成任意数据格式
 
 ```kotlin
-httpRequestFlow<String> {
+httpCallFlow<String> {
 
     method(OkRequestMethod.POST)
 
@@ -120,7 +120,7 @@ httpRequestFlow<String> {
 下载
 
 ```kotlin
-httpRequestFlow<File> {
+httpCallFlow<File> {
     client (
         //注意 HttpLoggingInterceptor.Level < BODY
         OkHttpClient.Builder()
