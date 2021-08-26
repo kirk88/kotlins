@@ -3,16 +3,16 @@ package com.nice.common.viewmodel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
-import com.nice.common.event.Event
+import com.nice.common.event.Message
 import com.nice.common.event.EventLifecycleObserver
 
 interface ViewModelEventDispatcher {
 
-    fun onInterceptViewModelEvent(event: Event): Boolean
+    fun onInterceptViewModelEvent(message: Message): Boolean
 
-    fun dispatchViewModelEvent(event: Event): Boolean
+    fun dispatchViewModelEvent(message: Message): Boolean
 
-    fun onViewModelEvent(event: Event): Boolean
+    fun onViewModelEvent(message: Message): Boolean
 
 }
 

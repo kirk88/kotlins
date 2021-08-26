@@ -8,7 +8,7 @@ import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.bluetooth.Bluetooth
 import com.nice.common.app.NiceViewModelActivity
-import com.nice.common.event.Event
+import com.nice.common.event.Message
 import com.nice.common.helper.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -61,19 +61,19 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }.launchIn(lifecycleScope)
     }
 
-    override fun dispatchViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "dispatchViewModelEvent: " + event.message)
-        return super.dispatchViewModelEvent(event)
+    override fun dispatchViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "dispatchViewModelEvent: " + message.javaClass.simpleName)
+        return super.dispatchViewModelEvent(message)
     }
 
-    override fun onInterceptViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "onInterceptViewModelEvent: " + event.message)
-        return super.onInterceptViewModelEvent(event)
+    override fun onInterceptViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "onInterceptViewModelEvent: " + message.javaClass.simpleName)
+        return super.onInterceptViewModelEvent(message)
     }
 
-    override fun onViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "onViewModelEvent: " + event.message)
-        return super.onViewModelEvent(event)
+    override fun onViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "onViewModelEvent: " + message.javaClass.simpleName)
+        return super.onViewModelEvent(message)
     }
 
     companion object {

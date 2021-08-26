@@ -7,8 +7,7 @@ import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.nice.common.app.NiceViewModelFragment
-import com.nice.common.event.Event
-import com.nice.common.event.event
+import com.nice.common.event.Message
 import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
 import com.nice.common.helper.showIme
@@ -29,24 +28,24 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
             editText.postDelayed({ showSnackBar("你好", Snackbar.LENGTH_INDEFINITE) }, 2000)
         }
 
-        viewModel.event = event("hello world")
+        viewModel.message = Message.ShowToast("hello world")
 
         childFragmentManager.add<ChildFragment>(R.id.frame_container)
     }
 
-    override fun dispatchViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "dispatchViewModelEvent: " + event.message)
-        return super.dispatchViewModelEvent(event)
+    override fun dispatchViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "dispatchViewModelEvent: " + message.javaClass.simpleName)
+        return super.dispatchViewModelEvent(message)
     }
 
-    override fun onInterceptViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "onInterceptViewModelEvent: " + event.message)
-        return super.onInterceptViewModelEvent(event)
+    override fun onInterceptViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "onInterceptViewModelEvent: " + message.javaClass.simpleName)
+        return super.onInterceptViewModelEvent(message)
     }
 
-    override fun onViewModelEvent(event: Event): Boolean {
-        Log.e(TAG, "onViewModelEvent: " + event.message)
-        return super.onViewModelEvent(event)
+    override fun onViewModelEvent(message: Message): Boolean {
+        Log.e(TAG, "onViewModelEvent: " + message.javaClass.simpleName)
+        return super.onViewModelEvent(message)
     }
 
     companion object {

@@ -5,15 +5,17 @@ package com.nice.common.app
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
-import com.nice.common.event.Event
-import com.nice.common.event.EventCode
 import com.nice.common.event.EventLifecycleObserver
-import com.nice.common.event.getOrDefault
+import com.nice.common.event.Message
+import com.nice.common.helper.toast
 import com.nice.common.viewmodel.ViewModelController
 import com.nice.common.viewmodel.ViewModelEventDispatcher
 import com.nice.common.viewmodel.ViewModelEvents
 import com.nice.common.viewmodel.ViewModelOwner
-import com.nice.common.widget.*
+import com.nice.common.widget.InfiniteView
+import com.nice.common.widget.ProgressView
+import com.nice.common.widget.StatefulView
+import com.nice.common.widget.TipView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     NiceFragment(contentLayoutId),
@@ -34,68 +36,64 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
         ViewModelEvents.observeOnFragment(this)
     }
 
-    final override fun onEventChanged(event: Event) {
-        dispatchViewModelEvent(event)
+    final override fun onEventChanged(message: Message) {
+        dispatchViewModelEvent(message)
     }
 
-    override fun onInterceptViewModelEvent(event: Event): Boolean {
+    override fun onInterceptViewModelEvent(message: Message): Boolean {
         return false
     }
 
-    override fun dispatchViewModelEvent(event: Event): Boolean {
-        if (onInterceptViewModelEvent(event)) {
+    override fun dispatchViewModelEvent(message: Message): Boolean {
+        if (onInterceptViewModelEvent(message)) {
             return true
         }
 
         for (fragment in childFragmentManager.fragments) {
             if (!fragment.isAdded || fragment !is ViewModelEventDispatcher) continue
 
-            if (fragment.dispatchViewModelEvent(event)) {
+            if (fragment.dispatchViewModelEvent(message)) {
                 return true
             }
         }
 
-        return onViewModelEvent(event)
+        return onViewModelEvent(message)
     }
 
-    override fun onViewModelEvent(event: Event): Boolean {
-        when (event.code) {
-            EventCode.SHOW_PROGRESS -> progressView?.show(event.message)
-            EventCode.DISMISS_PROGRESS -> progressView?.dismiss()
-            EventCode.REFRESH_STATE -> infiniteView?.setRefreshState(
-                event.getOrDefault("state", InfiniteState.STATE_IDLE)
-            )
-            EventCode.LOADMORE_STATE -> infiniteView?.setLoadMoreState(
-                event.getOrDefault("state", InfiniteState.STATE_IDLE)
-            )
-            EventCode.SHOW_LOADING -> statefulView?.apply {
-                if (event.message != null) setLoadingText(event.message)
+    override fun onViewModelEvent(message: Message): Boolean {
+        when (message) {
+            is Message.ShowProgress -> progressView?.show(message.text)
+            is Message.DismissProgress -> progressView?.dismiss()
+            is Message.RefreshState -> infiniteView?.setRefreshState(message.state)
+            is Message.LoadMoreState -> infiniteView?.setLoadMoreState(message.state)
+            is Message.ShowLoading -> statefulView?.apply {
+                if (message.text != null) setLoadingText(message.text)
                 showLoading()
             }
-            EventCode.SHOW_EMPTY -> statefulView?.apply {
-                if (event.message != null) setEmptyText(event.message)
+            is Message.ShowEmpty -> statefulView?.apply {
+                if (message.text != null) setEmptyText(message.text)
                 showEmpty()
             }
-            EventCode.SHOW_ERROR -> statefulView?.apply {
-                if (event.message != null) setErrorText(event.message)
+            is Message.ShowError -> statefulView?.apply {
+                if (message.text != null) setErrorText(message.text)
                 showError()
             }
-            EventCode.SHOW_CONTENT -> statefulView?.showContent()
-            EventCode.ACTIVITY_FINISH -> activity?.finish()
-            EventCode.ACTIVITY_START -> {
-                val intent = event.intent ?: return true
-                val callback = event.resultCallback
-                if (callback == null) {
-                    startActivity(intent)
-                } else {
-                    activityForResultLauncher.launch(intent, callback)
+            is Message.ShowContent -> statefulView?.showContent()
+            is Message.FinishActivity -> activity?.finish()
+            is Message.StartActivity -> {
+                startActivity(message.intent)
+            }
+            is Message.StartActivityForResult -> {
+                activityForResultLauncher.launch(message.intent, message.callback)
+            }
+            is Message.SetActivityResult -> {
+                activity?.let {
+                    it.setResult(message.resultCode, message.data)
+                    it.finish()
                 }
             }
-            EventCode.ACTIVITY_RESULT -> activity?.let {
-                it.setResult(event.resultCode, event.intent)
-                it.finish()
-            }
-            else -> event.message?.let { tipView?.show(it) }
+            is Message.ShowToast -> toast(message.text, message.duration)
+            else -> return false
         }
         return true
     }

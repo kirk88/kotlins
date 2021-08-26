@@ -82,8 +82,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             client(
                 OkHttpClient.Builder()
                     .addInterceptor(
-                        HttpLoggingInterceptor()
-                            .setLevel(HttpLoggingInterceptor.Level.BASIC)
+                        HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)
                     )
                     .build()
             )
