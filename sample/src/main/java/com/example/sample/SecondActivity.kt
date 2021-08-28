@@ -59,6 +59,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         Bluetooth.state.onEach {
             Log.e(TAG, "state: $it")
         }.launchIn(lifecycleScope)
+
     }
 
     override fun dispatchViewModelEvent(message: Message): Boolean {
