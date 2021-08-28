@@ -28,7 +28,7 @@ class MessageDelegate {
 
     fun addObserver(owner: LifecycleOwner, observer: EventObserver) {
         owner.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
-            messages.asSharedFlow().onEach {
+            messages.onEach {
                 observer.onEventChanged(it)
             }.cancellable().collect()
         }
@@ -36,7 +36,7 @@ class MessageDelegate {
 
     fun addObserver(observer: EventLifecycleObserver) {
         observer.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
-            messages.asSharedFlow().onEach {
+            messages.onEach {
                 observer.onEventChanged(it)
             }.cancellable().collect()
         }
