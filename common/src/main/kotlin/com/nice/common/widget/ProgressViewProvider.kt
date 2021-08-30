@@ -162,11 +162,7 @@ val Context.progressViewFactory: ProgressViewFactory
     }
 
 val Activity.progressViewFactory: ProgressViewFactory
-    get() {
-        val view = window?.decorView
-            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
-        return view.progressViewFactory
-    }
+    get() = window.decorView.progressViewFactory
 
 val Fragment.progressViewFactory: ProgressViewFactory
     get() = requireActivity().progressViewFactory

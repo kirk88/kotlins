@@ -3,17 +3,13 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.nice.bluetooth.Bluetooth
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.event.Message
 import com.nice.common.helper.*
 import com.nice.common.widget.TipView
 import com.nice.common.widget.tipViews
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
@@ -46,7 +42,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
             label = "Third"
         )
 
-        navController.setStartDestination(R.id.fragment_second)
+        navController.setStartDestination(R.id.fragment_first)
 
         navView.setupWithController(navController) { item, position ->
             item.setIcon(
@@ -59,11 +55,6 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
-
-        Bluetooth.state.onEach {
-            Log.e(TAG, "state: $it")
-        }.launchIn(lifecycleScope)
-
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {

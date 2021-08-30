@@ -27,7 +27,8 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="Sample"
-            android:theme="@style/Theme.Kotlins.NoActionBar.Main">
+            android:theme="@style/Theme.Kotlins.NoActionBar.Main"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

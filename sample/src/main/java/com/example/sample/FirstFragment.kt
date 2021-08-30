@@ -9,22 +9,21 @@ import com.nice.common.event.Message
 import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
 import com.nice.common.widget.TipView
+import com.nice.common.widget.snackTipViewFactory
 import com.nice.common.widget.tipViews
 
 class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first) {
 
     override val viewModel: TestViewModel by activityViewModels()
 
-    override val tipView: TipView? by tipViews()
+    override val tipView: TipView? by tipViews { snackTipViewFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         findViewById<Button>(R.id.button).doOnClick {
-            viewModel.message = Message.Tip("hello world 2")
+            viewModel.message = Message.Tip("hello world")
         }
-
-        viewModel.message = Message.Tip("hello world")
 
         childFragmentManager.add<ChildFragment>(R.id.frame_container)
     }
