@@ -108,9 +108,12 @@ object ViewBindings {
     }.invoke(null, inflater, parent, attachToParent) as VB
 
     @Suppress("UNCHECKED_CAST")
-    fun <VB : ViewBinding> bind(viewBindingClass: Class<VB>, rootView: View) = methods.getOrPut(viewBindingClass) {
-                viewBindingClass.getMethod("bind", View::class.java)
-            }.invoke(null, rootView) as VB
+    fun <VB : ViewBinding> bind(
+        viewBindingClass: Class<VB>,
+        rootView: View
+    ) = methods.getOrPut(viewBindingClass) {
+        viewBindingClass.getMethod("bind", View::class.java)
+    }.invoke(null, rootView) as VB
 
 }
 

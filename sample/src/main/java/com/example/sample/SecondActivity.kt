@@ -10,12 +10,16 @@ import com.nice.bluetooth.Bluetooth
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.event.Message
 import com.nice.common.helper.*
+import com.nice.common.widget.TipView
+import com.nice.common.widget.tipViews
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
     override val viewModel: TestViewModel by viewModels()
+
+    override val tipView: TipView? by tipViews()
 
     private val binding: ActivitySecondBinding by viewBindings()
 
@@ -42,7 +46,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
             label = "Third"
         )
 
-        navController.setStartDestination(R.id.fragment_first)
+        navController.setStartDestination(R.id.fragment_second)
 
         navView.setupWithController(navController) { item, position ->
             item.setIcon(
@@ -62,19 +66,19 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
     }
 
-    override fun dispatchViewModelEvent(message: Message): Boolean {
-        Log.e(TAG, "dispatchViewModelEvent: " + message.javaClass.simpleName)
-        return super.dispatchViewModelEvent(message)
+    override fun dispatchViewModelMessage(message: Message): Boolean {
+        Log.e(TAG, "dispatchViewModelMessage: " + message.javaClass.simpleName)
+        return super.dispatchViewModelMessage(message)
     }
 
-    override fun onInterceptViewModelEvent(message: Message): Boolean {
-        Log.e(TAG, "onInterceptViewModelEvent: " + message.javaClass.simpleName)
-        return super.onInterceptViewModelEvent(message)
+    override fun onInterceptViewModelMessage(message: Message): Boolean {
+        Log.e(TAG, "onInterceptViewModelMessage: " + message.javaClass.simpleName)
+        return super.onInterceptViewModelMessage(message)
     }
 
-    override fun onViewModelEvent(message: Message): Boolean {
-        Log.e(TAG, "onViewModelEvent: " + message.javaClass.simpleName)
-        return super.onViewModelEvent(message)
+    override fun onViewModelMessage(message: Message): Boolean {
+        Log.e(TAG, "onViewModelMessage: " + message.javaClass.simpleName)
+        return super.onViewModelMessage(message)
     }
 
     companion object {

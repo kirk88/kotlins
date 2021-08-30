@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.nice.common.helper.isMainThread
 
 class TipViewLazy(private val factoryProducer: () -> TipViewFactory) :
     Lazy<TipView> {
@@ -38,30 +39,42 @@ internal class DefaultTipViewFactory(private val context: Context) : TipViewFact
 
 }
 
-internal class DefaultTipView(context: Context) : TipView {
+internal class DefaultTipView(private val context: Context) : TipView {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val toast: Toast by lazy {
-        Toast.makeText(context, "", Toast.LENGTH_SHORT)
-    }
+    private var currentToast: Toast? = null
 
     override fun show(message: CharSequence) {
-        handler.post {
-            toast.setText(message)
+        val runnable = Runnable {
+            val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT).also {
+                currentToast = it
+            }
             toast.show()
+        }
+        if (isMainThread) {
+            runnable.run()
+        } else {
+            handler.post(runnable)
         }
     }
 
     override fun show(messageId: Int) {
-        handler.post {
-            toast.setText(messageId)
+        val runnable = Runnable {
+            val toast = Toast.makeText(context, messageId, Toast.LENGTH_SHORT).also {
+                currentToast = it
+            }
             toast.show()
+        }
+        if (isMainThread) {
+            runnable.run()
+        } else {
+            handler.post(runnable)
         }
     }
 
     override fun dismiss() {
-        toast.cancel()
+        currentToast?.cancel()
     }
 
 }

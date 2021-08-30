@@ -42,9 +42,10 @@ class ImeChangeObserver {
 
         val rootView = view.rootView
 
-        val popup = rootView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow ?: ObservablePopupWindow(view.context).also {
-            rootView.setTag(R.id.ime_change_observer_popup_id, it)
-        }
+        val popup = rootView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
+            ?: ObservablePopupWindow(view.context).also {
+                rootView.setTag(R.id.ime_change_observer_popup_id, it)
+            }
 
         this.popup = popup.apply {
             addReceiver(receiver)
@@ -53,7 +54,8 @@ class ImeChangeObserver {
     }
 
 
-    private class ObservablePopupWindow(context: Context) : PopupWindow(), ViewTreeObserver.OnGlobalLayoutListener {
+    private class ObservablePopupWindow(context: Context) : PopupWindow(),
+        ViewTreeObserver.OnGlobalLayoutListener {
 
         private val receivers = mutableSetOf<ImeChangeReceiver>()
 
@@ -89,7 +91,10 @@ class ImeChangeObserver {
             }
         }
 
-        override fun showAtLocation(parent: View?, gravity: Int, x: Int, y: Int) {
+        override fun showAtLocation(parent: View, gravity: Int, x: Int, y: Int) {
+            if (!parent.isAttachedToWindow) {
+                return
+            }
             super.showAtLocation(parent, gravity, x, y)
             removeListener(this)
             addListener(this)
@@ -131,9 +136,10 @@ class ImeChangeObserver {
 
     companion object {
 
-        fun register(view: View, receiver: ImeChangeReceiver): ImeChangeObserver = ImeChangeObserver().also {
-            it.register(view, receiver)
-        }
+        fun register(view: View, receiver: ImeChangeReceiver): ImeChangeObserver =
+            ImeChangeObserver().also {
+                it.register(view, receiver)
+            }
 
     }
 

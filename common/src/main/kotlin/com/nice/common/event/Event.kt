@@ -3,7 +3,6 @@
 package com.nice.common.event
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.nice.common.widget.InfiniteState
@@ -23,11 +22,14 @@ sealed class Message : Event {
         extras[key] = value
     }
 
-    class ShowToast(val text: CharSequence, val duration: Int = Toast.LENGTH_SHORT) : Message()
+    class Tip(val text: CharSequence) : Message()
 
     class StartActivity(val intent: Intent) : Message()
 
-    class StartActivityForResult(val intent: Intent, val callback: ActivityResultCallback<ActivityResult>) : Message()
+    class StartActivityForResult(
+        val intent: Intent,
+        val callback: ActivityResultCallback<ActivityResult>
+    ) : Message()
 
     class SetActivityResult(val resultCode: Int, val data: Intent? = null) : Message()
 

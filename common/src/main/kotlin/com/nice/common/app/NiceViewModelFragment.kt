@@ -5,12 +5,11 @@ package com.nice.common.app
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
-import com.nice.common.event.EventLifecycleObserver
+import com.nice.common.event.LifecycleMessageObserver
 import com.nice.common.event.Message
-import com.nice.common.helper.toast
 import com.nice.common.viewmodel.ViewModelController
-import com.nice.common.viewmodel.ViewModelEventDispatcher
-import com.nice.common.viewmodel.ViewModelEvents
+import com.nice.common.viewmodel.ViewModelMessageDispatcher
+import com.nice.common.viewmodel.ViewModelMessages
 import com.nice.common.viewmodel.ViewModelOwner
 import com.nice.common.widget.InfiniteView
 import com.nice.common.widget.ProgressView
@@ -19,8 +18,8 @@ import com.nice.common.widget.TipView
 
 abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     NiceFragment(contentLayoutId),
-    EventLifecycleObserver,
-    ViewModelEventDispatcher,
+    LifecycleMessageObserver,
+    ViewModelMessageDispatcher,
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val statefulView: StatefulView? = null
@@ -33,34 +32,34 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ViewModelEvents.observeOnFragment(this)
+        ViewModelMessages.observeOnFragment(this)
     }
 
-    final override fun onEventChanged(message: Message) {
-        dispatchViewModelEvent(message)
+    final override fun onMessageChanged(message: Message) {
+        dispatchViewModelMessage(message)
     }
 
-    override fun onInterceptViewModelEvent(message: Message): Boolean {
+    override fun onInterceptViewModelMessage(message: Message): Boolean {
         return false
     }
 
-    override fun dispatchViewModelEvent(message: Message): Boolean {
-        if (onInterceptViewModelEvent(message)) {
+    override fun dispatchViewModelMessage(message: Message): Boolean {
+        if (onInterceptViewModelMessage(message)) {
             return true
         }
 
         for (fragment in childFragmentManager.fragments) {
-            if (!fragment.isAdded || fragment !is ViewModelEventDispatcher) continue
+            if (!fragment.isAdded || fragment !is ViewModelMessageDispatcher) continue
 
-            if (fragment.dispatchViewModelEvent(message)) {
+            if (fragment.dispatchViewModelMessage(message)) {
                 return true
             }
         }
 
-        return onViewModelEvent(message)
+        return onViewModelMessage(message)
     }
 
-    override fun onViewModelEvent(message: Message): Boolean {
+    override fun onViewModelMessage(message: Message): Boolean {
         when (message) {
             is Message.ShowProgress -> progressView?.show(message.text)
             is Message.DismissProgress -> progressView?.dismiss()
@@ -92,7 +91,7 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
                     it.finish()
                 }
             }
-            is Message.ShowToast -> toast(message.text, message.duration)
+            is Message.Tip -> tipView?.show(message.text)
             else -> return false
         }
         return true

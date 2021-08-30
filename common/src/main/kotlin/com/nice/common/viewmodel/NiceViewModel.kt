@@ -7,18 +7,18 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
-import com.nice.common.event.EventLifecycleObserver
-import com.nice.common.event.EventObserver
+import com.nice.common.event.LifecycleMessageObserver
 import com.nice.common.event.Message
 import com.nice.common.event.MessageDelegate
+import com.nice.common.event.MessageObserver
 
 interface ViewModelController {
 
     var message: Message
 
-    fun addEventObserver(owner: LifecycleOwner, observer: EventObserver)
+    fun observeMessage(owner: LifecycleOwner, observer: MessageObserver)
 
-    fun addEventObserver(observer: EventLifecycleObserver)
+    fun observeMessage(observer: LifecycleMessageObserver)
 
 }
 
@@ -27,12 +27,12 @@ private class DefaultViewModelController : ViewModelController {
     private val messageDelegate = MessageDelegate()
     override var message: Message by messageDelegate
 
-    override fun addEventObserver(owner: LifecycleOwner, observer: EventObserver) {
-        messageDelegate.addObserver(owner, observer)
+    override fun observeMessage(owner: LifecycleOwner, observer: MessageObserver) {
+        messageDelegate.observe(owner, observer)
     }
 
-    override fun addEventObserver(observer: EventLifecycleObserver) {
-        messageDelegate.addObserver(observer)
+    override fun observeMessage(observer: LifecycleMessageObserver) {
+        messageDelegate.observe(observer)
     }
 
 }

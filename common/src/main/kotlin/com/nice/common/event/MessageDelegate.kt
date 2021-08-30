@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty
 
 class MessageDelegate {
 
-    private val messages = MutableSharedFlow<Message>()
+    private val messages = MutableSharedFlow<Message>(extraBufferCapacity = Int.MAX_VALUE)
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): Message {
         return runBlocking { messages.last() }
@@ -26,29 +26,29 @@ class MessageDelegate {
         }
     }
 
-    fun addObserver(owner: LifecycleOwner, observer: EventObserver) {
+    fun observe(owner: LifecycleOwner, observer: MessageObserver) {
         owner.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
             messages.onEach {
-                observer.onEventChanged(it)
+                observer.onMessageChanged(it)
             }.cancellable().collect()
         }
     }
 
-    fun addObserver(observer: EventLifecycleObserver) {
+    fun observe(observer: LifecycleMessageObserver) {
         observer.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
             messages.onEach {
-                observer.onEventChanged(it)
+                observer.onMessageChanged(it)
             }.cancellable().collect()
         }
     }
 
 }
 
-fun interface EventObserver {
-    fun onEventChanged(message: Message)
+fun interface MessageObserver {
+    fun onMessageChanged(message: Message)
 }
 
-interface EventLifecycleObserver : EventObserver, LifecycleOwner
+interface LifecycleMessageObserver : MessageObserver, LifecycleOwner
 
 private fun <T> LifecycleOwner.launchWhenStateAtLeast(
     minState: Lifecycle.State,

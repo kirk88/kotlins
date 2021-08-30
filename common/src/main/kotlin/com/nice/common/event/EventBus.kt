@@ -10,10 +10,13 @@ import kotlinx.coroutines.launch
 
 object EventBus {
 
-    private val mutableEvents = MutableSharedFlow<Event>()
+    private val mutableEvents = MutableSharedFlow<Event>(extraBufferCapacity = Int.MAX_VALUE)
     val events = mutableEvents.asSharedFlow()
 
-    private val mutableStickyEvents = MutableSharedFlow<Event>(replay = 1)
+    private val mutableStickyEvents = MutableSharedFlow<Event>(
+        replay = 1,
+        extraBufferCapacity = Int.MAX_VALUE
+    )
     val stickyEvents = mutableStickyEvents.asSharedFlow()
 
     fun <T : Event> LifecycleOwner.produceEvent(event: T): Job = lifecycleScope.launch {
@@ -28,29 +31,35 @@ object EventBus {
 
     fun <T : Event> tryProduceStickyEvent(event: T): Boolean = mutableStickyEvents.tryEmit(event)
 
-    fun <T : Event> LifecycleOwner.produceEventWhenCreated(event: T): Job = lifecycleScope.launchWhenCreated {
-        mutableEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceEventWhenCreated(event: T): Job =
+        lifecycleScope.launchWhenCreated {
+            mutableEvents.emit(event)
+        }
 
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenCreated(event: T): Job = lifecycleScope.launchWhenCreated {
-        mutableStickyEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceStickyEventWhenCreated(event: T): Job =
+        lifecycleScope.launchWhenCreated {
+            mutableStickyEvents.emit(event)
+        }
 
-    fun <T : Event> LifecycleOwner.produceEventWhenStarted(event: T): Job = lifecycleScope.launchWhenStarted {
-        mutableEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceEventWhenStarted(event: T): Job =
+        lifecycleScope.launchWhenStarted {
+            mutableEvents.emit(event)
+        }
 
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenStarted(event: T): Job = lifecycleScope.launchWhenStarted {
-        mutableStickyEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceStickyEventWhenStarted(event: T): Job =
+        lifecycleScope.launchWhenStarted {
+            mutableStickyEvents.emit(event)
+        }
 
-    fun <T : Event> LifecycleOwner.produceEventWhenResumed(event: T): Job = lifecycleScope.launchWhenResumed {
-        mutableEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceEventWhenResumed(event: T): Job =
+        lifecycleScope.launchWhenResumed {
+            mutableEvents.emit(event)
+        }
 
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenResumed(event: T): Job = lifecycleScope.launchWhenResumed {
-        mutableStickyEvents.emit(event)
-    }
+    fun <T : Event> LifecycleOwner.produceStickyEventWhenResumed(event: T): Job =
+        lifecycleScope.launchWhenResumed {
+            mutableStickyEvents.emit(event)
+        }
 
     inline fun LifecycleOwner.subscribeEvent(
         crossinline predicate: suspend (Event) -> Boolean,
