@@ -1,4 +1,4 @@
-package com.nice.common.event
+package com.nice.common.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope

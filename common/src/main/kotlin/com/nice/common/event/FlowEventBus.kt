@@ -3,14 +3,16 @@
 package com.nice.common.event
 
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-object EventBus {
+object FlowEventBus {
 
     private val mutableEvents = MutableSharedFlow<Event>()
     val events = mutableEvents.asSharedFlow()
@@ -26,13 +28,21 @@ object EventBus {
         mutableStickyEvents.emit(event)
     }
 
+    fun <T : Event> ViewModel.produceEvent(event: T): Job = viewModelScope.launch {
+        mutableEvents.emit(event)
+    }
+
+    fun <T : Event> ViewModel.produceStickyEvent(event: T): Job = viewModelScope.launch {
+        mutableStickyEvents.emit(event)
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     fun <T : Event> produceEventGlobal(event: T): Job = GlobalScope.launch {
         mutableEvents.emit(event)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Event> produceStickyGlobal(event: T): Job = GlobalScope.launch {
+    fun <T : Event> produceStickyEventGlobal(event: T): Job = GlobalScope.launch {
         mutableStickyEvents.emit(event)
     }
 
@@ -101,9 +111,79 @@ object EventBus {
         .cancellable()
         .launchIn(lifecycleScope)
 
+    inline fun ViewModel.subscribeEvent(
+        crossinline predicate: suspend (Event) -> Boolean,
+        crossinline action: suspend (Event) -> Unit
+    ): Job = events
+        .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
+    inline fun <reified T : Event> ViewModel.subscribeEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = events
+        .filterIsInstance<T>()
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
+
+    inline fun ViewModel.subscribeStickyEvent(
+        crossinline predicate: suspend (Event) -> Boolean,
+        crossinline action: suspend (Event) -> Unit
+    ): Job = stickyEvents
+        .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
+    inline fun <reified T : Event> ViewModel.subscribeStickyEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = stickyEvents
+        .filterIsInstance<T>()
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun subscribeEventForever(
+        crossinline predicate: suspend (Event) -> Boolean,
+        crossinline action: suspend (Event) -> Unit
+    ): Job = events
+        .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <reified T : Event> subscribeEventForever(
+        crossinline action: suspend (T) -> Unit
+    ): Job = events
+        .filterIsInstance<T>()
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun subscribeStickyEventForever(
+        crossinline predicate: suspend (Event) -> Boolean,
+        crossinline action: suspend (Event) -> Unit
+    ): Job = stickyEvents
+        .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <reified T : Event> subscribeStickyEventForever(
+        crossinline action: suspend (T) -> Unit
+    ): Job = stickyEvents
+        .filterIsInstance<T>()
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+
 }
-
-open class NamedEvent(open val name: String, open val value: Any) : Event
-
-operator fun NamedEvent.component1(): String = name
-operator fun NamedEvent.component2(): Any = value

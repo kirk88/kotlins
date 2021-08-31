@@ -7,10 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
-import com.nice.common.event.LifecycleMessageObserver
-import com.nice.common.event.Message
-import com.nice.common.event.MessageDelegate
-import com.nice.common.event.MessageObserver
 
 interface ViewModelController {
 

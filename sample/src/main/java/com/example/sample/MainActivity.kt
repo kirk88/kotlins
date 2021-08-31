@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.component1
-import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -25,13 +23,13 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
+import com.nice.common.event.FlowEventBus.subscribeEvent
+import com.nice.common.event.NamedEvent
 import com.nice.common.helper.doOnClick
 import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
-import com.nice.kothttp.OkHttpMethod
-import com.nice.kothttp.httpCallFlow
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -41,8 +39,6 @@ import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -74,36 +70,19 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 this,
                 "key" to "value"
             ) {
-                Log.e(TAG, "" + it.component1() + " " + it.component2())
             }
         }
 
-        httpCallFlow<String> {
-            client(
-                OkHttpClient.Builder()
-                    .addInterceptor(
-                        HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)
-                    )
-                    .build()
-            )
+        subscribeEvent({ it is NamedEvent && it.name == "answer" }) {
+            Log.e(TAG, "what event: " + it.toString())
+        }
 
-            method(OkHttpMethod.Put)
+//        testDB()
+//        initBle()
+    }
 
-            url("https://www.baidu.com")
 
-            queryParameters {
-                "wd" += "keywords"
-            }
-        }.onStart {
-            Log.e("OkFaker", "onStart")
-        }.onEach {
-            Log.e("OkFaker", "onEach: $it")
-        }.onCompletion {
-            Log.e("OkFaker", "onCompletion")
-        }.catch {
-            Log.e("OkFaker", "onError: $it")
-        }.launchIn(lifecycleScope)
-
+    private fun testDB(){
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
@@ -172,11 +151,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
 
         }
-
-
-//        initBle()
     }
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun initBle() {
@@ -263,7 +238,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         if (!Bluetooth.isEnabled) {
             Bluetooth.isEnabled = true
         }
-
     }
 
     private class BleAdapter(context: Context) :

@@ -5,9 +5,9 @@ import android.util.Log
 import android.widget.Button
 import androidx.fragment.app.activityViewModels
 import com.nice.common.app.NiceViewModelFragment
-import com.nice.common.event.Message
 import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
+import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
 import com.nice.common.widget.snackTipViewFactory
 import com.nice.common.widget.tipViews

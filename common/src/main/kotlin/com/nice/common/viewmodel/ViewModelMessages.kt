@@ -3,8 +3,6 @@ package com.nice.common.viewmodel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
-import com.nice.common.event.LifecycleMessageObserver
-import com.nice.common.event.Message
 
 interface ViewModelMessageDispatcher {
 

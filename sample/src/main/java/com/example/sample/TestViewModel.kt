@@ -4,5 +4,7 @@ import com.nice.common.viewmodel.NiceViewModel
 
 class TestViewModel : NiceViewModel() {
 
+    init {
+    }
 
 }
