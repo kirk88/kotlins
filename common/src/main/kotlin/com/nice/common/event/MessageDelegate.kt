@@ -1,12 +1,8 @@
 package com.nice.common.event
 
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStateAtLeast
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KProperty
 
@@ -27,19 +23,15 @@ class MessageDelegate {
     }
 
     fun observe(owner: LifecycleOwner, observer: MessageObserver) {
-        owner.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
-            messages.onEach {
-                observer.onMessageChanged(it)
-            }.cancellable().collect()
-        }
+        messages.onEach {
+            observer.onMessageChanged(it)
+        }.cancellable().launchIn(owner.lifecycleScope)
     }
 
     fun observe(observer: LifecycleMessageObserver) {
-        observer.launchWhenStateAtLeast(Lifecycle.State.CREATED) {
-            messages.onEach {
-                observer.onMessageChanged(it)
-            }.cancellable().collect()
-        }
+        messages.onEach {
+            observer.onMessageChanged(it)
+        }.cancellable().launchIn(observer.lifecycleScope)
     }
 
 }
@@ -49,12 +41,3 @@ fun interface MessageObserver {
 }
 
 interface LifecycleMessageObserver : MessageObserver, LifecycleOwner
-
-private fun <T> LifecycleOwner.launchWhenStateAtLeast(
-    minState: Lifecycle.State,
-    block: suspend CoroutineScope.() -> T
-) {
-    lifecycleScope.launch {
-        lifecycle.whenStateAtLeast(minState, block)
-    }
-}

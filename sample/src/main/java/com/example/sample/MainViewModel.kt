@@ -11,12 +11,16 @@ class MainViewModel : NiceViewModel() {
     fun start() {
         message = Message.ShowLoading()
 
-
         viewModelScope.launch {
-            delay(500)
+            delay(3000)
 
             message = Message.ShowError()
+
+            delay(3000)
+
+            message = Message.ShowContent()
         }
     }
+
 
 }

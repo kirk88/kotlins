@@ -15,22 +15,22 @@ fun View.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT):
         addCallback(SnackBarLocationChangedCallback())
     }
 
-fun Fragment.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    requireView().snackBar(message, duration)
-
 fun Activity.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
     window.findViewById<View>(android.R.id.content).snackBar(message, duration)
+
+fun Fragment.snackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
+    requireActivity().snackBar(message, duration)
 
 fun View.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
     Snackbar.make(this, resId, duration).apply {
         addCallback(SnackBarLocationChangedCallback())
     }
 
-fun Fragment.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
-    requireView().snackBar(resId, duration)
-
 fun Activity.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
     window.findViewById<View>(android.R.id.content).snackBar(resId, duration)
+
+fun Fragment.snackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH_SHORT): Snackbar =
+    requireActivity().snackBar(resId, duration)
 
 fun View.showSnackBar(message: CharSequence, duration: Int = Snackbar.LENGTH_SHORT) =
     snackBar(message, duration).show()

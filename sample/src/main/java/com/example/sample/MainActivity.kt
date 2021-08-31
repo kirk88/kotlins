@@ -29,10 +29,7 @@ import com.nice.common.helper.doOnClick
 import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
-import com.nice.common.widget.ProgressView
-import com.nice.common.widget.TipView
-import com.nice.common.widget.progressViews
-import com.nice.common.widget.tipViews
+import com.nice.common.widget.*
 import com.nice.kothttp.OkHttpMethod
 import com.nice.kothttp.httpCallFlow
 import com.nice.sqlite.Transaction
@@ -46,7 +43,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import java.util.concurrent.Executors
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -54,6 +50,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     override val viewModel: MainViewModel by viewModels()
 
     override val progressView: ProgressView by progressViews()
+
+    override val statefulView: StatefulView by lazy {
+        StatefulFrameLayout.wrap(binding.contentView)
+    }
 
     private val binding: ActivityMainBinding by viewBindings()
 
@@ -173,6 +173,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         }
 
+
 //        initBle()
     }
 
@@ -283,16 +284,4 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         private val TAG = MainActivity::class.simpleName
     }
 
-}
-
-fun main() {
-
-    val scope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
-
-    httpCallFlow<String> {
-        url("http://www.baidu.com/s")
-        queryParameters {
-            "wd" += "Android"
-        }
-    }.launchIn(scope)
 }

@@ -22,10 +22,10 @@ class UpdateStatement<T : Table>(
 
 class UpdateBatchStatement<T : Table>(
     val subject: Subject<T>,
-    val batchUpdates: Sequence<UpdateSpec<T>>,
+    val updateSpecs: Sequence<UpdateSpec<T>>,
 ) : Statement {
 
-    private val iterator = batchUpdates.iterator()
+    private val iterator = updateSpecs.iterator()
     private val sqlCaches = mutableMapOf<UpdateSpec<*>, String>()
 
     private lateinit var nextSql: String

@@ -4,19 +4,18 @@ package com.nice.common.event
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 object EventBus {
 
-    private val mutableEvents = MutableSharedFlow<Event>(extraBufferCapacity = Int.MAX_VALUE)
+    private val mutableEvents = MutableSharedFlow<Event>()
     val events = mutableEvents.asSharedFlow()
 
-    private val mutableStickyEvents = MutableSharedFlow<Event>(
-        replay = 1,
-        extraBufferCapacity = Int.MAX_VALUE
-    )
+    private val mutableStickyEvents = MutableSharedFlow<Event>(replay = 1)
     val stickyEvents = mutableStickyEvents.asSharedFlow()
 
     fun <T : Event> LifecycleOwner.produceEvent(event: T): Job = lifecycleScope.launch {
@@ -27,9 +26,15 @@ object EventBus {
         mutableStickyEvents.emit(event)
     }
 
-    fun <T : Event> tryProduceEvent(event: T): Boolean = mutableEvents.tryEmit(event)
+    @OptIn(DelicateCoroutinesApi::class)
+    fun <T : Event> produceEventGlobal(event: T): Job = GlobalScope.launch {
+        mutableEvents.emit(event)
+    }
 
-    fun <T : Event> tryProduceStickyEvent(event: T): Boolean = mutableStickyEvents.tryEmit(event)
+    @OptIn(DelicateCoroutinesApi::class)
+    fun <T : Event> produceStickyGlobal(event: T): Job = GlobalScope.launch {
+        mutableStickyEvents.emit(event)
+    }
 
     fun <T : Event> LifecycleOwner.produceEventWhenCreated(event: T): Job =
         lifecycleScope.launchWhenCreated {

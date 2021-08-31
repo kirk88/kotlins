@@ -33,11 +33,27 @@ sealed class Message : Event {
 
     class SetActivityResult(val resultCode: Int, val data: Intent? = null) : Message()
 
-    object FinishActivity : Message()
+    class FinishActivity : Message(){
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 
     class ShowProgress(val text: CharSequence? = null) : Message()
 
-    object DismissProgress : Message()
+    class DismissProgress : Message() {
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 
     class RefreshState(val state: InfiniteState) : Message()
 
@@ -49,7 +65,15 @@ sealed class Message : Event {
 
     class ShowError(val text: CharSequence? = null) : Message()
 
-    object ShowContent : Message()
+    class ShowContent : Message() {
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 
     class Batch(val messages: Set<Message>) : Message()
 

@@ -21,10 +21,10 @@ class InsertStatement<T : Table>(
 
 class InsertBatchStatement<T : Table>(
     val subject: Subject<T>,
-    val batchInserts: Sequence<InsertSpec>,
+    val insertSpecs: Sequence<InsertSpec>,
 ) : Statement {
 
-    private val iterator = batchInserts.iterator()
+    private val iterator = insertSpecs.iterator()
     private val sqlCaches = mutableMapOf<InsertSpec, String>()
 
     private lateinit var nextSql: String
