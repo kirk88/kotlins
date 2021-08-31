@@ -45,7 +45,7 @@ fun Scanner(type: ScannerType = ScannerType.Low, services: List<UUID>? = null): 
 
 internal class AndroidSystemScanner : Scanner {
 
-    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothAdapter = defaultBluetoothAdapter
         ?: error("Bluetooth not supported")
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -80,7 +80,7 @@ internal class AndroidSystemScanner : Scanner {
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : Scanner {
 
-    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothAdapter = defaultBluetoothAdapter
         ?: error("Bluetooth not supported")
 
 
@@ -134,7 +134,7 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
 
 internal class LowVersionBleScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
 
-    private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothAdapter = defaultBluetoothAdapter
         ?: error("Bluetooth not supported")
 
     @OptIn(ExperimentalCoroutinesApi::class)

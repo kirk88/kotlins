@@ -4,6 +4,7 @@ package com.nice.bluetooth
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
 import androidx.startup.Initializer
@@ -14,6 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal lateinit var applicationContext: Context
     private set
+
+internal val defaultBluetoothAdapter: BluetoothAdapter? by lazy {
+    (applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+}
 
 object Bluetooth {
 
@@ -27,12 +32,12 @@ object Bluetooth {
     val state: Flow<BluetoothState> = bluetoothState.asStateFlow()
 
     val isSupported: Boolean
-        get() = BluetoothAdapter.getDefaultAdapter() != null
+        get() = defaultBluetoothAdapter != null
 
     var isEnabled: Boolean
-        get() = BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
+        get() = defaultBluetoothAdapter?.isEnabled ?: false
         set(value) {
-            BluetoothAdapter.getDefaultAdapter()?.apply {
+            defaultBluetoothAdapter?.apply {
                 if (value) enable() else disable()
             }
         }
@@ -46,6 +51,10 @@ object Bluetooth {
         ).apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_SCAN)
+                add(Manifest.permission.BLUETOOTH_CONNECT)
             }
         }.toTypedArray()
     }
