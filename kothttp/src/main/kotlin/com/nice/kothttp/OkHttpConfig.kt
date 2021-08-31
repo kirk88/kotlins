@@ -8,20 +8,18 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.net.URL
 
-class OkHttpConfig internal constructor(
-    internal val client: OkHttpClient? = null,
-    internal val domain: String? = null,
-    internal val cacheControl: CacheControl? = null,
-    internal val username: String? = null,
-    internal val password: String? = null,
-    internal val headers: Map<String, String>? = null,
-    internal val queryParameters: Map<String, String>? = null,
-    internal val formParameters: Map<String, String>? = null
-) {
+object OkHttpConfig {
 
-    fun newBuilder() = Builder(this)
+    internal var client: OkHttpClient? = null
+    internal var domain: String? = null
+    internal var cacheControl: CacheControl? = null
+    internal var username: String? = null
+    internal var password: String? = null
+    internal var headers: Map<String, String>? = null
+    internal var queryParameters: Map<String, String>? = null
+    internal var formParameters: Map<String, String>? = null
 
-    class Builder {
+    class Setter {
 
         private var client: OkHttpClient? = null
         private var domain: String? = null
@@ -32,19 +30,6 @@ class OkHttpConfig internal constructor(
         private var headers: MutableMap<String, String>? = null
         private var queryParameters: MutableMap<String, String>? = null
         private var formParameters: MutableMap<String, String>? = null
-
-        constructor()
-
-        internal constructor(httpConfig: OkHttpConfig) {
-            this.client = httpConfig.client
-            this.domain = httpConfig.domain
-            this.cacheControl = httpConfig.cacheControl
-            this.username = httpConfig.username
-            this.password = httpConfig.password
-            this.headers = httpConfig.headers?.toMutableMap()
-            this.queryParameters = httpConfig.queryParameters?.toMutableMap()
-            this.formParameters = httpConfig.formParameters?.toMutableMap()
-        }
 
         fun client(client: OkHttpClient) = apply {
             this.client = client
@@ -75,10 +60,6 @@ class OkHttpConfig internal constructor(
 
         fun headers(vararg parameters: Pair<String, String>) = headers(parameters.toMap())
 
-        fun removeHeader(name: String) = apply {
-            this.headers?.remove(name)
-        }
-
         fun queryParameters(parameters: Map<String, String>) = apply {
             if (this.queryParameters == null) {
                 this.queryParameters = mutableMapOf()
@@ -86,11 +67,8 @@ class OkHttpConfig internal constructor(
             this.queryParameters!!.putAll(parameters)
         }
 
-        fun queryParameters(vararg parameters: Pair<String, String>) = queryParameters(parameters.toMap())
-
-        fun removeQueryParameter(name: String) = apply {
-            this.queryParameters?.remove(name)
-        }
+        fun queryParameters(vararg parameters: Pair<String, String>) =
+            queryParameters(parameters.toMap())
 
         fun formParameters(parameters: Map<String, String>) = apply {
             if (this.formParameters == null) {
@@ -99,22 +77,20 @@ class OkHttpConfig internal constructor(
             this.formParameters!!.putAll(parameters)
         }
 
-        fun formParameters(vararg parameters: Pair<String, String>) = formParameters(parameters.toMap())
+        fun formParameters(vararg parameters: Pair<String, String>) =
+            formParameters(parameters.toMap())
 
-        fun removeFormParameter(name: String) = apply {
-            this.formParameters?.remove(name)
+        fun apply() = OkHttpConfig.also {
+            if (client != null) it.client = client
+            if (domain != null) it.domain = domain
+            if (cacheControl != null) it.cacheControl = cacheControl
+            if (username != null) it.username = username
+            if (password != null) it.password = password
+            if (headers != null) it.headers = headers
+            if (queryParameters != null) it.queryParameters = queryParameters
+            if (formParameters != null) it.formParameters = formParameters
         }
 
-        fun build(): OkHttpConfig = OkHttpConfig(
-            client,
-            domain,
-            cacheControl,
-            username,
-            password,
-            headers,
-            queryParameters,
-            formParameters
-        )
     }
 
 }

@@ -83,22 +83,11 @@ class OkHttpCall<T> internal constructor(
         return handledResponse
     }
 
-    companion object {
-
-        private var config: OkHttpConfig = OkHttpConfig()
-        fun setGlobalConfig(config: OkHttpConfig) {
-            this.config = config
-        }
-
-        val globalConfig: OkHttpConfig get() = config
-
-    }
-
 }
 
 class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
 
-    private val config: OkHttpConfig = OkHttpCall.globalConfig
+    private val config: OkHttpConfig = OkHttpConfig
 
     private var client: OkHttpClient = DEFAULT_CLIENT
     private var method: OkHttpMethod = OkHttpMethod.Get

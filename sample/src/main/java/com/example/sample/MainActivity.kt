@@ -73,14 +73,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        subscribeEvent({ it is NamedEvent && it.name == "answer" }) {
+        subscribeEvent({ it is NamedEvent }) {
             Log.e(TAG, "what event: " + it.toString())
         }
 
 //        testDB()
 //        initBle()
     }
-
 
     private fun testDB(){
         lifecycleScope.launch(Dispatchers.IO) {
@@ -95,6 +94,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         number = -index,
                         data = byteArrayOf(1, 2, 3)
                     )
+                    byteArrayOf(0x1, 0xF, )
                     beans.add(bean)
                 }
 

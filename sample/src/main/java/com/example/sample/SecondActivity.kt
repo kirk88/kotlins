@@ -59,8 +59,6 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         setupAppBarWithController(navController)
 
         produceEvent(NamedEvent("answer", "what you name?"))
-
-        produceEvent(NamedEvent("replay", "what you name?"))
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {
