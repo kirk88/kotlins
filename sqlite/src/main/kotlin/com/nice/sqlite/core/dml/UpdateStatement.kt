@@ -18,11 +18,12 @@ class UpdateStatement<T : Table>(
     override fun toString(dialect: Dialect): String {
         return dialect.build(this)
     }
+
 }
 
 class UpdateBatchStatement<T : Table>(
     val subject: Subject<T>,
-    val updateSpecs: Sequence<UpdateSpec<T>>,
+    val updateSpecs: Sequence<UpdateSpec<T>>
 ) : Statement {
 
     private val iterator = updateSpecs.iterator()

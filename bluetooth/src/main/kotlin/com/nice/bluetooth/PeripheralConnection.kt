@@ -13,7 +13,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
 private val STATUS_SUCCESS = GattStatus(GATT_SUCCESS)
@@ -30,9 +29,9 @@ internal class PeripheralConnection(
 ) : Readable, Writable {
 
     @Volatile
-    private var _connectionClient: ConnectionClient? = null
-    private val connectionClient: ConnectionClient
-        inline get() = _connectionClient ?: throw NotReadyException(toString())
+    private var _connectionHandler: ConnectionHandler? = null
+    private val connectionHandler: ConnectionHandler
+        inline get() = _connectionHandler ?: throw NotReadyException(toString())
 
     private val receiver = registerBluetoothStateReceiver {
         if (it == BluetoothAdapter.STATE_OFF) {
@@ -49,9 +48,7 @@ internal class PeripheralConnection(
     }
 
     private val scope = CoroutineScope(parentCoroutineContext + job)
-    private val connectJob = AtomicReference<Deferred<Throwable?>?>()
-
-    private val ready = MutableStateFlow(false)
+    private val connectJob = atomic<Deferred<Throwable?>?>()
 
     val state = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected())
     val mtu = MutableStateFlow<Int?>(null)
@@ -64,6 +61,66 @@ internal class PeripheralConnection(
 
     private val observers = PeripheralObservers(this)
 
+    private fun establishConnectionHandler(autoConnect: Boolean): ConnectionHandler {
+        return bluetoothDevice.connect(
+            applicationContext,
+            autoConnect,
+            defaultTransport,
+            defaultPhy,
+            state,
+            mtu,
+            phy
+        ) {
+            connectJob.getAndUpdateCompat { null }?.cancel()
+        } ?: throw ConnectionRejectedException()
+    }
+
+    /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
+    private fun connectAsync(autoConnect: Boolean) = scope.async(start = CoroutineStart.LAZY) {
+        var exception: Throwable? = null
+
+        try {
+            val connectionHandler = establishConnectionHandler(autoConnect).also {
+                _connectionHandler = it
+            }
+
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                connectionHandler.collectCharacteristicChanges(observers)
+            }
+
+            suspendUntilOrThrow<ConnectionState.Connecting.Services>()
+            onConnected(AndroidConnectedPeripheral(this@PeripheralConnection))
+            discoverServices()
+            onServicesDiscovered(AndroidServicesDiscoveredPeripheral(this@PeripheralConnection))
+            state.value = ConnectionState.Connecting.Observes
+            observers.rewire()
+        } catch (t: Throwable) {
+            close()
+            exception = t
+        }
+
+        if (exception == null) {
+            state.value = ConnectionState.Connected
+        }
+
+        exception
+    }
+
+    private suspend fun discoverServices() {
+        connectionHandler.execute({
+            discoverServices()
+        }) {
+            onServicesDiscovered.receiveOrThrow()
+        }
+
+        _services = connectionHandler.services
+    }
+
+    private fun close() {
+        _connectionHandler?.close()
+        _connectionHandler = null
+    }
+
     suspend fun connect(autoConnect: Boolean) {
         check(!job.isCancelled) { "Cannot connect, scope is cancelled for $this" }
         check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
@@ -74,77 +131,13 @@ internal class PeripheralConnection(
 
     suspend fun disconnect() {
         try {
-            _connectionClient?.apply {
+            _connectionHandler?.apply {
                 disconnect()
-                suspendUntilDisconnected()
+                suspendUntil<ConnectionState.Disconnected>()
             }
         } finally {
             close()
         }
-    }
-
-    private fun close() {
-        _connectionClient?.close()
-    }
-
-    /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
-    private fun connectAsync(autoConnect: Boolean) = scope.async(start = CoroutineStart.LAZY) {
-        ready.value = false
-
-        var exception: Throwable? = null
-
-        try {
-            val connectionClient = bluetoothDevice.connect(applicationContext, autoConnect, defaultTransport, defaultPhy, state, mtu, phy) {
-                connectJob.getAndUpdateCompat { null }?.cancel()
-            }?.also { _connectionClient = it } ?: throw ConnectionRejectedException()
-
-            scope.launch(start = CoroutineStart.UNDISPATCHED) {
-                connectionClient.collectCharacteristicChanges(observers)
-            }
-
-            suspendUntilConnected()
-            onConnected(AndroidConnectedPeripheral(this@PeripheralConnection))
-            discoverServices()
-            onServicesDiscovered(AndroidServicesDiscoveredPeripheral(this@PeripheralConnection))
-            observers.rewire()
-        } catch (t: Throwable) {
-            close()
-            exception = t
-        }
-
-        ready.value = true
-
-        exception
-    }
-
-    private suspend fun discoverServices() {
-        connectionClient.execute({
-            discoverServices()
-        }) {
-            onServicesDiscovered.getOrThrow()
-        }
-
-        _services = connectionClient.services
-    }
-
-    private suspend fun suspendUntilConnected() {
-        state.onEach { if (it is ConnectionState.Disconnected) throw ConnectionLostException() }
-            .first { it == ConnectionState.Connected }
-    }
-
-    private suspend fun suspendUntilDisconnected() {
-        state.first { it is ConnectionState.Disconnected }
-    }
-
-    suspend fun suspendUntilReady() {
-        // fast path
-        if (ready.value && state.value == ConnectionState.Connected) return
-
-        // slow path
-        combine(
-            ready,
-            state
-        ) { ready, state -> ready && state == ConnectionState.Connected }.first { it }
     }
 
     override suspend fun write(
@@ -153,12 +146,12 @@ internal class PeripheralConnection(
         writeType: WriteType
     ) {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        connectionClient.execute({
+        connectionHandler.execute({
             bluetoothGattCharacteristic.value = data
             bluetoothGattCharacteristic.writeType = writeType.intValue
             writeCharacteristic(bluetoothGattCharacteristic)
         }) {
-            onCharacteristicWrite.getOrThrow()
+            onCharacteristicWrite.receiveOrThrow()
         }
     }
 
@@ -166,10 +159,10 @@ internal class PeripheralConnection(
         characteristic: Characteristic
     ): ByteArray {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        return connectionClient.execute({
+        return connectionHandler.execute({
             readCharacteristic(bluetoothGattCharacteristic)
         }) {
-            onCharacteristicRead.getOrThrow()
+            onCharacteristicRead.receiveOrThrow()
         }.value!!
     }
 
@@ -184,11 +177,11 @@ internal class PeripheralConnection(
         bluetoothGattDescriptor: BluetoothGattDescriptor,
         data: ByteArray
     ) {
-        connectionClient.execute({
+        connectionHandler.execute({
             bluetoothGattDescriptor.value = data
             writeDescriptor(bluetoothGattDescriptor)
         }) {
-            onDescriptorWrite.getOrThrow()
+            onDescriptorWrite.receiveOrThrow()
         }
     }
 
@@ -196,37 +189,43 @@ internal class PeripheralConnection(
         descriptor: Descriptor
     ): ByteArray {
         val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
-        return connectionClient.execute({
+        return connectionHandler.execute({
             readDescriptor(bluetoothGattDescriptor)
         }) {
-            onDescriptorRead.getOrThrow()
+            onDescriptorRead.receiveOrThrow()
         }.value!!
     }
 
     suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
-        connectionClient.transaction({
+        connectionHandler.tryExecute({
+            beginReliableWrite()
+            var cause: Throwable? = null
             try {
-                beginReliableWrite()
                 action()
-                executeReliableWrite()
             } catch (t: Throwable) {
-                abortReliableWrite()
-                throw t
+                cause = t
+                throw GattRequestRejectedException(cause = t)
+            } finally {
+                if (cause == null) {
+                    executeReliableWrite()
+                } else {
+                    abortReliableWrite()
+                }
             }
         }) {
-            onReliableWriteCompleted.getOrThrow()
+            onReliableWriteCompleted.receiveOrThrow()
         }
     }
 
-    suspend fun readRssi(): Int = connectionClient.execute({
+    suspend fun readRssi(): Int = connectionHandler.execute({
         readRemoteRssi()
     }) {
-        onReadRemoteRssi.getOrThrow()
+        onReadRemoteRssi.receiveOrThrow()
     }.rssi
 
     suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectionClient.execute({
+            connectionHandler.execute({
                 requestConnectionPriority(priority.intValue)
             }) {
                 priority
@@ -242,10 +241,10 @@ internal class PeripheralConnection(
 
     suspend fun requestMtu(mtu: Int): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectionClient.execute({
+            connectionHandler.execute({
                 requestMtu(mtu)
             }) {
-                onMtuChanged.getOrThrow()
+                onMtuChanged.receiveOrThrow()
             }.mtu
         } else {
             Log.w(
@@ -258,10 +257,10 @@ internal class PeripheralConnection(
 
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            connectionClient.tryExecute({
+            connectionHandler.tryExecute({
                 setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
             }) {
-                onPhyUpdate.getOrThrow()
+                onPhyUpdate.receiveOrThrow()
             }.phy
         } else {
             Log.w(
@@ -274,10 +273,10 @@ internal class PeripheralConnection(
 
     suspend fun readPhy(): PreferredPhy {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            connectionClient.tryExecute({
+            connectionHandler.tryExecute({
                 readPhy()
             }) {
-                onPhyRead.getOrThrow()
+                onPhyRead.receiveOrThrow()
             }.phy
         } else {
             Log.w(
@@ -311,7 +310,7 @@ internal class PeripheralConnection(
     private fun setCharacteristicNotification(
         characteristic: DiscoveredCharacteristic,
         enable: Boolean
-    ) = connectionClient.setCharacteristicNotification(
+    ) = connectionHandler.setCharacteristicNotification(
         characteristic,
         enable
     )
@@ -364,7 +363,7 @@ internal class PeripheralConnection(
 }
 
 /** @throws GattStatusException if response has a non-`GATT_SUCCESS` status. */
-private suspend inline fun <T : Response> Channel<out T>.getOrThrow(): T {
+private suspend inline fun <T : Response> Channel<out T>.receiveOrThrow(): T {
     val response = try {
         receive()
     } catch (e: ConnectionLostException) {
@@ -405,22 +404,36 @@ private val ConnectionPriority.intValue: Int
         ConnectionPriority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
     }
 
-private fun <T> AtomicReference<T>.updateAndGetCompat(operation: (T) -> T?): T? {
-    var prev: T?
-    var next: T?
-    do {
-        prev = get()
-        next = operation(prev)
-    } while (!compareAndSet(prev, next))
-    return next
+/**
+ * Suspends until [PeripheralConnection] receiver arrives at the [ConnectionState] specified.
+ *
+ * @see [ConnectionState] for a description of the potential states.
+ */
+internal suspend inline fun <reified T : ConnectionState> PeripheralConnection.suspendUntil() {
+    state.first { it is T }
 }
 
-private fun <T> AtomicReference<T>.getAndUpdateCompat(operation: (T) -> T?): T? {
-    var prev: T?
-    var next: T?
-    do {
-        prev = get()
-        next = operation(prev)
-    } while (!compareAndSet(prev, next))
-    return prev
+/**
+ * Suspends until [PeripheralConnection] receiver arrives at the [ConnectionState] specified or any [ConnectionState] above it.
+ *
+ * @see [ConnectionState] for a description of the potential states.
+ * @see [ConnectionState.isAtLeast] for state ordering.
+ */
+internal suspend inline fun <reified T : ConnectionState> PeripheralConnection.suspendUntilAtLeast() {
+    state.first { it.isAtLeast<T>() }
+}
+
+/**
+ * Suspends until [PeripheralConnection] receiver arrives at the [ConnectionState] specified.
+ *
+ * @see ConnectionState for a description of the potential states.
+ * @throws ConnectionLostException if peripheral state arrives at [ConnectionState.Disconnected].
+ */
+internal suspend inline fun <reified T : ConnectionState> PeripheralConnection.suspendUntilOrThrow() {
+    require(T::class != ConnectionState.Disconnected::class) {
+        "PeripheralConnection.suspendUntilOrThrow() throws on ConnectionState.Disconnected, not intended for use with that ConnectionState."
+    }
+    state
+        .onEach { if (it is ConnectionState.Disconnected) throw ConnectionLostException() }
+        .first { it is T }
 }

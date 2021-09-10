@@ -219,6 +219,7 @@ interface Peripheral : Readable, Writable {
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction = {}
     ): Flow<ByteArray>
+
 }
 
 fun Peripheral.findService(serviceUuid: UUID): DiscoveredService? {
@@ -229,7 +230,10 @@ fun Peripheral.findService(predicate: (DiscoveredService) -> Boolean): Discovere
     return services.find(predicate)
 }
 
-fun Peripheral.findCharacteristic(serviceUuid: UUID, characteristicUuid: UUID): DiscoveredCharacteristic? {
+fun Peripheral.findCharacteristic(
+    serviceUuid: UUID,
+    characteristicUuid: UUID
+): DiscoveredCharacteristic? {
     return findService(serviceUuid)?.findCharacteristic(characteristicUuid)
 }
 

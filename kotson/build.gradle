@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'maven'
+    id 'maven-publish'
 }
 
 android {
@@ -37,30 +37,6 @@ dependencies {
     api deps.gson
 }
 
-def versionMajor = 1
-def versionMinor = 0
-def versionPatch = 0
-
-uploadArchives {
-    repositories.mavenDeployer {
-        def deployPath = file(getProperty('aar.deployPath'))
-        repository(url: "file://${deployPath.absolutePath}")
-        pom.project {
-            groupId "com.nice.kotlins"
-            artifactId "kotson"
-            version "${versionMajor}.${versionMinor}.${versionPatch}"
-
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-        }
-    }
-}
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
@@ -71,6 +47,24 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.getSrcDirs()
 }
 
-artifacts {
-    archives androidSourcesJar
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
+
+publishing {
+    publications {
+        production(MavenPublication) {
+            groupId "com.nice.kotlins"
+            artifactId "kotson"
+            version "${versionMajor}.${versionMinor}.${versionPatch}"
+
+            afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
+
+            artifact androidSourcesJar
+        }
+    }
+    repositories {
+        def deployPath = file(getProperty('aar.deployPath'))
+        maven { url "file://${deployPath.absolutePath}" }
+    }
 }

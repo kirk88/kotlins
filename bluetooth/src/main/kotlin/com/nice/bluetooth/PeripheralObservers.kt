@@ -2,6 +2,7 @@ package com.nice.bluetooth
 
 import android.util.Log
 import com.nice.bluetooth.common.Characteristic
+import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.NotReadyException
 import com.nice.bluetooth.common.OnSubscriptionAction
 import kotlinx.coroutines.flow.*
@@ -80,7 +81,7 @@ internal class PeripheralObservers(
         onSubscription: OnSubscriptionAction
     ): Flow<ByteArray> = characteristicChanges
         .onSubscription {
-            connection.suspendUntilReady()
+            connection.suspendUntilAtLeast<ConnectionState.Connecting.Observes>()
             if (observations.add(characteristic, onSubscription) == 1) {
                 connection.startObservation(characteristic)
             }

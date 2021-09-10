@@ -15,8 +15,9 @@ import com.example.sample.db.TestTable
 import com.example.sample.db.TestView
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
-import com.nice.bluetooth.ScannerType
-import com.nice.bluetooth.common.*
+import com.nice.bluetooth.ScannerLevel
+import com.nice.bluetooth.common.Advertisement
+import com.nice.bluetooth.common.BluetoothState
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
 import com.nice.common.adapter.SimpleRecyclerAdapter
@@ -25,8 +26,8 @@ import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
 import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
+import com.nice.common.helper.bind
 import com.nice.common.helper.doOnClick
-import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
@@ -60,7 +61,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding)
+        binding.bind(this)
         permissionRequestLauncher.register(this)
 
         title = "Home"
@@ -78,7 +79,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         }
 
 //        testDB()
-//        initBle()
+        initBle()
     }
 
     private fun testDB(){
@@ -94,7 +95,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         number = -index,
                         data = byteArrayOf(1, 2, 3)
                     )
-                    byteArrayOf(0x1, 0xF, )
                     beans.add(bean)
                 }
 
@@ -137,14 +137,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
 
                 start = System.currentTimeMillis()
-                var count = 0
                 for (row in offer(TestView).select(statementExecutor).asMapSequence()) {
-                    if (count <= 10) {
-                        Log.e(TAG, row.toString())
-                    } else {
-                        break
-                    }
-                    count++
+                    Log.e(TAG, row.toString())
                 }
                 Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
 
@@ -165,7 +159,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-                Scanner(ScannerType.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
+                Scanner(ScannerLevel.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
                     if (accumulator.add(value)) {
                         withContext(Dispatchers.Main) {
                             adapter.addItem(value)
@@ -187,30 +181,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         }
 
                         launch {
-                            val state = peripheral.state.drop(1)
-                                .first { it is ConnectionState.Disconnected }
-                            Log.e(TAG, "${it.address}  disconnected: $state")
+                            peripheral.state.collect { state->
+                                Log.e(TAG, "${it.address}  state: $state")
+                            }
                         }
 
-                        Log.e(TAG, "${it.address}  connecting")
                         peripheral.connect()
 
-                        Log.e(TAG, "${it.address}  connected")
-
-                        val characteristic = peripheral.findService { service ->
-                            service.serviceUuid.toString().contains("ffe0", true)
-                        }?.findCharacteristic { characteristic ->
-                            characteristic.characteristicUuid.toString().contains("ffe1", true)
-                        }
-
-                        if (characteristic != null) {
-                            Log.e(TAG, "observe...")
-
-                            peripheral.observe(characteristic) {
-                                Log.e(TAG, "onSubscription")
-                            }.collect {
-                                Log.e(TAG, "data : ${it.contentToString()}")
-                            }
+                        peripheral.services.forEach { service->
+                            Log.e(TAG, "service: $service")
                         }
                     }
                 }

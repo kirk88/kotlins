@@ -18,13 +18,11 @@ import kotlinx.coroutines.launch
 
 class ThirdFragment : NiceFragment() {
 
-
     private val binding: FragmentThirdBinding by viewBindings()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding)
+        binding.bind(this)
 
         val adapter = adapterBuilder<String, ItemViewHolder>(requireContext(),
             mutableListOf<String>().apply {

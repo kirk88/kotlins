@@ -8,6 +8,7 @@ import com.nice.sqlite.ManagedSQLiteOpenHelper
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
+import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.statementExecutor
 
@@ -64,11 +65,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(10) {
-        override fun onConfigure(db: SupportSQLiteDatabase) {
-            db.pageSize = 1024 * 32
-        }
-
+    private class Callback : SupportSQLiteOpenHelper.Callback(15) {
         override fun onCreate(db: SupportSQLiteDatabase) {
             offer(TestTable).create(db.statementExecutor) {
                 it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
@@ -77,7 +74,7 @@ object DB : ManagedSQLiteOpenHelper(
             offer(TestView).create(db.statementExecutor) {
                 offer(TestTable).orderBy {
                     desc(it.id)
-                }.selectDistinct()
+                }.limit { 10 }.selectDistinct()
             }
         }
 
@@ -89,7 +86,7 @@ object DB : ManagedSQLiteOpenHelper(
             offer(TestView).create(db.statementExecutor) {
                 offer(TestTable).orderBy {
                     desc(it.id)
-                }.selectDistinct()
+                }.limit { 10 }.selectDistinct()
             }
         }
     }

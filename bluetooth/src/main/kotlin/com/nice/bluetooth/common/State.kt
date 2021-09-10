@@ -9,8 +9,36 @@ enum class BluetoothState {
 
 sealed class ConnectionState {
 
-    object Connecting : ConnectionState() {
-        override fun toString(): String = "Connecting"
+    sealed class Connecting : ConnectionState() {
+        /**
+         * [Peripheral] has initiated the process of connecting, via Bluetooth.
+         *
+         * I/O operations (e.g. [write][Peripheral.write] and [read][Peripheral.read]) will throw [NotReadyException]
+         * while in this state.
+         */
+        object Bluetooth : Connecting() {
+            override fun toString(): String = "Connecting.Bluetooth"
+        }
+
+        /**
+         * [Peripheral] has connected, but has not yet discovered services.
+         *
+         * I/O operations (e.g. [write][Peripheral.write] and [read][Peripheral.read]) will throw [NotReadyException]
+         * while in this state.
+         */
+        object Services : Connecting() {
+            override fun toString(): String = "Connecting.Services"
+        }
+
+        /**
+         * [Peripheral] is wiring up [PeripheralObservers][Peripheral.observe].
+         *
+         * I/O operations (e.g. [write][Peripheral.write] and [read][Peripheral.read]) are permitted while in this state.
+         */
+        object Observes : Connecting() {
+            override fun toString(): String = "Connecting.Observes"
+        }
+
     }
 
     object Connected : ConnectionState() {
@@ -51,10 +79,24 @@ sealed class ConnectionState {
             }
 
             /**
+             *  `GATT_CONN_TERMINATE_LOCAL_HOST`
+             */
+            object CentralDisconnected : Status() {
+                override fun toString(): String = "CentralDisconnected"
+            }
+
+            /**
              *  `GATT_CONN_FAIL_ESTABLISH`
              */
             object Failed : Status() {
                 override fun toString(): String = "Failed"
+            }
+
+            /**
+             *  `GATT_CONN_L2C_FAILURE`
+             */
+            object L2CapFailure : Status() {
+                override fun toString(): String = "L2CapFailure"
             }
 
             /**
@@ -64,9 +106,15 @@ sealed class ConnectionState {
                 override fun toString(): String = "Timeout"
             }
 
+            /**
+             *  `GATT_CONN_LMP_TIMEOUT`
+             */
+            object LinkManagerProtocolTimeout : Status() {
+                override fun toString(): String = "LinkManagerProtocolTimeout"
+            }
 
             /**
-             *  `GATT_CONN_CANCEL`
+             * `CBErrorOperationCancelled`
              */
             object Cancelled : Status() {
                 override fun toString(): String = "Cancelled"
@@ -80,4 +128,34 @@ sealed class ConnectionState {
 
         }
     }
+}
+
+/**
+ * Returns `true` if `this` is at least in state [T], where [ConnectionState]s are ordered:
+ * - [ConnectionState.Disconnected] (smallest)
+ * - [ConnectionState.Disconnecting]
+ * - [ConnectionState.Connecting.Bluetooth]
+ * - [ConnectionState.Connecting.Services]
+ * - [ConnectionState.Connecting.Observes]
+ * - [ConnectionState.Connected] (largest)
+ */
+internal inline fun <reified T : ConnectionState> ConnectionState.isAtLeast(): Boolean {
+    val currentState = when (this) {
+        is ConnectionState.Disconnected -> 0
+        ConnectionState.Disconnecting -> 1
+        ConnectionState.Connecting.Bluetooth -> 2
+        ConnectionState.Connecting.Services -> 3
+        ConnectionState.Connecting.Observes -> 4
+        ConnectionState.Connected -> 5
+    }
+    val targetState = when (T::class) {
+        ConnectionState.Disconnected::class -> 0
+        ConnectionState.Disconnecting::class -> 1
+        ConnectionState.Connecting.Bluetooth::class -> 2
+        ConnectionState.Connecting.Services::class -> 3
+        ConnectionState.Connecting.Observes::class -> 4
+        ConnectionState.Connected::class -> 5
+        else -> error("Unreachable.")
+    }
+    return currentState >= targetState
 }

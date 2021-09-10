@@ -484,7 +484,7 @@ object SQLiteDialect : Dialect {
             builder.append(type)
             builder.append(' ')
         }
-        builder.append("VIEW ")
+        builder.append("VIEW IF NOT EXISTS ")
         builder.append(statement.subject.view.renderedName)
         builder.append(' ')
         builder.append("AS ")
@@ -575,15 +575,16 @@ object SQLiteDialect : Dialect {
         append(index.render())
     }
 
-    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String = buildString {
-        append("INSERT ")
-        if (conflictAlgorithm != ConflictAlgorithm.None) {
-            append("OR ")
-            append(conflictAlgorithm)
-            append(' ')
+    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String =
+        buildString {
+            append("INSERT ")
+            if (conflictAlgorithm != ConflictAlgorithm.None) {
+                append("OR ")
+                append(conflictAlgorithm)
+                append(' ')
+            }
+            append("INTO ")
+            append(table.renderedName)
         }
-        append("INTO ")
-        append(table.renderedName)
-    }
 
 }

@@ -9,16 +9,13 @@ import com.nice.bluetooth.common.ConnectionLostException
 import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.common.PreferredPhy
-import com.nice.bluetooth.external.GATT_CONN_CANCEL
-import com.nice.bluetooth.external.GATT_CONN_FAIL_ESTABLISH
-import com.nice.bluetooth.external.GATT_CONN_TERMINATE_PEER_USER
-import com.nice.bluetooth.external.GATT_CONN_TIMEOUT
+import com.nice.bluetooth.external.*
 import com.nice.bluetooth.gatt.Response.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.getOrElse
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private typealias DisconnectedAction = () -> Unit
@@ -69,10 +66,10 @@ internal class Callback(
         newState: Int
     ) {
         when (newState) {
-            STATE_CONNECTING -> state.value = ConnectionState.Connecting
-            STATE_CONNECTED -> state.value = ConnectionState.Connected
+            STATE_CONNECTING -> state.value = ConnectionState.Connecting.Bluetooth
+            STATE_CONNECTED -> state.value = ConnectionState.Connecting.Services
             STATE_DISCONNECTING -> state.value = ConnectionState.Disconnecting
-            STATE_DISCONNECTED -> state.value = ConnectionState.Disconnected(status.toStatus())
+            STATE_DISCONNECTED -> state.value = ConnectionState.Disconnected(status.connectionState)
         }
 
         if (newState == STATE_DISCONNECTED) {
@@ -165,7 +162,7 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        val preferredPhy = PreferredPhy(txPhy.phy, rxPhy.phy)
         onPhyUpdate.trySendOrLog(OnPhyUpdate(preferredPhy, GattStatus(status)))
         if (status == GATT_SUCCESS) phy?.value = preferredPhy
     }
@@ -176,7 +173,7 @@ internal class Callback(
         rxPhy: Int,
         status: Int
     ) {
-        val preferredPhy = PreferredPhy(txPhy.toPhy(), rxPhy.toPhy())
+        val preferredPhy = PreferredPhy(txPhy.phy, rxPhy.phy)
         onPhyRead.trySendOrLog(OnPhyRead(preferredPhy, GattStatus(status)))
     }
 
@@ -190,24 +187,29 @@ internal class Callback(
 
 }
 
-private fun Int.toPhy(): Phy = when (this) {
-    BluetoothDevice.PHY_LE_1M -> Phy.Le1M
-    BluetoothDevice.PHY_LE_2M -> Phy.Le2M
-    BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
-    else -> error("Unknown phy: $this")
-}
+private val Int.phy: Phy
+    get() = when (this) {
+        BluetoothDevice.PHY_LE_1M -> Phy.Le1M
+        BluetoothDevice.PHY_LE_2M -> Phy.Le2M
+        BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
+        else -> error("Unknown phy: $this")
+    }
 
-private fun Int.toStatus(): ConnectionState.Disconnected.Status? = when (this) {
-    GATT_SUCCESS -> null
-    GATT_CONN_TIMEOUT -> ConnectionState.Disconnected.Status.Timeout
-    GATT_CONN_TERMINATE_PEER_USER -> ConnectionState.Disconnected.Status.PeripheralDisconnected
-    GATT_CONN_FAIL_ESTABLISH -> ConnectionState.Disconnected.Status.Failed
-    GATT_CONN_CANCEL -> ConnectionState.Disconnected.Status.Cancelled
-    else -> ConnectionState.Disconnected.Status.Unknown(this)
-}
+private val Int.connectionState: ConnectionState.Disconnected.Status?
+    get() = when (this) {
+        GATT_SUCCESS -> null
+        GATT_CONN_L2C_FAILURE -> ConnectionState.Disconnected.Status.L2CapFailure
+        GATT_CONN_TIMEOUT -> ConnectionState.Disconnected.Status.Timeout
+        GATT_CONN_TERMINATE_PEER_USER -> ConnectionState.Disconnected.Status.PeripheralDisconnected
+        GATT_CONN_TERMINATE_LOCAL_HOST -> ConnectionState.Disconnected.Status.CentralDisconnected
+        GATT_CONN_FAIL_ESTABLISH -> ConnectionState.Disconnected.Status.Failed
+        GATT_CONN_LMP_TIMEOUT -> ConnectionState.Disconnected.Status.LinkManagerProtocolTimeout
+        GATT_CONN_CANCEL -> ConnectionState.Disconnected.Status.Cancelled
+        else -> ConnectionState.Disconnected.Status.Unknown(this)
+    }
 
 private fun <E> SendChannel<E>.trySendOrLog(element: E) {
-    trySend(element).getOrElse { cause ->
+    trySend(element).onFailure { cause ->
         Log.w(TAG, "Callback was unable to deliver $element", cause)
     }
 }

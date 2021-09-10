@@ -21,7 +21,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 
-internal class ConnectionClient(
+internal class ConnectionHandler(
     private val bluetoothGatt: BluetoothGatt,
     private val dispatcher: CoroutineDispatcher,
     private val callback: Callback,
@@ -36,8 +36,6 @@ internal class ConnectionClient(
         get() = bluetoothGatt.services.map { it.toDiscoveredService() }
 
     private val lock = Mutex()
-    private val operationLocked = Any()
-    private val transactionLocked = Any()
 
     fun connect() = bluetoothGatt.connect()
 
@@ -61,7 +59,7 @@ internal class ConnectionClient(
     suspend inline fun <T> execute(
         crossinline action: suspend BluetoothGatt.() -> Boolean,
         crossinline response: suspend Callback.() -> T
-    ): T = lock.withLock(operationLocked) {
+    ): T = lock.withLock {
         withContext(dispatcher) {
             bluetoothGatt.action() || throw GattRequestRejectedException()
         }
@@ -78,27 +76,7 @@ internal class ConnectionClient(
     suspend inline fun <T> tryExecute(
         crossinline action: suspend BluetoothGatt.() -> Unit,
         crossinline response: suspend Callback.() -> T
-    ): T = lock.withLock(operationLocked) {
-        withContext(dispatcher) {
-            try {
-                bluetoothGatt.action()
-            } catch (t: Throwable) {
-                throw GattRequestRejectedException(cause = t)
-            }
-        }
-
-        callback.response()
-    }
-
-    /**
-     * Executes a [BluetoothGatt] transaction.
-     *
-     * @throws GattRequestRejectedException if [action] cause an exception.
-     */
-    suspend inline fun <T> transaction(
-        crossinline action: suspend BluetoothGatt.() -> Unit,
-        crossinline response: suspend Callback.() -> T
-    ): T = lock.withLock(transactionLocked) {
+    ): T = lock.withLock {
         withContext(dispatcher) {
             try {
                 bluetoothGatt.action()
@@ -111,11 +89,15 @@ internal class ConnectionClient(
     }
 
     suspend fun collectCharacteristicChanges(observers: PeripheralObservers) {
-        callback.onCharacteristicChanged.consumeAsFlow().map { (bluetoothGattCharacteristic, value) ->
-            PeripheralEvent.CharacteristicChange(bluetoothGattCharacteristic.toCharacteristic(), value)
-        }.collect {
-            observers.emit(it)
-        }
+        callback.onCharacteristicChanged.consumeAsFlow()
+            .map { (bluetoothGattCharacteristic, value) ->
+                PeripheralEvent.CharacteristicChange(
+                    bluetoothGattCharacteristic.toCharacteristic(),
+                    value
+                )
+            }.collect {
+                observers.emit(it)
+            }
     }
 
     fun setCharacteristicNotification(characteristic: DiscoveredCharacteristic, enabled: Boolean) {
@@ -141,12 +123,17 @@ internal fun BluetoothDevice.connect(
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
     onClose: () -> Unit
-): ConnectionClient? =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+): ConnectionHandler? {
+    // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see
+    // Disconnected before the connection request has kicked off the Connecting state (via Callback).
+    state.value = ConnectionState.Connecting.Bluetooth
+
+   return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         connectApi26(context, autoConnect, defaultTransport, defaultPhy, state, mtu, phy, onClose)
     } else {
         connectApi23(context, autoConnect, defaultTransport, state, mtu, onClose)
     }
+}
 
 /**
  * @param defaultTransport is only used on API level >= 23.
@@ -158,7 +145,7 @@ private fun BluetoothDevice.connectApi23(
     state: MutableStateFlow<ConnectionState>,
     mtu: MutableStateFlow<Int?>,
     onClose: () -> Unit
-): ConnectionClient? {
+): ConnectionHandler? {
     val callback = Callback(state, mtu)
     val bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         connectGatt(context, autoConnect, callback, defaultTransport.intValue)
@@ -166,14 +153,10 @@ private fun BluetoothDevice.connectApi23(
         connectGatt(context, autoConnect, callback)
     } ?: return null
 
-    // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see
-    // Disconnected before the connection request has kicked off the Connecting state (via Callback).
-    state.value = ConnectionState.Connecting
-
     val dispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, threadName).apply { isDaemon = true }
     }.asCoroutineDispatcher()
-    return ConnectionClient(
+    return ConnectionHandler(
         bluetoothGatt,
         dispatcher,
         callback
@@ -193,7 +176,7 @@ private fun BluetoothDevice.connectApi26(
     mtu: MutableStateFlow<Int?>,
     phy: MutableStateFlow<PreferredPhy?>,
     onClose: () -> Unit
-): ConnectionClient? {
+): ConnectionHandler? {
     val thread = HandlerThread(threadName).apply { start() }
     try {
         val handler = Handler(thread.looper)
@@ -201,14 +184,16 @@ private fun BluetoothDevice.connectApi26(
         val callback = Callback(state, mtu, phy)
 
         val bluetoothGatt =
-            connectGatt(context, autoConnect, callback, defaultTransport.intValue, defaultPhy.intValue, handler)
-                ?: return null
+            connectGatt(
+                context,
+                autoConnect,
+                callback,
+                defaultTransport.intValue,
+                defaultPhy.intValue,
+                handler
+            ) ?: return null
 
-        // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see
-        // Disconnected before the connection request has kicked off the Connecting state (via Callback).
-        state.value = ConnectionState.Connecting
-
-        return ConnectionClient(
+        return ConnectionHandler(
             bluetoothGatt,
             dispatcher,
             callback

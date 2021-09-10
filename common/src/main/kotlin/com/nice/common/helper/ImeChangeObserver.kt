@@ -11,7 +11,6 @@ import android.view.ViewTreeObserver
 import android.widget.PopupWindow
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnAttach
-import androidx.core.view.doOnDetach
 import com.nice.common.R
 
 class ImeChangeObserver {
@@ -96,9 +95,11 @@ class ImeChangeObserver {
             super.showAtLocation(parent, gravity, x, y)
             removeListener(this)
             addListener(this)
-            parent.doOnDetach {
-                dismiss()
-            }
+        }
+
+        override fun dismiss() {
+            super.dismiss()
+            currentHeight = 0
         }
 
         fun show(parent: View) = showAtLocation(parent, Gravity.NO_GRAVITY, 0, 0)

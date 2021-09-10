@@ -53,6 +53,7 @@ fun Activity.showSnackBar(@StringRes resId: Int, duration: Int = Snackbar.LENGTH
 private class SnackBarLocationChangedCallback : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
     private var originalBottomMargin = -1
+    private var bottomMarginRunnable: Runnable? = null
 
     private val observer = ImeChangeObserver()
 
@@ -62,15 +63,26 @@ private class SnackBarLocationChangedCallback : BaseTransientBottomBar.BaseCallb
 
     override fun onShown(transientBottomBar: Snackbar) {
         val view = transientBottomBar.view
-        val layoutParams = view.layoutParams as? ViewGroup.MarginLayoutParams ?: return
-
-        if (originalBottomMargin == -1) {
-            originalBottomMargin = layoutParams.bottomMargin
+        observer.register(view) { height ->
+            bottomMarginRunnable?.let { view.removeCallbacks(it) }
+            view.post(BottomMarginRunnable(view, height).also {
+                bottomMarginRunnable = it
+            })
         }
+    }
 
-        observer.register(view) {
-            layoutParams.bottomMargin = originalBottomMargin + it
-            view.layoutParams = layoutParams
+    private inner class BottomMarginRunnable(
+        private val view: View,
+        private val extraBottomMargin: Int
+    ) : Runnable {
+        override fun run() {
+            val layoutParams = view.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+            if (originalBottomMargin == -1) {
+                originalBottomMargin = layoutParams.bottomMargin
+            }
+
+            layoutParams.bottomMargin = originalBottomMargin + extraBottomMargin
+            view.requestLayout()
         }
     }
 
