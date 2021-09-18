@@ -159,7 +159,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
             else true
         }
 
-        onItemViewHolderCreated(holder)
+        onItemViewHolderCreated(holder, viewType)
 
         return holder
     }
@@ -170,7 +170,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         viewType: Int
     ): VH
 
-    open fun onItemViewHolderCreated(holder: VH) {
+    open fun onItemViewHolderCreated(holder: VH, viewType: Int) {
 
     }
 
