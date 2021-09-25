@@ -40,35 +40,35 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     fun setOnItemClickListener(listener: OnItemClickListener<T, VH>?) {
         itemClickListener = listener
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnItemLongClickListener(listener: OnItemLongClickListener<T, VH>?) {
         itemLongClickListener = listener
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnItemChildClickListener(listener: OnItemChildClickListener<T, VH>?) {
         itemChildClickListener = listener
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnItemChildLongClickListener(listener: OnItemChildLongClickListener<T, VH>?) {
         itemChildLongClickListener = listener
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setItemClickable(itemClickable: Boolean) {
         if (this.itemClickable != itemClickable) {
             this.itemClickable = itemClickable
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
     }
 
     fun setItemLongClickable(itemLongClickable: Boolean) {
         if (this.itemLongClickable != itemLongClickable) {
             this.itemLongClickable = itemLongClickable
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
     }
 

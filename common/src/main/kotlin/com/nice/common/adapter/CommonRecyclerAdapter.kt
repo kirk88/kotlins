@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "NotifyDataSetChanged")
 
 package com.nice.common.adapter
 
@@ -57,11 +57,7 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         synchronized(lock) {
             val oldSize = modifiableItems.size
             if (modifiableItems.addAll(items)) {
-                if (oldSize == 0) {
-                    notifyDataSetChanged()
-                } else {
-                    notifyItemRangeInserted(oldSize, items.size)
-                }
+                notifyItemRangeInserted(oldSize, items.size)
             }
         }
     }
