@@ -1,6 +1,6 @@
 package com.nice.kothttp
 
-interface RequestScope : Iterable<OkCall<*>> {
+interface CallScope : Iterable<OkCall<*>> {
 
     fun add(call: OkCall<*>)
 

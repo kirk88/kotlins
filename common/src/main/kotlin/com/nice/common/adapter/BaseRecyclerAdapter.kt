@@ -40,11 +40,13 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     fun setOnItemClickListener(listener: OnItemClickListener<T, VH>?) {
         itemClickListener = listener
+        itemClickable = true
         notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnItemLongClickListener(listener: OnItemLongClickListener<T, VH>?) {
         itemLongClickListener = listener
+        itemLongClickable = true
         notifyItemRangeChanged(0, itemCount)
     }
 
@@ -128,7 +130,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val holder = onCreateItemViewHolder(layoutInflater, parent, viewType)
 
-        if (itemClickListener != null && itemClickable) {
+        if (itemClickable) {
             holder.setOnClickListener {
                 if (!onItemClick(holder)) {
                     itemClickListener?.onItemClick(this, holder)
@@ -138,7 +140,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
             holder.removeOnClickListener()
         }
 
-        if (itemLongClickListener != null && itemLongClickable) {
+        if (itemLongClickable) {
             holder.setOnLongClickListener {
                 if (!onItemLongClick(holder))
                     itemLongClickListener?.onItemLongClick(this, holder) ?: false
@@ -174,7 +176,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
 
     }
 
-    abstract fun onBindItemViewHolder(holder: VH, item: T, payloads: MutableList<Any>)
+    abstract fun onBindItemViewHolder(holder: VH, item: T, payloads: List<Any>)
 
     final override fun onBindViewHolder(holder: VH, position: Int) {
 
@@ -183,7 +185,7 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     final override fun onBindViewHolder(
         holder: VH,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: List<Any>
     ) {
         val item = getItemOrNull(holder.layoutPosition) ?: return
         onBindItemViewHolder(holder, item, payloads)
@@ -220,8 +222,10 @@ operator fun <T> BaseRecyclerAdapter<T, *>.get(position: Int): T = getItem(posit
 
 fun <T> BaseRecyclerAdapter<T, *>.getItemOrNull(position: Int): T? = items.getOrNull(position)
 
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T = items.getOrNull(position) ?: defaultValue
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrDefault(position: Int, defaultValue: T): T =
+    items.getOrNull(position) ?: defaultValue
 
-fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T) = items.getOrNull(position) ?: defaultValue(position)
+fun <T> BaseRecyclerAdapter<T, *>.getItemOrElse(position: Int, defaultValue: (Int) -> T) =
+    items.getOrNull(position) ?: defaultValue(position)
 
 fun BaseRecyclerAdapter<*, *>.isNotEmpty(): Boolean = !isEmpty()

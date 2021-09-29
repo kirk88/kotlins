@@ -34,8 +34,8 @@ android {
 
 dependencies {
     implementation deps.kotlinStdlib
-    api deps.sqliteKtx
-    api deps.sqliteFramework
+    api deps.androidxSqliteKtx
+    api deps.androidxSqliteFramework
 }
 
 tasks.withType(JavaCompile) {

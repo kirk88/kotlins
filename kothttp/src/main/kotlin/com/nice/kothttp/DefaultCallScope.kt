@@ -2,7 +2,7 @@
 
 package com.nice.kothttp
 
-class DefaultRequestScope : RequestScope {
+class DefaultCallScope : CallScope {
 
     private var resources: MutableList<OkCall<*>>? = null
 
