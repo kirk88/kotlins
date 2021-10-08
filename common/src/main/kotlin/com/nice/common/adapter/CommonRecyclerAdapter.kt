@@ -98,6 +98,13 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
         }
     }
 
+    fun updateItemAt(position: Int, item: T, payload: Any? = null) {
+        synchronized(lock) {
+            modifiableItems[position] = item
+            notifyItemChanged(position, payload)
+        }
+    }
+
     fun updateItems(items: List<T>, payload: Any? = null) {
         synchronized(lock) {
             for (item in items) {
@@ -153,6 +160,16 @@ abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
             notifyDataSetChanged()
         }
     }
+
+    fun indexOfItem(item: T): Int {
+        val index: Int
+        synchronized(lock) {
+            index = modifiableItems.indexOf(item)
+        }
+        return index
+    }
+
+    fun containsItem(item: T): Boolean = indexOfItem(item) > -1
 
     fun refreshItems(payload: Any? = null) {
         notifyItemRangeChanged(0, modifiableItems.size, payload)

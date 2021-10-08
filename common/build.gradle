@@ -76,7 +76,7 @@ task androidSourcesJar(type: Jar) {
 
 def versionMajor = 1
 def versionMinor = 0
-def versionPatch = 1
+def versionPatch = 2
 
 publishing {
     publications {

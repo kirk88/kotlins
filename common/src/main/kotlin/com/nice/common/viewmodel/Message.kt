@@ -18,7 +18,7 @@ sealed class Message {
         extras[key] = value
     }
 
-    class Tip(val text: CharSequence) : Message()
+    class Event(val what: Int): Message()
 
     class StartActivity(val intent: Intent) : Message()
 
@@ -70,6 +70,8 @@ sealed class Message {
             return System.identityHashCode(this)
         }
     }
+
+    class Tip(val text: CharSequence) : Message()
 
     class Batch(val messages: Set<Message>) : Message()
 
