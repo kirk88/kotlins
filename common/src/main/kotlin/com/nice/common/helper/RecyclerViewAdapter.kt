@@ -33,7 +33,7 @@ class RecyclerViewAdapter<T, VH : ItemViewHolder> private constructor(
         return viewHolderCreators.getValue(viewType).create(inflater, parent)
     }
 
-    override fun onBindItemViewHolder(holder: VH, item: T, payloads: MutableList<Any>) {
+    override fun onBindItemViewHolder(holder: VH, item: T, payloads: List<Any>) {
         viewHolderBinders.getValue(holder.itemViewType).bind(holder, item, payloads)
     }
 
@@ -134,6 +134,6 @@ fun interface ViewHolderCreator<VH : ItemViewHolder> {
 
 fun interface ViewHolderBinder<T, VH : ItemViewHolder> {
 
-    fun bind(holder: VH, item: T, payloads: MutableList<Any>)
+    fun bind(holder: VH, item: T, payloads: List<Any>)
 
 }

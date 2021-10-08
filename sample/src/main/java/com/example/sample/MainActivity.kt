@@ -222,11 +222,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     private class BleAdapter(context: Context) :
         SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_2) {
 
-        override fun onBindItemViewHolder(
-            holder: ItemViewHolder,
-            item: Advertisement,
-            payloads: MutableList<Any>
-        ) {
+        override fun onBindItemViewHolder(holder: ItemViewHolder, item: Advertisement, payloads: List<Any>) {
             holder.findViewById<TextView>(android.R.id.text1).string = item.name
             holder.findViewById<TextView>(android.R.id.text2).string = item.address
         }

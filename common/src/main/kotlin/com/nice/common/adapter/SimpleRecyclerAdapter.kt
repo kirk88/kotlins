@@ -30,7 +30,7 @@ abstract class SimpleRecyclerAdapter<T>(
     }
 
 
-    override fun onBindItemViewHolder(holder: ItemViewHolder, item: T, payloads: MutableList<Any>) {
+    override fun onBindItemViewHolder(holder: ItemViewHolder, item: T, payloads: List<Any>) {
 
     }
 
