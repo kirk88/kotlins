@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.nice.common.viewmodel
 
 import android.content.Intent
@@ -5,7 +7,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.nice.common.widget.InfiniteState
 
-sealed class Message {
+sealed class Message(val what: Int = -1) {
 
     private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
@@ -18,7 +20,7 @@ sealed class Message {
         extras[key] = value
     }
 
-    class Event(val what: Int): Message()
+    class Event(what: Int): Message(what)
 
     class StartActivity(val intent: Intent) : Message()
 
