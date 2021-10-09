@@ -9,11 +9,11 @@ internal class AndroidAdvertisement(
     private val scanResult: BluetoothScanResult
 ) : Advertisement {
 
+    private val device: BluetoothDevice
+        get() = scanResult.device
+
     private val scanRecord: ScanRecord?
         get() = scanResult.scanRecord
-
-    override val device: BluetoothDevice
-        get() = scanResult.device
 
     override val name: String
         get() = device.name.orEmpty()

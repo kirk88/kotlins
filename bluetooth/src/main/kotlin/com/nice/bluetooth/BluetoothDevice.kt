@@ -126,7 +126,7 @@ internal fun BluetoothDevice.connect(
 ): ConnectionHandler? {
     // Explicitly set Connecting state so when Peripheral is suspending until Connected, it doesn't incorrectly see
     // Disconnected before the connection request has kicked off the Connecting state (via Callback).
-    state.value = ConnectionState.Connecting.Bluetooth
+    state.value = ConnectionState.Connecting.Device
 
    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         connectApi26(context, autoConnect, defaultTransport, defaultPhy, state, mtu, phy, onClose)
