@@ -5,13 +5,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion versions.compileSdk
+    compileSdk versions.compileSdk
 
     defaultConfig {
-        minSdkVersion versions.minSdk
-        targetSdkVersion versions.targetSdk
-
-        consumerProguardFiles "consumer-rules.pro"
+        minSdk versions.minSdk
+        targetSdk versions.targetSdk
     }
 
     buildFeatures{
@@ -26,8 +24,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility versions.sourceCompatibility
-        targetCompatibility versions.targetCompatibility
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
