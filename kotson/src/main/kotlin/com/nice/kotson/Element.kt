@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 
-private fun <T : Any> JsonElement?.nullOr(getNotNull: JsonElement.() -> T): T? = if (this == null || isJsonNull) null else getNotNull()
+private inline fun <T : Any> JsonElement?.nullOr(block: JsonElement.() -> T): T? = if (this == null || isJsonNull) null else block()
 
 val JsonElement.string: String get() = asString
 val JsonElement?.stringOrNull: String? get() = nullOr { string }

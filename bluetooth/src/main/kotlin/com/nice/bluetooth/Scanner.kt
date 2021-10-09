@@ -54,27 +54,15 @@ internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : S
         check(bluetoothAdapter.isEnabled) { "Bluetooth is disabled" }
 
         val receiver = registerBluetoothScannerReceiver(
-            onScanResult = { device, rssi ->
-                val result = BluetoothScanResult(device, rssi)
-                val deliverResult = {
-                    trySendBlocking(AndroidAdvertisement(result))
-                        .onFailure {
-                            Log.w(
-                                TAG,
-                                "Unable to deliver scan result due to failure in flow or premature closing."
-                            )
-                        }
-                }
-                if (filterServices == null) {
-                    deliverResult.invoke()
-                } else {
-                    val serviceUuids = result.scanRecord?.serviceUuids
-                    if (serviceUuids == null) {
-                        deliverResult.invoke()
-                    } else if (serviceUuids.any { filterServices.contains(it) }) {
-                        deliverResult.invoke()
+            filterServices,
+            onScanResult = { result ->
+                trySendBlocking(AndroidAdvertisement(result))
+                    .onFailure {
+                        Log.w(
+                            TAG,
+                            "Unable to deliver scan result due to failure in flow or premature closing."
+                        )
                     }
-                }
             },
             onScanFinished = {
                 cancel()

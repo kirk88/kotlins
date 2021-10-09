@@ -60,20 +60,6 @@ class TitleAppBar @JvmOverloads constructor(
     private var bottomDividerColor: Int = 0
     private val bottomDividerDrawable: ColorDrawable by lazy { ColorDrawable() }
 
-    fun provideSupportActionBar(
-        activity: AppCompatActivity,
-        block: ActionBar.() -> Unit = { }
-    ) {
-        check(actionBar == null) {
-            "ActionBar already exists"
-        }
-        activity.setSupportActionBar(toolbar)
-        actionBar = activity.supportActionBar?.apply {
-            setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
-            block()
-        }
-    }
-
     fun setPopupTheme(@StyleRes theme: Int) {
         toolbar.popupTheme = theme
     }
@@ -399,6 +385,14 @@ class TitleAppBar @JvmOverloads constructor(
         throw IllegalStateException("Can not find a suitable TitleToolbar")
     }
 
+    private fun attachToActivity(activity: AppCompatActivity, block: ActionBar.() -> Unit = {}) {
+        activity.setSupportActionBar(toolbar)
+        actionBar = activity.supportActionBar!!.apply {
+            setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
+            block()
+        }
+    }
+
     init {
         val ta = TintTypedArray.obtainStyledAttributes(
             getContext(),
@@ -415,10 +409,14 @@ class TitleAppBar @JvmOverloads constructor(
         toolbar = findSuitableTitleToolbar()
 
         val titleMargin: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMargin, 0)
-        val marginStart: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginStart, titleMargin)
-        val marginEnd: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginEnd, titleMargin)
-        val marginTop: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginTop, titleMargin)
-        val marginBottom: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginBottom, titleMargin)
+        val marginStart: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginStart, titleMargin)
+        val marginEnd: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginEnd, titleMargin)
+        val marginTop: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginTop, titleMargin)
+        val marginBottom: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_titleMarginBottom, titleMargin)
         if (marginStart != NO_DIMEN || marginEnd != NO_DIMEN
             || marginTop != NO_DIMEN || marginBottom != NO_DIMEN
         ) {
@@ -430,8 +428,10 @@ class TitleAppBar @JvmOverloads constructor(
             )
         }
 
-        val contentInsetLeft: Int = ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetLeft, NO_DIMEN)
-        val contentInsetRight: Int = ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetRight, NO_DIMEN)
+        val contentInsetLeft: Int =
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetLeft, NO_DIMEN)
+        val contentInsetRight: Int =
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_contentInsetRight, NO_DIMEN)
 
         if (contentInsetLeft != NO_DIMEN
             || contentInsetRight != NO_DIMEN
@@ -442,8 +442,10 @@ class TitleAppBar @JvmOverloads constructor(
             )
         }
 
-        val contentInsetStart: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetStart, NO_DIMEN)
-        val contentInsetEnd: Int = ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetEnd, NO_DIMEN)
+        val contentInsetStart: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetStart, NO_DIMEN)
+        val contentInsetEnd: Int =
+            ta.getDimensionPixelOffset(R.styleable.TitleAppBar_contentInsetEnd, NO_DIMEN)
         if (contentInsetStart != NO_DIMEN ||
             contentInsetEnd != NO_DIMEN
         ) {
@@ -479,8 +481,9 @@ class TitleAppBar @JvmOverloads constructor(
             )
         ) {
             val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
-            val showHomeAsUp = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
-            provideSupportActionBar(activity) {
+            val showHomeAsUp =
+                ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
+            attachToActivity(activity) {
                 setDisplayShowHomeEnabled(showHome)
                 setDisplayHomeAsUpEnabled(showHomeAsUp)
             }
@@ -547,9 +550,11 @@ class TitleAppBar @JvmOverloads constructor(
             inflateMenu(ta.getResourceId(R.styleable.TitleAppBar_menu, 0))
         }
 
-        bottomDividerHeight = ta.getDimensionPixelSize(R.styleable.TitleAppBar_bottomDividerHeight, 1)
+        bottomDividerHeight =
+            ta.getDimensionPixelSize(R.styleable.TitleAppBar_bottomDividerHeight, 1)
         bottomDividerColor = ta.getColor(R.styleable.TitleAppBar_bottomDividerColor, Color.GRAY)
-        showBottomDivider = ta.getInt(R.styleable.TitleAppBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
+        showBottomDivider =
+            ta.getInt(R.styleable.TitleAppBar_showBottomDivider, SHOW_BOTTOM_DIVIDER_IF_NEED)
 
         ta.recycle()
     }
@@ -562,145 +567,145 @@ class TitleAppBar @JvmOverloads constructor(
 
         private const val NO_DIMEN = Int.MIN_VALUE
 
+        val TitleAppBar.menu: Menu
+            get() = getMenu()
+
+        var TitleAppBar.title: CharSequence?
+            get() = getTitle()
+            set(value) {
+                setTitle(value)
+            }
+
+        var TitleAppBar.subtitle: CharSequence?
+            get() = getSubtitle()
+            set(value) {
+                setSubtitle(value)
+            }
+
+        var TitleAppBar.titleTextColor: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setTitleTextColor(value)
+            }
+
+        var TitleAppBar.subtitleTextColor: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setSubtitleTextColor(value)
+            }
+
+        var TitleAppBar.titleTextAppearance: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setTitleTextAppearance(value)
+            }
+
+        var TitleAppBar.subtitleTextAppearance: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setSubtitleTextAppearance(value)
+            }
+
+        var TitleAppBar.titleMargin: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setTitleMargin(value, value, value, value)
+            }
+
+        var TitleAppBar.titleMarginStart: Int
+            get() = getTitleMarginStart()
+            set(value) {
+                setTitleMarginStart(value)
+            }
+
+        var TitleAppBar.titleMarginEnd: Int
+            get() = getTitleMarginEnd()
+            set(value) {
+                setTitleMarginEnd(value)
+            }
+
+        var TitleAppBar.titleMarginTop: Int
+            get() = getTitleMarginTop()
+            set(value) {
+                setTitleMarginTop(value)
+            }
+
+        var TitleAppBar.titleMarginBottom: Int
+            get() = getTitleMarginBottom()
+            set(value) {
+                setTitleMarginBottom(value)
+            }
+
+        var TitleAppBar.horizontalContentInsetRelative: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setContentInsetsRelative(value, value)
+            }
+
+        var TitleAppBar.horizontalContentInsetAbsolute: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setContentInsetsAbsolute(value, value)
+            }
+
+        var TitleAppBar.contentInsetStartWithNavigation: Int
+            get() = getContentInsetStartWithNavigation()
+            set(value) {
+                setContentInsetStartWithNavigation(value)
+            }
+
+        var TitleAppBar.contentInsetEndWithActions: Int
+            get() = getContentInsetEndWithActions()
+            set(value) {
+                setContentInsetEndWithActions(value)
+            }
+
+        var TitleAppBar.navigationIcon: Drawable?
+            get() = getNavigationIcon()
+            set(value) {
+                setNavigationIcon(value)
+            }
+
+        var TitleAppBar.navigationIconTint: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setNavigationIconTint(value)
+            }
+
+        var TitleAppBar.navigationIconTintList: ColorStateList?
+            get() = getNavigationIconTintList()
+            set(value) {
+                setNavigationIconTintList(value)
+            }
+
+        var TitleAppBar.navigationIconTintMode: PorterDuff.Mode?
+            get() = getNavigationIconTintMode()
+            set(value) {
+                setNavigationIconTintMode(value)
+            }
+
+        var TitleAppBar.navigationContentDescription: CharSequence?
+            get() = getNavigationContentDescription()
+            set(value) {
+                setNavigationContentDescription(value)
+            }
+
+        var TitleAppBar.isDisplayShowTitleEnabled: Boolean
+            get() = isDisplayShowTitleEnabled()
+            set(value) {
+                setDisplayShowTitleEnabled(value)
+            }
+
+
+        fun AppCompatActivity.setTitleAppBar(
+            titleAppBar: TitleAppBar
+        ) {
+            titleAppBar.attachToActivity(this)
+        }
+
     }
 
 }
-
-fun AppCompatActivity.setSupportActionBar(
-    titleAppBar: TitleAppBar,
-    block: ActionBar.() -> Unit = {}
-) {
-    titleAppBar.provideSupportActionBar(this, block)
-}
-
-val TitleAppBar.menu: Menu
-    get() = getMenu()
-
-var TitleAppBar.title: CharSequence?
-    get() = getTitle()
-    set(value) {
-        setTitle(value)
-    }
-
-var TitleAppBar.subtitle: CharSequence?
-    get() = getSubtitle()
-    set(value) {
-        setSubtitle(value)
-    }
-
-var TitleAppBar.titleTextColor: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setTitleTextColor(value)
-    }
-
-var TitleAppBar.subtitleTextColor: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setSubtitleTextColor(value)
-    }
-
-var TitleAppBar.titleTextAppearance: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setTitleTextAppearance(value)
-    }
-
-var TitleAppBar.subtitleTextAppearance: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setSubtitleTextAppearance(value)
-    }
-
-var TitleAppBar.titleMargin: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setTitleMargin(value, value, value, value)
-    }
-
-var TitleAppBar.titleMarginStart: Int
-    get() = getTitleMarginStart()
-    set(value) {
-        setTitleMarginStart(value)
-    }
-
-var TitleAppBar.titleMarginEnd: Int
-    get() = getTitleMarginEnd()
-    set(value) {
-        setTitleMarginEnd(value)
-    }
-
-var TitleAppBar.titleMarginTop: Int
-    get() = getTitleMarginTop()
-    set(value) {
-        setTitleMarginTop(value)
-    }
-
-var TitleAppBar.titleMarginBottom: Int
-    get() = getTitleMarginBottom()
-    set(value) {
-        setTitleMarginBottom(value)
-    }
-
-var TitleAppBar.horizontalContentInsetRelative: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setContentInsetsRelative(value, value)
-    }
-
-var TitleAppBar.horizontalContentInsetAbsolute: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setContentInsetsAbsolute(value, value)
-    }
-
-var TitleAppBar.contentInsetStartWithNavigation: Int
-    get() = getContentInsetStartWithNavigation()
-    set(value) {
-        setContentInsetStartWithNavigation(value)
-    }
-
-var TitleAppBar.contentInsetEndWithActions: Int
-    get() = getContentInsetEndWithActions()
-    set(value) {
-        setContentInsetEndWithActions(value)
-    }
-
-var TitleAppBar.navigationIcon: Drawable?
-    get() = getNavigationIcon()
-    set(value) {
-        setNavigationIcon(value)
-    }
-
-var TitleAppBar.navigationIconTint: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setNavigationIconTint(value)
-    }
-
-var TitleAppBar.navigationIconTintList: ColorStateList?
-    get() = getNavigationIconTintList()
-    set(value) {
-        setNavigationIconTintList(value)
-    }
-
-var TitleAppBar.navigationIconTintMode: PorterDuff.Mode?
-    get() = getNavigationIconTintMode()
-    set(value) {
-        setNavigationIconTintMode(value)
-    }
-
-var TitleAppBar.navigationContentDescription: CharSequence?
-    get() = getNavigationContentDescription()
-    set(value) {
-        setNavigationContentDescription(value)
-    }
-
-var TitleAppBar.isDisplayShowTitleEnabled: Boolean
-    get() = isDisplayShowTitleEnabled()
-    set(value) {
-        setDisplayShowTitleEnabled(value)
-    }
 
 class TitleToolbar @JvmOverloads constructor(
     context: Context,
@@ -1151,7 +1156,8 @@ class TitleToolbar @JvmOverloads constructor(
 
         constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.TitleToolbar_Layout)
-            isOverrideAttributes = ta.getBoolean(R.styleable.TitleToolbar_Layout_layout_overrideAttributes, false)
+            isOverrideAttributes =
+                ta.getBoolean(R.styleable.TitleToolbar_Layout_layout_overrideAttributes, false)
             ta.recycle()
         }
 
@@ -1175,9 +1181,11 @@ class TitleToolbar @JvmOverloads constructor(
             defStyleAttr, 0
         )
 
-        displayShowTitleEnabled = ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
+        displayShowTitleEnabled =
+            ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
         titleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_titleTextAppearance, 0)
-        subtitleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
+        subtitleTextAppearance =
+            ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
         navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
         navigationIconTintMode = DrawableUtils.parseTintMode(
             ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
@@ -1187,52 +1195,56 @@ class TitleToolbar @JvmOverloads constructor(
         ta.recycle()
     }
 
+    companion object {
+
+        var TitleToolbar.titleTextColor: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setTitleTextColor(value)
+            }
+
+        var TitleToolbar.subtitleTextColor: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setSubtitleTextColor(value)
+            }
+
+        var TitleToolbar.titleTextAppearance: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setTitleTextAppearance(context, value)
+            }
+
+        var TitleToolbar.subtitleTextAppearance: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setSubtitleTextAppearance(context, value)
+            }
+
+        var TitleToolbar.navigationIconTint: Int
+            @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
+            set(value) {
+                setNavigationIconTint(value)
+            }
+
+        var TitleToolbar.navigationIconTintList: ColorStateList?
+            get() = getNavigationIconTintList()
+            set(value) {
+                setNavigationIconTintList(value)
+            }
+
+        var TitleToolbar.navigationIconTintMode: PorterDuff.Mode?
+            get() = getNavigationIconTintMode()
+            set(value) {
+                setNavigationIconTintMode(value)
+            }
+
+        var TitleToolbar.displayShowTitleEnabled: Boolean
+            get() = isDisplayShowTitleEnabled()
+            set(value) {
+                setDisplayShowTitleEnabled(value)
+            }
+
+    }
+
 }
-
-var TitleToolbar.titleTextColor: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setTitleTextColor(value)
-    }
-
-var TitleToolbar.subtitleTextColor: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setSubtitleTextColor(value)
-    }
-
-var TitleToolbar.titleTextAppearance: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setTitleTextAppearance(context, value)
-    }
-
-var TitleToolbar.subtitleTextAppearance: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setSubtitleTextAppearance(context, value)
-    }
-
-var TitleToolbar.navigationIconTint: Int
-    @Deprecated(NO_GETTER_MESSAGE) get() = NO_GETTER
-    set(value) {
-        setNavigationIconTint(value)
-    }
-
-var TitleToolbar.navigationIconTintList: ColorStateList?
-    get() = getNavigationIconTintList()
-    set(value) {
-        setNavigationIconTintList(value)
-    }
-
-var TitleToolbar.navigationIconTintMode: PorterDuff.Mode?
-    get() = getNavigationIconTintMode()
-    set(value) {
-        setNavigationIconTintMode(value)
-    }
-
-var TitleToolbar.displayShowTitleEnabled: Boolean
-    get() = isDisplayShowTitleEnabled()
-    set(value) {
-        setDisplayShowTitleEnabled(value)
-    }

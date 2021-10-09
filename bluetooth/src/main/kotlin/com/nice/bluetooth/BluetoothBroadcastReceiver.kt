@@ -6,11 +6,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.nice.bluetooth.common.BluetoothScanResult
+import java.util.*
 
 private val BLUETOOTH_STATE_INTENT_FILTER: IntentFilter =
     IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
 
-internal class BluetoothStateReceiver(private val action: (state: Int) -> Unit) : BroadcastReceiver() {
+internal class BluetoothStateReceiver(private val action: (state: Int) -> Unit) :
+    BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
@@ -48,7 +51,9 @@ internal class BluetoothScannerReceiver(
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             BluetoothDevice.ACTION_FOUND -> {
-                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE) ?: return
+                val device =
+                    intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                        ?: return
                 val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                 onScanResult.invoke(device, rssi.toInt())
             }
@@ -71,11 +76,19 @@ internal class BluetoothScannerReceiver(
 }
 
 internal inline fun registerBluetoothScannerReceiver(
-    crossinline onScanResult: (device: BluetoothDevice, rssi: Int) -> Unit,
+    serviceUuids: List<UUID>?,
+    crossinline onScanResult: (result: BluetoothScanResult) -> Unit,
     crossinline onScanFinished: () -> Unit
 ): BluetoothScannerReceiver = BluetoothScannerReceiver(
     onScanResult = { device, rssi ->
-        onScanResult.invoke(device, rssi)
+        val result = BluetoothScanResult(device, rssi)
+        if (serviceUuids == null) {
+            onScanResult.invoke(result)
+        } else {
+            if (result.scanRecord?.serviceUuids?.any { serviceUuids.contains(it) } == true) {
+                onScanResult.invoke(result)
+            }
+        }
     },
     onScanFinished = {
         onScanFinished.invoke()
