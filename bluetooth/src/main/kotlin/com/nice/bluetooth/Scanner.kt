@@ -23,6 +23,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
+@SuppressLint("NewApi")
+fun Scanner(level: ScannerLevel = ScannerLevel.Low, services: List<UUID>? = null): Scanner =
+    when (level) {
+        ScannerLevel.System -> AndroidSystemScanner(services)
+        ScannerLevel.High -> HighVersionBleScanner(services)
+        ScannerLevel.Low -> LowVersionBleScanner(services)
+    }
+
 enum class ScannerLevel {
     System,
 
@@ -34,15 +42,6 @@ enum class ScannerLevel {
 class ScanFailedException internal constructor(
     errorCode: Int
 ) : IllegalStateException("Bluetooth scan failed with error code $errorCode")
-
-@SuppressLint("NewApi")
-fun Scanner(level: ScannerLevel = ScannerLevel.Low, services: List<UUID>? = null): Scanner =
-    when (level) {
-        ScannerLevel.System -> AndroidSystemScanner(services)
-        ScannerLevel.High -> HighVersionBleScanner(services)
-        ScannerLevel.Low -> LowVersionBleScanner(services)
-    }
-
 
 internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : Scanner {
 
