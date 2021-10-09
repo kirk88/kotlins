@@ -20,7 +20,15 @@ sealed class Message(val what: Int = -1) {
         extras[key] = value
     }
 
-    class Event(what: Int): Message(what)
+    class Event : Message {
+        constructor(what: Int) : super(what)
+
+        constructor(what: Int, vararg args: Pair<String, Any?>) : super(what) {
+            for (arg in args) {
+                set(arg.first, arg.second)
+            }
+        }
+    }
 
     class StartActivity(val intent: Intent) : Message()
 
