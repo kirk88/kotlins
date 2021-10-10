@@ -42,11 +42,4 @@ dependencies {
     implementation project(':bluetooth')
     implementation project(':kothttp')
     implementation project(':atomic')
-
-    def nav_version = "2.3.5"
-
-    // Java language implementation
-    implementation "androidx.navigation:navigation-fragment:$nav_version"
-    implementation "androidx.navigation:navigation-ui:$nav_version"
-
 }

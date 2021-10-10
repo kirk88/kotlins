@@ -16,6 +16,7 @@ import androidx.collection.SparseArrayCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.*
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -449,6 +450,74 @@ fun TabLayout.setupWithController(
 fun AppCompatActivity.setupTabLayoutWithController(
     graph: NavigationGraph,
     tabLayout: TabLayout,
+    viewPager: ViewPager,
+    autoRefresh: Boolean = true
+) {
+    viewPager.adapter = FragmentPagerAdapter(this, graph)
+
+    val startDestination = graph.findDestination(graph.getStartDestination())
+    if (startDestination != null) {
+        viewPager.currentItem = graph.indexOf(startDestination)
+    }
+
+    tabLayout.setupWithViewPager(viewPager, autoRefresh)
+}
+
+fun Fragment.setupTabLayoutWithController(
+    graph: NavigationGraph,
+    tabLayout: TabLayout,
+    viewPager: ViewPager,
+    autoRefresh: Boolean = true
+) {
+    viewPager.adapter = FragmentPagerAdapter(this, graph)
+
+    val startDestination = graph.findDestination(graph.getStartDestination())
+    if (startDestination != null) {
+        viewPager.currentItem = graph.indexOf(startDestination)
+    }
+
+    tabLayout.setupWithViewPager(viewPager, autoRefresh)
+}
+
+private class FragmentPagerAdapter : FragmentStatePagerAdapter {
+
+    private val graph: NavigationGraph
+
+    private val fragmentFactory: FragmentFactory
+    private val classLoader: ClassLoader
+
+    constructor(fragmentActivity: FragmentActivity, graph: NavigationGraph) : super(
+        fragmentActivity.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
+    ) {
+        this.graph = graph
+        fragmentFactory = fragmentActivity.supportFragmentManager.fragmentFactory
+        classLoader = fragmentActivity.classLoader
+    }
+
+    constructor(fragment: Fragment, graph: NavigationGraph) : super(
+        fragment.childFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
+    ) {
+        this.graph = graph
+        fragmentFactory = fragment.childFragmentManager.fragmentFactory
+        classLoader = fragment.requireContext().classLoader
+    }
+
+    override fun getCount(): Int {
+        return graph.size
+    }
+
+    override fun getItem(position: Int): Fragment {
+        val destination = requireNotNull(graph.getDestination(position))
+        return fragmentFactory.instantiate(classLoader, destination.className).apply {
+            arguments = destination.args
+        }
+    }
+
+}
+
+fun AppCompatActivity.setupTabLayoutWithController(
+    graph: NavigationGraph,
+    tabLayout: TabLayout,
     viewPager2: ViewPager2,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
@@ -459,7 +528,7 @@ fun AppCompatActivity.setupTabLayoutWithController(
         viewPager2.currentItem = graph.indexOf(startDestination)
     }
 
-    viewPager2.adapter = FragmentPagerAdapter(this, graph)
+    viewPager2.adapter = FragmentPagerAdapter2(this, graph)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
         tab.text = graph.getDestination(position)?.label
@@ -480,7 +549,7 @@ fun Fragment.setupTabLayoutWithController(
         viewPager2.currentItem = graph.indexOf(startDestination)
     }
 
-    viewPager2.adapter = FragmentPagerAdapter(this, graph)
+    viewPager2.adapter = FragmentPagerAdapter2(this, graph)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
         tab.text = graph.getDestination(position)?.label
@@ -488,7 +557,7 @@ fun Fragment.setupTabLayoutWithController(
     }.attach()
 }
 
-private class FragmentPagerAdapter :
+private class FragmentPagerAdapter2 :
     FragmentStateAdapter {
 
     private val graph: NavigationGraph
@@ -509,7 +578,6 @@ private class FragmentPagerAdapter :
         fragmentFactory = fragment.childFragmentManager.fragmentFactory
         classLoader = fragment.requireContext().classLoader
     }
-
 
     override fun getItemCount(): Int {
         return graph.size
