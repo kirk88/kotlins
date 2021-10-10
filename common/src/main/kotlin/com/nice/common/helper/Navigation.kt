@@ -506,6 +506,10 @@ private class FragmentPagerAdapter : FragmentStatePagerAdapter {
         return graph.size
     }
 
+    override fun getPageTitle(position: Int): CharSequence? {
+        return graph.getDestination(position)?.label
+    }
+
     override fun getItem(position: Int): Fragment {
         val destination = requireNotNull(graph.getDestination(position))
         return fragmentFactory.instantiate(classLoader, destination.className).apply {
