@@ -137,7 +137,7 @@ class NavigationGraph : Iterable<NavigationDestination> {
             return
         }
         check(destination.parent == null) {
-            "Destination already has a parent set. Call NavigationController.remove() to remove the previous parent."
+            "Destination already has a parent set. Call NavigationGraph.remove() to remove the previous parent."
         }
         existingDestination?.setParent(null)
         destination.setParent(this)
