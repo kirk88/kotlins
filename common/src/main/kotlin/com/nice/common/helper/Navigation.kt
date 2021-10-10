@@ -35,12 +35,12 @@ class NavigationDestination(
     val args: Bundle? = null
 ) {
 
-    val parent: NavigationController?
+    val parent: NavigationGraph?
         get() = _parent
 
-    private var _parent: NavigationController? = null
+    private var _parent: NavigationGraph? = null
 
-    internal fun setParent(parent: NavigationController?) {
+    internal fun setParent(parent: NavigationGraph?) {
         _parent = parent
     }
 
@@ -121,28 +121,15 @@ private object DefaultFragmentNavigator : FragmentNavigator {
 
 }
 
-class NavigationController internal constructor(
-    private val fragmentManager: FragmentManager,
-    @IdRes private val containerViewId: Int
-) : Iterable<NavigationDestination> {
-
-    private var navigator: FragmentNavigator = DefaultFragmentNavigator
-
-    private val listeners = mutableListOf<OnDestinationChangedListener>()
-
-    private val destinations = SparseArrayCompat<NavigationDestination>()
-
-    private var primaryNavigationDestination: NavigationDestination? = null
+class NavigationGraph : Iterable<NavigationDestination> {
 
     @IdRes
     private var startDestination: Int = -1
 
+    private val destinations = SparseArrayCompat<NavigationDestination>()
+
     val size: Int
         get() = destinations.size()
-
-    fun setFragmentNavigator(navigator: FragmentNavigator) {
-        this.navigator = navigator
-    }
 
     fun addDestination(destination: NavigationDestination) {
         val existingDestination = destinations.get(destination.id)
@@ -205,15 +192,64 @@ class NavigationController internal constructor(
         return startDestination
     }
 
-    fun findStartDestination(): NavigationDestination? {
-        return findDestination(startDestination)
+    override fun iterator(): MutableIterator<NavigationDestination> {
+        return object : MutableIterator<NavigationDestination> {
+            private var index = -1
+            private var wentToNext = false
+            override fun hasNext(): Boolean {
+                return index + 1 < destinations.size()
+            }
+
+            override fun next(): NavigationDestination {
+                if (!hasNext()) {
+                    throw NoSuchElementException()
+                }
+                wentToNext = true
+                return destinations.valueAt(++index)
+            }
+
+            override fun remove() {
+                check(wentToNext) { "You must call next() before you can remove an element" }
+                destinations.valueAt(index).setParent(null)
+                destinations.removeAt(index)
+                index--
+                wentToNext = false
+            }
+        }
+    }
+
+}
+
+class NavigationController internal constructor(
+    private val fragmentManager: FragmentManager,
+    @IdRes private val containerViewId: Int
+) {
+
+    private var _fragmentNavigator: FragmentNavigator = DefaultFragmentNavigator
+    val fragmentNavigator: FragmentNavigator
+        get() = _fragmentNavigator
+
+    private var _graph: NavigationGraph? = null
+    val graph: NavigationGraph?
+        get() = _graph
+
+    private var primaryNavigationDestination: NavigationDestination? = null
+
+    private val listeners = mutableListOf<OnDestinationChangedListener>()
+
+    fun setFragmentNavigator(navigator: FragmentNavigator) {
+        this._fragmentNavigator = navigator
+    }
+
+    fun setGraph(graph: NavigationGraph) {
+        this._graph = graph
     }
 
     fun navigate(
         @IdRes id: Int,
         allowingStateLoss: Boolean = false
     ): Boolean {
-        val destination = findDestination(id) ?: return false
+        val destination = graph?.findDestination(id) ?: return false
         return navigate(destination, allowingStateLoss)
     }
 
@@ -223,7 +259,7 @@ class NavigationController internal constructor(
         @AnimatorRes @AnimRes exit: Int,
         allowingStateLoss: Boolean = false
     ): Boolean {
-        val destination = findDestination(id) ?: return false
+        val destination = graph?.findDestination(id) ?: return false
         return navigate(destination, enter, exit, allowingStateLoss)
     }
 
@@ -241,13 +277,13 @@ class NavigationController internal constructor(
         allowingStateLoss: Boolean = false
     ): Boolean {
         val parent = destination.parent
-        if (parent == null || parent != this) {
+        if (parent == null || parent != graph) {
             return false
         }
 
         setPrimaryNavigationDestination(destination)
 
-        navigator.navigate(
+        _fragmentNavigator.navigate(
             fragmentManager,
             containerViewId,
             destination.className,
@@ -288,32 +324,6 @@ class NavigationController internal constructor(
         listeners.remove(listener)
     }
 
-    override fun iterator(): MutableIterator<NavigationDestination> {
-        return object : MutableIterator<NavigationDestination> {
-            private var index = -1
-            private var wentToNext = false
-            override fun hasNext(): Boolean {
-                return index + 1 < destinations.size()
-            }
-
-            override fun next(): NavigationDestination {
-                if (!hasNext()) {
-                    throw NoSuchElementException()
-                }
-                wentToNext = true
-                return destinations.valueAt(++index)
-            }
-
-            override fun remove() {
-                check(wentToNext) { "You must call next() before you can remove an element" }
-                destinations.valueAt(index).setParent(null)
-                destinations.removeAt(index)
-                index--
-                wentToNext = false
-            }
-        }
-    }
-
     fun interface OnDestinationChangedListener {
         fun onDestinationChanged(
             controller: NavigationController,
@@ -323,21 +333,21 @@ class NavigationController internal constructor(
 
 }
 
-operator fun NavigationController.get(@IdRes id: Int): NavigationDestination = requireNotNull(findDestination(id)) {
+operator fun NavigationGraph.get(@IdRes id: Int): NavigationDestination = requireNotNull(findDestination(id)) {
     "No destination for $id was found in $this"
 }
 
-operator fun NavigationController.contains(@IdRes id: Int): Boolean = findDestination(id) != null
+operator fun NavigationGraph.contains(@IdRes id: Int): Boolean = findDestination(id) != null
 
-operator fun NavigationController.plusAssign(destination: NavigationDestination) {
+operator fun NavigationGraph.plusAssign(destination: NavigationDestination) {
     addDestination(destination)
 }
 
-operator fun NavigationController.plusAssign(destinations: Collection<NavigationDestination>) {
+operator fun NavigationGraph.plusAssign(destinations: Collection<NavigationDestination>) {
     addDestinations(destinations)
 }
 
-operator fun NavigationController.minusAssign(node: NavigationDestination) {
+operator fun NavigationGraph.minusAssign(node: NavigationDestination) {
     removeDestination(node)
 }
 
@@ -355,18 +365,20 @@ fun BottomNavigationView.setupWithController(
     controller: NavigationController,
     itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
 ) {
+    val graph = controller.graph ?: return
+
     doOnItemSelected {
         controller.navigate(it)
     }
 
     if (itemCount == 0) {
-        for ((index, destination) in controller.withIndex()) {
+        for ((index, destination) in graph.withIndex()) {
             val item = menu.add(Menu.NONE, destination.id, Menu.NONE, destination.label)
             itemConfigurationStrategy(item, index)
         }
     } else {
-        check(itemCount == controller.size) {
-            "BottomNavigationView items and NavigationController destinations lengths are inconsistent"
+        check(itemCount == graph.size) {
+            "The number of items in BottomNavigationView and the number of destinations in NavigationGraph are inconsistent"
         }
 
         for ((index, item) in items.withIndex()) {
@@ -374,27 +386,27 @@ fun BottomNavigationView.setupWithController(
         }
     }
 
-    selectedItemId = controller.getStartDestination()
+    selectedItemId = graph.getStartDestination()
 }
 
 fun NavigationView.setupWithController(
     controller: NavigationController,
     itemConfigurationStrategy: (item: MenuItem, position: Int) -> Unit = { _, _ -> }
 ) {
+    val graph = controller.graph ?: return
 
     doOnItemSelected {
         controller.navigate(it)
     }
 
-
     if (itemCount == 0) {
-        for ((index, destination) in controller.withIndex()) {
+        for ((index, destination) in graph.withIndex()) {
             val item = menu.add(Menu.NONE, destination.id, Menu.NONE, destination.label)
             itemConfigurationStrategy(item, index)
         }
     } else {
-        check(itemCount == controller.size) {
-            "BottomNavigationView items and NavigationController destinations lengths are inconsistent"
+        check(itemCount == graph.size) {
+            "The number of items in NavigationView and the number of destinations in NavigationGraph are inconsistent"
         }
 
         for ((index, item) in items.withIndex()) {
@@ -402,26 +414,28 @@ fun NavigationView.setupWithController(
         }
     }
 
-    checkedItemId = controller.getStartDestination()
+    checkedItemId = graph.getStartDestination()
 }
 
 fun TabLayout.setupWithController(
     controller: NavigationController,
     tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
+    val graph = controller.graph ?: return
+
     doOnTabSelected {
         controller.navigate(it)
     }
 
     if (tabCount == 0) {
-        for ((index, destination) in controller.withIndex()) {
+        for ((index, destination) in graph.withIndex()) {
             val tab = newTab().setId(destination.id).setText(destination.label)
             tabConfigurationStrategy(tab, index)
             addTab(tab, false)
         }
     } else {
-        check(tabCount == controller.size) {
-            "TabLayout tabs and NavigationController destinations lengths are inconsistent"
+        check(tabCount == graph.size) {
+            "The number of tabs in TabLayout and the number of destinations in NavigationGraph are inconsistent"
         }
 
         for ((index, tab) in tabs.withIndex()) {
@@ -429,59 +443,47 @@ fun TabLayout.setupWithController(
         }
     }
 
-    selectedTabId = controller.getStartDestination()
+    selectedTabId = graph.getStartDestination()
 }
 
 fun AppCompatActivity.setupTabLayoutWithController(
+    graph: NavigationGraph,
     tabLayout: TabLayout,
     viewPager2: ViewPager2,
-    controller: NavigationController,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
     tabConfigurationStrategy: (tab: TabLayout.Tab, position: Int) -> Unit = { _, _ -> }
 ) {
-    val startDestination = controller.findStartDestination()
+    val startDestination = graph.findDestination(graph.getStartDestination())
     if (startDestination != null) {
-        controller.setPrimaryNavigationDestination(startDestination)
-        viewPager2.currentItem = controller.indexOf(startDestination)
+        viewPager2.currentItem = graph.indexOf(startDestination)
     }
 
-    viewPager2.doOnPageSelected {
-        val destination = controller.getDestination(it)
-        controller.setPrimaryNavigationDestination(destination)
-    }
-
-    viewPager2.adapter = FragmentPagerAdapter(this, controller)
+    viewPager2.adapter = FragmentPagerAdapter(this, graph)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
-        tab.text = controller.getDestination(position)?.label
+        tab.text = graph.getDestination(position)?.label
         tabConfigurationStrategy(tab, position)
     }.attach()
 }
 
 fun Fragment.setupTabLayoutWithController(
+    graph: NavigationGraph,
     tabLayout: TabLayout,
     viewPager2: ViewPager2,
-    controller: NavigationController,
     autoRefresh: Boolean = true,
     smoothScroll: Boolean = true,
     tabConfigurationStrategy: (tab: TabLayout.Tab, index: Int) -> Unit = { _, _ -> }
 ) {
-    val startDestination = controller.findStartDestination()
+    val startDestination = graph.findDestination(graph.getStartDestination())
     if (startDestination != null) {
-        controller.setPrimaryNavigationDestination(startDestination)
-        viewPager2.currentItem = controller.indexOf(startDestination)
+        viewPager2.currentItem = graph.indexOf(startDestination)
     }
 
-    viewPager2.doOnPageSelected {
-        val destination = controller.getDestination(it)
-        controller.setPrimaryNavigationDestination(destination)
-    }
-
-    viewPager2.adapter = FragmentPagerAdapter(this, controller)
+    viewPager2.adapter = FragmentPagerAdapter(this, graph)
 
     TabLayoutMediator(tabLayout, viewPager2, autoRefresh, smoothScroll) { tab, position ->
-        tab.text = controller.getDestination(position)?.label
+        tab.text = graph.getDestination(position)?.label
         tabConfigurationStrategy(tab, position)
     }.attach()
 }
@@ -489,32 +491,32 @@ fun Fragment.setupTabLayoutWithController(
 private class FragmentPagerAdapter :
     FragmentStateAdapter {
 
-    private val controller: NavigationController
+    private val graph: NavigationGraph
 
     private val fragmentFactory: FragmentFactory
     private val classLoader: ClassLoader
 
-    constructor(fragmentActivity: FragmentActivity, controller: NavigationController) : super(
+    constructor(fragmentActivity: FragmentActivity, graph: NavigationGraph) : super(
         fragmentActivity
     ) {
-        this.controller = controller
+        this.graph = graph
         fragmentFactory = fragmentActivity.supportFragmentManager.fragmentFactory
         classLoader = fragmentActivity.classLoader
     }
 
-    constructor(fragment: Fragment, controller: NavigationController) : super(fragment) {
-        this.controller = controller
+    constructor(fragment: Fragment, graph: NavigationGraph) : super(fragment) {
+        this.graph = graph
         fragmentFactory = fragment.childFragmentManager.fragmentFactory
         classLoader = fragment.requireContext().classLoader
     }
 
 
     override fun getItemCount(): Int {
-        return controller.size
+        return graph.size
     }
 
     override fun createFragment(position: Int): Fragment {
-        val destination = controller.getDestination(position)!!
+        val destination = requireNotNull(graph.getDestination(position))
         return fragmentFactory.instantiate(classLoader, destination.className).apply {
             arguments = destination.args
         }
