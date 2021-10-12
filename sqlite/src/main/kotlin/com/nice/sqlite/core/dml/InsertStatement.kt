@@ -21,7 +21,7 @@ class InsertStatement<T : Table>(
 
 class InsertBatchStatement<T : Table>(
     val subject: Subject<T>,
-    val insertSpecs: Sequence<InsertSpec>,
+    insertSpecs: Sequence<InsertSpec>
 ) : Statement {
 
     private val iterator = insertSpecs.iterator()

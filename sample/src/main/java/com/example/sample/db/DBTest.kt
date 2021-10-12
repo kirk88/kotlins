@@ -5,11 +5,11 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
+import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
-import com.nice.sqlite.core.dml.limit
-import com.nice.sqlite.core.dml.selectDistinct
+import com.nice.sqlite.core.dml.*
 import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
@@ -91,4 +91,19 @@ object DB : ManagedSQLiteOpenHelper(
         }
     }
 
+}
+
+object Table2 : Table("table2"){
+
+
+    val id = IntColumn("id")
+
+}
+
+fun main() {
+    println(offer(TestTable).join(Table2).using { testTable, table2 ->
+        testTable.id + testTable.name + table2.id
+    }.on { testTable, table2 ->
+        table2.id eq testTable.id
+    }.select().toString(SQLiteDialect))
 }

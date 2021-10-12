@@ -23,7 +23,7 @@ class UpdateStatement<T : Table>(
 
 class UpdateBatchStatement<T : Table>(
     val subject: Subject<T>,
-    val updateSpecs: Sequence<UpdateSpec<T>>
+    updateSpecs: Sequence<UpdateSpec<T>>
 ) : Statement {
 
     private val iterator = updateSpecs.iterator()

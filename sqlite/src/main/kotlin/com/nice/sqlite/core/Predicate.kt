@@ -15,39 +15,6 @@ interface Predicate {
 
 }
 
-private class WhereCause(
-    private vararg val values: Any,
-    private val whereCase: (Boolean) -> String
-) : Predicate {
-
-    private val id: Int by lazy { whereCase(true).hashCode() }
-
-    override fun render(dialect: Dialect): String =
-        whereCase(false).format(dialect, values)
-
-    override fun fullRender(dialect: Dialect): String =
-        whereCase(true).format(dialect, values)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as WhereCause
-
-        if (!values.contentEquals(other.values)) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = values.contentHashCode()
-        result = 31 * result + id
-        return result
-    }
-
-}
-
 private class Condition(
     private val predicateLeft: Predicate,
     private val connector: String,
@@ -60,26 +27,6 @@ private class Condition(
     override fun fullRender(dialect: Dialect): String =
         "(${predicateLeft.fullRender(dialect)} $connector ${predicateRight.fullRender(dialect)})"
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Condition
-
-        if (predicateLeft != other.predicateLeft) return false
-        if (connector != other.connector) return false
-        if (predicateRight != other.predicateRight) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = predicateLeft.hashCode()
-        result = 31 * result + connector.hashCode()
-        result = 31 * result + predicateRight.hashCode()
-        return result
-    }
-
 }
 
 infix fun Predicate.and(predicate: Predicate): Predicate {
@@ -90,66 +37,76 @@ infix fun Predicate.or(predicate: Predicate): Predicate {
     return Condition(this, "OR", predicate)
 }
 
+private fun predicate(
+    rendered: (dialect: Dialect, full: Boolean) -> String
+): Predicate {
+    return object : Predicate {
+        override fun render(dialect: Dialect): String = rendered(dialect, false)
+
+        override fun fullRender(dialect: Dialect): String = rendered(dialect, true)
+    }
+}
+
 infix fun Column<*>.eq(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} = ?" }
+    predicate { dialect, full -> "${render(it)} = ?" }
 
 infix fun Column<*>.ne(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} <> ?" }
+    predicate { dialect, full -> "${render(it)} <> ?" }
 
 infix fun Column<*>.gt(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} > ?" }
+    predicate { dialect, full -> "${render(it)} > ?" }
 
 infix fun Column<*>.lt(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} < ?" }
+    predicate { dialect, full -> "${render(it)} < ?" }
 
 infix fun Column<*>.gte(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} >= ?" }
+    predicate { dialect, full -> "${render(it)} >= ?" }
 
 infix fun Column<*>.lte(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} <= ?" }
+    predicate { dialect, full -> "${render(it)} <= ?" }
 
 infix fun Column<*>.like(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} LIKE ?" }
+    predicate { dialect, full -> "${render(it)} LIKE ?" }
 
 infix fun Column<*>.glob(value: Any): Predicate =
-    WhereCause(value) { "${render(it)} GLOB ?" }
+    predicate { dialect, full -> "${render(it)} GLOB ?" }
 
 fun Column<*>.isNotNull(): Predicate =
-    WhereCause { "${render(it)} IS NOT NULL" }
+    predicate { dialect, full -> "${render(it)} IS NOT NULL" }
 
 fun Column<*>.isNull(): Predicate =
-    WhereCause { "${render(it)} IS NULL" }
+    predicate { dialect, full -> "${render(it)} IS NULL" }
 
 fun Column<*>.between(value1: Any, value2: Any): Predicate =
-    WhereCause(value1, value2) { "${render(it)} BETWEEN ? AND ?" }
+    predicate { dialect, full -> "${render(it)} BETWEEN ? AND ?" }
 
 fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
-    WhereCause(value1, value2) { "${render(it)} NOT BETWEEN ? AND ?" }
+    predicate { dialect, full -> "${render(it)} NOT BETWEEN ? AND ?" }
 
 fun Column<*>.any(vararg values: Any): Predicate =
-    WhereCause(*values) {
+    predicate { dialect, full ->
         values.joinToString(
-            prefix = "${render(it)} IN (",
+            prefix = "${render(dialect, full)} IN (",
             postfix = ")"
-        ) { "?" }
+        ) { it.render(dialect, full) }
     }
 
 fun Column<*>.none(vararg values: Any): Predicate =
-    WhereCause(*values) {
+    predicate { dialect, full ->
         values.joinToString(
-            prefix = "${render(it)} NOT IN (",
+            prefix = "${render(dialect, full)} NOT IN (",
             postfix = ")"
-        ) { "?" }
+        ) { it.render(dialect, full) }
     }
 
 fun exists(statement: QueryStatement): Predicate =
-    WhereCause(statement) { "EXISTS ?" }
+    predicate { dialect, full -> "EXISTS ${statement.render(dialect, full)}" }
 
-private fun Column<*>.render(full: Boolean) =
-    if (full) fullRender() else render()
-
-private fun Any.render(dialect: Dialect) =
-    if (this is Statement) "(${toString(dialect)})" else toSqlString()
+private fun Any.render(dialect: Dialect, full: Boolean) = when (this) {
+    is Column<*> -> if (full) fullRender() else render()
+    is Statement -> "(${toString(dialect)})"
+    else -> toSqlString()
+}
 
 private fun String.format(dialect: Dialect, args: Array<out Any>): String {
     val builder = StringBuilder(this)
