@@ -45,8 +45,7 @@ class ScanFailedException internal constructor(
 
 internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : Scanner {
 
-    private val bluetoothAdapter = defaultBluetoothAdapter
-        ?: error("Bluetooth not supported")
+    private val bluetoothAdapter = Bluetooth.adapter
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val advertisements: Flow<Advertisement> = callbackFlow {
@@ -81,8 +80,7 @@ internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : S
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : Scanner {
 
-    private val bluetoothAdapter = defaultBluetoothAdapter
-        ?: error("Bluetooth not supported")
+    private val bluetoothAdapter = Bluetooth.adapter
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val advertisements: Flow<Advertisement> = callbackFlow {
@@ -135,8 +133,7 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
 internal class LowVersionBleScanner internal constructor(private val filterServices: List<UUID>?) :
     Scanner {
 
-    private val bluetoothAdapter = defaultBluetoothAdapter
-        ?: error("Bluetooth not supported")
+    private val bluetoothAdapter = Bluetooth.adapter
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val advertisements: Flow<Advertisement> = callbackFlow {

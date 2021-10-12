@@ -27,24 +27,27 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         val navView = findViewById<BottomNavigationView>(R.id.nav_view)
 
-        val navController = findNavigationController(R.id.frame_container)
-        navController += NavigationDestination(
+        val navGraph = NavigationGraph()
+        navGraph += NavigationDestination(
             R.id.fragment_first,
             FirstFragment::class.java.name,
             label = "First"
         )
-        navController += NavigationDestination(
+        navGraph += NavigationDestination(
             R.id.fragment_second,
             SecondFragment::class.java.name,
             label = "Second"
         )
-        navController += NavigationDestination(
+        navGraph += NavigationDestination(
             R.id.fragment_third,
             ThirdFragment::class.java.name,
             label = "Third"
         )
 
-        navController.setStartDestination(R.id.fragment_first)
+        navGraph.setStartDestination(R.id.fragment_first)
+
+        val navController = findNavigationController(R.id.frame_container)
+        navController.setGraph(navGraph)
 
         navView.setupWithController(navController) { item, position ->
             item.setIcon(

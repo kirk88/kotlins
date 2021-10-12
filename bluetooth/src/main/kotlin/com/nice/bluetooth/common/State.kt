@@ -11,13 +11,13 @@ sealed class ConnectionState {
 
     sealed class Connecting : ConnectionState() {
         /**
-         * [Peripheral] has initiated the process of connecting, via Bluetooth.
+         * [Peripheral] has initiated the process of connecting, via BluetoothDevice.
          *
          * I/O operations (e.g. [write][Peripheral.write] and [read][Peripheral.read]) will throw [NotReadyException]
          * while in this state.
          */
-        object Bluetooth : Connecting() {
-            override fun toString(): String = "Connecting.Bluetooth"
+        object Device : Connecting() {
+            override fun toString(): String = "Connecting.Device"
         }
 
         /**
@@ -134,7 +134,7 @@ sealed class ConnectionState {
  * Returns `true` if `this` is at least in state [T], where [ConnectionState]s are ordered:
  * - [ConnectionState.Disconnected] (smallest)
  * - [ConnectionState.Disconnecting]
- * - [ConnectionState.Connecting.Bluetooth]
+ * - [ConnectionState.Connecting.Device]
  * - [ConnectionState.Connecting.Services]
  * - [ConnectionState.Connecting.Observes]
  * - [ConnectionState.Connected] (largest)
@@ -143,7 +143,7 @@ internal inline fun <reified T : ConnectionState> ConnectionState.isAtLeast(): B
     val currentState = when (this) {
         is ConnectionState.Disconnected -> 0
         ConnectionState.Disconnecting -> 1
-        ConnectionState.Connecting.Bluetooth -> 2
+        ConnectionState.Connecting.Device -> 2
         ConnectionState.Connecting.Services -> 3
         ConnectionState.Connecting.Observes -> 4
         ConnectionState.Connected -> 5
@@ -151,7 +151,7 @@ internal inline fun <reified T : ConnectionState> ConnectionState.isAtLeast(): B
     val targetState = when (T::class) {
         ConnectionState.Disconnected::class -> 0
         ConnectionState.Disconnecting::class -> 1
-        ConnectionState.Connecting.Bluetooth::class -> 2
+        ConnectionState.Connecting.Device::class -> 2
         ConnectionState.Connecting.Services::class -> 3
         ConnectionState.Connecting.Observes::class -> 4
         ConnectionState.Connected::class -> 5

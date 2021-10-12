@@ -9,7 +9,7 @@ abstract class ViewBindingRecyclerAdapter<T, VB : ViewBinding>(
         context: Context
 ) : CommonRecyclerAdapter<T, ViewBindingHolder<VB>>(context) {
 
-    abstract fun onCreateItemView(
+    abstract fun onCreateItemViewBinding(
             inflater: LayoutInflater,
             parent: ViewGroup,
             viewType: Int
@@ -20,7 +20,7 @@ abstract class ViewBindingRecyclerAdapter<T, VB : ViewBinding>(
             parent: ViewGroup,
             viewType: Int
     ): ViewBindingHolder<VB> {
-        return ViewBindingHolder(onCreateItemView(inflater, parent, viewType))
+        return ViewBindingHolder(onCreateItemViewBinding(inflater, parent, viewType))
     }
 
 }

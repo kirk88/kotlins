@@ -10,9 +10,14 @@ import kotlin.coroutines.CoroutineContext
 fun CoroutineScope.peripheral(
     advertisement: Advertisement,
     builderAction: PeripheralBuilderAction = {}
-): Peripheral = peripheral(advertisement.device, builderAction)
+): Peripheral = peripheral(advertisement.address, builderAction)
 
 fun CoroutineScope.peripheral(
+    address: String,
+    builderAction: PeripheralBuilderAction = {}
+): Peripheral = peripheral(Bluetooth.adapter.getRemoteDevice(address), builderAction)
+
+private fun CoroutineScope.peripheral(
     bluetoothDevice: BluetoothDevice,
     builderAction: PeripheralBuilderAction = {}
 ): Peripheral {

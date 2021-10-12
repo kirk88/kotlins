@@ -1,6 +1,5 @@
 package com.nice.bluetooth.common
 
-import android.bluetooth.BluetoothDevice
 import java.util.*
 
 enum class BondState {
@@ -10,8 +9,6 @@ enum class BondState {
 }
 
 interface Advertisement {
-    val device: BluetoothDevice
-
     /**
      * The name in the Advertisement.
      * The same as, or a shortened version of, the local name assigned to the device
