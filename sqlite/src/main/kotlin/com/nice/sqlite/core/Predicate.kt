@@ -124,7 +124,7 @@ fun Column<*>.none(vararg values: Any): Predicate =
     }
 
 fun exists(statement: QueryStatement): Predicate =
-    predicate { dialect, _ -> "EXISTS ${statement.toString(dialect)}" }
+    predicate { dialect, _ -> "EXISTS (${statement.toString(dialect)})" }
 
 private fun Column<*>.render(full: Boolean) =
     if (full) fullRender() else render()

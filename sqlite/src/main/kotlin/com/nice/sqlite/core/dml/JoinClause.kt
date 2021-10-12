@@ -37,34 +37,12 @@ inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.on(predicate: (T, T2) -> P
     )
 }
 
-inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.using(using: (T, T2) -> Sequence<Definition>): JoinUsing2Clause<T, T2> {
-    return JoinUsing2Clause(
-        using(subject.table, table2),
-        subject,
-        table2,
-        type
-    )
-}
-
-
-data class JoinUsing2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
-    @PublishedApi
-    internal val definitions: Sequence<Definition>,
-    @PublishedApi
-    internal val subject: Subject<T>,
-    @PublishedApi
-    internal val table2: T2,
-    @PublishedApi
-    internal val type: JoinType
-)
-
-inline fun <T : Table, T2 : Table> JoinUsing2Clause<T, T2>.on(predicate: (T, T2) -> Predicate): JoinOn2Clause<T, T2> {
+inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.using(using: (T) -> Sequence<Definition>): JoinOn2Clause<T, T2> {
     return JoinOn2Clause(
         subject,
         table2,
         type,
-        predicate(subject.table, table2),
-        this
+        usingDefinitions = using(subject.table)
     )
 }
 
@@ -76,9 +54,9 @@ data class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal construct
     @PublishedApi
     internal val type: JoinType,
     @PublishedApi
-    internal val predicate: Predicate,
+    internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val joinUsing2Clause: JoinUsing2Clause<T, T2>? = null
+    internal val usingDefinitions: Sequence<Definition>? = null
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn2Clause<T, T2>.join(table3: T3): Join3Clause<T, T2, T3> {
@@ -181,34 +159,12 @@ inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.on(predica
     )
 }
 
-inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.using(using: (T, T2, T3) -> Sequence<Definition>): JoinUsing3Clause<T, T2, T3> {
-    return JoinUsing3Clause(
-        using(joinOn2Clause.subject.table, joinOn2Clause.table2, table3),
-        joinOn2Clause,
-        table3,
-        type
-    )
-}
-
-
-data class JoinUsing3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
-    @PublishedApi
-    internal val definitions: Sequence<Definition>,
-    @PublishedApi
-    internal val joinOn2Clause: JoinOn2Clause<T, T2>,
-    @PublishedApi
-    internal val table3: T3,
-    @PublishedApi
-    internal val type: JoinType
-)
-
-inline fun <T : Table, T2 : Table, T3 : Table> JoinUsing3Clause<T, T2, T3>.on(predicate: (T, T2, T3) -> Predicate): JoinOn3Clause<T, T2, T3> {
+inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.using(using: (T) -> Sequence<Definition>): JoinOn3Clause<T, T2, T3> {
     return JoinOn3Clause(
         joinOn2Clause,
         table3,
         type,
-        predicate(joinOn2Clause.subject.table, joinOn2Clause.table2, table3),
-        this
+        usingDefinitions = using(joinOn2Clause.subject.table)
     )
 }
 
@@ -220,9 +176,9 @@ data class JoinOn3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi intern
     @PublishedApi
     internal val type: JoinType,
     @PublishedApi
-    internal val predicate: Predicate,
+    internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val joinUsing3Clause: JoinUsing3Clause<T, T2, T3>? = null
+    internal val usingDefinitions: Sequence<Definition>? = null
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn3Clause<T, T2, T3>.join(table4: T4): Join4Clause<T, T2, T3, T4> {
@@ -338,45 +294,12 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3
     )
 }
 
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3, T4>.using(using: (T, T2, T3, T4) -> Sequence<Definition>): JoinUsing4Clause<T, T2, T3, T4> {
-    return JoinUsing4Clause(
-        using(
-            joinOn3Clause.joinOn2Clause.subject.table,
-            joinOn3Clause.joinOn2Clause.table2,
-            joinOn3Clause.table3,
-            table4
-        ),
-        joinOn3Clause,
-        table4,
-        type
-    )
-}
-
-data class JoinUsing4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
-    @PublishedApi
-    internal val definitions: Sequence<Definition>,
-    @PublishedApi
-    internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
-    @PublishedApi
-    internal val table4: T4,
-    @PublishedApi
-    internal val type: JoinType
-)
-
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinUsing4Clause<T, T2, T3, T4>.on(
-    predicate: (T, T2, T3, T4) -> Predicate
-): JoinOn4Clause<T, T2, T3, T4> {
+inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3, T4>.using(using: (T) -> Sequence<Definition>): JoinOn4Clause<T, T2, T3, T4> {
     return JoinOn4Clause(
         joinOn3Clause,
         table4,
         type,
-        predicate(
-            joinOn3Clause.joinOn2Clause.subject.table,
-            joinOn3Clause.joinOn2Clause.table2,
-            joinOn3Clause.table3,
-            table4
-        ),
-        this
+        usingDefinitions = using(joinOn3Clause.joinOn2Clause.subject.table)
     )
 }
 
@@ -388,9 +311,9 @@ data class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @Publish
     @PublishedApi
     internal val type: JoinType,
     @PublishedApi
-    internal val predicate: Predicate,
+    internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val joinUsing4Clause: JoinUsing4Clause<T, T2, T3, T4>? = null
+    internal val usingDefinitions: Sequence<Definition>? = null
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.where(

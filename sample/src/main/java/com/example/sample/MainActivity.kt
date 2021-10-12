@@ -9,10 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.DB
-import com.example.sample.db.DBTest
-import com.example.sample.db.TestTable
-import com.example.sample.db.TestView
+import com.example.sample.db.*
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerLevel
@@ -28,11 +25,16 @@ import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
 import com.nice.common.helper.*
 import com.nice.common.widget.*
+import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
 import com.nice.sqlite.core.ddl.invoke
+import com.nice.sqlite.core.dml.on
+import com.nice.sqlite.core.dml.select
+import com.nice.sqlite.core.dml.selectDistinct
+import com.nice.sqlite.core.dml.using
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -77,15 +79,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         binding.image.imageUrl = "https://img0.baidu.com/it/u=763353973,739674203&fm=253&fmt=auto&app=138&f=PNG?w=500&h=314"
 
-//        testDB()
-        initBle()
+        testDB()
+//        initBle()
     }
 
     private fun testDB(){
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
-                repeat(10000) { index ->
+                repeat(5) { index ->
                     val bean = DBTest(
                         id = index.toLong(),
                         name = "jack",
@@ -97,7 +99,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     beans.add(bean)
                 }
 
-                var start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
                         item {
@@ -109,38 +110,27 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                             }
                         }
                     }
-                }.also {
-                    Log.e(TAG, "insert last row id: $it")
                 }
-                Log.e(TAG, "insert: ${System.currentTimeMillis() - start}")
 
-                start = System.currentTimeMillis()
-                offer(TestTable).updateBatch(statementExecutor) {
-                    for (bean in beans) {
-                        item {
-                            conflictAlgorithm = ConflictAlgorithm.Replace
+                offer(TestTable2).insertBatch (statementExecutor) {
+                        for (index in 0..3){
+                            item {
+                                conflictAlgorithm = ConflictAlgorithm.Replace
 
-                            where {
-                                it.id eq bean.id
-                            }
-
-                            assignments {
-                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
+                                assignments {
+                                    it.id(index) + it.pid(index) + it.name("jack") + it.age(13)
+                                }
                             }
                         }
-                    }
-                }.also {
-                    Log.e(TAG, "update number of rows: $it")
                 }
-                Log.e(TAG, "update: ${System.currentTimeMillis() - start}")
 
-                start = System.currentTimeMillis()
-                for (row in offer(TestView).select(statementExecutor).asMapSequence()) {
-                    Log.e(TAG, row.toString())
+                offer(TestTable2).join(TestTable).using { testTable2 ->
+                    testTable2.name
+                }.selectDistinct(statementExecutor){testTable2, testTable ->
+                    testTable2.name + testTable2.pid + testTable2.age
+                }.asMapSequence().forEach {
+                    Log.e("TAGTAG", it.toString())
                 }
-                Log.e(TAG, "query: ${System.currentTimeMillis() - start}")
-
             }
 
         }

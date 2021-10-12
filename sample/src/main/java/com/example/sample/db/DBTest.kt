@@ -47,6 +47,13 @@ data class DBTest @ClassParserConstructor constructor(
     }
 }
 
+data class DBTest2 @ClassParserConstructor constructor(
+    val id: Long = 0,
+    val pid: Long,
+    val name: String,
+    val age: Int
+)
+
 val TestView = View("test_view")
 
 object TestTable : Table("test") {
@@ -58,6 +65,18 @@ object TestTable : Table("test") {
     val data = BlobColumn("data").default(byteArrayOf(1, 2, 3, 4, 5))
 }
 
+object TestTable2 : Table("test2"){
+
+    val id = IntColumn("id")
+
+    val pid = IntColumn("pid").foreignKey(TestTable.id)
+
+    val name = StringColumn("name")
+
+    val age = IntColumn("age")
+
+}
+
 object DB : ManagedSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
         .name("test_db.db")
@@ -65,7 +84,7 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(15) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(18) {
         override fun onCreate(db: SupportSQLiteDatabase) {
             offer(TestTable).create(db.statementExecutor) {
                 it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
@@ -75,6 +94,10 @@ object DB : ManagedSQLiteOpenHelper(
                 offer(TestTable).orderBy {
                     desc(it.id)
                 }.limit { 10 }.selectDistinct()
+            }
+
+            offer(TestTable2).create(db.statementExecutor){
+                it.id + it.pid + it.name + it.age
             }
         }
 
@@ -88,22 +111,11 @@ object DB : ManagedSQLiteOpenHelper(
                     desc(it.id)
                 }.limit { 10 }.selectDistinct()
             }
+
+            offer(TestTable2).alter(db.statementExecutor){
+                it.name + it.age
+            }
         }
     }
 
-}
-
-object Table2 : Table("table2"){
-
-
-    val id = IntColumn("id")
-
-}
-
-fun main() {
-    println(offer(TestTable).join(Table2).using { testTable, table2 ->
-        testTable.id + testTable.name + table2.id
-    }.on { testTable, table2 ->
-        table2.id eq testTable.id
-    }.select().toString(SQLiteDialect))
 }

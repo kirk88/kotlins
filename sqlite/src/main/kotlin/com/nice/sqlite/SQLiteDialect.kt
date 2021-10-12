@@ -153,53 +153,49 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+        statement.joinOn2Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn2Clause.predicate.fullRender(this))
+        statement.joinOn2Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
 
-        val where = statement.where2Clause
-        if (where != null) {
+        statement.where2Clause?.let { where ->
             builder.append(" WHERE ")
             builder.append(where.predicate.fullRender(this))
         }
 
-        val group = statement.group2Clause
-        if (group != null) {
+        statement.group2Clause?.let { group ->
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
                 it.fullRender()
             }
         }
 
-        val having = statement.having2Clause
-        if (having != null) {
+        statement.having2Clause?.let { having ->
             builder.append(" HAVING ")
             builder.append(having.predicate.fullRender(this))
         }
 
-        val order = statement.order2Clause
-        if (order != null) {
+        statement.order2Clause?.let { order ->
             builder.append(" ORDER BY ")
             order.orderings.joinTo(builder) {
                 it.fullRender()
             }
         }
 
-        val limit = statement.limit2Clause
-        if (limit != null) {
+        statement.limit2Clause?.let { limit ->
             builder.append(" LIMIT ")
             builder.append(limit.limit)
         }
 
-        val offset = statement.offset2Clause
-        if (offset != null) {
+        statement.offset2Clause?.let { offset ->
             builder.append(" OFFSET ")
             builder.append(offset.offset)
         }
@@ -228,40 +224,42 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+        statement.joinOn3Clause.joinOn2Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.predicate.fullRender(this))
+        statement.joinOn3Clause.joinOn2Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
         builder.append(' ')
         builder.append(statement.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn3Clause.table3.renderedName)
 
-        statement.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(
+        statement.joinOn3Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn3Clause.predicate.fullRender(this))
+        statement.joinOn3Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
 
-        val where = statement.where3Clause
-        if (where != null) {
+        statement.where3Clause?.let { where ->
             builder.append(" WHERE ")
             builder.append(where.predicate.fullRender(this))
         }
 
-        val group = statement.group3Clause
-        if (group != null) {
+        statement.group3Clause?.let { group ->
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
                 it.fullRender()
@@ -318,83 +316,83 @@ object SQLiteDialect : Dialect {
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
 
-        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.joinUsing2Clause?.definitions?.joinTo(
+        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate.fullRender(this))
+        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
         builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
 
-        statement.joinOn4Clause.joinOn3Clause.joinUsing3Clause?.definitions?.joinTo(
+        statement.joinOn4Clause.joinOn3Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.predicate.fullRender(this))
+        statement.joinOn4Clause.joinOn3Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
         builder.append(' ')
         builder.append(statement.joinOn4Clause.type)
         builder.append(" JOIN ")
         builder.append(statement.joinOn4Clause.table4.renderedName)
 
-        statement.joinOn4Clause.joinUsing4Clause?.definitions?.joinTo(
+        statement.joinOn4Clause.usingDefinitions?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
         ) {
-            it.fullRender()
+            it.render()
         }
 
-        builder.append(" ON ")
-        builder.append(statement.joinOn4Clause.predicate.fullRender(this))
+        statement.joinOn4Clause.predicate?.let { on ->
+            builder.append(" ON ")
+            builder.append(on.fullRender(this))
+        }
 
-        val where = statement.where4Clause
-        if (where != null) {
+        statement.where4Clause?.let { where ->
             builder.append(" WHERE ")
             builder.append(where.predicate.fullRender(this))
         }
 
-        val group = statement.group4Clause
-        if (group != null) {
+        statement.group4Clause?.let { group ->
             builder.append(" GROUP BY ")
             group.columns.joinTo(builder) {
                 it.fullRender()
             }
         }
 
-        val having = statement.having4Clause
-        if (having != null) {
+        statement.having4Clause?.let { having ->
             builder.append(" HAVING ")
             builder.append(having.predicate.fullRender(this))
         }
 
-        val order = statement.order4Clause
-        if (order != null) {
+        statement.order4Clause?.let { order ->
             builder.append(" ORDER BY ")
             order.orderings.joinTo(builder) {
                 it.fullRender()
             }
         }
 
-        val limit = statement.limit4Clause
-        if (limit != null) {
+        statement.limit4Clause?.let { limit ->
             builder.append(" LIMIT ")
             builder.append(limit.limit)
         }
 
-        val offset = statement.offset4Clause
-        if (offset != null) {
+        statement.offset4Clause?.let { offset ->
             builder.append(" OFFSET ")
             builder.append(offset.offset)
         }

@@ -7,7 +7,7 @@ buildscript {
             targetSdk        : 30,
 
             pluginVersions   : "0.39.0",
-            pluginAndroid    : '7.0.2',
+            pluginAndroid    : '7.0.3',
             pluginKotlin     : "1.5.31",
 
             kotlinStdlib     : "1.5.31",
