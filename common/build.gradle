@@ -59,7 +59,10 @@ dependencies {
     api deps.androidxDatastoreCore
     api deps.androidxMultidex
     api deps.material
-    api deps.coil
+    api(deps.coil){
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+        exclude group: 'com.squareup.okio', module: 'okio'
+    }
 }
 
 tasks.withType(JavaCompile) {

@@ -26,10 +26,7 @@ import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
 import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
-import com.nice.common.helper.bind
-import com.nice.common.helper.doOnClick
-import com.nice.common.helper.string
-import com.nice.common.helper.viewBindings
+import com.nice.common.helper.*
 import com.nice.common.widget.*
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
@@ -61,7 +58,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.bind(this)
+        setContentView(binding)
         permissionRequestLauncher.register(this)
 
         title = "Home"
@@ -77,6 +74,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         subscribeEvent({ it is NamedEvent }) {
             Log.e(TAG, "what event: " + it.toString())
         }
+
+        binding.image.imageUrl = "https://img0.baidu.com/it/u=763353973,739674203&fm=253&fmt=auto&app=138&f=PNG?w=500&h=314"
 
 //        testDB()
         initBle()
