@@ -48,45 +48,69 @@ private fun predicate(
 }
 
 infix fun Column<*>.eq(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} = ?" }
+    predicate { dialect, full -> "${render(full)} = ${value.render(dialect, full)}" }
 
 infix fun Column<*>.ne(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} <> ?" }
+    predicate { dialect, full -> "${render(full)} <> ${value.render(dialect, full)}" }
 
 infix fun Column<*>.gt(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} > ?" }
+    predicate { dialect, full -> "${render(full)} > ${value.render(dialect, full)}" }
 
 infix fun Column<*>.lt(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} < ?" }
+    predicate { dialect, full -> "${render(full)} < ${value.render(dialect, full)}" }
 
 infix fun Column<*>.gte(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} >= ?" }
+    predicate { dialect, full -> "${render(full)} >= ${value.render(dialect, full)}" }
 
 infix fun Column<*>.lte(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} <= ?" }
+    predicate { dialect, full -> "${render(full)} <= ${value.render(dialect, full)}" }
 
 infix fun Column<*>.like(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} LIKE ?" }
+    predicate { dialect, full -> "${render(full)} LIKE ${value.render(dialect, full)}" }
 
 infix fun Column<*>.glob(value: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} GLOB ?" }
+    predicate { dialect, full -> "${render(full)} GLOB ${value.render(dialect, full)}" }
 
 fun Column<*>.isNotNull(): Predicate =
-    predicate { dialect, full -> "${render(it)} IS NOT NULL" }
+    predicate { dialect, full -> "${render(full)} IS NOT NULL" }
 
 fun Column<*>.isNull(): Predicate =
-    predicate { dialect, full -> "${render(it)} IS NULL" }
+    predicate { dialect, full -> "${render(full)} IS NULL" }
 
 fun Column<*>.between(value1: Any, value2: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} BETWEEN ? AND ?" }
+    predicate { dialect, full ->
+        "${render(full)} BETWEEN ${
+            value1.render(
+                dialect,
+                full
+            )
+        } AND ${
+            value2.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
-    predicate { dialect, full -> "${render(it)} NOT BETWEEN ? AND ?" }
+    predicate { dialect, full ->
+        "${render(full)} NOT BETWEEN ${
+            value1.render(
+                dialect,
+                full
+            )
+        } AND ${
+            value2.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 fun Column<*>.any(vararg values: Any): Predicate =
     predicate { dialect, full ->
         values.joinToString(
-            prefix = "${render(dialect, full)} IN (",
+            prefix = "${render(full)} IN (",
             postfix = ")"
         ) { it.render(dialect, full) }
     }
@@ -94,26 +118,19 @@ fun Column<*>.any(vararg values: Any): Predicate =
 fun Column<*>.none(vararg values: Any): Predicate =
     predicate { dialect, full ->
         values.joinToString(
-            prefix = "${render(dialect, full)} NOT IN (",
+            prefix = "${render(full)} NOT IN (",
             postfix = ")"
         ) { it.render(dialect, full) }
     }
 
 fun exists(statement: QueryStatement): Predicate =
-    predicate { dialect, full -> "EXISTS ${statement.render(dialect, full)}" }
+    predicate { dialect, _ -> "EXISTS ${statement.toString(dialect)}" }
+
+private fun Column<*>.render(full: Boolean) =
+    if (full) fullRender() else render()
 
 private fun Any.render(dialect: Dialect, full: Boolean) = when (this) {
     is Column<*> -> if (full) fullRender() else render()
     is Statement -> "(${toString(dialect)})"
     else -> toSqlString()
-}
-
-private fun String.format(dialect: Dialect, args: Array<out Any>): String {
-    val builder = StringBuilder(this)
-    var offset = builder.indexOf("?")
-    for (value in args) {
-        builder.replace(offset, offset + 1, value.render(dialect))
-        offset = builder.indexOf("?", offset)
-    }
-    return builder.toString()
 }
