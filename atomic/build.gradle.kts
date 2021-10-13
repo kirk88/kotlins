@@ -1,76 +1,80 @@
 plugins {
     id("com.android.library")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
+    id("maven-publish")
 }
 
 android {
-    compileSdk versions.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk versions.minSdk
-        targetSdk versions.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-    sourceSets {
-        main.java.srcDirs += "src/main/kotlin"
     }
 }
 
 dependencies {
-    implementation()
+    implementation(libs.kotlin.stdlib)
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
+val sourceJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("source")
+    from(sourceSets["main"].allJava)
 }
 
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.convention("sources")
-    archiveClassifier.set("sources")
-    from android.sourceSets.main.java.getSrcDirs()
-}
-
-def versionMajor = 1
-def versionMinor = 0
-def versionPatch = 0
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
 
 publishing {
     publications {
-        production(MavenPublication) {
-            groupId "com.nice.kotlins"
-            artifactId "atomic"
-            version "${versionMajor}.${versionMinor}.${versionPatch}"
+        create<MavenPublication>("atomic") {
+            groupId = "com.nice.kotlins"
+            artifactId = "atomic"
+            version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
             afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
 
-            artifact androidSourcesJar
+            artifact(sourceJar)
 
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode("dependencies")
-                configurations.implementation.allDependencies.each { dependency ->
-                    def dependencyNode = dependenciesNode.appendNode("dependency")
-                    dependencyNode.appendNode("groupId", dependency.group)
-                    dependencyNode.appendNode("artifactId", dependency.name)
-                    dependencyNode.appendNode("version", dependency.version)
+            pom {
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                withXml {
+                    val dependenciesNode = asNode().appendNode("dependencies")
+                    configurations.implementation.get().allDependencies.forEach { dependency ->
+                        val dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", dependency.group)
+                        dependencyNode.appendNode("artifactId", dependency.name)
+                        dependencyNode.appendNode("version", dependency.version)
+                    }
                 }
             }
         }
     }
     repositories {
-        def deployPath = file(getProperty("aar.deployPath"))
-        maven { url "file://${deployPath.absolutePath}" }
+        val deployPath = file(requireNotNull(properties["aar.deployPath"]))
+        maven { url = uri("file://${deployPath.absolutePath}") }
     }
 }

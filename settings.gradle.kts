@@ -1,5 +1,4 @@
 enableFeaturePreview("VERSION_CATALOGS")
-
 pluginManagement {
     repositories {
         google()
@@ -7,12 +6,12 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
+        id("com.android.application") version "7.1.0-alpha13"
+        id("com.android.library") version "7.1.0-alpha13"
+        id("org.jetbrains.kotlin.android") version "1.5.30"
         id("com.github.ben-manes.versions") version "0.39.0"
-//        id("com.android.library") version "7.0.3"
-//        id("kotlin-android") version "1.5.31"
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
@@ -24,34 +23,33 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs"){
-            alias("android").toPluginId("com.android.library").version("7.0.3")
+            version("compileSdk", "31")
+            version("minSdk", "21")
+            version("targetSdk", "30")
+
+            alias("kotlin-stdlib").to("org.jetbrains.kotlin", "kotlin-stdlib").version("1.5.30")
+            alias("kotlin-coroutines-core").to("org.jetbrains.kotlinx", "kotlinx-coroutines-core").version("1.5.2")
+            alias("kotlin-coroutines-android").to("org.jetbrains.kotlinx", "kotlinx-coroutines-android").version("1.5.2")
+
+            //kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
+//kotlinLifecycleViewmodelSavedstate: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.kotlinLifecycle}",
+//kotlinLifecycleRuntime            : "androidx.lifecycle:lifecycle-runtime-ktx:${versions.kotlinLifecycle}",
+//kotlinLifecycleLivedata           : "androidx.lifecycle:lifecycle-livedata-ktx:${versions.kotlinLifecycle}",
+//            alias("kotlinStdlib").to("org.jetbrains.kotlinx", "kotlinx-coroutines-android").version("1.5.2")
         }
     }
 }
-
 rootProject.name = "kotlins"
 rootProject.buildFileName = "build.gradle.kts.kts"
+include(":atomic")
 //include(":sample")
 //include(":common")
 //include(":bluetooth")
 //include(":sqlite")
 //include(":kothttp")
 //include(":kotson")
-include(":atomic")
+//
 
-//ext.versions = [
-//    compileSdk       : 31,
-//minSdk           : 19,
-//targetSdk        : 30,
-//
-//pluginVersions   : "0.39.0",
-//pluginAndroid    : '7.0.3',
-//pluginKotlin     : "1.5.31",
-//
-//kotlinStdlib     : "1.5.31",
-//
-//kotlinxCoroutines: "1.5.2",
-//
 //kotlinLifecycle  : "2.4.0-rc01",
 //
 //coreKtx          : "1.7.0-beta02",
@@ -83,20 +81,11 @@ include(":atomic")
 //]
 //
 //ext.deps = [
-//    versionsPlugin                    : "com.github.ben-manes:gradle-versions-plugin:${versions.pluginVersions}",
-//
-//androidPlugin                     : "com.android.tools.build:gradle:${versions.pluginAndroid}",
-//kotlinPlugin                      : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.pluginKotlin}",
-//
-//kotlinStdlib                      : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinStdlib}",
-//
-//kotlinxCoroutinesCore             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinxCoroutines}",
-//kotlinxCoroutinesAndroid          : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinxCoroutines}",
-//
-//kotlinLifecycleViewmodelKtx       : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.kotlinLifecycle}",
-//kotlinLifecycleViewmodelSavedstate: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.kotlinLifecycle}",
-//kotlinLifecycleRuntime            : "androidx.lifecycle:lifecycle-runtime-ktx:${versions.kotlinLifecycle}",
-//kotlinLifecycleLivedata           : "androidx.lifecycle:lifecycle-livedata-ktx:${versions.kotlinLifecycle}",
+
+
+
+
+
 //
 //androidxCoreKtx                   : "androidx.core:core-ktx:${versions.coreKtx}",
 //
@@ -130,3 +119,4 @@ include(":atomic")
 //
 //coil                              : "io.coil-kt:coil:${versions.coil}",
 //]
+include(":mylibrary")
