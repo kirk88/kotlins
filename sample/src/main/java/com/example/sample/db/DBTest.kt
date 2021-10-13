@@ -5,11 +5,12 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
-import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.core.*
+import com.nice.sqlite.core.ddl.ColumnConstraintAction
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
-import com.nice.sqlite.core.dml.*
+import com.nice.sqlite.core.dml.limit
+import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
@@ -65,11 +66,11 @@ object TestTable : Table("test") {
     val data = BlobColumn("data").default(byteArrayOf(1, 2, 3, 4, 5))
 }
 
-object TestTable2 : Table("test2"){
+object TestTable2 : Table("test2") {
 
-    val id = IntColumn("id")
+    val id = IntColumn("id").primaryKey()
 
-    val pid = IntColumn("pid").foreignKey(TestTable.id)
+    val pid = IntColumn("pid").references(TestTable.id).onDelete(ColumnConstraintAction.Cascade)
 
     val name = StringColumn("name")
 
@@ -84,7 +85,11 @@ object DB : ManagedSQLiteOpenHelper(
         .build()
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(18) {
+    private class Callback : SupportSQLiteOpenHelper.Callback(20) {
+        override fun onConfigure(db: SupportSQLiteDatabase) {
+            db.setForeignKeyConstraintsEnabled(true)
+        }
+
         override fun onCreate(db: SupportSQLiteDatabase) {
             offer(TestTable).create(db.statementExecutor) {
                 it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
@@ -96,7 +101,7 @@ object DB : ManagedSQLiteOpenHelper(
                 }.limit { 10 }.selectDistinct()
             }
 
-            offer(TestTable2).create(db.statementExecutor){
+            offer(TestTable2).create(db.statementExecutor) {
                 it.id + it.pid + it.name + it.age
             }
         }
@@ -112,8 +117,12 @@ object DB : ManagedSQLiteOpenHelper(
                 }.limit { 10 }.selectDistinct()
             }
 
-            offer(TestTable2).alter(db.statementExecutor){
+            offer(TestTable2).alter(db.statementExecutor) {
                 it.name + it.age
+            }
+
+            offer(TestTable2).create(db.statementExecutor) {
+                it.id + it.pid + it.name + it.age
             }
         }
     }

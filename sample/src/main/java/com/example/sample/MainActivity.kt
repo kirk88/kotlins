@@ -9,7 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.*
+import com.example.sample.db.DB
+import com.example.sample.db.DBTest
+import com.example.sample.db.TestTable
+import com.example.sample.db.TestTable2
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerLevel
@@ -25,16 +28,14 @@ import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
 import com.nice.common.helper.*
 import com.nice.common.widget.*
-import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
 import com.nice.sqlite.core.ddl.invoke
+import com.nice.sqlite.core.dml.delete
 import com.nice.sqlite.core.dml.on
-import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.core.dml.using
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -77,17 +78,18 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             Log.e(TAG, "what event: " + it.toString())
         }
 
-        binding.image.imageUrl = "https://img0.baidu.com/it/u=763353973,739674203&fm=253&fmt=auto&app=138&f=PNG?w=500&h=314"
+        binding.image.imageUrl =
+            "https://img0.baidu.com/it/u=763353973,739674203&fm=253&fmt=auto&app=138&f=PNG?w=500&h=314"
 
         testDB()
 //        initBle()
     }
 
-    private fun testDB(){
+    private fun testDB() {
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
-                repeat(5) { index ->
+                repeat(10000) { index ->
                     val bean = DBTest(
                         id = index.toLong(),
                         name = "jack",
@@ -99,6 +101,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     beans.add(bean)
                 }
 
+                val start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
                         item {
@@ -111,23 +114,59 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         }
                     }
                 }
+                Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
 
-                offer(TestTable2).insertBatch (statementExecutor) {
-                        for (index in 0..3){
-                            item {
-                                conflictAlgorithm = ConflictAlgorithm.Replace
 
-                                assignments {
-                                    it.id(index) + it.pid(index) + it.name("jack") + it.age(13)
-                                }
+                val start2 = System.currentTimeMillis()
+                offer(TestTable).updateBatch(statementExecutor) {
+                    for (bean in beans) {
+                        item {
+                            conflictAlgorithm = ConflictAlgorithm.Replace
+
+                            where {
+                                it.age gt 100
+                            }
+
+                            assignments {
+                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                             }
                         }
+                    }
+                }
+                Log.e("TAGTAG", "update time: ${System.currentTimeMillis() - start2}")
+
+
+                offer(TestTable2).insertBatch(statementExecutor) {
+                    for (index in 0..4) {
+                        item {
+                            conflictAlgorithm = ConflictAlgorithm.Replace
+
+                            assignments {
+                                it.id(index) + it.pid(index) + it.name("tom") + it.age(13)
+                            }
+                        }
+                    }
                 }
 
-                offer(TestTable2).join(TestTable).using { testTable2 ->
-                    testTable2.name
-                }.selectDistinct(statementExecutor){testTable2, testTable ->
-                    testTable2.name + testTable2.pid + testTable2.age
+                offer(TestTable).where { it.id eq 3 }.delete(statementExecutor)
+
+//                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
+//                    Log.e("TAGTAG", it.toString())
+//                }
+//
+//                Log.e("TAGTAG", "==============================")
+//
+//                offer(TestTable2).select(statementExecutor).asMapSequence().forEach {
+//                    Log.e("TAGTAG", it.toString())
+//                }
+
+                Log.e("TAGTAG", "==============================")
+
+                offer(TestTable2).join(TestTable).on { testTable2, testTable ->
+                    testTable2.pid eq testTable.id
+                }.selectDistinct(statementExecutor) { testTable2, testTable ->
+                    testTable2.name + testTable2.pid + testTable2.age + testTable.number
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
@@ -170,14 +209,14 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         }
 
                         launch {
-                            peripheral.state.collect { state->
+                            peripheral.state.collect { state ->
                                 Log.e(TAG, "${it.address}  state: $state")
                             }
                         }
 
                         peripheral.connect()
 
-                        peripheral.services.forEach { service->
+                        peripheral.services.forEach { service ->
                             Log.e(TAG, "service: $service")
                         }
                     }

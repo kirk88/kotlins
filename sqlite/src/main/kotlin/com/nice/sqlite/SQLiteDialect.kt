@@ -14,7 +14,7 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
-            builder.append(statement.subject.table.renderedName)
+            builder.append(statement.subject.table.render())
             builder.append(" (")
 
             columns.joinTo(builder, postfix = ")") {
@@ -38,7 +38,7 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
-                "ALTER TABLE ${statement.subject.table.renderedName} ADD ${decompileColumnSql(it)}"
+                "ALTER TABLE ${statement.subject.table.render()} ADD ${decompileColumnSql(it)}"
             }
         }
 
@@ -57,7 +57,7 @@ object SQLiteDialect : Dialect {
 
         if (statement.definitions.none()) {
             builder.append("DROP TABLE ")
-            builder.append(statement.subject.table.renderedName)
+            builder.append(statement.subject.table.render())
         } else {
             check(statement.definitions.none {
                 it is Column<*>
@@ -87,7 +87,7 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.subject.table.renderedName)
+        builder.append(statement.subject.table.render())
 
         val where = statement.whereClause
         if (where != null) {
@@ -147,13 +147,13 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn2Clause.subject.table.renderedName)
+        builder.append(statement.joinOn2Clause.subject.table.render())
         builder.append(' ')
         builder.append(statement.joinOn2Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn2Clause.table2.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn2Clause.table2.render())
 
-        statement.joinOn2Clause.usingDefinitions?.joinTo(
+        statement.joinOn2Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -218,13 +218,13 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
+        builder.append(statement.joinOn3Clause.joinOn2Clause.subject.table.render())
         builder.append(' ')
         builder.append(statement.joinOn3Clause.joinOn2Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn3Clause.joinOn2Clause.table2.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn3Clause.joinOn2Clause.table2.render())
 
-        statement.joinOn3Clause.joinOn2Clause.usingDefinitions?.joinTo(
+        statement.joinOn3Clause.joinOn2Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -238,10 +238,10 @@ object SQLiteDialect : Dialect {
         }
         builder.append(' ')
         builder.append(statement.joinOn3Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn3Clause.table3.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn3Clause.table3.render())
 
-        statement.joinOn3Clause.usingDefinitions?.joinTo(
+        statement.joinOn3Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -310,13 +310,13 @@ object SQLiteDialect : Dialect {
             }
         }
         builder.append(" FROM ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.renderedName)
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table.render())
         builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.table2.render())
 
-        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.usingDefinitions?.joinTo(
+        statement.joinOn4Clause.joinOn3Clause.joinOn2Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -330,10 +330,10 @@ object SQLiteDialect : Dialect {
         }
         builder.append(' ')
         builder.append(statement.joinOn4Clause.joinOn3Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.joinOn3Clause.table3.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn4Clause.joinOn3Clause.table3.render())
 
-        statement.joinOn4Clause.joinOn3Clause.usingDefinitions?.joinTo(
+        statement.joinOn4Clause.joinOn3Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -347,10 +347,10 @@ object SQLiteDialect : Dialect {
         }
         builder.append(' ')
         builder.append(statement.joinOn4Clause.type)
-        builder.append(" JOIN ")
-        builder.append(statement.joinOn4Clause.table4.renderedName)
+        builder.append(' ')
+        builder.append(statement.joinOn4Clause.table4.render())
 
-        statement.joinOn4Clause.usingDefinitions?.joinTo(
+        statement.joinOn4Clause.using?.joinTo(
             builder,
             prefix = " USING (",
             postfix = ")"
@@ -430,7 +430,7 @@ object SQLiteDialect : Dialect {
             builder.append(statement.conflictAlgorithm)
             builder.append(' ')
         }
-        builder.append(statement.subject.table.renderedName)
+        builder.append(statement.subject.table.render())
         builder.append(" SET ")
 
         statement.assignments.joinTo(builder) {
@@ -449,7 +449,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: DeleteStatement<T>): String {
         val builder = StringBuilder()
         builder.append("DELETE FROM ")
-        builder.append(statement.subject.table.renderedName)
+        builder.append(statement.subject.table.render())
 
         val where = statement.whereClause
         if (where != null) {
@@ -483,7 +483,7 @@ object SQLiteDialect : Dialect {
             builder.append(' ')
         }
         builder.append("VIEW IF NOT EXISTS ")
-        builder.append(statement.subject.view.renderedName)
+        builder.append(statement.subject.view.render())
         builder.append(' ')
         builder.append("AS ")
         builder.append(statement.statement.toString(this))
@@ -492,7 +492,7 @@ object SQLiteDialect : Dialect {
     }
 
     override fun build(statement: SelectViewStatement): String {
-        return "SELECT * FROM ${statement.subject.view.renderedName}"
+        return "SELECT * FROM ${statement.subject.view.render()}"
     }
 
     private fun decompileColumnSql(column: Column<*>): String = buildString {
@@ -511,11 +511,6 @@ object SQLiteDialect : Dialect {
                 append(primaryKeyConstraint)
             }
 
-            if (foreignKeyConstraint != null) {
-                append(' ')
-                append(foreignKeyConstraint)
-            }
-
             if (uniqueConstraint != null) {
                 append(' ')
                 append(uniqueConstraint)
@@ -524,6 +519,11 @@ object SQLiteDialect : Dialect {
             if (notNullConstraint != null) {
                 append(' ')
                 append(notNullConstraint)
+            }
+
+            if (referencesConstraint != null) {
+                append(' ')
+                append(referencesConstraint)
             }
 
             if (onUpdateAction != null) {
@@ -582,7 +582,7 @@ object SQLiteDialect : Dialect {
                 append(' ')
             }
             append("INTO ")
-            append(table.renderedName)
+            append(table.render())
         }
 
 }

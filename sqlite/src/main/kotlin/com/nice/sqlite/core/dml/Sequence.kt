@@ -24,11 +24,12 @@ internal class LinkedSequence<E> : MutableSequence<E> {
 
 }
 
-internal fun <E> mutableSequenceOf(vararg elements: E): MutableSequence<E> = LinkedSequence<E>().apply {
-    for (element in elements) {
-        add(element)
+internal fun <E> mutableSequenceOf(vararg elements: E): MutableSequence<E> =
+    LinkedSequence<E>().apply {
+        for (element in elements) {
+            add(element)
+        }
     }
-}
 
 internal inline fun <T> Sequence<T>.joinTo(
     builder: StringBuilder,

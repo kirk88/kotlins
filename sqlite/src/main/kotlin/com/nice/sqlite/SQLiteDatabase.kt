@@ -39,8 +39,8 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun executeUpdateBatch(statement: UpdateBatchStatement<*>): Int {
         var numberOfRows = 0
-        while (statement.moveToNext(SQLiteDialect)) {
-            val executable = statement.next()
+        while (statement.hasNext()) {
+            val executable = statement.next(SQLiteDialect)
             numberOfRows += database.compileStatement(executable.sql).also {
                 it.bindAll(executable.assignments)
             }.executeUpdateDelete()
@@ -60,8 +60,8 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
 
     override fun executeInsertBatch(statement: InsertBatchStatement<*>): Long {
         var lastRowId = -1L
-        while (statement.moveToNext(SQLiteDialect)) {
-            val executable = statement.next()
+        while (statement.hasNext()) {
+            val executable = statement.next(SQLiteDialect)
             lastRowId = database.compileStatement(executable.sql).also {
                 it.bindAll(executable.assignments)
             }.executeInsert()

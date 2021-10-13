@@ -47,15 +47,6 @@ class Assignments @PublishedApi internal constructor(
 
 }
 
-internal fun Any?.toSqlString(): String {
-    return when (this) {
-        null -> "NULL"
-        is Number -> toString()
-        is Boolean -> if (this) "1" else "0"
-        else -> "'${toString().replace("'", "''")}'"
-    }
-}
-
 operator fun Column<Int>.invoke(value: Int): Assignment {
     return Assignment.Value(this, value)
 }

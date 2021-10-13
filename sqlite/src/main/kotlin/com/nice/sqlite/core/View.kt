@@ -2,6 +2,7 @@
 
 package com.nice.sqlite.core
 
+import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.surrounding
 
 enum class ViewType {
@@ -14,11 +15,11 @@ enum class ViewType {
 }
 
 class View(
-    private val name: String,
+    val name: String,
     val type: ViewType = ViewType.None
-) {
+) : Renderer {
 
-    val renderedName: String = name.surrounding()
+    override fun render(): String = name.surrounding()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -21,56 +21,54 @@ class InsertStatement<T : Table>(
 
 class InsertBatchStatement<T : Table>(
     val subject: Subject<T>,
-    insertSpecs: Sequence<InsertSpec>
+    insertParts: Sequence<InsertPart>
 ) : Statement {
 
-    private val iterator = insertSpecs.iterator()
-    private val sqlCaches = mutableMapOf<InsertSpec, String>()
+    private val iterator = insertParts.iterator()
+    private val sqlCaches = mutableMapOf<InsertPart, String>()
 
     private lateinit var nextSql: String
-    private lateinit var nextInsert: InsertSpec
+    private lateinit var nextInsert: InsertPart
 
     override fun toString(dialect: Dialect): String {
-        val nextStatement = InsertStatement(subject, nextInsert.conflictAlgorithm, nextInsert.assignments)
+        val nextStatement =
+            InsertStatement(subject, nextInsert.conflictAlgorithm, nextInsert.assignments)
         return dialect.build(nextStatement)
     }
 
-    fun moveToNext(dialect: Dialect): Boolean {
-        val hasNext = iterator.hasNext()
-        if (hasNext) {
-            nextInsert = iterator.next()
-            nextSql = sqlCaches.getOrPut(nextInsert) {
-                toString(dialect)
-            }
+    fun next(dialect: Dialect): Executable {
+        nextInsert = iterator.next()
+        nextSql = sqlCaches.getOrPut(nextInsert) {
+            toString(dialect)
         }
-        return hasNext
+        return Executable(nextSql, nextInsert.assignments)
     }
 
-    fun next(): Executable = Executable(nextSql, nextInsert.assignments)
+    fun hasNext(): Boolean = iterator.hasNext()
 
 }
 
 class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: Subject<T>
-) : Sequence<InsertSpec> {
+) : Sequence<InsertPart> {
 
     @PublishedApi
-    internal val insertSpecs = mutableListOf<InsertSpec>()
+    internal val insertSpecs = mutableListOf<InsertPart>()
 
-    inline fun item(buildAction: InsertSpecBuilder<T>.() -> Unit) {
-        insertSpecs.add(InsertSpecBuilder(subject).apply(buildAction).build())
+    inline fun item(buildAction: InsertPartBuilder<T>.() -> Unit) {
+        insertSpecs.add(InsertPartBuilder(subject).apply(buildAction).build())
     }
 
-    override fun iterator(): Iterator<InsertSpec> = insertSpecs.iterator()
+    override fun iterator(): Iterator<InsertPart> = insertSpecs.iterator()
 
 }
 
-data class InsertSpec(
+data class InsertPart(
     val conflictAlgorithm: ConflictAlgorithm,
     val assignments: Assignments
 )
 
-class InsertSpecBuilder<T : Table>(
+class InsertPartBuilder<T : Table>(
     @PublishedApi internal val subject: Subject<T>
 ) {
 
@@ -83,6 +81,6 @@ class InsertSpecBuilder<T : Table>(
     }
 
     @PublishedApi
-    internal fun build(): InsertSpec = InsertSpec(conflictAlgorithm, assignments)
+    internal fun build(): InsertPart = InsertPart(conflictAlgorithm, assignments)
 
 }

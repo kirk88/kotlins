@@ -8,7 +8,7 @@ import com.nice.sqlite.core.dml.mutableSequenceOf
 
 enum class SqlOrderDirection { ASC, DESC }
 
-interface Ordering : Sequence<Ordering>, Renderer {
+interface Ordering : Sequence<Ordering>, FullRenderer {
 
     val column: Column<*>
     val direction: SqlOrderDirection

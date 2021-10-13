@@ -23,57 +23,55 @@ class UpdateStatement<T : Table>(
 
 class UpdateBatchStatement<T : Table>(
     val subject: Subject<T>,
-    updateSpecs: Sequence<UpdateSpec<T>>
+    updateParts: Sequence<UpdatePart<T>>
 ) : Statement {
 
-    private val iterator = updateSpecs.iterator()
-    private val sqlCaches = mutableMapOf<UpdateSpec<*>, String>()
+    private val iterator = updateParts.iterator()
+    private val sqlCaches = mutableMapOf<UpdatePart<*>, String>()
 
     private lateinit var nextSql: String
-    private lateinit var nextUpdate: UpdateSpec<T>
+    private lateinit var nextUpdate: UpdatePart<T>
 
     override fun toString(dialect: Dialect): String {
-        val nextStatement = UpdateStatement(subject, nextUpdate.conflictAlgorithm, nextUpdate.assignments, nextUpdate.whereClause)
+        val nextStatement =
+            UpdateStatement(subject, nextUpdate.conflictAlgorithm, nextUpdate.assignments, nextUpdate.whereClause)
         return dialect.build(nextStatement)
     }
 
-    fun moveToNext(dialect: Dialect): Boolean {
-        val hasNext = iterator.hasNext()
-        if (hasNext) {
-            nextUpdate = iterator.next()
-            nextSql = sqlCaches.getOrPut(nextUpdate) {
-                toString(dialect)
-            }
+    fun next(dialect: Dialect): Executable {
+        nextUpdate = iterator.next()
+        nextSql = sqlCaches.getOrPut(nextUpdate) {
+            toString(dialect)
         }
-        return hasNext
+        return Executable(nextSql, nextUpdate.assignments)
     }
 
-    fun next(): Executable = Executable(nextSql, nextUpdate.assignments)
+    fun hasNext(): Boolean = iterator.hasNext()
 
 }
 
 class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: Subject<T>
-) : Sequence<UpdateSpec<T>> {
+) : Sequence<UpdatePart<T>> {
 
     @PublishedApi
-    internal val updateSpecs = mutableListOf<UpdateSpec<T>>()
+    internal val updateSpecs = mutableListOf<UpdatePart<T>>()
 
-    inline fun item(buildAction: UpdateSpecBuilder<T>.() -> Unit) {
-        updateSpecs.add(UpdateSpecBuilder(subject).apply(buildAction).build())
+    inline fun item(buildAction: UpdatePartBuilder<T>.() -> Unit) {
+        updateSpecs.add(UpdatePartBuilder(subject).apply(buildAction).build())
     }
 
-    override fun iterator(): Iterator<UpdateSpec<T>> = updateSpecs.iterator()
+    override fun iterator(): Iterator<UpdatePart<T>> = updateSpecs.iterator()
 
 }
 
-data class UpdateSpec<T : Table>(
+data class UpdatePart<T : Table>(
     val conflictAlgorithm: ConflictAlgorithm,
     val assignments: Assignments,
     val whereClause: WhereClause<T>?
 )
 
-class UpdateSpecBuilder<T : Table>(
+class UpdatePartBuilder<T : Table>(
     @PublishedApi internal val subject: Subject<T>
 ) {
 
@@ -91,6 +89,6 @@ class UpdateSpecBuilder<T : Table>(
     }
 
     @PublishedApi
-    internal fun build(): UpdateSpec<T> = UpdateSpec(conflictAlgorithm, assignments, whereClause)
+    internal fun build(): UpdatePart<T> = UpdatePart(conflictAlgorithm, assignments, whereClause)
 
 }

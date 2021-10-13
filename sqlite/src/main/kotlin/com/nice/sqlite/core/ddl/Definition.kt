@@ -16,7 +16,7 @@ enum class SqlType {
     override fun toString(): String = name.uppercase()
 }
 
-interface Definition : Sequence<Definition>, Renderer {
+interface Definition : Sequence<Definition>, FullRenderer {
 
     override fun iterator(): Iterator<Definition> = OnceIterator(this)
 
@@ -42,8 +42,8 @@ abstract class Column<T : Any>(
         _meta = _meta.copy(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
     }
 
-    fun foreignKey(references: Column<*>) = apply {
-        _meta = _meta.copy(foreignKeyConstraint = ColumnConstraint.ForeignKey(references))
+    fun references(column: Column<*>) = apply {
+        _meta = _meta.copy(referencesConstraint = ColumnConstraint.References(column))
     }
 
     fun unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) = apply {
@@ -64,7 +64,7 @@ abstract class Column<T : Any>(
 
     override fun render(): String = name.surrounding()
 
-    override fun fullRender(): String = "${table.renderedName}.${name.surrounding()}"
+    override fun fullRender(): String = "${table.render()}.${name.surrounding()}"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -91,7 +91,7 @@ abstract class Column<T : Any>(
     data class Meta(
         val defaultConstraint: ColumnConstraint.Default? = null,
         val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
-        val foreignKeyConstraint: ColumnConstraint.ForeignKey? = null,
+        val referencesConstraint: ColumnConstraint.References? = null,
         val uniqueConstraint: ColumnConstraint.Unique? = null,
         val notNullConstraint: ColumnConstraint.NotNull? = null,
         val onUpdateAction: ColumnConstraintAction? = null,
@@ -100,7 +100,7 @@ abstract class Column<T : Any>(
 
 }
 
-class UColumn internal constructor(
+class AliasColumn internal constructor(
     val column: Column<*>,
     val alias: String
 ) : Definition {
@@ -113,7 +113,7 @@ class UColumn internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as UColumn
+        other as AliasColumn
 
         if (column != other.column) return false
         if (alias != other.alias) return false
@@ -131,7 +131,7 @@ class UColumn internal constructor(
 
 }
 
-fun column(column: Column<*>, alias: String): UColumn = UColumn(column, alias)
+fun aliasColumn(column: Column<*>, alias: String): AliasColumn = AliasColumn(column, alias)
 
 class Index internal constructor(
     val name: String,
@@ -157,14 +157,14 @@ class Index internal constructor(
         val table = columns.first().table
         append(name.surrounding())
         append(" ON ")
-        append(table.renderedName)
+        append(table.render())
     }
 
     override fun fullRender(): String = buildString {
         val table = columns.first().table
         append(name.surrounding())
         append(" ON ")
-        append(table.renderedName)
+        append(table.render())
         append(' ')
         columns.joinTo(this, prefix = "(", postfix = ")") {
             it.render()

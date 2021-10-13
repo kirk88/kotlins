@@ -7,7 +7,7 @@ enum class ColumnConstraintAction(
 ) {
     SetNull("SET NULL"),
     SetDefault("SET DEFAULT"),
-    SetRestrict("SET DEFAULT"),
+    SetRestrict("SET RESTRICT"),
     Cascade("CASCADE"),
     NoAction("NO ACTION");
 
@@ -36,11 +36,14 @@ sealed class ColumnConstraint {
 
     }
 
-    class ForeignKey(val references: Column<*>) : ColumnConstraint() {
+    class References(val column: Column<*>) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
             append("REFERENCES ")
-            append(references.fullRender())
+            append(column.table.render())
+            append('(')
+            append(column.render())
+            append(')')
         }
 
     }
