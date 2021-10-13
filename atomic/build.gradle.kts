@@ -1,7 +1,6 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'maven-publish'
+    id("com.android.library")
+    id("kotlin-android")
 }
 
 android {
@@ -15,7 +14,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
     compileOptions {
@@ -23,19 +22,19 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += "src/main/kotlin"
     }
 }
 
 dependencies {
-    implementation deps.kotlinStdlib
+    implementation()
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
 
 task androidSourcesJar(type: Jar) {
@@ -71,7 +70,7 @@ publishing {
         }
     }
     repositories {
-        def deployPath = file(getProperty('aar.deployPath'))
+        def deployPath = file(getProperty("aar.deployPath"))
         maven { url "file://${deployPath.absolutePath}" }
     }
 }
