@@ -183,20 +183,12 @@ inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -
 inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
     viewBinding<VB>(binding.root).apply(block).root
 
-fun Activity.setContentView(binding: ViewBinding) = setContentView(binding.root)
+fun Activity.bindContentView(binding: ViewBinding) = setContentView(binding.root)
 
-fun Activity.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
-    addContentView(binding.root, params)
+fun NiceFragment.bindContentView(binding: ViewBinding) = setContentView(binding.root)
 
-fun NiceFragment.setContentView(binding: ViewBinding) = setContentView(binding.root)
+fun Dialog.bindContentView(binding: ViewBinding) = setContentView(binding.root)
 
-fun NiceFragment.addContentView(binding: ViewBinding, params: ViewGroup.LayoutParams) =
-    addContentView(binding.root, params)
-
-fun ViewGroup.addView(binding: ViewBinding) = addView(binding.root)
-
-fun Dialog.setContentView(binding: ViewBinding) = setContentView(binding.root)
-
-fun PopupWindow.setContentView(binding: ViewBinding) {
+fun PopupWindow.bindContentView(binding: ViewBinding) {
     contentView = binding.root
 }

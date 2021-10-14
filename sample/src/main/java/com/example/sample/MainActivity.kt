@@ -61,7 +61,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding)
+        bindContentView(binding)
         permissionRequestLauncher.register(this)
 
         title = "Home"

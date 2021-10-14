@@ -30,54 +30,54 @@ val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = ColumnValue:
 val StringParser: RowParser<String> = SingleColumnParser(modifier = ColumnValue::asString)
 val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = ColumnValue::asBlob)
 
-fun <T : Any> Cursor.parseSingle(parser: RowParser<T>): T = use {
-    if (count != 1)
-        throw SQLiteException("parseSingle accepts only cursors with a single entry")
-    moveToFirst()
-    return parser.parseRow(readColumnsArray(this))
+fun <T : Any> Cursor.single(parser: RowParser<T>): T = use {
+    if (it.count != 1)
+        throw SQLiteException("single accepts only cursors with getCount() == 1")
+    it.moveToFirst()
+    return parser.parseRow(readColumnsArray(it))
 }
 
-fun <T : Any> Cursor.parseSingleOrNull(parser: RowParser<T>): T? = use {
-    if (count > 1)
-        throw SQLiteException("parseSingle accepts only cursors with a single entry or empty cursors")
-    if (count == 0)
+fun <T : Any> Cursor.singleOrNull(parser: RowParser<T>): T? = use {
+    if (it.count > 1)
+        throw SQLiteException("singleOrNull accepts only cursors with getCount() == 1 or empty cursors")
+    if (it.count == 0)
         return null
-    moveToFirst()
-    return parser.parseRow(readColumnsArray(this))
+    it.moveToFirst()
+    return parser.parseRow(readColumnsArray(it))
 }
 
-fun <T : Any> Cursor.parseList(parser: RowParser<T>): List<T> = use {
-    val list = ArrayList<T>(count)
-    moveToFirst()
-    while (!isAfterLast) {
-        list.add(parser.parseRow(readColumnsArray(this)))
-        moveToNext()
+fun <T : Any> Cursor.toList(parser: RowParser<T>): List<T> = use {
+    val list = ArrayList<T>(it.count)
+    it.moveToFirst()
+    while (!it.isAfterLast) {
+        list.add(parser.parseRow(readColumnsArray(it)))
+        it.moveToNext()
     }
     return list
 }
 
-fun <T : Any> Cursor.parseSingle(parser: MapRowParser<T>): T = use {
-    if (count != 1)
-        throw SQLiteException("parseSingle accepts only cursors with getCount() == 1")
-    moveToFirst()
-    return parser.parseRow(readColumnsMap(this))
+fun <T : Any> Cursor.single(parser: MapRowParser<T>): T = use {
+    if (it.count != 1)
+        throw SQLiteException("single accepts only cursors with getCount() == 1")
+    it.moveToFirst()
+    return parser.parseRow(readColumnsMap(it))
 }
 
-fun <T : Any> Cursor.parseSingleOrNull(parser: MapRowParser<T>): T? = use {
-    if (count > 1)
-        throw SQLiteException("parseSingle accepts only cursors with getCount() == 1 or empty cursors")
-    if (count == 0)
+fun <T : Any> Cursor.singleOrNull(parser: MapRowParser<T>): T? = use {
+    if (it.count > 1)
+        throw SQLiteException("singleOrNull accepts only cursors with getCount() == 1 or empty cursors")
+    if (it.count == 0)
         return null
-    moveToFirst()
-    return parser.parseRow(readColumnsMap(this))
+    it.moveToFirst()
+    return parser.parseRow(readColumnsMap(it))
 }
 
-fun <T : Any> Cursor.parseList(parser: MapRowParser<T>): List<T> = use {
-    val list = ArrayList<T>(count)
-    moveToFirst()
-    while (!isAfterLast) {
-        list.add(parser.parseRow(readColumnsMap(this)))
-        moveToNext()
+fun <T : Any> Cursor.toList(parser: MapRowParser<T>): List<T> = use {
+    val list = ArrayList<T>(it.count)
+    it.moveToFirst()
+    while (!it.isAfterLast) {
+        list.add(parser.parseRow(readColumnsMap(it)))
+        it.moveToNext()
     }
     return list
 }

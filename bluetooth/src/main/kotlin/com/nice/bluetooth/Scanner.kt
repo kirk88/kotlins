@@ -1,3 +1,5 @@
+@file:SuppressLint("MissingPermission")
+
 package com.nice.bluetooth
 
 import android.annotation.SuppressLint
