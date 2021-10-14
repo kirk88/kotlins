@@ -29,13 +29,17 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 }
 
 dependencies {
     implementation(libs.kotlin.stdlib)
-    api(libs.bundles.androidx.sqlite)
+    implementation(libs.bundles.kotlinx.coroutines)
+    implementation(libs.androidx.setup)
+    implementation(libs.androidx.annotation)
 }
+
 
 val versionMajor = 1
 val versionMinor = 0
@@ -54,9 +58,9 @@ tasks {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("sqlite") {
+            create<MavenPublication>("kbletooth") {
                 groupId = "com.nice.kotlins"
-                artifactId = "sqlite"
+                artifactId = "kbletooth"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(tasks.getByName("sourceJar"))
@@ -64,13 +68,14 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
+                    name.set("kbletooth")
+                    description.set("Kotlin Asynchronous Bluetooth Low-Energy")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
                             url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
-
                     withXml {
                         val dependenciesNode = asNode().appendNode("dependencies")
                         configurations.implementation.get().allDependencies.forEach { dependency ->
@@ -84,7 +89,7 @@ afterEvaluate {
             }
         }
         repositories {
-            val deployPath = file(requireNotNull(properties["aar.deployPath"]))
+            val deployPath = file(requireNotNull(properties["libs.deployPath"]))
             maven("file://${deployPath.absolutePath}")
         }
     }

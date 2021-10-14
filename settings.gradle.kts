@@ -8,8 +8,9 @@ pluginManagement {
     plugins {
         id("com.android.application") version "7.1.0-alpha13"
         id("com.android.library") version "7.1.0-alpha13"
-        id("org.jetbrains.kotlin.android") version "1.6.0-RC"
+        id("org.jetbrains.kotlin.android") version "1.5.31"
         id("com.github.ben-manes.versions") version "0.39.0"
+        id("org.jetbrains.kotlin.jvm") version "1.5.30"
     }
 }
 dependencyResolutionManagement {
@@ -209,4 +210,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "kotlins"
 rootProject.buildFileName = "build.gradle.kts"
-include(":atomic", ":bluetooth", ":common", ":sqlite", ":kothttp", "kotson", ":sample")
+include(":atomic", ":kbletooth", ":common", ":kotorm", ":kothttp", "kotson", ":sample")

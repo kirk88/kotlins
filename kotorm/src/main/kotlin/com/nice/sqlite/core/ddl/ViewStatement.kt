@@ -1,11 +1,11 @@
 package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Dialect
-import com.nice.sqlite.core.StatementViewSubject
+import com.nice.sqlite.core.ViewSubject
 import com.nice.sqlite.core.dml.QueryStatement
 
 class CreateViewStatement(
-    val subject: StatementViewSubject,
+    val subject: ViewSubject,
     val statement: QueryStatement
 ) : Statement {
 
@@ -16,7 +16,7 @@ class CreateViewStatement(
 }
 
 class SelectViewStatement(
-    val subject: StatementViewSubject
+    val subject: ViewSubject
 ) : QueryStatement {
 
     override fun toString(dialect: Dialect): String {

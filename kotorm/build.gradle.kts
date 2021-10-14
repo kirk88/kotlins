@@ -29,17 +29,13 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 }
 
 dependencies {
     implementation(libs.kotlin.stdlib)
-    implementation(libs.bundles.kotlinx.coroutines)
-    implementation(libs.androidx.setup)
-    implementation(libs.androidx.annotation)
+    api(libs.bundles.androidx.sqlite)
 }
-
 
 val versionMajor = 1
 val versionMinor = 0
@@ -58,9 +54,9 @@ tasks {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("bluetooth") {
+            create<MavenPublication>("kotorm") {
                 groupId = "com.nice.kotlins"
-                artifactId = "bluetooth"
+                artifactId = "kotorm"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(tasks.getByName("sourceJar"))
@@ -68,13 +64,14 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
+                    name.set("kotorm")
+                    description.set("A ORM framework for kotlin")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
                             url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
-
                     withXml {
                         val dependenciesNode = asNode().appendNode("dependencies")
                         configurations.implementation.get().allDependencies.forEach { dependency ->
@@ -88,7 +85,7 @@ afterEvaluate {
             }
         }
         repositories {
-            val deployPath = file(requireNotNull(properties["aar.deployPath"]))
+            val deployPath = file(requireNotNull(properties["libs.deployPath"]))
             maven("file://${deployPath.absolutePath}")
         }
     }

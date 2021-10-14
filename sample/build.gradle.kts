@@ -42,8 +42,8 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":sqlite"))
-    implementation(project(":bluetooth"))
+    implementation(project(":kotorm"))
+    implementation(project(":kbletooth"))
     implementation(project(":kothttp"))
     implementation(project(":atomic"))
 }

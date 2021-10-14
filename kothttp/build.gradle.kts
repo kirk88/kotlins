@@ -66,13 +66,14 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
+                    name.set("kothttp")
+                    description.set("New okhttp api in kotlin")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
                             url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
-
                     withXml {
                         val dependenciesNode = asNode().appendNode("dependencies")
                         configurations.implementation.get().allDependencies.forEach { dependency ->
@@ -86,7 +87,7 @@ afterEvaluate {
             }
         }
         repositories {
-            val deployPath = file(requireNotNull(properties["aar.deployPath"]))
+            val deployPath = file(requireNotNull(properties["libs.deployPath"]))
             maven("file://${deployPath.absolutePath}")
         }
     }
