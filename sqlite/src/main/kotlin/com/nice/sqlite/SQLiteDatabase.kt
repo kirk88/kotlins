@@ -9,9 +9,9 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import com.nice.sqlite.core.ddl.Assignment
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.StatementExecutor
+import com.nice.sqlite.core.ddl.Value
 import com.nice.sqlite.core.dml.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -42,7 +42,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
             numberOfRows += database.compileStatement(executable.sql).also {
-                it.bindAll(executable.assignments)
+                it.bindAll(executable.values)
             }.executeUpdateDelete()
         }
         return numberOfRows
@@ -63,7 +63,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
             lastRowId = database.compileStatement(executable.sql).also {
-                it.bindAll(executable.assignments)
+                it.bindAll(executable.values)
             }.executeInsert()
         }
         return lastRowId
@@ -73,7 +73,7 @@ internal class SQLiteStatementExecutor(private val database: SupportSQLiteDataba
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun SupportSQLiteStatement.bindAll(assignments: Sequence<Assignment>) {
+    private fun SupportSQLiteStatement.bindAll(assignments: Sequence<Value>) {
         for ((index, assignment) in assignments.withIndex()) {
             when (val value = assignment.value) {
                 null -> bindNull(index + 1)

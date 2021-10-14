@@ -5,12 +5,15 @@ package com.nice.sqlite.core.dml
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.core.ddl.ConflictAlgorithm
+import com.nice.sqlite.core.ddl.Executable
+import com.nice.sqlite.core.ddl.Statement
+import com.nice.sqlite.core.ddl.Value
 
 class InsertStatement<T : Table>(
     val subject: Subject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Sequence<Assignment>
+    val assignments: Sequence<Value>
 ) : Statement {
 
     override fun toString(dialect: Dialect): String {
@@ -32,7 +35,7 @@ class InsertBatchStatement<T : Table>(
 
     override fun toString(dialect: Dialect): String {
         val nextStatement =
-            InsertStatement(subject, nextInsert.conflictAlgorithm, nextInsert.assignments)
+            InsertStatement(subject, nextInsert.conflictAlgorithm, nextInsert.values)
         return dialect.build(nextStatement)
     }
 
@@ -41,7 +44,7 @@ class InsertBatchStatement<T : Table>(
         nextSql = sqlCaches.getOrPut(nextInsert) {
             toString(dialect)
         }
-        return Executable(nextSql, nextInsert.assignments)
+        return Executable(nextSql, nextInsert.values)
     }
 
     fun hasNext(): Boolean = iterator.hasNext()
@@ -63,24 +66,45 @@ class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
 
 }
 
-data class InsertPart(
+class InsertPart(
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Assignments
-)
+    val values: Sequence<Value>
+) {
+
+    private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
+        it.column.name
+    }.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as InsertPart
+
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+
+}
 
 class InsertPartBuilder<T : Table>(
     @PublishedApi internal val subject: Subject<T>
 ) {
 
-    private lateinit var assignments: Assignments
+    private lateinit var values: Sequence<Value>
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun assignments(assignments: (T) -> Sequence<Assignment>) {
-        this.assignments = Assignments(assignments(subject.table))
+    fun values(values: (T) -> Sequence<Value>) {
+        this.values = values.invoke(subject.table)
     }
 
     @PublishedApi
-    internal fun build(): InsertPart = InsertPart(conflictAlgorithm, assignments)
+    internal fun build(): InsertPart = InsertPart(conflictAlgorithm, values)
 
 }

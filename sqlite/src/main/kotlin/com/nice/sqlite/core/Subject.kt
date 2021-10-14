@@ -144,7 +144,7 @@ inline fun <T : Table> StatementSubject<T>.selectDistinct(
 
 inline fun <T : Table> StatementSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): UpdateStatement<T> {
     return UpdateStatement(this, conflictAlgorithm, values(table))
 }
@@ -152,7 +152,7 @@ inline fun <T : Table> StatementSubject<T>.update(
 inline fun <T : Table> StatementSubject<T>.update(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): Int {
     return executor.executeUpdate(update(conflictAlgorithm, values))
 }
@@ -180,7 +180,7 @@ inline fun <T : Table> StatementSubject<T>.delete(executor: StatementExecutor): 
 
 inline fun <T : Table> StatementSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): InsertStatement<T> {
     return InsertStatement(this, conflictAlgorithm, values(table))
 }
@@ -189,7 +189,7 @@ inline fun <T : Table> StatementSubject<T>.insert(
 inline fun <T : Table> StatementSubject<T>.insert(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): Long {
     return executor.executeInsert(insert(conflictAlgorithm, values))
 }

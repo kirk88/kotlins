@@ -81,7 +81,7 @@ inline fun <T : Table> WhereClause<T>.selectDistinct(
 
 inline fun <T : Table> WhereClause<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): UpdateStatement<T> {
     return UpdateStatement(subject, conflictAlgorithm, values(subject.table), whereClause = this)
 }
@@ -89,7 +89,7 @@ inline fun <T : Table> WhereClause<T>.update(
 inline fun <T : Table> WhereClause<T>.update(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
-    values: (T) -> Sequence<Assignment>
+    values: (T) -> Sequence<Value>
 ): Int {
     return executor.executeUpdate(update(conflictAlgorithm, values))
 }

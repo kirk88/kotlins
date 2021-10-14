@@ -107,7 +107,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
 
-                            assignments {
+                            values {
                                 it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                                         it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                             }
@@ -127,7 +127,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                                 it.age gt 100
                             }
 
-                            assignments {
+                            values {
                                 it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                                         it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                             }
@@ -142,7 +142,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
 
-                            assignments {
+                            values {
                                 it.id(index) + it.pid(index) + it.name("tom") + it.age(13)
                             }
                         }
