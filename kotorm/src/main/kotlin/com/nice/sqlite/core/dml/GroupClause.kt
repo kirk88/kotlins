@@ -55,7 +55,7 @@ inline fun <T : Table> GroupClause<T>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table> GroupClause<T>.selectStatement(
+internal inline fun <T : Table> GroupClause<T>.select(
     selection: (T) -> Sequence<Definition>,
     distinct: Boolean
 ): SelectStatement<T> = SelectStatement(
@@ -68,11 +68,11 @@ internal inline fun <T : Table> GroupClause<T>.selectStatement(
 
 inline fun <T : Table> GroupClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> = selectStatement(selection, false)
+): SelectStatement<T> = select(selection, false)
 
 inline fun <T : Table> GroupClause<T>.selectDistinct(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> = selectStatement(selection, true)
+): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> GroupClause<T>.select(
     executor: StatementExecutor,
@@ -137,7 +137,7 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectStatement(
+internal inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> = Select2Statement(
@@ -153,11 +153,11 @@ internal inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectStatement(
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> = selectStatement(selection, false)
+): Select2Statement<T, T2> = select(selection, false)
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> = selectStatement(selection, true)
+): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
     executor: StatementExecutor,
@@ -224,7 +224,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> = Select3Statement(
@@ -241,11 +241,11 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> = selectStatement(selection, false)
+): Select3Statement<T, T2, T3> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDistinct(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> = selectStatement(selection, true)
+): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
     executor: StatementExecutor,
@@ -314,7 +314,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> = Select4Statement(
@@ -332,11 +332,11 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> = selectStatement(selection, false)
+): Select4Statement<T, T2, T3, T4> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.selectDistinct(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> = selectStatement(selection, true)
+): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
     executor: StatementExecutor,

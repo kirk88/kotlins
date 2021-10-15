@@ -51,7 +51,7 @@ inline fun <T : Table> HavingClause<T>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table> HavingClause<T>.selectStatement(
+internal inline fun <T : Table> HavingClause<T>.select(
     selection: (T) -> Sequence<Definition>,
     distinct: Boolean
 ): SelectStatement<T> = SelectStatement(
@@ -65,11 +65,11 @@ internal inline fun <T : Table> HavingClause<T>.selectStatement(
 
 inline fun <T : Table> HavingClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> = selectStatement(selection, false)
+): SelectStatement<T> = select(selection, false)
 
 inline fun <T : Table> HavingClause<T>.selectDistinct(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> = selectStatement(selection, true)
+): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> HavingClause<T>.select(
     executor: StatementExecutor,
@@ -127,7 +127,7 @@ inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.selectStatement(
+internal inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> = Select2Statement(
@@ -144,11 +144,11 @@ internal inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.selectStatement
 
 inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> = selectStatement(selection, false)
+): Select2Statement<T, T2> = select(selection, false)
 
 inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.selectDistinct(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> = selectStatement(selection, true)
+): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Having2Clause<T, T2>.select(
     executor: StatementExecutor,
@@ -207,7 +207,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.offset(
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> = Select3Statement(
@@ -225,11 +225,11 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>
 
 inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> = selectStatement(selection, false)
+): Select3Statement<T, T2, T3> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.selectDistinct(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> = selectStatement(selection, true)
+): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Having3Clause<T, T2, T3>.select(
     executor: StatementExecutor,
@@ -289,7 +289,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, 
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> = Select4Statement(
@@ -308,40 +308,18 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Claus
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Cursor = selectStatement(
-    selection,
-    false
-)
+): Select4Statement<T, T2, T3, T4> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.selectDistinct(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Cursor {
-    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(
-        selectStatement(
-            selection,
-            true
-        )
-    )
-}
+): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.select(
+    executor: StatementExecutor,
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Cursor {
-    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(
-        selectStatement(
-            selection,
-            false
-        )
-    )
-}
+): Cursor = executor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Having4Clause<T, T2, T3, T4>.selectDistinct(
+    executor: StatementExecutor,
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Cursor {
-    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(
-        selectStatement(
-            selection,
-            true
-        )
-    )
-}
+): Cursor = executor.executeQuery(selectDistinct(selection))

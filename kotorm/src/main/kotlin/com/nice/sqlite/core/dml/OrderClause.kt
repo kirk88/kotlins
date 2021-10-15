@@ -44,7 +44,7 @@ inline fun <T : Table> OrderClause<T>.offset(offset: () -> Int): OffsetClause<T>
 }
 
 @PublishedApi
-internal inline fun <T : Table> OrderClause<T>.selectStatement(
+internal inline fun <T : Table> OrderClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() },
     distinct: Boolean
 ): SelectStatement<T> {
@@ -62,13 +62,13 @@ internal inline fun <T : Table> OrderClause<T>.selectStatement(
 inline fun <T : Table> OrderClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return subject.executor.executeQuery(selectStatement(selection, false))
+    return subject.executor.executeQuery(select(selection, false))
 }
 
 inline fun <T : Table> OrderClause<T>.selectDistinct(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return subject.executor.executeQuery(selectStatement(selection, true))
+    return subject.executor.executeQuery(select(selection, true))
 }
 
 data class Order2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -108,7 +108,7 @@ inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.offset(offset: () -> Int)
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.selectStatement(
+internal inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> {
@@ -129,13 +129,13 @@ internal inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.selectStatement(
 inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
+    return joinOn2Clause.subject.executor.executeQuery(select(selection, false))
 }
 
 inline fun <T : Table, T2 : Table> Order2Clause<T, T2>.selectDistinct(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
+    return joinOn2Clause.subject.executor.executeQuery(select(selection, true))
 }
 
 data class Order3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -175,7 +175,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.offset(of
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> {
@@ -197,13 +197,13 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.
 inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(select(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> Order3Clause<T, T2, T3>.selectDistinct(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(select(selection, true))
 }
 
 data class Order4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -243,7 +243,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause<T, T2, T
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause<T, T2, T3, T4>.selectStatement(
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> {
@@ -266,11 +266,11 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
+    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(select(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Order4Clause<T, T2, T3, T4>.selectDistinct(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
+    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(select(selection, true))
 }
