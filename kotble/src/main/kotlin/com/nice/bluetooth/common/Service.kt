@@ -4,7 +4,6 @@ package com.nice.bluetooth.common
 
 import android.bluetooth.BluetoothGattService
 import java.util.*
-import kotlin.NoSuchElementException
 
 interface Service {
     val serviceUuid: UUID

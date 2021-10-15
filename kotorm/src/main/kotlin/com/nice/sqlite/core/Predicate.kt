@@ -2,11 +2,10 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.toSqlString
-import com.nice.sqlite.core.dml.QueryStatement
+import com.nice.sqlite.core.ddl.QueryStatement
 
 interface Predicate {
 
@@ -65,28 +64,84 @@ private class ConditionPart(
 }
 
 infix fun Column<*>.eq(value: Any): Predicate =
-    ConditionPart("$name = $value") { dialect, full -> "${render(full = full)} = ${value.render(dialect, full)}" }
+    ConditionPart("$name = $value") { dialect, full ->
+        "${render(full = full)} = ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.ne(value: Any): Predicate =
-    ConditionPart("$name <> $value") { dialect, full -> "${render(full = full)} <> ${value.render(dialect, full)}" }
+    ConditionPart("$name <> $value") { dialect, full ->
+        "${render(full = full)} <> ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.gt(value: Any): Predicate =
-    ConditionPart("$name > $value") { dialect, full -> "${render(full = full)} > ${value.render(dialect, full)}" }
+    ConditionPart("$name > $value") { dialect, full ->
+        "${render(full = full)} > ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.lt(value: Any): Predicate =
-    ConditionPart("$name < $value") { dialect, full -> "${render(full = full)} < ${value.render(dialect, full)}" }
+    ConditionPart("$name < $value") { dialect, full ->
+        "${render(full = full)} < ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.gte(value: Any): Predicate =
-    ConditionPart("$name >= $value") { dialect, full -> "${render(full = full)} >= ${value.render(dialect, full)}" }
+    ConditionPart("$name >= $value") { dialect, full ->
+        "${render(full = full)} >= ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.lte(value: Any): Predicate =
-    ConditionPart("$name <= $value") { dialect, full -> "${render(full = full)} <= ${value.render(dialect, full)}" }
+    ConditionPart("$name <= $value") { dialect, full ->
+        "${render(full = full)} <= ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.like(value: Any): Predicate =
-    ConditionPart("$name LIKE $value") { dialect, full -> "${render(full = full)} LIKE ${value.render(dialect, full)}" }
+    ConditionPart("$name LIKE $value") { dialect, full ->
+        "${render(full = full)} LIKE ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 infix fun Column<*>.glob(value: Any): Predicate =
-    ConditionPart("$name GLOB $value") { dialect, full -> "${render(full = full)} GLOB ${value.render(dialect, full)}" }
+    ConditionPart("$name GLOB $value") { dialect, full ->
+        "${render(full = full)} GLOB ${
+            value.render(
+                dialect,
+                full
+            )
+        }"
+    }
 
 fun Column<*>.isNotNull(): Predicate =
     ConditionPart("$name IS NOT NULL") { _, full -> "${render(full = full)} IS NOT NULL" }
@@ -141,7 +196,9 @@ fun Column<*>.none(vararg values: Any): Predicate =
     }
 
 fun exists(statement: QueryStatement): Predicate =
-    ConditionPart(statement.toString(SQLiteDialect)) { dialect, _ -> "EXISTS ${statement.render(dialect = dialect)}" }
+    ConditionPart("EXISTS ${System.identityHashCode(statement)}") { dialect, _ ->
+        "EXISTS ${statement.render(dialect = dialect)}"
+    }
 
 
 private fun Any.render(dialect: Dialect? = null, full: Boolean = false) = when {

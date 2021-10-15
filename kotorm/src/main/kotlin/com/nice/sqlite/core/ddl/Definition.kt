@@ -3,9 +3,6 @@
 package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.dml.MutableSequence
-import com.nice.sqlite.core.dml.OnceIterator
-import com.nice.sqlite.core.dml.mutableSequenceOf
 
 enum class SqlType {
     Integer,

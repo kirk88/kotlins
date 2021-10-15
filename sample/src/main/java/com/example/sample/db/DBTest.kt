@@ -1,7 +1,6 @@
 package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
-import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
@@ -9,9 +8,8 @@ import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ColumnConstraintAction
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
-import com.nice.sqlite.core.dml.limit
-import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.statementExecutor
+import com.nice.sqlite.from
+import kotlinx.coroutines.channels.Channel
 
 data class DBTest @ClassParserConstructor constructor(
     val id: Long = 0,
@@ -79,51 +77,49 @@ object TestTable2 : Table("test2") {
 }
 
 object DB : ManagedSQLiteOpenHelper(
-    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("test_db.db")
-        .callback(Callback())
-        .build()
+    applicationContext,
+    "test_db.db"
 ) {
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(20) {
-        override fun onConfigure(db: SupportSQLiteDatabase) {
-            db.setForeignKeyConstraintsEnabled(true)
+    override fun onConfigure(db: SupportSQLiteDatabase) {
+        db.setForeignKeyConstraintsEnabled(true)
+    }
+
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        db.from(TestTable).create {
+            it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
         }
 
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            offer(TestTable).create(db.statementExecutor) {
-                it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
-            }
-
-            offer(TestView).create(db.statementExecutor) {
-                offer(TestTable).orderBy {
-                    desc(it.id)
-                }.limit { 10 }.selectDistinct()
-            }
-
-            offer(TestTable2).create(db.statementExecutor) {
-                it.id + it.pid + it.name + it.age
-            }
+        db.from(TestView).create {
+            offer(TestTable)
+                .orderBy { desc(it.id) }
+                .limit { 10 }
+                .selectDistinct()
         }
 
-        override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            offer(TestTable).alter(db.statementExecutor) {
-                it.number + it.data + index(it.id, it.name).ifNotExists()
-            }
+        db.from(TestTable2).create {
+            it.id + it.pid + it.name + it.age
+        }
+    }
 
-            offer(TestView).create(db.statementExecutor) {
-                offer(TestTable).orderBy {
-                    desc(it.id)
-                }.limit { 10 }.selectDistinct()
-            }
+    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.from(TestTable).alter {
+            it.number + it.data + index(it.id, it.name).ifNotExists()
+        }
 
-            offer(TestTable2).alter(db.statementExecutor) {
-                it.name + it.age
-            }
+        db.from(TestView).create {
+            offer(TestTable)
+                .orderBy { desc(it.id) }
+                .limit { 10 }
+                .selectDistinct()
+        }
 
-            offer(TestTable2).create(db.statementExecutor) {
-                it.id + it.pid + it.name + it.age
-            }
+        db.from(TestTable2).alter {
+            it.name + it.age
+        }
+
+        db.from(TestTable2).create {
+            it.id + it.pid + it.name + it.age
         }
     }
 

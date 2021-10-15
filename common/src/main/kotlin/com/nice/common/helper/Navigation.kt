@@ -25,7 +25,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nice.common.R
 import com.nice.common.widget.TitleAppBar
-import java.util.*
 import java.util.regex.Pattern
 
 class NavigationDestination(

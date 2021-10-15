@@ -36,7 +36,7 @@ import com.nice.sqlite.core.ddl.invoke
 import com.nice.sqlite.core.dml.delete
 import com.nice.sqlite.core.dml.on
 import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.statementExecutor
+import com.nice.sqlite.from
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -102,7 +102,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 }
 
                 val start = System.currentTimeMillis()
-                offer(TestTable).insertBatch(statementExecutor) {
+                from(TestTable).insertBatch {
                     for (bean in beans) {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
@@ -118,7 +118,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
 
                 val start2 = System.currentTimeMillis()
-                offer(TestTable).updateBatch(statementExecutor) {
+                from(TestTable).updateBatch {
                     for (bean in beans) {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
@@ -137,7 +137,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e("TAGTAG", "update time: ${System.currentTimeMillis() - start2}")
 
 
-                offer(TestTable2).insertBatch(statementExecutor) {
+                from(TestTable2).insertBatch {
                     for (index in 0..4) {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
@@ -149,7 +149,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     }
                 }
 
-                offer(TestTable).where { it.id eq 3 }.delete(statementExecutor)
+                from(TestTable).where { it.id eq 3 }.delete()
 
 //                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
 //                    Log.e("TAGTAG", it.toString())
@@ -163,9 +163,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 Log.e("TAGTAG", "==============================")
 
-                offer(TestTable2).join(TestTable).on { testTable2, testTable ->
+                from(TestTable2).join(TestTable).on { testTable2, testTable ->
                     testTable2.pid eq testTable.id
-                }.selectDistinct(statementExecutor) { testTable2, testTable ->
+                }.selectDistinct { testTable2, testTable ->
                     testTable2.name + testTable2.pid + testTable2.age + testTable.number
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())

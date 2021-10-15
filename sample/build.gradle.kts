@@ -43,7 +43,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":kotorm"))
-    implementation(project(":kbletooth"))
+    implementation(project(":kotble"))
     implementation(project(":kothttp"))
     implementation(project(":atomic"))
 }

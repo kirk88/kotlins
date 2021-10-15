@@ -1,18 +1,15 @@
 @file:Suppress("unused")
 
-package com.nice.sqlite.core.dml
+package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Predicate
-import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.ddl.Executable
-import com.nice.sqlite.core.ddl.Statement
-import com.nice.sqlite.core.ddl.Value
+import com.nice.sqlite.core.TableSubject
+import com.nice.sqlite.core.dml.WhereClause
 
 class UpdateStatement<T : Table>(
-    val subject: Subject<T>,
+    val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
     val assignments: Sequence<Value>,
     val whereClause: WhereClause<T>? = null
@@ -25,7 +22,7 @@ class UpdateStatement<T : Table>(
 }
 
 class UpdateBatchStatement<T : Table>(
-    val subject: Subject<T>,
+    val subject: TableSubject<T>,
     updateParts: Sequence<UpdatePart<T>>
 ) : Statement {
 
@@ -59,7 +56,7 @@ class UpdateBatchStatement<T : Table>(
 }
 
 class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
-    @PublishedApi internal val subject: Subject<T>
+    @PublishedApi internal val subject: TableSubject<T>
 ) : Sequence<UpdatePart<T>> {
 
     @PublishedApi
@@ -103,7 +100,7 @@ data class UpdatePart<T : Table>(
 }
 
 class UpdatePartBuilder<T : Table>(
-    @PublishedApi internal val subject: Subject<T>
+    @PublishedApi internal val subject: TableSubject<T>
 ) {
 
     private lateinit var values: Sequence<Value>

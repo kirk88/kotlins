@@ -1,7 +1,6 @@
 package com.nice.sqlite.core.ddl
 
 import android.database.Cursor
-import com.nice.sqlite.core.dml.*
 
 interface StatementExecutor {
 

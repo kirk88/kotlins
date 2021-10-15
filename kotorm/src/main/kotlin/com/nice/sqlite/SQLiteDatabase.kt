@@ -12,35 +12,13 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
-import com.nice.sqlite.core.*
-import com.nice.sqlite.core.ddl.Statement
-import com.nice.sqlite.core.ddl.StatementExecutor
-import com.nice.sqlite.core.ddl.Value
-import com.nice.sqlite.core.dml.*
+import com.nice.sqlite.core.ddl.*
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
 val SupportSQLiteDatabase.statementExecutor: StatementExecutor
     get() = SQLiteStatementExecutor(this)
-
-fun SupportSQLiteDatabase.from(view: View): StatementViewSubject {
-    return StatementViewSubject(view, statementExecutor)
-}
-
-fun <T : Table> SupportSQLiteDatabase.from(table: T): StatementSubject<T> {
-    return StatementSubject(table, statementExecutor)
-}
-
-data class StatementSubject<T : Table> @PublishedApi internal constructor(
-    override val table: T,
-    override val executor: StatementExecutor
-) : Subject<T>
-
-data class StatementViewSubject @PublishedApi internal constructor(
-    override val view: View,
-    override val executor: StatementExecutor
-) : ViewSubject
 
 private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabase) :
     StatementExecutor {

@@ -3,10 +3,9 @@
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
-import com.nice.sqlite.core.Subject
+import com.nice.sqlite.core.TableSubject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Definition
-import com.nice.sqlite.core.ddl.StatementExecutor
+import com.nice.sqlite.core.ddl.*
 
 data class OffsetClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -14,7 +13,7 @@ data class OffsetClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
     internal val limitClause: LimitClause<T>,
     @PublishedApi
-    internal val subject: Subject<T>,
+    internal val subject: TableSubject<T>,
     @PublishedApi
     internal val whereClause: WhereClause<T>? = null,
     @PublishedApi
@@ -26,9 +25,9 @@ data class OffsetClause<T : Table> @PublishedApi internal constructor(
 )
 
 @PublishedApi
-internal inline fun <T : Table> OffsetClause<T>.select(
-    distinct: Boolean,
-    selection: (T) -> Sequence<Definition>
+internal inline fun <T : Table> OffsetClause<T>.selectStatement(
+    selection: (T) -> Sequence<Definition>,
+    distinct: Boolean
 ): SelectStatement<T> {
     return SelectStatement(
         subject,
@@ -47,28 +46,14 @@ internal inline fun <T : Table> OffsetClause<T>.select(
 
 inline fun <T : Table> OffsetClause<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> {
-    return select(false, selection)
-}
-
-inline fun <T : Table> OffsetClause<T>.select(
-    executor: StatementExecutor,
-    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table> OffsetClause<T>.selectDistinct(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> {
-    return select(true, selection)
-}
-
-inline fun <T : Table> OffsetClause<T>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T) -> Sequence<Definition> = { emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return subject.executor.executeQuery(selectStatement(selection, true))
 }
 
 data class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -89,9 +74,9 @@ data class Offset2Clause<T : Table, T2 : Table> @PublishedApi internal construct
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
-    distinct: Boolean,
-    selection: (T, T2) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectStatement(
+    selection: (T, T2) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select2Statement<T, T2> {
     return Select2Statement(
         selection(
@@ -111,28 +96,14 @@ internal inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
 
 inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.select(
-    executor: StatementExecutor,
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectDistinct(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table> Offset2Clause<T, T2>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
 }
 
 data class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -153,9 +124,9 @@ data class Offset3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi intern
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
-    distinct: Boolean,
-    selection: (T, T2, T3) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectStatement(
+    selection: (T, T2, T3) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select3Statement<T, T2, T3> {
     return Select3Statement(
         selection(
@@ -176,28 +147,14 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>
 
 inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.select(
-    executor: StatementExecutor,
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectDistinct(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table> Offset3Clause<T, T2, T3>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
 }
 
 data class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -218,9 +175,9 @@ data class Offset4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @Publish
 )
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
-    distinct: Boolean,
-    selection: (T, T2, T3, T4) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.selectStatement(
+    selection: (T, T2, T3, T4) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> {
     return Select4Statement(
         selection(
@@ -242,26 +199,12 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Claus
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.select(
-    executor: StatementExecutor,
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.selectDistinct(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Offset4Clause<T, T2, T3, T4>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
 }

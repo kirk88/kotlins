@@ -11,7 +11,10 @@ import com.nice.bluetooth.gatt.GattStatus
 import com.nice.bluetooth.gatt.Response
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 

@@ -1,17 +1,13 @@
 @file:Suppress("unused")
 
-package com.nice.sqlite.core.dml
+package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Dialect
-import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.ddl.Executable
-import com.nice.sqlite.core.ddl.Statement
-import com.nice.sqlite.core.ddl.Value
+import com.nice.sqlite.core.TableSubject
 
 class InsertStatement<T : Table>(
-    val subject: Subject<T>,
+    val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
     val assignments: Sequence<Value>
 ) : Statement {
@@ -23,7 +19,7 @@ class InsertStatement<T : Table>(
 }
 
 class InsertBatchStatement<T : Table>(
-    val subject: Subject<T>,
+    val subject: TableSubject<T>,
     insertParts: Sequence<InsertPart>
 ) : Statement {
 
@@ -52,7 +48,7 @@ class InsertBatchStatement<T : Table>(
 }
 
 class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
-    @PublishedApi internal val subject: Subject<T>
+    @PublishedApi internal val subject: TableSubject<T>
 ) : Sequence<InsertPart> {
 
     @PublishedApi
@@ -93,7 +89,7 @@ class InsertPart(
 }
 
 class InsertPartBuilder<T : Table>(
-    @PublishedApi internal val subject: Subject<T>
+    @PublishedApi internal val subject: TableSubject<T>
 ) {
 
     private lateinit var values: Sequence<Value>

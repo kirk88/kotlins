@@ -4,11 +4,10 @@ import com.nice.sqlite.core.Dialect
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.ViewType
 import com.nice.sqlite.core.ddl.*
-import com.nice.sqlite.core.dml.*
 
 object SQLiteDialect : Dialect {
 
-    override fun <T : Table> build(statement: CreateStatement<T>): String {
+    override fun <T : Table> build(statement: TableCreateStatement<T>): String {
         val builder = StringBuilder()
 
         val columns = statement.definitions.filterIsInstance<Column<*>>()
@@ -32,7 +31,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun <T : Table> build(statement: AlterStatement<T>): String {
+    override fun <T : Table> build(statement: TableAlterStatement<T>): String {
         val builder = StringBuilder()
 
         val columns = statement.definitions.filterIsInstance<Column<*>>()
@@ -52,7 +51,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun <T : Table> build(statement: DropStatement<T>): String {
+    override fun <T : Table> build(statement: TableDropStatement<T>): String {
         val builder = StringBuilder()
 
         if (statement.definitions.none()) {
@@ -473,7 +472,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun build(statement: CreateViewStatement): String {
+    override fun build(statement: ViewCreateStatement): String {
         val builder = StringBuilder()
 
         builder.append("CREATE ")
@@ -491,7 +490,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    override fun build(statement: SelectViewStatement): String {
+    override fun build(statement: ViewSelectStatement): String {
         return "SELECT * FROM ${statement.subject.view.render()}"
     }
 

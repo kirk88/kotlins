@@ -12,7 +12,5 @@ enum class ConflictAlgorithm(
     Ignore("IGNORE"),
     Replace("REPLACE");
 
-    override fun toString(): String {
-        return value
-    }
+    override fun toString(): String = value
 }

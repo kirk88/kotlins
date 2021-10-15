@@ -6,11 +6,11 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("com.android.application") version "7.1.0-alpha13"
-        id("com.android.library") version "7.1.0-alpha13"
+        id("com.android.application") version "7.1.0-beta01"
+        id("com.android.library") version "7.1.0-beta01"
         id("org.jetbrains.kotlin.android") version "1.5.31"
         id("com.github.ben-manes.versions") version "0.39.0"
-        id("org.jetbrains.kotlin.jvm") version "1.5.30"
+        id("org.jetbrains.kotlin.jvm") version "1.5.31"
     }
 }
 dependencyResolutionManagement {
@@ -39,7 +39,7 @@ dependencyResolutionManagement {
             alias("kotlin-stdlib").to(
                 "org.jetbrains.kotlin",
                 "kotlin-stdlib"
-            ).version("1.5.30")
+            ).version("1.5.31")
 
             alias("kotlinx-coroutines-core").to(
                 "org.jetbrains.kotlinx",
@@ -210,4 +210,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "kotlins"
 rootProject.buildFileName = "build.gradle.kts"
-include(":atomic", ":kbletooth", ":common", ":kotorm", ":kothttp", "kotson", ":sample")
+include(":atomic", ":kotble", ":common", ":kotorm", ":kothttp", "kotson", ":sample")

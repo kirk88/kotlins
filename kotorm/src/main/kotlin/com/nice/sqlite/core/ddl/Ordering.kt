@@ -2,10 +2,6 @@
 
 package com.nice.sqlite.core.ddl
 
-import com.nice.sqlite.core.dml.MutableSequence
-import com.nice.sqlite.core.dml.OnceIterator
-import com.nice.sqlite.core.dml.mutableSequenceOf
-
 enum class SqlOrderDirection { ASC, DESC }
 
 interface Ordering : Sequence<Ordering>, FullRenderer {

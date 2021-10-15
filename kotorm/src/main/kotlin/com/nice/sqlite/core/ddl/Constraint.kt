@@ -11,9 +11,7 @@ enum class ColumnConstraintAction(
     Cascade("CASCADE"),
     NoAction("NO ACTION");
 
-    override fun toString(): String {
-        return value
-    }
+    override fun toString(): String = value
 }
 
 sealed class ColumnConstraint {

@@ -1,19 +1,17 @@
 @file:Suppress("unused")
 
-package com.nice.sqlite.core.dml
+package com.nice.sqlite.core.ddl
 
 import android.database.Cursor
 import com.nice.sqlite.core.Dialect
-import com.nice.sqlite.core.Subject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Definition
-import com.nice.sqlite.core.ddl.Statement
-import com.nice.sqlite.core.ddl.StatementExecutor
+import com.nice.sqlite.core.TableSubject
+import com.nice.sqlite.core.dml.*
 
 interface QueryStatement : Statement
 
 class SelectStatement<T : Table>(
-    val subject: Subject<T>,
+    val subject: TableSubject<T>,
     val definitions: Sequence<Definition>,
     val whereClause: WhereClause<T>? = null,
     val orderClause: OrderClause<T>? = null,
@@ -97,7 +95,7 @@ class UnionStatement(
 
 }
 
-inline fun QueryStatement.union(other: () -> QueryStatement): UnionStatement {
+inline infix fun QueryStatement.union(other: () -> QueryStatement): UnionStatement {
     return UnionStatement(this, other(), false)
 }
 

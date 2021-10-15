@@ -6,11 +6,9 @@ import android.database.Cursor
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
 
-interface Subject<T : Table> {
+interface TableSubject<T : Table> {
 
     val table: T
-
-    val executor: StatementExecutor
 
 }
 
@@ -18,173 +16,150 @@ interface ViewSubject {
 
     val view: View
 
-    val executor: StatementExecutor
-
 }
 
-inline fun ViewSubject.createStatement(statement: () -> QueryStatement): CreateViewStatement {
-    return CreateViewStatement(this, statement())
+fun <T : Table> TableSubject(table: T) = object : TableSubject<T> {
+    override val table: T = table
 }
+
+fun ViewSubject(view: View) = object : ViewSubject {
+    override val view: View = view
+}
+
+fun offer(view: View): ViewSubject = ViewSubject(view)
+
+fun <T : Table> offer(table: T): TableSubject<T> = TableSubject(table)
 
 inline fun ViewSubject.create(
     statement: () -> QueryStatement
-) {
-    executor.execute(createStatement(statement))
-}
+): ViewCreateStatement = ViewCreateStatement(this, statement())
 
-inline fun ViewSubject.selectStatement(): SelectViewStatement {
-    return SelectViewStatement(this)
-}
+inline fun ViewSubject.create(
+    executor: StatementExecutor,
+    statement: () -> QueryStatement
+) = executor.execute(create(statement))
 
-inline fun ViewSubject.select(): Cursor {
-    return executor.executeQuery(selectStatement())
-}
+fun ViewSubject.select(): ViewSelectStatement = ViewSelectStatement(this)
 
-inline fun <T : Table> Subject<T>.createStatement(definitions: (T) -> Sequence<Definition>): CreateStatement<T> {
-    return CreateStatement(this, definitions(table))
-}
+fun ViewSubject.select(executor: StatementExecutor): Cursor = executor.executeQuery(select())
 
-inline fun <T : Table> Subject<T>.create(
+inline fun <T : Table> TableSubject<T>.create(
     definitions: (T) -> Sequence<Definition>
-) {
-    executor.execute(createStatement(definitions))
-}
+): TableCreateStatement<T> = TableCreateStatement(this, definitions(table))
 
-inline fun <T : Table> Subject<T>.alterStatement(definitions: (T) -> Sequence<Definition>): AlterStatement<T> {
-    return AlterStatement(this, definitions(table))
-}
-
-inline fun <T : Table> Subject<T>.alter(
+inline fun <T : Table> TableSubject<T>.create(
+    executor: StatementExecutor,
     definitions: (T) -> Sequence<Definition>
-) {
-    executor.execute(alterStatement(definitions))
-}
+) = executor.execute(create(definitions))
 
-inline fun <T : Table> Subject<T>.dropStatement(
+inline fun <T : Table> TableSubject<T>.alter(
+    definitions: (T) -> Sequence<Definition>
+): TableAlterStatement<T> = TableAlterStatement(this, definitions(table))
+
+inline fun <T : Table> TableSubject<T>.alter(
+    executor: StatementExecutor,
+    definitions: (T) -> Sequence<Definition>
+) = executor.execute(alter(definitions))
+
+inline fun <T : Table> TableSubject<T>.drop(
     definitions: (T) -> Sequence<Definition> = { emptySequence() }
-): DropStatement<T> {
-    return DropStatement(this, definitions(table))
-}
+): TableDropStatement<T> = TableDropStatement(this, definitions(table))
 
-inline fun <T : Table> Subject<T>.drop(
+inline fun <T : Table> TableSubject<T>.drop(
+    executor: StatementExecutor,
     definitions: (T) -> Sequence<Definition> = { emptySequence() }
-) {
-    executor.execute(dropStatement(definitions))
-}
+) = executor.execute(drop(definitions))
 
-inline fun <T : Table, T2 : Table> Subject<T>.join(table2: T2): Join2Clause<T, T2> {
-    return Join2Clause(this, table2, JoinType.Inner)
-}
+fun <T : Table, T2 : Table> TableSubject<T>.join(table2: T2): Join2Clause<T, T2> =
+    Join2Clause(this, table2, JoinType.Inner)
 
-inline fun <T : Table, T2 : Table> Subject<T>.outerJoin(table2: T2): Join2Clause<T, T2> {
-    return Join2Clause(this, table2, JoinType.Outer)
-}
+fun <T : Table, T2 : Table> TableSubject<T>.outerJoin(table2: T2): Join2Clause<T, T2> =
+    Join2Clause(this, table2, JoinType.Outer)
 
-inline fun <T : Table, T2 : Table> Subject<T>.crossJoin(table2: T2): Join2Clause<T, T2> {
-    return Join2Clause(this, table2, JoinType.Cross)
-}
+fun <T : Table, T2 : Table> TableSubject<T>.crossJoin(table2: T2): Join2Clause<T, T2> =
+    Join2Clause(this, table2, JoinType.Cross)
 
-inline fun <T : Table> Subject<T>.where(predicate: (T) -> Predicate): WhereClause<T> {
-    return WhereClause(predicate(table), this)
-}
+inline fun <T : Table> TableSubject<T>.where(predicate: (T) -> Predicate): WhereClause<T> =
+    WhereClause(predicate(table), this)
 
-inline fun <T : Table> Subject<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> {
-    return GroupClause(group(table), this)
-}
+inline fun <T : Table> TableSubject<T>.groupBy(group: (T) -> Sequence<Column<*>>): GroupClause<T> =
+    GroupClause(group(table), this)
 
-inline fun <T : Table> Subject<T>.orderBy(order: (T) -> Sequence<Ordering>): OrderClause<T> {
-    return OrderClause(order(table), this)
-}
+inline fun <T : Table> TableSubject<T>.orderBy(order: (T) -> Sequence<Ordering>): OrderClause<T> =
+    OrderClause(order(table), this)
 
-inline fun <T : Table> Subject<T>.limit(limit: () -> Int): LimitClause<T> {
-    return LimitClause(limit(), this)
-}
+inline fun <T : Table> TableSubject<T>.limit(limit: () -> Int): LimitClause<T> =
+    LimitClause(limit(), this)
 
-inline fun <T : Table> Subject<T>.offset(offset: () -> Int): OffsetClause<T> {
-    return OffsetClause(offset(), limit { -1 }, this)
-}
+inline fun <T : Table> TableSubject<T>.offset(offset: () -> Int): OffsetClause<T> =
+    OffsetClause(offset(), limit { -1 }, this)
 
-inline fun <T : Table> Subject<T>.selectStatement(
+fun <T : Table> TableSubject<T>.delete(): DeleteStatement<T> = DeleteStatement(this)
+
+fun <T : Table> TableSubject<T>.delete(executor: StatementExecutor): Int =
+    executor.executeDelete(delete())
+
+inline fun <T : Table> TableSubject<T>.select(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> {
-    return SelectStatement(this, selection(table))
-}
+): SelectStatement<T> = SelectStatement(this, selection(table))
 
-inline fun <T : Table> Subject<T>.select(
+inline fun <T : Table> TableSubject<T>.select(
+    executor: StatementExecutor,
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): Cursor {
-    return executor.executeQuery(selectStatement(selection))
-}
+): Cursor = executor.executeQuery(select(selection))
 
-inline fun <T : Table> Subject<T>.selectDistinctStatement(
+inline fun <T : Table> TableSubject<T>.selectDistinct(
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): SelectStatement<T> {
-    return SelectStatement(this, selection(table), distinct = true)
-}
+): SelectStatement<T> = SelectStatement(this, selection(table), distinct = true)
 
-inline fun <T : Table> Subject<T>.selectDistinct(
+inline fun <T : Table> TableSubject<T>.selectDistinct(
+    executor: StatementExecutor,
     selection: (T) -> Sequence<Definition> = { emptySequence() }
-): Cursor {
-    return executor.executeQuery(selectDistinctStatement(selection))
-}
+): Cursor = executor.executeQuery(selectDistinct(selection))
 
-inline fun <T : Table> Subject<T>.updateStatement(
+inline fun <T : Table> TableSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Value>
-): UpdateStatement<T> {
-    return UpdateStatement(this, conflictAlgorithm, values(table))
-}
+): UpdateStatement<T> = UpdateStatement(this, conflictAlgorithm, values(table))
 
-inline fun <T : Table> Subject<T>.update(
+
+inline fun <T : Table> TableSubject<T>.update(
+    executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Value>
-): Int {
-    return executor.executeUpdate(updateStatement(conflictAlgorithm, values))
-}
+): Int = executor.executeUpdate(update(conflictAlgorithm, values))
 
-inline fun <T : Table> Subject<T>.updateBatchStatement(
+inline fun <T : Table> TableSubject<T>.updateBatch(
     buildAction: UpdateBatchBuilder<T>.() -> Unit
-): UpdateBatchStatement<T> {
-    return UpdateBatchStatement(this, UpdateBatchBuilder(this).apply(buildAction))
-}
+): UpdateBatchStatement<T> = UpdateBatchStatement(
+    this,
+    UpdateBatchBuilder(this).apply(buildAction)
+)
 
-inline fun <T : Table> Subject<T>.updateBatch(
+inline fun <T : Table> TableSubject<T>.updateBatch(
+    executor: StatementExecutor,
     buildAction: UpdateBatchBuilder<T>.() -> Unit
-): Int {
-    return executor.executeUpdateBatch(updateBatchStatement(buildAction))
-}
+): Int = executor.executeUpdateBatch(updateBatch(buildAction))
 
-inline fun <T : Table> Subject<T>.deleteStatement(): DeleteStatement<T> {
-    return DeleteStatement(this)
-}
-
-inline fun <T : Table> Subject<T>.delete(): Int {
-    return executor.executeDelete(deleteStatement())
-}
-
-inline fun <T : Table> Subject<T>.insertStatement(
+inline fun <T : Table> TableSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Value>
-): InsertStatement<T> {
-    return InsertStatement(this, conflictAlgorithm, values(table))
-}
+): InsertStatement<T> = InsertStatement(this, conflictAlgorithm, values(table))
 
-
-inline fun <T : Table> Subject<T>.insert(
+inline fun <T : Table> TableSubject<T>.insert(
+    executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     values: (T) -> Sequence<Value>
-): Long {
-    return executor.executeInsert(insertStatement(conflictAlgorithm, values))
-}
+): Long = executor.executeInsert(insert(conflictAlgorithm, values))
 
-inline fun <T : Table> Subject<T>.insertBatchStatement(
+inline fun <T : Table> TableSubject<T>.insertBatch(
     buildAction: InsertBatchBuilder<T>.() -> Unit
-): InsertBatchStatement<T> {
-    return InsertBatchStatement(this, InsertBatchBuilder(this).apply(buildAction))
-}
+): InsertBatchStatement<T> = InsertBatchStatement(
+    this,
+    InsertBatchBuilder(this).apply(buildAction)
+)
 
-inline fun <T : Table> Subject<T>.insertBatch(
+inline fun <T : Table> TableSubject<T>.insertBatch(
+    executor: StatementExecutor,
     buildAction: InsertBatchBuilder<T>.() -> Unit
-): Long {
-    return executor.executeInsertBatch(insertBatchStatement(buildAction))
-}
+): Long = executor.executeInsertBatch(insertBatch(buildAction))

@@ -4,12 +4,9 @@ package com.nice.sqlite.core.dml
 
 import android.database.Cursor
 import com.nice.sqlite.core.Predicate
-import com.nice.sqlite.core.Subject
+import com.nice.sqlite.core.TableSubject
 import com.nice.sqlite.core.Table
-import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.Definition
-import com.nice.sqlite.core.ddl.Ordering
-import com.nice.sqlite.core.ddl.StatementExecutor
+import com.nice.sqlite.core.ddl.*
 
 enum class JoinType {
     Inner,
@@ -25,7 +22,7 @@ enum class JoinType {
 
 data class Join2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val subject: Subject<T>,
+    internal val subject: TableSubject<T>,
     @PublishedApi
     internal val table2: T2,
     @PublishedApi
@@ -52,7 +49,7 @@ inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.using(using: (T, T2) -> Se
 
 data class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val subject: Subject<T>,
+    internal val subject: TableSubject<T>,
     @PublishedApi
     internal val table2: T2,
     @PublishedApi
@@ -104,9 +101,9 @@ inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.offset(offset: () -> Int
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
-    distinct: Boolean,
-    selection: (T, T2) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectStatement(
+    selection: (T, T2) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select2Statement<T, T2> {
     return Select2Statement(
         selection(
@@ -120,29 +117,14 @@ internal inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
-    executor: StatementExecutor,
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return subject.executor.executeQuery(selectStatement(selection, false))
 }
-
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectDistinct(
     selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
-): Select2Statement<T, T2> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2) -> Sequence<Definition> = { _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return subject.executor.executeQuery(selectStatement(selection, true))
 }
 
 data class Join3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -234,9 +216,9 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.offset(o
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
-    distinct: Boolean,
-    selection: (T, T2, T3) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectStatement(
+    selection: (T, T2, T3) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select3Statement<T, T2, T3> {
     return Select3Statement(
         selection(
@@ -251,28 +233,14 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
-    executor: StatementExecutor,
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectDistinct(
     selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
-): Select3Statement<T, T2, T3> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2, T3) -> Sequence<Definition> = { _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
 }
 
 data class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -385,9 +353,9 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, 
 }
 
 @PublishedApi
-internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
-    distinct: Boolean,
-    selection: (T, T2, T3, T4) -> Sequence<Definition>
+internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.selectStatement(
+    selection: (T, T2, T3, T4) -> Sequence<Definition>,
+    distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> {
     return Select4Statement(
         selection(
@@ -403,26 +371,12 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Claus
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> {
-    return select(false, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
-    executor: StatementExecutor,
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(select(selection))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, false))
 }
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.selectDistinct(
     selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
-): Select4Statement<T, T2, T3, T4> {
-    return select(true, selection)
-}
-
-inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.selectDistinct(
-    executor: StatementExecutor,
-    selection: (T, T2, T3, T4) -> Sequence<Definition> = { _, _, _, _ -> emptySequence() }
 ): Cursor {
-    return executor.executeQuery(selectDistinct(selection))
+    return joinOn3Clause.joinOn2Clause.subject.executor.executeQuery(selectStatement(selection, true))
 }

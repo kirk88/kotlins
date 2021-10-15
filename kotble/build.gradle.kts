@@ -58,9 +58,9 @@ tasks {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("kbletooth") {
+            create<MavenPublication>("kotble") {
                 groupId = "com.nice.kotlins"
-                artifactId = "kbletooth"
+                artifactId = "kotble"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(tasks.getByName("sourceJar"))
@@ -68,7 +68,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("kbletooth")
+                    name.set("kotble")
                     description.set("Kotlin Asynchronous Bluetooth Low-Energy")
                     licenses {
                         license {

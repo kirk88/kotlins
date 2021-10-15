@@ -1,9 +1,5 @@
 package com.nice.sqlite.core.ddl
 
-import com.nice.sqlite.core.dml.MutableSequence
-import com.nice.sqlite.core.dml.OnceIterator
-import com.nice.sqlite.core.dml.mutableSequenceOf
-
 data class Value(
     val column: Column<*>,
     val value: Any?

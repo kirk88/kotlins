@@ -5,7 +5,6 @@ package com.nice.kotson
 import com.google.gson.*
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.*
 
 private inline fun <T : Any> JsonElement?.nullOr(block: JsonElement.() -> T): T? = if (this == null || isJsonNull) null else block()
 

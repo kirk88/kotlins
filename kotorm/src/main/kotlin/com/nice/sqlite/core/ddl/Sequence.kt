@@ -1,4 +1,4 @@
-package com.nice.sqlite.core.dml
+package com.nice.sqlite.core.ddl
 
 interface MutableSequence<E> : Sequence<E> {
 

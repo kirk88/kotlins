@@ -1,13 +1,12 @@
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.*
-import com.nice.sqlite.core.dml.*
 
 interface Dialect {
 
-    fun <T : Table> build(statement: CreateStatement<T>): String
-    fun <T : Table> build(statement: AlterStatement<T>): String
-    fun <T : Table> build(statement: DropStatement<T>): String
+    fun <T : Table> build(statement: TableCreateStatement<T>): String
+    fun <T : Table> build(statement: TableAlterStatement<T>): String
+    fun <T : Table> build(statement: TableDropStatement<T>): String
 
     fun <T : Table> build(statement: SelectStatement<T>): String
     fun <T : Table, T2 : Table> build(statement: Select2Statement<T, T2>): String
@@ -20,7 +19,7 @@ interface Dialect {
 
     fun build(statement: UnionStatement): String
 
-    fun build(statement: CreateViewStatement): String
-    fun build(statement: SelectViewStatement): String
+    fun build(statement: ViewCreateStatement): String
+    fun build(statement: ViewSelectStatement): String
 
 }
