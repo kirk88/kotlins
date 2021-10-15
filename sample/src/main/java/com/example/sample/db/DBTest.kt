@@ -8,6 +8,8 @@ import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ColumnConstraintAction
 import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
+import com.nice.sqlite.core.dml.limit
+import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.from
 import kotlinx.coroutines.channels.Channel
 
@@ -78,7 +80,8 @@ object TestTable2 : Table("test2") {
 
 object DB : ManagedSQLiteOpenHelper(
     applicationContext,
-    "test_db.db"
+    "test_db.db",
+    20
 ) {
 
     override fun onConfigure(db: SupportSQLiteDatabase) {
@@ -86,39 +89,39 @@ object DB : ManagedSQLiteOpenHelper(
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) {
-        db.from(TestTable).create {
+        offer(TestTable).create() {
             it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
         }
 
-        db.from(TestView).create {
+        offer(TestView).create {
             offer(TestTable)
                 .orderBy { desc(it.id) }
                 .limit { 10 }
                 .selectDistinct()
         }
 
-        db.from(TestTable2).create {
+        offer(TestTable2).create {
             it.id + it.pid + it.name + it.age
         }
     }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.from(TestTable).alter {
+        offer(TestTable).alter {
             it.number + it.data + index(it.id, it.name).ifNotExists()
         }
 
-        db.from(TestView).create {
+        offer(TestView).create {
             offer(TestTable)
                 .orderBy { desc(it.id) }
                 .limit { 10 }
                 .selectDistinct()
         }
 
-        db.from(TestTable2).alter {
+        offer(TestTable2).alter {
             it.name + it.age
         }
 
-        db.from(TestTable2).create {
+        offer(TestTable2).create {
             it.id + it.pid + it.name + it.age
         }
     }

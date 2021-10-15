@@ -126,11 +126,19 @@ abstract class ManagedSQLiteOpenHelper(
                         this@ManagedSQLiteOpenHelper.onCreate(db)
                     }
 
-                    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                    override fun onUpgrade(
+                        db: SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int
+                    ) {
                         this@ManagedSQLiteOpenHelper.onUpgrade(db, oldVersion, newVersion)
                     }
 
-                    override fun onDowngrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                    override fun onDowngrade(
+                        db: SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int
+                    ) {
                         this@ManagedSQLiteOpenHelper.onDowngrade(db, oldVersion, newVersion)
                     }
 
@@ -148,7 +156,10 @@ abstract class ManagedSQLiteOpenHelper(
     private val counter = AtomicInteger()
     private var db: SupportSQLiteDatabase? = null
 
-    fun <T> use(transaction: Transaction = Transaction.None, action: SupportSQLiteDatabase.() -> T): T {
+    fun <T> use(
+        transaction: Transaction = Transaction.None,
+        action: SupportSQLiteDatabase.() -> T
+    ): T {
         try {
             return openDatabase().run {
                 if (transaction == Transaction.None) {
@@ -196,10 +207,7 @@ abstract class ManagedSQLiteOpenHelper(
     open fun onOpen(db: SupportSQLiteDatabase) {}
 
     open fun onCorruption(db: SupportSQLiteDatabase) {
-        Log.e(
-            TAG,
-            "Corruption reported by sqlite on database: " + db.path
-        )
+        Log.e(TAG, "Corruption reported by sqlite on database: " + db.path)
         if (!db.isOpen) {
             deleteDatabaseFile(db.path)
             return
@@ -226,28 +234,19 @@ abstract class ManagedSQLiteOpenHelper(
     }
 
     private fun deleteDatabaseFile(fileName: String) {
-        if (fileName.equals(":memory:", ignoreCase = true) || fileName.trim { it <= ' ' }.isEmpty()) {
+        if (fileName.equals(":memory:", ignoreCase = true)
+            || fileName.trim { it <= ' ' }.isEmpty()
+        ) {
             return
         }
         Log.w(TAG, "deleting the database file: $fileName")
         try {
-            try {
-                val deleted = File(fileName).delete()
-                if (!deleted) {
-                    Log.e(
-                        TAG,
-                        "Could not delete the database file $fileName"
-                    )
-                }
-            } catch (error: Exception) {
-                Log.e(
-                    TAG,
-                    "error while deleting corrupted database file",
-                    error
-                )
+            val deleted = File(fileName).delete()
+            if (!deleted) {
+                Log.e(TAG, "Could not delete the database file $fileName")
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "delete failed: ", e)
+        } catch (error: Exception) {
+            Log.e(TAG, "error while deleting corrupted database file", error)
         }
     }
 
