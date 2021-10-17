@@ -9,7 +9,7 @@ import com.nice.common.adapter.anim.ScaleInAnimation
 import com.nice.common.adapter.plusAssign
 import com.nice.common.app.NiceFragment
 import com.nice.common.helper.adapterBuilder
-import com.nice.common.helper.bindContentView
+import com.nice.common.helper.setContentView
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.divider.GridDividerItemDecoration
 
@@ -28,7 +28,7 @@ class SecondFragment : NiceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bindContentView(binding)
+        setContentView(binding)
 
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.RED, 10))

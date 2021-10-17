@@ -23,7 +23,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bindContentView(binding)
+        setContentView(binding)
 
         val navView = findViewById<BottomNavigationView>(R.id.nav_view)
 

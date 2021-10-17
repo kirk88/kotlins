@@ -22,7 +22,7 @@ class ThirdFragment : NiceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bindContentView(binding)
+        setContentView(binding)
 
         val adapter = adapterBuilder<String, ItemViewHolder>(requireContext(),
             mutableListOf<String>().apply {
