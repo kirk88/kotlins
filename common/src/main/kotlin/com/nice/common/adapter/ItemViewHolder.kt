@@ -36,31 +36,31 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         }
     }
 
-    fun setOnChildClickListener(clickListener: View.OnClickListener) {
+    internal fun setOnChildClickListener(clickListener: View.OnClickListener) {
         clickViews.map { id -> findViewById<View?>(id) }.forEach {
             it?.setOnClickListener(clickListener)
         }
     }
 
-    fun setOnChildLongClickListener(longClickListener: View.OnLongClickListener) {
+    internal fun setOnChildLongClickListener(longClickListener: View.OnLongClickListener) {
         longClickViews.map { id -> findViewById<View?>(id) }.forEach {
             it?.setOnLongClickListener(longClickListener)
         }
     }
 
-    fun setOnClickListener(clickListener: View.OnClickListener) {
+    internal fun setOnClickListener(clickListener: View.OnClickListener) {
         itemView.setOnClickListener(clickListener)
     }
 
-    fun removeOnClickListener() {
+    internal fun removeOnClickListener() {
         itemView.setOnClickListener(null)
     }
 
-    fun setOnLongClickListener(longClickListener: View.OnLongClickListener) {
+    internal fun setOnLongClickListener(longClickListener: View.OnLongClickListener) {
         itemView.setOnLongClickListener(longClickListener)
     }
 
-    fun removeOnLongClickListener() {
+    internal fun removeOnLongClickListener() {
         itemView.setOnLongClickListener(null)
     }
 
