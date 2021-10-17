@@ -70,7 +70,7 @@ inline fun <T : Table> TableSubject<T>.drop(
     definitions: (T) -> Sequence<Definition> = { emptySequence() }
 ) = executor.execute(drop(definitions))
 
-fun <T : Table, T2 : Table> TableSubject<T>.join(table2: T2): Join2Clause<T, T2> =
+fun <T : Table, T2 : Table> TableSubject<T>.innerJoin(table2: T2): Join2Clause<T, T2> =
     Join2Clause(this, table2, JoinType.Inner)
 
 fun <T : Table, T2 : Table> TableSubject<T>.outerJoin(table2: T2): Join2Clause<T, T2> =

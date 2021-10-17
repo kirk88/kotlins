@@ -39,14 +39,16 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 2
+val versionPatch = 0
 
 tasks {
-    register<com.android.build.gradle.tasks.SourceJarTask>("sourceJar") {
-        archiveClassifier.set("source")
+    register<com.android.build.gradle.tasks.SourceJarTask>("sourcesJar") {
+        variantName = "sources"
+        archiveClassifier.set("sources")
     }
 
     register<com.android.build.gradle.tasks.JavaDocJarTask>("javadocJar") {
+        variantName = "javadoc"
         archiveClassifier.set("javadoc")
     }
 }
@@ -59,7 +61,7 @@ afterEvaluate {
                 artifactId = "kotorm"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
-                artifact(tasks.getByName("sourceJar"))
+                artifact(tasks.getByName("sourcesJar"))
                 artifact(tasks.getByName("javadocJar"))
                 artifact(tasks.getByName("bundleReleaseAar"))
 

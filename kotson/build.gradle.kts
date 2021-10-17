@@ -21,41 +21,30 @@ val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("kotson") {
-                groupId = "com.nice.kotlins"
-                artifactId = "kotson"
-                version = "${versionMajor}.${versionMinor}.${versionPatch}"
+publishing {
+    publications {
+        create<MavenPublication>("kotson") {
+            groupId = "com.nice.kotlins"
+            artifactId = "kotson"
+            version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
-                from(components["java"])
+            from(components["java"])
 
-                pom {
-                    name.set("kotson")
-                    description.set("Kotlin extensions for JSON manipulation via Gson")
-                    licenses {
-                        license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                        }
-                    }
-                    withXml {
-                        val dependenciesNode = asNode().appendNode("dependencies")
-                        configurations.implementation.get().allDependencies.forEach { dependency ->
-                            val dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", dependency.group)
-                            dependencyNode.appendNode("artifactId", dependency.name)
-                            dependencyNode.appendNode("version", dependency.version)
-                        }
+            pom {
+                name.set("kotson")
+                description.set("Kotlin extensions for JSON manipulation via Gson")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
             }
         }
-        repositories {
-            val deployPath = file(requireNotNull(properties["libs.deployPath"]))
-            maven("file://${deployPath.absolutePath}")
-        }
+    }
+    repositories {
+        val deployPath = file(requireNotNull(properties["libs.deployPath"]))
+        maven("file://${deployPath.absolutePath}")
     }
 }
 

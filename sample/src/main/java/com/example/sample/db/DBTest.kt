@@ -10,8 +10,7 @@ import com.nice.sqlite.core.ddl.desc
 import com.nice.sqlite.core.ddl.index
 import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.selectDistinct
-import com.nice.sqlite.from
-import kotlinx.coroutines.channels.Channel
+import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
     val id: Long = 0,
@@ -89,39 +88,39 @@ object DB : ManagedSQLiteOpenHelper(
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) {
-        offer(TestTable).create() {
+        offer(TestTable).create(db.statementExecutor) {
             it.id + it.name + it.age + it.flag + it.number + it.data + index(it.id, it.name)
         }
 
-        offer(TestView).create {
+        offer(TestView).create(db.statementExecutor) {
             offer(TestTable)
                 .orderBy { desc(it.id) }
                 .limit { 10 }
                 .selectDistinct()
         }
 
-        offer(TestTable2).create {
+        offer(TestTable2).create(db.statementExecutor) {
             it.id + it.pid + it.name + it.age
         }
     }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        offer(TestTable).alter {
+        offer(TestTable).alter(db.statementExecutor) {
             it.number + it.data + index(it.id, it.name).ifNotExists()
         }
 
-        offer(TestView).create {
+        offer(TestView).create(db.statementExecutor) {
             offer(TestTable)
                 .orderBy { desc(it.id) }
                 .limit { 10 }
                 .selectDistinct()
         }
 
-        offer(TestTable2).alter {
+        offer(TestTable2).alter(db.statementExecutor) {
             it.name + it.age
         }
 
-        offer(TestTable2).create {
+        offer(TestTable2).create(db.statementExecutor) {
             it.id + it.pid + it.name + it.age
         }
     }

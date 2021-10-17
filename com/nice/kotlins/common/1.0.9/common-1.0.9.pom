@@ -5,6 +5,8 @@
   <artifactId>common</artifactId>
   <version>1.0.9</version>
   <packaging>aar</packaging>
+  <name>common</name>
+  <description>A sweet set of kotlin common tools</description>
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>
@@ -15,7 +17,7 @@
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
-      <version>1.5.30</version>
+      <version>1.5.31</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
@@ -115,7 +117,7 @@
     <dependency>
       <groupId>androidx.databinding</groupId>
       <artifactId>viewbinding</artifactId>
-      <version>7.1.0-alpha13</version>
+      <version>7.1.0-beta01</version>
     </dependency>
   </dependencies>
 </project>

@@ -58,11 +58,13 @@ val versionMinor = 0
 val versionPatch = 9
 
 tasks {
-    register<com.android.build.gradle.tasks.SourceJarTask>("sourceJar") {
-        archiveClassifier.set("source")
+    register<com.android.build.gradle.tasks.SourceJarTask>("sourcesJar") {
+        variantName = "sources"
+        archiveClassifier.set("sources")
     }
 
     register<com.android.build.gradle.tasks.JavaDocJarTask>("javadocJar") {
+        variantName = "javadoc"
         archiveClassifier.set("javadoc")
     }
 }
@@ -75,7 +77,7 @@ afterEvaluate {
                 artifactId = "common"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
-                artifact(tasks.getByName("sourceJar"))
+                artifact(tasks.getByName("sourcesJar"))
                 artifact(tasks.getByName("javadocJar"))
                 artifact(tasks.getByName("bundleReleaseAar"))
 
