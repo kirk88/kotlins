@@ -30,6 +30,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    sourceSets {
+        named("main") {
+            java.srcDir("src/main/kotlin")
+        }
+    }
 }
 
 dependencies {
@@ -41,16 +47,9 @@ val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0
 
-tasks {
-    register<com.android.build.gradle.tasks.SourceJarTask>("sourcesJar") {
-        variantName = "sources"
-        archiveClassifier.set("sources")
-    }
-
-    register<com.android.build.gradle.tasks.JavaDocJarTask>("javadocJar") {
-        variantName = "javadoc"
-        archiveClassifier.set("javadoc")
-    }
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
 afterEvaluate {
@@ -61,8 +60,7 @@ afterEvaluate {
                 artifactId = "kotorm"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
-                artifact(tasks.getByName("sourcesJar"))
-                artifact(tasks.getByName("javadocJar"))
+                artifact(sourcesJar)
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {

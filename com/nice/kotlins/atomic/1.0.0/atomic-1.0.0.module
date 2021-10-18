@@ -30,10 +30,10 @@
           "name": "atomic-1.0.0.jar",
           "url": "atomic-1.0.0.jar",
           "size": 30146,
-          "sha512": "9f64dadc25634deb880742e4ac2097df72efe718f705310ffa146b2b16715d7a004f0edd6ebba79afb2f0264ea4dee290113fd4949662fecceea9d8462cbf2c1",
-          "sha256": "5650ec71fd62495c9826f6eb5c070c4a124826fdb8813c4fc5e39d1f8b767ec1",
-          "sha1": "f2ea939364a72fa2cc843b9578e1874fe3efb823",
-          "md5": "a10ce127fc97b6b9dab49d087863c312"
+          "sha512": "df50f122bcfaf8dbf2f2b0f750fa513106d0d07affbe0d26353c2456906f10878c506f0556e25364661f1ece239d445420660a56908f35460fb2fdeddf5a7d97",
+          "sha256": "3de9068b877cca9f42718455fdb6341774ca7d43dde1b79c357872861817ffc0",
+          "sha1": "8068e88ae55242d2671f66431807c5409c73e91e",
+          "md5": "ee859d6f5a0479d1790ede22bc31b7a5"
         }
       ]
     },
@@ -62,10 +62,10 @@
           "name": "atomic-1.0.0.jar",
           "url": "atomic-1.0.0.jar",
           "size": 30146,
-          "sha512": "9f64dadc25634deb880742e4ac2097df72efe718f705310ffa146b2b16715d7a004f0edd6ebba79afb2f0264ea4dee290113fd4949662fecceea9d8462cbf2c1",
-          "sha256": "5650ec71fd62495c9826f6eb5c070c4a124826fdb8813c4fc5e39d1f8b767ec1",
-          "sha1": "f2ea939364a72fa2cc843b9578e1874fe3efb823",
-          "md5": "a10ce127fc97b6b9dab49d087863c312"
+          "sha512": "df50f122bcfaf8dbf2f2b0f750fa513106d0d07affbe0d26353c2456906f10878c506f0556e25364661f1ece239d445420660a56908f35460fb2fdeddf5a7d97",
+          "sha256": "3de9068b877cca9f42718455fdb6341774ca7d43dde1b79c357872861817ffc0",
+          "sha1": "8068e88ae55242d2671f66431807c5409c73e91e",
+          "md5": "ee859d6f5a0479d1790ede22bc31b7a5"
         }
       ]
     },
@@ -82,10 +82,10 @@
           "name": "atomic-1.0.0-sources.jar",
           "url": "atomic-1.0.0-sources.jar",
           "size": 5978,
-          "sha512": "73d6c912996c587ab9c643d60b5a9b3e7d3ae7b6648f110b295aabdef1193d2a731289ef05b26d6083eac876a871ed22b65620c2689d5a1eeffb632ee80b46a2",
-          "sha256": "fd68f2cc673e92f5e84be693cae9e99404ff7174c2b2ed57cf5c86a2c1ba41c3",
-          "sha1": "53f9c788428c3749f7e9da03f4fdc03062202fd6",
-          "md5": "4a0e737e2f1bd762e3be5d8146734b34"
+          "sha512": "0080ba8c6c229dc699956d3e2f947868ba1d90f49db5ed076ddc1b863e5e50c07017ec014a81bda5ece6cb46e25bd46237bac5070711d9dbeea72e8a85a4989a",
+          "sha256": "c43dc232ca5cd275201e5cc68c58fd4fa6c97568fab91803769401b6c6e8621d",
+          "sha1": "153ec72e63b41f44f2333100395c5c089386cf86",
+          "md5": "5d3f029b77f441780f889f169d2a4019"
         }
       ]
     },
@@ -102,10 +102,10 @@
           "name": "atomic-1.0.0-javadoc.jar",
           "url": "atomic-1.0.0-javadoc.jar",
           "size": 261,
-          "sha512": "27ac30a0d47edf69e5fd2e136edd367df9ced7159688564a2705e5776fece187701bc4f40d99e335baeba8f0f3f2e2453edd0b5e63af13df918dc2b01a4cca45",
-          "sha256": "f0ee91f206419631ddb6a28ea360a9388d5dddc9d610fb860278cfe3f2a49bad",
-          "sha1": "a631146909cf8f0e4383997b1b1731fd5ee1e259",
-          "md5": "6d6f9aa930e444dc51e43d52a2ddd990"
+          "sha512": "d8736a8a1e0ffc42fe11e811743b5aab410245d03be48391c249997be4fd004c7b8241dae5d5343fbf8056eaf233a5b5cb51ccc8cf5a37c52e05247e8569a6ff",
+          "sha256": "578739222e795e0e1e752eaaa61e4ec2f26517f65d3ea1e596337ac5707ab245",
+          "sha1": "0bd2261454fff89639415285d08b21622b5796de",
+          "md5": "a359e60579a3a37072a39c82f17736d3"
         }
       ]
     }

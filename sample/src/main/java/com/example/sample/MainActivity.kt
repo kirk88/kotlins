@@ -18,6 +18,7 @@ import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerLevel
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
+import com.nice.bluetooth.common.atomic
 import com.nice.bluetooth.peripheral
 import com.nice.common.adapter.ItemViewHolder
 import com.nice.common.adapter.SimpleRecyclerAdapter
