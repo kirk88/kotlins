@@ -11,8 +11,6 @@ sealed class ColumnConstraintAction(
     object Cascade : ColumnConstraintAction("CASCADE")
     object NoAction : ColumnConstraintAction("NO ACTION")
 
-    class Named(name: String) : ColumnConstraintAction(name)
-
     override fun toString(): String = name
 }
 
