@@ -170,9 +170,7 @@ class Index internal constructor(
         }
     }
 
-    override fun toString(): String {
-        return name
-    }
+    override fun toString(): String = name
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -206,8 +204,27 @@ fun index(
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
 
-class Function internal constructor(private val name: String, private val column: Column<*>) :
+class Function internal constructor(private val name: String, private val values: Array<out Any>) :
     Definition {
+
+    override fun render(): String = buildString {
+        append(name)
+        values.joinTo(this, prefix = "(", postfix = ")") {
+            if (it is Column<*>) it.render() else it.toSqlString()
+        }
+    }
+
+    override fun fullRender(): String = buildString {
+        append(name)
+        values.joinTo(this, prefix = "(", postfix = ")") {
+            if (it is Column<*>) it.fullRender() else it.toSqlString()
+        }
+    }
+
+    override fun toString(): String = buildString {
+        append(name)
+        values.joinTo(this, prefix = "(", postfix = ")")
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -216,31 +233,30 @@ class Function internal constructor(private val name: String, private val column
         other as Function
 
         if (name != other.name) return false
-        if (column != other.column) return false
+        if (!values.contentEquals(other.values)) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
-        result = 31 * result + column.hashCode()
+        result = 31 * result + values.contentHashCode()
         return result
     }
 
-    override fun render(): String = "$name(${column.render()})"
-
-    override fun fullRender(): String = "$name(${column.fullRender()})"
-
-    override fun toString(): String = "$name(${column.name})"
-
 }
 
-fun count(column: Column<*>): Definition = Function("count", column)
-fun max(column: Column<*>): Definition = Function("max", column)
-fun min(column: Column<*>): Definition = Function("min", column)
-fun avg(column: Column<*>): Definition = Function("avg", column)
-fun sum(column: Column<*>): Definition = Function("sum", column)
-fun abs(column: Column<*>): Definition = Function("abs", column)
-fun upper(column: Column<*>): Definition = Function("upper", column)
-fun lower(column: Column<*>): Definition = Function("lower", column)
-fun length(column: Column<*>): Definition = Function("length", column)
+fun function(
+    name: String,
+    vararg values: Any
+): Function = Function(name, values)
+
+fun count(column: Column<*>): Definition = function("count", column)
+fun max(column: Column<*>): Definition = function("max", column)
+fun min(column: Column<*>): Definition = function("min", column)
+fun avg(column: Column<*>): Definition = function("avg", column)
+fun sum(column: Column<*>): Definition = function("sum", column)
+fun abs(column: Column<*>): Definition = function("abs", column)
+fun upper(column: Column<*>): Definition = function("upper", column)
+fun lower(column: Column<*>): Definition = function("lower", column)
+fun length(column: Column<*>): Definition = function("length", column)
