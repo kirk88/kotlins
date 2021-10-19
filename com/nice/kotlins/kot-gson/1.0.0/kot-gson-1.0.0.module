@@ -1,0 +1,129 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.nice.kotlins",
+    "module": "kot-gson",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.8.8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "kot-gson-1.0.0.jar",
+          "url": "kot-gson-1.0.0.jar",
+          "size": 214768,
+          "sha512": "5babc9f303d0abaa2fab94b04e9acc7f91ea20e41e0c8016753625e3df81a3c23c48f599dc02aaffe765aa6ceec56aeb25441f2c2ccb37e33a9d7315f2beb4da",
+          "sha256": "5b6231424c2ab0d568ffa0e97b984ffeda24d89d810ee39f90f42709b0e86c32",
+          "sha1": "b6347b6b536e356e50465d3defe2f16cbbd461da",
+          "md5": "56c4fbf4c8b2669bec5f5451b5e34e4a"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "1.5.31"
+          }
+        },
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.8.8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "kot-gson-1.0.0.jar",
+          "url": "kot-gson-1.0.0.jar",
+          "size": 214768,
+          "sha512": "5babc9f303d0abaa2fab94b04e9acc7f91ea20e41e0c8016753625e3df81a3c23c48f599dc02aaffe765aa6ceec56aeb25441f2c2ccb37e33a9d7315f2beb4da",
+          "sha256": "5b6231424c2ab0d568ffa0e97b984ffeda24d89d810ee39f90f42709b0e86c32",
+          "sha1": "b6347b6b536e356e50465d3defe2f16cbbd461da",
+          "md5": "56c4fbf4c8b2669bec5f5451b5e34e4a"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-gson-1.0.0-sources.jar",
+          "url": "kot-gson-1.0.0-sources.jar",
+          "size": 7842,
+          "sha512": "34d13f53b81ea8b164c8f0df767379792ac7c21715da1d78268b2ca34dc3d9bf69442b1a16a094296cc764c8e4dc36c151a43242c66edc1bcc95b762390397c1",
+          "sha256": "077408c63afd99429639c78d03063e6feda79d47f71cd4e1b95b22687eadd7eb",
+          "sha1": "4e30b71bc7ed905f3e4492d2aaa8ca4893fd0e0a",
+          "md5": "1d2ee5c37a1a5b22623a58c0079af503"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-gson-1.0.0-javadoc.jar",
+          "url": "kot-gson-1.0.0-javadoc.jar",
+          "size": 261,
+          "sha512": "414828456e3e5b9270e77b35bf57a159c6c216b7df4a045cca604ba2d26784595ce767800c247ef152041fc400f15694e4e3ceded3d96cabe09ba68a72c3b260",
+          "sha256": "2d6b4283d9da6e9892b31980aab6f1b82bf7538c86fe183d9e19d8040334143d",
+          "sha1": "ef06ce352e77097c65727c35bc80688ac2d16df3",
+          "md5": "a47ad74b31024d07b45f071ae89ad6e9"
+        }
+      ]
+    }
+  ]
+}

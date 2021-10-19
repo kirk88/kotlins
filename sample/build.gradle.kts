@@ -46,4 +46,5 @@ dependencies {
     implementation(project(":kot-bluetooth"))
     implementation(project(":kot-okhttp"))
     implementation(project(":kot-atomic"))
+    implementation(project(":kot-gson"))
 }
