@@ -7,14 +7,13 @@ plugins {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-
+    
     withSourcesJar()
     withJavadocJar()
 }
 
 dependencies {
     implementation(libs.kotlin.stdlib)
-    api(libs.google.gson)
 }
 
 val versionMajor = 1
@@ -23,16 +22,16 @@ val versionPatch = 0
 
 publishing {
     publications {
-        create<MavenPublication>("kotson") {
+        create<MavenPublication>("maven") {
             groupId = "com.nice.kotlins"
-            artifactId = "kotson"
+            artifactId = "kot-atomic"
             version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
             from(components["java"])
 
             pom {
-                name.set("kotson")
-                description.set("Kotlin extensions for JSON manipulation via Gson")
+                name.set("atomic")
+                description.set("Kotlin atomic operations")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")

@@ -210,4 +210,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "kotlins"
 rootProject.buildFileName = "build.gradle.kts"
-include(":atomic", ":kotble", ":common", ":kotorm", ":kothttp", "kotson", ":sample")
+include(":kot-atomic", ":kot-bluetooth", ":kot-common", ":kot-sqlite", ":kot-okhttp", "kotson", ":sample")

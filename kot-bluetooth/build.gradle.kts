@@ -58,9 +58,9 @@ val sourcesJar by tasks.creating(Jar::class) {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("kotble") {
+            create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
-                artifactId = "kotble"
+                artifactId = "kot-bluetooth"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(sourcesJar)

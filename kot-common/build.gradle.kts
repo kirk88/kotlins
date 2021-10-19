@@ -12,6 +12,10 @@ android {
         targetSdk = androids.versions.targetSdk.get().toInt()
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,6 +33,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
     sourceSets {
@@ -39,8 +44,19 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
-    api(libs.bundles.androidx.sqlite)
+    api(libs.kotlin.stdlib)
+    api(libs.bundles.kotlinx.coroutines)
+    api(libs.bundles.androidx.common.app)
+    api(libs.bundles.androidx.common.view)
+    api(libs.bundles.androidx.lifecycle)
+    api(libs.bundles.androidx.datastore)
+    api(libs.androidx.setup)
+    api(libs.androidx.multidex)
+    api(libs.google.material)
+    api(libs.coil) {
+        exclude("com.squareup.okhttp3", "okhttp")
+        exclude("com.squareup.okio", "okio")
+    }
 }
 
 val versionMajor = 1
@@ -55,17 +71,17 @@ val sourcesJar by tasks.creating(Jar::class) {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("kotorm") {
+            create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
-                artifactId = "kotorm"
+                artifactId = "kot-common"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(sourcesJar)
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("kotorm")
-                    description.set("A ORM framework for kotlin")
+                    name.set("common")
+                    description.set("A sweet set of kotlin common tools")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")

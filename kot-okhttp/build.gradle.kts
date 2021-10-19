@@ -57,9 +57,9 @@ val sourcesJar by tasks.creating(Jar::class) {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("kothttp") {
+            create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
-                artifactId = "kothttp"
+                artifactId = "kot-okhttp"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(sourcesJar)

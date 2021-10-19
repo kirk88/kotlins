@@ -12,10 +12,6 @@ android {
         targetSdk = androids.versions.targetSdk.get().toInt()
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -33,7 +29,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
     sourceSets {
@@ -44,23 +39,12 @@ android {
 }
 
 dependencies {
-    api(libs.kotlin.stdlib)
-    api(libs.bundles.kotlinx.coroutines)
-    api(libs.bundles.androidx.common.app)
-    api(libs.bundles.androidx.common.view)
-    api(libs.bundles.androidx.lifecycle)
-    api(libs.bundles.androidx.datastore)
-    api(libs.androidx.setup)
-    api(libs.androidx.multidex)
-    api(libs.google.material)
-    api(libs.coil) {
-        exclude("com.squareup.okhttp3", "okhttp")
-        exclude("com.squareup.okio", "okio")
-    }
+    implementation(libs.kotlin.stdlib)
+    api(libs.bundles.androidx.sqlite)
 }
 
 val versionMajor = 1
-val versionMinor = 1
+val versionMinor = 0
 val versionPatch = 0
 
 val sourcesJar by tasks.creating(Jar::class) {
@@ -71,17 +55,17 @@ val sourcesJar by tasks.creating(Jar::class) {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("common") {
+            create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
-                artifactId = "common"
+                artifactId = "kot-sqlite"
                 version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(sourcesJar)
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("common")
-                    description.set("A sweet set of kotlin common tools")
+                    name.set("kotorm")
+                    description.set("A sqlite framework for kotlin")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")

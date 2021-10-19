@@ -59,6 +59,8 @@ abstract class Column<T : Any>(
         _meta = _meta.copy(onDeleteAction = action)
     }
 
+    operator fun invoke(value: T): Value = Value(this, value)
+
     override fun render(): String = name.surrounding()
 
     override fun fullRender(): String = "${table.render()}.${name.surrounding()}"
