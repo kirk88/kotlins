@@ -12,7 +12,6 @@ import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.DB
 import com.example.sample.db.DBTest
 import com.example.sample.db.TestTable
-import com.example.sample.db.TestTable2
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerLevel
@@ -32,9 +31,7 @@ import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.dml.delete
-import com.nice.sqlite.core.dml.on
-import com.nice.sqlite.core.dml.selectDistinct
+import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -88,14 +85,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         lifecycleScope.launch(Dispatchers.IO) {
             DB.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
-                repeat(10000) { index ->
+                val time = System.currentTimeMillis()
+                repeat(5) { index ->
                     val bean = DBTest(
                         id = index.toLong(),
                         name = "jack",
                         age = index,
                         flag = true,
                         number = -index,
-                        data = byteArrayOf(1, 2, 3)
+                        data = byteArrayOf(1, 2, 3),
+                        time = time + 3 * 60 * 60 * 1000
                     )
                     beans.add(bean)
                 }
@@ -108,47 +107,60 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                             values {
                                 it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
+                                        it.flag(bean.flag) + it.number(bean.number)
                             }
                         }
                     }
                 }
                 Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
 
-
-                val start2 = System.currentTimeMillis()
-                offer(TestTable).updateBatch(statementExecutor) {
-                    for (bean in beans) {
-                        item {
-                            conflictAlgorithm = ConflictAlgorithm.Replace
-
-                            where {
-                                it.age gt 100
-                            }
-
-                            values {
-                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
-                            }
-                        }
-                    }
-                }
-                Log.e("TAGTAG", "update time: ${System.currentTimeMillis() - start2}")
-
-
-                offer(TestTable2).insertBatch(statementExecutor) {
-                    for (index in 0..4) {
-                        item {
-                            conflictAlgorithm = ConflictAlgorithm.Replace
-
-                            values {
-                                it.id(index) + it.pid(index) + it.name("tom") + it.age(13)
-                            }
-                        }
-                    }
+                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
+                    Log.e("TAGTAG", it.toString())
                 }
 
-                offer(TestTable).where { it.id eq 3 }.delete(statementExecutor)
+                offer(TestTable).where { it.id eq 0 }.update(statementExecutor){
+                    it.name("tom")
+                }
+
+                Log.e("TAGTAG", "==============================")
+
+                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
+                    Log.e("TAGTAG", it.getValue("data").asBlob().contentToString())
+                }
+
+//                val start2 = System.currentTimeMillis()
+//                offer(TestTable).updateBatch(statementExecutor) {
+//                    for (bean in beans) {
+//                        item {
+//                            conflictAlgorithm = ConflictAlgorithm.Replace
+//
+//                            where {
+//                                it.age gt 100
+//                            }
+//
+//                            values {
+//                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+//                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
+//                            }
+//                        }
+//                    }
+//                }
+//                Log.e("TAGTAG", "update time: ${System.currentTimeMillis() - start2}")
+//
+//
+//                offer(TestTable2).insertBatch(statementExecutor) {
+//                    for (index in 0..4) {
+//                        item {
+//                            conflictAlgorithm = ConflictAlgorithm.Replace
+//
+//                            values {
+//                                it.id(index) + it.pid(index) + it.name("tom") + it.age(13)
+//                            }
+//                        }
+//                    }
+//                }
+
+//                offer(TestTable).where { it.id eq 3 }.delete(statementExecutor)
 
 //                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
 //                    Log.e("TAGTAG", it.toString())
@@ -160,15 +172,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //                    Log.e("TAGTAG", it.toString())
 //                }
 
-                Log.e("TAGTAG", "==============================")
-
-                offer(TestTable2).innerJoin(TestTable).on { testTable2, testTable ->
-                    testTable2.pid eq testTable.id
-                }.selectDistinct(statementExecutor) { testTable2, testTable ->
-                    testTable2.name + testTable2.pid + testTable2.age + testTable.number
-                }.asMapSequence().forEach {
-                    Log.e("TAGTAG", it.toString())
-                }
+//                Log.e("TAGTAG", "==============================")
+//
+//                offer(TestTable2).innerJoin(TestTable).on { testTable2, testTable ->
+//                    testTable2.pid eq testTable.id
+//                }.selectDistinct(statementExecutor) { testTable2, testTable ->
+//                    testTable2.name + testTable2.pid + testTable2.age + testTable.number
+//                }.asMapSequence().forEach {
+//                    Log.e("TAGTAG", it.toString())
+//                }
             }
 
         }

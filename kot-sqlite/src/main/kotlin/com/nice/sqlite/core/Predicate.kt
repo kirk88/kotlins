@@ -2,10 +2,10 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.Column
+import com.nice.sqlite.core.ddl.Definition
+import com.nice.sqlite.core.ddl.QueryStatement
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.toSqlString
-import com.nice.sqlite.core.ddl.QueryStatement
 
 interface Predicate {
 
@@ -63,7 +63,7 @@ private class ConditionPart(
 
 }
 
-infix fun Column<*>.eq(value: Any): Predicate =
+infix fun Definition.eq(value: Any): Predicate =
     ConditionPart("$name = $value") { dialect, full ->
         "${render(full = full)} = ${
             value.render(
@@ -73,7 +73,7 @@ infix fun Column<*>.eq(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.ne(value: Any): Predicate =
+infix fun Definition.ne(value: Any): Predicate =
     ConditionPart("$name <> $value") { dialect, full ->
         "${render(full = full)} <> ${
             value.render(
@@ -83,7 +83,7 @@ infix fun Column<*>.ne(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.gt(value: Any): Predicate =
+infix fun Definition.gt(value: Any): Predicate =
     ConditionPart("$name > $value") { dialect, full ->
         "${render(full = full)} > ${
             value.render(
@@ -93,7 +93,7 @@ infix fun Column<*>.gt(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.lt(value: Any): Predicate =
+infix fun Definition.lt(value: Any): Predicate =
     ConditionPart("$name < $value") { dialect, full ->
         "${render(full = full)} < ${
             value.render(
@@ -103,7 +103,7 @@ infix fun Column<*>.lt(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.gte(value: Any): Predicate =
+infix fun Definition.gte(value: Any): Predicate =
     ConditionPart("$name >= $value") { dialect, full ->
         "${render(full = full)} >= ${
             value.render(
@@ -113,7 +113,7 @@ infix fun Column<*>.gte(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.lte(value: Any): Predicate =
+infix fun Definition.lte(value: Any): Predicate =
     ConditionPart("$name <= $value") { dialect, full ->
         "${render(full = full)} <= ${
             value.render(
@@ -123,7 +123,7 @@ infix fun Column<*>.lte(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.like(value: Any): Predicate =
+infix fun Definition.like(value: Any): Predicate =
     ConditionPart("$name LIKE $value") { dialect, full ->
         "${render(full = full)} LIKE ${
             value.render(
@@ -133,7 +133,7 @@ infix fun Column<*>.like(value: Any): Predicate =
         }"
     }
 
-infix fun Column<*>.glob(value: Any): Predicate =
+infix fun Definition.glob(value: Any): Predicate =
     ConditionPart("$name GLOB $value") { dialect, full ->
         "${render(full = full)} GLOB ${
             value.render(
@@ -143,43 +143,43 @@ infix fun Column<*>.glob(value: Any): Predicate =
         }"
     }
 
-fun Column<*>.isNotNull(): Predicate =
+fun Definition.isNotNull(): Predicate =
     ConditionPart("$name IS NOT NULL") { _, full -> "${render(full = full)} IS NOT NULL" }
 
-fun Column<*>.isNull(): Predicate =
+fun Definition.isNull(): Predicate =
     ConditionPart("$name IS NULL") { _, full -> "${render(full = full)} IS NULL" }
 
-fun Column<*>.between(value1: Any, value2: Any): Predicate =
-    ConditionPart("$name BETWEEN $value1 AND $value2") { dialect, full ->
+fun Definition.between(startValue: Any, endValue: Any): Predicate =
+    ConditionPart("$name BETWEEN $startValue AND $endValue") { dialect, full ->
         "${render(full = full)} BETWEEN ${
-            value1.render(
+            startValue.render(
                 dialect,
                 full
             )
         } AND ${
-            value2.render(
+            endValue.render(
                 dialect,
                 full
             )
         }"
     }
 
-fun Column<*>.notBetween(value1: Any, value2: Any): Predicate =
-    ConditionPart("$name NOT BETWEEN $value1 AND $value2") { dialect, full ->
+fun Definition.notBetween(startValue: Any, endValue: Any): Predicate =
+    ConditionPart("$name NOT BETWEEN $startValue AND $endValue") { dialect, full ->
         "${render(full = full)} NOT BETWEEN ${
-            value1.render(
+            startValue.render(
                 dialect,
                 full
             )
         } AND ${
-            value2.render(
+            endValue.render(
                 dialect,
                 full
             )
         }"
     }
 
-fun Column<*>.any(vararg values: Any): Predicate =
+fun Definition.any(vararg values: Any): Predicate =
     ConditionPart("$name IN ${values.contentToString()}") { dialect, full ->
         values.joinToString(
             prefix = "${render(full = full)} IN (",
@@ -187,7 +187,7 @@ fun Column<*>.any(vararg values: Any): Predicate =
         ) { it.render(dialect, full) }
     }
 
-fun Column<*>.none(vararg values: Any): Predicate =
+fun Definition.none(vararg values: Any): Predicate =
     ConditionPart("$name NOT IN ${values.contentToString()}") { dialect, full ->
         values.joinToString(
             prefix = "${render(full = full)} NOT IN (",
@@ -202,7 +202,7 @@ fun exists(statement: QueryStatement): Predicate =
 
 
 private fun Any.render(dialect: Dialect? = null, full: Boolean = false) = when {
-    this is Column<*> -> if (full) fullRender() else render()
+    this is Definition -> if (full) fullRender() else render()
     this is Statement && dialect != null -> "(${toString(dialect)})"
     else -> toSqlString()
 }

@@ -4,16 +4,20 @@ package com.nice.sqlite.core.ddl
 
 import com.nice.sqlite.core.Table
 
-enum class SqlType {
-    Integer,
-    Real,
-    Text,
-    Blob;
+sealed class SqlType(val name: String) {
+    object Integer : SqlType("integer")
+    object Real : SqlType("real")
+    object Text : SqlType("text")
+    object Blob : SqlType("blob")
+
+    class Named(name: String) : SqlType(name)
 
     override fun toString(): String = name.uppercase()
 }
 
 interface Definition : Sequence<Definition>, FullRenderer {
+
+    val name: String
 
     override fun iterator(): Iterator<Definition> = OnceIterator(this)
 
@@ -22,14 +26,76 @@ interface Definition : Sequence<Definition>, FullRenderer {
 
 }
 
+class Defined(override val name: String) : Definition {
+    override fun render(): String = name
+    override fun fullRender(): String = name
+    override fun toString(): String = name
+}
+
+fun defined(name: String): Defined = Defined(name)
+
+class AliasDefinition internal constructor(
+    override val name: String,
+    val definition: Definition
+) : Definition {
+
+    override fun render(): String = "${definition.render()} AS ${name.surrounding()}"
+
+    override fun fullRender(): String = "${definition.fullRender()} AS ${name.surrounding()}"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AliasDefinition
+
+        if (definition != other.definition) return false
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = definition.hashCode()
+        result = 31 * result + name.hashCode()
+        return result
+    }
+
+    override fun toString(): String = name
+
+}
+
+fun Column<*>.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
+fun Function.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
+
 abstract class Column<T : Any>(
-    val table: Table,
-    val name: String,
-    val type: SqlType
+    override val name: String,
+    val type: SqlType,
+    val table: Table
 ) : Definition {
 
     private var _meta = Meta()
     val meta: Meta get() = _meta
+
+    internal fun setMeta(
+        defaultConstraint: ColumnConstraint.Default? = _meta.defaultConstraint,
+        primaryKeyConstraint: ColumnConstraint.PrimaryKey? = _meta.primaryKeyConstraint,
+        referencesConstraint: ColumnConstraint.References? = _meta.referencesConstraint,
+        uniqueConstraint: ColumnConstraint.Unique? = _meta.uniqueConstraint,
+        notNullConstraint: ColumnConstraint.NotNull? = _meta.notNullConstraint,
+        onUpdateAction: ColumnConstraintAction? = _meta.onUpdateAction,
+        onDeleteAction: ColumnConstraintAction? = _meta.onDeleteAction
+    ) {
+        _meta = _meta.copy(
+            defaultConstraint = defaultConstraint,
+            primaryKeyConstraint = primaryKeyConstraint,
+            referencesConstraint = referencesConstraint,
+            uniqueConstraint = uniqueConstraint,
+            notNullConstraint = notNullConstraint,
+            onUpdateAction = onUpdateAction,
+            onDeleteAction = onDeleteAction
+        )
+    }
 
     fun default(value: T) = apply {
         _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
@@ -99,41 +165,8 @@ abstract class Column<T : Any>(
 
 }
 
-class AliasColumn internal constructor(
-    val column: Column<*>,
-    val alias: String
-) : Definition {
-
-    override fun render(): String = "${column.render()} AS ${alias.surrounding()}"
-
-    override fun fullRender(): String = "${column.fullRender()} AS ${alias.surrounding()}"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AliasColumn
-
-        if (column != other.column) return false
-        if (alias != other.alias) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = column.hashCode()
-        result = 31 * result + alias.hashCode()
-        return result
-    }
-
-    override fun toString(): String = alias
-
-}
-
-fun aliasColumn(column: Column<*>, alias: String): AliasColumn = AliasColumn(column, alias)
-
 class Index internal constructor(
-    val name: String,
+    override val name: String,
     val columns: Array<out Column<*>>
 ) : Definition {
 
@@ -204,8 +237,10 @@ fun index(
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
 
-class Function internal constructor(private val name: String, private val values: Array<out Any>) :
-    Definition {
+class Function internal constructor(
+    override val name: String,
+    private val values: Array<out Any>
+) : Definition {
 
     override fun render(): String = buildString {
         append(name)
@@ -221,10 +256,7 @@ class Function internal constructor(private val name: String, private val values
         }
     }
 
-    override fun toString(): String = buildString {
-        append(name)
-        values.joinTo(this, prefix = "(", postfix = ")")
-    }
+    override fun toString(): String = name
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -251,12 +283,36 @@ fun function(
     vararg values: Any
 ): Function = Function(name, values)
 
-fun count(column: Column<*>): Definition = function("count", column)
-fun max(column: Column<*>): Definition = function("max", column)
-fun min(column: Column<*>): Definition = function("min", column)
-fun avg(column: Column<*>): Definition = function("avg", column)
-fun sum(column: Column<*>): Definition = function("sum", column)
-fun abs(column: Column<*>): Definition = function("abs", column)
-fun upper(column: Column<*>): Definition = function("upper", column)
-fun lower(column: Column<*>): Definition = function("lower", column)
-fun length(column: Column<*>): Definition = function("length", column)
+fun count(column: Column<*>): Function = function("count", column)
+fun max(column: Column<*>): Function = function("max", column)
+fun min(column: Column<*>): Function = function("min", column)
+fun avg(column: Column<*>): Function = function("avg", column)
+fun sum(column: Column<*>): Function = function("sum", column)
+fun abs(column: Column<*>): Function = function("abs", column)
+fun upper(column: Column<*>): Function = function("upper", column)
+fun lower(column: Column<*>): Function = function("lower", column)
+fun length(column: Column<*>): Function = function("length", column)
+
+fun date(column: Column<*>, vararg modifiers: String): Function =
+    function("date", arrayOf(column, *modifiers))
+
+fun time(column: Column<*>, vararg modifiers: String): Function =
+    function("time", arrayOf(column, *modifiers))
+
+fun datetime(column: Column<*>, vararg modifiers: String): Function =
+    function("datetime", arrayOf(column, *modifiers))
+
+fun strftime(column: Column<*>, vararg modifiers: String): Function =
+    function("strftime", arrayOf(column, *modifiers))
+
+fun date(source: String, vararg modifiers: String): Function =
+    function("date", arrayOf(source, *modifiers))
+
+fun time(source: String, vararg modifiers: String): Function =
+    function("time", arrayOf(source, *modifiers))
+
+fun datetime(source: String, vararg modifiers: String): Function =
+    function("datetime", arrayOf(source, *modifiers))
+
+fun strftime(pattern: String, source: String, vararg modifiers: String): Function =
+    function("strftime", arrayOf(pattern, source, *modifiers))

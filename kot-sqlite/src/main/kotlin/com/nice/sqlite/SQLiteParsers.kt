@@ -4,6 +4,7 @@ package com.nice.sqlite
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
+import java.nio.charset.StandardCharsets
 
 fun interface RowParser<out T> {
     fun parseRow(row: Array<ColumnValue>): T
@@ -148,23 +149,23 @@ class ColumnValue internal constructor(internal val value: Any?) {
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> asTyped(type: Class<T>): T? = castValue(value, type) as T?
 
-    fun asInt(defaultValue: Int = 0) = (value as? Long)?.toInt() ?: defaultValue
+    fun asInt(defaultValue: Int = 0) = asTyped() ?: defaultValue
 
-    fun asLong(defaultValue: Long = 0.toLong()) = value as? Long ?: defaultValue
+    fun asLong(defaultValue: Long = 0.toLong()) = asTyped() ?: defaultValue
 
-    fun asShort(defaultValue: Short = 0.toShort()) = (value as? Long)?.toShort() ?: defaultValue
+    fun asShort(defaultValue: Short = 0.toShort()) = asTyped() ?: defaultValue
 
-    fun asDouble(defaultValue: Double = 0.toDouble()) = value as? Double ?: defaultValue
+    fun asDouble(defaultValue: Double = 0.toDouble()) = asTyped() ?: defaultValue
 
-    fun asFloat(defaultValue: Float = 0.toFloat()) = (value as? Double)?.toFloat() ?: defaultValue
+    fun asFloat(defaultValue: Float = 0.toFloat()) = asTyped() ?: defaultValue
 
-    fun asString(defaultValue: String = ""): String = value?.toString() ?: defaultValue
+    fun asString(defaultValue: String = ""): String = asTyped() ?: defaultValue
 
-    fun asBlob(defaultValue: ByteArray = byteArrayOf()) = value as? ByteArray ?: defaultValue
+    fun asBlob(defaultValue: ByteArray = byteArrayOf()) = asTyped() ?: defaultValue
 
-    override fun toString(): String {
-        return value.toString()
-    }
+    fun asBoolean(defaultValue: Boolean = false) = asTyped() ?: defaultValue
+
+    override fun toString(): String = value.toString()
 }
 
 inline fun <reified T : Any> ColumnValue.asTyped(): T? = asTyped(T::class.java)
@@ -227,7 +228,7 @@ private fun castValue(value: Any?, type: Class<*>): Any? {
     }
 
     if (value is String && (type == ByteArray::class.java)) {
-        return value.encodeToByteArray()
+        return value.toByteArray(StandardCharsets.UTF_8)
     }
 
     throw IllegalArgumentException("Value $value of type ${value::class.java} can't be cast to ${type.canonicalName}")

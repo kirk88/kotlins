@@ -86,9 +86,9 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
                 is Long -> bindLong(index + 1, value)
                 is Int -> bindLong(index + 1, value.toLong())
                 is Short -> bindLong(index + 1, value.toLong())
-                is Boolean -> bindLong(index + 1, if (value) 1 else 0)
                 is Double -> bindDouble(index + 1, value)
                 is Float -> bindDouble(index + 1, value.toDouble())
+                is Boolean -> bindLong(index + 1, if (value) 1 else 0)
                 is ByteArray -> bindBlob(index + 1, value)
             }
         }

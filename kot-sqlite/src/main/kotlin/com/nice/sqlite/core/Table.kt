@@ -2,21 +2,39 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.Renderer
-import com.nice.sqlite.core.ddl.SqlType
-import com.nice.sqlite.core.ddl.surrounding
+import com.nice.sqlite.core.ddl.*
 
 abstract class Table(private val name: String) : Renderer {
 
-    inner class BooleanColumn(name: String) : Column<Boolean>(this, name, SqlType.Integer)
-    inner class IntColumn(name: String) : Column<Int>(this, name, SqlType.Integer)
-    inner class LongColumn(name: String) : Column<Long>(this, name, SqlType.Integer)
-    inner class ShortColumn(name: String) : Column<Short>(this, name, SqlType.Integer)
-    inner class FloatColumn(name: String) : Column<Float>(this, name, SqlType.Real)
-    inner class DoubleColumn(name: String) : Column<Double>(this, name, SqlType.Real)
-    inner class StringColumn(name: String) : Column<String>(this, name, SqlType.Text)
-    inner class BlobColumn(name: String) : Column<ByteArray>(this, name, SqlType.Blob)
+    inner class IntColumn(name: String) : Column<Int>(name, SqlType.Integer, this)
+    inner class LongColumn(name: String) : Column<Long>(name, SqlType.Integer, this)
+    inner class ShortColumn(name: String) : Column<Short>(name, SqlType.Integer, this)
+    inner class FloatColumn(name: String) : Column<Float>(name, SqlType.Real, this)
+    inner class DoubleColumn(name: String) : Column<Double>(name, SqlType.Real, this)
+    inner class StringColumn(name: String) : Column<String>(name, SqlType.Text, this)
+    inner class BlobColumn(name: String) : Column<ByteArray>(name, SqlType.Blob, this)
+    inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.Integer, this)
+
+    inner class DateColumn(name: String) : Column<String>(name, SqlType.Named("date"), this) {
+        fun default(value: Defined) = apply {
+            setMeta(defaultConstraint = ColumnConstraint.Default(value))
+        }
+    }
+    inner class TimeColumn(name: String) : Column<String>(name, SqlType.Named("time"), this){
+        fun default(value: Defined) = apply {
+            setMeta(defaultConstraint = ColumnConstraint.Default(value))
+        }
+    }
+    inner class DatetimeColumn(name: String) : Column<String>(name, SqlType.Named("datetime"), this){
+        fun default(value: Defined) = apply {
+            setMeta(defaultConstraint = ColumnConstraint.Default(value))
+        }
+    }
+    inner class TimestampColumn(name: String) : Column<String>(name, SqlType.Named("timestamp"), this){
+        fun default(value: Defined) = apply {
+            setMeta(defaultConstraint = ColumnConstraint.Default(value))
+        }
+    }
 
     override fun render(): String = name.surrounding()
 

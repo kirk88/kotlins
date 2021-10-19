@@ -2,15 +2,15 @@
 
 package com.nice.sqlite.core.ddl
 
-enum class ConflictAlgorithm(
-    private val value: String
+sealed class ConflictAlgorithm(
+    private val name: String
 ) {
-    None(""),
-    Rollback("ROLLBACK"),
-    Abort("ABORT"),
-    Fail("FAIL"),
-    Ignore("IGNORE"),
-    Replace("REPLACE");
+    object None : ConflictAlgorithm("")
+    object Rollback : ConflictAlgorithm("ROLLBACK")
+    object Abort : ConflictAlgorithm("ABORT")
+    object Fail : ConflictAlgorithm("FAIL")
+    object Ignore : ConflictAlgorithm("IGNORE")
+    object Replace : ConflictAlgorithm("REPLACE")
 
-    override fun toString(): String = value
+    override fun toString(): String = name
 }

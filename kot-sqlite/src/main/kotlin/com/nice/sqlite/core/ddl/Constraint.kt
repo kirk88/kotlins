@@ -2,16 +2,18 @@
 
 package com.nice.sqlite.core.ddl
 
-enum class ColumnConstraintAction(
-    private val value: String
+sealed class ColumnConstraintAction(
+    private val name: String
 ) {
-    SetNull("SET NULL"),
-    SetDefault("SET DEFAULT"),
-    SetRestrict("SET RESTRICT"),
-    Cascade("CASCADE"),
-    NoAction("NO ACTION");
+    object SetNull : ColumnConstraintAction("SET NULL")
+    object SetDefault : ColumnConstraintAction("SET DEFAULT")
+    object SetRestrict : ColumnConstraintAction("SET RESTRICT")
+    object Cascade : ColumnConstraintAction("CASCADE")
+    object NoAction : ColumnConstraintAction("NO ACTION")
 
-    override fun toString(): String = value
+    class Named(name: String) : ColumnConstraintAction(name)
+
+    override fun toString(): String = name
 }
 
 sealed class ColumnConstraint {
