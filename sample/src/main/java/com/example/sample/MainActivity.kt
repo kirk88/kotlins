@@ -31,6 +31,7 @@ import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
+import com.nice.sqlite.core.ddl.datetime
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
@@ -114,7 +115,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 }
                 Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
 
-                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
+                offer(TestTable).select(statementExecutor){
+                    it.id + it.name + it.age + datetime(it.time, "localtime")
+                }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
 

@@ -294,25 +294,25 @@ fun lower(column: Column<*>): Function = function("lower", column)
 fun length(column: Column<*>): Function = function("length", column)
 
 fun date(column: Column<*>, vararg modifiers: String): Function =
-    function("date", arrayOf(column, *modifiers))
+    function("date", column, *modifiers)
 
 fun time(column: Column<*>, vararg modifiers: String): Function =
-    function("time", arrayOf(column, *modifiers))
+    function("time", column, *modifiers)
 
 fun datetime(column: Column<*>, vararg modifiers: String): Function =
-    function("datetime", arrayOf(column, *modifiers))
+    function("datetime", column, *modifiers)
 
 fun strftime(column: Column<*>, vararg modifiers: String): Function =
-    function("strftime", arrayOf(column, *modifiers))
+    function("strftime", column, *modifiers)
 
 fun date(source: String, vararg modifiers: String): Function =
-    function("date", arrayOf(source, *modifiers))
+    function("date", source, *modifiers)
 
 fun time(source: String, vararg modifiers: String): Function =
-    function("time", arrayOf(source, *modifiers))
+    function("time", source, *modifiers)
 
 fun datetime(source: String, vararg modifiers: String): Function =
-    function("datetime", arrayOf(source, *modifiers))
+    function("datetime", source, *modifiers)
 
 fun strftime(pattern: String, source: String, vararg modifiers: String): Function =
-    function("strftime", arrayOf(pattern, source, *modifiers))
+    function("strftime", pattern, source, *modifiers)
