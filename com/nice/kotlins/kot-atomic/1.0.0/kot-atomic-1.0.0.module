@@ -1,0 +1,113 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.nice.kotlins",
+    "module": "kot-atomic",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "files": [
+        {
+          "name": "kot-atomic-1.0.0.jar",
+          "url": "kot-atomic-1.0.0.jar",
+          "size": 30245,
+          "sha512": "9e451f57cf7efb6d5b9e3767ffbae3ab1ca2351c07d465f7dd8b36ae93abb3271cbd71361f49eace0f9783e540fc8f61da99e15b0d2b7414211a914b21407eb4",
+          "sha256": "e408b6e9132475ef8590c25a1b62b6ce44006c30d591a05cc182bbf1f0165699",
+          "sha1": "eeb1fdbe60957cc67b25b5b2347bd419aabfd6ec",
+          "md5": "44436f7833d7097e0b0dacde4088f9a8"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "1.5.31"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "kot-atomic-1.0.0.jar",
+          "url": "kot-atomic-1.0.0.jar",
+          "size": 30245,
+          "sha512": "9e451f57cf7efb6d5b9e3767ffbae3ab1ca2351c07d465f7dd8b36ae93abb3271cbd71361f49eace0f9783e540fc8f61da99e15b0d2b7414211a914b21407eb4",
+          "sha256": "e408b6e9132475ef8590c25a1b62b6ce44006c30d591a05cc182bbf1f0165699",
+          "sha1": "eeb1fdbe60957cc67b25b5b2347bd419aabfd6ec",
+          "md5": "44436f7833d7097e0b0dacde4088f9a8"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-atomic-1.0.0-sources.jar",
+          "url": "kot-atomic-1.0.0-sources.jar",
+          "size": 5978,
+          "sha512": "bbce4ab53fa16edb0d9f9587e3949d7a554f4084e046aacb575eeeb43c48216d7aec3fade0452a84c28243421d8cb7306bd1f6e0ad6853324e1e2c93f9c5ee2b",
+          "sha256": "1f128818111820a86bc37f9fc93e8ee9557b192e4e8eaf52ed3c3c1eb4da3b62",
+          "sha1": "cc0ebc2a99482bdd42955317384621c344f107f3",
+          "md5": "c99d8d7bb617d718e0f7cf4725ad776f"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-atomic-1.0.0-javadoc.jar",
+          "url": "kot-atomic-1.0.0-javadoc.jar",
+          "size": 261,
+          "sha512": "1b4020b457bbd1b6b9f9e6100b6e5ace49e81f02e1dd7877420a4aa0de6ca0db581a0455cbca87cddb012fad4cc2e066cb4ae738d5d61cb2044778d8f2cba9c6",
+          "sha256": "ba67dfab7276524e5f7c675911124bfc75455d9e39e2dcea2949ee7aa4050684",
+          "sha1": "29a2b9a8adaf5a24d4f962b553f9ae487963c73b",
+          "md5": "af959be562da67afc6e00f903c495c36"
+        }
+      ]
+    }
+  ]
+}
