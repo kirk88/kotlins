@@ -54,12 +54,10 @@ class Trigger private constructor(
         }
 
         fun action(statement: () -> Statement) = apply {
-            this.statement = statement(requireNotNull(where) {
-                "The action(statement) method must be called after the on(table, column) method"
-            }.table)
+            this.statement = statement()
         }
 
-        fun build(): Trigger<T> {
+        fun build(): Trigger {
             val event = requireNotNull(this.event) {
                 "You must call the event(event) method"
             }
