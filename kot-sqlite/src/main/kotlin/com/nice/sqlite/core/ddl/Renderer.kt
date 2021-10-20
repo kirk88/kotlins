@@ -2,7 +2,6 @@ package com.nice.sqlite.core.ddl
 
 import java.nio.charset.StandardCharsets
 
-
 interface Renderer {
 
     fun render(): String
@@ -20,9 +19,11 @@ internal fun String.surrounding() = "\"$this\""
 internal fun Any?.toSqlString(): String {
     return when (this) {
         null -> "NULL"
-        is Number, is Defined -> toString()
+        is String -> "'${replace("'", "''")}'"
+        is Number -> toString()
         is Boolean -> if (this) "1" else "0"
         is ByteArray -> "'${toString(StandardCharsets.UTF_8)}'"
-        else -> "'${toString().replace("'", "''")}'"
+        is Defined -> render()
+        else -> error("Unsupported value type: $javaClass")
     }
 }

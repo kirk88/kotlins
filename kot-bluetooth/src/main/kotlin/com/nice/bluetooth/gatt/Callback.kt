@@ -1,5 +1,6 @@
 package com.nice.bluetooth.gatt
 
+import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
 import android.bluetooth.BluetoothProfile.*
@@ -60,6 +61,7 @@ internal class Callback(
         disconnectedAction?.invoke()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onConnectionStateChange(
         gatt: BluetoothGatt,
         status: Int,

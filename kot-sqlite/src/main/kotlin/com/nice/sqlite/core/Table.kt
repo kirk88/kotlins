@@ -2,7 +2,10 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.core.ddl.Column
+import com.nice.sqlite.core.ddl.Renderer
+import com.nice.sqlite.core.ddl.SqlType
+import com.nice.sqlite.core.ddl.surrounding
 
 abstract class Table(private val name: String) : Renderer {
 
@@ -14,27 +17,10 @@ abstract class Table(private val name: String) : Renderer {
     inner class StringColumn(name: String) : Column<String>(name, SqlType.Text, this)
     inner class BlobColumn(name: String) : Column<ByteArray>(name, SqlType.Blob, this)
     inner class BooleanColumn(name: String) : Column<Boolean>(name, SqlType.Integer, this)
-
-    inner class DateColumn(name: String) : Column<String>(name, SqlType.Named("date"), this) {
-        fun default(value: Defined) = apply {
-            setMeta(defaultConstraint = ColumnConstraint.Default(value))
-        }
-    }
-    inner class TimeColumn(name: String) : Column<String>(name, SqlType.Named("time"), this){
-        fun default(value: Defined) = apply {
-            setMeta(defaultConstraint = ColumnConstraint.Default(value))
-        }
-    }
-    inner class DatetimeColumn(name: String) : Column<String>(name, SqlType.Named("datetime"), this){
-        fun default(value: Defined) = apply {
-            setMeta(defaultConstraint = ColumnConstraint.Default(value))
-        }
-    }
-    inner class TimestampColumn(name: String) : Column<String>(name, SqlType.Named("timestamp"), this){
-        fun default(value: Defined) = apply {
-            setMeta(defaultConstraint = ColumnConstraint.Default(value))
-        }
-    }
+    inner class DateColumn(name: String) : Column<String>(name, SqlType.Named("date"), this)
+    inner class TimeColumn(name: String) : Column<String>(name, SqlType.Named("time"), this)
+    inner class DatetimeColumn(name: String) : Column<String>(name, SqlType.Named("datetime"), this)
+    inner class TimestampColumn(name: String) : Column<String>(name, SqlType.Named("timestamp"), this)
 
     override fun render(): String = name.surrounding()
 

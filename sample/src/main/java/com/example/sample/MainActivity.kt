@@ -103,8 +103,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     beans.add(bean)
                 }
 
-                Channel<String> {  }
-
                 val start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
@@ -113,12 +111,14 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                             values {
                                 it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                        it.flag(bean.flag) + it.number(bean.number)
+                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                             }
                         }
                     }
                 }
                 Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
+
+                Log.e("TAGTAG", "==============================")
 
                 offer(TestTable).select(statementExecutor){
                     it.id + it.name + it.age + datetime(it.time, "localtime").aliased("time")
@@ -126,6 +126,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     Log.e("TAGTAG", it.toString())
                 }
 
+                Thread.sleep(2000)
 
                 offer(TestTable).where { it.id eq 0 }.update(statementExecutor){
                     it.name("tom")

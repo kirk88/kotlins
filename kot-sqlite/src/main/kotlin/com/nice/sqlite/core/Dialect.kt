@@ -22,4 +22,6 @@ interface Dialect {
     fun build(statement: ViewCreateStatement): String
     fun build(statement: ViewSelectStatement): String
 
+    fun <T: Table> build(statement: TriggerCreateStatement<T>): String
+
 }

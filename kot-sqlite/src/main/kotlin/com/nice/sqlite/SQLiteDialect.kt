@@ -412,8 +412,14 @@ object SQLiteDialect : Dialect {
 
         builder.append(") VALUES (")
 
-        statement.assignments.joinTo(builder) {
-            "?"
+        if (statement.nativeBindValues) {
+            statement.assignments.joinTo(builder) {
+                "?"
+            }
+        } else {
+            statement.assignments.joinTo(builder) {
+                it.value.toSqlString()
+            }
         }
 
         builder.append(')')
@@ -432,8 +438,14 @@ object SQLiteDialect : Dialect {
         builder.append(statement.subject.table.render())
         builder.append(" SET ")
 
-        statement.assignments.joinTo(builder) {
-            "${it.column.render()} = ?"
+        if (statement.nativeBindValues) {
+            statement.assignments.joinTo(builder) {
+                "${it.column.render()} = ?"
+            }
+        } else {
+            statement.assignments.joinTo(builder) {
+                "${it.column.render()} = ${it.value.toSqlString()}"
+            }
         }
 
         val where = statement.whereClause
@@ -492,6 +504,30 @@ object SQLiteDialect : Dialect {
 
     override fun build(statement: ViewSelectStatement): String {
         return "SELECT * FROM ${statement.subject.view.render()}"
+    }
+
+    override fun <T : Table> build(statement: TriggerCreateStatement<T>): String {
+        val builder = StringBuilder()
+        builder.append("CREATE TRIGGER IF NOT EXISTS ")
+        builder.append(statement.subject.trigger.render())
+        builder.append(' ')
+        builder.append(statement.subject.trigger.event.render())
+        builder.append(' ')
+        builder.append(statement.subject.trigger.where.render())
+        builder.append(' ')
+
+        val predicate = statement.subject.trigger.predicate
+        if (predicate != null) {
+            builder.append("WHEN ")
+            builder.append(predicate.render(this))
+            builder.append(' ')
+        }
+
+        builder.append("BEGIN")
+        builder.append(' ')
+        builder.append(statement.subject.trigger.statement.toString(this))
+        builder.append("; END")
+        return builder.toString()
     }
 
     private fun decompileColumnSql(column: Column<*>): String = buildString {

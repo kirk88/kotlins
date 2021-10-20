@@ -9,12 +9,11 @@ import com.nice.sqlite.core.TableSubject
 class InsertStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Sequence<Value>
+    val assignments: Sequence<Value>,
+    val nativeBindValues: Boolean = false
 ) : Statement {
 
-    override fun toString(dialect: Dialect): String {
-        return dialect.build(this)
-    }
+    override fun toString(dialect: Dialect): String = dialect.build(this)
 
 }
 
@@ -30,8 +29,12 @@ class InsertBatchStatement<T : Table>(
     private lateinit var nextInsert: InsertPart
 
     override fun toString(dialect: Dialect): String {
-        val nextStatement =
-            InsertStatement(subject, nextInsert.conflictAlgorithm, nextInsert.values)
+        val nextStatement = InsertStatement(
+            subject,
+            nextInsert.conflictAlgorithm,
+            nextInsert.values,
+            true
+        )
         return dialect.build(nextStatement)
     }
 

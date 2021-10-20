@@ -7,10 +7,10 @@ import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.surrounding
 
-class Trigger private constructor(
+class Trigger<T : Table> private constructor(
     val name: String,
     val event: TriggerEvent,
-    val where: TriggerWhere,
+    val where: TriggerWhere<T>,
     val predicate: Predicate?,
     val statement: Statement
 ) : Renderer {
@@ -23,7 +23,7 @@ class Trigger private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Trigger
+        other as Trigger<*>
 
         if (name != other.name) return false
 
@@ -34,10 +34,10 @@ class Trigger private constructor(
         return name.hashCode()
     }
 
-    class Builder(private val name: String) {
+    class Builder<T : Table>(private val name: String) {
 
         private var event: TriggerEvent? = null
-        private var where: TriggerWhere? = null
+        private var where: TriggerWhere<T>? = null
         private var predicate: Predicate? = null
         private var statement: Statement? = null
 
@@ -45,19 +45,21 @@ class Trigger private constructor(
             this.event = TriggerEvent(time, type)
         }
 
-        fun <T : Table> on(table: T, column: (T) -> Column<*>? = { null }) = apply {
+        fun on(table: T, column: (T) -> Column<*>? = { null }) = apply {
             this.where = TriggerWhere(table, column(table))
         }
 
-        fun whence(predicate: () -> Predicate) = apply {
-            this.predicate = predicate()
+        fun whence(predicate: (T) -> Predicate) = apply {
+            this.predicate = predicate(requireNotNull(where) {
+                "The whence(predicate) method must be called after the on(table, column) method  "
+            }.table)
         }
 
         fun action(statement: () -> Statement) = apply {
             this.statement = statement()
         }
 
-        fun build(): Trigger {
+        fun build(): Trigger<T> {
             val event = requireNotNull(this.event) {
                 "You must call the event(event) method"
             }
@@ -93,16 +95,20 @@ data class TriggerEvent(
     val time: TriggerTime,
     val type: TriggerType
 ) : Renderer {
-    override fun render(): String {
-        TODO("Not yet implemented")
-    }
+    override fun render(): String = "$time $type"
 }
 
-data class TriggerWhere(
-    val table: Table,
+data class TriggerWhere<T : Table>(
+    val table: T,
     val column: Column<*>?
 ) : Renderer {
-    override fun render(): String {
-        TODO("Not yet implemented")
+    override fun render(): String = buildString {
+        if (column != null) {
+            append("OF ")
+            append(column.render())
+            append(' ')
+        }
+        append("ON ")
+        append(table.render())
     }
 }

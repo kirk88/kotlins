@@ -4,13 +4,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSQLiteOpenHelper
+import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.core.*
-import com.nice.sqlite.core.ddl.ColumnConstraintAction
-import com.nice.sqlite.core.ddl.defined
-import com.nice.sqlite.core.ddl.desc
-import com.nice.sqlite.core.ddl.index
+import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.selectDistinct
+import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
 
 data class DBTest @ClassParserConstructor constructor(
@@ -89,16 +88,19 @@ val TestView = View("test_view") {
 }
 
 val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
-    .event { TriggerTime.After + TriggerType.Update }
+    .event(TriggerTime.After, TriggerType.Update)
     .on(TestTable)
+    .whence { it.id.old gt 0 }
     .action {
-        offer(it).where {  }
+        offer(TestTable)
+            .where { it.id eq it.id.old }
+            .update { it.time(datetime("now")) }
     }.build()
 
 object DB : ManagedSQLiteOpenHelper(
     applicationContext,
     "test_db.db",
-    21
+    22
 ) {
 
     override fun onConfigure(db: SupportSQLiteDatabase) {
@@ -118,6 +120,8 @@ object DB : ManagedSQLiteOpenHelper(
         offer(TestTable2).create(db.statementExecutor) {
             it.id + it.pid + it.name + it.age
         }
+
+        offer(TestTrigger).create(db.statementExecutor)
     }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -134,6 +138,12 @@ object DB : ManagedSQLiteOpenHelper(
         offer(TestTable2).create(db.statementExecutor) {
             it.id + it.pid + it.name + it.age
         }
+
+        offer(TestTrigger).create(db.statementExecutor)
     }
 
+}
+
+fun main() {
+    println(offer(TestTrigger).create().toString(SQLiteDialect))
 }

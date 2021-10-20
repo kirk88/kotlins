@@ -7,28 +7,38 @@ import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
 
 interface TableSubject<T : Table> {
-
     val table: T
-
 }
 
 interface ViewSubject {
-
     val view: View
-
 }
 
-fun <T : Table> TableSubject(table: T) = object : TableSubject<T> {
+interface TriggerSubject<T : Table> {
+    val trigger: Trigger<T>
+}
+
+internal fun <T : Table> TableSubject(table: T) = object : TableSubject<T> {
     override val table: T = table
 }
 
-fun ViewSubject(view: View) = object : ViewSubject {
+internal fun ViewSubject(view: View) = object : ViewSubject {
     override val view: View = view
 }
+
+internal fun <T : Table> TriggerSubject(trigger: Trigger<T>) = object : TriggerSubject<T> {
+    override val trigger: Trigger<T> = trigger
+}
+
+fun <T : Table> offer(trigger: Trigger<T>): TriggerSubject<T> = TriggerSubject(trigger)
 
 fun offer(view: View): ViewSubject = ViewSubject(view)
 
 fun <T : Table> offer(table: T): TableSubject<T> = TableSubject(table)
+
+fun <T : Table> TriggerSubject<T>.create(): TriggerCreateStatement<T> = TriggerCreateStatement(this)
+
+fun <T : Table> TriggerSubject<T>.create(executor: StatementExecutor) = executor.execute(create())
 
 fun ViewSubject.create(): ViewCreateStatement = ViewCreateStatement(this)
 
@@ -114,15 +124,17 @@ inline fun <T : Table> TableSubject<T>.selectDistinct(
 
 inline fun <T : Table> TableSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
-): UpdateStatement<T> = UpdateStatement(this, conflictAlgorithm, values(table))
+): UpdateStatement<T> = UpdateStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 
 inline fun <T : Table> TableSubject<T>.update(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
-): Int = executor.executeUpdate(update(conflictAlgorithm, values))
+): Int = executor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.updateBatch(
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit
@@ -138,14 +150,16 @@ inline fun <T : Table> TableSubject<T>.updateBatch(
 
 inline fun <T : Table> TableSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
-): InsertStatement<T> = InsertStatement(this, conflictAlgorithm, values(table))
+): InsertStatement<T> = InsertStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 inline fun <T : Table> TableSubject<T>.insert(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
-): Long = executor.executeInsert(insert(conflictAlgorithm, values))
+): Long = executor.executeInsert(insert(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.insertBatch(
     crossinline buildAction: InsertBatchBuilder<T>.() -> Unit

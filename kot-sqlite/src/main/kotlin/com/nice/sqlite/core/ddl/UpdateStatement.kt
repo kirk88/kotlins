@@ -12,12 +12,11 @@ class UpdateStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
     val assignments: Sequence<Value>,
-    val whereClause: WhereClause<T>? = null
+    val whereClause: WhereClause<T>? = null,
+    val nativeBindValues: Boolean = false
 ) : Statement {
 
-    override fun toString(dialect: Dialect): String {
-        return dialect.build(this)
-    }
+    override fun toString(dialect: Dialect): String = dialect.build(this)
 
 }
 
@@ -33,13 +32,13 @@ class UpdateBatchStatement<T : Table>(
     private lateinit var nextUpdate: UpdatePart<T>
 
     override fun toString(dialect: Dialect): String {
-        val nextStatement =
-            UpdateStatement(
-                subject,
-                nextUpdate.conflictAlgorithm,
-                nextUpdate.values,
-                nextUpdate.whereClause
-            )
+        val nextStatement = UpdateStatement(
+            subject,
+            nextUpdate.conflictAlgorithm,
+            nextUpdate.values,
+            nextUpdate.whereClause,
+            true
+        )
         return dialect.build(nextStatement)
     }
 

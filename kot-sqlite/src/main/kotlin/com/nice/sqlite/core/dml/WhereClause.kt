@@ -62,19 +62,22 @@ inline fun <T : Table> WhereClause<T>.selectDistinct(
 
 inline fun <T : Table> WhereClause<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
 ): UpdateStatement<T> = UpdateStatement(
     subject,
     conflictAlgorithm,
     values(subject.table),
-    whereClause = this
+    whereClause = this,
+    nativeBindValues = nativeBindValues
 )
 
 inline fun <T : Table> WhereClause<T>.update(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
+    nativeBindValues: Boolean = false,
     crossinline values: (T) -> Sequence<Value>
-): Int = executor.executeUpdate(update(conflictAlgorithm, values))
+): Int = executor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> WhereClause<T>.updateBatch(
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit

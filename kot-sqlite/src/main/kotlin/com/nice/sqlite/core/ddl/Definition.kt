@@ -26,7 +26,7 @@ interface Definition : Sequence<Definition>, FullRenderer {
 
 }
 
-class Defined(override val name: String) : Definition {
+open class Defined(override val name: String) : Definition {
     override fun render(): String = name
     override fun fullRender(): String = name
     override fun toString(): String = name
@@ -77,27 +77,11 @@ abstract class Column<T : Any>(
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    internal fun setMeta(
-        defaultConstraint: ColumnConstraint.Default? = _meta.defaultConstraint,
-        primaryKeyConstraint: ColumnConstraint.PrimaryKey? = _meta.primaryKeyConstraint,
-        referencesConstraint: ColumnConstraint.References? = _meta.referencesConstraint,
-        uniqueConstraint: ColumnConstraint.Unique? = _meta.uniqueConstraint,
-        notNullConstraint: ColumnConstraint.NotNull? = _meta.notNullConstraint,
-        onUpdateAction: ColumnConstraintAction? = _meta.onUpdateAction,
-        onDeleteAction: ColumnConstraintAction? = _meta.onDeleteAction
-    ) {
-        _meta = _meta.copy(
-            defaultConstraint = defaultConstraint,
-            primaryKeyConstraint = primaryKeyConstraint,
-            referencesConstraint = referencesConstraint,
-            uniqueConstraint = uniqueConstraint,
-            notNullConstraint = notNullConstraint,
-            onUpdateAction = onUpdateAction,
-            onDeleteAction = onDeleteAction
-        )
+    fun default(value: T) = apply {
+        _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
     }
 
-    fun default(value: T) = apply {
+    fun default(value: Defined) = apply {
         _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
     }
 
@@ -126,6 +110,8 @@ abstract class Column<T : Any>(
     }
 
     operator fun invoke(value: T): Value = Value(this, value)
+
+    operator fun invoke(value: Defined): Value = Value(this, value)
 
     override fun render(): String = name.surrounding()
 
@@ -164,6 +150,19 @@ abstract class Column<T : Any>(
     )
 
 }
+
+private class TriggerColumn(
+    override val name: String,
+    private val column: Column<*>
+) : Definition {
+    override fun render(): String = "${name.uppercase()}.${column.render()}"
+    override fun fullRender(): String = render()
+}
+
+val Column<*>.new: Definition
+    get() = TriggerColumn("new", this)
+val Column<*>.old: Definition
+    get() = TriggerColumn("old", this)
 
 class Index internal constructor(
     override val name: String,
@@ -238,9 +237,9 @@ fun index(
 ): Index = Index(name, columns)
 
 class Function internal constructor(
-    override val name: String,
+    name: String,
     private val values: Array<out Any>
-) : Definition {
+) : Defined(name) {
 
     override fun render(): String = buildString {
         append(name)

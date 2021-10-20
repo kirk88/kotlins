@@ -24,21 +24,27 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
     StatementExecutor {
 
     override fun execute(statement: Statement) {
-        for (sql in statement.toString(SQLiteDialect).split(";")) {
-            val executeSql = { database.compileStatement(sql).execute() }
-            if (sql.startsWith("alter", true)) {
-                runCatching(executeSql).onFailure {
-                    Log.w(TAG, "Alter table failed: ${it.message}")
+        if (statement is TriggerCreateStatement<*>) {
+            database.compileStatement(statement.toString(SQLiteDialect)).execute()
+        } else {
+            for (sql in statement.toString(SQLiteDialect).split(";")) {
+                val executeSql = { database.compileStatement(sql).execute() }
+                if (sql.startsWith("alter", true)) {
+                    runCatching(executeSql).onFailure {
+                        Log.w(TAG, "Alter table failed: ${it.message}")
+                    }
+                } else {
+                    executeSql()
                 }
-            } else {
-                executeSql()
             }
         }
     }
 
     override fun executeUpdate(statement: UpdateStatement<*>): Int {
-        return database.compileStatement(statement.toString(SQLiteDialect)).also {
-            it.bindAll(statement.assignments)
+        return database.compileStatement(statement.toString(SQLiteDialect)).apply {
+            if (statement.nativeBindValues) {
+                bindValues(statement.assignments)
+            }
         }.executeUpdateDelete()
     }
 
@@ -46,8 +52,8 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
         var numberOfRows = 0
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            numberOfRows += database.compileStatement(executable.sql).also {
-                it.bindAll(executable.values)
+            numberOfRows += database.compileStatement(executable.sql).apply {
+                bindValues(executable.values)
             }.executeUpdateDelete()
         }
         return numberOfRows
@@ -58,8 +64,10 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
     }
 
     override fun executeInsert(statement: InsertStatement<*>): Long {
-        return database.compileStatement(statement.toString(SQLiteDialect)).also {
-            it.bindAll(statement.assignments)
+        return database.compileStatement(statement.toString(SQLiteDialect)).apply {
+            if (statement.nativeBindValues) {
+                bindValues(statement.assignments)
+            }
         }.executeInsert()
     }
 
@@ -67,8 +75,8 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
         var lastRowId = -1L
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            lastRowId = database.compileStatement(executable.sql).also {
-                it.bindAll(executable.values)
+            lastRowId = database.compileStatement(executable.sql).apply {
+                bindValues(executable.values)
             }.executeInsert()
         }
         return lastRowId
@@ -78,7 +86,7 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun SupportSQLiteStatement.bindAll(assignments: Sequence<Value>) {
+    private fun SupportSQLiteStatement.bindValues(assignments: Sequence<Value>) {
         for ((index, assignment) in assignments.withIndex()) {
             when (val value = assignment.value) {
                 null -> bindNull(index + 1)
