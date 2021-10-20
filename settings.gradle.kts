@@ -217,6 +217,6 @@ include(
     ":kot-common",
     ":kot-sqlite",
     ":kot-okhttp",
-    "kot-gson",
+    ":kot-gson",
     ":sample"
 )
