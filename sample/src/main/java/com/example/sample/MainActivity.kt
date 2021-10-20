@@ -25,12 +25,16 @@ import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
 import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
-import com.nice.common.helper.*
+import com.nice.common.helper.doOnClick
+import com.nice.common.helper.setContentView
+import com.nice.common.helper.string
+import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
+import com.nice.sqlite.core.ddl.aliased
 import com.nice.sqlite.core.ddl.datetime
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
@@ -75,11 +79,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             Log.e(TAG, "what event: " + it.toString())
         }
 
-        binding.image.imageUrl =
-            "https://img0.baidu.com/it/u=763353973,739674203&fm=253&fmt=auto&app=138&f=PNG?w=500&h=314"
 
         testDB()
 //        initBle()
+
     }
 
     private fun testDB() {
@@ -116,10 +119,11 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
 
                 offer(TestTable).select(statementExecutor){
-                    it.id + it.name + it.age + datetime(it.time, "localtime")
+                    it.id + it.name + it.age + datetime(it.time, "localtime").aliased("time")
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
+
 
                 offer(TestTable).where { it.id eq 0 }.update(statementExecutor){
                     it.name("tom")
@@ -128,7 +132,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e("TAGTAG", "==============================")
 
                 offer(TestTable).select(statementExecutor).asMapSequence().forEach {
-                    Log.e("TAGTAG", it.getValue("data").asBlob().contentToString())
+                    Log.e("TAGTAG", it.toString())
                 }
 
 //                val start2 = System.currentTimeMillis()

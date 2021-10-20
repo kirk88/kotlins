@@ -47,4 +47,5 @@ dependencies {
     implementation(project(":kot-okhttp"))
     implementation(project(":kot-atomic"))
     implementation(project(":kot-gson"))
+    implementation("cz.adaptech:tesseract4android:3.0.0")
 }

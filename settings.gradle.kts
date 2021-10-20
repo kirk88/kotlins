@@ -20,6 +20,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://dl.google.com/dl/android/maven2")
+        maven("https://jitpack.io")
     }
 
     versionCatalogs {

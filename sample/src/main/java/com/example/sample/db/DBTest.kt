@@ -67,7 +67,7 @@ object TestTable : Table("test") {
     val flag = BooleanColumn("flag").default(false)
     val number = IntColumn("number").default(10)
     val data = BlobColumn("data").default(byteArrayOf(1, 2, 3, 4, 5))
-    val time = DatetimeColumn("time")
+    val time = TimestampColumn("time")
         .default(defined("CURRENT_TIMESTAMP"))
 }
 
