@@ -61,6 +61,7 @@ tasks {
     register<com.android.build.gradle.tasks.SourceJarTask>("sourcesJar") {
         variantName = "sources"
         archiveClassifier.set("sources")
+        from(android.sourceSets["main"].java.srcDirs)
     }
 
     register<com.android.build.gradle.tasks.JavaDocJarTask>("javadocJar") {
