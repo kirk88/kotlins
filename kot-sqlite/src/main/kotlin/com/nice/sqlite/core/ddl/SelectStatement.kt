@@ -8,8 +8,6 @@ import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.TableSubject
 import com.nice.sqlite.core.dml.*
 
-interface QueryStatement : Statement
-
 class SelectStatement<T : Table>(
     val subject: TableSubject<T>,
     val definitions: Sequence<Definition>,

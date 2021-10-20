@@ -103,6 +103,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     beans.add(bean)
                 }
 
+                Channel<String> {  }
+
                 val start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {

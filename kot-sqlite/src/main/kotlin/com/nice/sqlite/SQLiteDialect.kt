@@ -485,7 +485,7 @@ object SQLiteDialect : Dialect {
         builder.append(statement.subject.view.render())
         builder.append(' ')
         builder.append("AS ")
-        builder.append(statement.statement.toString(this))
+        builder.append(statement.subject.view.statement.toString(this))
 
         return builder.toString()
     }

@@ -7,3 +7,5 @@ interface Statement {
     fun toString(dialect: Dialect): String
 
 }
+
+interface QueryStatement : Statement

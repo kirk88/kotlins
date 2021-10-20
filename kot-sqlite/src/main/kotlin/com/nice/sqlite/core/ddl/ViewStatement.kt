@@ -5,7 +5,6 @@ import com.nice.sqlite.core.ViewSubject
 
 class ViewCreateStatement(
     val subject: ViewSubject,
-    val statement: QueryStatement
 ) : Statement {
 
     override fun toString(dialect: Dialect): String = dialect.build(this)

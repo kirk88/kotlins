@@ -58,8 +58,6 @@ data class DBTest2 @ClassParserConstructor constructor(
     val age: Int
 )
 
-val TestView = View("test_view")
-
 object TestTable : Table("test") {
     val id = LongColumn("id").primaryKey()
     val name = StringColumn("name").default("jack")
@@ -83,6 +81,20 @@ object TestTable2 : Table("test2") {
 
 }
 
+val TestView = View("test_view") {
+    offer(TestTable)
+        .orderBy { desc(it.id) }
+        .limit { 10 }
+        .selectDistinct()
+}
+
+val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
+    .event { TriggerTime.After + TriggerType.Update }
+    .on(TestTable)
+    .action {
+        offer(it).where {  }
+    }.build()
+
 object DB : ManagedSQLiteOpenHelper(
     applicationContext,
     "test_db.db",
@@ -95,15 +107,13 @@ object DB : ManagedSQLiteOpenHelper(
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         offer(TestTable).create(db.statementExecutor) {
-            it.id + it.name + it.age + it.flag + it.number + it.data + it.time + index(it.id, it.name)
+            it.id + it.name + it.age + it.flag + it.number + it.data + it.time + index(
+                it.id,
+                it.name
+            )
         }
 
-        offer(TestView).create(db.statementExecutor) {
-            offer(TestTable)
-                .orderBy { desc(it.id) }
-                .limit { 10 }
-                .selectDistinct()
-        }
+        offer(TestView).create(db.statementExecutor)
 
         offer(TestTable2).create(db.statementExecutor) {
             it.id + it.pid + it.name + it.age
@@ -115,12 +125,7 @@ object DB : ManagedSQLiteOpenHelper(
             it.number + it.data + it.time + index(it.id, it.name).ifNotExists()
         }
 
-        offer(TestView).create(db.statementExecutor) {
-            offer(TestTable)
-                .orderBy { desc(it.id) }
-                .limit { 10 }
-                .selectDistinct()
-        }
+        offer(TestView).create(db.statementExecutor)
 
         offer(TestTable2).alter(db.statementExecutor) {
             it.name + it.age
