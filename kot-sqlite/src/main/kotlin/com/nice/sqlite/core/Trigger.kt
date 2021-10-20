@@ -7,10 +7,10 @@ import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.Statement
 import com.nice.sqlite.core.ddl.surrounding
 
-class Trigger<T : Table> private constructor(
+class Trigger private constructor(
     val name: String,
     val event: TriggerEvent,
-    val where: TriggerWhere<T>,
+    val where: TriggerWhere,
     val predicate: Predicate?,
     val statement: Statement
 ) : Renderer {
@@ -23,7 +23,7 @@ class Trigger<T : Table> private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Trigger<*>
+        other as Trigger
 
         if (name != other.name) return false
 
@@ -34,18 +34,18 @@ class Trigger<T : Table> private constructor(
         return name.hashCode()
     }
 
-    class Builder<T : Table>(private val name: String) {
+    class Builder(private val name: String) {
 
         private var event: TriggerEvent? = null
-        private var where: TriggerWhere<T>? = null
+        private var where: TriggerWhere? = null
         private var predicate: Predicate? = null
         private var statement: Statement? = null
 
-        fun event(event: () -> TriggerEvent) = apply {
-            this.event = event()
+        fun event(time: TriggerTime, type: TriggerType) = apply {
+            this.event = TriggerEvent(time, type)
         }
 
-        fun on(table: T, column: (T) -> Column<*>? = { null }) = apply {
+        fun <T : Table> on(table: T, column: (T) -> Column<*>? = { null }) = apply {
             this.where = TriggerWhere(table, column(table))
         }
 
@@ -53,7 +53,7 @@ class Trigger<T : Table> private constructor(
             this.predicate = predicate()
         }
 
-        fun action(statement: (T) -> Statement) = apply{
+        fun action(statement: () -> Statement) = apply {
             this.statement = statement(requireNotNull(where) {
                 "The action(statement) method must be called after the on(table, column) method"
             }.table)
@@ -94,11 +94,17 @@ enum class TriggerType {
 data class TriggerEvent(
     val time: TriggerTime,
     val type: TriggerType
-)
+) : Renderer {
+    override fun render(): String {
+        TODO("Not yet implemented")
+    }
+}
 
-data class TriggerWhere<T>(
-    val table: T,
+data class TriggerWhere(
+    val table: Table,
     val column: Column<*>?
-)
-
-operator fun TriggerTime.plus(type: TriggerType): TriggerEvent = TriggerEvent(this, type)
+) : Renderer {
+    override fun render(): String {
+        TODO("Not yet implemented")
+    }
+}
