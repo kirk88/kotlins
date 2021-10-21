@@ -34,6 +34,9 @@ import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
+import com.nice.sqlite.core.ddl.aliased
+import com.nice.sqlite.core.ddl.asc
+import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
@@ -130,7 +133,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e("TAGTAG", "==============================")
 
                 offer(TestTable).select(statementExecutor) {
-                    it.id + it.name + it.age + it.time.local
+                    it.id + it.name + it.age + it.time.local.aliased("time")
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
@@ -143,8 +146,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 Log.e("TAGTAG", "==============================")
 
-                offer(TestTable).select(statementExecutor){
-                    it.id + it.name + it.age + it.time.local
+                offer(TestTable).orderBy { it.time.asc }.select(statementExecutor){
+                    it.id + it.name + it.age + it.time.local.aliased("time")
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }

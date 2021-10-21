@@ -207,6 +207,21 @@ sealed class Defined(override val name: String) : Definition {
     override fun fullRender(): String = render()
     override fun toString(): String = render()
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Defined
+
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
     internal class Named(name: String) : Defined(name)
 
     internal class Old(private val column: Column<*>) : Defined(column.name) {
@@ -273,39 +288,24 @@ fun function(
     vararg values: Any
 ): Function = Function(name, values)
 
-fun count(column: Column<*>): Function = function("count", column)
-fun max(column: Column<*>): Function = function("max", column)
-fun min(column: Column<*>): Function = function("min", column)
-fun avg(column: Column<*>): Function = function("avg", column)
-fun sum(column: Column<*>): Function = function("sum", column)
-fun abs(column: Column<*>): Function = function("abs", column)
-fun upper(column: Column<*>): Function = function("upper", column)
-fun lower(column: Column<*>): Function = function("lower", column)
-fun length(column: Column<*>): Function = function("length", column)
+fun count(column: Column<*>) = function("count", column)
+fun max(column: Column<*>) = function("max", column)
+fun min(column: Column<*>) = function("min", column)
+fun avg(column: Column<*>) = function("avg", column)
+fun sum(column: Column<*>) = function("sum", column)
+fun abs(column: Column<*>) = function("abs", column)
+fun upper(column: Column<*>) = function("upper", column)
+fun lower(column: Column<*>) = function("lower", column)
+fun length(column: Column<*>) = function("length", column)
 
-fun date(column: Column<*>, vararg modifiers: String): Function =
-    function("date", column, *modifiers)
-
-fun time(column: Column<*>, vararg modifiers: String): Function =
-    function("time", column, *modifiers)
-
-fun datetime(column: Column<*>, vararg modifiers: String): Function =
-    function("datetime", column, *modifiers)
-
-fun strftime(column: Column<*>, vararg modifiers: String): Function =
-    function("strftime", column, *modifiers)
-
-fun date(source: String, vararg modifiers: String): Function =
-    function("date", source, *modifiers)
-
-fun time(source: String, vararg modifiers: String): Function =
-    function("time", source, *modifiers)
-
-fun datetime(source: String, vararg modifiers: String): Function =
-    function("datetime", source, *modifiers)
-
-fun strftime(pattern: String, source: String, vararg modifiers: String): Function =
-    function("strftime", pattern, source, *modifiers)
+fun date(column: Column<*>, vararg modifiers: String) = function("date", column, *modifiers)
+fun time(column: Column<*>, vararg modifiers: String) = function("time", column, *modifiers)
+fun datetime(column: Column<*>, vararg modifiers: String) = function("datetime", column, *modifiers)
+fun strftime(column: Column<*>, vararg modifiers: String) = function("strftime", column, *modifiers)
+fun date(source: String, vararg modifiers: String) = function("date", source, *modifiers)
+fun time(source: String, vararg modifiers: String) = function("time", source, *modifiers)
+fun datetime(source: String, vararg modifiers: String) = function("datetime", source, *modifiers)
+fun strftime(pattern: String, source: String, vararg modifiers: String) = function("strftime", pattern, source, *modifiers)
 
 class AliasDefinition internal constructor(
     override val name: String,
@@ -338,5 +338,5 @@ class AliasDefinition internal constructor(
 
 }
 
-fun Column<*>.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
-fun Function.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
+fun Column<*>.aliased(name: String) = AliasDefinition(name, this)
+fun Function.aliased(name: String) = AliasDefinition(name, this)

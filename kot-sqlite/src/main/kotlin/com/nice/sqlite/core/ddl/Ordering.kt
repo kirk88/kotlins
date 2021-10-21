@@ -6,7 +6,7 @@ enum class SqlOrderDirection { ASC, DESC }
 
 interface Ordering : Sequence<Ordering>, FullRenderer {
 
-    val column: Column<*>
+    val definition: Definition
     val direction: SqlOrderDirection
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
@@ -14,15 +14,20 @@ interface Ordering : Sequence<Ordering>, FullRenderer {
     operator fun plus(ordering: Ordering): MutableSequence<Ordering> =
         mutableSequenceOf(this, ordering)
 
-    override fun render(): String = "${column.render()} $direction"
+    override fun render(): String = "${definition.render()} $direction"
 
-    override fun fullRender(): String = "${column.fullRender()} $direction"
+    override fun fullRender(): String = "${definition.fullRender()} $direction"
 
-    data class By(override val column: Column<*>, override val direction: SqlOrderDirection) : Ordering {
-        override fun toString(): String = "$column $direction"
+    data class By(
+        override val definition: Definition,
+        override val direction: SqlOrderDirection
+    ) : Ordering {
+        override fun toString(): String = "$definition $direction"
     }
 
 }
 
-fun asc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.ASC)
-fun desc(column: Column<*>): Ordering = Ordering.By(column, SqlOrderDirection.DESC)
+val Definition.asc: Ordering
+    get() = Ordering.By(this, SqlOrderDirection.ASC)
+val Definition.desc: Ordering
+    get() = Ordering.By(this, SqlOrderDirection.DESC)

@@ -82,7 +82,7 @@ object TestTable2 : Table("test2") {
 
 val TestView = View("test_view") {
     offer(TestTable)
-        .orderBy { desc(it.id) }
+        .orderBy { it.id.desc }
         .limit { 10 }
         .selectDistinct()
 }

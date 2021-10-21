@@ -3,6 +3,7 @@
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.core.ddl.Function
 
 abstract class Table(private val name: String) : Renderer {
 
@@ -39,11 +40,11 @@ abstract class Table(private val name: String) : Renderer {
 
 }
 
-val Table.DateColumn.local: Definition
-    get() = date(this, "localtime").aliased(name)
+val Table.DateColumn.local: Function
+    get() = date(this, "localtime")
 
-val Table.TimeColumn.local: Definition
-    get() = time(this, "localtime").aliased(name)
+val Table.TimeColumn.local: Function
+    get() = time(this, "localtime")
 
-val Table.DatetimeColumn.local: Definition
-    get() = datetime(this, "localtime").aliased(name)
+val Table.DatetimeColumn.local: Function
+    get() = datetime(this, "localtime")
