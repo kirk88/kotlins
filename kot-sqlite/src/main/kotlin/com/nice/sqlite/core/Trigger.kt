@@ -51,7 +51,7 @@ class Trigger<T : Table> private constructor(
 
         fun whence(predicate: (T) -> Predicate) = apply {
             this.predicate = predicate(requireNotNull(where) {
-                "The whence(predicate) method must be called after the on(table, column) method  "
+                "whence(predicate) must called after on(table, column)"
             }.table)
         }
 
@@ -61,13 +61,13 @@ class Trigger<T : Table> private constructor(
 
         fun build(): Trigger<T> {
             val event = requireNotNull(this.event) {
-                "You must call the event(event) method"
+                "You must call at(time, type)"
             }
             val where = requireNotNull(this.where) {
-                "You must call the on(table, column) method"
+                "You must call on(table, column)"
             }
             val statement = requireNotNull(this.statement) {
-                "You must call the action(statement) method"
+                "You must call trigger(statement)"
             }
             return Trigger(name, event, where, predicate, statement)
         }

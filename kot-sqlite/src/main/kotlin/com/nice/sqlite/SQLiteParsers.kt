@@ -83,6 +83,12 @@ fun <T : Any> Cursor.toList(parser: MapRowParser<T>): List<T> = use {
     return list
 }
 
+inline fun <reified T : Any> Cursor.single(): T = single(classParser())
+
+inline fun <reified T : Any> Cursor.singleOrNull(): T? = singleOrNull(classParser())
+
+inline fun <reified T : Any> Cursor.toList(): List<T> = toList(classParser())
+
 fun Cursor.asSequence(): Sequence<Array<ColumnValue>> {
     return CursorSequence(this)
 }
