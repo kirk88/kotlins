@@ -2,20 +2,67 @@
 
 package com.nice.sqlite
 
-import android.content.Context
 import android.database.Cursor
-import android.database.sqlite.SQLiteException
 import android.util.Log
-import android.util.Pair
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
 import com.nice.sqlite.core.ddl.*
-import java.io.File
-import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
+
+private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
+
+enum class Transaction {
+    None,
+    Immediate,
+    Exclusive
+}
+
+open class SupportSQLiteDatabaseHelper(
+    configuration: SupportSQLiteOpenHelper.Configuration,
+    factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
+) {
+
+    private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)
+
+    private val counter = AtomicInteger()
+    private var db: SupportSQLiteDatabase? = null
+
+    fun <T> use(
+        transaction: Transaction = Transaction.None,
+        action: SupportSQLiteDatabase.() -> T
+    ): T {
+        try {
+            return openDatabase().run {
+                if (transaction == Transaction.None) {
+                    action()
+                } else {
+                    transaction(transaction == Transaction.Exclusive, action)
+                }
+            }
+        } finally {
+            closeDatabase()
+        }
+    }
+
+    @Synchronized
+    private fun openDatabase(): SupportSQLiteDatabase {
+        if (counter.incrementAndGet() == 1) {
+            db = delegate.writableDatabase
+        }
+        return db!!
+    }
+
+    @Synchronized
+    private fun closeDatabase() {
+        if (counter.decrementAndGet() == 0) {
+            db?.close()
+        }
+    }
+
+}
 
 val SupportSQLiteDatabase.statementExecutor: StatementExecutor
     get() = SQLiteStatementExecutor(this)
@@ -99,162 +146,6 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
                 is Boolean -> bindLong(index + 1, if (value) 1 else 0)
                 is ByteArray -> bindBlob(index + 1, value)
             }
-        }
-    }
-
-}
-
-private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
-
-enum class Transaction {
-    None,
-    Immediate,
-    Exclusive
-}
-
-abstract class ManagedSQLiteOpenHelper(
-    context: Context,
-    name: String,
-    version: Int,
-    useNoBackupDirectory: Boolean = false,
-    factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
-) {
-
-    private val delegate: SupportSQLiteOpenHelper = factory.create(
-        SupportSQLiteOpenHelper.Configuration.builder(context)
-            .name(name)
-            .noBackupDirectory(useNoBackupDirectory)
-            .callback(
-                object : SupportSQLiteOpenHelper.Callback(version) {
-                    override fun onConfigure(db: SupportSQLiteDatabase) {
-                        this@ManagedSQLiteOpenHelper.onConfigure(db)
-                    }
-
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        this@ManagedSQLiteOpenHelper.onCreate(db)
-                    }
-
-                    override fun onUpgrade(
-                        db: SupportSQLiteDatabase,
-                        oldVersion: Int,
-                        newVersion: Int
-                    ) {
-                        this@ManagedSQLiteOpenHelper.onUpgrade(db, oldVersion, newVersion)
-                    }
-
-                    override fun onDowngrade(
-                        db: SupportSQLiteDatabase,
-                        oldVersion: Int,
-                        newVersion: Int
-                    ) {
-                        this@ManagedSQLiteOpenHelper.onDowngrade(db, oldVersion, newVersion)
-                    }
-
-                    override fun onOpen(db: SupportSQLiteDatabase) {
-                        this@ManagedSQLiteOpenHelper.onOpen(db)
-                    }
-
-                    override fun onCorruption(db: SupportSQLiteDatabase) {
-                        this@ManagedSQLiteOpenHelper.onCorruption(db)
-                    }
-                }
-            ).build()
-    )
-
-    private val counter = AtomicInteger()
-    private var db: SupportSQLiteDatabase? = null
-
-    fun <T> use(
-        transaction: Transaction = Transaction.None,
-        action: SupportSQLiteDatabase.() -> T
-    ): T {
-        try {
-            return openDatabase().run {
-                if (transaction == Transaction.None) {
-                    action()
-                } else {
-                    transaction(transaction == Transaction.Exclusive, action)
-                }
-            }
-        } finally {
-            closeDatabase()
-        }
-    }
-
-    @Synchronized
-    private fun openDatabase(): SupportSQLiteDatabase {
-        if (counter.incrementAndGet() == 1) {
-            db = delegate.writableDatabase
-        }
-        return db!!
-    }
-
-    @Synchronized
-    private fun closeDatabase() {
-        if (counter.decrementAndGet() == 0) {
-            db?.close()
-        }
-    }
-
-    open fun onConfigure(db: SupportSQLiteDatabase) {}
-
-    abstract fun onCreate(db: SupportSQLiteDatabase)
-
-    abstract fun onUpgrade(
-        db: SupportSQLiteDatabase, oldVersion: Int,
-        newVersion: Int
-    )
-
-    open fun onDowngrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        throw SQLiteException(
-            "Can't downgrade database from version "
-                    + oldVersion + " to " + newVersion
-        )
-    }
-
-    open fun onOpen(db: SupportSQLiteDatabase) {}
-
-    open fun onCorruption(db: SupportSQLiteDatabase) {
-        Log.e(TAG, "Corruption reported by sqlite on database: " + db.path)
-        if (!db.isOpen) {
-            deleteDatabaseFile(db.path)
-            return
-        }
-        var attachedDbs: List<Pair<String?, String>>? = null
-        try {
-            try {
-                attachedDbs = db.attachedDbs
-            } catch (_: SQLiteException) {
-            }
-            try {
-                db.close()
-            } catch (_: IOException) {
-            }
-        } finally {
-            if (attachedDbs != null) {
-                for (p in attachedDbs) {
-                    deleteDatabaseFile(p.second)
-                }
-            } else {
-                deleteDatabaseFile(db.path)
-            }
-        }
-    }
-
-    private fun deleteDatabaseFile(fileName: String) {
-        if (fileName.equals(":memory:", ignoreCase = true)
-            || fileName.trim { it <= ' ' }.isEmpty()
-        ) {
-            return
-        }
-        Log.w(TAG, "deleting the database file: $fileName")
-        try {
-            val deleted = File(fileName).delete()
-            if (!deleted) {
-                Log.e(TAG, "Could not delete the database file $fileName")
-            }
-        } catch (error: Exception) {
-            Log.e(TAG, "error while deleting corrupted database file", error)
         }
     }
 

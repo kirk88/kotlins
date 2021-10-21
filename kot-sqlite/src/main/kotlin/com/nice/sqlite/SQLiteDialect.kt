@@ -414,7 +414,7 @@ object SQLiteDialect : Dialect {
 
         if (statement.nativeBindValues) {
             statement.assignments.joinTo(builder) {
-                "?"
+                if (it.value is Definition) it.value.render() else "?"
             }
         } else {
             statement.assignments.joinTo(builder) {
@@ -440,7 +440,7 @@ object SQLiteDialect : Dialect {
 
         if (statement.nativeBindValues) {
             statement.assignments.joinTo(builder) {
-                "${it.column.render()} = ?"
+                "${it.column.render()} = ${if (it.value is Definition) it.value.render() else "?"}"
             }
         } else {
             statement.assignments.joinTo(builder) {

@@ -41,7 +41,7 @@ class Trigger<T : Table> private constructor(
         private var predicate: Predicate? = null
         private var statement: Statement? = null
 
-        fun event(time: TriggerTime, type: TriggerType) = apply {
+        fun at(time: TriggerTime, type: TriggerType) = apply {
             this.event = TriggerEvent(time, type)
         }
 
@@ -55,7 +55,7 @@ class Trigger<T : Table> private constructor(
             }.table)
         }
 
-        fun action(statement: () -> Statement) = apply {
+        fun trigger(statement: () -> Statement) = apply {
             this.statement = statement()
         }
 

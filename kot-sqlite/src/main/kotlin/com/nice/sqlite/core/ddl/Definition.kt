@@ -26,49 +26,7 @@ interface Definition : Sequence<Definition>, FullRenderer {
 
 }
 
-open class Defined(override val name: String) : Definition {
-    override fun render(): String = name
-    override fun fullRender(): String = name
-    override fun toString(): String = name
-}
-
-fun defined(name: String): Defined = Defined(name)
-
-class AliasDefinition internal constructor(
-    override val name: String,
-    val definition: Definition
-) : Definition {
-
-    override fun render(): String = "${definition.render()} AS ${name.surrounding()}"
-
-    override fun fullRender(): String = "${definition.fullRender()} AS ${name.surrounding()}"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AliasDefinition
-
-        if (definition != other.definition) return false
-        if (name != other.name) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = definition.hashCode()
-        result = 31 * result + name.hashCode()
-        return result
-    }
-
-    override fun toString(): String = name
-
-}
-
-fun Column<*>.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
-fun Function.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
-
-abstract class Column<T : Any>(
+open class Column<T : Any>(
     override val name: String,
     val type: SqlType,
     val table: Table
@@ -77,36 +35,24 @@ abstract class Column<T : Any>(
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    fun default(value: T) = apply {
-        _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
-    }
-
-    fun default(value: Defined) = apply {
-        _meta = _meta.copy(defaultConstraint = ColumnConstraint.Default(value))
-    }
-
-    fun primaryKey(autoIncrement: Boolean = false) = apply {
-        _meta = _meta.copy(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
-    }
-
-    fun references(column: Column<*>) = apply {
-        _meta = _meta.copy(referencesConstraint = ColumnConstraint.References(column))
-    }
-
-    fun unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) = apply {
-        _meta = _meta.copy(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
-    }
-
-    fun notNull() = apply {
-        _meta = _meta.copy(notNullConstraint = ColumnConstraint.NotNull)
-    }
-
-    fun onUpdate(action: ColumnConstraintAction) = apply {
-        _meta = _meta.copy(onUpdateAction = action)
-    }
-
-    fun onDelete(action: ColumnConstraintAction) = apply {
-        _meta = _meta.copy(onDeleteAction = action)
+    fun setMeta(
+        defaultConstraint: ColumnConstraint.Default? = _meta.defaultConstraint,
+        primaryKeyConstraint: ColumnConstraint.PrimaryKey? = _meta.primaryKeyConstraint,
+        referencesConstraint: ColumnConstraint.References? = _meta.referencesConstraint,
+        uniqueConstraint: ColumnConstraint.Unique? = _meta.uniqueConstraint,
+        notNullConstraint: ColumnConstraint.NotNull? = _meta.notNullConstraint,
+        onUpdateAction: ColumnConstraintAction? = _meta.onUpdateAction,
+        onDeleteAction: ColumnConstraintAction? = _meta.onDeleteAction
+    ) {
+        _meta = _meta.copy(
+            defaultConstraint = defaultConstraint,
+            primaryKeyConstraint = primaryKeyConstraint,
+            referencesConstraint = referencesConstraint,
+            uniqueConstraint = uniqueConstraint,
+            notNullConstraint = notNullConstraint,
+            onUpdateAction = onUpdateAction,
+            onDeleteAction = onDeleteAction
+        )
     }
 
     operator fun invoke(value: T): Value = Value(this, value)
@@ -151,18 +97,38 @@ abstract class Column<T : Any>(
 
 }
 
-private class TriggerColumn(
-    override val name: String,
-    private val column: Column<*>
-) : Definition {
-    override fun render(): String = "${name.uppercase()}.${column.render()}"
-    override fun fullRender(): String = render()
+fun <V : Any, T : Column<V>> T.default(value: V) = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-val Column<*>.new: Definition
-    get() = TriggerColumn("new", this)
-val Column<*>.old: Definition
-    get() = TriggerColumn("old", this)
+fun <T : Column<*>> T.default(value: Defined) = apply {
+    setMeta(defaultConstraint = ColumnConstraint.Default(value))
+}
+
+fun <T : Column<*>> T.primaryKey(autoIncrement: Boolean = false) = apply {
+    setMeta(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
+}
+
+fun <T : Column<*>> T.references(column: Column<*>) = apply {
+    setMeta(referencesConstraint = ColumnConstraint.References(column))
+}
+
+fun <T : Column<*>> T.unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) =
+    apply {
+        setMeta(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
+    }
+
+fun <T : Column<*>> T.notNull() = apply {
+    setMeta(notNullConstraint = ColumnConstraint.NotNull)
+}
+
+fun <T : Column<*>> T.onUpdate(action: ColumnConstraintAction) = apply {
+    setMeta(onUpdateAction = action)
+}
+
+fun <T : Column<*>> T.onDelete(action: ColumnConstraintAction) = apply {
+    setMeta(onDeleteAction = action)
+}
 
 class Index internal constructor(
     override val name: String,
@@ -235,6 +201,31 @@ fun index(
     vararg columns: Column<*>,
     name: String = columns.joinToString("_")
 ): Index = Index(name, columns)
+
+sealed class Defined(override val name: String) : Definition {
+    override fun render(): String = name
+    override fun fullRender(): String = render()
+    override fun toString(): String = render()
+
+    internal class Named(name: String) : Defined(name)
+
+    internal class Old(private val column: Column<*>) : Defined(column.name) {
+        override fun render(): String = "OLD.${column.render()}"
+    }
+
+    internal class New(private val column: Column<*>) : Defined(column.name) {
+        override fun render(): String = "NEW.${column.render()}"
+    }
+
+    object CurrentTime : Defined("CURRENT_TIMESTAMP")
+}
+
+fun defined(name: String): Defined = Defined.Named(name)
+
+val Column<*>.old: Defined
+    get() = Defined.Old(this)
+val Column<*>.new: Defined
+    get() = Defined.New(this)
 
 class Function internal constructor(
     name: String,
@@ -315,3 +306,37 @@ fun datetime(source: String, vararg modifiers: String): Function =
 
 fun strftime(pattern: String, source: String, vararg modifiers: String): Function =
     function("strftime", pattern, source, *modifiers)
+
+class AliasDefinition internal constructor(
+    override val name: String,
+    val definition: Definition
+) : Definition {
+
+    override fun render(): String = "${definition.render()} AS ${name.surrounding()}"
+
+    override fun fullRender(): String = "${definition.fullRender()} AS ${name.surrounding()}"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AliasDefinition
+
+        if (definition != other.definition) return false
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = definition.hashCode()
+        result = 31 * result + name.hashCode()
+        return result
+    }
+
+    override fun toString(): String = name
+
+}
+
+fun Column<*>.aliased(name: String): AliasDefinition = AliasDefinition(name, this)
+fun Function.aliased(name: String): AliasDefinition = AliasDefinition(name, this)

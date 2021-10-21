@@ -19,7 +19,13 @@ sealed class ColumnConstraint {
     class Default(val value: Any) : ColumnConstraint() {
         override fun toString(): String = buildString {
             append("DEFAULT ")
-            append(value.toSqlString())
+            if (value is Function) {
+                append('(')
+                append(value.toSqlString())
+                append(')')
+            } else {
+                append(value.toSqlString())
+            }
         }
     }
 

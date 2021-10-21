@@ -2,16 +2,19 @@ package com.example.sample
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.DB
 import com.example.sample.db.DBTest
+import com.example.sample.db.Database
 import com.example.sample.db.TestTable
+import com.googlecode.tesseract.android.TessBaseAPI
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerLevel
@@ -25,17 +28,12 @@ import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
 import com.nice.common.event.FlowEventBus.subscribeEvent
 import com.nice.common.event.NamedEvent
-import com.nice.common.helper.doOnClick
-import com.nice.common.helper.setContentView
-import com.nice.common.helper.string
-import com.nice.common.helper.viewBindings
+import com.nice.common.helper.*
 import com.nice.common.widget.*
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.ddl.aliased
-import com.nice.sqlite.core.ddl.datetime
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
@@ -83,13 +81,25 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         testDB()
 //        initBle()
 
+//        initTess()
+    }
+
+    private fun initTess() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                val baseApi = TessBaseAPI()
+                baseApi.init(Environment.getExternalStorageDirectory().absolutePath, "chi_sim")
+                baseApi.setImage(getDrawableCompat(R.mipmap.test)!!.toBitmap())
+                baseApi.utF8Text
+            }
+            binding.image.text = result
+        }
     }
 
     private fun testDB() {
         lifecycleScope.launch(Dispatchers.IO) {
-            DB.use(Transaction.Exclusive) {
+            Database.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
-                val time = System.currentTimeMillis()
                 repeat(5) { index ->
                     val bean = DBTest(
                         id = index.toLong(),
@@ -97,13 +107,12 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         age = index,
                         flag = true,
                         number = -index,
-                        data = byteArrayOf(1, 2, 3),
-                        time = time + 3 * 60 * 60 * 1000
+                        data = byteArrayOf(1, 2, 3)
                     )
                     beans.add(bean)
                 }
 
-                val start = System.currentTimeMillis()
+                var start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
                         item {
@@ -120,21 +129,23 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 Log.e("TAGTAG", "==============================")
 
-                offer(TestTable).select(statementExecutor){
-                    it.id + it.name + it.age + datetime(it.time, "localtime").aliased("time")
+                offer(TestTable).select(statementExecutor) {
+                    it.id + it.name + it.age + it.time.local
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
 
                 Thread.sleep(2000)
 
-                offer(TestTable).where { it.id eq 0 }.update(statementExecutor){
+                offer(TestTable).where { it.id eq 0 }.update(statementExecutor) {
                     it.name("tom")
                 }
 
                 Log.e("TAGTAG", "==============================")
 
-                offer(TestTable).select(statementExecutor).asMapSequence().forEach {
+                offer(TestTable).select(statementExecutor){
+                    it.id + it.name + it.age + it.time.local
+                }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
 
@@ -271,7 +282,11 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     private class BleAdapter(context: Context) :
         SimpleRecyclerAdapter<Advertisement>(context, android.R.layout.simple_list_item_2) {
 
-        override fun onBindItemViewHolder(holder: ItemViewHolder, item: Advertisement, payloads: List<Any>) {
+        override fun onBindItemViewHolder(
+            holder: ItemViewHolder,
+            item: Advertisement,
+            payloads: List<Any>
+        ) {
             holder.findViewById<TextView>(android.R.id.text1).string = item.name
             holder.findViewById<TextView>(android.R.id.text2).string = item.address
         }

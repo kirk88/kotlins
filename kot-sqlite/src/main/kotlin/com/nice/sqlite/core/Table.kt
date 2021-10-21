@@ -2,10 +2,7 @@
 
 package com.nice.sqlite.core
 
-import com.nice.sqlite.core.ddl.Column
-import com.nice.sqlite.core.ddl.Renderer
-import com.nice.sqlite.core.ddl.SqlType
-import com.nice.sqlite.core.ddl.surrounding
+import com.nice.sqlite.core.ddl.*
 
 abstract class Table(private val name: String) : Renderer {
 
@@ -20,7 +17,6 @@ abstract class Table(private val name: String) : Renderer {
     inner class DateColumn(name: String) : Column<String>(name, SqlType.Named("date"), this)
     inner class TimeColumn(name: String) : Column<String>(name, SqlType.Named("time"), this)
     inner class DatetimeColumn(name: String) : Column<String>(name, SqlType.Named("datetime"), this)
-    inner class TimestampColumn(name: String) : Column<String>(name, SqlType.Named("timestamp"), this)
 
     override fun render(): String = name.surrounding()
 
@@ -42,3 +38,12 @@ abstract class Table(private val name: String) : Renderer {
     override fun toString(): String = name
 
 }
+
+val Table.DateColumn.local: Definition
+    get() = date(this, "localtime").aliased(name)
+
+val Table.TimeColumn.local: Definition
+    get() = time(this, "localtime").aliased(name)
+
+val Table.DatetimeColumn.local: Definition
+    get() = datetime(this, "localtime").aliased(name)

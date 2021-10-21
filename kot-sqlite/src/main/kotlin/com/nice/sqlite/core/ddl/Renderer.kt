@@ -24,6 +24,6 @@ internal fun Any?.toSqlString(): String {
         is Boolean -> if (this) "1" else "0"
         is ByteArray -> "'${toString(StandardCharsets.UTF_8)}'"
         is Defined -> render()
-        else -> error("Unsupported value type: $javaClass")
+        else -> error("Unsupported value type: ${javaClass.name}")
     }
 }

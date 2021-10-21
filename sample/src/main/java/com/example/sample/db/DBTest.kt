@@ -1,10 +1,11 @@
 package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
-import com.nice.sqlite.ManagedSQLiteOpenHelper
 import com.nice.sqlite.SQLiteDialect
+import com.nice.sqlite.SupportSQLiteDatabaseHelper
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.limit
@@ -19,7 +20,7 @@ data class DBTest @ClassParserConstructor constructor(
     val flag: Boolean,
     val number: Int,
     val data: ByteArray,
-    val time: Long
+    val time: String = ""
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -64,8 +65,7 @@ object TestTable : Table("test") {
     val flag = BooleanColumn("flag").default(false)
     val number = IntColumn("number").default(10)
     val data = BlobColumn("data").default(byteArrayOf(1, 2, 3, 4, 5))
-    val time = TimestampColumn("time")
-        .default(defined("CURRENT_TIMESTAMP"))
+    val time = DatetimeColumn("time").default(Defined.CurrentTime)
 }
 
 object TestTable2 : Table("test2") {
@@ -87,32 +87,23 @@ val TestView = View("test_view") {
         .selectDistinct()
 }
 
-val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
-    .event(TriggerTime.After, TriggerType.Update)
+private val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
+    .at(TriggerTime.After, TriggerType.Update)
     .on(TestTable)
-    .whence { it.id.old gt 0 }
-    .action {
+    .trigger {
         offer(TestTable)
             .where { it.id eq it.id.old }
             .update { it.time(datetime("now")) }
     }.build()
 
-object DB : ManagedSQLiteOpenHelper(
-    applicationContext,
-    "test_db.db",
-    22
-) {
-
+private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback(22) {
     override fun onConfigure(db: SupportSQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(true)
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         offer(TestTable).create(db.statementExecutor) {
-            it.id + it.name + it.age + it.flag + it.number + it.data + it.time + index(
-                it.id,
-                it.name
-            )
+            it.id + it.name + it.age + it.flag + it.number + it.data + it.time + index(it.id, it.name)
         }
 
         offer(TestView).create(db.statementExecutor)
@@ -141,8 +132,14 @@ object DB : ManagedSQLiteOpenHelper(
 
         offer(TestTrigger).create(db.statementExecutor)
     }
-
 }
+
+object Database : SupportSQLiteDatabaseHelper(
+    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
+        .name("test_db.db")
+        .callback(SQLiteOpenHelperCallback)
+        .build()
+)
 
 fun main() {
     println(offer(TestTrigger).create().toString(SQLiteDialect))
