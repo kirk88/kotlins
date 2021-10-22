@@ -85,6 +85,16 @@ object FlowEventBus {
         .cancellable()
         .launchIn(lifecycleScope)
 
+    inline fun LifecycleOwner.subscribeEvent(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = events
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(lifecycleScope)
+
     inline fun <reified T : Event> LifecycleOwner.subscribeEvent(
         crossinline action: suspend (T) -> Unit
     ): Job = events
@@ -99,6 +109,16 @@ object FlowEventBus {
         crossinline action: suspend (Event) -> Unit
     ): Job = stickyEvents
         .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(lifecycleScope)
+
+    inline fun LifecycleOwner.subscribeStickyEvent(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = stickyEvents
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
         .onEach { action.invoke(it) }
         .cancellable()
         .launchIn(lifecycleScope)
@@ -120,6 +140,16 @@ object FlowEventBus {
         .cancellable()
         .launchIn(viewModelScope)
 
+    inline fun ViewModel.subscribeEvent(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = events
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
     inline fun <reified T : Event> ViewModel.subscribeEvent(
         crossinline action: suspend (T) -> Unit
     ): Job = events
@@ -128,12 +158,21 @@ object FlowEventBus {
         .cancellable()
         .launchIn(viewModelScope)
 
-
     inline fun ViewModel.subscribeStickyEvent(
         crossinline predicate: suspend (Event) -> Boolean,
         crossinline action: suspend (Event) -> Unit
     ): Job = stickyEvents
         .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(viewModelScope)
+
+    inline fun ViewModel.subscribeStickyEvent(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = stickyEvents
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
         .onEach { action.invoke(it) }
         .cancellable()
         .launchIn(viewModelScope)
@@ -146,13 +185,23 @@ object FlowEventBus {
         .cancellable()
         .launchIn(viewModelScope)
 
-
     @OptIn(DelicateCoroutinesApi::class)
     inline fun subscribeEventForever(
         crossinline predicate: suspend (Event) -> Boolean,
         crossinline action: suspend (Event) -> Unit
     ): Job = events
         .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun subscribeEventForever(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = events
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
         .onEach { action.invoke(it) }
         .cancellable()
         .launchIn(GlobalScope)
@@ -172,6 +221,17 @@ object FlowEventBus {
         crossinline action: suspend (Event) -> Unit
     ): Job = stickyEvents
         .filter { predicate.invoke(it) }
+        .onEach { action.invoke(it) }
+        .cancellable()
+        .launchIn(GlobalScope)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun subscribeStickyEventForever(
+        name: String,
+        crossinline action: suspend (NamedEvent) -> Unit
+    ): Job = stickyEvents
+        .filterIsInstance<NamedEvent>()
+        .filter { it.name == name }
         .onEach { action.invoke(it) }
         .cancellable()
         .launchIn(GlobalScope)
