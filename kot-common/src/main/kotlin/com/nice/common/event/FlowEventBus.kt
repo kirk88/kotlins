@@ -6,22 +6,20 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 object FlowEventBus {
 
-    private val mutableEvents = MutableSharedFlow<Event>()
-    val events = mutableEvents.asSharedFlow()
+    private val eventSubjects = mutableMapOf<String, EventSubject>()
 
-    private val mutableStickyEvents = MutableSharedFlow<Event>(replay = 1)
-    val stickyEvents = mutableStickyEvents.asSharedFlow()
+    private fun getEventSubject(name: String): EventSubject = eventSubjects.getOrPut(name) {
+        EventSubject()
+    }
 
-    fun <T : Event> LifecycleOwner.produceEvent(event: T): Job = lifecycleScope.launch {
-        mutableEvents.emit(event)
+
+    fun <T : Any> LifecycleOwner.produceEvent(name: String, event: T): Job = lifecycleScope.launch {
+
     }
 
     fun <T : Event> LifecycleOwner.produceStickyEvent(event: T): Job = lifecycleScope.launch {
@@ -245,5 +243,9 @@ object FlowEventBus {
         .cancellable()
         .launchIn(GlobalScope)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun clearStickyEvent() {
+        mutableStickyEvents.resetReplayCache()
+    }
 
 }
