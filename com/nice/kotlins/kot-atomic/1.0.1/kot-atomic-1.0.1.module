@@ -29,11 +29,11 @@
         {
           "name": "kot-atomic-1.0.1.jar",
           "url": "kot-atomic-1.0.1.jar",
-          "size": 30245,
-          "sha512": "9cb0a093011ca349f248943d3888cd2760a07ddcf02371508a202cff9744b419bcfd271bca0a84952b70cee7d7a2fec0a691390658d678934e87652267836db9",
-          "sha256": "15b0f914dc8a9e94c67c364ae69f7070f24ab6a1f97309f615a349f8fa9b020d",
-          "sha1": "293defe75a4ac8fff92488b91709e8bff8b763d0",
-          "md5": "91035069f797a3541987c1517462135a"
+          "size": 30242,
+          "sha512": "3e145d3d23d955a179b27a23ded799e18ca6c1512abb016e9710a8cd6d28837489d86302f074776f5e1ee7991bcb15370d1a204f6b5d9f291fbdd331f9a3e069",
+          "sha256": "9e981be47b1ad2c99a90c4c9adb5fc4eb55bcd57069aa4e084b989bf66e4e07d",
+          "sha1": "f5e4c9f2b556230c0460bab1f5fc4d50b6029423",
+          "md5": "632ff78770a38beed5ec0ca67e6e8f4d"
         }
       ]
     },
@@ -61,11 +61,11 @@
         {
           "name": "kot-atomic-1.0.1.jar",
           "url": "kot-atomic-1.0.1.jar",
-          "size": 30245,
-          "sha512": "9cb0a093011ca349f248943d3888cd2760a07ddcf02371508a202cff9744b419bcfd271bca0a84952b70cee7d7a2fec0a691390658d678934e87652267836db9",
-          "sha256": "15b0f914dc8a9e94c67c364ae69f7070f24ab6a1f97309f615a349f8fa9b020d",
-          "sha1": "293defe75a4ac8fff92488b91709e8bff8b763d0",
-          "md5": "91035069f797a3541987c1517462135a"
+          "size": 30242,
+          "sha512": "3e145d3d23d955a179b27a23ded799e18ca6c1512abb016e9710a8cd6d28837489d86302f074776f5e1ee7991bcb15370d1a204f6b5d9f291fbdd331f9a3e069",
+          "sha256": "9e981be47b1ad2c99a90c4c9adb5fc4eb55bcd57069aa4e084b989bf66e4e07d",
+          "sha1": "f5e4c9f2b556230c0460bab1f5fc4d50b6029423",
+          "md5": "632ff78770a38beed5ec0ca67e6e8f4d"
         }
       ]
     },
@@ -82,10 +82,10 @@
           "name": "kot-atomic-1.0.1-sources.jar",
           "url": "kot-atomic-1.0.1-sources.jar",
           "size": 5978,
-          "sha512": "7c66c6040f9a5249356587aef39b524a2a5b2c0dceeb782b992d2ea4c4ee8f5c5e75ae4815de2ee967f34f1c8b099e08caf88511f557de83ef374a1035ff6e25",
-          "sha256": "34a84c670edcfd543fd7d5e04a783f2ead8e6e794f65b6b77b05e244520c34fc",
-          "sha1": "45c256c9213cb1025aa2d18a8a4ddd645c5da431",
-          "md5": "0fcd232b998d662044cabdf410a05619"
+          "sha512": "4e56b2f268d355823a7e2981e3ad812b5a2e636ad5a7b65034c23495baf6f1703968f99bce2b6491fc644a5fbe3c89c0937b7298a5383d070a865a4b6c6a16f4",
+          "sha256": "61f9cefeb475f567e576392ac00abe9b8e9b86c4382fb4c801e1ccaea9dadea5",
+          "sha1": "233411adf1ba34b6b07802f43c2e9f6e9da5c697",
+          "md5": "f388af67f01002b816bef3fe646e4272"
         }
       ]
     },
@@ -102,10 +102,10 @@
           "name": "kot-atomic-1.0.1-javadoc.jar",
           "url": "kot-atomic-1.0.1-javadoc.jar",
           "size": 261,
-          "sha512": "03a3d986aecaafd80d9676f983230bee016a8487bc9f6dd0c21440f2053a8b1931347691c90be2fc28fe20fb6c140e9d248cda3bcafcdba16209a890c176e217",
-          "sha256": "e9ae9048ccdfdd96d0a843b27610a30fc01d6b69be3a75e8cd422d9a48b191c8",
-          "sha1": "9357881ff3509048f355a0b9fe9113070e214e43",
-          "md5": "a99035cddf41bd0d6ab40d963efc7ffd"
+          "sha512": "60a456d13dfcd7f14138a31b456fbed2d78f131722ddf31a77f5f2af6b3f91452f36cc27d57748462341ab835ad449195baa2321d15f2fce5d73c9a23e5171dc",
+          "sha256": "7ed6d354f1af139f502c4cd1a44ab34fbe54c78c7d845386fdbcf3d60feb3372",
+          "sha1": "80eb5d4242310d303a3cbf4ba99eae540dce697a",
+          "md5": "cf171c01893fdd87fc1922c9f1807e8a"
         }
       ]
     }

@@ -12,6 +12,14 @@ java {
     withJavadocJar()
 }
 
+kotlin {
+    target {
+        compilations.all {
+            kotlinOptions.jvmTarget = "11"
+        }
+    }
+}
+
 dependencies {
     api(libs.google.gson)
     implementation(libs.kotlin.stdlib)
