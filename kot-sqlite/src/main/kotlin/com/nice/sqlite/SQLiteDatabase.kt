@@ -28,7 +28,7 @@ open class SupportSQLiteDatabaseHelper(
     private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)
 
     private val counter = AtomicInteger()
-    private var db: SupportSQLiteDatabase? = null
+    private var database: SupportSQLiteDatabase? = null
 
     fun <T> use(
         transaction: Transaction = Transaction.None,
@@ -50,25 +50,26 @@ open class SupportSQLiteDatabaseHelper(
     @Synchronized
     private fun openDatabase(): SupportSQLiteDatabase {
         if (counter.incrementAndGet() == 1) {
-            db = delegate.writableDatabase
+            database = delegate.writableDatabase
         }
-        return db!!
+        return database!!
     }
 
     @Synchronized
     private fun closeDatabase() {
         if (counter.decrementAndGet() == 0) {
-            db?.close()
+            database?.close()
         }
     }
 
 }
 
 val SupportSQLiteDatabase.statementExecutor: StatementExecutor
-    get() = SQLiteStatementExecutor(this)
+    get() = SQLiteStatementExecutor[this]
 
-private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabase) :
-    StatementExecutor {
+private class SQLiteStatementExecutor private constructor(
+    private val database: SupportSQLiteDatabase
+) : StatementExecutor {
 
     override fun execute(statement: Statement) {
         if (statement is TriggerCreateStatement<*>) {
@@ -147,6 +148,20 @@ private class SQLiteStatementExecutor(private val database: SupportSQLiteDatabas
                 is ByteArray -> bindBlob(index + 1, value)
             }
         }
+    }
+
+    companion object {
+
+        private var instance: SQLiteStatementExecutor? = null
+
+        @Synchronized
+        operator fun get(database: SupportSQLiteDatabase): SQLiteStatementExecutor {
+            if (instance == null || instance!!.database !== database) {
+                instance = SQLiteStatementExecutor(database)
+            }
+            return instance!!
+        }
+
     }
 
 }

@@ -19,7 +19,7 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
-        "org.gradle.jvm.version": 8,
+        "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-api",
         "org.jetbrains.kotlin.localToProject": "public",
@@ -39,10 +39,10 @@
           "name": "kot-gson-1.0.1.jar",
           "url": "kot-gson-1.0.1.jar",
           "size": 214768,
-          "sha512": "006354c499b93e4a63ef93ef47ecdf44a39c30d6efe3e95bfade1f0a4b1d113ec50874368f50be6d98fc2ffc6bda2f4f8a2498ec64201151a24c98aac71bdd4c",
-          "sha256": "5f40fac4affe7211b6482e34377308585fe7e2b5daadd1a818200b2d4c99a36f",
-          "sha1": "5adad22269eec9d9b6ffd08bcd4c67aaa85599c6",
-          "md5": "b84859def7c7a20d9acb9277eefa88df"
+          "sha512": "fb9192b6ac2ca0fcafc09f005f2b03e05f8b1dd9c4a8d4b06172c80ffcce759777551ced808518a1d917d4e6c7b80432d031350801b307d4b29fbe069c2498c7",
+          "sha256": "8bf883e51c7e4b0100f4d1460153523cc0aa75b0783b06e4653c93e5ad0c8cbf",
+          "sha1": "04c5c464b3e17c10d7960ee9504a88566e000682",
+          "md5": "271a851e20efbb364898661c6223fc66"
         }
       ]
     },
@@ -51,7 +51,7 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
-        "org.gradle.jvm.version": 8,
+        "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-runtime",
         "org.jetbrains.kotlin.localToProject": "public",
@@ -78,10 +78,10 @@
           "name": "kot-gson-1.0.1.jar",
           "url": "kot-gson-1.0.1.jar",
           "size": 214768,
-          "sha512": "006354c499b93e4a63ef93ef47ecdf44a39c30d6efe3e95bfade1f0a4b1d113ec50874368f50be6d98fc2ffc6bda2f4f8a2498ec64201151a24c98aac71bdd4c",
-          "sha256": "5f40fac4affe7211b6482e34377308585fe7e2b5daadd1a818200b2d4c99a36f",
-          "sha1": "5adad22269eec9d9b6ffd08bcd4c67aaa85599c6",
-          "md5": "b84859def7c7a20d9acb9277eefa88df"
+          "sha512": "fb9192b6ac2ca0fcafc09f005f2b03e05f8b1dd9c4a8d4b06172c80ffcce759777551ced808518a1d917d4e6c7b80432d031350801b307d4b29fbe069c2498c7",
+          "sha256": "8bf883e51c7e4b0100f4d1460153523cc0aa75b0783b06e4653c93e5ad0c8cbf",
+          "sha1": "04c5c464b3e17c10d7960ee9504a88566e000682",
+          "md5": "271a851e20efbb364898661c6223fc66"
         }
       ]
     },
@@ -98,10 +98,10 @@
           "name": "kot-gson-1.0.1-sources.jar",
           "url": "kot-gson-1.0.1-sources.jar",
           "size": 7842,
-          "sha512": "96ea28461ad572eb5d1b4f55dce0afddeea3e731790bfaab17a97837783507321b404a019fc37687788691e6b3e1edcf825d620fa5d5c2d679d64327541e2e6f",
-          "sha256": "3530ee00b4d78f2cf5c8a0fd5d33575b59e03fc4da6877ab7229556766f947b1",
-          "sha1": "2c7e81f2cd11fd2901fd943f6afcdbd869109d0e",
-          "md5": "2ecb724a348411fd3030ede16f1a8266"
+          "sha512": "9bc411cc85e6d81335badc09fe3f307f000468b1fe8241f4595dfdf9443f9c61b91a905b121ee3ff73b9a471e61d242c297e72b4dfee8fee68988be9735ab155",
+          "sha256": "24b7ba07e8ca753a2a0fe6c938319c39d6c38e7d5a4f5be2766630d971a35061",
+          "sha1": "45dc6ebe2964d6596d8acdd2a77d5bf45c9cde7e",
+          "md5": "facf1a289e800fc07115a51e4b1907fc"
         }
       ]
     },
@@ -118,10 +118,10 @@
           "name": "kot-gson-1.0.1-javadoc.jar",
           "url": "kot-gson-1.0.1-javadoc.jar",
           "size": 261,
-          "sha512": "9598a294c1b181f230ed993fa7faf8dc821e0f1589fffd7968ed38cb66bcdd6874ca33730ca848912320c6d17a9df5766daa6687c2fe592e9480589d5e97ae1f",
-          "sha256": "f4c37f3609b6575f7cd2e78ff2c4e4a99150602b7c7580ee29cf9cdccea39ecf",
-          "sha1": "cb1c36845208d0758b64b6b5f70393291803a0ff",
-          "md5": "de227f19897ff3593209ae2aac7f6ab0"
+          "sha512": "cb69fb4c3bfb729a21fade22259364f09653b46e36776272de8729e2f72594b6e7afa17d2f1e5f56adceee622c090b86568a3ac064acf3d69477bcb79b785736",
+          "sha256": "7e42bc0c4c57d4f7d5687d71e24d22be842623378482dc0c8c16d0a32bc56c1a",
+          "sha1": "5d32ccf7486440e9412762c509fde416b02ca85c",
+          "md5": "8079762ed64f7f090c76101818d7469f"
         }
       ]
     }
