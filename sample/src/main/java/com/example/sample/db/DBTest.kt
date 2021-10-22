@@ -4,7 +4,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
-import com.nice.sqlite.SQLiteDialect
 import com.nice.sqlite.SupportSQLiteDatabaseHelper
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.*
@@ -142,5 +141,16 @@ object Database : SupportSQLiteDatabaseHelper(
 )
 
 fun main() {
-    println(offer(TestTrigger).create().toString(SQLiteDialect))
+    val aMask = 0x1
+    val bMask = 0x1 shl 1
+    val cMask = 0x1 shl 2
+
+    val t =   0 or 2
+
+    println(0 and aMask)
+
+    println(1 and aMask)
+    println(2 and aMask)
+
+
 }

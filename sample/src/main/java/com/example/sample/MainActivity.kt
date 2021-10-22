@@ -36,6 +36,7 @@ import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.ConflictAlgorithm
 import com.nice.sqlite.core.ddl.aliased
 import com.nice.sqlite.core.ddl.asc
+import com.nice.sqlite.core.ddl.date
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
@@ -133,7 +134,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 Log.e("TAGTAG", "==============================")
 
                 offer(TestTable).select(statementExecutor) {
-                    it.id + it.name + it.age + it.time.local.aliased("time")
+                    it.id + it.name + it.age + date(it.time)
                 }.asMapSequence().forEach {
                     Log.e("TAGTAG", it.toString())
                 }
