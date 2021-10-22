@@ -13,13 +13,13 @@ java {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
     api(libs.google.gson)
+    implementation(libs.kotlin.stdlib)
 }
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 0
+val versionPatch = 1
 
 publishing {
     publications {

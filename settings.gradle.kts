@@ -9,8 +9,8 @@ pluginManagement {
         id("com.android.application") version "7.1.0-beta01"
         id("com.android.library") version "7.1.0-beta01"
         id("org.jetbrains.kotlin.android") version "1.5.31"
-        id("com.github.ben-manes.versions") version "0.39.0"
         id("org.jetbrains.kotlin.jvm") version "1.5.31"
+        id("com.github.ben-manes.versions") version "0.39.0"
     }
 }
 dependencyResolutionManagement {
@@ -20,7 +20,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://dl.google.com/dl/android/maven2")
-        maven("https://jitpack.io")
     }
 
     versionCatalogs {
@@ -31,25 +30,47 @@ dependencyResolutionManagement {
         }
 
         create("libs") {
-            version("coroutines", "1.5.2")
+            version("kotlin_stdlib", "1.5.31")
+            version("kotlinx_coroutines", "1.5.2")
             version("lifecycle", "2.4.0-rc01")
             version("datastore", "1.0.0")
             version("sqlite", "2.2.0-beta01")
-            version("okhttp", "5.0.0-alpha.2")
+            version("okhttp", "4.9.2")
 
             alias("kotlin-stdlib").to(
                 "org.jetbrains.kotlin",
                 "kotlin-stdlib"
-            ).version("1.5.31")
+            ).versionRef("kotlin_stdlib")
+            alias("kotlin-stdlib-common").to(
+                "org.jetbrains.kotlin",
+                "kotlin-stdlib-common"
+            ).versionRef("kotlin_stdlib")
+            alias("kotlin-stdlib-jdk7").to(
+                "org.jetbrains.kotlin",
+                "kotlin-stdlib-jdk7"
+            ).versionRef("kotlin_stdlib")
+            alias("kotlin-stdlib-jdk8").to(
+                "org.jetbrains.kotlin",
+                "kotlin-stdlib-jdk8"
+            ).versionRef("kotlin_stdlib")
+            bundle(
+                "kotlin-stdlibs",
+                listOf(
+                    "kotlin-stdlib",
+                    "kotlin-stdlib-common",
+                    "kotlin-stdlib-jdk7",
+                    "kotlin-stdlib-jdk8"
+                )
+            )
 
             alias("kotlinx-coroutines-core").to(
                 "org.jetbrains.kotlinx",
                 "kotlinx-coroutines-core"
-            ).versionRef("coroutines")
+            ).versionRef("kotlinx_coroutines")
             alias("kotlinx-coroutines-android").to(
                 "org.jetbrains.kotlinx",
                 "kotlinx-coroutines-android"
-            ).versionRef("coroutines")
+            ).versionRef("kotlinx_coroutines")
             bundle(
                 "kotlinx-coroutines",
                 listOf(

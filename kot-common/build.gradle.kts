@@ -27,8 +27,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    api(libs.kotlin.stdlib)
+    api(libs.bundles.kotlin.stdlibs)
     api(libs.bundles.kotlinx.coroutines)
     api(libs.bundles.androidx.common.app)
     api(libs.bundles.androidx.common.view)
@@ -53,15 +53,12 @@ dependencies {
     api(libs.androidx.setup)
     api(libs.androidx.multidex)
     api(libs.google.material)
-    api(libs.coil) {
-        exclude("com.squareup.okhttp3", "okhttp")
-        exclude("com.squareup.okio", "okio")
-    }
+    api(libs.coil)
 }
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 0
+val versionPatch = 1
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")

@@ -141,16 +141,29 @@ object Database : SupportSQLiteDatabaseHelper(
 )
 
 fun main() {
-    val aMask = 0x1
-    val bMask = 0x1 shl 1
-    val cMask = 0x1 shl 2
+    val a = 0x1
+    val b = 0x1 shl 1
+    val c = 0x1 shl 2
 
-    val t =   0 or 2
+    var flag = 0
 
-    println(0 and aMask)
+   flag = flag or a
 
-    println(1 and aMask)
-    println(2 and aMask)
+    println(flag and a)
+    println(flag and b)
+    println(flag and c)
 
+    println("=============")
 
+    flag = flag or b
+
+    println(flag and a)
+    println(flag and b)
+    println(flag and c)
+    println("=============")
+    flag = flag or c
+
+    println(flag and a)
+    println(flag and b)
+    println(flag and c)
 }

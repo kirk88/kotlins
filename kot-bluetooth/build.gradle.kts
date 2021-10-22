@@ -23,8 +23,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
+    implementation(libs.bundles.kotlin.stdlibs)
     implementation(libs.bundles.kotlinx.coroutines)
     implementation(libs.androidx.setup)
     implementation(libs.androidx.annotation)
@@ -48,7 +48,7 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 0
+val versionPatch = 1
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
