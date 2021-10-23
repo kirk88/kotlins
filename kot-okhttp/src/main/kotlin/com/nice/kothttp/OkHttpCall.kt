@@ -35,7 +35,7 @@ class OkHttpCall<T> internal constructor(
         call?.cancel()
     }
 
-    override fun execute(): Flow<T> = flow {
+    override fun make(): Flow<T> = flow {
         val result = withContext(Dispatchers.IO) {
             val call = createCall()
             val response = suspendCancellableCoroutine<Response> { con ->
@@ -234,7 +234,7 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
         )
     }
 
-    fun execute(): Flow<T> = build().execute()
+    fun make(): Flow<T> = build().make()
 
     init {
         config.client?.let { client(it) }
@@ -353,4 +353,4 @@ inline fun <reified T> buildHttpCall(buildAction: OkHttpCallBuilder<T>.() -> Uni
 
 inline fun <reified T> httpCallFlow(buildAction: OkHttpCallBuilder<T>.() -> Unit): Flow<T> =
     buildHttpCall(buildAction)
-        .execute()
+        .make()

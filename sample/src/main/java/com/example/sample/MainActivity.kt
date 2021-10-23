@@ -29,6 +29,7 @@ import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
+import com.nice.kothttp.httpCallBuilder
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -76,7 +77,9 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        emitStickyEvent("what you name?")
+        emitStickyEvent {
+            httpCallBuilder<String>().url("https://www.baidu.com").make().first()
+        }
 
         testDB()
 //        initBle()

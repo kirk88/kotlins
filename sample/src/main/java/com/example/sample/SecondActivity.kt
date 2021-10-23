@@ -16,7 +16,6 @@ import com.nice.common.widget.TipView
 import com.nice.common.widget.tipViews
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
@@ -66,13 +65,11 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         setupAppBarWithController(navController)
 
-        collectEvent<String> {
+        collectEvent<String>("name") {
             Log.e("TAGTAG", "collectEvent: $it")
         }
 
-        FlowEventBus.get<String>().asStickySharedFlow().onStart {
-            Log.e("TAGTAG", "flow start")
-        }.onEach {
+        FlowEventBus.get<String>().asStickySharedFlow().onEach {
             Log.e("TAGTAG", "flow: $it")
         }.launchIn(lifecycleScope)
     }

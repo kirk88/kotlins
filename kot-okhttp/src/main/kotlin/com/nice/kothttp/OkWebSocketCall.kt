@@ -34,7 +34,7 @@ class OkWebSocketCall(
     override fun <T> tag(type: Class<out T>): T? = request.tag(type)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun execute(): Flow<OkWebSocketResponse> {
+    override fun make(): Flow<OkWebSocketResponse> {
         check(executed.compareAndSet(false, true)) { "Already Executed" }
 
         return callbackFlow {
@@ -137,7 +137,7 @@ class OkWebSocketCallBuilder internal constructor() {
         return OkWebSocketCall(client, request)
     }
 
-    fun execute(): Flow<OkWebSocketResponse> = build().execute()
+    fun make(): Flow<OkWebSocketResponse> = build().make()
 
 }
 
@@ -150,4 +150,4 @@ fun buildWebSocketCall(buildAction: OkWebSocketCallBuilder.() -> Unit): OkWebSoc
 
 fun webSocketCallFlow(buildAction: OkWebSocketCallBuilder.() -> Unit): Flow<OkWebSocketResponse> =
     buildWebSocketCall(buildAction)
-        .execute()
+        .make()

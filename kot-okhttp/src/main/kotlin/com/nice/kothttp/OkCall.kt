@@ -18,7 +18,7 @@ interface OkCall<T> {
 
     fun <T> tag(type: Class<out T>): T?
 
-    fun execute(): Flow<T>
+    fun make(): Flow<T>
 
     fun cancel()
 
