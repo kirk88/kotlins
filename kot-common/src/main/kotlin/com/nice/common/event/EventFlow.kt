@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 
-class EventFlow<T : Any> {
+@PublishedApi
+internal class EventFlow<T> {
 
     @PublishedApi
     internal val flow = MutableSharedFlow<T>(extraBufferCapacity = Int.MAX_VALUE)
@@ -47,5 +48,8 @@ class EventFlow<T : Any> {
 
 }
 
-fun <T : Any> EventFlow<T>.asSharedFlow() = flow.asSharedFlow()
-fun <T : Any> EventFlow<T>.asStickySharedFlow() = stickyFlow.asSharedFlow()
+@PublishedApi
+internal fun <T> EventFlow<T>.asSharedFlow() = flow.asSharedFlow()
+
+@PublishedApi
+internal fun <T> EventFlow<T>.asStickySharedFlow() = stickyFlow.asSharedFlow()

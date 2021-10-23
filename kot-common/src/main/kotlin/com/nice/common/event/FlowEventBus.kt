@@ -7,140 +7,153 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.SharedFlow
 
 object FlowEventBus {
 
-    private val flows = mutableMapOf<String, EventFlow<out Any>>()
+    @PublishedApi
+    internal val flows = mutableMapOf<String, EventFlow<*>>()
 
-    operator fun <T : Any> get(name: String): EventFlow<T> =
-        flows.getOrPut(name) { EventFlow<T>() } as EventFlow<T>
+    @PublishedApi
+    internal fun <T> get(name: String): EventFlow<T?> =
+        flows.getOrPut(name) { EventFlow<T?>() } as EventFlow<T?>
 
-    inline fun <reified T : Any> get(): EventFlow<T> = get(T::class.java.name)
+    @PublishedApi
+    internal inline fun <reified T> get(): EventFlow<T?> =
+        flows.getOrPut(T::class.java.name) { EventFlow<T?>() } as EventFlow<T?>
 
-    fun <T : Any> LifecycleOwner.emitEvent(
+    fun <T> event(name: String): SharedFlow<T?> = get<T>(name).asSharedFlow()
+
+    inline fun <reified T> event(): SharedFlow<T?> = get<T>().asSharedFlow()
+
+    fun <T> stickyEvent(name: String): SharedFlow<T?> = get<T>(name).asStickySharedFlow()
+
+    inline fun <reified T> stickyEvent(): SharedFlow<T?> = get<T>().asStickySharedFlow()
+
+    fun <T> LifecycleOwner.emitEvent(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launch {
         if (delay > 0) delay(delay)
         get<T>(name).emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEvent(
+    inline fun <T> LifecycleOwner.emitEvent(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launch {
         get<T>(name).emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEvent(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitEvent(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEvent(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitEvent(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launch {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEvent(
+    fun <T> LifecycleOwner.emitStickyEvent(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launch {
         if (delay > 0) delay(delay)
         get<T>(name).emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEvent(
+    inline fun <T> LifecycleOwner.emitStickyEvent(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launch {
         get<T>(name).emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEvent(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitStickyEvent(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEvent(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitStickyEvent(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launch {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
-    fun <T : Any> ViewModel.emitEvent(
+    fun <T> ViewModel.emitEvent(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = viewModelScope.launch {
         if (delay > 0) delay(delay)
         get<T>(name).emitEvent(event)
     }
 
-    inline fun <T : Any> ViewModel.emitEvent(
+    inline fun <T> ViewModel.emitEvent(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = viewModelScope.launch {
         get<T>(name).emitEvent(event())
     }
 
-    fun <T : Any> ViewModel.emitEvent(
-        event: T,
+    inline fun <reified T> ViewModel.emitEvent(
+        event: T?,
         delay: Long = 0L
     ): Job = viewModelScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
-    inline fun <T : Any> ViewModel.emitEvent(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> ViewModel.emitEvent(
+        crossinline event: suspend () -> T?
     ): Job = viewModelScope.launch {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
-    fun <T : Any> ViewModel.emitStickyEvent(
+    fun <T> ViewModel.emitStickyEvent(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = viewModelScope.launch {
         if (delay > 0) delay(delay)
         get<T>(name).emitStickyEvent(event)
     }
 
-    inline fun <T : Any> ViewModel.emitStickyEvent(
+    inline fun <T> ViewModel.emitStickyEvent(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = viewModelScope.launch {
         get<T>(name).emitStickyEvent(event())
     }
 
-    fun <T : Any> ViewModel.emitStickyEvent(
-        event: T,
+    inline fun <reified T> ViewModel.emitStickyEvent(
+        event: T?,
         delay: Long = 0L
     ): Job = viewModelScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
-    inline fun <T : Any> ViewModel.emitStickyEvent(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> ViewModel.emitStickyEvent(
+        crossinline event: suspend () -> T?
     ): Job = viewModelScope.launch {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> emitEventGlobal(
+    fun <T> emitEventGlobal(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = GlobalScope.launch {
         if (delay > 0) delay(delay)
@@ -148,33 +161,33 @@ object FlowEventBus {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T : Any> emitEventGlobal(
+    inline fun <T> emitEventGlobal(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = GlobalScope.launch {
         get<T>(name).emitEvent(event())
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> emitEventGlobal(
-        event: T,
+    inline fun <reified T> emitEventGlobal(
+        event: T?,
         delay: Long = 0L
     ): Job = GlobalScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T : Any> emitEventGlobal(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> emitEventGlobal(
+        crossinline event: suspend () -> T?
     ): Job = GlobalScope.launch {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> emitStickyEventGlobal(
+    fun <T> emitStickyEventGlobal(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = GlobalScope.launch {
         if (delay > 0) delay(delay)
@@ -182,318 +195,294 @@ object FlowEventBus {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T : Any> emitStickyEventGlobal(
+    inline fun <T> emitStickyEventGlobal(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = GlobalScope.launch {
         get<T>(name).emitStickyEvent(event())
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> emitStickyEventGlobal(
-        event: T,
+    inline fun <reified T> emitStickyEventGlobal(
+        event: T?,
         delay: Long = 0L
     ): Job = GlobalScope.launch {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T : Any> emitStickyEventGlobal(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> emitStickyEventGlobal(
+        crossinline event: suspend () -> T?
     ): Job = GlobalScope.launch {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenCreated(
+    fun <T> LifecycleOwner.emitEventWhenCreated(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenCreated {
         if (delay > 0) delay(delay)
         get<T>(name).emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenCreated(
+    inline fun <T> LifecycleOwner.emitEventWhenCreated(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenCreated {
         get<T>(name).emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenCreated(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitEventWhenCreated(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenCreated {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenCreated(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitEventWhenCreated(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenCreated {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
+    fun <T> LifecycleOwner.emitStickyEventWhenCreated(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenCreated {
         if (delay > 0) delay(delay)
         get<T>(name).emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
+    inline fun <T> LifecycleOwner.emitStickyEventWhenCreated(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenCreated {
         get<T>(name).emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenCreated(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenCreated {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenCreated(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenCreated {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenStarted(
+    fun <T> LifecycleOwner.emitEventWhenStarted(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenStarted {
         if (delay > 0) delay(delay)
         get<T>(name).emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenStarted(
+    inline fun <T> LifecycleOwner.emitEventWhenStarted(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenStarted {
         get<T>(name).emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenStarted(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitEventWhenStarted(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenStarted {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenStarted(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitEventWhenStarted(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenStarted {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
+    fun <T> LifecycleOwner.emitStickyEventWhenStarted(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenStarted {
         if (delay > 0) delay(delay)
         get<T>(name).emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
+    inline fun <T> LifecycleOwner.emitStickyEventWhenStarted(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenStarted {
         get<T>(name).emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenStarted(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenStarted {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenStarted(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenStarted {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenResumed(
+    fun <T> LifecycleOwner.emitEventWhenResumed(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenResumed {
         if (delay > 0) delay(delay)
         get<T>(name).emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenResumed(
+    inline fun <T> LifecycleOwner.emitEventWhenResumed(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenResumed {
         get<T>(name).emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitEventWhenResumed(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitEventWhenResumed(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenResumed {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitEvent(event)
+        get<T>().emitEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitEventWhenResumed(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitEventWhenResumed(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenResumed {
-        event().let { get<T>(it.javaClass.name).emitEvent(it) }
+        get<T>().emitEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
+    fun <T> LifecycleOwner.emitStickyEventWhenResumed(
         name: String,
-        event: T,
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenResumed {
         if (delay > 0) delay(delay)
         get<T>(name).emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
+    inline fun <T> LifecycleOwner.emitStickyEventWhenResumed(
         name: String,
-        crossinline event: suspend CoroutineScope.() -> T
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenResumed {
         get<T>(name).emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
-        event: T,
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenResumed(
+        event: T?,
         delay: Long = 0L
     ): Job = lifecycleScope.launchWhenResumed {
         if (delay > 0) delay(delay)
-        get<T>(event.javaClass.name).emitStickyEvent(event)
+        get<T>().emitStickyEvent(event)
     }
 
-    inline fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
-        crossinline event: suspend CoroutineScope.() -> T
+    inline fun <reified T> LifecycleOwner.emitStickyEventWhenResumed(
+        crossinline event: suspend () -> T?
     ): Job = lifecycleScope.launchWhenResumed {
-        event().let { get<T>(it.javaClass.name).emitStickyEvent(it) }
+        get<T>().emitStickyEvent(event())
     }
 
-    fun <T : Any> LifecycleOwner.collectEvent(
+    inline fun <T> LifecycleOwner.collectEvent(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
-        get<T>(name).collectEvent {
-            action(it)
-        }
+        get<T>(name).collectEvent(action)
     }
 
-    inline fun <reified T : Any> LifecycleOwner.collectEvent(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> LifecycleOwner.collectEvent(
+        crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
-        get<T>(T::class.java.name).collectEvent {
-            action(it)
-        }
+        get<T>().collectEvent(action)
     }
 
-    fun <T : Any> LifecycleOwner.collectStickEvent(
+    inline fun <T> LifecycleOwner.collectStickEvent(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
-        get<T>(name).collectStickyEvent {
-            action(it)
-        }
+        get<T>(name).collectStickyEvent(action)
     }
 
-    inline fun <reified T : Any> LifecycleOwner.collectStickEvent(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> LifecycleOwner.collectStickEvent(
+        crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
-        get<T>(T::class.java.name).collectStickyEvent {
-            action(it)
-        }
+        get<T>().collectStickyEvent(action)
     }
 
-    fun <T : Any> ViewModel.collectEvent(
+    inline fun <T> ViewModel.collectEvent(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = viewModelScope.launch {
-        get<T>(name).collectEvent {
-            action(it)
-        }
+        get<T>(name).collectEvent(action)
     }
 
-    inline fun <reified T : Any> ViewModel.collectEvent(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> ViewModel.collectEvent(
+        crossinline action: suspend (T?) -> Unit
     ): Job = viewModelScope.launch {
-        get<T>(T::class.java.name).collectEvent {
-            action(it)
-        }
+        get<T>().collectEvent(action)
     }
 
-    fun <T : Any> ViewModel.collectStickyEvent(
+    inline fun <T> ViewModel.collectStickyEvent(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = viewModelScope.launch {
-        get<T>(name).collectStickyEvent {
-            action(it)
-        }
+        get<T>(name).collectStickyEvent(action)
     }
 
-    inline fun <reified T : Any> ViewModel.collectStickyEvent(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> ViewModel.collectStickyEvent(
+        crossinline action: suspend (T?) -> Unit
     ): Job = viewModelScope.launch {
-        get<T>(T::class.java.name).collectStickyEvent {
-            action(it)
-        }
+        get<T>().collectStickyEvent(action)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> collectEventForever(
+    inline fun <T> collectEventForever(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = GlobalScope.launch {
-        get<T>(name).collectEvent {
-            action(it)
-        }
+        get<T>(name).collectEvent(action)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <reified T : Any> collectEventForever(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> collectEventForever(
+        crossinline action: suspend (T?) -> Unit
     ): Job = GlobalScope.launch {
-        get<T>(T::class.java.name).collectEvent {
-            action(it)
-        }
+        get<T>().collectEvent(action)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Any> collectStickyEventForever(
+    inline fun <T> collectStickyEventForever(
         name: String,
-        action: suspend CoroutineScope.(T) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = GlobalScope.launch {
-        get<T>(name).collectStickyEvent {
-            action(it)
-        }
+        get<T>(name).collectStickyEvent(action)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <reified T : Any> collectStickyEventForever(
-        noinline action: suspend CoroutineScope.(T) -> Unit
+    inline fun <reified T> collectStickyEventForever(
+        crossinline action: suspend (T?) -> Unit
     ): Job = GlobalScope.launch {
-        get<T>(T::class.java.name).collectStickyEvent {
-            action(it)
-        }
+        get<T>().collectStickyEvent(action)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun clearStickyEvent(name: String) = get<Any>(name).clearStickyEvent()
 
-    inline fun <reified T : Any> clearStickyEvent() = get<T>(T::class.java.name).clearStickyEvent()
+    inline fun <reified T> clearStickyEvent() = get<T>().clearStickyEvent()
 
 }

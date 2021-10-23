@@ -23,13 +23,14 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
+import com.nice.common.event.FlowEventBus.collectEvent
 import com.nice.common.event.FlowEventBus.emitStickyEvent
+import com.nice.common.event.FlowEventBus.stickyEvent
 import com.nice.common.helper.doOnClick
 import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
-import com.nice.kothttp.httpCallBuilder
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -77,12 +78,21 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        emitStickyEvent {
-            httpCallBuilder<String>().url("https://www.baidu.com").make().first()
+//        testDB()
+//        initBle()
+
+
+        emitStickyEvent<String> {
+            null
         }
 
-        testDB()
-//        initBle()
+        collectEvent<String> {
+            Log.e("TAGTAG", "collectEvent: $it")
+        }
+//
+        stickyEvent<String>().onEach {
+            Log.e("TAGTAG", "flow: $it")
+        }.launchIn(lifecycleScope)
 
     }
 

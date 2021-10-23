@@ -3,19 +3,13 @@ package com.example.sample
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.common.app.NiceViewModelActivity
-import com.nice.common.event.FlowEventBus
-import com.nice.common.event.FlowEventBus.collectEvent
-import com.nice.common.event.asStickySharedFlow
 import com.nice.common.helper.*
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
 import com.nice.common.widget.tipViews
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
@@ -64,14 +58,6 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
-
-        collectEvent<String>("name") {
-            Log.e("TAGTAG", "collectEvent: $it")
-        }
-
-        FlowEventBus.get<String>().asStickySharedFlow().onEach {
-            Log.e("TAGTAG", "flow: $it")
-        }.launchIn(lifecycleScope)
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {
