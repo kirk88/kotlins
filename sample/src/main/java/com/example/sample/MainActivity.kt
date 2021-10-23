@@ -23,8 +23,7 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
-import com.nice.common.event.FlowEventBus.subscribeEvent
-import com.nice.common.event.NamedEvent
+import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.doOnClick
 import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
@@ -77,10 +76,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        subscribeEvent({ it is NamedEvent }) {
-            Log.e(TAG, "what event: " + it.toString())
-        }
-
+        emitStickyEvent("what you name?")
 
         testDB()
 //        initBle()

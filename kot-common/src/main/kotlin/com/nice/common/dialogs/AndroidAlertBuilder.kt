@@ -1,4 +1,4 @@
-@file:Suppress("unused", "OverridingDeprecatedMember")
+@file:Suppress("UNUSED", "OverridingDeprecatedMember")
 
 package com.nice.common.dialogs
 

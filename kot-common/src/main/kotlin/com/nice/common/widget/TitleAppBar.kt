@@ -1,4 +1,4 @@
-@file:Suppress("unused", "RestrictedApi")
+@file:Suppress("UNUSED", "RestrictedApi")
 
 package com.nice.common.widget
 

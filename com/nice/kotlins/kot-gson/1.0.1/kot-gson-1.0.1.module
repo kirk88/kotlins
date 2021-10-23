@@ -97,11 +97,11 @@
         {
           "name": "kot-gson-1.0.1-sources.jar",
           "url": "kot-gson-1.0.1-sources.jar",
-          "size": 7842,
-          "sha512": "401b67c902443736f26d7e347d5802175c6c31e1d8d7da19531529c4466f45f965fc179c4dbef0c7e3bc3e5c53c234f89a3f1986137f7adb97f154cb2ee141f8",
-          "sha256": "4563845bd2a66f0889aeb431335b9935452b33b94ba271d3130caf3e502482c5",
-          "sha1": "d763b699ed180bff8ea7b36fd32ebfd74648e608",
-          "md5": "d98cbe0b63516bd8d1f7805c8701bbcd"
+          "size": 7848,
+          "sha512": "2e7548016aa0b9fd60e4bfcdf4f15cc1053903e4f6bb3e3d97b86c577e6bc2b4ddf458ed97dbaee640c064a98f8624cb0b7c57ba8e241a1acfbeb6815917bde7",
+          "sha256": "764c42e9e28b8a85e28582847dd0b5b86538e8de4d595e1eb093fdbd338c5998",
+          "sha1": "787b87740d91a21b5eec1f64a252d19b70deb50c",
+          "md5": "fde31e5c0855bec480875ce77901cf61"
         }
       ]
     },

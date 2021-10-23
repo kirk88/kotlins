@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("UNUSED", "UNCHECKED_CAST")
 
 package com.nice.common.event
 
@@ -7,245 +7,298 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 
 object FlowEventBus {
 
-    private val eventSubjects = mutableMapOf<String, EventSubject>()
+    private val flows = mutableMapOf<String, EventFlow<out Any>>()
 
-    private fun getEventSubject(name: String): EventSubject = eventSubjects.getOrPut(name) {
-        EventSubject()
-    }
+    operator fun <T : Any> get(name: String): EventFlow<T> =
+        flows.getOrPut(name) { EventFlow<T>() } as EventFlow<T>
 
+    inline fun <reified T : Any> get(): EventFlow<T> = get(T::class.java.name)
 
-    fun <T : Any> LifecycleOwner.produceEvent(name: String, event: T): Job = lifecycleScope.launch {
-
-    }
-
-    fun <T : Event> LifecycleOwner.produceStickyEvent(event: T): Job = lifecycleScope.launch {
-        mutableStickyEvents.emit(event)
-    }
-
-    fun <T : Event> ViewModel.produceEvent(event: T): Job = viewModelScope.launch {
-        mutableEvents.emit(event)
-    }
-
-    fun <T : Event> ViewModel.produceStickyEvent(event: T): Job = viewModelScope.launch {
-        mutableStickyEvents.emit(event)
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Event> produceEventGlobal(event: T): Job = GlobalScope.launch {
-        mutableEvents.emit(event)
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun <T : Event> produceStickyEventGlobal(event: T): Job = GlobalScope.launch {
-        mutableStickyEvents.emit(event)
-    }
-
-    fun <T : Event> LifecycleOwner.produceEventWhenCreated(event: T): Job =
-        lifecycleScope.launchWhenCreated {
-            mutableEvents.emit(event)
-        }
-
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenCreated(event: T): Job =
-        lifecycleScope.launchWhenCreated {
-            mutableStickyEvents.emit(event)
-        }
-
-    fun <T : Event> LifecycleOwner.produceEventWhenStarted(event: T): Job =
-        lifecycleScope.launchWhenStarted {
-            mutableEvents.emit(event)
-        }
-
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenStarted(event: T): Job =
-        lifecycleScope.launchWhenStarted {
-            mutableStickyEvents.emit(event)
-        }
-
-    fun <T : Event> LifecycleOwner.produceEventWhenResumed(event: T): Job =
-        lifecycleScope.launchWhenResumed {
-            mutableEvents.emit(event)
-        }
-
-    fun <T : Event> LifecycleOwner.produceStickyEventWhenResumed(event: T): Job =
-        lifecycleScope.launchWhenResumed {
-            mutableStickyEvents.emit(event)
-        }
-
-    inline fun LifecycleOwner.subscribeEvent(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = events
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
-
-    inline fun LifecycleOwner.subscribeEvent(
+    fun <T : Any> LifecycleOwner.emitEvent(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = events
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
 
-    inline fun <reified T : Event> LifecycleOwner.subscribeEvent(
-        crossinline action: suspend (T) -> Unit
-    ): Job = events
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
+    fun <T : Any> LifecycleOwner.emitEvent(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
 
-
-    inline fun LifecycleOwner.subscribeStickyEvent(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = stickyEvents
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
-
-    inline fun LifecycleOwner.subscribeStickyEvent(
+    fun <T : Any> LifecycleOwner.emitStickyEvent(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
 
-    inline fun <reified T : Event> LifecycleOwner.subscribeStickyEvent(
-        crossinline action: suspend (T) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(lifecycleScope)
+    fun <T : Any> LifecycleOwner.emitStickyEvent(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
 
-    inline fun ViewModel.subscribeEvent(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = events
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
-
-    inline fun ViewModel.subscribeEvent(
+    fun <T : Any> ViewModel.emitEvent(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = events
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
+        event: T, delay: Long = 0L
+    ): Job = viewModelScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
 
-    inline fun <reified T : Event> ViewModel.subscribeEvent(
-        crossinline action: suspend (T) -> Unit
-    ): Job = events
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
+    fun <T : Any> ViewModel.emitEvent(
+        event: T,
+        delay: Long = 0L
+    ): Job = viewModelScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
 
-    inline fun ViewModel.subscribeStickyEvent(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = stickyEvents
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
-
-    inline fun ViewModel.subscribeStickyEvent(
+    fun <T : Any> ViewModel.emitStickyEvent(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
+        event: T, delay: Long = 0L
+    ): Job = viewModelScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
 
-    inline fun <reified T : Event> ViewModel.subscribeStickyEvent(
-        crossinline action: suspend (T) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(viewModelScope)
+    fun <T : Any> ViewModel.emitStickyEvent(
+        event: T,
+        delay: Long = 0L
+    ): Job = viewModelScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun subscribeEventForever(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = events
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
-
-    @OptIn(DelicateCoroutinesApi::class)
-    inline fun subscribeEventForever(
+    fun <T : Any> emitEventGlobal(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = events
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
+        event: T, delay: Long = 0L
+    ): Job = GlobalScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <reified T : Event> subscribeEventForever(
-        crossinline action: suspend (T) -> Unit
-    ): Job = events
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
+    fun <T : Any> emitEventGlobal(
+        event: T,
+        delay: Long = 0L
+    ): Job = GlobalScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun subscribeStickyEventForever(
-        crossinline predicate: suspend (Event) -> Boolean,
-        crossinline action: suspend (Event) -> Unit
-    ): Job = stickyEvents
-        .filter { predicate.invoke(it) }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
-
-    @OptIn(DelicateCoroutinesApi::class)
-    inline fun subscribeStickyEventForever(
+    fun <T : Any> emitStickyEventGlobal(
         name: String,
-        crossinline action: suspend (NamedEvent) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<NamedEvent>()
-        .filter { it.name == name }
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
+        event: T, delay: Long = 0L
+    ): Job = GlobalScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <reified T : Event> subscribeStickyEventForever(
+    fun <T : Any> emitStickyEventGlobal(
+        event: T,
+        delay: Long = 0L
+    ): Job = GlobalScope.launch {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenCreated(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenCreated {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenCreated(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenCreated {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenCreated {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenCreated(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenCreated {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenStarted(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenStarted {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenStarted(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenStarted {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenStarted {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenStarted(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenStarted {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenResumed(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenResumed {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitEventWhenResumed(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenResumed {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
+        name: String,
+        event: T, delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenResumed {
+        if (delay > 0) delay(delay)
+        get<T>(name).emitStickyEvent(event)
+    }
+
+    fun <T : Any> LifecycleOwner.emitStickyEventWhenResumed(
+        event: T,
+        delay: Long = 0L
+    ): Job = lifecycleScope.launchWhenResumed {
+        if (delay > 0) delay(delay)
+        get<T>(event.javaClass.name).emitStickyEvent(event)
+    }
+
+    inline fun <T : Any> LifecycleOwner.collectEvent(
+        name: String,
         crossinline action: suspend (T) -> Unit
-    ): Job = stickyEvents
-        .filterIsInstance<T>()
-        .onEach { action.invoke(it) }
-        .cancellable()
-        .launchIn(GlobalScope)
+    ): Job = lifecycleScope.launch {
+        get<T>(name).collectEvent(action)
+    }
+
+    inline fun <reified T : Any> LifecycleOwner.collectEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = lifecycleScope.launch {
+        get<T>(T::class.java.name).collectEvent(action)
+    }
+
+    inline fun <T : Any> LifecycleOwner.collectStickEvent(
+        name: String,
+        crossinline action: suspend (T) -> Unit
+    ): Job = lifecycleScope.launch {
+        get<T>(name).collectStickyEvent(action)
+    }
+
+    inline fun <reified T : Any> LifecycleOwner.collectStickEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = lifecycleScope.launch {
+        get<T>(T::class.java.name).collectStickyEvent(action)
+    }
+
+    inline fun <T : Any> ViewModel.collectEvent(
+        name: String,
+        crossinline action: suspend (T) -> Unit
+    ): Job = viewModelScope.launch {
+        get<T>(name).collectEvent(action)
+    }
+
+    inline fun <reified T : Any> ViewModel.collectEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = viewModelScope.launch {
+        get<T>(T::class.java.name).collectEvent(action)
+    }
+
+    inline fun <T : Any> ViewModel.collectStickyEvent(
+        name: String,
+        crossinline action: suspend (T) -> Unit
+    ): Job = viewModelScope.launch {
+        get<T>(name).collectStickyEvent(action)
+    }
+
+    inline fun <reified T : Any> ViewModel.collectStickyEvent(
+        crossinline action: suspend (T) -> Unit
+    ): Job = viewModelScope.launch {
+        get<T>(T::class.java.name).collectStickyEvent(action)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <T : Any> collectEventForever(
+        name: String,
+        crossinline action: suspend (T) -> Unit
+    ): Job = GlobalScope.launch {
+        get<T>(name).collectEvent(action)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <reified T : Any> collectEventForever(
+        crossinline action: suspend (T) -> Unit
+    ): Job = GlobalScope.launch {
+        get<T>(T::class.java.name).collectEvent(action)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <T : Any> collectStickyEventForever(
+        name: String,
+        crossinline action: suspend (T) -> Unit
+    ): Job = GlobalScope.launch {
+        get<T>(name).collectStickyEvent(action)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    inline fun <reified T : Any> collectStickyEventForever(
+        crossinline action: suspend (T) -> Unit
+    ): Job = GlobalScope.launch {
+        get<T>(T::class.java.name).collectStickyEvent(action)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearStickyEvent() {
-        mutableStickyEvents.resetReplayCache()
-    }
+    fun clearStickyEvent(name: String) = get<Any>(name).clearStickyEvent()
+
+    inline fun <reified T : Any> clearStickyEvent() = get<T>(T::class.java.name).clearStickyEvent()
 
 }

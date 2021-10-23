@@ -1,4 +1,4 @@
-@file:Suppress("unused", "MissingPermission")
+@file:Suppress("UNUSED", "MissingPermission")
 
 package com.nice.bluetooth
 

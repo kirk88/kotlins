@@ -1,4 +1,4 @@
-@file:Suppress("unused", "NotifyDataSetChanged")
+@file:Suppress("UNUSED", "NotifyDataSetChanged")
 
 package com.nice.common.adapter
 

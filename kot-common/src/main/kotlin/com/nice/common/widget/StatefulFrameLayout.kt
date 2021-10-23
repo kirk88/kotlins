@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("UNUSED")
 
 package com.nice.common.widget
 
