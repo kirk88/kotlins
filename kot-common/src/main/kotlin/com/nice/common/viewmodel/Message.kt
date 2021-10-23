@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED")
+@file:Suppress("UNUSED", "UNCHECKED_CAST")
 
 package com.nice.common.viewmodel
 
@@ -9,11 +9,10 @@ import com.nice.common.widget.InfiniteState
 
 sealed class Message(val what: Int = -1) {
 
-    private val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
+    internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
-    operator fun <T : Any> get(key: String): T? {
-        @Suppress("UNCHECKED_CAST")
-        return this.extras[key] as T?
+    operator fun <T : Any> get(key: String): T {
+        return this.extras.getValue(key) as T
     }
 
     operator fun Message.set(key: String, value: Any?) {
@@ -87,8 +86,8 @@ sealed class Message(val what: Int = -1) {
 
 }
 
-fun <T : Any> Message.getValue(key: String): T = requireNotNull(get(key))
+fun <T : Any> Message.getOrNull(key: String): T? = extras[key] as? T
 
-fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = get(key) ?: defaultValue
+fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(key) ?: defaultValue
 
-fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = get(key) ?: defaultValue()
+fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
