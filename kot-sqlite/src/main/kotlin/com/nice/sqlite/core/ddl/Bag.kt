@@ -4,8 +4,6 @@ package com.nice.sqlite.core.ddl
 
 interface Bag<out T> {
 
-    val size: Int
-
     operator fun iterator(): Iterator<T>
 
 }
@@ -39,9 +37,6 @@ internal class LinkedBag<T> : MutableBag<T> {
 
     private val delegate = linkedSetOf<T>()
 
-    override val size: Int
-        get() = delegate.size
-
     override fun add(element: T): Boolean = delegate.add(element)
 
     override fun remove(element: T): Boolean = delegate.remove(element)
@@ -57,7 +52,6 @@ internal object EmptyBagIterator : Iterator<Nothing> {
 
 @PublishedApi
 internal object EmptyBag : Bag<Nothing> {
-    override val size: Int = 0
     override fun iterator(): Iterator<Nothing> = EmptyBagIterator
 }
 
@@ -72,7 +66,7 @@ fun <T> mutableBagOf(vararg elements: T): MutableBag<T> =
 
 fun <T> mutableBagOf(): MutableBag<T> = LinkedBag()
 
-fun <T> Bag<T>.none() = size == 0
+fun <T> Bag<T>.none() = !iterator().hasNext()
 
 inline fun <T> Bag<T>.none(predicate: (T) -> Boolean): Boolean {
     if (none()) return true
