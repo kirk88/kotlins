@@ -67,7 +67,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         setupAppBarWithController(navController)
 
         collectEvent<String> {
-            Log.e("TAGTAG", "subscribeEvent: $it")
+            Log.e("TAGTAG", "collectEvent: $it")
         }
 
         FlowEventBus.get<String>().asStickySharedFlow().onStart {
