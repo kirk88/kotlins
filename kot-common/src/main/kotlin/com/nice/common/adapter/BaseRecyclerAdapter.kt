@@ -130,6 +130,8 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val holder = onCreateItemViewHolder(layoutInflater, parent, viewType)
 
+        onItemViewHolderCreated(holder, viewType)
+
         if (itemClickable) {
             holder.setOnClickListener {
                 if (!onItemClick(holder)) {
@@ -160,8 +162,6 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
                 itemChildLongClickListener?.onItemChildLongClick(this, holder, it) ?: false
             else true
         }
-
-        onItemViewHolderCreated(holder, viewType)
 
         return holder
     }
