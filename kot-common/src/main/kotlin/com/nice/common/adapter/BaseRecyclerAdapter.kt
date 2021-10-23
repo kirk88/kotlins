@@ -74,22 +74,22 @@ abstract class BaseRecyclerAdapter<T, VH : ItemViewHolder>(
         }
     }
 
-    protected fun callOnItemClick(holder: VH) {
+    fun callOnItemClick(holder: VH) {
         if (onItemClick(holder)) return
         itemClickListener?.onItemClick(this, holder)
     }
 
-    protected fun callOnItemLongClick(holder: VH) {
+    fun callOnItemLongClick(holder: VH) {
         if (onItemLongClick(holder)) return
         itemLongClickListener?.onItemLongClick(this, holder)
     }
 
-    protected fun callOnItemChildClick(holder: VH, view: View) {
+    fun callOnItemChildClick(holder: VH, view: View) {
         if (onItemChildClick(holder, view)) return
         itemChildClickListener?.onItemChildClick(this, holder, view)
     }
 
-    protected fun callOnItemChildLongClick(holder: VH, view: View) {
+    fun callOnItemChildLongClick(holder: VH, view: View) {
         if (onItemChildLongClick(holder, view)) return
         itemChildLongClickListener?.onItemChildLongClick(this, holder, view)
     }
