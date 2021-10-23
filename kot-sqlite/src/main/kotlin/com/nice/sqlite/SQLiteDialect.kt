@@ -561,14 +561,14 @@ object SQLiteDialect : Dialect {
                 append(referencesConstraint)
             }
 
-            if (onUpdateAction != null) {
-                append(" ON UPDATE ")
-                append(onUpdateAction)
+            if (onUpdateConstraint != null) {
+                append(' ')
+                append(onUpdateConstraint)
             }
 
-            if (onDeleteAction != null) {
-                append(" ON DELETE ")
-                append(onDeleteAction)
+            if (onDeleteConstraint != null) {
+                append(' ')
+                append(onDeleteConstraint)
             }
         }
     }
@@ -577,16 +577,16 @@ object SQLiteDialect : Dialect {
         with(index.meta) {
             append("CREATE")
 
-            if (unique != null) {
+            if (uniqueConstraint != null) {
                 append(' ')
-                append(unique)
+                append(uniqueConstraint)
             }
 
             append(" INDEX")
 
-            if (ifNotExists != null) {
+            if (ifNotExistsConstraint != null) {
                 append(' ')
-                append(ifNotExists)
+                append(ifNotExistsConstraint)
             }
         }
 
@@ -598,9 +598,9 @@ object SQLiteDialect : Dialect {
         with(index.meta) {
             append("DROP INDEX")
 
-            if (ifExists != null) {
+            if (ifExistsConstraint != null) {
                 append(' ')
-                append(ifExists)
+                append(ifExistsConstraint)
             }
         }
 

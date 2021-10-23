@@ -4,15 +4,15 @@ package com.nice.sqlite.core.ddl
 
 enum class SqlOrderDirection { ASC, DESC }
 
-interface Ordering : Sequence<Ordering>, FullRenderer {
+interface Ordering : Bag<Ordering>, FullRenderer {
 
     val definition: Definition
     val direction: SqlOrderDirection
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
 
-    operator fun plus(ordering: Ordering): MutableSequence<Ordering> =
-        mutableSequenceOf(this, ordering)
+    operator fun plus(ordering: Ordering): MutableBag<Ordering> =
+        mutableBagOf(this, ordering)
 
     override fun render(): String = "${definition.render()} $direction"
 

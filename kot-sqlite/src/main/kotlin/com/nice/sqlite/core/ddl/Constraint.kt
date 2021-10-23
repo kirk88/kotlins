@@ -2,14 +2,14 @@
 
 package com.nice.sqlite.core.ddl
 
-sealed class ColumnConstraintAction(
+sealed class ConstraintAction(
     private val name: String
 ) {
-    object SetNull : ColumnConstraintAction("SET NULL")
-    object SetDefault : ColumnConstraintAction("SET DEFAULT")
-    object SetRestrict : ColumnConstraintAction("SET RESTRICT")
-    object Cascade : ColumnConstraintAction("CASCADE")
-    object NoAction : ColumnConstraintAction("NO ACTION")
+    object SetNull : ConstraintAction("SET NULL")
+    object SetDefault : ConstraintAction("SET DEFAULT")
+    object SetRestrict : ConstraintAction("SET RESTRICT")
+    object Cascade : ConstraintAction("CASCADE")
+    object NoAction : ConstraintAction("NO ACTION")
 
     override fun toString(): String = name
 }
@@ -40,18 +40,6 @@ sealed class ColumnConstraint {
 
     }
 
-    class References(val column: Column<*>) : ColumnConstraint() {
-
-        override fun toString(): String = buildString {
-            append("REFERENCES ")
-            append(column.table.render())
-            append('(')
-            append(column.render())
-            append(')')
-        }
-
-    }
-
     class Unique(val conflictAlgorithm: ConflictAlgorithm) : ColumnConstraint() {
 
         override fun toString(): String = buildString {
@@ -68,7 +56,41 @@ sealed class ColumnConstraint {
         override fun toString(): String = "NOT NULL"
     }
 
+    class References(val column: Column<*>) : ColumnConstraint() {
+
+        override fun toString(): String = buildString {
+            append("REFERENCES ")
+            append(column.table.render())
+            append('(')
+            append(column.render())
+            append(')')
+        }
+
+    }
+
+    class OnUpdate(val action: ConstraintAction) : ColumnConstraint() {
+        override fun toString(): String = buildString {
+            append("ON UPDATE ")
+            append(action)
+        }
+    }
+
+    class OnDelete(val action: ConstraintAction) : ColumnConstraint() {
+        override fun toString(): String = buildString {
+            append("ON DELETE ")
+            append(action)
+        }
+    }
+
 }
+
+fun Default(value: Any) = ColumnConstraint.Default(value)
+fun PrimaryKey(autoIncrement: Boolean = false) = ColumnConstraint.PrimaryKey(autoIncrement)
+fun References(column: Column<*>) = ColumnConstraint.References(column)
+fun Unique(conflictAlgorithm: ConflictAlgorithm) = ColumnConstraint.Unique(conflictAlgorithm)
+fun NotNull() = ColumnConstraint.NotNull
+fun OnUpdate(action: ConstraintAction) = ColumnConstraint.OnUpdate(action)
+fun OnDelete(action: ConstraintAction) = ColumnConstraint.OnDelete(action)
 
 sealed class IndexConstraint {
 
@@ -85,3 +107,7 @@ sealed class IndexConstraint {
     }
 
 }
+
+fun Unique() = IndexConstraint.Unique
+fun IfNotExists() = IndexConstraint.IfNotExists
+fun IfExists() = IndexConstraint.IfExists

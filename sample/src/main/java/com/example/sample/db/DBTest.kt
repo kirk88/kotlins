@@ -58,20 +58,20 @@ data class DBTest2 @ClassParserConstructor constructor(
 )
 
 object TestTable : Table("test") {
-    val id = LongColumn("id").primaryKey()
-    val name = StringColumn("name").default("jack")
-    val age = IntColumn("age").default(20)
-    val flag = BooleanColumn("flag").default(false)
-    val number = IntColumn("number").default(10)
-    val data = BlobColumn("data").default(byteArrayOf(1, 2, 3, 4, 5))
-    val time = DatetimeColumn("time").default(Defined.CurrentTime)
+    val id = LongColumn("id") + PrimaryKey()
+    val name = StringColumn("name") + Default("jack")
+    val age = IntColumn("age") + Default(20)
+    val flag = BooleanColumn("flag") + Default(false)
+    val number = IntColumn("number") + Default(10)
+    val data = BlobColumn("data") + Default(byteArrayOf(1, 2, 3, 4, 5))
+    val time = DatetimeColumn("time") + Default(Defined.CurrentTime)
 }
 
 object TestTable2 : Table("test2") {
 
     val id = IntColumn("id").primaryKey()
 
-    val pid = IntColumn("pid").references(TestTable.id).onDelete(ColumnConstraintAction.Cascade)
+    val pid = IntColumn("pid").references(TestTable.id).onDelete(ConstraintAction.Cascade)
 
     val name = StringColumn("name")
 

@@ -6,7 +6,7 @@ import com.nice.sqlite.core.TableSubject
 
 class TableCreateStatement<T : Table>(
     val subject: TableSubject<T>,
-    val definitions: Sequence<Definition>
+    val definitions: Bag<Definition>
 ) : Statement {
 
     override fun toString(dialect: Dialect): String = dialect.build(this)
@@ -15,7 +15,7 @@ class TableCreateStatement<T : Table>(
 
 class TableAlterStatement<T : Table>(
     val subject: TableSubject<T>,
-    val definitions: Sequence<Definition>
+    val definitions: Bag<Definition>
 ) : Statement {
 
     override fun toString(dialect: Dialect): String = dialect.build(this)
@@ -24,7 +24,7 @@ class TableAlterStatement<T : Table>(
 
 class TableDropStatement<T : Table>(
     val subject: TableSubject<T>,
-    val definitions: Sequence<Definition>
+    val definitions: Bag<Definition>
 ) : Statement {
 
     override fun toString(dialect: Dialect): String = dialect.build(this)

@@ -9,7 +9,7 @@ import com.nice.sqlite.core.TableSubject
 class InsertStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Sequence<Value>,
+    val assignments: Bag<Value>,
     val nativeBindValues: Boolean = false
 ) : Statement {
 
@@ -19,7 +19,7 @@ class InsertStatement<T : Table>(
 
 class InsertBatchStatement<T : Table>(
     val subject: TableSubject<T>,
-    insertParts: Sequence<InsertPart>
+    insertParts: Bag<InsertPart>
 ) : Statement {
 
     private val iterator = insertParts.iterator()
@@ -52,7 +52,7 @@ class InsertBatchStatement<T : Table>(
 
 class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: TableSubject<T>
-) : Sequence<InsertPart> {
+) : Bag<InsertPart> {
 
     @PublishedApi
     internal val insertSpecs = mutableListOf<InsertPart>()
@@ -67,7 +67,7 @@ class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
 
 class InsertPart(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Sequence<Value>
+    val values: Bag<Value>
 ) {
 
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -95,11 +95,11 @@ class InsertPartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Sequence<Value>
+    private lateinit var values: Bag<Value>
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Sequence<Value>) {
+    fun values(values: (T) -> Bag<Value>) {
         this.values = values.invoke(subject.table)
     }
 

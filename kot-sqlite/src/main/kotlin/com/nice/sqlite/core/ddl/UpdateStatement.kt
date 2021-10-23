@@ -11,7 +11,7 @@ import com.nice.sqlite.core.dml.WhereClause
 class UpdateStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Sequence<Value>,
+    val assignments: Bag<Value>,
     val whereClause: WhereClause<T>? = null,
     val nativeBindValues: Boolean = false
 ) : Statement {
@@ -22,7 +22,7 @@ class UpdateStatement<T : Table>(
 
 class UpdateBatchStatement<T : Table>(
     val subject: TableSubject<T>,
-    updateParts: Sequence<UpdatePart<T>>
+    updateParts: Bag<UpdatePart<T>>
 ) : Statement {
 
     private val iterator = updateParts.iterator()
@@ -56,7 +56,7 @@ class UpdateBatchStatement<T : Table>(
 
 class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: TableSubject<T>
-) : Sequence<UpdatePart<T>> {
+) : Bag<UpdatePart<T>> {
 
     @PublishedApi
     internal val updateSpecs = mutableListOf<UpdatePart<T>>()
@@ -71,7 +71,7 @@ class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
 
 data class UpdatePart<T : Table>(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Sequence<Value>,
+    val values: Bag<Value>,
     val whereClause: WhereClause<T>?
 ) {
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -102,12 +102,12 @@ class UpdatePartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Sequence<Value>
+    private lateinit var values: Bag<Value>
     private var whereClause: WhereClause<T>? = null
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Sequence<Value>) {
+    fun values(values: (T) -> Bag<Value>) {
         this.values = values.invoke(subject.table)
     }
 

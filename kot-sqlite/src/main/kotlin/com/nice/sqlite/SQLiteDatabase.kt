@@ -134,7 +134,7 @@ private class SQLiteStatementExecutor private constructor(
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun SupportSQLiteStatement.bindValues(assignments: Sequence<Value>) {
+    private fun SupportSQLiteStatement.bindValues(assignments: Bag<Value>) {
         for ((index, assignment) in assignments.withIndex()) {
             when (val value = assignment.value) {
                 null -> bindNull(index + 1)

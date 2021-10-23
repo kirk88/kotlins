@@ -23,9 +23,6 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
-import com.nice.common.event.FlowEventBus.collectEvent
-import com.nice.common.event.FlowEventBus.emitStickyEvent
-import com.nice.common.event.FlowEventBus.stickyEvent
 import com.nice.common.helper.doOnClick
 import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
@@ -78,21 +75,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-//        testDB()
+        testDB()
 //        initBle()
-
-
-        emitStickyEvent<String> {
-            null
-        }
-
-        collectEvent<String> {
-            Log.e("TAGTAG", "collectEvent: $it")
-        }
-//
-        stickyEvent<String>().onEach {
-            Log.e("TAGTAG", "flow: $it")
-        }.launchIn(lifecycleScope)
 
     }
 

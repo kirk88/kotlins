@@ -15,14 +15,14 @@ sealed class SqlType(val name: String) {
     override fun toString(): String = name.uppercase()
 }
 
-interface Definition : Sequence<Definition>, FullRenderer {
+interface Definition : Bag<Definition>, FullRenderer {
 
     val name: String
 
     override fun iterator(): Iterator<Definition> = OnceIterator(this)
 
-    operator fun plus(definition: Definition): MutableSequence<Definition> =
-        mutableSequenceOf(this, definition)
+    operator fun plus(definition: Definition): MutableBag<Definition> =
+        mutableBagOf(this, definition)
 
 }
 
@@ -41,8 +41,8 @@ open class Column<T : Any>(
         referencesConstraint: ColumnConstraint.References? = _meta.referencesConstraint,
         uniqueConstraint: ColumnConstraint.Unique? = _meta.uniqueConstraint,
         notNullConstraint: ColumnConstraint.NotNull? = _meta.notNullConstraint,
-        onUpdateAction: ColumnConstraintAction? = _meta.onUpdateAction,
-        onDeleteAction: ColumnConstraintAction? = _meta.onDeleteAction
+        onUpdateConstraint: ColumnConstraint.OnUpdate? = _meta.onUpdateConstraint,
+        onDeleteConstraint: ColumnConstraint.OnDelete? = _meta.onDeleteConstraint
     ) {
         _meta = _meta.copy(
             defaultConstraint = defaultConstraint,
@@ -50,8 +50,8 @@ open class Column<T : Any>(
             referencesConstraint = referencesConstraint,
             uniqueConstraint = uniqueConstraint,
             notNullConstraint = notNullConstraint,
-            onUpdateAction = onUpdateAction,
-            onDeleteAction = onDeleteAction
+            onUpdateConstraint = onUpdateConstraint,
+            onDeleteConstraint = onDeleteConstraint
         )
     }
 
@@ -91,8 +91,8 @@ open class Column<T : Any>(
         val referencesConstraint: ColumnConstraint.References? = null,
         val uniqueConstraint: ColumnConstraint.Unique? = null,
         val notNullConstraint: ColumnConstraint.NotNull? = null,
-        val onUpdateAction: ColumnConstraintAction? = null,
-        val onDeleteAction: ColumnConstraintAction? = null
+        val onUpdateConstraint: ColumnConstraint.OnUpdate? = null,
+        val onDeleteConstraint: ColumnConstraint.OnDelete? = null
     )
 
 }
@@ -105,29 +105,56 @@ fun <T : Column<*>> T.default(value: Defined) = apply {
     setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
+operator fun <T : Column<*>> T.plus(defaultConstraint: ColumnConstraint.Default) = apply {
+    setMeta(defaultConstraint = defaultConstraint)
+}
+
 fun <T : Column<*>> T.primaryKey(autoIncrement: Boolean = false) = apply {
     setMeta(primaryKeyConstraint = ColumnConstraint.PrimaryKey(autoIncrement))
+}
+
+operator fun <V : Any, T : Column<V>> T.plus(primaryKeyConstraint: ColumnConstraint.PrimaryKey?) = apply {
+    setMeta(primaryKeyConstraint = primaryKeyConstraint)
 }
 
 fun <T : Column<*>> T.references(column: Column<*>) = apply {
     setMeta(referencesConstraint = ColumnConstraint.References(column))
 }
 
-fun <T : Column<*>> T.unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) =
-    apply {
-        setMeta(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
-    }
+operator fun <T : Column<*>> T.plus(referencesConstraint: ColumnConstraint.References) = apply {
+    setMeta(referencesConstraint = referencesConstraint)
+}
+
+fun <T : Column<*>> T.unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) = apply {
+    setMeta(uniqueConstraint = ColumnConstraint.Unique(conflictAlgorithm))
+}
+
+operator fun <T : Column<*>> T.plus(uniqueConstraint: ColumnConstraint.Unique) = apply {
+    setMeta(uniqueConstraint = uniqueConstraint)
+}
 
 fun <T : Column<*>> T.notNull() = apply {
     setMeta(notNullConstraint = ColumnConstraint.NotNull)
 }
 
-fun <T : Column<*>> T.onUpdate(action: ColumnConstraintAction) = apply {
-    setMeta(onUpdateAction = action)
+operator fun <T : Column<*>> T.plus(notNullConstraint: ColumnConstraint.NotNull) = apply {
+    setMeta(notNullConstraint = notNullConstraint)
 }
 
-fun <T : Column<*>> T.onDelete(action: ColumnConstraintAction) = apply {
-    setMeta(onDeleteAction = action)
+fun <T : Column<*>> T.onUpdate(action: ConstraintAction) = apply {
+    setMeta(onUpdateConstraint = ColumnConstraint.OnUpdate(action))
+}
+
+operator fun <T : Column<*>> T.plus(onUpdateConstraint: ColumnConstraint.OnUpdate) = apply {
+    setMeta(onUpdateConstraint = onUpdateConstraint)
+}
+
+fun <T : Column<*>> T.onDelete(action: ConstraintAction) = apply {
+    setMeta(onDeleteConstraint = ColumnConstraint.OnDelete(action))
+}
+
+operator fun <T : Column<*>> T.plus(onDeleteConstraint: ColumnConstraint.OnDelete) = apply {
+    setMeta(onDeleteConstraint = onDeleteConstraint)
 }
 
 class Index internal constructor(
@@ -138,16 +165,16 @@ class Index internal constructor(
     private var _meta = Meta()
     val meta: Meta get() = _meta
 
-    fun unique() = apply {
-        _meta = _meta.copy(unique = IndexConstraint.Unique)
-    }
-
-    fun ifNotExists() = apply {
-        _meta = _meta.copy(ifNotExists = IndexConstraint.IfNotExists)
-    }
-
-    fun ifExists() = apply {
-        _meta = _meta.copy(ifExists = IndexConstraint.IfExists)
+    fun setMeta(
+        uniqueConstraint: IndexConstraint.Unique? = _meta.uniqueConstraint,
+        ifNotExistsConstraint: IndexConstraint.IfNotExists? = _meta.ifNotExistsConstraint,
+        ifExistsConstraint: IndexConstraint.IfExists? = _meta.ifExistsConstraint
+    ) {
+        _meta = _meta.copy(
+            uniqueConstraint = uniqueConstraint,
+            ifNotExistsConstraint = ifNotExistsConstraint,
+            ifExistsConstraint = ifExistsConstraint
+        )
     }
 
     override fun render(): String = buildString {
@@ -190,11 +217,35 @@ class Index internal constructor(
 
 
     data class Meta(
-        val unique: IndexConstraint.Unique? = null,
-        val ifNotExists: IndexConstraint.IfNotExists? = null,
-        val ifExists: IndexConstraint.IfExists? = null
+        val uniqueConstraint: IndexConstraint.Unique? = null,
+        val ifNotExistsConstraint: IndexConstraint.IfNotExists? = null,
+        val ifExistsConstraint: IndexConstraint.IfExists? = null
     )
 
+}
+
+fun Index.unique() = apply {
+    setMeta(uniqueConstraint = IndexConstraint.Unique)
+}
+
+operator fun Index.plus(uniqueConstraint: IndexConstraint.Unique) = apply {
+    setMeta(uniqueConstraint = uniqueConstraint)
+}
+
+fun Index.ifNotExists() = apply {
+    setMeta(ifNotExistsConstraint = IndexConstraint.IfNotExists)
+}
+
+operator fun Index.plus(ifNotExistsConstraint: IndexConstraint.IfNotExists) = apply {
+    setMeta(ifNotExistsConstraint = ifNotExistsConstraint)
+}
+
+fun Index.ifExists() = apply {
+    setMeta(ifExistsConstraint = IndexConstraint.IfExists)
+}
+
+operator fun Index.plus(ifExistsConstraint: IndexConstraint.IfExists) = apply {
+    setMeta(ifExistsConstraint = ifExistsConstraint)
 }
 
 fun index(
@@ -304,7 +355,8 @@ fun datetime(column: Column<*>, vararg modifiers: String) = function("datetime",
 fun date(source: String, vararg modifiers: String) = function("date", source, *modifiers)
 fun time(source: String, vararg modifiers: String) = function("time", source, *modifiers)
 fun datetime(source: String, vararg modifiers: String) = function("datetime", source, *modifiers)
-fun strftime(pattern: String, source: String, vararg modifiers: String) = function("strftime", pattern, source, *modifiers)
+fun strftime(pattern: String, source: String, vararg modifiers: String) =
+    function("strftime", pattern, source, *modifiers)
 
 class AliasDefinition internal constructor(
     override val name: String,

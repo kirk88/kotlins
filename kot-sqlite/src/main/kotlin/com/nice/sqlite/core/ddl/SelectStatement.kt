@@ -9,7 +9,7 @@ import com.nice.sqlite.core.dml.*
 
 class SelectStatement<T : Table>(
     val subject: TableSubject<T>,
-    val definitions: Sequence<Definition>,
+    val definitions: Bag<Definition>,
     val whereClause: WhereClause<T>? = null,
     val orderClause: OrderClause<T>? = null,
     val limitClause: LimitClause<T>? = null,
@@ -26,7 +26,7 @@ class SelectStatement<T : Table>(
 }
 
 class Select2Statement<T : Table, T2 : Table>(
-    val definitions: Sequence<Definition>,
+    val definitions: Bag<Definition>,
     val joinOn2Clause: JoinOn2Clause<T, T2>,
     val where2Clause: Where2Clause<T, T2>? = null,
     val order2Clause: Order2Clause<T, T2>? = null,
@@ -44,7 +44,7 @@ class Select2Statement<T : Table, T2 : Table>(
 }
 
 class Select3Statement<T : Table, T2 : Table, T3 : Table>(
-    val definitions: Sequence<Definition>,
+    val definitions: Bag<Definition>,
     val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     val where3Clause: Where3Clause<T, T2, T3>? = null,
     val order3Clause: Order3Clause<T, T2, T3>? = null,
@@ -63,7 +63,7 @@ class Select3Statement<T : Table, T2 : Table, T3 : Table>(
 
 
 class Select4Statement<T : Table, T2 : Table, T3 : Table, T4 : Table>(
-    val definitions: Sequence<Definition>,
+    val definitions: Bag<Definition>,
     val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
     val where4Clause: Where4Clause<T, T2, T3, T4>? = null,
     val order4Clause: Order4Clause<T, T2, T3, T4>? = null,
