@@ -14,7 +14,7 @@ import com.example.sample.db.Database
 import com.example.sample.db.TestTable
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
-import com.nice.bluetooth.ScannerLevel
+import com.nice.bluetooth.ScannerType
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothState
 import com.nice.bluetooth.peripheral
@@ -203,7 +203,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
-                Scanner(ScannerLevel.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
+                Scanner(ScannerType.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
                     if (accumulator.add(value)) {
                         withContext(Dispatchers.Main) {
                             adapter.addItem(value)

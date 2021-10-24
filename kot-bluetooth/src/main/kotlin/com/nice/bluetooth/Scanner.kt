@@ -26,14 +26,14 @@ import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
 @SuppressLint("NewApi")
-fun Scanner(level: ScannerLevel = ScannerLevel.Low, services: List<UUID>? = null): Scanner =
-    when (level) {
-        ScannerLevel.System -> AndroidSystemScanner(services)
-        ScannerLevel.High -> HighVersionBleScanner(services)
-        ScannerLevel.Low -> LowVersionBleScanner(services)
+fun Scanner(type: ScannerType = ScannerType.Low, services: List<UUID>? = null): Scanner =
+    when (type) {
+        ScannerType.System -> AndroidSystemScanner(services)
+        ScannerType.High -> HighVersionBleScanner(services)
+        ScannerType.Low -> LowVersionBleScanner(services)
     }
 
-enum class ScannerLevel {
+enum class ScannerType {
     System,
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
