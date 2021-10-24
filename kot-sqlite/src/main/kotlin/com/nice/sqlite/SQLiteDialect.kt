@@ -64,7 +64,7 @@ object SQLiteDialect : Dialect {
 
             val indexes = statement.definitions.map { it as Index }
             indexes.joinTo(builder, separator = ";") {
-                decompileDropIndexSql(it)
+                "DROP INDEX IF EXISTS ${it.render()}"
             }
         }
 
@@ -574,50 +574,22 @@ object SQLiteDialect : Dialect {
     }
 
     private fun decompileCreateIndexSql(index: Index): String = buildString {
-        with(index.meta) {
-            append("CREATE")
-
-            if (uniqueConstraint != null) {
-                append(' ')
-                append(uniqueConstraint)
-            }
-
-            append(" INDEX")
-
-            if (ifNotExistsConstraint != null) {
-                append(' ')
-                append(ifNotExistsConstraint)
-            }
+        append("CREATE ")
+        if (index.unique) {
+            append("UNIQUE ")
         }
-
-        append(' ')
+        append("INDEX IF NOT EXISTS ")
         append(index.fullRender())
     }
 
-    private fun decompileDropIndexSql(index: Index): String = buildString {
-        with(index.meta) {
-            append("DROP INDEX")
-
-            if (ifExistsConstraint != null) {
-                append(' ')
-                append(ifExistsConstraint)
-            }
+    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String = buildString {
+        append("INSERT")
+        if (conflictAlgorithm != ConflictAlgorithm.None) {
+            append(" OR ")
+            append(conflictAlgorithm)
         }
-
-        append(' ')
-        append(index.render())
+        append(" INTO ")
+        append(table.render())
     }
-
-    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String =
-        buildString {
-            append("INSERT ")
-            if (conflictAlgorithm != ConflictAlgorithm.None) {
-                append("OR ")
-                append(conflictAlgorithm)
-                append(' ')
-            }
-            append("INTO ")
-            append(table.render())
-        }
 
 }

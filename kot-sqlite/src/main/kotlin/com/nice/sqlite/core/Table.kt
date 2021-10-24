@@ -19,6 +19,16 @@ abstract class Table(private val name: String) : Renderer {
     inner class TimeColumn(name: String) : Column<String>(name, SqlType.Named("time"), this)
     inner class DatetimeColumn(name: String) : Column<String>(name, SqlType.Named("datetime"), this)
 
+    inner class UniqueIndex(
+        vararg columns: Column<*>,
+        name: String = columns.joinToString("_")
+    ) : Index(name, columns, true, this)
+
+    inner class NonuniqueIndex(
+        vararg columns: Column<*>,
+        name: String = columns.joinToString("_")
+    ) : Index(name, columns, false, this)
+
     override fun render(): String = name.surrounding()
 
     override fun equals(other: Any?): Boolean {

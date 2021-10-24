@@ -32,11 +32,11 @@ open class Column<T : Any>(
     val table: Table
 ) : Definition {
 
-    private var _meta = Meta()
-    val meta: Meta get() = _meta
+    private var _meta = Meta<T>()
+    val meta: Meta<T> get() = _meta
 
     fun setMeta(
-        defaultConstraint: ColumnConstraint.Default? = _meta.defaultConstraint,
+        defaultConstraint: ColumnConstraint.Default<T>? = _meta.defaultConstraint,
         primaryKeyConstraint: ColumnConstraint.PrimaryKey? = _meta.primaryKeyConstraint,
         referencesConstraint: ColumnConstraint.References? = _meta.referencesConstraint,
         uniqueConstraint: ColumnConstraint.Unique? = _meta.uniqueConstraint,
@@ -85,8 +85,8 @@ open class Column<T : Any>(
 
     override fun toString(): String = name
 
-    data class Meta(
-        val defaultConstraint: ColumnConstraint.Default? = null,
+    data class Meta<T: Any>(
+        val defaultConstraint: ColumnConstraint.Default<T>? = null,
         val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
         val referencesConstraint: ColumnConstraint.References? = null,
         val uniqueConstraint: ColumnConstraint.Unique? = null,
@@ -101,11 +101,11 @@ fun <V : Any, T : Column<V>> T.default(value: V) = apply {
     setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-fun <T : Column<*>> T.default(value: Defined) = apply {
+fun <V : Any, T : Column<V>> T.default(value: Defined) = apply {
     setMeta(defaultConstraint = ColumnConstraint.Default(value))
 }
 
-operator fun <T : Column<*>> T.plus(defaultConstraint: ColumnConstraint.Default) = apply {
+operator fun <V : Any, T : Column<V>> T.plus(defaultConstraint: ColumnConstraint.Default<V>) = apply {
     setMeta(defaultConstraint = defaultConstraint)
 }
 
@@ -157,35 +157,20 @@ operator fun <T : Column<*>> T.plus(onDeleteConstraint: ColumnConstraint.OnDelet
     setMeta(onDeleteConstraint = onDeleteConstraint)
 }
 
-class Index internal constructor(
+open class Index(
     override val name: String,
-    val columns: Array<out Column<*>>
+    val columns: Array<out Column<*>>,
+    val unique: Boolean,
+    val table: Table
 ) : Definition {
 
-    private var _meta = Meta()
-    val meta: Meta get() = _meta
-
-    fun setMeta(
-        uniqueConstraint: IndexConstraint.Unique? = _meta.uniqueConstraint,
-        ifNotExistsConstraint: IndexConstraint.IfNotExists? = _meta.ifNotExistsConstraint,
-        ifExistsConstraint: IndexConstraint.IfExists? = _meta.ifExistsConstraint
-    ) {
-        _meta = _meta.copy(
-            uniqueConstraint = uniqueConstraint,
-            ifNotExistsConstraint = ifNotExistsConstraint,
-            ifExistsConstraint = ifExistsConstraint
-        )
-    }
-
     override fun render(): String = buildString {
-        val table = columns.first().table
         append(name.surrounding())
         append(" ON ")
         append(table.render())
     }
 
     override fun fullRender(): String = buildString {
-        val table = columns.first().table
         append(name.surrounding())
         append(" ON ")
         append(table.render())
@@ -215,43 +200,7 @@ class Index internal constructor(
         return result
     }
 
-
-    data class Meta(
-        val uniqueConstraint: IndexConstraint.Unique? = null,
-        val ifNotExistsConstraint: IndexConstraint.IfNotExists? = null,
-        val ifExistsConstraint: IndexConstraint.IfExists? = null
-    )
-
 }
-
-fun Index.unique() = apply {
-    setMeta(uniqueConstraint = IndexConstraint.Unique)
-}
-
-operator fun Index.plus(uniqueConstraint: IndexConstraint.Unique) = apply {
-    setMeta(uniqueConstraint = uniqueConstraint)
-}
-
-fun Index.ifNotExists() = apply {
-    setMeta(ifNotExistsConstraint = IndexConstraint.IfNotExists)
-}
-
-operator fun Index.plus(ifNotExistsConstraint: IndexConstraint.IfNotExists) = apply {
-    setMeta(ifNotExistsConstraint = ifNotExistsConstraint)
-}
-
-fun Index.ifExists() = apply {
-    setMeta(ifExistsConstraint = IndexConstraint.IfExists)
-}
-
-operator fun Index.plus(ifExistsConstraint: IndexConstraint.IfExists) = apply {
-    setMeta(ifExistsConstraint = ifExistsConstraint)
-}
-
-fun index(
-    vararg columns: Column<*>,
-    name: String = columns.joinToString("_")
-): Index = Index(name, columns)
 
 sealed class Defined(override val name: String) : Definition {
     override fun render(): String = name

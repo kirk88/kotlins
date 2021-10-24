@@ -74,6 +74,10 @@ inline fun <T> Bag<T>.none(predicate: (T) -> Boolean): Boolean {
     return true
 }
 
+inline fun <T> Bag<T>.forEach(action: (T) -> Unit) {
+    for (element in this) action(element)
+}
+
 inline fun <T, R> Bag<T>.mapTo(destination: MutableBag<R>, transform: (T) -> R): Bag<R> {
     for (element in this)
         destination.add(transform(element))
@@ -113,13 +117,13 @@ internal class IndexingIterable<out T>(private val iteratorFactory: () -> Iterat
     override fun iterator(): Iterator<IndexedValue<T>> = iteratorFactory().withIndex()
 }
 
-inline fun <T> Bag<T>.joinTo(
-    appendable: Appendable,
+inline fun <T, A : Appendable> Bag<T>.joinTo(
+    appendable: A,
     separator: String = ", ",
     prefix: String = "",
     postfix: String = "",
     transform: (T) -> String = { it.toString() }
-) {
+): A {
     appendable.append(prefix)
     var count = 0
     for (element in this) {
@@ -127,4 +131,14 @@ inline fun <T> Bag<T>.joinTo(
         appendable.append(transform(element))
     }
     appendable.append(postfix)
+    return appendable
+}
+
+inline fun <T> Bag<T>.joinToString(
+    separator: String = ", ",
+    prefix: String = "",
+    postfix: String = "",
+    transform: (T) -> String = { it.toString() }
+): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, transform).toString()
 }

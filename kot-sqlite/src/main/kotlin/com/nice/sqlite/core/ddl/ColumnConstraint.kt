@@ -16,7 +16,17 @@ sealed class ConstraintAction(
 
 sealed class ColumnConstraint {
 
-    class Default(val value: Any) : ColumnConstraint() {
+    class Default<V : Any> : ColumnConstraint {
+        private val value: Any
+
+        constructor(value: V) : super() {
+            this.value = value
+        }
+
+        constructor(value: Defined) : super() {
+            this.value = value
+        }
+
         override fun toString(): String = buildString {
             append("DEFAULT ")
             if (value is Function) {
@@ -84,30 +94,11 @@ sealed class ColumnConstraint {
 
 }
 
-fun Default(value: Any) = ColumnConstraint.Default(value)
+fun <V : Any> Default(value: V) = ColumnConstraint.Default(value)
+fun <V : Any> Default(value: Defined) = ColumnConstraint.Default<V>(value)
 fun PrimaryKey(autoIncrement: Boolean = false) = ColumnConstraint.PrimaryKey(autoIncrement)
 fun References(column: Column<*>) = ColumnConstraint.References(column)
 fun Unique(conflictAlgorithm: ConflictAlgorithm) = ColumnConstraint.Unique(conflictAlgorithm)
 fun NotNull() = ColumnConstraint.NotNull
 fun OnUpdate(action: ConstraintAction) = ColumnConstraint.OnUpdate(action)
 fun OnDelete(action: ConstraintAction) = ColumnConstraint.OnDelete(action)
-
-sealed class IndexConstraint {
-
-    object Unique : IndexConstraint() {
-        override fun toString(): String = "UNIQUE"
-    }
-
-    object IfNotExists : IndexConstraint() {
-        override fun toString(): String = "IF NOT EXISTS"
-    }
-
-    object IfExists : IndexConstraint() {
-        override fun toString(): String = "IF EXISTS"
-    }
-
-}
-
-fun Unique() = IndexConstraint.Unique
-fun IfNotExists() = IndexConstraint.IfNotExists
-fun IfExists() = IndexConstraint.IfExists

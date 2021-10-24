@@ -65,13 +65,15 @@ object TestTable : Table("test") {
     val number = IntColumn("number") + Default(10)
     val data = BlobColumn("data") + Default(byteArrayOf(1, 2, 3, 4, 5))
     val time = DatetimeColumn("time") + Default(Defined.CurrentTime)
+
+    val idNameIndex = NonuniqueIndex(id, name)
 }
 
 object TestTable2 : Table("test2") {
 
-    val id = IntColumn("id").primaryKey()
+    val id = IntColumn("id") + PrimaryKey()
 
-    val pid = IntColumn("pid").references(TestTable.id).onDelete(ConstraintAction.Cascade)
+    val pid = IntColumn("pid") + References(TestTable.id) + OnDelete(ConstraintAction.Cascade)
 
     val name = StringColumn("name")
 
@@ -102,10 +104,8 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         offer(TestTable).create(db.statementExecutor) {
-            it.id + it.name + it.age + it.flag + it.number + it.data + it.time + index(
-                it.id,
-                it.name
-            )
+            it.id + it.name + it.age + it.flag +
+                    it.number + it.data + it.time + it.idNameIndex
         }
 
         offer(TestView).create(db.statementExecutor)
@@ -119,7 +119,7 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
         offer(TestTable).alter(db.statementExecutor) {
-            it.number + it.data + it.time + index(it.id, it.name).ifNotExists()
+            it.number + it.data + it.time + it.idNameIndex
         }
 
         offer(TestView).create(db.statementExecutor)
