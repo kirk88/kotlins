@@ -89,13 +89,9 @@ inline fun <reified T : Any> Cursor.singleOrNull(): T? = singleOrNull(classParse
 
 inline fun <reified T : Any> Cursor.toList(): List<T> = toList(classParser())
 
-fun Cursor.asSequence(): Sequence<Array<ColumnValue>> {
-    return CursorSequence(this)
-}
+fun Cursor.asSequence(): Sequence<Array<ColumnValue>> = CursorSequence(this).constrainOnce()
 
-fun Cursor.asMapSequence(): Sequence<Map<String, ColumnValue>> {
-    return CursorMapSequence(this)
-}
+fun Cursor.asMapSequence(): Sequence<Map<String, ColumnValue>> = CursorMapSequence(this).constrainOnce()
 
 fun Cursor.getColumnValue(index: Int): ColumnValue {
     val value = if (isNull(index)) null

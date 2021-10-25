@@ -11,9 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
+import com.example.sample.db.AppDatabase
 import com.example.sample.db.DBTest
-import com.example.sample.db.Database
 import com.example.sample.db.TestTable
+import com.example.sample.db.execute
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -30,7 +31,6 @@ import com.nice.common.helper.setContentView
 import com.nice.common.helper.string
 import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
-import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.*
@@ -80,72 +80,71 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     }
 
     private fun testDB() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            Database.use(Transaction.Exclusive) {
-                val beans = mutableListOf<DBTest>()
-                repeat(100000) { index ->
-                    val bean = DBTest(
-                        id = index.toLong(),
-                        name = "jack",
-                        age = index,
-                        flag = true,
-                        number = -index,
-                        data = byteArrayOf(1, 2, 3)
-                    )
-                    beans.add(bean)
-                }
+        AppDatabase.execute(lifecycleScope) {
+            val beans = mutableListOf<DBTest>()
+            repeat(100000) { index ->
+                val bean = DBTest(
+                    id = index.toLong(),
+                    name = "jack",
+                    age = index,
+                    flag = true,
+                    number = -index,
+                    data = byteArrayOf(1, 2, 3)
+                )
+                beans.add(bean)
+            }
 
-                var start = System.currentTimeMillis()
+            var start = System.currentTimeMillis()
 
-                for (bean in beans){
-                    val values = ContentValues()
-                    values.put("id", bean.id)
-                    values.put("name", bean.name)
-                    values.put("age", bean.age)
-                    values.put("flag", bean.flag)
-                    values.put("number", bean.number)
-                    values.put("data", bean.data)
-                    insert(TestTable.toString(), SQLiteDatabase.CONFLICT_REPLACE, values)
-                }
-                Log.e("TAGTAG", "android api insert time: ${System.currentTimeMillis() - start}")
+            for (bean in beans) {
+                val values = ContentValues()
+                values.put("id", bean.id)
+                values.put("name", bean.name)
+                values.put("age", bean.age)
+                values.put("flag", bean.flag)
+                values.put("number", bean.number)
+                values.put("data", bean.data)
+                insert(TestTable.toString(), SQLiteDatabase.CONFLICT_REPLACE, values)
+            }
+            Log.e("TAGTAG", "android api insert time: ${System.currentTimeMillis() - start}")
 
-                Log.e("TAGTAG", "==============================")
+            Log.e("TAGTAG", "==============================")
 
-                start = System.currentTimeMillis()
-                offer(TestTable).insertBatch(statementExecutor) {
-                    for (bean in beans) {
-                        item {
-                            conflictAlgorithm = ConflictAlgorithm.Replace
-                            values {
-                                it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                                        it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
-                            }
+            start = System.currentTimeMillis()
+            offer(TestTable).insertBatch(statementExecutor) {
+                for (bean in beans) {
+                    item {
+                        conflictAlgorithm = ConflictAlgorithm.Replace
+                        values {
+                            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
+                                    it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                         }
                     }
                 }
-                Log.e("TAGTAG", "my api insert time: ${System.currentTimeMillis() - start}")
+            }
+            Log.e("TAGTAG", "my api insert time: ${System.currentTimeMillis() - start}")
 
-                Log.e("TAGTAG", "==============================")
+            Log.e("TAGTAG", "==============================")
 
-                offer(TestTable).select(statementExecutor) {
-                    it.id + it.name + it.age + date(it.time)
-                }.asMapSequence().take(5).forEach {
-                    Log.e("TAGTAG", it.toString())
-                }
+            offer(TestTable).select(statementExecutor) {
+                it.id + it.name + it.age + date(it.time)
+            }.asMapSequence().take(5).forEach {
+                Log.e("TAGTAG", it.toString())
+            }
 
-                Thread.sleep(2000)
+            Thread.sleep(2000)
 
-                offer(TestTable).where { it.id eq 0 }.update(statementExecutor) {
-                    it.name("tom")
-                }
+            offer(TestTable).where { it.id eq 0 }.update(statementExecutor) {
+                it.name("tom")
+            }
 
-                Log.e("TAGTAG", "==============================")
+            Log.e("TAGTAG", "==============================")
 
-                offer(TestTable).orderBy { it.time.asc }.select(statementExecutor) {
-                    it.id + it.name + it.age + it.time.local.aliased("time")
-                }.asMapSequence().take(5).forEach {
-                    Log.e("TAGTAG", it.toString())
-                }
+            offer(TestTable).orderBy { it.time.asc }.select(statementExecutor) {
+                it.id + it.name + it.age + it.time.local.aliased("time")
+            }.asMapSequence().take(5).forEach {
+                Log.e("TAGTAG", it.toString())
+            }
 
 //                val start2 = System.currentTimeMillis()
 //                offer(TestTable).updateBatch(statementExecutor) {
@@ -200,8 +199,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //                }.asMapSequence().forEach {
 //                    Log.e("TAGTAG", it.toString())
 //                }
-            }
-
         }
     }
 

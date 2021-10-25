@@ -18,4 +18,6 @@ interface StatementExecutor {
 
     fun executeQuery(statement: QueryStatement): Cursor
 
+    companion object
+
 }

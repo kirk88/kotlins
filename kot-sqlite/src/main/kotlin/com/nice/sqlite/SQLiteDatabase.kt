@@ -2,6 +2,7 @@
 
 package com.nice.sqlite
 
+import android.content.Context
 import android.database.Cursor
 import android.util.Log
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -10,38 +11,35 @@ import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
 import com.nice.sqlite.core.ddl.*
+import java.io.Closeable
 import java.util.concurrent.atomic.AtomicInteger
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
-enum class Transaction {
-    None,
-    Immediate,
-    Exclusive
-}
-
-open class SupportSQLiteDatabaseHelper(
+class SupportSQLiteDatabaseHelper(
     configuration: SupportSQLiteOpenHelper.Configuration,
     factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
-) {
+) : Closeable {
 
     private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)
 
     private val counter = AtomicInteger()
     private var database: SupportSQLiteDatabase? = null
 
-    fun <T> use(
-        transaction: Transaction = Transaction.None,
+    fun <T> use(action: SupportSQLiteDatabase.() -> T): T {
+        try {
+            return openDatabase().action()
+        } finally {
+            closeDatabase()
+        }
+    }
+
+    fun <T> transaction(
+        exclusive: Boolean = true,
         action: SupportSQLiteDatabase.() -> T
     ): T {
         try {
-            return openDatabase().run {
-                if (transaction == Transaction.None) {
-                    action()
-                } else {
-                    transaction(transaction == Transaction.Exclusive, action)
-                }
-            }
+            return openDatabase().transaction(exclusive, action)
         } finally {
             closeDatabase()
         }
@@ -62,10 +60,24 @@ open class SupportSQLiteDatabaseHelper(
         }
     }
 
+    override fun close() {
+        delegate.close()
+    }
+
 }
 
-val SupportSQLiteDatabase.statementExecutor: StatementExecutor
-    get() = SQLiteStatementExecutor[this]
+fun SupportSQLiteDatabaseHelper(
+    context: Context,
+    name: String,
+    callback: SupportSQLiteOpenHelper.Callback,
+    factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
+) = SupportSQLiteDatabaseHelper(
+    SupportSQLiteOpenHelper.Configuration.builder(context)
+        .name(name)
+        .callback(callback)
+        .build(),
+    factory
+)
 
 private class SQLiteStatementExecutor private constructor(
     private val database: SupportSQLiteDatabase
@@ -171,3 +183,10 @@ private class SQLiteStatementExecutor private constructor(
     }
 
 }
+
+operator fun StatementExecutor.Companion.get(database: SupportSQLiteDatabase): StatementExecutor {
+    return SQLiteStatementExecutor[database]
+}
+
+val SupportSQLiteDatabase.statementExecutor: StatementExecutor
+    get() = SQLiteStatementExecutor[this]

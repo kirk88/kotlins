@@ -11,6 +11,10 @@ import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 data class DBTest @ClassParserConstructor constructor(
     val id: Long = 0,
@@ -137,9 +141,19 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
     }
 }
 
-object Database : SupportSQLiteDatabaseHelper(
-    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("test_db.db")
-        .callback(SQLiteOpenHelperCallback)
-        .build()
-)
+val AppDatabase: SupportSQLiteDatabaseHelper by lazy {
+    SupportSQLiteDatabaseHelper(
+        applicationContext,
+        "test_db.db",
+        SQLiteOpenHelperCallback
+    )
+}
+
+fun SupportSQLiteDatabaseHelper.execute(
+    scope: CoroutineScope,
+    action: suspend SupportSQLiteDatabase.() -> Unit
+): Job {
+    return use {
+        scope.launch(Dispatchers.IO) { action() }
+    }
+}
