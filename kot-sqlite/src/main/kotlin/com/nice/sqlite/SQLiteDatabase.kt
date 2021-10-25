@@ -11,15 +11,14 @@ import androidx.sqlite.db.SupportSQLiteStatement
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.sqlite.db.transaction
 import com.nice.sqlite.core.ddl.*
-import java.io.Closeable
 import java.util.concurrent.atomic.AtomicInteger
 
 private val ANDROID_SQLITE_OPEN_HELPER_FACTORY = FrameworkSQLiteOpenHelperFactory()
 
-class SupportSQLiteDatabaseHelper(
+class ManagedSupportSQLiteOpenHelper(
     configuration: SupportSQLiteOpenHelper.Configuration,
     factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
-) : Closeable {
+) : SupportSQLiteOpenHelper {
 
     private val delegate: SupportSQLiteOpenHelper = factory.create(configuration)
 
@@ -60,21 +59,31 @@ class SupportSQLiteDatabaseHelper(
         }
     }
 
+    override fun getDatabaseName(): String? = delegate.databaseName
+
+    override fun setWriteAheadLoggingEnabled(enabled: Boolean) = delegate.setWriteAheadLoggingEnabled(enabled)
+
+    override fun getWritableDatabase(): SupportSQLiteDatabase = delegate.writableDatabase
+
+    override fun getReadableDatabase(): SupportSQLiteDatabase = delegate.readableDatabase
+
     override fun close() {
         delegate.close()
     }
 
 }
 
-fun SupportSQLiteDatabaseHelper(
+fun ManagedSupportSQLiteOpenHelper(
     context: Context,
-    name: String,
+    name: String?,
     callback: SupportSQLiteOpenHelper.Callback,
+    noBackupDirectory: Boolean,
     factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
-) = SupportSQLiteDatabaseHelper(
+) = ManagedSupportSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(context)
         .name(name)
         .callback(callback)
+        .noBackupDirectory(noBackupDirectory)
         .build(),
     factory
 )
