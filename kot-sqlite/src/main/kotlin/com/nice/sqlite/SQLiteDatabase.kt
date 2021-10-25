@@ -77,7 +77,7 @@ fun ManagedSupportSQLiteOpenHelper(
     context: Context,
     name: String?,
     callback: SupportSQLiteOpenHelper.Callback,
-    noBackupDirectory: Boolean,
+    noBackupDirectory: Boolean = false,
     factory: SupportSQLiteOpenHelper.Factory = ANDROID_SQLITE_OPEN_HELPER_FACTORY
 ) = ManagedSupportSQLiteOpenHelper(
     SupportSQLiteOpenHelper.Configuration.builder(context)
