@@ -100,6 +100,7 @@ private val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
 private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback(22) {
     override fun onConfigure(db: SupportSQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(true)
+        db.pageSize = 2000
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) {

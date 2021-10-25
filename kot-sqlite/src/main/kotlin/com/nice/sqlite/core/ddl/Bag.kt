@@ -12,16 +12,35 @@ interface MutableBag<T> : Bag<T> {
 
     fun add(element: T): Boolean
 
+    fun addAll(elements: Bag<T>): Boolean
+
     fun remove(element: T): Boolean
 
-    operator fun plus(element: T): MutableBag<T> = apply {
+    fun removeAll(elements: Bag<T>): Boolean
+
+}
+
+operator fun <T> Bag<T>.plus(element: T): Bag<T> {
+    if (this is MutableBag<T>) {
         add(element)
+        return this
     }
+    val bag = LinkedBag(this)
+    bag.add(element)
+    return bag
+}
 
-    operator fun minus(element: T): MutableBag<T> = apply {
+operator fun <T> Bag<T>.minus(element: T): Bag<T> {
+    if (this is MutableBag<T>) {
         remove(element)
+        return this
     }
-
+    var removed = false
+    return filterTo(LinkedBag()) {
+        if (!removed && it == element) {
+            removed = true; false
+        } else true
+    }
 }
 
 internal class OnceIterator<T>(private val value: T) : Iterator<T> {
@@ -33,13 +52,43 @@ internal class OnceIterator<T>(private val value: T) : Iterator<T> {
     }
 }
 
+@PublishedApi
 internal class LinkedBag<T> : MutableBag<T> {
 
-    private val delegate = linkedSetOf<T>()
+    private val delegate: LinkedHashSet<T>
+
+    constructor() : super() {
+        delegate = LinkedHashSet()
+    }
+
+    constructor(elements: Bag<T>) : super() {
+        delegate = LinkedHashSet()
+        addAll(elements)
+    }
 
     override fun add(element: T): Boolean = delegate.add(element)
 
+    override fun addAll(elements: Bag<T>): Boolean {
+        var modified = false
+        for (element in elements) {
+            if (delegate.add(element)) {
+                modified = true
+            }
+        }
+        return modified
+    }
+
     override fun remove(element: T): Boolean = delegate.remove(element)
+
+    override fun removeAll(elements: Bag<T>): Boolean {
+        var modified = false
+        for (element in elements) {
+            if (delegate.remove(element)) {
+                modified = true
+            }
+        }
+        return modified
+    }
 
     override fun iterator(): Iterator<T> = delegate.iterator()
 
@@ -58,10 +107,8 @@ internal object EmptyBag : Bag<Nothing> {
 fun <T> emptyBag(): Bag<T> = EmptyBag
 
 fun <T> mutableBagOf(vararg elements: T): MutableBag<T> =
-    LinkedBag<T>().apply {
-        for (element in elements) {
-            add(element)
-        }
+    if (elements.isEmpty()) LinkedBag() else LinkedBag<T>().apply {
+        for (element in elements) add(element)
     }
 
 fun <T> mutableBagOf(): MutableBag<T> = LinkedBag()
@@ -85,17 +132,17 @@ inline fun <T, R> Bag<T>.mapTo(destination: MutableBag<R>, transform: (T) -> R):
 }
 
 inline fun <T, R> Bag<T>.map(transform: (T) -> R): Bag<R> {
-    return mapTo(mutableBagOf(), transform)
+    return mapTo(LinkedBag(), transform)
 }
 
-inline fun <T> Bag<T>.filterTo(destination: MutableBag<T>, predicate: (T) -> Boolean): Bag<T> {
+inline fun <T, C : MutableBag<in T>> Bag<T>.filterTo(destination: C, predicate: (T) -> Boolean): C {
     for (element in this)
         if (predicate(element)) destination.add(element)
     return destination
 }
 
 inline fun <T> Bag<T>.filter(predicate: (T) -> Boolean): Bag<T> {
-    return filterTo(mutableBagOf(), predicate)
+    return filterTo(LinkedBag(), predicate)
 }
 
 inline fun <reified R, C : MutableBag<in R>> Bag<*>.filterIsInstanceTo(destination: C): C {
@@ -106,7 +153,7 @@ inline fun <reified R, C : MutableBag<in R>> Bag<*>.filterIsInstanceTo(destinati
 
 inline fun <reified R> Bag<*>.filterIsInstance(): Bag<R> {
     listOf<String>().withIndex()
-    return filterIsInstanceTo(mutableBagOf())
+    return filterIsInstanceTo(LinkedBag())
 }
 
 fun <T> Bag<T>.withIndex(): Iterable<IndexedValue<T>> {

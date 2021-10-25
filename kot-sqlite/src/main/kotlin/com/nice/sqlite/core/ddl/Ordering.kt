@@ -11,9 +11,6 @@ interface Ordering : Bag<Ordering>, FullRenderer {
 
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
 
-    operator fun plus(ordering: Ordering): MutableBag<Ordering> =
-        mutableBagOf(this, ordering)
-
     override fun render(): String = "${definition.render()} $direction"
 
     override fun fullRender(): String = "${definition.fullRender()} $direction"

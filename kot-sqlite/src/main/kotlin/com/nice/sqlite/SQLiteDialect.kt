@@ -17,14 +17,14 @@ object SQLiteDialect : Dialect {
             builder.append(" (")
 
             columns.joinTo(builder, postfix = ")") {
-                decompileColumnSql(it)
+                compileColumnSql(it)
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(it)
+                compileCreateIndexSql(it)
             }
         }
 
@@ -37,14 +37,14 @@ object SQLiteDialect : Dialect {
         val columns = statement.definitions.filterIsInstance<Column<*>>()
         if (!columns.none()) {
             columns.joinTo(builder, separator = ";") {
-                "ALTER TABLE ${statement.subject.table.render()} ADD ${decompileColumnSql(it)}"
+                "ALTER TABLE ${statement.subject.table.render()} ADD ${compileColumnSql(it)}"
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<Index>()
         if (!indexes.none()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
-                decompileCreateIndexSql(it)
+                compileCreateIndexSql(it)
             }
         }
 
@@ -402,7 +402,7 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: InsertStatement<T>): String {
         val builder = StringBuilder()
 
-        builder.append(decompileInsertSql(statement.subject.table, statement.conflictAlgorithm))
+        builder.append(compileInsertSql(statement.subject.table, statement.conflictAlgorithm))
 
         builder.append(" (")
 
@@ -530,7 +530,7 @@ object SQLiteDialect : Dialect {
         return builder.toString()
     }
 
-    private fun decompileColumnSql(column: Column<*>): String = buildString {
+    private fun compileColumnSql(column: Column<*>): String = buildString {
         append(column.render())
         append(' ')
         append(column.type)
@@ -573,7 +573,7 @@ object SQLiteDialect : Dialect {
         }
     }
 
-    private fun decompileCreateIndexSql(index: Index): String = buildString {
+    private fun compileCreateIndexSql(index: Index): String = buildString {
         append("CREATE ")
         if (index.unique) {
             append("UNIQUE ")
@@ -582,7 +582,7 @@ object SQLiteDialect : Dialect {
         append(index.fullRender())
     }
 
-    private fun decompileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String = buildString {
+    private fun compileInsertSql(table: Table, conflictAlgorithm: ConflictAlgorithm): String = buildString {
         append("INSERT")
         if (conflictAlgorithm != ConflictAlgorithm.None) {
             append(" OR ")

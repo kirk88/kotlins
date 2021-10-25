@@ -71,6 +71,8 @@ private class SQLiteStatementExecutor private constructor(
     private val database: SupportSQLiteDatabase
 ) : StatementExecutor {
 
+    private val caches = mutableMapOf<String, SupportSQLiteStatement>()
+
     override fun execute(statement: Statement) {
         if (statement is TriggerCreateStatement<*>) {
             database.compileStatement(statement.toString(SQLiteDialect)).execute()
@@ -100,7 +102,9 @@ private class SQLiteStatementExecutor private constructor(
         var numberOfRows = 0
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            numberOfRows += database.compileStatement(executable.sql).apply {
+            numberOfRows += caches.getOrPut(executable.sql) {
+                database.compileStatement(executable.sql)
+            }.apply {
                 bindValues(executable.values)
             }.executeUpdateDelete()
         }
@@ -123,7 +127,9 @@ private class SQLiteStatementExecutor private constructor(
         var lastRowId = -1L
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            lastRowId = database.compileStatement(executable.sql).apply {
+            lastRowId = caches.getOrPut(executable.sql) {
+                database.compileStatement(executable.sql)
+            }.apply {
                 bindValues(executable.values)
             }.executeInsert()
         }

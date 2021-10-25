@@ -1,6 +1,11 @@
 package com.example.sample.test
 
 fun main() {
+
+    val sa = "a"
+    val sb = "a"
+    println(sa === sb)
+
     val a = 0x1
     val b = 0x1 shl 1
     val c = 0x1 shl 2

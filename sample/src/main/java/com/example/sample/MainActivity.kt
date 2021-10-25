@@ -1,6 +1,8 @@
 package com.example.sample
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -31,10 +33,7 @@ import com.nice.common.widget.*
 import com.nice.sqlite.Transaction
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
-import com.nice.sqlite.core.ddl.ConflictAlgorithm
-import com.nice.sqlite.core.ddl.aliased
-import com.nice.sqlite.core.ddl.asc
-import com.nice.sqlite.core.ddl.date
+import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.statementExecutor
@@ -84,7 +83,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         lifecycleScope.launch(Dispatchers.IO) {
             Database.use(Transaction.Exclusive) {
                 val beans = mutableListOf<DBTest>()
-                repeat(5) { index ->
+                repeat(100000) { index ->
                     val bean = DBTest(
                         id = index.toLong(),
                         name = "jack",
@@ -97,11 +96,26 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                 }
 
                 var start = System.currentTimeMillis()
+
+                for (bean in beans){
+                    val values = ContentValues()
+                    values.put("id", bean.id)
+                    values.put("name", bean.name)
+                    values.put("age", bean.age)
+                    values.put("flag", bean.flag)
+                    values.put("number", bean.number)
+                    values.put("data", bean.data)
+                    insert(TestTable.toString(), SQLiteDatabase.CONFLICT_REPLACE, values)
+                }
+                Log.e("TAGTAG", "android api insert time: ${System.currentTimeMillis() - start}")
+
+                Log.e("TAGTAG", "==============================")
+
+                start = System.currentTimeMillis()
                 offer(TestTable).insertBatch(statementExecutor) {
                     for (bean in beans) {
                         item {
                             conflictAlgorithm = ConflictAlgorithm.Replace
-
                             values {
                                 it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                                         it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
@@ -109,13 +123,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                         }
                     }
                 }
-                Log.e("TAGTAG", "insert time: ${System.currentTimeMillis() - start}")
+                Log.e("TAGTAG", "my api insert time: ${System.currentTimeMillis() - start}")
 
                 Log.e("TAGTAG", "==============================")
 
                 offer(TestTable).select(statementExecutor) {
                     it.id + it.name + it.age + date(it.time)
-                }.asMapSequence().forEach {
+                }.asMapSequence().take(5).forEach {
                     Log.e("TAGTAG", it.toString())
                 }
 
@@ -129,7 +143,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
                 offer(TestTable).orderBy { it.time.asc }.select(statementExecutor) {
                     it.id + it.name + it.age + it.time.local.aliased("time")
-                }.asMapSequence().forEach {
+                }.asMapSequence().take(5).forEach {
                     Log.e("TAGTAG", it.toString())
                 }
 

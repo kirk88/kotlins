@@ -21,9 +21,6 @@ interface Definition : Bag<Definition>, FullRenderer {
 
     override fun iterator(): Iterator<Definition> = OnceIterator(this)
 
-    operator fun plus(definition: Definition): MutableBag<Definition> =
-        mutableBagOf(this, definition)
-
 }
 
 open class Column<T : Any>(
@@ -85,7 +82,7 @@ open class Column<T : Any>(
 
     override fun toString(): String = name
 
-    data class Meta<T: Any>(
+    data class Meta<T : Any>(
         val defaultConstraint: ColumnConstraint.Default<T>? = null,
         val primaryKeyConstraint: ColumnConstraint.PrimaryKey? = null,
         val referencesConstraint: ColumnConstraint.References? = null,
