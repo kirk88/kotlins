@@ -9,7 +9,7 @@ import com.nice.common.helper.application
 
 object Common
 
-class CommonInitializer: Initializer<Common> {
+class CommonInitializer : Initializer<Common> {
 
     override fun create(context: Context): Common {
         val application = requireNotNull(context.application) {

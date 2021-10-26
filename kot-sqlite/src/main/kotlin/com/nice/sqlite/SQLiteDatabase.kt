@@ -25,7 +25,7 @@ class ManagedSupportSQLiteOpenHelper(
     private val counter = AtomicInteger()
     private var database: SupportSQLiteDatabase? = null
 
-    fun <T> use(action: SupportSQLiteDatabase.() -> T): T {
+    fun <T> execute(action: SupportSQLiteDatabase.() -> T): T {
         try {
             return openDatabase().action()
         } finally {
@@ -47,7 +47,7 @@ class ManagedSupportSQLiteOpenHelper(
     @Synchronized
     private fun openDatabase(): SupportSQLiteDatabase {
         if (counter.incrementAndGet() == 1) {
-            database = delegate.writableDatabase
+            database = writableDatabase
         }
         return database!!
     }

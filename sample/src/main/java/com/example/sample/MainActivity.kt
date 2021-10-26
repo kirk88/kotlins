@@ -14,7 +14,7 @@ import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.AppDatabase
 import com.example.sample.db.DBTest
 import com.example.sample.db.TestTable
-import com.example.sample.db.execute
+import com.example.sample.db.transactionAsync
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -74,13 +74,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        testDB()
+//        testDB()
 //        initBle()
 
     }
 
     private fun testDB() {
-        AppDatabase.execute(lifecycleScope) {
+        AppDatabase.transactionAsync(lifecycleScope) {
             val beans = mutableListOf<DBTest>()
             repeat(100000) { index ->
                 val bean = DBTest(

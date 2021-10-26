@@ -4,7 +4,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.nice.common.applicationContext
 import com.nice.sqlite.ClassParserConstructor
-import com.nice.sqlite.SupportSQLiteDatabaseHelper
+import com.nice.sqlite.ManagedSupportSQLiteOpenHelper
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.limit
@@ -141,19 +141,24 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
     }
 }
 
-val AppDatabase: SupportSQLiteDatabaseHelper by lazy {
-    SupportSQLiteDatabaseHelper(
+val AppDatabase: ManagedSupportSQLiteOpenHelper by lazy {
+    ManagedSupportSQLiteOpenHelper(
         applicationContext,
         "test_db.db",
         SQLiteOpenHelperCallback
     )
 }
 
-fun SupportSQLiteDatabaseHelper.execute(
+fun ManagedSupportSQLiteOpenHelper.executeAsync(
     scope: CoroutineScope,
-    action: suspend SupportSQLiteDatabase.() -> Unit
-): Job {
-    return use {
-        scope.launch(Dispatchers.IO) { action() }
-    }
+    action: SupportSQLiteDatabase.() -> Unit
+): Job = scope.launch(Dispatchers.IO) {
+    execute(action)
+}
+
+fun ManagedSupportSQLiteOpenHelper.transactionAsync(
+    scope: CoroutineScope,
+    action: SupportSQLiteDatabase.() -> Unit
+): Job = scope.launch(Dispatchers.IO) {
+    transaction(action = action)
 }
