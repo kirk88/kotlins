@@ -39,10 +39,10 @@
           "name": "kot-gson-1.0.1.jar",
           "url": "kot-gson-1.0.1.jar",
           "size": 215161,
-          "sha512": "9622ac1b59f528866f99dcfaf29812e7c50b369468701c26650bfe6414d787ce6bb7804a8aa9693ecb615bc5e4f1bf9d8d526338da9e0c816e886d8cf7f08817",
-          "sha256": "9a78891ae0eaf255845d3ab5b0773f3b6f40d501d9d4ea8cdf00f8d6a2fac740",
-          "sha1": "5bc34e955b909b0a329f27be83353e2bb490d0db",
-          "md5": "ea74536150b1c186d6ab6daa317787a1"
+          "sha512": "58db036369dc49d69a8b42652a7bca025006d5ba34c628030e746267f2794c48231dd1314aa77d2b72bb08910ec1ebc56328f9507756140c4e8162862675ffdf",
+          "sha256": "babf21979e14b0c71ce1c797b3453077c989d7ee2abcb76e8f04ed0791496f31",
+          "sha1": "3a0f3928e30c0d0c913cd59ba5b437fe8aadc2f0",
+          "md5": "f5b77cb6a5e36bc989478c2927f7b853"
         }
       ]
     },
@@ -78,10 +78,10 @@
           "name": "kot-gson-1.0.1.jar",
           "url": "kot-gson-1.0.1.jar",
           "size": 215161,
-          "sha512": "9622ac1b59f528866f99dcfaf29812e7c50b369468701c26650bfe6414d787ce6bb7804a8aa9693ecb615bc5e4f1bf9d8d526338da9e0c816e886d8cf7f08817",
-          "sha256": "9a78891ae0eaf255845d3ab5b0773f3b6f40d501d9d4ea8cdf00f8d6a2fac740",
-          "sha1": "5bc34e955b909b0a329f27be83353e2bb490d0db",
-          "md5": "ea74536150b1c186d6ab6daa317787a1"
+          "sha512": "58db036369dc49d69a8b42652a7bca025006d5ba34c628030e746267f2794c48231dd1314aa77d2b72bb08910ec1ebc56328f9507756140c4e8162862675ffdf",
+          "sha256": "babf21979e14b0c71ce1c797b3453077c989d7ee2abcb76e8f04ed0791496f31",
+          "sha1": "3a0f3928e30c0d0c913cd59ba5b437fe8aadc2f0",
+          "md5": "f5b77cb6a5e36bc989478c2927f7b853"
         }
       ]
     },
@@ -98,10 +98,10 @@
           "name": "kot-gson-1.0.1-sources.jar",
           "url": "kot-gson-1.0.1-sources.jar",
           "size": 7848,
-          "sha512": "2e7548016aa0b9fd60e4bfcdf4f15cc1053903e4f6bb3e3d97b86c577e6bc2b4ddf458ed97dbaee640c064a98f8624cb0b7c57ba8e241a1acfbeb6815917bde7",
-          "sha256": "764c42e9e28b8a85e28582847dd0b5b86538e8de4d595e1eb093fdbd338c5998",
-          "sha1": "787b87740d91a21b5eec1f64a252d19b70deb50c",
-          "md5": "fde31e5c0855bec480875ce77901cf61"
+          "sha512": "0b53daf638067fd7e1645da508d5e7aec684e393532da7dad6978180c7d30443d940a8407d1f4e160c700279b216472471863044e5f0fdd1f70bcf35fdfe17ee",
+          "sha256": "e5773cda37706a817892e6e727670fb6e9650f562fcffd7fe06eaa94c32e343b",
+          "sha1": "9f1517b44d00ac36ae5bf75366a4811245ecbea4",
+          "md5": "b79358ad593d3b0450377dcb5efbdb21"
         }
       ]
     },
@@ -118,10 +118,10 @@
           "name": "kot-gson-1.0.1-javadoc.jar",
           "url": "kot-gson-1.0.1-javadoc.jar",
           "size": 261,
-          "sha512": "5d63ba27b6f095955a370abea53e824e411bbdec0091c47b01915dc2908b116b864e98482722f9a93b05c94453dfdc42701c58c4a93b71767b6860f0ba40f3c5",
-          "sha256": "80d20133965b87b1eaf349d45238b617b09a60eabf259743ca622ef0abd2a114",
-          "sha1": "08c3e0aaba997d43d4bb41006d3b944af7cfd522",
-          "md5": "2785b6bd228a3055ddcbd85135114ce9"
+          "sha512": "0fa483a33c44c29465beb4d55cfff025cf533badb725d2854f194f0c83ff96cbbbbbf158c0d3ee8366eafc1d3bbf8939464225739f66bed17e5bffc1ab8c8582",
+          "sha256": "82fe8cc79f39820b3e9bcd73f01802d2856a7df1d553f90016b549be45038759",
+          "sha1": "c2eb548a4a9a0f781632c014b871040cb5149883",
+          "md5": "d88bd7a29a102e403175a7209e823f3c"
         }
       ]
     }
