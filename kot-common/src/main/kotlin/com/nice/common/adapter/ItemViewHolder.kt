@@ -25,26 +25,54 @@ open class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun removeOnChildClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             clickViews.remove(id)
-            findViewById<View?>(id)?.setOnClickListener(null)
+            get<View>(id).setOnClickListener(null)
         }
     }
 
     fun removeOnChildLongClickListener(@IdRes vararg viewIds: Int) {
         for (id in viewIds) {
             longClickViews.remove(id)
-            findViewById<View?>(id)?.setOnLongClickListener(null)
+            get<View>(id).setOnLongClickListener(null)
+        }
+    }
+
+    fun addOnChildClickListener(vararg views: View) {
+        for (view in views) {
+            clickViews.add(view.id)
+        }
+    }
+
+    fun addOnChildLongClickListener(vararg views: View) {
+        for (view in views) {
+            longClickViews.add(view.id)
+        }
+    }
+
+    fun removeOnChildClickListener(vararg views: View) {
+        for (view in views) {
+            if (clickViews.remove(view.id)) {
+                view.setOnClickListener(null)
+            }
+        }
+    }
+
+    fun removeOnChildLongClickListener(vararg views: View) {
+        for (view in views) {
+            if (longClickViews.remove(view.id)) {
+                view.setOnLongClickListener(null)
+            }
         }
     }
 
     internal fun setOnChildClickListener(clickListener: View.OnClickListener) {
-        clickViews.map { id -> findViewById<View?>(id) }.forEach {
-            it?.setOnClickListener(clickListener)
+        clickViews.map { id -> get<View>(id) }.forEach {
+            it.setOnClickListener(clickListener)
         }
     }
 
     internal fun setOnChildLongClickListener(longClickListener: View.OnLongClickListener) {
-        longClickViews.map { id -> findViewById<View?>(id) }.forEach {
-            it?.setOnLongClickListener(longClickListener)
+        longClickViews.map { id -> get<View>(id) }.forEach {
+            it.setOnLongClickListener(longClickListener)
         }
     }
 

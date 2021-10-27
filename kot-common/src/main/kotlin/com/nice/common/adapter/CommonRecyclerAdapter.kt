@@ -5,12 +5,12 @@ package com.nice.common.adapter
 import android.content.Context
 import java.util.*
 
-abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context) :
+abstract class CommonRecyclerAdapter<T, VH : ItemViewHolder>(context: Context, items: List<T>? = null) :
     BaseRecyclerAdapter<T, VH>(context) {
 
     private val lock: Any = Any()
 
-    protected val modifiableItems: MutableList<T> = mutableListOf()
+    protected val modifiableItems: MutableList<T> = items?.toMutableList() ?: mutableListOf()
 
     override val items: List<T> = Collections.unmodifiableList(modifiableItems)
 
