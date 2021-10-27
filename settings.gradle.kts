@@ -6,8 +6,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("com.android.application") version "7.0.3"
-        id("com.android.library") version "7.0.3"
+        id("com.android.application") version "7.2.0-alpha02"
+        id("com.android.library") version "7.2.0-alpha02"
         id("org.jetbrains.kotlin.android") version "1.5.31"
         id("org.jetbrains.kotlin.jvm") version "1.5.31"
         id("com.github.ben-manes.versions") version "0.39.0"
@@ -201,7 +201,7 @@ dependencyResolutionManagement {
             alias("google-material").to(
                 "com.google.android.material",
                 "material"
-            ).version("1.5.0-alpha04")
+            ).version("1.5.0-alpha05")
             alias("google-gson").to(
                 "com.google.code.gson",
                 "gson"

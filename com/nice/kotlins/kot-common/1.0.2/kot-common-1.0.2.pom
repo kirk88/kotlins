@@ -122,7 +122,7 @@
     <dependency>
       <groupId>com.google.android.material</groupId>
       <artifactId>material</artifactId>
-      <version>1.5.0-alpha04</version>
+      <version>1.5.0-alpha05</version>
     </dependency>
     <dependency>
       <groupId>io.coil-kt</groupId>
