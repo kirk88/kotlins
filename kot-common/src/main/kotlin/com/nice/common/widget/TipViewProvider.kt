@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.nice.common.helper.activity
-import com.nice.common.helper.isMainThread
+import com.nice.common.helper.isInMainThread
 import com.nice.common.helper.snackBar
 
 class TipViewLazy(private val factoryProducer: () -> TipViewFactory) :
@@ -47,7 +47,7 @@ internal class ToastTipView(private val context: Context) : TipView {
                 currentToast = it
             }.show()
         }
-        if (isMainThread) {
+        if (isInMainThread()) {
             runnable.run()
         } else {
             handler.post(runnable)
@@ -60,7 +60,7 @@ internal class ToastTipView(private val context: Context) : TipView {
                 currentToast = it
             }.show()
         }
-        if (isMainThread) {
+        if (isInMainThread()) {
             runnable.run()
         } else {
             handler.post(runnable)
@@ -93,7 +93,7 @@ internal class SnackTipView(private val view: View) : TipView {
                 currentSnackbar = it
             }.show()
         }
-        if (isMainThread) {
+        if (isInMainThread()) {
             runnable.run()
         } else {
             handler.post(runnable)
@@ -106,7 +106,7 @@ internal class SnackTipView(private val view: View) : TipView {
                 currentSnackbar = it
             }.show()
         }
-        if (isMainThread) {
+        if (isInMainThread()) {
             runnable.run()
         } else {
             handler.post(runnable)
@@ -127,43 +127,43 @@ internal class SnackTipViewFactory(private val view: View) : TipViewFactory {
 
 }
 
-val View.toastTipViewFactory: TipViewFactory
+val View.defaultToastTipViewFactory: TipViewFactory
     get() = ToastTipViewFactory(context)
 
-val Context.toastTipViewFactory: TipViewFactory
+val Context.defaultToastTipViewFactory: TipViewFactory
     get() = ToastTipViewFactory(this)
 
-val Fragment.toastTipViewFactory: TipViewFactory
-    get() = requireActivity().toastTipViewFactory
+val Fragment.defaultToastTipViewFactory: TipViewFactory
+    get() = requireActivity().defaultToastTipViewFactory
 
-val View.snackTipViewFactory: TipViewFactory
+val View.defaultSnackTipViewFactory: TipViewFactory
     get() = SnackTipViewFactory(this)
 
-val Activity.snackTipViewFactory: TipViewFactory
-    get() = window.findViewById<View>(android.R.id.content).snackTipViewFactory
+val Activity.defaultSnackTipViewFactory: TipViewFactory
+    get() = window.findViewById<View>(android.R.id.content).defaultSnackTipViewFactory
 
-val Context.snackTipViewFactory: TipViewFactory
+val Context.defaultSnackTipViewFactory: TipViewFactory
     get() {
         val activity = this.activity
             ?: throw IllegalStateException("The application or service context has no TipViewFactory")
-        return activity.snackTipViewFactory
+        return activity.defaultSnackTipViewFactory
     }
 
-val Fragment.snackTipViewFactory: TipViewFactory
-    get() = requireActivity().snackTipViewFactory
+val Fragment.defaultSnackTipViewFactory: TipViewFactory
+    get() = requireActivity().defaultSnackTipViewFactory
 
 
 fun View.tipViews(factoryProducer: (() -> TipViewFactory)? = null): Lazy<TipView> {
-    val factoryPromise = factoryProducer ?: { toastTipViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultToastTipViewFactory }
     return TipViewLazy(factoryPromise)
 }
 
 fun Context.tipViews(factoryProducer: (() -> TipViewFactory)? = null): Lazy<TipView> {
-    val factoryPromise = factoryProducer ?: { toastTipViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultToastTipViewFactory }
     return TipViewLazy(factoryPromise)
 }
 
 fun Fragment.tipViews(factoryProducer: (() -> TipViewFactory)? = null): Lazy<TipView> {
-    val factoryPromise = factoryProducer ?: { toastTipViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultToastTipViewFactory }
     return TipViewLazy(factoryPromise)
 }

@@ -50,7 +50,7 @@ inline fun <reified VM : ViewModel> Fragment.viewModel(
     return ViewModelProvider(
         viewModelStore,
         factoryProducer ?: defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    )[VM::class.java]
 }
 
 @MainThread
@@ -60,7 +60,7 @@ inline fun <reified VM : ViewModel> Fragment.activityViewModel(
     return ViewModelProvider(
         requireActivity().viewModelStore,
         factoryProducer ?: requireActivity().defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    )[VM::class.java]
 }
 
 @MainThread
@@ -70,5 +70,5 @@ inline fun <reified VM : ViewModel> ComponentActivity.viewModel(
     return ViewModelProvider(
         viewModelStore,
         factoryProducer ?: defaultViewModelProviderFactory
-    ).get(VM::class.java)
+    )[VM::class.java]
 }

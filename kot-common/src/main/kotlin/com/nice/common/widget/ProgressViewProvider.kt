@@ -151,39 +151,39 @@ internal class DefaultProgressView(parent: View) : ProgressView {
 
 }
 
-val View.progressViewFactory: ProgressViewFactory
+val View.defaultProgressViewFactory: ProgressViewFactory
     get() = DefaultProgressViewFactory(this)
 
-val Context.progressViewFactory: ProgressViewFactory
+val Context.defaultProgressViewFactory: ProgressViewFactory
     get() {
         val activity = this.activity
             ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
-        return activity.progressViewFactory
+        return activity.defaultProgressViewFactory
     }
 
-val Activity.progressViewFactory: ProgressViewFactory
-    get() = window.decorView.progressViewFactory
+val Activity.defaultProgressViewFactory: ProgressViewFactory
+    get() = window.decorView.defaultProgressViewFactory
 
-val Fragment.progressViewFactory: ProgressViewFactory
-    get() = requireActivity().progressViewFactory
+val Fragment.defaultProgressViewFactory: ProgressViewFactory
+    get() = requireActivity().defaultProgressViewFactory
 
 
 fun View.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
-    val factoryPromise = factoryProducer ?: { progressViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
     return ProgressViewLazy(factoryPromise)
 }
 
 fun Context.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
-    val factoryPromise = factoryProducer ?: { progressViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
     return ProgressViewLazy(factoryPromise)
 }
 
 fun Activity.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
-    val factoryPromise = factoryProducer ?: { progressViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
     return ProgressViewLazy(factoryPromise)
 }
 
 fun Fragment.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
-    val factoryPromise = factoryProducer ?: { progressViewFactory }
+    val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
     return ProgressViewLazy(factoryPromise)
 }

@@ -97,7 +97,7 @@ internal object MainThreadExecutorDispatcher : HandlerExecutorDispatcher {
 
     override val immediate: ExecutorDispatcher = object : ExecutorDispatcher {
         override fun dispatch(command: Runnable) {
-            if (isMainThread) {
+            if (isInMainThread()) {
                 command.run()
             } else {
                 executor.execute(command)

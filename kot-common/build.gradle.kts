@@ -58,7 +58,7 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 2
+val versionPatch = 3
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
