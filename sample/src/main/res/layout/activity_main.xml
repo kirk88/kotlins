@@ -13,10 +13,9 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
-        app:displayShowHomeAsUpEnabled="true"
-        app:displayShowHomeEnabled="true"
+        app:navigationAsUp="true"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
-        app:provideSupportActionBar="true"
+        app:provideActionBar="true"
         app:statusBarForeground="?colorPrimaryVariant" />
 
         <androidx.appcompat.widget.LinearLayoutCompat

@@ -74,6 +74,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
+        progressView.show()
+
 //        testDB()
 //        initBle()
 

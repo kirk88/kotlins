@@ -2,21 +2,15 @@
 
 package com.nice.common.widget
 
-import android.app.Activity
+import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.view.Gravity
+import android.os.Handler
+import android.os.Looper
 import android.view.View
-import android.view.WindowManager
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.nice.common.R
-import com.nice.common.helper.activity
-import com.nice.common.helper.findViewById
 import com.nice.common.helper.ifNullOrEmpty
-import com.nice.common.helper.weak
 
 class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
     Lazy<ProgressView> {
@@ -39,27 +33,23 @@ interface ProgressViewFactory {
 
 }
 
-internal class DefaultProgressViewFactory(private val parent: View) : ProgressViewFactory {
+internal class DefaultProgressViewFactory(private val context: Context) : ProgressViewFactory {
 
     override fun create(): ProgressView {
-        return DefaultProgressView(parent)
+        return DefaultProgressView(context)
     }
 
 }
 
-internal class DefaultProgressView(parent: View) : ProgressView {
+internal class DefaultProgressView(context: Context) : ProgressView {
 
-    private val view: View? by weak { parent.rootView }
+    private val handler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
-    private val popup: PopupWindow by lazy {
-        PopupWindow().apply {
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-            inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
-            animationStyle = R.style.Animation_Progress_Popup
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-            contentView = View.inflate(parent.context, R.layout.abc_dialog_progress_view, null)
+    private val dialog: Dialog by lazy {
+        Dialog(context, R.style.Theme_Progress_Dialog).apply {
+            setCancelable(true)
+            setCanceledOnTouchOutside(false)
+            setContentView(R.layout.abc_dialog_progress_view)
         }
     }
 
@@ -88,7 +78,7 @@ internal class DefaultProgressView(parent: View) : ProgressView {
     }
 
     override fun show(messageId: Int) {
-        delayShow(view?.context?.getText(messageId))
+        delayShow(dialog.context.getText(messageId))
     }
 
     override fun dismiss() {
@@ -100,48 +90,38 @@ internal class DefaultProgressView(parent: View) : ProgressView {
 
         startTime = -1L
         isDismissed = false
-        removeCallbacks(hideRunnable)
+        handler.removeCallbacks(hideRunnable)
         isPostHide = false
         if (!isPostShow) {
-            postDelayed(showRunnable, MIN_DELAY)
+            handler.postDelayed(showRunnable, MIN_DELAY)
             isPostShow = true
         }
     }
 
     private fun delayHide() {
         isDismissed = true
-        removeCallbacks(showRunnable)
+        handler.removeCallbacks(showRunnable)
         isPostShow = false
         val diff: Long = System.currentTimeMillis() - startTime
         if (diff >= MIN_SHOW_TIME || startTime == -1L) {
-            postDelayed(hideRunnable, 0L)
+            handler.postDelayed(hideRunnable, 0L)
         } else {
             if (!isPostHide) {
-                postDelayed(hideRunnable, MIN_SHOW_TIME - diff)
+                handler.postDelayed(hideRunnable, MIN_SHOW_TIME - diff)
                 isPostHide = true
             }
         }
     }
 
     private fun showInternal() {
-        popup.findViewById<TextView>(R.id.message)?.apply {
-            text = messageText.ifNullOrEmpty {
-                context.getText(R.string.loader_progress_message)
-            }
+        dialog.findViewById<TextView>(R.id.message)?.apply {
+            text = messageText.ifNullOrEmpty { context.getText(R.string.loader_progress_message) }
         }
-        view?.let { popup.showAtLocation(it, Gravity.CENTER, 0, 0) }
+        dialog.show()
     }
 
     private fun dismissInternal() {
-        popup.dismiss()
-    }
-
-    private fun removeCallbacks(runnable: Runnable) {
-        view?.removeCallbacks(runnable)
-    }
-
-    private fun postDelayed(runnable: Runnable, delayMillis: Long) {
-        view?.postDelayed(runnable, delayMillis)
+        dialog.dismiss()
     }
 
     companion object {
@@ -152,21 +132,13 @@ internal class DefaultProgressView(parent: View) : ProgressView {
 }
 
 val View.defaultProgressViewFactory: ProgressViewFactory
-    get() = DefaultProgressViewFactory(this)
+    get() = DefaultProgressViewFactory(context)
 
 val Context.defaultProgressViewFactory: ProgressViewFactory
-    get() {
-        val activity = this.activity
-            ?: throw IllegalStateException("The application or service context has no ProgressViewFactory")
-        return activity.defaultProgressViewFactory
-    }
-
-val Activity.defaultProgressViewFactory: ProgressViewFactory
-    get() = window.decorView.defaultProgressViewFactory
+    get() = DefaultProgressViewFactory(this)
 
 val Fragment.defaultProgressViewFactory: ProgressViewFactory
     get() = requireActivity().defaultProgressViewFactory
-
 
 fun View.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
     val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
@@ -174,11 +146,6 @@ fun View.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): La
 }
 
 fun Context.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
-    val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
-    return ProgressViewLazy(factoryPromise)
-}
-
-fun Activity.progressViews(factoryProducer: (() -> ProgressViewFactory)? = null): Lazy<ProgressView> {
     val factoryPromise = factoryProducer ?: { defaultProgressViewFactory }
     return ProgressViewLazy(factoryPromise)
 }

@@ -51,9 +51,15 @@
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="Animation.Progress.Popup" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/anim_popup_enter</item>
-        <item name="android:windowExitAnimation">@anim/anim_popup_exit</item>
+    <style name="Theme.Progress.Dialog" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Progress.Dialog</item>
+    </style>
+
+    <style name="Animation.Progress.Dialog" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_progress_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/anim_progress_dialog_exit</item>
     </style>
 
 </resources>

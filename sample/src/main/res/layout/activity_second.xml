@@ -10,10 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
-        app:displayShowHomeAsUpEnabled="true"
-        app:displayShowHomeEnabled="true"
+        app:navigationAsUp="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:provideSupportActionBar="true"
+        app:provideActionBar="true"
         app:title="@string/app_name" />
 
     <androidx.fragment.app.FragmentContainerView
