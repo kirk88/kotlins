@@ -1,3 +1,3 @@
 package com.nice.sqlite
 
-const val TAG = "SQLiteDatabase"
+internal const val TAG = "SQLiteDatabase"
