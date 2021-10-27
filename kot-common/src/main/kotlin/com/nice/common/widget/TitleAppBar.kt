@@ -384,7 +384,7 @@ class TitleAppBar @JvmOverloads constructor(
         setNavigationEnabled(ta.getBoolean(R.styleable.TitleToolbar_navigationEnabled, true))
 
         val activity = context.appCompatActivity
-        if (activity != null && ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar, false)) {
+        if (activity != null && ta.getBoolean(R.styleable.TitleAppBar_provideActionBar, false)) {
             val navigationAsUp = ta.getBoolean(R.styleable.TitleAppBar_navigationAsUp, false)
             attachToActivity(activity) { setDisplayHomeAsUpEnabled(navigationAsUp) }
         }

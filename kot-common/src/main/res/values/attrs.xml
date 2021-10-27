@@ -71,7 +71,7 @@
         </attr>
         <attr name="bottomDividerHeight" format="dimension|reference" />
         <attr name="bottomDividerColor" format="color|reference" />
-        <attr name="provideSupportActionBar" format="boolean" />
+        <attr name="provideActionBar" format="boolean" />
         <attr name="popupTheme" format="reference" />
         <attr name="menu" format="reference" />
     </declare-styleable>
