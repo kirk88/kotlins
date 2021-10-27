@@ -140,7 +140,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             Log.e("TAGTAG", "==============================")
 
-            offer(TestTable).orderBy { it.time.asc }.select(statementExecutor) {
+            offer(TestTable).orderBy { asc(it.time) }.select(statementExecutor) {
                 it.id + it.name + it.age + it.time.local.aliased("time")
             }.asMapSequence().take(5).forEach {
                 Log.e("TAGTAG", it.toString())

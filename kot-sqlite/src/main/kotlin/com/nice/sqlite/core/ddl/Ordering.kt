@@ -24,7 +24,5 @@ interface Ordering : Bag<Ordering>, FullRenderer {
 
 }
 
-val Definition.asc: Ordering
-    get() = Ordering.By(this, SqlOrderDirection.ASC)
-val Definition.desc: Ordering
-    get() = Ordering.By(this, SqlOrderDirection.DESC)
+fun asc(definition: Definition): Ordering = Ordering.By(definition, SqlOrderDirection.ASC)
+fun desc(definition: Definition): Ordering = Ordering.By(definition, SqlOrderDirection.DESC)
