@@ -170,17 +170,17 @@ inline fun <reified VB : ViewBinding> viewBinding(rootView: View) =
 inline fun <reified VB : ViewBinding> viewBinding(rootViewBinding: ViewBinding) =
     ViewBindings.bind(VB::class.java, rootViewBinding.root)
 
-inline fun <reified VB : ViewBinding> bindingView(
+inline fun <reified VB : ViewBinding> viewOfBinding(
     inflater: LayoutInflater,
     parent: ViewGroup? = null,
     attachToParent: Boolean = false,
     block: VB.() -> Unit
 ): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
 
-inline fun <reified VB : ViewBinding> bindingView(rootView: View, block: VB.() -> Unit) =
+inline fun <reified VB : ViewBinding> viewOfBinding(rootView: View, block: VB.() -> Unit) =
     viewBinding<VB>(rootView).apply(block).root
 
-inline fun <reified VB : ViewBinding> bindingView(binding: ViewBinding, block: VB.() -> Unit) =
+inline fun <reified VB : ViewBinding> viewOfBinding(binding: ViewBinding, block: VB.() -> Unit) =
     viewBinding<VB>(binding.root).apply(block).root
 
 fun Activity.setContentView(binding: ViewBinding) = setContentView(binding.root)
