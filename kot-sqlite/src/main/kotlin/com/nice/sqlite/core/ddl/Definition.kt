@@ -52,7 +52,7 @@ open class Column<T : Any>(
         )
     }
 
-    operator fun invoke(value: T): Value = Value(this, value)
+    operator fun invoke(value: T?): Value = Value(this, value)
 
     operator fun invoke(value: Defined): Value = Value(this, value)
 
