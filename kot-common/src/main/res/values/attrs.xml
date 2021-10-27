@@ -52,21 +52,18 @@
         <attr name="titleMarginEnd" />
         <attr name="titleMarginTop" />
         <attr name="titleMarginBottom" />
+        <attr name="titleVisible" />
         <attr name="contentInsetStart" />
         <attr name="contentInsetEnd" />
         <attr name="contentInsetLeft" />
         <attr name="contentInsetRight" />
         <attr name="contentInsetStartWithNavigation" />
         <attr name="contentInsetEndWithActions" />
-        <attr name="popupTheme" />
-        <attr name="menu" />
         <attr name="navigationIcon" />
         <attr name="navigationContentDescription" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />
-        <attr name="displayShowTitleEnabled" />
-        <attr name="displayShowHomeEnabled" format="boolean" />
-        <attr name="displayShowHomeAsUpEnabled" format="boolean" />
+        <attr name="navigationAsUp" format="boolean" />
         <attr name="showBottomDivider" format="enum">
             <enum name="ifNeed" value="0" />
             <enum name="always" value="1" />
@@ -75,9 +72,12 @@
         <attr name="bottomDividerHeight" format="dimension|reference" />
         <attr name="bottomDividerColor" format="color|reference" />
         <attr name="provideSupportActionBar" format="boolean" />
+        <attr name="popupTheme" format="reference" />
+        <attr name="menu" format="reference" />
     </declare-styleable>
 
-    <attr name="displayShowTitleEnabled" format="boolean" />
+    <attr name="titleVisible" format="boolean" />
+    <attr name="navigationEnabled" format="boolean" />
     <attr name="navigationIconTint" format="color|reference" />
     <attr name="navigationIconTintMode" format="enum">
         <enum name="src_over" value="3" />
@@ -93,9 +93,10 @@
     <declare-styleable name="TitleToolbar">
         <attr name="titleTextAppearance" />
         <attr name="subtitleTextAppearance" />
-        <attr name="displayShowTitleEnabled" />
+        <attr name="titleVisible" />
         <attr name="navigationIconTint" />
         <attr name="navigationIconTintMode" />
+        <attr name="navigationEnabled" />
     </declare-styleable>
 
     <declare-styleable name="TitleToolbar_Layout">

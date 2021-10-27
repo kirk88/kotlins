@@ -64,9 +64,7 @@ class TitleAppBar @JvmOverloads constructor(
         toolbar.popupTheme = theme
     }
 
-    fun getPopupTheme(): Int {
-        return toolbar.popupTheme
-    }
+    fun getPopupTheme(): Int = toolbar.popupTheme
 
     fun setTitle(title: CharSequence?) {
         if (actionBar != null) {
@@ -76,29 +74,18 @@ class TitleAppBar @JvmOverloads constructor(
         }
     }
 
-    fun setTitle(@StringRes resId: Int) {
-        setTitle(context.getText(resId))
-    }
+    fun setTitle(@StringRes resId: Int) = setTitle(context.getText(resId))
 
-    fun getTitle(): CharSequence? {
-        return toolbar.title
-    }
+    fun getTitle(): CharSequence? = toolbar.title
 
     fun setTitleTextColor(color: ColorStateList?) {
-        if (color == null) {
-            return
-        }
-
+        color ?: return
         toolbar.setTitleTextColor(color)
     }
 
-    fun setTitleTextColor(@ColorInt color: Int) {
-        setTitleTextColor(ColorStateList.valueOf(color))
-    }
+    fun setTitleTextColor(@ColorInt color: Int) = setTitleTextColor(ColorStateList.valueOf(color))
 
-    fun setTitleTextAppearance(@StyleRes resId: Int) {
-        toolbar.setTitleTextAppearance(context, resId)
-    }
+    fun setTitleTextAppearance(@StyleRes resId: Int) = toolbar.setTitleTextAppearance(context, resId)
 
     fun setSubtitle(subtitle: CharSequence?) {
         if (actionBar != null) {
@@ -108,101 +95,66 @@ class TitleAppBar @JvmOverloads constructor(
         }
     }
 
-    fun getSubtitle(): CharSequence? {
-        return toolbar.subtitle
-    }
+    fun getSubtitle(): CharSequence? = toolbar.subtitle
 
-    fun setSubtitle(@StringRes resId: Int) {
-        setSubtitle(context.getText(resId))
-    }
+    fun setSubtitle(@StringRes resId: Int) = setSubtitle(context.getText(resId))
 
     fun setSubtitleTextColor(color: ColorStateList?) {
-        if (color == null) {
-            return
-        }
-
+        color ?: return
         toolbar.setSubtitleTextColor(color)
     }
 
-    fun setSubtitleTextColor(@ColorInt color: Int) {
-        setSubtitleTextColor(ColorStateList.valueOf(color))
-    }
+    fun setSubtitleTextColor(@ColorInt color: Int) = setSubtitleTextColor(ColorStateList.valueOf(color))
 
-    fun setSubtitleTextAppearance(@StyleRes resId: Int) {
-        toolbar.setSubtitleTextAppearance(context, resId)
-    }
+    fun setSubtitleTextAppearance(@StyleRes resId: Int) = toolbar.setSubtitleTextAppearance(context, resId)
 
-    fun setTitleMargin(start: Int, top: Int, end: Int, bottom: Int) {
-        toolbar.setTitleMargin(start, top, end, bottom)
-    }
+    fun setTitleMargin(start: Int, top: Int, end: Int, bottom: Int) = toolbar.setTitleMargin(start, top, end, bottom)
 
-    fun getTitleMarginStart(): Int {
-        return toolbar.titleMarginStart
-    }
+    fun getTitleMarginStart(): Int = toolbar.titleMarginStart
 
     fun setTitleMarginStart(margin: Int) {
         toolbar.titleMarginStart = margin
     }
 
-    fun getTitleMarginTop(): Int {
-        return toolbar.titleMarginTop
-    }
+    fun getTitleMarginTop(): Int = toolbar.titleMarginTop
 
     fun setTitleMarginTop(margin: Int) {
         toolbar.titleMarginTop = margin
     }
 
-    fun getTitleMarginEnd(): Int {
-        return toolbar.titleMarginEnd
-    }
+    fun getTitleMarginEnd(): Int = toolbar.titleMarginEnd
 
     fun setTitleMarginEnd(margin: Int) {
         toolbar.titleMarginEnd = margin
     }
 
-    fun getTitleMarginBottom(): Int {
-        return toolbar.titleMarginBottom
-    }
+    fun getTitleMarginBottom(): Int = toolbar.titleMarginBottom
 
     fun setTitleMarginBottom(margin: Int) {
         toolbar.titleMarginBottom = margin
     }
 
-    fun setContentInsetsRelative(contentInsetStart: Int, contentInsetEnd: Int) {
+    fun setContentInsetsRelative(contentInsetStart: Int, contentInsetEnd: Int) =
         toolbar.setContentInsetsRelative(contentInsetStart, contentInsetEnd)
-    }
 
-    fun getContentInsetStart(): Int {
-        return toolbar.contentInsetStart
-    }
+    fun getContentInsetStart(): Int = toolbar.contentInsetStart
 
-    fun getContentInsetEnd(): Int {
-        return toolbar.contentInsetEnd
-    }
+    fun getContentInsetEnd(): Int = toolbar.contentInsetEnd
 
-    fun setContentInsetsAbsolute(contentInsetLeft: Int, contentInsetRight: Int) {
+    fun setContentInsetsAbsolute(contentInsetLeft: Int, contentInsetRight: Int) =
         toolbar.setContentInsetsAbsolute(contentInsetLeft, contentInsetRight)
-    }
 
-    fun getContentInsetLeft(): Int {
-        return toolbar.contentInsetLeft
-    }
+    fun getContentInsetLeft(): Int = toolbar.contentInsetLeft
 
-    fun getContentInsetRight(): Int {
-        return toolbar.contentInsetRight
-    }
+    fun getContentInsetRight(): Int = toolbar.contentInsetRight
 
-    fun getContentInsetStartWithNavigation(): Int {
-        return toolbar.contentInsetStartWithNavigation
-    }
+    fun getContentInsetStartWithNavigation(): Int = toolbar.contentInsetStartWithNavigation
 
     fun setContentInsetStartWithNavigation(insetStartWithNavigation: Int) {
         toolbar.contentInsetStartWithNavigation = insetStartWithNavigation
     }
 
-    fun getContentInsetEndWithActions(): Int {
-        return toolbar.contentInsetEndWithActions
-    }
+    fun getContentInsetEndWithActions(): Int = toolbar.contentInsetEndWithActions
 
     fun setContentInsetEndWithActions(insetEndWithActions: Int) {
         toolbar.contentInsetEndWithActions = insetEndWithActions
@@ -212,72 +164,55 @@ class TitleAppBar @JvmOverloads constructor(
         toolbar.navigationIcon = icon
     }
 
-    fun getNavigationIcon(): Drawable? {
-        return toolbar.navigationIcon
-    }
+    fun getNavigationIcon(): Drawable? = toolbar.navigationIcon
 
-    fun setNavigationIcon(@DrawableRes resId: Int) {
-        setNavigationIcon(ContextCompat.getDrawable(context, resId))
-    }
+    fun setNavigationIcon(@DrawableRes resId: Int) = setNavigationIcon(ContextCompat.getDrawable(context, resId))
 
-    fun setNavigationIconTintList(color: ColorStateList?) {
-        toolbar.setNavigationIconTintList(color)
-    }
+    fun setNavigationIconTintList(color: ColorStateList?) = toolbar.setNavigationIconTintList(color)
 
     fun setNavigationIconTint(@ColorInt color: Int) {
         setNavigationIconTintList(ColorStateList.valueOf(color))
     }
 
-    fun getNavigationIconTintList(): ColorStateList? {
-        return toolbar.getNavigationIconTintList()
-    }
+    fun getNavigationIconTintList(): ColorStateList? = toolbar.getNavigationIconTintList()
 
-    fun setNavigationIconTintMode(mode: PorterDuff.Mode?) {
-        toolbar.setNavigationIconTintMode(mode)
-    }
+    fun setNavigationIconTintMode(mode: PorterDuff.Mode?) = toolbar.setNavigationIconTintMode(mode)
 
-    fun getNavigationIconTintMode(): PorterDuff.Mode? {
-        return toolbar.getNavigationIconTintMode()
-    }
+    fun getNavigationIconTintMode(): PorterDuff.Mode? = toolbar.getNavigationIconTintMode()
+
+    fun setNavigationEnabled(enabled: Boolean) = toolbar.setNavigationEnabled(enabled)
+
+    fun isNavigationEnabled(): Boolean = toolbar.isNavigationEnabled()
 
     fun setNavigationContentDescription(description: CharSequence?) {
         toolbar.navigationContentDescription = description
     }
 
-    fun setNavigationContentDescription(@StringRes resId: Int) {
-        setNavigationContentDescription(context.getText(resId))
-    }
+    fun setNavigationContentDescription(@StringRes resId: Int) = setNavigationContentDescription(context.getText(resId))
 
-    fun getNavigationContentDescription(): CharSequence? {
-        return toolbar.navigationContentDescription
-    }
+    fun getNavigationContentDescription(): CharSequence? = toolbar.navigationContentDescription
 
-    fun setNavigationOnClickListener(clickListener: OnClickListener?) {
+    fun setNavigationOnClickListener(clickListener: OnClickListener?) =
         toolbar.setNavigationOnClickListener(clickListener)
-    }
 
-    fun setDisplayShowTitleEnabled(enabled: Boolean) {
+    fun setTitleVisible(visible: Boolean) {
         if (actionBar != null) {
-            actionBar!!.setDisplayShowTitleEnabled(enabled)
+            actionBar!!.setDisplayShowTitleEnabled(visible)
         } else {
-            toolbar.setDisplayShowTitleEnabled(enabled)
+            toolbar.setTitleVisible(visible)
         }
     }
 
-    fun isDisplayShowTitleEnabled(): Boolean {
+    fun isTitleVisible(): Boolean {
         if (actionBar != null) {
             return (actionBar!!.displayOptions and ActionBar.DISPLAY_SHOW_TITLE) != 0
         }
-        return toolbar.isDisplayShowTitleEnabled()
+        return toolbar.isTitleVisible()
     }
 
-    fun inflateMenu(@MenuRes id: Int) {
-        toolbar.inflateMenu(id)
-    }
+    fun inflateMenu(@MenuRes id: Int) = toolbar.inflateMenu(id)
 
-    fun getMenu(): Menu {
-        return toolbar.menu
-    }
+    fun getMenu(): Menu = toolbar.menu
 
     fun addMenu(
         title: CharSequence,
@@ -301,25 +236,16 @@ class TitleAppBar @JvmOverloads constructor(
         toolbar.menu.clear()
     }
 
-    fun findMenuItem(@IdRes menuId: Int): MenuItem {
-        return toolbar.menu.findItem(menuId)
-    }
+    fun findMenuItem(@IdRes menuId: Int): MenuItem = toolbar.menu.findItem(menuId)
 
-    fun getMenuItem(index: Int): MenuItem {
-        return toolbar.menu.getItem(index)
-    }
+    fun getMenuItem(index: Int): MenuItem = toolbar.menu.getItem(index)
 
-    fun setOnMenuItemClickListener(listener: Toolbar.OnMenuItemClickListener?) {
+    fun setOnMenuItemClickListener(listener: Toolbar.OnMenuItemClickListener?) =
         toolbar.setOnMenuItemClickListener(listener)
-    }
 
-    fun setOnTitleClickListener(listener: OnClickListener?) {
-        toolbar.setOnTitleClickListener(listener)
-    }
+    fun setOnTitleClickListener(listener: OnClickListener?) = toolbar.setOnTitleClickListener(listener)
 
-    fun setOnSubtitleClickListener(listener: OnClickListener?) {
-        toolbar.setOnSubtitleClickListener(listener)
-    }
+    fun setOnSubtitleClickListener(listener: OnClickListener?) = toolbar.setOnSubtitleClickListener(listener)
 
     fun setShowBottomDivider(@BottomDividerMode showDivider: Int) {
         if (showBottomDivider != showDivider) {
@@ -388,7 +314,7 @@ class TitleAppBar @JvmOverloads constructor(
     private fun attachToActivity(activity: AppCompatActivity, block: ActionBar.() -> Unit = {}) {
         activity.setSupportActionBar(toolbar)
         actionBar = activity.supportActionBar!!.apply {
-            setDisplayShowTitleEnabled(toolbar.isDisplayShowTitleEnabled())
+            setDisplayShowTitleEnabled(toolbar.isTitleVisible())
             block()
         }
     }
@@ -454,16 +380,13 @@ class TitleAppBar @JvmOverloads constructor(
             setContentInsetEndWithActions(contentInsetEndWithActions)
         }
 
-        setDisplayShowTitleEnabled(ta.getBoolean(R.styleable.TitleAppBar_displayShowTitleEnabled, true))
+        setTitleVisible(ta.getBoolean(R.styleable.TitleAppBar_titleVisible, true))
+        setNavigationEnabled(ta.getBoolean(R.styleable.TitleToolbar_navigationEnabled, true))
 
         val activity = context.appCompatActivity
         if (activity != null && ta.getBoolean(R.styleable.TitleAppBar_provideSupportActionBar, false)) {
-            val showHome = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeEnabled, false)
-            val showHomeAsUp = ta.getBoolean(R.styleable.TitleAppBar_displayShowHomeAsUpEnabled, false)
-            attachToActivity(activity) {
-                setDisplayShowHomeEnabled(showHome)
-                setDisplayHomeAsUpEnabled(showHomeAsUp)
-            }
+            val navigationAsUp = ta.getBoolean(R.styleable.TitleAppBar_navigationAsUp, false)
+            attachToActivity(activity) { setDisplayHomeAsUpEnabled(navigationAsUp) }
         }
 
         val titleText = ta.getText(R.styleable.TitleAppBar_title)
@@ -657,16 +580,22 @@ class TitleAppBar @JvmOverloads constructor(
                 setNavigationIconTintMode(value)
             }
 
+        var TitleAppBar.isNavigationEnabled: Boolean
+            get() = isNavigationEnabled()
+            set(value) {
+                setNavigationEnabled(value)
+            }
+
         var TitleAppBar.navigationContentDescription: CharSequence?
             get() = getNavigationContentDescription()
             set(value) {
                 setNavigationContentDescription(value)
             }
 
-        var TitleAppBar.isDisplayShowTitleEnabled: Boolean
-            get() = isDisplayShowTitleEnabled()
+        var TitleAppBar.isTitleVisible: Boolean
+            get() = isTitleVisible()
             set(value) {
-                setDisplayShowTitleEnabled(value)
+                setTitleVisible(value)
             }
 
 
@@ -701,6 +630,8 @@ class TitleToolbar @JvmOverloads constructor(
     private var titleTextView: TextView? = null
     private var subtitleTextView: TextView? = null
 
+    private var titleVisible: Boolean = true
+
     private var navigationIcon: Drawable? = null
     private var navigationIconTint: ColorStateList? = null
     private var navigationIconTintMode: PorterDuff.Mode? = null
@@ -709,16 +640,16 @@ class TitleToolbar @JvmOverloads constructor(
     private var navigationButtonView: ImageButton? = null
     private var navigationWidth: Int = 0
 
-    private var isLayoutInflated: Boolean = false
+    private var navigationEnabled: Boolean = true
 
-    private var displayShowTitleEnabled: Boolean = true
+    private var isLayoutInflated: Boolean = false
 
     private var toolbarLayout: CollapsingToolbarLayout? = null
 
     override fun setTitle(title: CharSequence?) {
         titleText = title
 
-        if (!isLayoutInflated || !displayShowTitleEnabled) {
+        if (!isLayoutInflated || !titleVisible) {
             return
         }
 
@@ -736,9 +667,7 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    override fun getTitle(): CharSequence? {
-        return titleText
-    }
+    override fun getTitle(): CharSequence? = titleText
 
     override fun setTitleTextAppearance(context: Context, resId: Int) {
         titleTextAppearance = resId
@@ -777,7 +706,7 @@ class TitleToolbar @JvmOverloads constructor(
     override fun setSubtitle(subtitle: CharSequence?) {
         subtitleText = subtitle
 
-        if (!isLayoutInflated || !displayShowTitleEnabled) {
+        if (!isLayoutInflated || !titleVisible) {
             return
         }
 
@@ -828,14 +757,14 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    fun setDisplayShowTitleEnabled(enabled: Boolean) {
-        if (displayShowTitleEnabled == enabled) {
+    fun setTitleVisible(visible: Boolean) {
+        if (titleVisible == visible) {
             return
         }
 
-        displayShowTitleEnabled = enabled
+        titleVisible = visible
 
-        if (enabled) {
+        if (visible) {
             title = titleText
             subtitle = subtitleText
         } else {
@@ -844,9 +773,7 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    fun isDisplayShowTitleEnabled(): Boolean {
-        return displayShowTitleEnabled
-    }
+    fun isTitleVisible(): Boolean = titleVisible
 
     override fun setNavigationIcon(icon: Drawable?) {
         navigationIcon = icon
@@ -882,13 +809,9 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    fun setNavigationIconTint(@ColorInt color: Int) {
-        setNavigationIconTintList(ColorStateList.valueOf(color))
-    }
+    fun setNavigationIconTint(@ColorInt color: Int) = setNavigationIconTintList(ColorStateList.valueOf(color))
 
-    fun getNavigationIconTintList(): ColorStateList? {
-        return navigationIconTint
-    }
+    fun getNavigationIconTintList(): ColorStateList? = navigationIconTint
 
     fun setNavigationIconTintMode(mode: PorterDuff.Mode?) {
         navigationIconTintMode = mode
@@ -901,9 +824,16 @@ class TitleToolbar @JvmOverloads constructor(
         }
     }
 
-    fun getNavigationIconTintMode(): PorterDuff.Mode? {
-        return navigationIconTintMode
+    fun getNavigationIconTintMode(): PorterDuff.Mode? = navigationIconTintMode
+
+    fun setNavigationEnabled(enabled: Boolean) {
+        navigationEnabled = enabled
+        if (navigationButtonView != null) {
+            navigationButtonView!!.isEnabled = enabled
+        }
     }
+
+    fun isNavigationEnabled(): Boolean = navigationEnabled
 
     override fun setNavigationContentDescription(description: CharSequence?) {
         navigationContentDescription = description
@@ -1097,6 +1027,7 @@ class TitleToolbar @JvmOverloads constructor(
         check(buttonView is ImageButton) {
             "The view with ID ${buttonView.id} is not a ImageButton"
         }
+        buttonView.isEnabled = navigationEnabled
 
         navigationButtonView = buttonView
     }
@@ -1154,11 +1085,9 @@ class TitleToolbar @JvmOverloads constructor(
             defStyleAttr, 0
         )
 
-        displayShowTitleEnabled =
-            ta.getBoolean(R.styleable.TitleToolbar_displayShowTitleEnabled, true)
+        titleVisible = ta.getBoolean(R.styleable.TitleToolbar_titleVisible, true)
         titleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_titleTextAppearance, 0)
-        subtitleTextAppearance =
-            ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
+        subtitleTextAppearance = ta.getResourceId(R.styleable.TitleToolbar_subtitleTextAppearance, 0)
         navigationIconTint = ta.getColorStateList(R.styleable.TitleToolbar_navigationIconTint)
         navigationIconTintMode = DrawableUtils.parseTintMode(
             ta.getInt(R.styleable.TitleToolbar_navigationIconTintMode, 0),
@@ -1212,10 +1141,16 @@ class TitleToolbar @JvmOverloads constructor(
                 setNavigationIconTintMode(value)
             }
 
-        var TitleToolbar.displayShowTitleEnabled: Boolean
-            get() = isDisplayShowTitleEnabled()
+        var TitleToolbar.isNavigationEnabled: Boolean
+            get() = isNavigationEnabled()
             set(value) {
-                setDisplayShowTitleEnabled(value)
+                setNavigationEnabled(value)
+            }
+
+        var TitleToolbar.isTitleVisible: Boolean
+            get() = isTitleVisible()
+            set(value) {
+                setTitleVisible(value)
             }
 
     }

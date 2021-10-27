@@ -9,14 +9,13 @@ import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
-import com.nice.common.widget.snackTipViewFactory
 import com.nice.common.widget.tipViews
 
 class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_first) {
 
     override val viewModel: TestViewModel by activityViewModels()
 
-    override val tipView: TipView? by tipViews { snackTipViewFactory }
+    override val tipView: TipView? by tipViews()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
