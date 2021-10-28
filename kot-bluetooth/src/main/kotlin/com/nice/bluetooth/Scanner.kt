@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
-@SuppressLint("NewApi")
 fun Scanner(type: ScannerType = ScannerType.Low, services: List<UUID>? = null): Scanner =
     when (type) {
         ScannerType.System -> AndroidSystemScanner(services)

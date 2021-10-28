@@ -6,8 +6,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("com.android.application") version "7.2.0-alpha02"
-        id("com.android.library") version "7.2.0-alpha02"
+        id("com.android.application") version "7.0.3"
+        id("com.android.library") version "7.0.3"
         id("org.jetbrains.kotlin.android") version "1.5.31"
         id("org.jetbrains.kotlin.jvm") version "1.5.31"
         id("com.github.ben-manes.versions") version "0.39.0"
@@ -25,7 +25,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("androids") {
             version("compileSdk", "31")
-            version("minSdk", "21")
+            version("minSdk", "19")
             version("targetSdk", "30")
         }
 

@@ -29,7 +29,7 @@ class TipViewLazy(private val factoryProducer: () -> TipViewFactory) :
 }
 
 
-interface TipViewFactory {
+fun interface TipViewFactory {
 
     fun create(): TipView
 

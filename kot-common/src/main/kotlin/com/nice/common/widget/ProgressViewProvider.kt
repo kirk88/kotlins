@@ -27,7 +27,7 @@ class ProgressViewLazy(private val factoryProducer: () -> ProgressViewFactory) :
 }
 
 
-interface ProgressViewFactory {
+fun interface ProgressViewFactory {
 
     fun create(): ProgressView
 

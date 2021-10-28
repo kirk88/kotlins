@@ -5,6 +5,8 @@ package com.nice.common.viewmodel
 import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
+import androidx.annotation.StringRes
+import com.nice.common.applicationContext
 import com.nice.common.widget.InfiniteState
 
 sealed class Message(val what: Int = -1) {
@@ -27,6 +29,10 @@ sealed class Message(val what: Int = -1) {
                 set(arg.first, arg.second)
             }
         }
+    }
+
+    class Tip(val text: CharSequence) : Message() {
+        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
     }
 
     class StartActivity(val intent: Intent) : Message()
@@ -79,8 +85,6 @@ sealed class Message(val what: Int = -1) {
             return System.identityHashCode(this)
         }
     }
-
-    class Tip(val text: CharSequence) : Message()
 
     class Batch(val messages: Set<Message>) : Message()
 

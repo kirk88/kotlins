@@ -174,13 +174,13 @@ inline fun <reified VB : ViewBinding> viewOfBinding(
     inflater: LayoutInflater,
     parent: ViewGroup? = null,
     attachToParent: Boolean = false,
-    block: VB.() -> Unit
+    block: VB.() -> Unit = {}
 ): View = viewBinding<VB>(inflater, parent, attachToParent).apply(block).root
 
-inline fun <reified VB : ViewBinding> viewOfBinding(rootView: View, block: VB.() -> Unit) =
+inline fun <reified VB : ViewBinding> viewOfBinding(rootView: View, block: VB.() -> Unit = {}) =
     viewBinding<VB>(rootView).apply(block).root
 
-inline fun <reified VB : ViewBinding> viewOfBinding(binding: ViewBinding, block: VB.() -> Unit) =
+inline fun <reified VB : ViewBinding> viewOfBinding(binding: ViewBinding, block: VB.() -> Unit = {}) =
     viewBinding<VB>(binding.root).apply(block).root
 
 fun Activity.setContentView(binding: ViewBinding) = setContentView(binding.root)
