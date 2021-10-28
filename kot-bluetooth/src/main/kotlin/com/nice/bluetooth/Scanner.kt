@@ -42,6 +42,9 @@ enum class ScannerType {
     Low
 }
 
+/**
+ * [settings] is only used when [type] = [ScannerType.High]
+ */
 class ScannerBuilder {
 
     internal var filterServices: MutableList<UUID>? = null
