@@ -27,8 +27,8 @@ fun Scanner(buildAction: ScannerBuilder.() -> Unit): Scanner {
     val builder = ScannerBuilder().apply(buildAction)
     return when (builder.type) {
         ScannerType.System -> AndroidSystemScanner(builder.filterServices)
-        ScannerType.High -> HighVersionBleScanner(builder.filterServices, builder.settings)
-        ScannerType.Low -> LowVersionBleScanner(builder.filterServices)
+        ScannerType.New -> AndroidNewScanner(builder.filterServices, builder.settings)
+        ScannerType.Old -> AndroidOldScanner(builder.filterServices)
     }
 }
 
@@ -38,18 +38,21 @@ fun Scanner(type: ScannerType): Scanner = Scanner {
 
 enum class ScannerType {
     System,
-    High,
-    Low
+    New,
+    Old
 }
 
 /**
- * [settings] is only used when [type] = [ScannerType.High]
+ * [type] is not designed to work with different Android versions,
+ * but you can try to change it when Bluetooth cannot scan devices.
+ *
+ * [settings] is only used when [type] = [ScannerType.New]
  */
 class ScannerBuilder {
 
     internal var filterServices: MutableList<UUID>? = null
 
-    var type: ScannerType = ScannerType.Low
+    var type: ScannerType = ScannerType.New
 
     var settings: ScanSettings = ScanSettings.Builder().build()
 
@@ -98,7 +101,7 @@ internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : S
 }
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-internal class HighVersionBleScanner(
+internal class AndroidNewScanner(
     private val filterServices: List<UUID>?,
     private val settings: ScanSettings
 ) : Scanner {
@@ -152,8 +155,7 @@ internal class HighVersionBleScanner(
     }
 }
 
-internal class LowVersionBleScanner internal constructor(private val filterServices: List<UUID>?) :
-    Scanner {
+internal class AndroidOldScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 
