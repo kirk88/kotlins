@@ -25,4 +25,6 @@
     <item name="vertical_divider_drawable_id" type="id" />
     <item name="horizontal_divider_drawable_id" type="id" />
 
+    <item name="gesture_delegate_id" type="id" />
+
 </resources>
