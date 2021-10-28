@@ -2,7 +2,6 @@
 
 package com.nice.common.dialogs
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
@@ -14,7 +13,7 @@ import androidx.annotation.StringRes
 import com.nice.common.external.NO_GETTER_MESSAGE
 import kotlin.DeprecationLevel.ERROR
 
-@SuppressLint("SupportAnnotationUsage")
+@Suppress("SupportAnnotationUsage")
 interface AlertBuilder<out D : DialogInterface> {
     val context: Context
 

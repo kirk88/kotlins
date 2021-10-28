@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED")
+@file:Suppress("UNUSED", "DEPRECATION")
 
 package com.nice.common.helper
 

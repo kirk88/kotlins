@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.bluetooth.le.ScanSettings
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -40,6 +41,7 @@ import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import java.util.*
 
 
 class MainActivity : NiceViewModelActivity<MainViewModel>() {
@@ -216,6 +218,16 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             lifecycleScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
                 Log.e(TAG, throwable.message, throwable)
             }) {
+                Scanner {
+                    type = ScannerType.Low
+
+                    settings = ScanSettings.Builder()
+                        .setLegacy(true)
+                        .build()
+
+                    addFilterService(UUID.randomUUID())
+                }.advertisements
+
                 Scanner(ScannerType.Low).advertisements.scan(mutableSetOf<Advertisement>()) { accumulator, value ->
                     if (accumulator.add(value)) {
                         withContext(Dispatchers.Main) {

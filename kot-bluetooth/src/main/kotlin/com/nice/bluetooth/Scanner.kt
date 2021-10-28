@@ -1,8 +1,7 @@
-@file:SuppressLint("MissingPermission")
+@file:Suppress("MissingPermission", "BlockingMethodInNonBlockingContext", "UNUSED", "DEPRECATION")
 
 package com.nice.bluetooth
 
-import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
@@ -12,7 +11,6 @@ import android.bluetooth.le.ScanSettings
 import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothScanResult
 import com.nice.bluetooth.common.Scanner
@@ -25,19 +23,37 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
-fun Scanner(type: ScannerType = ScannerType.Low, services: List<UUID>? = null): Scanner =
-    when (type) {
-        ScannerType.System -> AndroidSystemScanner(services)
-        ScannerType.High -> HighVersionBleScanner(services)
-        ScannerType.Low -> LowVersionBleScanner(services)
+fun Scanner(buildAction: ScannerBuilder.() -> Unit): Scanner {
+    val builder = ScannerBuilder().apply(buildAction)
+    return when (builder.type) {
+        ScannerType.System -> AndroidSystemScanner(builder.filterServices)
+        ScannerType.High -> HighVersionBleScanner(builder.filterServices, builder.settings)
+        ScannerType.Low -> LowVersionBleScanner(builder.filterServices)
     }
+}
+
+fun Scanner(type: ScannerType): Scanner = Scanner {
+    this.type = type
+}
 
 enum class ScannerType {
     System,
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     High,
     Low
+}
+
+class ScannerBuilder {
+
+    internal var filterServices: MutableList<UUID>? = null
+
+    var type: ScannerType = ScannerType.Low
+
+    var settings: ScanSettings = ScanSettings.Builder().build()
+
+    fun addFilterService(uuid: UUID) {
+        (filterServices ?: mutableListOf<UUID>().also { filterServices = it }).add(uuid)
+    }
+
 }
 
 class ScanFailedException internal constructor(
@@ -79,7 +95,10 @@ internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : S
 }
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : Scanner {
+internal class HighVersionBleScanner(
+    private val filterServices: List<UUID>?,
+    private val settings: ScanSettings
+) : Scanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 
@@ -99,15 +118,15 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
             }
 
             override fun onBatchScanResults(results: MutableList<ScanResult>) {
-                runCatching {
-                    results.forEach {
-                        trySendBlocking(AndroidAdvertisement(BluetoothScanResult(it))).getOrThrow()
-                    }
-                }.onFailure {
-                    Log.w(
-                        TAG,
-                        "Unable to deliver batch scan results due to failure in flow or premature closing."
-                    )
+                for (result in results) {
+                    trySendBlocking(AndroidAdvertisement(BluetoothScanResult(result)))
+                        .onFailure {
+                            Log.w(
+                                TAG,
+                                "Unable to deliver batch scan results due to failure in flow or premature closing."
+                            )
+                        }
+                        .getOrNull() ?: break
                 }
             }
 
@@ -116,12 +135,11 @@ internal class HighVersionBleScanner(private val filterServices: List<UUID>?) : 
             }
         }
 
-        val scanFilter = filterServices
-            ?.map { ScanFilter.Builder().setServiceUuid(ParcelUuid(it)).build() }
-            ?.toList()
         bluetoothAdapter.bluetoothLeScanner.startScan(
-            scanFilter,
-            ScanSettings.Builder().build(),
+            filterServices
+                ?.map { ScanFilter.Builder().setServiceUuid(ParcelUuid(it)).build() }
+                ?.toList(),
+            settings,
             callback
         )
 
