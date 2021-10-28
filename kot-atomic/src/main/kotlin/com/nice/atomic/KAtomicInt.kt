@@ -16,7 +16,7 @@ class KAtomicInt internal constructor(initial: Int) : KAtomicNumber<Int>() {
     override fun lazySet(newValue: Int) = delegate.lazySet(newValue)
     override fun getAndSet(newValue: Int): Int = delegate.getAndSet(newValue)
     override fun compareAndSet(expect: Int, update: Int): Boolean = delegate.compareAndSet(expect, update)
-    override fun weakCompareAndSet(expect: Int, update: Int): Boolean = delegate.weakCompareAndSet(expect, update)
+    override fun weakCompareAndSetPlain(expect: Int, update: Int): Boolean = delegate.weakCompareAndSetPlain(expect, update)
     override fun getAndAdd(delta: Int): Int = delegate.getAndAdd(delta)
     override fun getAndIncrement(): Int = delegate.getAndIncrement()
     override fun getAndDecrement(): Int = delegate.getAndDecrement()

@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -26,10 +27,7 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
-import com.nice.common.helper.doOnClick
-import com.nice.common.helper.setContentView
-import com.nice.common.helper.string
-import com.nice.common.helper.viewBindings
+import com.nice.common.helper.*
 import com.nice.common.widget.*
 import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
@@ -59,6 +57,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     private val permissionRequestLauncher =
         PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding)
@@ -74,7 +73,10 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        progressView.show()
+        GestureDelegate(binding.contentView).doOnSingleTapUp {
+            showToast("what?")
+            true
+        }
 
 //        testDB()
 //        initBle()

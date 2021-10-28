@@ -62,7 +62,7 @@ inline fun <T : View> T.doOnLongClick(crossinline action: (view: T) -> Boolean) 
     setOnLongClickListener { view -> action(view as T) }
 }
 
-inline fun <T : View> View.doOnTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
+inline fun <T : View> T.doOnTouch(crossinline action: (view: T, event: MotionEvent) -> Boolean) {
     @Suppress("ClickableViewAccessibility", "UNCHECKED_CAST")
     setOnTouchListener { view, event -> action(view as T, event) }
 }

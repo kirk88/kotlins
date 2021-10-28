@@ -18,21 +18,26 @@
         app:provideActionBar="true"
         app:statusBarForeground="?colorPrimaryVariant" />
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/content_view"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/content_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@android:color/holo_red_light"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -44,10 +49,5 @@
         android:src="@drawable/abc_vector_test"
         app:elevation="10dp"
         app:fabCustomSize="48dp" />
-
-    <TextView
-        android:id="@+id/image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

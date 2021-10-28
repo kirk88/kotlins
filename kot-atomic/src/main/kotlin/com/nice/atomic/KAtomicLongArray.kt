@@ -27,7 +27,7 @@ class KAtomicLongArray : KAtomicNumberArray<Long> {
     override fun lazySet(index: Int, newValue: Long) = delegate[index].lazySet(newValue)
     override fun getAndSet(index: Int, newValue: Long): Long = delegate[index].getAndSet(newValue)
     override fun compareAndSet(index: Int, expect: Long, update: Long): Boolean = delegate[index].compareAndSet(expect, update)
-    override fun weakCompareAndSet(index: Int, expect: Long, update: Long): Boolean = delegate[index].weakCompareAndSet(expect, update)
+    override fun weakCompareAndSetPlain(index: Int, expect: Long, update: Long): Boolean = delegate[index].weakCompareAndSetPlain(expect, update)
     override fun getAndIncrement(index: Int): Long = delegate[index].getAndIncrement()
     override fun getAndDecrement(index: Int): Long = delegate[index].getAndDecrement()
     override fun getAndAdd(index: Int, delta: Long): Long = delegate[index].getAndAdd(delta)

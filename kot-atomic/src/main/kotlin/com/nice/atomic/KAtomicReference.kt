@@ -17,6 +17,6 @@ class KAtomicReference<V> internal constructor(initial: V) : KAtomic<V> {
     override fun lazySet(newValue: V) = delegate.lazySet(newValue)
     override fun getAndSet(newValue: V): V = delegate.getAndSet(newValue)
     override fun compareAndSet(expect: V, update: V): Boolean = delegate.compareAndSet(expect, update)
-    override fun weakCompareAndSet(expect: V, update: V): Boolean = delegate.weakCompareAndSet(expect, update)
+    override fun weakCompareAndSetPlain(expect: V, update: V): Boolean = delegate.weakCompareAndSetPlain(expect, update)
 
 }

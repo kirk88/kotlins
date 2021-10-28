@@ -16,7 +16,7 @@ class KAtomicLong(initial: Long) : KAtomicNumber<Long>() {
     override fun lazySet(newValue: Long) = delegate.lazySet(newValue)
     override fun getAndSet(newValue: Long): Long = delegate.getAndSet(newValue)
     override fun compareAndSet(expect: Long, update: Long): Boolean = delegate.compareAndSet(expect, update)
-    override fun weakCompareAndSet(expect: Long, update: Long): Boolean = delegate.weakCompareAndSet(expect, update)
+    override fun weakCompareAndSetPlain(expect: Long, update: Long): Boolean = delegate.weakCompareAndSetPlain(expect, update)
     override fun getAndAdd(delta: Long): Long = delegate.getAndAdd(delta)
     override fun getAndIncrement(): Long = delegate.getAndIncrement()
     override fun getAndDecrement(): Long = delegate.getAndDecrement()

@@ -22,7 +22,7 @@ interface KAtomic<V> {
 
     fun compareAndSet(expect: V, update: V): Boolean
 
-    fun weakCompareAndSet(expect: V, update: V): Boolean
+    fun weakCompareAndSetPlain(expect: V, update: V): Boolean
 
     fun getAndUpdate(operation: UnaryOperator<V>): V {
         var prev: V

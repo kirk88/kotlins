@@ -17,7 +17,7 @@ class KAtomicBoolean internal constructor(initial: Boolean) : KAtomic<Boolean> {
     override fun lazySet(newValue: Boolean) = delegate.lazySet(newValue)
     override fun getAndSet(newValue: Boolean): Boolean = delegate.getAndSet(newValue)
     override fun compareAndSet(expect: Boolean, update: Boolean): Boolean = delegate.compareAndSet(expect, update)
-    override fun weakCompareAndSet(expect: Boolean, update: Boolean): Boolean = delegate.weakCompareAndSet(expect, update)
+    override fun weakCompareAndSetPlain(expect: Boolean, update: Boolean): Boolean = delegate.weakCompareAndSetPlain(expect, update)
 
     override fun toString(): String = delegate.toString()
 

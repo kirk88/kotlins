@@ -14,7 +14,7 @@ interface KAtomicArray<E> {
 
     fun compareAndSet(index: Int, expect: E, update: E): Boolean
 
-    fun weakCompareAndSet(index: Int, expect: E, update: E): Boolean
+    fun weakCompareAndSetPlain(index: Int, expect: E, update: E): Boolean
 
     fun getAndUpdate(index: Int, operation: UnaryOperator<E>): E
 
