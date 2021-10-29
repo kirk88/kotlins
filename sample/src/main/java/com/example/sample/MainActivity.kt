@@ -75,7 +75,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
             showToast("what?")
-            true
         }
 //        testDB()
 //        initBle()

@@ -17,7 +17,16 @@ class GestureDelegate internal constructor(context: Context) : GestureDetector.S
 
     private val listeners = mutableListOf<GestureDetector.OnGestureListener>()
 
-    internal fun onTouchEvent(e: MotionEvent): Boolean = detector.onTouchEvent(e)
+    private var consumeTouchEvent: Boolean = false
+
+    internal fun onTouchEvent(e: MotionEvent): Boolean {
+        detector.onTouchEvent(e)
+        return consumeTouchEvent
+    }
+
+    internal fun setConsumeTouchEvent(consume: Boolean) {
+        consumeTouchEvent = consume
+    }
 
     fun addListener(listener: GestureDetector.OnGestureListener) {
         if (!listeners.contains(listener)) {
@@ -31,9 +40,9 @@ class GestureDelegate internal constructor(context: Context) : GestureDetector.S
 
     override fun onDown(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener.onDown(e)) return true
+            listener.onDown(e)
         }
-        return super.onDown(e)
+        return false
     }
 
     override fun onShowPress(e: MotionEvent) {
@@ -44,16 +53,16 @@ class GestureDelegate internal constructor(context: Context) : GestureDetector.S
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener.onSingleTapUp(e)) return true
+            listener.onSingleTapUp(e)
         }
-        return super.onSingleTapUp(e)
+        return false
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
         for (listener in listeners) {
-            if (listener.onScroll(e1, e2, distanceX, distanceY)) return true
+            listener.onScroll(e1, e2, distanceX, distanceY)
         }
-        return super.onScroll(e1, e2, distanceX, distanceY)
+        return false
     }
 
     override fun onLongPress(e: MotionEvent) {
@@ -64,38 +73,38 @@ class GestureDelegate internal constructor(context: Context) : GestureDetector.S
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         for (listener in listeners) {
-            if (listener.onFling(e1, e2, velocityX, velocityY)) return true
+            listener.onFling(e1, e2, velocityX, velocityY)
         }
-        return super.onFling(e1, e2, velocityX, velocityY)
+        return false
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener is GestureDetector.OnDoubleTapListener && listener.onSingleTapConfirmed(e)) return true
+            if (listener is GestureDetector.OnDoubleTapListener) listener.onSingleTapConfirmed(e)
         }
-        return super.onSingleTapConfirmed(e)
+        return false
     }
 
     override fun onDoubleTap(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener is GestureDetector.OnDoubleTapListener && listener.onDoubleTap(e)) return true
+            if (listener is GestureDetector.OnDoubleTapListener) listener.onDoubleTap(e)
         }
-        return super.onDoubleTap(e)
+        return false
     }
 
     override fun onDoubleTapEvent(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener is GestureDetector.OnDoubleTapListener && listener.onDoubleTapEvent(e)) return true
+            if (listener is GestureDetector.OnDoubleTapListener) listener.onDoubleTapEvent(e)
         }
-        return super.onDoubleTapEvent(e)
+        return false
     }
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onContextClick(e: MotionEvent): Boolean {
         for (listener in listeners) {
-            if (listener is GestureDetector.OnContextClickListener && listener.onContextClick(e)) return true
+            if (listener is GestureDetector.OnContextClickListener) listener.onContextClick(e)
         }
-        return super.onContextClick(e)
+        return false
     }
 
 }
@@ -106,68 +115,98 @@ fun GestureDelegate(view: View, consume: Boolean = false): GestureDelegate {
         view.setTag(R.id.gesture_delegate_id, it)
         view.setOnTouchListener { _, event -> it.onTouchEvent(event); consume }
     }
+    delegate.setConsumeTouchEvent(consume)
     return delegate
 }
 
 inline fun GestureDelegate.addListener(
-    crossinline onDown: (e: MotionEvent) -> Boolean = { _ -> false },
+    crossinline onDown: (e: MotionEvent) -> Unit = { _ -> },
     crossinline onShowPress: (e: MotionEvent) -> Unit = { _ -> },
-    crossinline onSingleTapUp: (e: MotionEvent) -> Boolean = { _ -> false },
-    crossinline onScroll: (e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float) -> Boolean = { _, _, _, _ -> false },
+    crossinline onSingleTapUp: (e: MotionEvent) -> Unit = { _ -> },
+    crossinline onScroll: (e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float) -> Unit = { _, _, _, _ -> },
     crossinline onLongPress: (e: MotionEvent) -> Unit = { _ -> },
-    crossinline onFling: (e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float) -> Boolean = { _, _, _, _ -> false },
-    crossinline onSingleTapConfirmed: (e: MotionEvent) -> Boolean = { _ -> false },
-    crossinline onDoubleTap: (e: MotionEvent) -> Boolean = { _ -> false },
-    crossinline onDoubleTapEvent: (e: MotionEvent) -> Boolean = { _ -> false },
-    crossinline onContextClick: (e: MotionEvent) -> Boolean = { _ -> false }
+    crossinline onFling: (e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float) -> Unit = { _, _, _, _ -> },
+    crossinline onSingleTapConfirmed: (e: MotionEvent) -> Unit = { _ -> },
+    crossinline onDoubleTap: (e: MotionEvent) -> Unit = { _ -> },
+    crossinline onDoubleTapEvent: (e: MotionEvent) -> Unit = { _ -> },
+    crossinline onContextClick: (e: MotionEvent) -> Unit = { _ -> }
 ): GestureDetector.OnGestureListener {
     val listener = object : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent): Boolean = onDown.invoke(e)
+        override fun onDown(e: MotionEvent): Boolean {
+            onDown.invoke(e)
+            return false
+        }
+
         override fun onShowPress(e: MotionEvent) = onShowPress.invoke(e)
-        override fun onSingleTapUp(e: MotionEvent): Boolean = onSingleTapUp.invoke(e)
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean =
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            onSingleTapUp.invoke(e)
+            return false
+        }
+
+        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
             onScroll.invoke(e1, e2, distanceX, distanceY)
+            return false
+        }
+
 
         override fun onLongPress(e: MotionEvent) = onLongPress.invoke(e)
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean =
+        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
             onFling.invoke(e1, e2, velocityX, velocityY)
+            return false
+        }
 
-        override fun onSingleTapConfirmed(e: MotionEvent): Boolean = onSingleTapConfirmed.invoke(e)
-        override fun onDoubleTap(e: MotionEvent): Boolean = onDoubleTap.invoke(e)
-        override fun onDoubleTapEvent(e: MotionEvent): Boolean = onDoubleTapEvent.invoke(e)
-        override fun onContextClick(e: MotionEvent): Boolean = onContextClick.invoke(e)
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            onSingleTapConfirmed.invoke(e)
+            return false
+        }
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            onDoubleTap.invoke(e)
+            return false
+        }
+
+        override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+            onDoubleTapEvent.invoke(e)
+            return false
+        }
+
+        override fun onContextClick(e: MotionEvent): Boolean {
+            onContextClick.invoke(e)
+            return false
+        }
     }
     addListener(listener)
     return listener
 }
 
-inline fun GestureDelegate.doOnDown(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnDown(crossinline action: (MotionEvent) -> Unit) =
     addListener(onDown = action)
 
 inline fun GestureDelegate.doOnShowPress(crossinline action: (MotionEvent) -> Unit) =
     addListener(onShowPress = action)
 
-inline fun GestureDelegate.doOnSingleTapUp(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnSingleTapUp(crossinline action: (MotionEvent) -> Unit) =
     addListener(onSingleTapUp = action)
 
-inline fun GestureDelegate.doOnScroll(crossinline action: (e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float) -> Boolean) =
+inline fun GestureDelegate.doOnScroll(crossinline action: (e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float) -> Unit) =
     addListener(onScroll = action)
 
 inline fun GestureDelegate.doOnLongPress(crossinline action: (MotionEvent) -> Unit) =
     addListener(onLongPress = action)
 
-inline fun GestureDelegate.doOnFling(crossinline action: (e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float) -> Boolean) =
+inline fun GestureDelegate.doOnFling(crossinline action: (e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float) -> Unit) =
     addListener(onFling = action)
 
-inline fun GestureDelegate.doOnSingleTapConfirmed(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnSingleTapConfirmed(crossinline action: (MotionEvent) -> Unit) =
     addListener(onSingleTapConfirmed = action)
 
-inline fun GestureDelegate.doOnDoubleTap(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnDoubleTap(crossinline action: (MotionEvent) -> Unit) =
     addListener(onDoubleTap = action)
 
-inline fun GestureDelegate.doOnDoubleTapEvent(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnDoubleTapEvent(crossinline action: (MotionEvent) -> Unit) =
     addListener(onDoubleTapEvent = action)
 
 @RequiresApi(Build.VERSION_CODES.M)
-inline fun GestureDelegate.doOnContextClick(crossinline action: (MotionEvent) -> Boolean) =
+inline fun GestureDelegate.doOnContextClick(crossinline action: (MotionEvent) -> Unit) =
     addListener(onContextClick = action)
