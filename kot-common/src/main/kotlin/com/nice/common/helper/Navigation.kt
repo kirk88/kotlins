@@ -91,7 +91,7 @@ fun interface FragmentNavigator {
         @AnimatorRes @AnimRes enter: Int,
         @AnimatorRes @AnimRes exit: Int,
         allowingStateLoss: Boolean,
-        args: () -> Bundle?
+        args: Bundle?
     )
 
 }
@@ -106,7 +106,7 @@ private object DefaultFragmentNavigator : FragmentNavigator {
         enter: Int,
         exit: Int,
         allowingStateLoss: Boolean,
-        args: () -> Bundle?
+        args: Bundle?
     ) {
         fragmentManager.show(
             containerViewId,
@@ -114,9 +114,8 @@ private object DefaultFragmentNavigator : FragmentNavigator {
             tag,
             enter,
             exit,
-            allowingStateLoss,
-            args
-        )
+            allowingStateLoss
+        ) { args }
     }
 
 }
@@ -290,8 +289,9 @@ class NavigationController internal constructor(
             destination.tag,
             enter,
             exit,
-            allowingStateLoss
-        ) { destination.args }
+            allowingStateLoss,
+            destination.args
+        )
         return true
     }
 
@@ -560,8 +560,7 @@ fun Fragment.setupTabLayoutWithController(
     }.attach()
 }
 
-private class FragmentPagerAdapter2 :
-    FragmentStateAdapter {
+private class FragmentPagerAdapter2 : FragmentStateAdapter {
 
     private val graph: NavigationGraph
 
