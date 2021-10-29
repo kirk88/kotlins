@@ -44,9 +44,12 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
         }
 
         for (fragment in childFragmentManager.fragments) {
-            if (!fragment.isAdded || fragment !is ViewModelMessageDispatcher) continue
-
-            if (fragment.dispatchViewModelMessage(message)) {
+            fragment.isResumed
+            if (fragment is ViewModelMessageDispatcher
+                && fragment is ViewModelOwner<*>
+                && fragment.viewModel !== viewModel
+                && fragment.dispatchViewModelMessage(message)
+            ) {
                 return true
             }
         }

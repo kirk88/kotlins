@@ -77,7 +77,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             showToast("what?")
             true
         }
-
 //        testDB()
 //        initBle()
 

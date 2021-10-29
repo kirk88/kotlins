@@ -18,7 +18,7 @@
         app:provideActionBar="true"
         app:statusBarForeground="?colorPrimaryVariant" />
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <com.example.sample.widget.TouchLinearLayout
         android:id="@+id/content_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,6 +29,7 @@
             android:id="@+id/text"
             android:layout_width="match_parent"
             android:layout_height="100dp"
+            android:textIsSelectable="true"
             android:background="@android:color/holo_red_light"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -37,7 +38,7 @@
             android:layout_height="match_parent"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.example.sample.widget.TouchLinearLayout>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

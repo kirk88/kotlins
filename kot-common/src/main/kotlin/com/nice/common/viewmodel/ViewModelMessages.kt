@@ -4,17 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 
-interface ViewModelMessageDispatcher {
-
-    fun onInterceptViewModelMessage(message: Message): Boolean
-
-    fun dispatchViewModelMessage(message: Message): Boolean
-
-    fun onViewModelMessage(message: Message): Boolean
-
-}
-
-object ViewModelMessages {
+internal object ViewModelMessages {
 
     fun <T, VM> observeOnActivity(owner: T) where T : FragmentActivity, T : LifecycleMessageObserver, T : ViewModelOwner<VM>, VM : ViewModel, VM : ViewModelController {
         owner.viewModel.observeMessage(owner)

@@ -44,9 +44,11 @@ abstract class NiceViewModelActivity<VM>(@LayoutRes contentLayoutId: Int = 0) :
         }
 
         for (fragment in supportFragmentManager.fragments) {
-            if (!fragment.isAdded || fragment !is ViewModelMessageDispatcher) continue
-
-            if (fragment.dispatchViewModelMessage(message)) {
+            if (fragment is ViewModelMessageDispatcher
+                && fragment is ViewModelOwner<*>
+                && fragment.viewModel !== viewModel
+                && fragment.dispatchViewModelMessage(message)
+            ) {
                 return true
             }
         }
