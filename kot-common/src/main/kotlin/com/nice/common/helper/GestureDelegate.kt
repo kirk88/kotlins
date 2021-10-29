@@ -101,10 +101,10 @@ class GestureDelegate internal constructor(context: Context) : GestureDetector.S
 }
 
 @Suppress("ClickableViewAccessibility")
-fun GestureDelegate(view: View): GestureDelegate {
+fun GestureDelegate(view: View, consume: Boolean = false): GestureDelegate {
     val delegate = view.getTag(R.id.gesture_delegate_id) as? GestureDelegate ?: GestureDelegate(view.context).also {
         view.setTag(R.id.gesture_delegate_id, it)
-        view.setOnTouchListener { _, event -> it.onTouchEvent(event); true }
+        view.setOnTouchListener { _, event -> it.onTouchEvent(event); consume }
     }
     return delegate
 }

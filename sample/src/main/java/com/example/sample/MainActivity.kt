@@ -73,7 +73,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             }
         }
 
-        GestureDelegate(binding.contentView).doOnSingleTapUp {
+        GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
             showToast("what?")
             true
         }
