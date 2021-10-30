@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED")
+@file:Suppress("UNUSED", "RestrictedApi")
 
 package com.nice.common.widget
 
@@ -16,6 +16,8 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.DrawableUtils
 import androidx.core.content.ContextCompat
 import androidx.core.view.contains
 import androidx.fragment.app.Fragment
@@ -42,6 +44,8 @@ class StatefulFrameLayout @JvmOverloads constructor(
     private var emptyTextColor: Int
     private var emptyTextAppearance: Int
     private var emptyButtonBackground: Drawable?
+    private var emptyButtonBackgroundTintList: ColorStateList? = null
+    private var emptyButtonBackgroundTintMode: PorterDuff.Mode? = null
     private var emptyButtonText: CharSequence?
     private var emptyButtonTextColor: Int
     private var emptyButtonTextAppearance: Int
@@ -52,6 +56,8 @@ class StatefulFrameLayout @JvmOverloads constructor(
     private var errorTextColor: Int
     private var errorTextAppearance: Int
     private var errorButtonBackground: Drawable?
+    private var errorButtonBackgroundTintList: ColorStateList? = null
+    private var errorButtonBackgroundTintMode: PorterDuff.Mode? = null
     private var errorButtonText: CharSequence?
     private var errorButtonTextColor: Int
     private var errorButtonTextAppearance: Int
@@ -108,6 +114,11 @@ class StatefulFrameLayout @JvmOverloads constructor(
                 emptyButtonBackground = ColorDrawable(color)
             }
         }
+        emptyButtonBackgroundTintList = a.getColorStateList(R.styleable.StatefulFrameLayout_emptyButtonBackgroundTint)
+        emptyButtonBackgroundTintMode = DrawableUtils.parseTintMode(
+            a.getInt(R.styleable.StatefulFrameLayout_emptyButtonBackgroundTintMode, 0),
+            PorterDuff.Mode.SRC_ATOP
+        )
         emptyButtonVisible = a.getBoolean(R.styleable.StatefulFrameLayout_emptyButtonVisible, false)
 
         errorImage = a.getDrawable(R.styleable.StatefulFrameLayout_errorImage)
@@ -124,6 +135,11 @@ class StatefulFrameLayout @JvmOverloads constructor(
                 errorButtonBackground = ColorDrawable(color)
             }
         }
+        errorButtonBackgroundTintList = a.getColorStateList(R.styleable.StatefulFrameLayout_errorButtonBackgroundTint)
+        errorButtonBackgroundTintMode = DrawableUtils.parseTintMode(
+            a.getInt(R.styleable.StatefulFrameLayout_errorButtonBackgroundTintMode, 0),
+            PorterDuff.Mode.SRC_ATOP
+        )
         errorButtonVisible = a.getBoolean(R.styleable.StatefulFrameLayout_errorButtonVisible, true)
 
         loadingProgressColor = a.getColor(R.styleable.StatefulFrameLayout_loadingProgressColor, NO_VALUE)
@@ -423,7 +439,13 @@ class StatefulFrameLayout @JvmOverloads constructor(
                 }
                 view.findViewById<Button>(R.id.empty_button)?.apply {
                     text = emptyButtonText
-                    background = emptyButtonBackground
+                    if (emptyButtonBackground != null) {
+                        background = emptyButtonBackground
+                    }
+                    if (emptyButtonBackgroundTintList != null) {
+                        backgroundTintList = emptyButtonBackgroundTintList
+                        backgroundTintMode = emptyButtonBackgroundTintMode
+                    }
                     if (emptyButtonTextAppearance != NO_VALUE) {
                         textAppearance = emptyButtonTextAppearance
                     }
@@ -447,7 +469,13 @@ class StatefulFrameLayout @JvmOverloads constructor(
                 }
                 view.findViewById<Button>(R.id.error_button)?.apply {
                     text = errorButtonText
-                    background = errorButtonBackground
+                    if (errorButtonBackground != null) {
+                        background = errorButtonBackground
+                    }
+                    if (errorButtonBackgroundTintList != null) {
+                        backgroundTintList = errorButtonBackgroundTintList
+                        backgroundTintMode = errorButtonBackgroundTintMode
+                    }
                     if (errorButtonTextAppearance != NO_VALUE) {
                         textAppearance = errorButtonTextAppearance
                     }

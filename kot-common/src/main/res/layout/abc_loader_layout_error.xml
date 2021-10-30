@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="16dp"
         android:adjustViewBounds="true" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -20,19 +21,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         tools:text="@string/loader_error_message"
         tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ErrorText" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@id/error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_margin="16dp"
         android:gravity="center"
         android:minWidth="160dp"
-        tools:background="@drawable/background_loader_layout_button"
+        app:cornerRadius="30dp"
         tools:text="@string/loader_retry_message"
         tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ButtonText"
         tools:textColor="#ffffff" />

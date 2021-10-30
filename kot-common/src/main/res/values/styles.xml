@@ -17,16 +17,11 @@
         <item name="errorButtonText">@string/loader_retry_message</item>
 
         <item name="emptyTextAppearance">@style/TextAppearance.StatefulFrameLayout.EmptyText</item>
-        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText
-        </item>
+        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText</item>
         <item name="loadingTextAppearance">@style/TextAppearance.StatefulFrameLayout.LoadingText
         </item>
         <item name="errorTextAppearance">@style/TextAppearance.StatefulFrameLayout.ErrorText</item>
-        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText
-        </item>
-
-        <item name="emptyButtonBackground">@drawable/background_loader_layout_button</item>
-        <item name="errorButtonBackground">@drawable/background_loader_layout_button</item>
+        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText</item>
     </style>
 
     <style name="TextAppearance.StatefulFrameLayout" parent="TextAppearance.AppCompat" />

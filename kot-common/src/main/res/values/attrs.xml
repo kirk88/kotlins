@@ -20,6 +20,15 @@
         <attr name="emptyButtonTextColor" format="color" />
         <attr name="emptyButtonTextAppearance" format="reference" />
         <attr name="emptyButtonBackground" format="reference" />
+        <attr name="emptyButtonBackgroundTint" format="color" />
+        <attr name="emptyButtonBackgroundTintMode" format="enum" >
+            <enum name="src_over" value="3" />
+            <enum name="src_in" value="5" />
+            <enum name="src_atop" value="9" />
+            <enum name="multiply" value="14" />
+            <enum name="screen" value="15" />
+            <enum name="add" value="16" />
+        </attr>
         <attr name="emptyButtonVisible" format="boolean" />
 
         <attr name="errorImage" format="reference" />
@@ -30,6 +39,15 @@
         <attr name="errorButtonTextColor" format="color" />
         <attr name="errorButtonTextAppearance" format="reference" />
         <attr name="errorButtonBackground" format="reference" />
+        <attr name="errorButtonBackgroundTint" format="color" />
+        <attr name="errorButtonBackgroundTintMode" format="enum" >
+            <enum name="src_over" value="3" />
+            <enum name="src_in" value="5" />
+            <enum name="src_atop" value="9" />
+            <enum name="multiply" value="14" />
+            <enum name="screen" value="15" />
+            <enum name="add" value="16" />
+        </attr>
         <attr name="errorButtonVisible" format="boolean" />
 
         <attr name="loadingProgressColor" format="color" />

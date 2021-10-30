@@ -21,7 +21,9 @@
     <com.nice.common.widget.StatefulFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:defaultShow="empty"
+        app:defaultShow="content"
+        app:emptyButtonVisible="true"
+        app:emptyButtonText="234234"
         app:emptyImage="@mipmap/ic_launcher">
         <com.example.sample.widget.TouchLinearLayout
             android:id="@+id/content_view"
@@ -49,8 +51,6 @@
     </com.nice.common.widget.StatefulFrameLayout>
 
 
-
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -59,6 +59,7 @@
         android:layout_margin="16dp"
         android:src="@drawable/abc_vector_test"
         app:elevation="10dp"
-        app:fabCustomSize="48dp" />
+        app:fabCustomSize="48dp"
+        tools:ignore="SpeakableTextPresentCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
