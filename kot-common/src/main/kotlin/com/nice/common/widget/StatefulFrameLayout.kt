@@ -416,7 +416,9 @@ class StatefulFrameLayout @JvmOverloads constructor(
                     }
                 }
                 view.findViewById<TextView>(R.id.loading_text)?.apply {
-                    text = loadingText
+                    if(loadingText != null){
+                        text = loadingText
+                    }
                     if (loadingTextAppearance != NO_VALUE) {
                         textAppearance = loadingTextAppearance
                     }
@@ -429,7 +431,9 @@ class StatefulFrameLayout @JvmOverloads constructor(
             TYPE_EMPTY_VIEW -> {
                 view.findViewById<ImageView>(R.id.empty_image)?.setImageDrawable(this.emptyImage)
                 view.findViewById<TextView>(R.id.empty_text)?.apply {
-                    text = emptyText
+                    if(emptyText != null){
+                        text = emptyText
+                    }
                     if (emptyTextAppearance != NO_VALUE) {
                         textAppearance = emptyTextAppearance
                     }
@@ -438,7 +442,9 @@ class StatefulFrameLayout @JvmOverloads constructor(
                     }
                 }
                 view.findViewById<Button>(R.id.empty_button)?.apply {
-                    text = emptyButtonText
+                    if(emptyButtonText != null){
+                        text = emptyButtonText
+                    }
                     if (emptyButtonBackground != null) {
                         background = emptyButtonBackground
                     }
@@ -459,7 +465,9 @@ class StatefulFrameLayout @JvmOverloads constructor(
             TYPE_ERROR_VIEW -> {
                 view.findViewById<ImageView>(R.id.error_image)?.setImageDrawable(this.errorImage)
                 view.findViewById<TextView>(R.id.error_text)?.apply {
-                    text = errorText
+                    if(errorText != null){
+                        text = errorText
+                    }
                     if (errorTextAppearance != NO_VALUE) {
                         textAppearance = errorTextAppearance
                     }
@@ -468,7 +476,9 @@ class StatefulFrameLayout @JvmOverloads constructor(
                     }
                 }
                 view.findViewById<Button>(R.id.error_button)?.apply {
-                    text = errorButtonText
+                    if(errorButtonText != null) {
+                        text = errorButtonText
+                    }
                     if (errorButtonBackground != null) {
                         background = errorButtonBackground
                     }
