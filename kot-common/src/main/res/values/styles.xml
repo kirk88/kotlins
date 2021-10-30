@@ -25,8 +25,8 @@
         <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText
         </item>
 
-        <item name="emptyButtonBackground">@drawable/loading_layout_button</item>
-        <item name="errorButtonBackground">@drawable/loading_layout_button</item>
+        <item name="emptyButtonBackground">@drawable/background_loader_layout_button</item>
+        <item name="errorButtonBackground">@drawable/background_loader_layout_button</item>
     </style>
 
     <style name="TextAppearance.StatefulFrameLayout" parent="TextAppearance.AppCompat" />

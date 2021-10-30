@@ -32,7 +32,7 @@
         android:layout_margin="20dp"
         android:gravity="center"
         android:minWidth="160dp"
-        tools:background="@drawable/loading_layout_button"
+        tools:background="@drawable/background_loader_layout_button"
         tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ButtonText"
         tools:textColor="#ffffff" />
 </LinearLayout>
