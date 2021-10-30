@@ -14,7 +14,7 @@ sealed class Message(val what: Int = -1) {
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
     operator fun <T : Any> get(key: String): T {
-        return this.extras.getValue(key) as T
+        return extras.getValue(key) as T
     }
 
     operator fun Message.set(key: String, value: Any?) {
@@ -54,7 +54,9 @@ sealed class Message(val what: Int = -1) {
         }
     }
 
-    class ShowProgress(val text: CharSequence? = null) : Message()
+    class ShowProgress(val text: CharSequence? = null) : Message() {
+        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
+    }
 
     class DismissProgress : Message() {
         override fun equals(other: Any?): Boolean {
@@ -70,11 +72,17 @@ sealed class Message(val what: Int = -1) {
 
     class LoadMoreState(val state: InfiniteState) : Message()
 
-    class ShowLoading(val text: CharSequence? = null) : Message()
+    class ShowLoading(val text: CharSequence? = null) : Message() {
+        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
+    }
 
-    class ShowEmpty(val text: CharSequence? = null) : Message()
+    class ShowEmpty(val text: CharSequence? = null) : Message() {
+        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
+    }
 
-    class ShowError(val text: CharSequence? = null) : Message()
+    class ShowError(val text: CharSequence? = null) : Message() {
+        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
+    }
 
     class ShowContent : Message() {
         override fun equals(other: Any?): Boolean {
