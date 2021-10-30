@@ -18,28 +18,37 @@
         app:provideActionBar="true"
         app:statusBarForeground="?colorPrimaryVariant" />
 
-    <com.example.sample.widget.TouchLinearLayout
-        android:id="@+id/content_view"
+    <com.nice.common.widget.StatefulFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-           <TextView
-               android:id="@+id/text"
-               android:layout_width="match_parent"
-               android:layout_height="100dp"
-               android:textIsSelectable="true"
-               android:background="@android:color/black"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
+        app:defaultShow="empty"
+        app:emptyImage="@mipmap/ic_launcher">
+        <com.example.sample.widget.TouchLinearLayout
+            android:id="@+id/content_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="100dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    </com.example.sample.widget.TouchLinearLayout>
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:textIsSelectable="true"
+                android:background="@android:color/black"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="100dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        </com.example.sample.widget.TouchLinearLayout>
+
+    </com.nice.common.widget.StatefulFrameLayout>
+
+
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

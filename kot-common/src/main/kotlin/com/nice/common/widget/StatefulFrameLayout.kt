@@ -8,7 +8,6 @@ import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -98,13 +97,10 @@ class StatefulFrameLayout @JvmOverloads constructor(
         emptyImage = a.getDrawable(R.styleable.StatefulFrameLayout_emptyImage)
         emptyText = a.getText(R.styleable.StatefulFrameLayout_emptyText)
         emptyTextColor = a.getColor(R.styleable.StatefulFrameLayout_emptyTextColor, NO_VALUE)
-        emptyTextAppearance =
-            a.getResourceId(R.styleable.StatefulFrameLayout_emptyTextAppearance, NO_VALUE)
+        emptyTextAppearance = a.getResourceId(R.styleable.StatefulFrameLayout_emptyTextAppearance, NO_VALUE)
         emptyButtonText = a.getText(R.styleable.StatefulFrameLayout_emptyButtonText)
-        emptyButtonTextColor =
-            a.getColor(R.styleable.StatefulFrameLayout_emptyButtonTextColor, NO_VALUE)
-        emptyButtonTextAppearance =
-            a.getResourceId(R.styleable.StatefulFrameLayout_emptyButtonTextAppearance, NO_VALUE)
+        emptyButtonTextColor = a.getColor(R.styleable.StatefulFrameLayout_emptyButtonTextColor, NO_VALUE)
+        emptyButtonTextAppearance = a.getResourceId(R.styleable.StatefulFrameLayout_emptyButtonTextAppearance, NO_VALUE)
         emptyButtonBackground = a.getDrawable(R.styleable.StatefulFrameLayout_emptyButtonBackground)
         if (emptyButtonBackground == null) {
             val color = a.getColor(R.styleable.StatefulFrameLayout_emptyButtonBackground, NO_VALUE)
@@ -117,13 +113,10 @@ class StatefulFrameLayout @JvmOverloads constructor(
         errorImage = a.getDrawable(R.styleable.StatefulFrameLayout_errorImage)
         errorText = a.getText(R.styleable.StatefulFrameLayout_errorText)
         errorTextColor = a.getColor(R.styleable.StatefulFrameLayout_errorTextColor, NO_VALUE)
-        errorTextAppearance =
-            a.getResourceId(R.styleable.StatefulFrameLayout_errorTextAppearance, NO_VALUE)
+        errorTextAppearance = a.getResourceId(R.styleable.StatefulFrameLayout_errorTextAppearance, NO_VALUE)
         errorButtonText = a.getText(R.styleable.StatefulFrameLayout_errorButtonText)
-        errorButtonTextColor =
-            a.getColor(R.styleable.StatefulFrameLayout_errorButtonTextColor, NO_VALUE)
-        errorButtonTextAppearance =
-            a.getResourceId(R.styleable.StatefulFrameLayout_errorButtonTextAppearance, NO_VALUE)
+        errorButtonTextColor = a.getColor(R.styleable.StatefulFrameLayout_errorButtonTextColor, NO_VALUE)
+        errorButtonTextAppearance = a.getResourceId(R.styleable.StatefulFrameLayout_errorButtonTextAppearance, NO_VALUE)
         errorButtonBackground = a.getDrawable(R.styleable.StatefulFrameLayout_errorButtonBackground)
         if (errorButtonBackground == null) {
             val color = a.getColor(R.styleable.StatefulFrameLayout_errorButtonBackground, NO_VALUE)
@@ -133,16 +126,13 @@ class StatefulFrameLayout @JvmOverloads constructor(
         }
         errorButtonVisible = a.getBoolean(R.styleable.StatefulFrameLayout_errorButtonVisible, true)
 
-        loadingProgressColor =
-            a.getColor(R.styleable.StatefulFrameLayout_loadingProgressColor, NO_VALUE)
-        loadingProgressDrawable =
-            a.getDrawable(R.styleable.StatefulFrameLayout_loadingProgressDrawable)
+        loadingProgressColor = a.getColor(R.styleable.StatefulFrameLayout_loadingProgressColor, NO_VALUE)
+        loadingProgressDrawable = a.getDrawable(R.styleable.StatefulFrameLayout_loadingProgressDrawable)
         loadingText = a.getText(R.styleable.StatefulFrameLayout_loadingText)
         loadingTextColor = a.getColor(R.styleable.StatefulFrameLayout_loadingTextColor, NO_VALUE)
-        loadingTextAppearance =
-            a.getResourceId(R.styleable.StatefulFrameLayout_loadingTextAppearance, NO_VALUE)
+        loadingTextAppearance = a.getResourceId(R.styleable.StatefulFrameLayout_loadingTextAppearance, NO_VALUE)
 
-        defaultViewType = a.getInt(R.styleable.StatefulFrameLayout_defaultShow, NO_TYPE)
+        defaultViewType = a.getInt(R.styleable.StatefulFrameLayout_defaultShow, TYPE_CONTENT_VIEW)
         a.recycle()
     }
 
@@ -159,9 +149,7 @@ class StatefulFrameLayout @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (!isInEditMode) {
-            showImmediately(defaultViewType, false)
-        }
+        showImmediately(defaultViewType, false)
     }
 
     override fun showLoading() {
@@ -333,9 +321,7 @@ class StatefulFrameLayout @JvmOverloads constructor(
         if (dataObservers == null) {
             dataObservers = mutableMapOf()
         }
-        dataObservers!!.getOrPut(adapter) {
-            AdapterDataObserver(adapter) { this }
-        }.register()
+        dataObservers!!.getOrPut(adapter) { AdapterDataObserver(adapter) { this } }.register()
         return this
     }
 
@@ -408,7 +394,7 @@ class StatefulFrameLayout @JvmOverloads constructor(
                 view.findViewById<ProgressBar>(R.id.loading_progress)?.apply {
                     if (loadingProgressDrawable != null) {
                         indeterminateDrawable = loadingProgressDrawable
-                    } else if (Build.VERSION.SDK_INT >= 21 && loadingProgressColor != NO_VALUE) {
+                    } else if (loadingProgressColor != NO_VALUE) {
                         indeterminateTintMode = PorterDuff.Mode.SRC_ATOP
                         indeterminateTintList = ColorStateList.valueOf(loadingProgressColor)
                     }
