@@ -46,10 +46,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     override val progressView: ProgressView by progressViews()
 
-    override val statefulView: StatefulView by lazy {
-        StatefulFrameLayout.wrap(binding.contentView)
-    }
-
     private val binding: ActivityMainBinding by viewBindings()
 
     override val tipView: TipView by tipViews()

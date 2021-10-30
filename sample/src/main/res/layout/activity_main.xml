@@ -21,7 +21,7 @@
     <com.nice.common.widget.StatefulFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:defaultShow="content"
+        app:defaultShow="empty"
         app:emptyButtonVisible="true"
         app:emptyButtonText="234234"
         app:emptyImage="@mipmap/ic_launcher">
