@@ -229,35 +229,19 @@ internal class PeripheralConnection(
     }.rssi
 
     suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectionHandler.execute({
-                requestConnectionPriority(priority.intValue)
-            }) {
-                priority
-            }
-        } else {
-            Log.w(
-                TAG,
-                "Unable to request connection priority on a device below android5.0."
-            )
+        return connectionHandler.execute({
+            requestConnectionPriority(priority.intValue)
+        }) {
             priority
         }
     }
 
     suspend fun requestMtu(mtu: Int): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectionHandler.execute({
-                requestMtu(mtu)
-            }) {
-                onMtuChanged.receiveOrThrow()
-            }.mtu
-        } else {
-            Log.w(
-                TAG,
-                "Unable to request mtu on a device below android5.0."
-            )
-            mtu
-        }
+        return connectionHandler.execute({
+            requestMtu(mtu)
+        }) {
+            onMtuChanged.receiveOrThrow()
+        }.mtu
     }
 
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
