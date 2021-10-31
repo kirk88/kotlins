@@ -17,11 +17,15 @@
         <item name="errorButtonText">@string/loader_retry_message</item>
 
         <item name="emptyTextAppearance">@style/TextAppearance.StatefulFrameLayout.EmptyText</item>
-        <item name="emptyButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText</item>
+        <item name="emptyButtonTextAppearance">
+            @style/TextAppearance.StatefulFrameLayout.ButtonText
+        </item>
         <item name="loadingTextAppearance">@style/TextAppearance.StatefulFrameLayout.LoadingText
         </item>
         <item name="errorTextAppearance">@style/TextAppearance.StatefulFrameLayout.ErrorText</item>
-        <item name="errorButtonTextAppearance">@style/TextAppearance.StatefulFrameLayout.ButtonText</item>
+        <item name="errorButtonTextAppearance">
+            @style/TextAppearance.StatefulFrameLayout.ButtonText
+        </item>
     </style>
 
     <style name="TextAppearance.StatefulFrameLayout" parent="TextAppearance.AppCompat" />
@@ -49,12 +53,6 @@
     <style name="Theme.Progress.Dialog" parent="ThemeOverlay.AppCompat.Dialog">
         <item name="android:windowBackground">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowAnimationStyle">@style/Animation.Progress.Dialog</item>
-    </style>
-
-    <style name="Animation.Progress.Dialog" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/anim_progress_dialog_enter</item>
-        <item name="android:windowExitAnimation">@anim/anim_progress_dialog_exit</item>
     </style>
 
 </resources>

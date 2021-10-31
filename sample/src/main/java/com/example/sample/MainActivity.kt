@@ -62,16 +62,21 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         title = "Home"
 
         binding.fab.doOnClick {
-            activityForResultLauncher.launch<SecondActivity, ActivityResult>(
-                this,
-                "key" to "value"
-            ) {
-            }
+//            activityForResultLauncher.launch<SecondActivity, ActivityResult>(
+//                this,
+//                "key" to "value"
+//            ) {
+//            }
+
+            progressView.show()
         }
 
         GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
             showToast("what?")
         }
+
+
+
 
 //        testDB()
 //        initBle()
