@@ -94,7 +94,9 @@ sealed class Message(val what: Int = -1) {
         }
     }
 
-    class Batch(val messages: Set<Message>) : Message()
+    class Batch(val messages: Set<Message>) : Message() {
+        constructor(vararg messages: Message) : this(messages.toSet())
+    }
 
 }
 
