@@ -31,7 +31,7 @@ enum class CharacteristicPermission(internal val value: Int) {
 fun characteristicOf(
     service: String,
     characteristic: String
-): Characteristic = Characteristic.create(
+): Characteristic = Characteristic(
     serviceUuid = UUID.fromString(service),
     characteristicUuid = UUID.fromString(characteristic)
 )
@@ -41,7 +41,7 @@ interface Characteristic {
     val characteristicUuid: UUID
 
     companion object {
-        fun create(
+        operator fun invoke(
             serviceUuid: UUID,
             characteristicUuid: UUID
         ): Characteristic = LazyCharacteristic(serviceUuid, characteristicUuid)
@@ -57,12 +57,14 @@ data class DiscoveredCharacteristic internal constructor(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
     val descriptors: List<DiscoveredDescriptor>,
-    val bluetoothGattCharacteristic: BluetoothGattCharacteristic
-) : Characteristic, Iterable<DiscoveredDescriptor> {
+    internal val bluetoothGattCharacteristic: BluetoothGattCharacteristic
+) : Characteristic {
 
-    val properties: Array<CharacteristicProperty> = CharacteristicProperty.values().filter { hasProperty(it) }.toTypedArray()
+    val properties: Array<CharacteristicProperty> =
+        CharacteristicProperty.values().filter { hasProperty(it) }.toTypedArray()
 
-    val permissions: Array<CharacteristicPermission> = CharacteristicPermission.values().filter { hasPermission(it) }.toTypedArray()
+    val permissions: Array<CharacteristicPermission> =
+        CharacteristicPermission.values().filter { hasPermission(it) }.toTypedArray()
 
     fun hasProperty(property: CharacteristicProperty): Boolean {
         return bluetoothGattCharacteristic.properties and property.value != 0
@@ -71,10 +73,6 @@ data class DiscoveredCharacteristic internal constructor(
     fun hasPermission(permission: CharacteristicPermission): Boolean {
         bluetoothGattCharacteristic.permissions
         return bluetoothGattCharacteristic.permissions and permission.value != 0
-    }
-
-    override fun iterator(): Iterator<DiscoveredDescriptor> {
-        return descriptors.iterator()
     }
 
     override fun toString(): String =
@@ -99,20 +97,7 @@ internal fun <T : Characteristic> List<T>.first(
 ): T = firstOrNull { it.characteristicUuid == characteristicUuid }
     ?: throw NoSuchElementException("Characteristic $characteristicUuid not found")
 
-internal fun BluetoothGattCharacteristic.toDiscoveredCharacteristic(): DiscoveredCharacteristic {
-    val androidDescriptors = descriptors.map { descriptor ->
-        descriptor.toDiscoveredDescriptor(service.uuid, uuid)
-    }
-
-    return DiscoveredCharacteristic(
-        serviceUuid = service.uuid,
-        characteristicUuid = uuid,
-        descriptors = androidDescriptors,
-        bluetoothGattCharacteristic = this
-    )
-}
-
-internal fun BluetoothGattCharacteristic.toCharacteristic() = Characteristic.create(
+internal fun BluetoothGattCharacteristic.toCharacteristic() = Characteristic(
     serviceUuid = service.uuid,
     characteristicUuid = uuid
 )

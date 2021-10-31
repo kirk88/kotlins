@@ -51,8 +51,6 @@ class AndroidPeripheral internal constructor(
         onServicesDiscovered
     )
 
-    override val device: BluetoothDevice = bluetoothDevice
-
     override val state: Flow<ConnectionState> = connection.state.asStateFlow()
 
     override val mtu: Flow<Int?> = connection.mtu.asStateFlow()
@@ -110,22 +108,5 @@ class AndroidPeripheral internal constructor(
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction
     ): Flow<ByteArray> = connection.observe(characteristic, onSubscription)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AndroidPeripheral
-
-        if (device != other.device) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return device.hashCode()
-    }
-
-    override fun toString(): String = "Peripheral(bluetoothDevice=$device)"
 
 }

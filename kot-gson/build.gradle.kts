@@ -27,7 +27,7 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 1
+val versionPatch = 2
 
 publishing {
     publications {

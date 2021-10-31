@@ -21,7 +21,7 @@ fun descriptorOf(
     service: String,
     characteristic: String,
     descriptor: String
-): Descriptor = Descriptor.create(
+): Descriptor = Descriptor(
     serviceUuid = UUID.fromString(service),
     characteristicUuid = UUID.fromString(characteristic),
     descriptorUuid = UUID.fromString(descriptor)
@@ -33,7 +33,7 @@ interface Descriptor {
     val descriptorUuid: UUID
 
     companion object {
-        fun create(
+        operator fun invoke(
             serviceUuid: UUID,
             characteristicUuid: UUID,
             descriptorUuid: UUID
@@ -47,11 +47,11 @@ private data class LazyDescriptor(
     override val descriptorUuid: UUID
 ) : Descriptor
 
-data class DiscoveredDescriptor(
+data class DiscoveredDescriptor internal constructor(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
     override val descriptorUuid: UUID,
-    val bluetoothGattDescriptor: BluetoothGattDescriptor
+    internal val bluetoothGattDescriptor: BluetoothGattDescriptor
 ) : Descriptor {
 
     val permissions: Array<DescriptorPermission> = DescriptorPermission.values().filter { hasPermission(it) }.toTypedArray()
@@ -69,14 +69,3 @@ internal fun <T : Descriptor> List<T>.first(
     descriptorUuid: UUID
 ): T = firstOrNull { it.descriptorUuid == descriptorUuid }
     ?: throw NoSuchElementException("Descriptor $descriptorUuid not found")
-
-
-internal fun BluetoothGattDescriptor.toDiscoveredDescriptor(
-    serviceUuid: UUID,
-    characteristicUuid: UUID
-) = DiscoveredDescriptor(
-    serviceUuid = serviceUuid,
-    characteristicUuid = characteristicUuid,
-    descriptorUuid = uuid,
-    bluetoothGattDescriptor = this
-)

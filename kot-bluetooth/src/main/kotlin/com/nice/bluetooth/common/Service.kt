@@ -12,12 +12,8 @@ interface Service {
 data class DiscoveredService internal constructor(
     override val serviceUuid: UUID,
     val characteristics: List<DiscoveredCharacteristic>,
-    val bluetoothGattService: BluetoothGattService
-) : Service, Iterable<DiscoveredCharacteristic> {
-
-    override fun iterator(): Iterator<DiscoveredCharacteristic> {
-        return characteristics.iterator()
-    }
+    internal val bluetoothGattService: BluetoothGattService
+) : Service {
 
     override fun toString(): String =
         "DiscoveredService(serviceUuid=$serviceUuid, characteristics=$characteristics)"
@@ -49,53 +45,44 @@ internal fun <T : Service> List<T>.first(
 ): T = firstOrNull { it.serviceUuid == serviceUuid }
     ?: throw NoSuchElementException("Service $serviceUuid not found")
 
+/** @throws NoSuchElementException if service or characteristic is not found. */
+internal fun List<DiscoveredService>.getCharacteristic(
+    characteristic: Characteristic
+): DiscoveredCharacteristic = first(characteristic.serviceUuid)
+    .characteristics
+    .first(characteristic.characteristicUuid)
+
+/** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
+internal fun List<DiscoveredService>.getDescriptor(
+    descriptor: Descriptor
+): DiscoveredDescriptor = first(descriptor.serviceUuid)
+    .characteristics
+    .first(descriptor.characteristicUuid)
+    .descriptors
+    .first(descriptor.descriptorUuid)
+
 internal fun BluetoothGattService.toDiscoveredService(): DiscoveredService {
     val serviceUuid = uuid
-    val characteristics = characteristics
-        .map { characteristic -> characteristic.toDiscoveredCharacteristic() }
+    val characteristics = characteristics.map { characteristic ->
+        val descriptors = characteristic.descriptors.map { descriptor ->
+            DiscoveredDescriptor(
+                serviceUuid = serviceUuid,
+                characteristicUuid = characteristic.uuid,
+                descriptorUuid = descriptor.uuid,
+                bluetoothGattDescriptor = descriptor
+            )
+        }
 
+        DiscoveredCharacteristic(
+            serviceUuid = serviceUuid,
+            characteristicUuid = characteristic.uuid,
+            descriptors = descriptors,
+            bluetoothGattCharacteristic = characteristic
+        )
+    }
     return DiscoveredService(
         serviceUuid = serviceUuid,
         characteristics = characteristics,
         bluetoothGattService = this
     )
 }
-
-/** @throws NoSuchElementException if service or characteristic is not found. */
-internal fun List<DiscoveredService>.getCharacteristic(
-    characteristic: Characteristic
-): DiscoveredCharacteristic =
-    getCharacteristic(
-        serviceUuid = characteristic.serviceUuid,
-        characteristicUuid = characteristic.characteristicUuid
-    )
-
-/** @throws NoSuchElementException if service or characteristic is not found. */
-private fun List<DiscoveredService>.getCharacteristic(
-    serviceUuid: UUID,
-    characteristicUuid: UUID
-): DiscoveredCharacteristic =
-    first(serviceUuid)
-        .characteristics
-        .first(characteristicUuid)
-
-/** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
-internal fun List<DiscoveredService>.getDescriptor(
-    descriptor: Descriptor
-): DiscoveredDescriptor =
-    getDescriptor(
-        serviceUuid = descriptor.serviceUuid,
-        characteristicUuid = descriptor.characteristicUuid,
-        descriptorUuid = descriptor.descriptorUuid
-    )
-
-/** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
-private fun List<DiscoveredService>.getDescriptor(
-    serviceUuid: UUID,
-    characteristicUuid: UUID,
-    descriptorUuid: UUID
-): DiscoveredDescriptor =
-    getCharacteristic(
-        serviceUuid = serviceUuid,
-        characteristicUuid = characteristicUuid
-    ).descriptors.first(descriptorUuid)

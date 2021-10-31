@@ -72,6 +72,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
             showToast("what?")
         }
+
+        progressView.show("正在连接蓝牙...")
 //        testDB()
 //        initBle()
 

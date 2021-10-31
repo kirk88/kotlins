@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
     app:cardBackgroundColor="?attr/colorBackgroundFloating"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
@@ -16,7 +15,9 @@
         android:gravity="center"
         android:minWidth="128dp"
         android:minHeight="128dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <ProgressBar
             style="@style/Widget.AppCompat.ProgressBar"
@@ -30,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
-            android:textAppearance="?textAppearanceBody1"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             tools:text="@string/loader_progress_message" />
 
     </LinearLayout>

@@ -69,8 +69,6 @@ interface Writable {
 
 interface Peripheral : Readable, Writable {
 
-    val device: BluetoothDevice
-
     /**
      * Provides a conflated [Flow] of the [Peripheral]'s [ConnectionState].
      *
@@ -237,10 +235,22 @@ fun Peripheral.findCharacteristic(
     return findService(serviceUuid)?.findCharacteristic(characteristicUuid)
 }
 
+fun Peripheral.findDescriptor(
+    serviceUuid: UUID,
+    characteristicUuid: UUID,
+    descriptorUuid: UUID
+): DiscoveredDescriptor? {
+    return findService(serviceUuid)?.findCharacteristic(characteristicUuid)?.findDescriptor(descriptorUuid)
+}
+
 operator fun Peripheral.get(serviceUuid: UUID): DiscoveredService {
     return services.first(serviceUuid)
 }
 
 operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID): DiscoveredCharacteristic {
     return get(serviceUuid)[characteristicUuid]
+}
+
+operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID, descriptorUuid: UUID): DiscoveredDescriptor {
+    return get(serviceUuid, characteristicUuid)[descriptorUuid]
 }
