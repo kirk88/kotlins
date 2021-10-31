@@ -48,7 +48,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     private val binding: ActivityMainBinding by viewBindings()
 
-    override val tipView: TipView by tipViews()
+    override val tipView: TipView by tipViews{ defaultSnackTipViewFactory }
 
     private val permissionRequestLauncher =
         PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
@@ -73,7 +73,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             showToast("what?")
         }
 
-        progressView.show("正在连接蓝牙...")
 //        testDB()
 //        initBle()
 

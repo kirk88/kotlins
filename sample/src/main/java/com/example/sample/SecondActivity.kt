@@ -9,13 +9,14 @@ import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.helper.*
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
+import com.nice.common.widget.defaultSnackTipViewFactory
 import com.nice.common.widget.tipViews
 
 class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
     override val viewModel: TestViewModel by viewModels()
 
-    override val tipView: TipView? by tipViews()
+    override val tipView: TipView? by tipViews{ defaultSnackTipViewFactory }
 
     private val binding: ActivitySecondBinding by viewBindings()
 

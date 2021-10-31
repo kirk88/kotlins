@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.PopupWindow
 import androidx.core.view.ViewCompat
-import androidx.core.view.doOnAttach
+import androidx.core.view.doOnLayout
 import com.nice.common.R
 
 class ImeChangeObserver {
@@ -19,10 +19,10 @@ class ImeChangeObserver {
     private var receiver: ImeChangeReceiver? = null
 
     fun register(view: View, receiver: ImeChangeReceiver) {
-        if (ViewCompat.isAttachedToWindow(view)) {
+        if (ViewCompat.isLaidOut(view)) {
             registerInternal(view, receiver)
         } else {
-            view.doOnAttach {
+            view.doOnLayout {
                 registerInternal(it, receiver)
             }
         }
@@ -43,7 +43,7 @@ class ImeChangeObserver {
         val rootView = view.rootView
 
         val popup = rootView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
-            ?: ObservablePopupWindow(view.context).also {
+            ?: ObservablePopupWindow(view.context, rootView.bottom).also {
                 rootView.setTag(R.id.ime_change_observer_popup_id, it)
             }
 
@@ -54,15 +54,13 @@ class ImeChangeObserver {
     }
 
 
-    private class ObservablePopupWindow(context: Context) : PopupWindow(),
+    private class ObservablePopupWindow(context: Context, bottom: Int) : PopupWindow(),
         ViewTreeObserver.OnGlobalLayoutListener {
 
         private val receivers = mutableSetOf<ImeChangeReceiver>()
 
-        private val contentRect = Rect().apply {
-            bottom = context.resources.displayMetrics.heightPixels
-        }
-        private var contentBottom: Int = contentRect.bottom
+        private val contentRect = Rect()
+        private var contentBottom: Int = bottom
         private var currentHeight: Int = 0
 
         private var viewTreeObserver: ViewTreeObserver? = null
@@ -81,7 +79,6 @@ class ImeChangeObserver {
             if (contentRect.bottom > contentBottom) {
                 contentBottom = contentRect.bottom
             }
-
             val height = contentBottom - contentRect.bottom
             if (currentHeight != height) {
                 currentHeight = height
