@@ -67,7 +67,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("kotble")
+                    name.set("kot-bluetooth")
                     description.set("Kotlin Asynchronous Bluetooth Low-Energy")
                     licenses {
                         license {

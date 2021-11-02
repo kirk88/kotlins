@@ -66,7 +66,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("kothttp")
+                    name.set("kot-okhttp")
                     description.set("New okhttp api in kotlin")
                     licenses {
                         license {

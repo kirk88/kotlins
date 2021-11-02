@@ -77,7 +77,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("common")
+                    name.set("kot-common")
                     description.set("A sweet set of kotlin common tools")
                     licenses {
                         license {

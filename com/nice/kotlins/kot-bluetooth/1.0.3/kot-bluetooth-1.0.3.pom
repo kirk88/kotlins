@@ -5,7 +5,7 @@
   <artifactId>kot-bluetooth</artifactId>
   <version>1.0.3</version>
   <packaging>aar</packaging>
-  <name>kotble</name>
+  <name>kot-bluetooth</name>
   <description>Kotlin Asynchronous Bluetooth Low-Energy</description>
   <licenses>
     <license>

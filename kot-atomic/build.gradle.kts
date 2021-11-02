@@ -38,7 +38,7 @@ publishing {
             from(components["java"])
 
             pom {
-                name.set("atomic")
+                name.set("kot-atomic")
                 description.set("Kotlin atomic operations")
                 licenses {
                     license {

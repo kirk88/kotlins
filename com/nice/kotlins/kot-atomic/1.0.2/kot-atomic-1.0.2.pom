@@ -9,7 +9,7 @@
   <groupId>com.nice.kotlins</groupId>
   <artifactId>kot-atomic</artifactId>
   <version>1.0.2</version>
-  <name>atomic</name>
+  <name>kot-atomic</name>
   <description>Kotlin atomic operations</description>
   <licenses>
     <license>

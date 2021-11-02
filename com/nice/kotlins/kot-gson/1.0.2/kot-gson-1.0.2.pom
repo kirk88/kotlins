@@ -9,7 +9,7 @@
   <groupId>com.nice.kotlins</groupId>
   <artifactId>kot-gson</artifactId>
   <version>1.0.2</version>
-  <name>kotson</name>
+  <name>kot-gson</name>
   <description>Kotlin extensions for JSON manipulation via Gson</description>
   <licenses>
     <license>
