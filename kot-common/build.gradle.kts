@@ -58,7 +58,7 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 1
-val versionPatch = 8
+val versionPatch = 9
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
@@ -77,7 +77,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("common")
+                    name.set("kot-common")
                     description.set("A sweet set of kotlin common tools")
                     licenses {
                         license {

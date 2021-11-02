@@ -2,7 +2,6 @@
 
 package com.nice.bluetooth.common
 
-import android.bluetooth.BluetoothDevice
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 import kotlin.coroutines.cancellation.CancellationException

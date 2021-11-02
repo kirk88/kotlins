@@ -74,10 +74,9 @@ internal class PeripheralConnection(
             defaultPhy,
             state,
             mtu,
-            phy
-        ) {
-            connectJob.getAndUpdateCompat { null }?.cancel()
-        } ?: throw ConnectionRejectedException()
+            phy,
+            onClose = { connectJob.getAndUpdateCompat { null }?.cancel() }
+        ) ?: throw ConnectionRejectedException()
     }
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
@@ -112,11 +111,10 @@ internal class PeripheralConnection(
     }
 
     private suspend fun discoverServices() {
-        connectionHandler.execute({
-            discoverServices()
-        }) {
-            onServicesDiscovered.receiveOrThrow()
-        }
+        connectionHandler.execute(
+            action = { discoverServices() },
+            response = { onServicesDiscovered.receiveOrThrow() }
+        )
 
         _services = connectionHandler.services
     }
@@ -127,11 +125,8 @@ internal class PeripheralConnection(
     }
 
     suspend fun connect(autoConnect: Boolean) {
-        check(!job.isCancelled) { "Cannot connect, scope is cancelled for $this" }
-        check(Bluetooth.isEnabled) { "Bluetooth is disabled" }
-        connectJob.updateAndGetCompat { it ?: connectAsync(autoConnect) }!!.await()?.let {
-            throw it
-        }
+        check(Bluetooth.isEnabled) { "Bluetooth is not enabled" }
+        connectJob.updateAndGetCompat { it ?: connectAsync(autoConnect) }!!.await()?.let { throw it }
     }
 
     suspend fun disconnect() {
@@ -151,24 +146,24 @@ internal class PeripheralConnection(
         writeType: WriteType
     ) {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        connectionHandler.execute({
-            bluetoothGattCharacteristic.value = data
-            bluetoothGattCharacteristic.writeType = writeType.intValue
-            writeCharacteristic(bluetoothGattCharacteristic)
-        }) {
-            onCharacteristicWrite.receiveOrThrow()
-        }
+        connectionHandler.execute(
+            action = {
+                bluetoothGattCharacteristic.value = data
+                bluetoothGattCharacteristic.writeType = writeType.intValue
+                writeCharacteristic(bluetoothGattCharacteristic)
+            },
+            response = { onCharacteristicWrite.receiveOrThrow() }
+        )
     }
 
     override suspend fun read(
         characteristic: Characteristic
     ): ByteArray {
         val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
-        return connectionHandler.execute({
-            readCharacteristic(bluetoothGattCharacteristic)
-        }) {
-            onCharacteristicRead.receiveOrThrow()
-        }.value!!
+        return connectionHandler.execute(
+            action = { readCharacteristic(bluetoothGattCharacteristic) },
+            response = { onCharacteristicRead.receiveOrThrow() }
+        ).value!!
     }
 
     override suspend fun write(
@@ -182,96 +177,88 @@ internal class PeripheralConnection(
         bluetoothGattDescriptor: BluetoothGattDescriptor,
         data: ByteArray
     ) {
-        connectionHandler.execute({
-            bluetoothGattDescriptor.value = data
-            writeDescriptor(bluetoothGattDescriptor)
-        }) {
-            onDescriptorWrite.receiveOrThrow()
-        }
+        connectionHandler.execute(
+            action = {
+                bluetoothGattDescriptor.value = data
+                writeDescriptor(bluetoothGattDescriptor)
+            },
+            response = { onDescriptorWrite.receiveOrThrow() }
+        )
     }
 
     override suspend fun read(
         descriptor: Descriptor
     ): ByteArray {
         val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
-        return connectionHandler.execute({
-            readDescriptor(bluetoothGattDescriptor)
-        }) {
-            onDescriptorRead.receiveOrThrow()
-        }.value!!
+        return connectionHandler.execute(
+            action = { readDescriptor(bluetoothGattDescriptor) },
+            response = { onDescriptorRead.receiveOrThrow() }
+        ).value!!
     }
 
     suspend fun reliableWrite(action: suspend Writable.() -> Unit) {
-        connectionHandler.tryExecute({
-            beginReliableWrite()
-            var cause: Throwable? = null
-            try {
-                action()
-            } catch (t: Throwable) {
-                cause = t
-                throw GattRequestRejectedException(cause = t)
-            } finally {
-                if (cause == null) {
-                    executeReliableWrite()
-                } else {
-                    abortReliableWrite()
+        connectionHandler.tryExecute(
+            action = {
+                beginReliableWrite()
+                var cause: Throwable? = null
+                try {
+                    action()
+                } catch (t: Throwable) {
+                    cause = t
+                    throw GattRequestRejectedException(cause = t)
+                } finally {
+                    if (cause == null) {
+                        executeReliableWrite()
+                    } else {
+                        abortReliableWrite()
+                    }
                 }
-            }
-        }) {
-            onReliableWriteCompleted.receiveOrThrow()
-        }
+            },
+            response = { onReliableWriteCompleted.receiveOrThrow() }
+        )
     }
 
-    suspend fun readRssi(): Int = connectionHandler.execute({
-        readRemoteRssi()
-    }) {
-        onReadRemoteRssi.receiveOrThrow()
-    }.rssi
+    suspend fun readRssi(): Int {
+        return connectionHandler.execute(
+            action = { readRemoteRssi() },
+            response = { onReadRemoteRssi.receiveOrThrow() }
+        ).rssi
+    }
 
     suspend fun requestConnectionPriority(priority: ConnectionPriority): ConnectionPriority {
-        return connectionHandler.execute({
-            requestConnectionPriority(priority.intValue)
-        }) {
-            priority
-        }
+        return connectionHandler.execute(
+            action = { requestConnectionPriority(priority.intValue) },
+            response = { priority }
+        )
     }
 
     suspend fun requestMtu(mtu: Int): Int {
-        return connectionHandler.execute({
-            requestMtu(mtu)
-        }) {
-            onMtuChanged.receiveOrThrow()
-        }.mtu
+        return connectionHandler.execute(
+            action = { requestMtu(mtu) },
+            response = { onMtuChanged.receiveOrThrow() }
+        ).mtu
     }
 
     suspend fun setPreferredPhy(phy: PreferredPhy, options: PhyOptions): PreferredPhy {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            connectionHandler.tryExecute({
-                setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue)
-            }) {
-                onPhyUpdate.receiveOrThrow()
-            }.phy
+            connectionHandler.tryExecute(
+                action = { setPreferredPhy(phy.txPhy.intValue, phy.rxPhy.intValue, options.intValue) },
+                response = { onPhyUpdate.receiveOrThrow() }
+            ).phy
         } else {
-            Log.w(
-                TAG,
-                "Unable to set preferred phy on a device below android8.0."
-            )
+            Log.w(TAG, "Unable to set preferred phy on a device below android8.0.")
             phy
         }
     }
 
     suspend fun readPhy(): PreferredPhy {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            connectionHandler.tryExecute({
-                readPhy()
-            }) {
-                onPhyRead.receiveOrThrow()
-            }.phy
+            connectionHandler.tryExecute(
+                action = { readPhy() },
+                response = { onPhyRead.receiveOrThrow() }
+            ).phy
         } else {
-            Log.w(
-                TAG,
-                "Unable to read phy on a device below android8.0."
-            )
+            Log.w(TAG, "Unable to read phy on a device below android8.0.")
             PreferredPhy(Phy.Le1M, Phy.Le1M)
         }
     }
@@ -355,8 +342,8 @@ internal class PeripheralConnection(
 private suspend inline fun <T : Response> Channel<out T>.receiveOrThrow(): T {
     val response = try {
         receive()
-    } catch (e: ConnectionLostException) {
-        throw ConnectionLostException(cause = e)
+    } catch (t: Throwable) {
+        throw ConnectionLostException(cause = t)
     }
     if (response.status != STATUS_SUCCESS) throw GattStatusException(response.toString())
     return response

@@ -67,9 +67,7 @@ class ManagedSupportSQLiteOpenHelper(
 
     override fun getReadableDatabase(): SupportSQLiteDatabase = delegate.readableDatabase
 
-    override fun close() {
-        delegate.close()
-    }
+    override fun close() = delegate.close()
 
 }
 

@@ -5,7 +5,7 @@
   <artifactId>kot-okhttp</artifactId>
   <version>1.0.2</version>
   <packaging>aar</packaging>
-  <name>kothttp</name>
+  <name>kot-okhttp</name>
   <description>New okhttp api in kotlin</description>
   <licenses>
     <license>

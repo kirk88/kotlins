@@ -64,7 +64,7 @@ afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
 
                 pom {
-                    name.set("kotorm")
+                    name.set("kot-sqlite")
                     description.set("A sqlite framework for kotlin")
                     licenses {
                         license {

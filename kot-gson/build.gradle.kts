@@ -39,7 +39,7 @@ publishing {
             from(components["java"])
 
             pom {
-                name.set("kotson")
+                name.set("kot-gson")
                 description.set("Kotlin extensions for JSON manipulation via Gson")
                 licenses {
                     license {
