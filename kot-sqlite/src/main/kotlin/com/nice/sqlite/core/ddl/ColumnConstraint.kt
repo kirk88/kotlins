@@ -98,7 +98,7 @@ fun <V : Any> Default(value: V) = ColumnConstraint.Default(value)
 fun <V : Any> Default(value: Defined) = ColumnConstraint.Default<V>(value)
 fun PrimaryKey(autoIncrement: Boolean = false) = ColumnConstraint.PrimaryKey(autoIncrement)
 fun References(column: Column<*>) = ColumnConstraint.References(column)
-fun Unique(conflictAlgorithm: ConflictAlgorithm) = ColumnConstraint.Unique(conflictAlgorithm)
+fun Unique(conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None) = ColumnConstraint.Unique(conflictAlgorithm)
 fun NotNull() = ColumnConstraint.NotNull
 fun OnUpdate(action: ConstraintAction) = ColumnConstraint.OnUpdate(action)
 fun OnDelete(action: ConstraintAction) = ColumnConstraint.OnDelete(action)
