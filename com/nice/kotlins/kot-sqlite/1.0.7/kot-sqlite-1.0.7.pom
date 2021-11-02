@@ -5,7 +5,7 @@
   <artifactId>kot-sqlite</artifactId>
   <version>1.0.7</version>
   <packaging>aar</packaging>
-  <name>kotorm</name>
+  <name>kot-sqlite</name>
   <description>A sqlite framework for kotlin</description>
   <licenses>
     <license>
