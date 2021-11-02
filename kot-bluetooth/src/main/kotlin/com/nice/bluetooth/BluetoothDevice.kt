@@ -34,10 +34,10 @@ internal class ConnectionHandler(
         callback.invokeOnDisconnected(onClose)
     }
 
+    private val lock = Mutex()
+
     val services: List<DiscoveredService>
         get() = bluetoothGatt.services.map { it.toDiscoveredService() }
-
-    private val lock = Mutex()
 
     fun connect() = bluetoothGatt.connect()
 
@@ -106,7 +106,7 @@ internal class ConnectionHandler(
         bluetoothGatt.setCharacteristicNotification(
             characteristic.bluetoothGattCharacteristic,
             enabled
-        )
+        ) || throw GattRequestRejectedException()
     }
 
 }
@@ -130,7 +130,7 @@ internal fun BluetoothDevice.connect(
     // Disconnected before the connection request has kicked off the Connecting state (via Callback).
     state.value = ConnectionState.Connecting.Device
 
-   return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         connectApi26(context, autoConnect, defaultTransport, defaultPhy, state, mtu, phy, onClose)
     } else {
         connectApi23(context, autoConnect, defaultTransport, state, mtu, onClose)
@@ -161,11 +161,9 @@ private fun BluetoothDevice.connectApi23(
     return ConnectionHandler(
         bluetoothGatt,
         dispatcher,
-        callback
-    ) {
-        dispatcher.close()
-        onClose.invoke()
-    }
+        callback,
+        onClose = { dispatcher.close(); onClose.invoke() }
+    )
 }
 
 @TargetApi(Build.VERSION_CODES.O)
@@ -185,24 +183,21 @@ private fun BluetoothDevice.connectApi26(
         val dispatcher = handler.asCoroutineDispatcher()
         val callback = Callback(state, mtu, phy)
 
-        val bluetoothGatt =
-            connectGatt(
-                context,
-                autoConnect,
-                callback,
-                defaultTransport.intValue,
-                defaultPhy.intValue,
-                handler
-            ) ?: return null
+        val bluetoothGatt = connectGatt(
+            context,
+            autoConnect,
+            callback,
+            defaultTransport.intValue,
+            defaultPhy.intValue,
+            handler
+        ) ?: return null
 
         return ConnectionHandler(
             bluetoothGatt,
             dispatcher,
-            callback
-        ) {
-            thread.quit()
-            onClose.invoke()
-        }
+            callback,
+            onClose = { thread.quit(); onClose.invoke() }
+        )
     } catch (t: Throwable) {
         thread.quit()
         throw t

@@ -42,9 +42,7 @@ object Bluetooth {
         bluetoothState.value = it.toBluetoothState()
     }
 
-    private val bluetoothState = MutableStateFlow(
-        if (isEnabled) BluetoothState.Opened else BluetoothState.Closed
-    )
+    private val bluetoothState = MutableStateFlow(bluetoothAdapter?.state?.toBluetoothState() ?: BluetoothState.Closed)
     val state: Flow<BluetoothState> = bluetoothState.asStateFlow()
 
     val isSupported: Boolean
