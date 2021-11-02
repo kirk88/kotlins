@@ -2,13 +2,11 @@ package com.example.sample
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import androidx.fragment.app.activityViewModels
 import com.nice.common.app.NiceViewModelFragment
 import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
-import com.nice.common.helper.showIme
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
 import com.nice.common.widget.defaultSnackTipViewFactory
@@ -24,7 +22,7 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
         super.onCreate(savedInstanceState)
 
         findViewById<Button>(R.id.button).doOnClick {
-            findViewById<View>(R.id.edittext).showIme()
+//            findViewById<View>(R.id.edittext).showIme()
             viewModel.message = Message.Tip("hello world")
         }
 
