@@ -2,6 +2,8 @@
 
 package com.nice.common.event
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -23,28 +25,44 @@ internal class EventFlow<T> {
     internal val stickyFlow: MutableSharedFlow<T>
         get() = stickyFlowLazy.value
 
-    suspend fun emitEvent(event: T) {
+    suspend fun emit(event: T) {
         flow.emit(event)
         if (stickyFlowLazy.isInitialized()) {
             stickyFlow.emit(event)
         }
     }
 
-    suspend fun emitStickyEvent(event: T) {
+    suspend fun emitSticky(event: T) {
         stickyFlow.emit(event)
         flow.emit(event)
     }
 
-    suspend inline fun collectEvent(crossinline action: suspend (T) -> Unit) {
+    suspend inline fun collect(crossinline action: suspend (T) -> Unit) {
         flow.asSharedFlow().collect(action)
     }
 
-    suspend inline fun collectStickyEvent(crossinline action: suspend (T) -> Unit) {
+    suspend inline fun collectWithLifecycle(
+        lifecycle: Lifecycle,
+        minActiveState: Lifecycle.State,
+        crossinline action: suspend (T) -> Unit
+    ) {
+        flow.asSharedFlow().flowWithLifecycle(lifecycle, minActiveState).collect(action)
+    }
+
+    suspend inline fun collectSticky(crossinline action: suspend (T) -> Unit) {
         stickyFlow.asSharedFlow().collect(action)
     }
 
+    suspend inline fun collectStickyWithLifecycle(
+        lifecycle: Lifecycle,
+        minActiveState: Lifecycle.State,
+        crossinline action: suspend (T) -> Unit
+    ) {
+        stickyFlow.asSharedFlow().flowWithLifecycle(lifecycle, minActiveState).collect(action)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearStickyEvent() {
+    fun clearStickyCache() {
         stickyFlow.resetReplayCache()
     }
 

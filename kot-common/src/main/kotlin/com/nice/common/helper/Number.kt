@@ -32,28 +32,40 @@ fun Double.between(min: Double, max: Double): Double {
     return min(max, max(this, min))
 }
 
-fun <T : Number> T?.orZero(): T {
-    @Suppress("UNCHECKED_CAST")
-    return this ?: when (this) {
-        is Int? -> 0
-        is Long? -> 0.toLong()
-        is Float? -> 0.toFloat()
-        is Double? -> 0.toDouble()
-        is Short? -> 0.toShort()
-        is Byte? -> 0.toByte()
-        is BigDecimal? -> 0.toBigDecimal()
-        is BigInteger? -> 0.toBigInteger()
-        else -> throw IllegalArgumentException("Wrong number type: $this")
-    } as T
-}
+fun BigDecimal.toTrimmedString(): String = stripTrailingZeros().toPlainString()
 
-inline fun <T : Number> T.ifZero(defaultValue: () -> T): T = if (this.toInt() != 0) this else defaultValue()
+fun Double.toTrimmedString(): String = toBigDecimal().toTrimmedString()
 
-inline fun <T : Number> T?.ifNullOrZero(defaultValue: () -> T): T = if (this != null && this.toInt() != 0) this else defaultValue()
+fun Float.toTrimmedString(): String = toBigDecimal().toTrimmedString()
 
-fun Number.toTrimmedString(): String = when (this) {
-    is BigDecimal -> stripTrailingZeros().toPlainString()
-    is Double -> toBigDecimal().stripTrailingZeros().toPlainString()
-    is Float -> toBigDecimal().stripTrailingZeros().toPlainString()
-    else -> toString()
-}
+fun Int?.orZero(): Int = this ?: 0
+
+fun Long?.orZero(): Long = this ?: 0.toLong()
+
+fun Float?.orZero(): Float = this ?: 0.toFloat()
+
+fun Double?.orZero(): Double = this ?: 0.toDouble()
+
+fun Short?.orZero(): Short = this ?: 0.toShort()
+
+fun Byte?.orZero(): Byte = this ?: 0.toByte()
+
+fun BigDecimal?.orZero(): BigDecimal = this ?: 0.toBigDecimal()
+
+fun BigInteger?.orZero(): BigInteger = this ?: 0.toBigInteger()
+
+inline fun Int?.orElse(defaultValue: () -> Int): Int = this ?: defaultValue()
+
+inline fun Long?.orElse(defaultValue: () -> Long): Long = this ?: defaultValue()
+
+inline fun Float?.orElse(defaultValue: () -> Float): Float = this ?: defaultValue()
+
+inline fun Double?.orElse(defaultValue: () -> Double): Double = this ?: defaultValue()
+
+inline fun Short?.orElse(defaultValue: () -> Short): Short = this ?: defaultValue()
+
+inline fun Byte?.orElse(defaultValue: () -> Byte): Byte = this ?: defaultValue()
+
+inline fun BigDecimal?.orElse(defaultValue: () -> BigDecimal): BigDecimal = this ?: defaultValue()
+
+inline fun BigInteger?.orElse(defaultValue: () -> BigInteger): BigInteger = this ?: defaultValue()

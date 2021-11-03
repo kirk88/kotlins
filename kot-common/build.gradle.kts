@@ -57,8 +57,9 @@ dependencies {
 }
 
 val versionMajor = 1
-val versionMinor = 1
-val versionPatch = 9
+val versionMinor = 2
+val versionPatch = 0
+val versionSuffix = "alpha01"
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
@@ -71,7 +72,7 @@ afterEvaluate {
             create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
                 artifactId = "kot-common"
-                version = "${versionMajor}.${versionMinor}.${versionPatch}"
+                version = "${versionMajor}.${versionMinor}.${versionPatch}-${versionSuffix}"
 
                 artifact(sourcesJar)
                 artifact(tasks.getByName("bundleReleaseAar"))

@@ -69,10 +69,10 @@ val Context.defaultActionBarHeight: Int
     }
 
 val Activity.actionBarHeight: Int
-    get() = actionBar?.height.ifNullOrZero { defaultActionBarHeight }
+    get() = actionBar?.height.orElse { defaultActionBarHeight }
 
 val AppCompatActivity.actionBarHeight: Int
-    get() = supportActionBar?.height.ifNullOrZero { defaultActionBarHeight }
+    get() = supportActionBar?.height.orElse { defaultActionBarHeight }
 
 val Context.isTabletDevice: Boolean
     get() {

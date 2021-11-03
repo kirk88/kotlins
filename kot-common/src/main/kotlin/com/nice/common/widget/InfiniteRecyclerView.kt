@@ -139,9 +139,11 @@ class InfiniteRecyclerView @JvmOverloads constructor(
 
     fun setColorSchemeResources(@ColorRes vararg colorResIds: Int) = refreshView.setColorSchemeResources(*colorResIds)
 
-    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) = refreshView.setProgressBackgroundColorSchemeColor(color)
+    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) =
+        refreshView.setProgressBackgroundColorSchemeColor(color)
 
-    fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) = refreshView.setProgressBackgroundColorSchemeResource(colorResId)
+    fun setProgressBackgroundColorSchemeResource(@ColorRes colorResId: Int) =
+        refreshView.setProgressBackgroundColorSchemeResource(colorResId)
 
     override fun setRefreshState(state: InfiniteState) {
         if (refreshState != state) {
@@ -225,21 +227,39 @@ class InfiniteRecyclerView @JvmOverloads constructor(
                             layoutManagerClass.getConstructor()
                         } catch (e1: NoSuchMethodException) {
                             e1.initCause(e)
-                            throw IllegalStateException("${attrs?.positionDescription}: Error creating LayoutManager $className", e1)
+                            throw IllegalStateException(
+                                "${attrs?.positionDescription}: Error creating LayoutManager $className",
+                                e1
+                            )
                         }
                     }
                     constructor.isAccessible = true
                     recyclerView.layoutManager = constructor.newInstance(context, attrs, defStyleAttr, 0)
                 } catch (e: ClassNotFoundException) {
-                    throw IllegalStateException("${attrs?.positionDescription}: Unable to find LayoutManager $className", e)
+                    throw IllegalStateException(
+                        "${attrs?.positionDescription}: Unable to find LayoutManager $className",
+                        e
+                    )
                 } catch (e: InvocationTargetException) {
-                    throw IllegalStateException("${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e)
+                    throw IllegalStateException(
+                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className",
+                        e
+                    )
                 } catch (e: InstantiationException) {
-                    throw IllegalStateException("${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className", e)
+                    throw IllegalStateException(
+                        "${attrs?.positionDescription}: Could not instantiate the LayoutManager: $className",
+                        e
+                    )
                 } catch (e: IllegalAccessException) {
-                    throw IllegalStateException("${attrs?.positionDescription}: Cannot access non-public constructor $className", e)
+                    throw IllegalStateException(
+                        "${attrs?.positionDescription}: Cannot access non-public constructor $className",
+                        e
+                    )
                 } catch (e: ClassCastException) {
-                    throw IllegalStateException("${attrs?.positionDescription}: Class is not a LayoutManager $className", e)
+                    throw IllegalStateException(
+                        "${attrs?.positionDescription}: Class is not a LayoutManager $className",
+                        e
+                    )
                 }
             }
         }
@@ -307,7 +327,8 @@ class InfiniteRecyclerView @JvmOverloads constructor(
                     } else if (layout is StaggeredGridLayoutManager) {
                         isScrollChanged = if (layout.orientation == VERTICAL) dy > 0 else dx > 0
                         lastVisiblePosition = layout.findLastVisibleItemPositions(null).maxOrNull().orZero()
-                        lastCompleteVisiblePosition = layout.findLastCompletelyVisibleItemPositions(null).maxOrNull().orZero()
+                        lastCompleteVisiblePosition =
+                            layout.findLastCompletelyVisibleItemPositions(null).maxOrNull().orZero()
                     }
                 }
 
@@ -412,10 +433,7 @@ class InfiniteRecyclerView @JvmOverloads constructor(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             return if (viewType == TYPE_FOOTER) {
-                FooterViewHolder(
-                    parent.inflate(R.layout.abc_load_more_view, false),
-                    retryListener
-                )
+                FooterViewHolder(parent.inflate(R.layout.abc_load_more_view, false), retryListener)
             } else {
                 innerAdapter.onCreateViewHolder(parent, viewType)
             }
