@@ -14,14 +14,17 @@ private const val EVENT_BUFFER_CAPACITY = Int.MAX_VALUE / 2
 @PublishedApi
 internal class EventFlow<T> {
 
-    @PublishedApi
-    internal val flow by lazy {
+    private val flowLazy = lazy {
         MutableSharedFlow<T>(extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
 
     private val stickyFlowLazy = lazy {
         MutableSharedFlow<T>(replay = EVENT_BUFFER_CAPACITY, extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
+
+    @PublishedApi
+    internal val flow: MutableSharedFlow<T>
+        get() = flowLazy.value
 
     @PublishedApi
     internal val stickyFlow: MutableSharedFlow<T>
@@ -36,7 +39,9 @@ internal class EventFlow<T> {
 
     suspend fun emitSticky(event: T) {
         stickyFlow.emit(event)
-        flow.emit(event)
+        if (flowLazy.isInitialized()) {
+            flow.emit(event)
+        }
     }
 
     suspend inline fun collect(crossinline action: suspend (T) -> Unit) {
