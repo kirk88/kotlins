@@ -396,7 +396,6 @@ object FlowEventBus {
 
     inline fun <T> LifecycleOwner.collectEventWithLifecycle(
         name: String,
-        lifecycle: Lifecycle,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
         crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
@@ -410,7 +409,6 @@ object FlowEventBus {
     }
 
     inline fun <reified T> LifecycleOwner.collectEventWithLifecycle(
-        lifecycle: Lifecycle,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
         crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
@@ -426,7 +424,6 @@ object FlowEventBus {
 
     inline fun <T> LifecycleOwner.collectStickEventWithLifecycle(
         name: String,
-        lifecycle: Lifecycle,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
         crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
@@ -440,7 +437,6 @@ object FlowEventBus {
     }
 
     inline fun <reified T> LifecycleOwner.collectStickEventWithLifecycle(
-        lifecycle: Lifecycle,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
         crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
