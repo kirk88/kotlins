@@ -61,10 +61,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         setupAppBarWithController(navController)
 
-        repeat(10){
-            emitStickyEvent("event")
-        }
-
+        emitStickyEvent("event")
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {

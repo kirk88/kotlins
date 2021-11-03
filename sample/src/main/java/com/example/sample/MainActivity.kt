@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
 import com.example.sample.db.AppDatabase
@@ -27,7 +28,11 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
+import com.nice.common.event.FlowEventBus.clearStickyEvent
+import com.nice.common.event.FlowEventBus.collectEvent
 import com.nice.common.event.FlowEventBus.collectEventWithLifecycle
+import com.nice.common.event.FlowEventBus.collectStickEvent
+import com.nice.common.event.FlowEventBus.collectStickEventWithLifecycle
 import com.nice.common.event.FlowEventBus.emitEvent
 import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.*
@@ -78,18 +83,11 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         }
 
 
-//        collectStickEventWithLifecycle<String>(){
-//            Log.e("TAGTAG", "collectStickEventWithLifecycle: $it")
-//        }
-
-        collectEventWithLifecycle<String>(){
-            Log.e("TAGTAG", "collectStickEventWithLifecycle2: $it")
-        }
-
         emitStickyEvent("3")
 
-
-        emitEvent("4")
+        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
+            Log.e("TAGTAG", "collectStickEventWithLifecycle: $it")
+        }
 
 //        testDB()
 //        initBle()

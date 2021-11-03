@@ -4,6 +4,7 @@ package com.nice.common.event
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -19,7 +20,7 @@ internal class EventFlow<T> {
     }
 
     private val stickyEventsLazy = lazy {
-        MutableSharedFlow<T>(replay = EVENT_BUFFER_CAPACITY)
+        MutableSharedFlow<T>(replay = 1, extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
 
     private val events by eventsLazy
@@ -64,6 +65,12 @@ internal class EventFlow<T> {
         crossinline action: suspend (T) -> Unit
     ) {
         sharedStickyEvents.flowWithLifecycle(lifecycle, minActiveState).collect(action)
+    }
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun clearStickyCache() {
+        stickyEvents.resetReplayCache()
     }
 
 }

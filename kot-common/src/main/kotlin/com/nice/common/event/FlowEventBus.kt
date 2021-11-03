@@ -424,7 +424,7 @@ object FlowEventBus {
     inline fun <T> LifecycleOwner.collectStickEventWithLifecycle(
         name: String,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        noinline action: suspend (T?) -> Unit
+        crossinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
         eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, action)
     }
@@ -497,5 +497,10 @@ object FlowEventBus {
     ): Job = GlobalScope.launch {
         eventFlow<T>().collectSticky(action)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun clearStickyEvent(name: String) = eventFlow<Any>(name).clearStickyCache()
+
+    inline fun <reified T> clearStickyEvent() = eventFlow<T>().clearStickyCache()
 
 }
