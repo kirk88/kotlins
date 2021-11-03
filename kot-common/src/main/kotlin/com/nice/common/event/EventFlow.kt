@@ -9,16 +9,18 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 
+private const val EVENT_BUFFER_CAPACITY = Int.MAX_VALUE / 2
+
 @PublishedApi
 internal class EventFlow<T> {
 
     @PublishedApi
     internal val flow by lazy {
-        MutableSharedFlow<T>(extraBufferCapacity = Int.MAX_VALUE)
+        MutableSharedFlow<T>(extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
 
     private val stickyFlowLazy = lazy {
-        MutableSharedFlow<T>(replay = 1, extraBufferCapacity = Int.MAX_VALUE)
+        MutableSharedFlow<T>(replay = EVENT_BUFFER_CAPACITY, extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
 
     @PublishedApi
