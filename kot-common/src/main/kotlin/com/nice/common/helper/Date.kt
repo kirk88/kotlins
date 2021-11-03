@@ -11,8 +11,6 @@ private fun getFormatter(pattern: String): SimpleDateFormat {
     return SimpleDateFormat(pattern, Locale.getDefault())
 }
 
-val Now: Date get() = Date()
-
 fun Date.toDateString(pattern: String = DEFAULT_TIME_PATTERN): String = getFormatter(pattern).format(this)
 
 fun String.toDate(pattern: String = DEFAULT_TIME_PATTERN): Date = requireNotNull(getFormatter(pattern).parse(this))
