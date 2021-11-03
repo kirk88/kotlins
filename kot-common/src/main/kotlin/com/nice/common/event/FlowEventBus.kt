@@ -4,7 +4,6 @@ package com.nice.common.event
 
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.SharedFlow
 
 object FlowEventBus {
 
@@ -425,7 +424,7 @@ object FlowEventBus {
     inline fun <T> LifecycleOwner.collectStickEventWithLifecycle(
         name: String,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline action: suspend (T?) -> Unit
+        noinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
         eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, action)
     }
@@ -438,7 +437,7 @@ object FlowEventBus {
 
     inline fun <reified T> LifecycleOwner.collectStickEventWithLifecycle(
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline action: suspend (T?) -> Unit
+        noinline action: suspend (T?) -> Unit
     ): Job = lifecycleScope.launch {
         eventFlow<T>().collectStickyWithLifecycle(lifecycle, minActiveState, action)
     }
@@ -499,17 +498,4 @@ object FlowEventBus {
         eventFlow<T>().collectSticky(action)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearStickyEvent(name: String) = eventFlow<Any>(name).clearStickyCache()
-
-    inline fun <reified T> clearStickyEvent() = eventFlow<T>().clearStickyCache()
-
 }
-
-fun <T> eventOf(name: String): SharedFlow<T?> = FlowEventBus.eventFlow<T>(name).asSharedFlow()
-
-inline fun <reified T> eventOf(): SharedFlow<T?> = FlowEventBus.eventFlow<T>().asSharedFlow()
-
-fun <T> stickyEventOf(name: String): SharedFlow<T?> = FlowEventBus.eventFlow<T>(name).asStickySharedFlow()
-
-inline fun <reified T> stickyEventOf(): SharedFlow<T?> = FlowEventBus.eventFlow<T>().asStickySharedFlow()

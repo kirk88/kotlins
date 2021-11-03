@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:visibility="gone"
         android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:navigationAsUp="true"
         app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
@@ -21,7 +22,7 @@
     <com.nice.common.widget.StatefulFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:defaultShow="empty"
+        app:defaultShow="content"
         app:emptyButtonVisible="true"
         app:emptyButtonText="234234"
         app:emptyImage="@mipmap/ic_launcher">

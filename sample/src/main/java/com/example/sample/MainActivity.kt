@@ -27,6 +27,9 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
+import com.nice.common.event.FlowEventBus.collectEventWithLifecycle
+import com.nice.common.event.FlowEventBus.emitEvent
+import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.*
 import com.nice.common.widget.*
 import com.nice.sqlite.asMapSequence
@@ -73,6 +76,20 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
         GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
             showToast("what?")
         }
+
+
+//        collectStickEventWithLifecycle<String>(){
+//            Log.e("TAGTAG", "collectStickEventWithLifecycle: $it")
+//        }
+
+        collectEventWithLifecycle<String>(){
+            Log.e("TAGTAG", "collectStickEventWithLifecycle2: $it")
+        }
+
+        emitStickyEvent("3")
+
+
+        emitEvent("4")
 
 //        testDB()
 //        initBle()

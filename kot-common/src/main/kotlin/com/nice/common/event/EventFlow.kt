@@ -4,8 +4,8 @@ package com.nice.common.event
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 
@@ -14,38 +14,36 @@ private const val EVENT_BUFFER_CAPACITY = Int.MAX_VALUE / 2
 @PublishedApi
 internal class EventFlow<T> {
 
-    private val flowLazy = lazy {
+    private val eventsLazy = lazy {
         MutableSharedFlow<T>(extraBufferCapacity = EVENT_BUFFER_CAPACITY)
     }
 
-    private val stickyFlowLazy = lazy {
-        MutableSharedFlow<T>(replay = EVENT_BUFFER_CAPACITY, extraBufferCapacity = EVENT_BUFFER_CAPACITY)
+    private val stickyEventsLazy = lazy {
+        MutableSharedFlow<T>(replay = EVENT_BUFFER_CAPACITY)
     }
 
-    @PublishedApi
-    internal val flow: MutableSharedFlow<T>
-        get() = flowLazy.value
+    private val events by eventsLazy
+    val sharedEvents: SharedFlow<T> by lazy { events.asSharedFlow() }
 
-    @PublishedApi
-    internal val stickyFlow: MutableSharedFlow<T>
-        get() = stickyFlowLazy.value
+    private val stickyEvents by stickyEventsLazy
+    val sharedStickyEvents: SharedFlow<T> by lazy { stickyEvents.asSharedFlow() }
 
     suspend fun emit(event: T) {
-        flow.emit(event)
-        if (stickyFlowLazy.isInitialized()) {
-            stickyFlow.emit(event)
+        events.emit(event)
+        if (stickyEventsLazy.isInitialized()) {
+            stickyEvents.emit(event)
         }
     }
 
     suspend fun emitSticky(event: T) {
-        stickyFlow.emit(event)
-        if (flowLazy.isInitialized()) {
-            flow.emit(event)
+        stickyEvents.emit(event)
+        if (eventsLazy.isInitialized()) {
+            events.emit(event)
         }
     }
 
     suspend inline fun collect(crossinline action: suspend (T) -> Unit) {
-        flow.asSharedFlow().collect(action)
+        sharedEvents.collect(action)
     }
 
     suspend inline fun collectWithLifecycle(
@@ -53,11 +51,11 @@ internal class EventFlow<T> {
         minActiveState: Lifecycle.State,
         crossinline action: suspend (T) -> Unit
     ) {
-        flow.asSharedFlow().flowWithLifecycle(lifecycle, minActiveState).collect(action)
+        sharedEvents.flowWithLifecycle(lifecycle, minActiveState).collect(action)
     }
 
     suspend inline fun collectSticky(crossinline action: suspend (T) -> Unit) {
-        stickyFlow.asSharedFlow().collect(action)
+        sharedStickyEvents.collect(action)
     }
 
     suspend inline fun collectStickyWithLifecycle(
@@ -65,18 +63,7 @@ internal class EventFlow<T> {
         minActiveState: Lifecycle.State,
         crossinline action: suspend (T) -> Unit
     ) {
-        stickyFlow.asSharedFlow().flowWithLifecycle(lifecycle, minActiveState).collect(action)
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearStickyCache() {
-        stickyFlow.resetReplayCache()
+        sharedStickyEvents.flowWithLifecycle(lifecycle, minActiveState).collect(action)
     }
 
 }
-
-@PublishedApi
-internal fun <T> EventFlow<T>.asSharedFlow() = flow.asSharedFlow()
-
-@PublishedApi
-internal fun <T> EventFlow<T>.asStickySharedFlow() = stickyFlow.asSharedFlow()

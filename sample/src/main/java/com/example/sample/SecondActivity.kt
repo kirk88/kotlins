@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.common.app.NiceViewModelActivity
+import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.*
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
@@ -59,6 +60,11 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
         }
 
         setupAppBarWithController(navController)
+
+        repeat(10){
+            emitStickyEvent("event")
+        }
+
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {
