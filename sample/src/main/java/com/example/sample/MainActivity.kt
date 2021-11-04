@@ -28,12 +28,7 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
-import com.nice.common.event.FlowEventBus.clearStickyEvent
-import com.nice.common.event.FlowEventBus.collectEvent
-import com.nice.common.event.FlowEventBus.collectEventWithLifecycle
-import com.nice.common.event.FlowEventBus.collectStickEvent
 import com.nice.common.event.FlowEventBus.collectStickEventWithLifecycle
-import com.nice.common.event.FlowEventBus.emitEvent
 import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.*
 import com.nice.common.widget.*
@@ -84,6 +79,8 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
 
         emitStickyEvent("3")
+
+//        clearStickyEvent<String>()
 
         collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
             Log.e("TAGTAG", "collectStickEventWithLifecycle: $it")
