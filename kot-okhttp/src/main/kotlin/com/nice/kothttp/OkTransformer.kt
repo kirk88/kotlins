@@ -17,16 +17,14 @@ internal class OkTransformer<T> {
 
     suspend fun transformResponse(response: Response): T {
         return try {
-            requireNotNull(responseMapper) {
-                "OkResponseMapper must not be null"
-            }.invoke(response)
+            requireNotNull(responseMapper) { "OkResponseMapper is null" }.map(response)
         } catch (error: Throwable) {
             transformError(error)
         }
     }
 
     suspend fun transformError(error: Throwable): T {
-        return errorMapper?.invoke(error) ?: throw error
+        return errorMapper?.map(error) ?: throw error
     }
 
 }

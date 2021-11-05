@@ -7,8 +7,17 @@ import okhttp3.Response
 import okio.ByteString
 import java.io.InputStream
 
-typealias OkResponseMapper<T> = suspend (Response) -> T
-typealias OkErrorMapper<T> = suspend (Throwable) -> T
+fun interface OkResponseMapper<T> {
+    suspend fun map(response: Response): T
+}
+
+fun interface OkErrorMapper<T> {
+    suspend fun map(error: Throwable): T
+}
+
+suspend operator fun <T> OkResponseMapper<T>.invoke(response: Response) = map(response)
+
+suspend operator fun <T> OkErrorMapper<T>.invoke(error: Throwable) = map(error)
 
 @PublishedApi
 internal val GSON: Gson = GsonBuilder()
@@ -17,14 +26,15 @@ internal val GSON: Gson = GsonBuilder()
     .create()
 
 @PublishedApi
-internal inline fun <reified T> typeMapper(): OkResponseMapper<T> = {
+internal inline fun <reified T> typeMapper(): OkResponseMapper<T> = OkResponseMapper {
     val typeToken = object : TypeToken<T>() {}
+    val body by lazy { requireNotNull(it.body) { "ResponseBody is null" } }
     when (typeToken.rawType) {
         Response::class.java -> it as T
-        String::class.java -> it.body!!.string() as T
-        ByteArray::class.java -> it.body!!.bytes() as T
-        ByteString::class.java -> it.body!!.byteString() as T
-        InputStream::class.java -> it.body!!.byteStream() as T
-        else -> GSON.fromJson(it.body!!.string(), typeToken.type)
+        String::class.java -> body.string() as T
+        ByteArray::class.java -> body.bytes() as T
+        ByteString::class.java -> body.byteString() as T
+        InputStream::class.java -> body.byteStream() as T
+        else -> GSON.fromJson(body.string(), typeToken.type)
     }
 }

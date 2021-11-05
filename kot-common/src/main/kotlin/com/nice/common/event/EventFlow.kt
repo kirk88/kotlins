@@ -2,15 +2,16 @@
 
 package com.nice.common.event
 
+import android.util.ArrayMap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.nice.common.helper.orZero
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onSubscription
-
-typealias FlowReceiver<T> = suspend (T) -> Unit
+import java.util.*
 
 @PublishedApi
 internal class EventFlow<T> {
@@ -20,24 +21,24 @@ internal class EventFlow<T> {
     }
     private val events by eventsLazy
 
-    private val eventReplayCache = mutableListOf<T>()
-    private val eventRepliedCounts = mutableMapOf<FlowReceiver<T>, Int>()
+    private var replayEvents: LinkedList<T>? = null
+    private val repliedCounts = ArrayMap<FlowReceiver<T>, Int>()
 
     suspend fun emit(value: T) {
         events.emit(value)
     }
 
     suspend fun emitSticky(value: T) {
-        eventReplayCache.add(value)
+        enqueueReply(value)
         events.emit(value)
     }
 
     suspend fun collect(receiver: FlowReceiver<T>) {
-        events.collect(receiver)
+        events.collect(receiver::onReceive)
     }
 
     suspend fun collectSticky(receiver: FlowReceiver<T>) {
-        events.onSubscription { replayIfNeed(receiver) }.collect(receiver)
+        events.flowWithReplay(receiver).collect(receiver::onReceive)
     }
 
     suspend fun collectStickyWithLifecycle(
@@ -46,20 +47,55 @@ internal class EventFlow<T> {
         receiver: FlowReceiver<T>
     ) {
         lifecycle.repeatOnLifecycle(minActiveState) {
-            events.onSubscription { replayIfNeed(receiver) }.collect(receiver)
+            events.flowWithReplay(receiver).collect(receiver::onReceive)
         }
     }
 
-    private suspend fun FlowCollector<T>.replayIfNeed(receiver: FlowReceiver<T>) {
-        eventReplayCache
-            .drop(eventRepliedCounts[receiver] ?: 0)
-            .forEach { emit(it) }
-        eventRepliedCounts[receiver] = eventReplayCache.size
+    private suspend fun SharedFlow<T>.flowWithReplay(receiver: FlowReceiver<T>) = onSubscription {
+        val replayEvents = replayEvents ?: return@onSubscription
+        val repliedCount = getRepliedCount(receiver)
+        try {
+            replayEvents.drop(repliedCount).forEach { emit(it) }
+        } finally {
+            updateRepliedCount(receiver)
+        }
+    }
+
+    private fun getRepliedCount(receiver: FlowReceiver<T>): Int {
+        val repliedCount: Int
+        synchronized(this) {
+            repliedCount = repliedCounts[receiver].orZero()
+        }
+        return repliedCount
+    }
+
+    private fun updateRepliedCount(receiver: FlowReceiver<T>) {
+        synchronized(this) {
+            if (replayEvents != null) {
+                repliedCounts[receiver] = replayEvents!!.size
+            }
+        }
+    }
+
+    private fun enqueueReply(value: T) {
+        synchronized(this) {
+            val cache = replayEvents ?: LinkedList<T>().also { replayEvents = it }
+            cache.add(value)
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun clearStickyCache() {
-        eventReplayCache.clear()
+        synchronized(this) {
+            replayEvents?.clear()
+            replayEvents = null
+        }
     }
 
 }
+
+fun interface FlowReceiver<T> {
+    suspend fun onReceive(value: T)
+}
+
+suspend operator fun <T> FlowReceiver<T>.invoke(value: T) = onReceive(value)

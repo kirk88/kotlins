@@ -206,6 +206,24 @@ object FlowEventBus {
         eventFlow<T>().emitSticky(event())
     }
 
+    suspend fun <T> emitEvent(
+        name: String,
+        event: T?
+    ) = eventFlow<T>(name).emit(event)
+
+    suspend inline fun <reified T> emitEvent(
+        event: T?
+    ) = eventFlow<T>().emit(event)
+
+    suspend fun <T> emitStickyEvent(
+        name: String,
+        event: T?
+    ) = eventFlow<T>(name).emitSticky(event)
+
+    suspend inline fun <reified T> emitStickyEvent(
+        event: T?
+    ) = eventFlow<T>().emitSticky(event)
+
     fun <T> LifecycleOwner.emitEventWhenCreated(
         name: String,
         event: T?,
@@ -483,7 +501,24 @@ object FlowEventBus {
         eventFlow<T>().collectSticky(receiver)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun <T> collectEvent(
+        name: String,
+        receiver: FlowReceiver<T?>
+    ) = eventFlow<T>(name).collect(receiver)
+
+    suspend inline fun <reified T> collectEvent(
+        receiver: FlowReceiver<T?>
+    ) = eventFlow<T>().collect(receiver)
+
+    suspend fun <T> collectStickyEvent(
+        name: String,
+        receiver: FlowReceiver<T?>
+    ) = eventFlow<T>(name).collectSticky(receiver)
+
+    suspend inline fun <reified T> collectStickyEvent(
+        receiver: FlowReceiver<T?>
+    ) = eventFlow<T>().collectSticky(receiver)
+
     fun clearStickyEvent(name: String) = eventFlow<Any>(name).clearStickyCache()
 
     inline fun <reified T> clearStickyEvent() = eventFlow<T>().clearStickyCache()

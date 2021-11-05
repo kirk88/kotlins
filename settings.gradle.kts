@@ -82,7 +82,7 @@ dependencyResolutionManagement {
             alias("androidx-activity-ktx").to("androidx.activity", "activity-ktx")
                 .version("1.4.0")
             alias("androidx-fragment-ktx").to("androidx.fragment", "fragment-ktx")
-                .version("1.4.0-beta01")
+                .version("1.4.0-rc01")
             alias("androidx-appcompat").to("androidx.appcompat", "appcompat")
                 .version("1.4.0-rc01")
             bundle(
@@ -102,7 +102,7 @@ dependencyResolutionManagement {
             )
 
             alias("androidx-annotation").to("androidx.annotation", "annotation")
-                .version("1.3.0-rc01")
+                .version("1.3.0")
             alias("androidx-setup").to("androidx.startup", "startup-runtime")
                 .version("1.1.0")
 

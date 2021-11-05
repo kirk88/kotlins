@@ -28,6 +28,9 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
+import com.nice.common.event.FlowEventBus
+import com.nice.common.event.FlowEventBus.collectEvent
+import com.nice.common.event.FlowEventBus.collectStickEvent
 import com.nice.common.event.FlowEventBus.collectStickEventWithLifecycle
 import com.nice.common.event.FlowEventBus.emitEvent
 import com.nice.common.event.FlowEventBus.emitStickyEvent
@@ -52,7 +55,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
     private val binding: ActivityMainBinding by viewBindings()
 
-    override val tipView: TipView by tipViews{ defaultSnackTipViewFactory }
+    override val tipView: TipView by tipViews { defaultSnackTipViewFactory }
 
     private val permissionRequestLauncher =
         PocketActivityResultLauncher(ActivityResultContracts.RequestMultiplePermissions())
@@ -78,19 +81,27 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             showToast("what?")
         }
 
+        emitEvent("2")
 
         emitStickyEvent("3")
 
 //        clearStickyEvent<String>()
 
-        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
+        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED) {
             Log.e("TAGTAG", "collectStickEventWithLifecycle1: $it")
         }
 
-        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
+        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED) {
             Log.e("TAGTAG", "collectStickEventWithLifecycle2: $it")
         }
 
+        collectStickEvent<String> {
+            Log.e("TAGTAG", "collectStickEvent: $it")
+        }
+
+        collectEvent<String> {
+            Log.e("TAGTAG", "collectEvent: $it")
+        }
 
         emitStickyEvent("4")
 
@@ -98,6 +109,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
 //        testDB()
 //        initBle()
+
+        lifecycleScope.launch {
+
+            FlowEventBus.emitStickyEventGlobal {
+                ""
+            }
+        }
 
     }
 

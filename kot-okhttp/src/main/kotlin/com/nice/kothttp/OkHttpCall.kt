@@ -45,7 +45,7 @@ class OkHttpCall<T> internal constructor(
                 val response = call.execute()
                 con.resume(response)
             }
-            transformer.transformResponse(processResponse(response))
+            transformer.transformResponse(interceptResponse(response))
         }
         emit(result)
     }
@@ -57,7 +57,7 @@ class OkHttpCall<T> internal constructor(
         }
         if (realCall == null) {
             try {
-                this.call = client.newCall(processRequest(request))
+                this.call = client.newCall(interceptRequest(request))
                 realCall = this.call
             } catch (error: Throwable) {
                 creationFailure = error
@@ -67,18 +67,18 @@ class OkHttpCall<T> internal constructor(
         return realCall!!
     }
 
-    private suspend fun processRequest(request: Request): Request {
+    private suspend fun interceptRequest(request: Request): Request {
         var handledRequest = request
         for (interceptor in requestInterceptors) {
-            handledRequest = interceptor.invoke(handledRequest)
+            handledRequest = interceptor.intercept(handledRequest)
         }
         return handledRequest
     }
 
-    private suspend fun processResponse(response: Response): Response {
+    private suspend fun interceptResponse(response: Response): Response {
         var handledResponse = response
         for (interceptor in responseInterceptors) {
-            handledResponse = interceptor.invoke(handledResponse)
+            handledResponse = interceptor.intercept(handledResponse)
         }
         return handledResponse
     }
