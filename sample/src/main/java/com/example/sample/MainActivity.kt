@@ -29,6 +29,7 @@ import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
 import com.nice.common.event.FlowEventBus.collectStickEventWithLifecycle
+import com.nice.common.event.FlowEventBus.emitEvent
 import com.nice.common.event.FlowEventBus.emitStickyEvent
 import com.nice.common.helper.*
 import com.nice.common.widget.*
@@ -83,8 +84,17 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 //        clearStickyEvent<String>()
 
         collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
-            Log.e("TAGTAG", "collectStickEventWithLifecycle: $it")
+            Log.e("TAGTAG", "collectStickEventWithLifecycle1: $it")
         }
+
+        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED){
+            Log.e("TAGTAG", "collectStickEventWithLifecycle2: $it")
+        }
+
+
+        emitStickyEvent("4")
+
+        emitEvent("5")
 
 //        testDB()
 //        initBle()

@@ -3,74 +3,63 @@
 package com.nice.common.event
 
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onSubscription
 
-private const val EVENT_BUFFER_CAPACITY = Int.MAX_VALUE / 2
+typealias FlowReceiver<T> = suspend (T) -> Unit
 
 @PublishedApi
 internal class EventFlow<T> {
 
     private val eventsLazy = lazy {
-        MutableSharedFlow<T>(extraBufferCapacity = EVENT_BUFFER_CAPACITY)
+        MutableSharedFlow<T>(extraBufferCapacity = Int.MAX_VALUE)
     }
-
-    private val stickyEventsLazy = lazy {
-        MutableSharedFlow<T>(replay = 1, extraBufferCapacity = EVENT_BUFFER_CAPACITY)
-    }
-
     private val events by eventsLazy
-    val sharedEvents: SharedFlow<T> by lazy { events.asSharedFlow() }
 
-    private val stickyEvents by stickyEventsLazy
-    val sharedStickyEvents: SharedFlow<T> by lazy { stickyEvents.asSharedFlow() }
+    private val eventReplayCache = mutableListOf<T>()
+    private val eventRepliedCounts = mutableMapOf<FlowReceiver<T>, Int>()
 
-    suspend fun emit(event: T) {
-        events.emit(event)
-        if (stickyEventsLazy.isInitialized()) {
-            stickyEvents.emit(event)
+    suspend fun emit(value: T) {
+        events.emit(value)
+    }
+
+    suspend fun emitSticky(value: T) {
+        eventReplayCache.add(value)
+        events.emit(value)
+    }
+
+    suspend fun collect(receiver: FlowReceiver<T>) {
+        events.collect(receiver)
+    }
+
+    suspend fun collectSticky(receiver: FlowReceiver<T>) {
+        events.onSubscription { replayIfNeed(receiver) }.collect(receiver)
+    }
+
+    suspend fun collectStickyWithLifecycle(
+        lifecycle: Lifecycle,
+        minActiveState: Lifecycle.State,
+        receiver: FlowReceiver<T>
+    ) {
+        lifecycle.repeatOnLifecycle(minActiveState) {
+            events.onSubscription { replayIfNeed(receiver) }.collect(receiver)
         }
     }
 
-    suspend fun emitSticky(event: T) {
-        stickyEvents.emit(event)
-        if (eventsLazy.isInitialized()) {
-            events.emit(event)
-        }
+    private suspend fun FlowCollector<T>.replayIfNeed(receiver: FlowReceiver<T>) {
+        eventReplayCache
+            .drop(eventRepliedCounts[receiver] ?: 0)
+            .forEach { emit(it) }
+        eventRepliedCounts[receiver] = eventReplayCache.size
     }
-
-    suspend inline fun collect(crossinline action: suspend (T) -> Unit) {
-        sharedEvents.collect(action)
-    }
-
-    suspend inline fun collectWithLifecycle(
-        lifecycle: Lifecycle,
-        minActiveState: Lifecycle.State,
-        crossinline action: suspend (T) -> Unit
-    ) {
-        sharedEvents.flowWithLifecycle(lifecycle, minActiveState).collect(action)
-    }
-
-    suspend inline fun collectSticky(crossinline action: suspend (T) -> Unit) {
-        sharedStickyEvents.collect(action)
-    }
-
-    suspend inline fun collectStickyWithLifecycle(
-        lifecycle: Lifecycle,
-        minActiveState: Lifecycle.State,
-        crossinline action: suspend (T) -> Unit
-    ) {
-        sharedStickyEvents.flowWithLifecycle(lifecycle, minActiveState).collect(action)
-    }
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun clearStickyCache() {
-        stickyEvents.resetReplayCache()
+        eventReplayCache.clear()
     }
 
 }

@@ -386,116 +386,101 @@ object FlowEventBus {
         eventFlow<T>().emitSticky(event())
     }
 
-    inline fun <T> LifecycleOwner.collectEvent(
+    fun <T> LifecycleOwner.collectEvent(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>(name).collect(action)
-    }
-
-    inline fun <T> LifecycleOwner.collectEventWithLifecycle(
-        name: String,
-        minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline action: suspend (T?) -> Unit
-    ): Job = lifecycleScope.launch {
-        eventFlow<T>(name).collectWithLifecycle(lifecycle, minActiveState, action)
+        eventFlow<T>(name).collect(receiver)
     }
 
     inline fun <reified T> LifecycleOwner.collectEvent(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>().collect(action)
+        eventFlow<T>().collect(receiver)
     }
 
-    inline fun <reified T> LifecycleOwner.collectEventWithLifecycle(
-        minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline action: suspend (T?) -> Unit
-    ): Job = lifecycleScope.launch {
-        eventFlow<T>().collectWithLifecycle(lifecycle, minActiveState, action)
-    }
-
-    inline fun <T> LifecycleOwner.collectStickEvent(
+    fun <T> LifecycleOwner.collectStickEvent(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>(name).collectSticky(action)
+        eventFlow<T>(name).collectSticky(receiver)
     }
 
-    inline fun <T> LifecycleOwner.collectStickEventWithLifecycle(
+    fun <T> LifecycleOwner.collectStickEventWithLifecycle(
         name: String,
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, action)
+        eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, receiver)
     }
 
     inline fun <reified T> LifecycleOwner.collectStickEvent(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>().collectSticky(action)
+        eventFlow<T>().collectSticky(receiver)
     }
 
     inline fun <reified T> LifecycleOwner.collectStickEventWithLifecycle(
         minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-        noinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = lifecycleScope.launch {
-        eventFlow<T>().collectStickyWithLifecycle(lifecycle, minActiveState, action)
+        eventFlow<T>().collectStickyWithLifecycle(lifecycle, minActiveState, receiver)
     }
 
-    inline fun <T> ViewModel.collectEvent(
+    fun <T> ViewModel.collectEvent(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = viewModelScope.launch {
-        eventFlow<T>(name).collect(action)
+        eventFlow<T>(name).collect(receiver)
     }
 
     inline fun <reified T> ViewModel.collectEvent(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = viewModelScope.launch {
-        eventFlow<T>().collect(action)
+        eventFlow<T>().collect(receiver)
     }
 
-    inline fun <T> ViewModel.collectStickyEvent(
+    fun <T> ViewModel.collectStickyEvent(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = viewModelScope.launch {
-        eventFlow<T>(name).collectSticky(action)
+        eventFlow<T>(name).collectSticky(receiver)
     }
 
     inline fun <reified T> ViewModel.collectStickyEvent(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = viewModelScope.launch {
-        eventFlow<T>().collectSticky(action)
+        eventFlow<T>().collectSticky(receiver)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T> collectEventForever(
+    fun <T> collectEventForever(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = GlobalScope.launch {
-        eventFlow<T>(name).collect(action)
+        eventFlow<T>(name).collect(receiver)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     inline fun <reified T> collectEventForever(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = GlobalScope.launch {
-        eventFlow<T>().collect(action)
+        eventFlow<T>().collect(receiver)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <T> collectStickyEventForever(
+    fun <T> collectStickyEventForever(
         name: String,
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = GlobalScope.launch {
-        eventFlow<T>(name).collectSticky(action)
+        eventFlow<T>(name).collectSticky(receiver)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     inline fun <reified T> collectStickyEventForever(
-        crossinline action: suspend (T?) -> Unit
+        receiver: FlowReceiver<T?>
     ): Job = GlobalScope.launch {
-        eventFlow<T>().collectSticky(action)
+        eventFlow<T>().collectSticky(receiver)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

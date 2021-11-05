@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
 android {
     compileSdk = androids.versions.compileSdk.get().toInt()
 
