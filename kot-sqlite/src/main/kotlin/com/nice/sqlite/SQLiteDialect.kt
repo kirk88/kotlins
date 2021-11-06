@@ -11,7 +11,7 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         val columns = statement.definitions.filterIsInstance<Column<*>>()
-        if (!columns.none()) {
+        if (!columns.isEmpty()) {
             builder.append("CREATE TABLE IF NOT EXISTS ")
             builder.append(statement.subject.table.render())
             builder.append(" (")
@@ -22,7 +22,7 @@ object SQLiteDialect : Dialect {
         }
 
         val indexes = statement.definitions.filterIsInstance<Index>()
-        if (!indexes.none()) {
+        if (!indexes.isEmpty()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
                 compileCreateIndexSql(it)
             }
@@ -35,14 +35,14 @@ object SQLiteDialect : Dialect {
         val builder = StringBuilder()
 
         val columns = statement.definitions.filterIsInstance<Column<*>>()
-        if (!columns.none()) {
+        if (!columns.isEmpty()) {
             columns.joinTo(builder, separator = ";") {
                 "ALTER TABLE ${statement.subject.table.render()} ADD ${compileColumnSql(it)}"
             }
         }
 
         val indexes = statement.definitions.filterIsInstance<Index>()
-        if (!indexes.none()) {
+        if (!indexes.isEmpty()) {
             indexes.joinTo(builder, separator = ";", prefix = ";") {
                 compileCreateIndexSql(it)
             }
@@ -54,13 +54,11 @@ object SQLiteDialect : Dialect {
     override fun <T : Table> build(statement: TableDropStatement<T>): String {
         val builder = StringBuilder()
 
-        if (statement.definitions.none()) {
+        if (statement.definitions.isEmpty()) {
             builder.append("DROP TABLE ")
             builder.append(statement.subject.table.render())
         } else {
-            check(statement.definitions.none {
-                it is Column<*>
-            }) { "Drop columns are not supported yet" }
+            check(statement.definitions.none { it is Column<*> }) { "Drop columns are not supported yet" }
 
             val indexes = statement.definitions.map { it as Index }
             indexes.joinTo(builder, separator = ";") {
@@ -78,7 +76,7 @@ object SQLiteDialect : Dialect {
         if (statement.distinct) {
             builder.append("DISTINCT ")
         }
-        if (statement.definitions.none()) {
+        if (statement.definitions.isEmpty()) {
             builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
@@ -138,7 +136,7 @@ object SQLiteDialect : Dialect {
         if (statement.distinct) {
             builder.append("DISTINCT ")
         }
-        if (statement.definitions.none()) {
+        if (statement.definitions.isEmpty()) {
             builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
@@ -209,7 +207,7 @@ object SQLiteDialect : Dialect {
         if (statement.distinct) {
             builder.append("DISTINCT ")
         }
-        if (statement.definitions.none()) {
+        if (statement.definitions.isEmpty()) {
             builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
@@ -301,7 +299,7 @@ object SQLiteDialect : Dialect {
         if (statement.distinct) {
             builder.append("DISTINCT ")
         }
-        if (statement.definitions.none()) {
+        if (statement.definitions.isEmpty()) {
             builder.append('*')
         } else {
             statement.definitions.joinTo(builder) {
@@ -406,18 +404,18 @@ object SQLiteDialect : Dialect {
 
         builder.append(" (")
 
-        statement.assignments.joinTo(builder) {
+        statement.values.joinTo(builder) {
             it.column.render()
         }
 
         builder.append(") VALUES (")
 
         if (statement.nativeBindValues) {
-            statement.assignments.joinTo(builder) {
+            statement.values.joinTo(builder) {
                 if (it.value is Definition) it.value.render() else "?"
             }
         } else {
-            statement.assignments.joinTo(builder) {
+            statement.values.joinTo(builder) {
                 it.value.toSqlString()
             }
         }
@@ -439,11 +437,11 @@ object SQLiteDialect : Dialect {
         builder.append(" SET ")
 
         if (statement.nativeBindValues) {
-            statement.assignments.joinTo(builder) {
+            statement.values.joinTo(builder) {
                 "${it.column.render()} = ${if (it.value is Definition) it.value.render() else "?"}"
             }
         } else {
-            statement.assignments.joinTo(builder) {
+            statement.values.joinTo(builder) {
                 "${it.column.render()} = ${it.value.toSqlString()}"
             }
         }

@@ -9,7 +9,7 @@ import com.nice.sqlite.core.TableSubject
 class InsertStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Bag<Value>,
+    val values: Bag<Assignment>,
     val nativeBindValues: Boolean = false
 ) : Statement {
 
@@ -61,13 +61,14 @@ class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
         insertSpecs.add(InsertPartBuilder(subject).apply(buildAction).build())
     }
 
+    override val size: Int get() = insertSpecs.size
     override fun iterator(): Iterator<InsertPart> = insertSpecs.iterator()
 
 }
 
 class InsertPart(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<Value>
+    val values: Bag<Assignment>
 ) {
 
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -95,11 +96,11 @@ class InsertPartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Bag<Value>
+    private lateinit var values: Bag<Assignment>
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Bag<Value>) {
+    fun values(values: (T) -> Bag<Assignment>) {
         this.values = values.invoke(subject.table)
     }
 

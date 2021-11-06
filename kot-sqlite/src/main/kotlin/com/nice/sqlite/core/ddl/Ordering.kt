@@ -9,6 +9,7 @@ interface Ordering : Bag<Ordering>, FullRenderer {
     val definition: Definition
     val direction: SqlOrderDirection
 
+    override val size: Int get() = 1
     override fun iterator(): Iterator<Ordering> = OnceIterator(this)
 
     override fun render(): String = "${definition.render()} $direction"

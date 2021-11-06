@@ -4,6 +4,10 @@ package com.nice.sqlite.core.ddl
 
 interface Bag<out T> {
 
+    val size: Int
+
+    fun isEmpty(): Boolean = size == 0
+
     operator fun iterator(): Iterator<T>
 
 }
@@ -18,6 +22,8 @@ interface MutableBag<T> : Bag<T> {
 
     fun removeAll(elements: Bag<T>): Boolean
 
+    fun clear()
+
 }
 
 operator fun <T> Bag<T>.plus(element: T): Bag<T> {
@@ -25,7 +31,7 @@ operator fun <T> Bag<T>.plus(element: T): Bag<T> {
         add(element)
         return this
     }
-    val bag = LinkedBag(this)
+    val bag = ArrayBag(this)
     bag.add(element)
     return bag
 }
@@ -36,35 +42,29 @@ operator fun <T> Bag<T>.minus(element: T): Bag<T> {
         return this
     }
     var removed = false
-    return filterTo(LinkedBag()) {
+    return filterTo(ArrayBag()) {
         if (!removed && it == element) {
             removed = true; false
         } else true
     }
 }
 
-internal class OnceIterator<T>(private val value: T) : Iterator<T> {
-    private var valid = true
-    override fun hasNext(): Boolean = valid
-    override fun next(): T {
-        valid = false
-        return value
-    }
-}
-
 @PublishedApi
-internal class LinkedBag<T> : MutableBag<T> {
+internal class ArrayBag<T> : MutableBag<T> {
 
-    private val delegate: LinkedHashSet<T>
+    private val delegate: ArrayList<T>
 
     constructor() : super() {
-        delegate = LinkedHashSet()
+        delegate = ArrayList()
     }
 
     constructor(elements: Bag<T>) : super() {
-        delegate = LinkedHashSet()
+        delegate = ArrayList()
         addAll(elements)
     }
+
+    override val size: Int
+        get() = delegate.size
 
     override fun add(element: T): Boolean = delegate.add(element)
 
@@ -90,8 +90,19 @@ internal class LinkedBag<T> : MutableBag<T> {
         return modified
     }
 
+    override fun clear() = delegate.clear()
+
     override fun iterator(): Iterator<T> = delegate.iterator()
 
+}
+
+internal class OnceIterator<T>(private val value: T) : Iterator<T> {
+    private var valid = true
+    override fun hasNext(): Boolean = valid
+    override fun next(): T {
+        valid = false
+        return value
+    }
 }
 
 internal object EmptyBagIterator : Iterator<Nothing> {
@@ -101,22 +112,28 @@ internal object EmptyBagIterator : Iterator<Nothing> {
 
 @PublishedApi
 internal object EmptyBag : Bag<Nothing> {
+    override val size: Int = 0
     override fun iterator(): Iterator<Nothing> = EmptyBagIterator
 }
 
 fun <T> emptyBag(): Bag<T> = EmptyBag
 
 fun <T> mutableBagOf(vararg elements: T): MutableBag<T> =
-    if (elements.isEmpty()) LinkedBag() else LinkedBag<T>().apply {
+    if (elements.isEmpty()) ArrayBag() else ArrayBag<T>().apply {
         for (element in elements) add(element)
     }
 
-fun <T> mutableBagOf(): MutableBag<T> = LinkedBag()
+fun <T> mutableBagOf(): MutableBag<T> = ArrayBag()
 
-fun <T> Bag<T>.none() = !iterator().hasNext()
+fun <T> bagOf(): Bag<T> = EmptyBag
+
+fun <T> bagOf(vararg elements: T): Bag<T> = object : Bag<T> {
+    override val size: Int = elements.size
+    override fun iterator(): Iterator<T> = elements.iterator()
+}
 
 inline fun <T> Bag<T>.none(predicate: (T) -> Boolean): Boolean {
-    if (none()) return true
+    if (isEmpty()) return true
     for (element in this) if (predicate(element)) return false
     return true
 }
@@ -132,7 +149,7 @@ inline fun <T, R> Bag<T>.mapTo(destination: MutableBag<R>, transform: (T) -> R):
 }
 
 inline fun <T, R> Bag<T>.map(transform: (T) -> R): Bag<R> {
-    return mapTo(LinkedBag(), transform)
+    return mapTo(ArrayBag(), transform)
 }
 
 inline fun <T, C : MutableBag<in T>> Bag<T>.filterTo(destination: C, predicate: (T) -> Boolean): C {
@@ -142,7 +159,7 @@ inline fun <T, C : MutableBag<in T>> Bag<T>.filterTo(destination: C, predicate: 
 }
 
 inline fun <T> Bag<T>.filter(predicate: (T) -> Boolean): Bag<T> {
-    return filterTo(LinkedBag(), predicate)
+    return filterTo(ArrayBag(), predicate)
 }
 
 inline fun <reified R, C : MutableBag<in R>> Bag<*>.filterIsInstanceTo(destination: C): C {
@@ -153,7 +170,7 @@ inline fun <reified R, C : MutableBag<in R>> Bag<*>.filterIsInstanceTo(destinati
 
 inline fun <reified R> Bag<*>.filterIsInstance(): Bag<R> {
     listOf<String>().withIndex()
-    return filterIsInstanceTo(LinkedBag())
+    return filterIsInstanceTo(ArrayBag())
 }
 
 fun <T> Bag<T>.withIndex(): Iterable<IndexedValue<T>> {

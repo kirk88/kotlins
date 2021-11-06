@@ -218,7 +218,7 @@ offer(TestTable).insert {
 ```kotlin
 offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
     for (bean in beans) {
-        assignments {
+        values {
             it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                     it.flag(bean.flag) + it.number(bean.number)
         }

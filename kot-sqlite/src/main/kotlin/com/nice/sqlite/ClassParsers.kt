@@ -3,7 +3,7 @@ package com.nice.sqlite
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
-inline fun <reified T : Any> classParser(): MapRowParser<T> = ClassParsers.get(T::class.java)
+inline fun <reified T : Any> classParser(): RowParser<T> = ClassParsers.get(T::class.java)
 
 private fun isApplicableType(type: Class<*>): Boolean {
     if (type.isPrimitive) {
@@ -21,9 +21,9 @@ private fun isApplicableType(type: Class<*>): Boolean {
     }
 }
 
-internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
+internal class ClassParser<T>(clazz: Class<T>) : RowParser<T> {
 
-    private val delegate: MapRowParser<T>
+    private val delegate: RowParser<T>
 
     init {
         val constructors = clazz.declaredConstructors
@@ -61,20 +61,20 @@ internal class ClassParser<T>(clazz: Class<T>) : MapRowParser<T> {
             }
     }
 
-    override fun parseRow(row: Map<String, ColumnValue>): T {
-        return delegate.parseRow(row)
+    override fun parse(row: Row): T {
+        return delegate.parse(row)
     }
 }
 
 internal class ClassConstructorParser<T>(
     private val constructor: Constructor<*>
-) : MapRowParser<T> {
+) : RowParser<T> {
 
     private val parameterTypes: Array<Class<*>> = constructor.parameterTypes
 
-    override fun parseRow(row: Map<String, ColumnValue>): T {
+    override fun parse(row: Row): T {
         if (parameterTypes.size != row.size) {
-            val columnsRendered = row.values.joinToString(prefix = "[", postfix = "]")
+            val columnsRendered = row.joinToString(prefix = "[", postfix = "]") { it.value.toString() }
             val parameterTypesRendered =
                 parameterTypes.joinToString(prefix = "[", postfix = "]") { it.name }
             throw IllegalArgumentException(
@@ -85,8 +85,8 @@ internal class ClassConstructorParser<T>(
         val args = arrayOfNulls<Any>(parameterTypes.size)
 
         for ((index, type) in parameterTypes.withIndex()) {
-            val value = row.values.elementAt(index)
-            args[index] = value.asTyped(type)
+            val element = row[index]
+            args[index] = element.asTyped(type)
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -97,15 +97,13 @@ internal class ClassConstructorParser<T>(
 
 internal class ClassFieldParser<T>(
     private val constructor: Constructor<*>
-) : MapRowParser<T> {
+) : RowParser<T> {
 
     private val adapter = ClassReflections.getAdapter(constructor.declaringClass)
 
-    override fun parseRow(row: Map<String, ColumnValue>): T {
+    override fun parse(row: Row): T {
         @Suppress("UNCHECKED_CAST")
-        return constructor.newInstance().also {
-            adapter.write(it, row)
-        } as T
+        return constructor.newInstance().also { adapter.write(it, row) } as T
     }
 
 }
@@ -117,9 +115,7 @@ internal object ClassParsers {
 
     fun <T> get(clazz: Class<T>): ClassParser<T> {
         @Suppress("UNCHECKED_CAST")
-        return parsers.getOrPut(clazz) {
-            ClassParser(clazz)
-        } as ClassParser<T>
+        return parsers.getOrPut(clazz) { ClassParser(clazz) } as ClassParser<T>
     }
 
 }

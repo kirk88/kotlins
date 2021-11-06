@@ -7,15 +7,11 @@ import android.database.sqlite.SQLiteException
 import java.nio.charset.StandardCharsets
 
 fun interface RowParser<out T> {
-    fun parseRow(row: Array<ColumnValue>): T
+    fun parse(row: Row): T
 }
 
-fun interface MapRowParser<out T> {
-    fun parseRow(row: Map<String, ColumnValue>): T
-}
-
-private class SingleColumnParser<out T>(val modifier: (ColumnValue) -> T) : RowParser<T> {
-    override fun parseRow(row: Array<ColumnValue>): T {
+private class SingleColumnParser<out T>(val modifier: (ColumnElement) -> T) : RowParser<T> {
+    override fun parse(row: Row): T {
         if (row.size != 1)
             throw SQLiteException("Invalid row: row for SingleColumnParser must contain exactly one column")
         @Suppress("UNCHECKED_CAST")
@@ -23,19 +19,19 @@ private class SingleColumnParser<out T>(val modifier: (ColumnValue) -> T) : RowP
     }
 }
 
-val ShortParser: RowParser<Short> = SingleColumnParser(modifier = ColumnValue::asShort)
-val IntParser: RowParser<Int> = SingleColumnParser(modifier = ColumnValue::asInt)
-val LongParser: RowParser<Long> = SingleColumnParser(modifier = ColumnValue::asLong)
-val FloatParser: RowParser<Float> = SingleColumnParser(modifier = ColumnValue::asFloat)
-val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = ColumnValue::asDouble)
-val StringParser: RowParser<String> = SingleColumnParser(modifier = ColumnValue::asString)
-val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = ColumnValue::asBlob)
+val ShortParser: RowParser<Short> = SingleColumnParser(modifier = ColumnElement::asShort)
+val IntParser: RowParser<Int> = SingleColumnParser(modifier = ColumnElement::asInt)
+val LongParser: RowParser<Long> = SingleColumnParser(modifier = ColumnElement::asLong)
+val FloatParser: RowParser<Float> = SingleColumnParser(modifier = ColumnElement::asFloat)
+val DoubleParser: RowParser<Double> = SingleColumnParser(modifier = ColumnElement::asDouble)
+val StringParser: RowParser<String> = SingleColumnParser(modifier = ColumnElement::asString)
+val BlobParser: RowParser<ByteArray> = SingleColumnParser(modifier = ColumnElement::asBlob)
 
 fun <T : Any> Cursor.single(parser: RowParser<T>): T = use {
     if (it.count != 1)
         throw SQLiteException("single accepts only cursors with getCount() == 1")
     it.moveToFirst()
-    return parser.parseRow(readColumnsArray(it))
+    return parser.parse(it.readRow())
 }
 
 fun <T : Any> Cursor.singleOrNull(parser: RowParser<T>): T? = use {
@@ -44,40 +40,14 @@ fun <T : Any> Cursor.singleOrNull(parser: RowParser<T>): T? = use {
     if (it.count == 0)
         return null
     it.moveToFirst()
-    return parser.parseRow(readColumnsArray(it))
+    return parser.parse(it.readRow())
 }
 
 fun <T : Any> Cursor.toList(parser: RowParser<T>): List<T> = use {
     val list = ArrayList<T>(it.count)
     it.moveToFirst()
     while (!it.isAfterLast) {
-        list.add(parser.parseRow(readColumnsArray(it)))
-        it.moveToNext()
-    }
-    return list
-}
-
-fun <T : Any> Cursor.single(parser: MapRowParser<T>): T = use {
-    if (it.count != 1)
-        throw SQLiteException("single accepts only cursors with getCount() == 1")
-    it.moveToFirst()
-    return parser.parseRow(readColumnsMap(it))
-}
-
-fun <T : Any> Cursor.singleOrNull(parser: MapRowParser<T>): T? = use {
-    if (it.count > 1)
-        throw SQLiteException("singleOrNull accepts only cursors with getCount() == 1 or empty cursors")
-    if (it.count == 0)
-        return null
-    it.moveToFirst()
-    return parser.parseRow(readColumnsMap(it))
-}
-
-fun <T : Any> Cursor.toList(parser: MapRowParser<T>): List<T> = use {
-    val list = ArrayList<T>(it.count)
-    it.moveToFirst()
-    while (!it.isAfterLast) {
-        list.add(parser.parseRow(readColumnsMap(it)))
+        list.add(parser.parse(it.readRow()))
         it.moveToNext()
     }
     return list
@@ -89,11 +59,19 @@ inline fun <reified T : Any> Cursor.singleOrNull(): T? = singleOrNull(classParse
 
 inline fun <reified T : Any> Cursor.toList(): List<T> = toList(classParser())
 
-fun Cursor.asSequence(): Sequence<Array<ColumnValue>> = CursorSequence(this).constrainOnce()
+fun Cursor.rowSequence(): Sequence<Row> = CursorRowSequence(this).constrainOnce()
 
-fun Cursor.asMapSequence(): Sequence<Map<String, ColumnValue>> = CursorMapSequence(this).constrainOnce()
+private fun Cursor.readRow(): Row {
+    val size = columnCount
+    val elements = ArrayList<ColumnElement>(size)
+    for (index in 0 until size) {
+        elements.add(getColumnElement(index))
+    }
+    return Row(elements)
+}
 
-fun Cursor.getColumnValue(index: Int): ColumnValue {
+private fun Cursor.getColumnElement(index: Int): ColumnElement {
+    val name = getColumnName(index)
     val value = if (isNull(index)) null
     else when (getType(index)) {
         Cursor.FIELD_TYPE_INTEGER -> getLong(index)
@@ -102,50 +80,41 @@ fun Cursor.getColumnValue(index: Int): ColumnValue {
         Cursor.FIELD_TYPE_BLOB -> getBlob(index)
         else -> null
     }
-    return ColumnValue(value)
+    return ColumnElement(name, value)
 }
 
-private fun readColumnsArray(cursor: Cursor): Array<ColumnValue> {
-    val count = cursor.columnCount
-    val list = ArrayList<ColumnValue>(count)
-    for (index in 0 until count) {
-        list.add(cursor.getColumnValue(index))
-    }
-    return list.toTypedArray()
-}
-
-private fun readColumnsMap(cursor: Cursor): Map<String, ColumnValue> {
-    val count = cursor.columnCount
-    val map = mutableMapOf<String, ColumnValue>()
-    for (index in 0 until count) {
-        map[cursor.getColumnName(index)] = cursor.getColumnValue(index)
-    }
-    return map
-}
-
-private class CursorMapSequence(val cursor: Cursor) : Sequence<Map<String, ColumnValue>> {
-    override fun iterator() = object : Iterator<Map<String, ColumnValue>> {
+private class CursorRowSequence(val cursor: Cursor) : Sequence<Row> {
+    override fun iterator() = object : Iterator<Row> {
         override fun hasNext() = cursor.position < cursor.count - 1
 
-        override fun next(): Map<String, ColumnValue> {
+        override fun next(): Row {
             cursor.moveToNext()
-            return readColumnsMap(cursor)
+            return cursor.readRow()
         }
     }
 }
 
-private class CursorSequence(val cursor: Cursor) : Sequence<Array<ColumnValue>> {
-    override fun iterator() = object : Iterator<Array<ColumnValue>> {
-        override fun hasNext() = cursor.position < cursor.count - 1
 
-        override fun next(): Array<ColumnValue> {
-            cursor.moveToNext()
-            return readColumnsArray(cursor)
-        }
-    }
+class Row internal constructor(
+    private val elements: List<ColumnElement>
+) : Iterable<ColumnElement> {
+
+    val size: Int = elements.size
+
+    override fun iterator(): Iterator<ColumnElement> = elements.iterator()
+
+    operator fun get(index: Int): ColumnElement = elements[index]
+
+    operator fun get(name: String): ColumnElement = elements.first { it.name == name }
+
+    override fun toString(): String = elements.toString()
+
 }
 
-class ColumnValue internal constructor(internal val value: Any?) {
+class ColumnElement internal constructor(
+    val name: String,
+    val value: Any?
+) {
     fun isNull(): Boolean = value == null
 
     @Suppress("UNCHECKED_CAST")
@@ -167,10 +136,13 @@ class ColumnValue internal constructor(internal val value: Any?) {
 
     fun asBoolean(defaultValue: Boolean = false) = asTyped() ?: defaultValue
 
-    override fun toString(): String = value.toString()
+    override fun toString(): String = "$name=$value"
 }
 
-inline fun <reified T : Any> ColumnValue.asTyped(): T? = asTyped(T::class.java)
+operator fun ColumnElement.component1(): String = name
+operator fun ColumnElement.component2(): Any? = value
+
+inline fun <reified T : Any> ColumnElement.asTyped(): T? = asTyped(T::class.java)
 
 @Suppress("RemoveRedundantQualifierName")
 private fun castValue(value: Any?, type: Class<*>): Any? {

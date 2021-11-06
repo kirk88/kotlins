@@ -3,7 +3,6 @@
 package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.*
-import com.nice.sqlite.core.ddl.Function
 
 abstract class Table(private val name: String) : Renderer {
 
@@ -22,12 +21,12 @@ abstract class Table(private val name: String) : Renderer {
     inner class UniqueIndex(
         vararg columns: Column<*>,
         name: String = columns.joinToString("_")
-    ) : Index(name, columns, true, this)
+    ) : Index(name, true, this, columns)
 
     inner class NonuniqueIndex(
         vararg columns: Column<*>,
         name: String = columns.joinToString("_")
-    ) : Index(name, columns, false, this)
+    ) : Index(name, false, this, columns)
 
     override fun render(): String = name.surrounding()
 
@@ -49,12 +48,3 @@ abstract class Table(private val name: String) : Renderer {
     override fun toString(): String = name
 
 }
-
-val Table.DateColumn.local: Function
-    get() = date(this, "localtime")
-
-val Table.TimeColumn.local: Function
-    get() = time(this, "localtime")
-
-val Table.DatetimeColumn.local: Function
-    get() = datetime(this, "localtime")

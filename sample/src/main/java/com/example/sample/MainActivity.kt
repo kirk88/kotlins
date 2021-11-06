@@ -10,13 +10,9 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.AppDatabase
-import com.example.sample.db.DBTest
-import com.example.sample.db.TestTable
-import com.example.sample.db.transactionAsync
+import com.example.sample.db.*
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -28,19 +24,16 @@ import com.nice.common.adapter.SimpleRecyclerAdapter
 import com.nice.common.app.NiceViewModelActivity
 import com.nice.common.app.PocketActivityResultLauncher
 import com.nice.common.app.launch
-import com.nice.common.event.FlowEventBus
-import com.nice.common.event.FlowEventBus.collectEvent
-import com.nice.common.event.FlowEventBus.collectStickEvent
-import com.nice.common.event.FlowEventBus.collectStickEventWithLifecycle
-import com.nice.common.event.FlowEventBus.emitEvent
-import com.nice.common.event.FlowEventBus.emitStickyEvent
-import com.nice.common.helper.*
+import com.nice.common.helper.doOnClick
+import com.nice.common.helper.setContentView
+import com.nice.common.helper.string
+import com.nice.common.helper.viewBindings
 import com.nice.common.widget.*
-import com.nice.sqlite.asMapSequence
 import com.nice.sqlite.core.*
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.update
+import com.nice.sqlite.rowSequence
 import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -77,52 +70,37 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         }
 
-        GestureDelegate(binding.contentView, consume = true).doOnSingleTapUp {
-            showToast("what?")
-        }
-
-        emitEvent("2")
-
-        emitStickyEvent("3")
-
-//        clearStickyEvent<String>()
-
-        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED) {
-            Log.e("TAGTAG", "collectStickEventWithLifecycle1: $it")
-        }
-
-        collectStickEventWithLifecycle<String>(minActiveState = Lifecycle.State.RESUMED) {
-            Log.e("TAGTAG", "collectStickEventWithLifecycle2: $it")
-        }
-
-        collectStickEvent<String> {
-            Log.e("TAGTAG", "collectStickEvent: $it")
-        }
-
-        collectEvent<String> {
-            Log.e("TAGTAG", "collectEvent: $it")
-        }
-
-        emitStickyEvent("4")
-
-        emitEvent("5")
-
-//        testDB()
+        testDB()
 //        initBle()
 
-        lifecycleScope.launch {
-
-            FlowEventBus.emitStickyEventGlobal {
-                ""
-            }
-        }
 
     }
 
     private fun testDB() {
+        lifecycleScope.launch(Dispatchers.IO){
+            val beans = mutableListOf<DBB>()
+            repeat(10000) { index ->
+                val bean = DBB(
+                    id = index.toLong(),
+                    name = "jack",
+                    age = index,
+                    flag = true,
+                    number = -index,
+                    data = byteArrayOf(1, 2, 3)
+                )
+                beans.add(bean)
+            }
+            var start = System.currentTimeMillis()
+
+            RoomDB.testDao.insert(beans)
+
+            Log.e("TAGTAG", "room api insert time: ${System.currentTimeMillis() - start}")
+        }
+
+
         AppDatabase.transactionAsync(lifecycleScope) {
             val beans = mutableListOf<DBTest>()
-            repeat(100000) { index ->
+            repeat(10000) { index ->
                 val bean = DBTest(
                     id = index.toLong(),
                     name = "jack",
@@ -151,26 +129,39 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             Log.e("TAGTAG", "==============================")
 
             start = System.currentTimeMillis()
+
             offer(TestTable).insertBatch(statementExecutor) {
+                var index = 0
+                var s: Long
                 for (bean in beans) {
+                    s = System.nanoTime()
                     item {
                         conflictAlgorithm = ConflictAlgorithm.Replace
+
+//                        values { bagOf(it.id(bean.id) , it.name(bean.name) , it.age(bean.age) ,
+//                            it.flag(bean.flag) , it.number(bean.number) , it.data(bean.data)) }
                         values {
                             it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                                     it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
                         }
                     }
+                    if(index < 10) Log.e("TAGTAG", "each: ${System.nanoTime() - s}")
+                    index += 1
                 }
             }
             Log.e("TAGTAG", "my api insert time: ${System.currentTimeMillis() - start}")
 
             Log.e("TAGTAG", "==============================")
 
+            start = System.currentTimeMillis()
+
             offer(TestTable).select(statementExecutor) {
                 it.id + it.name + it.age + date(it.time)
-            }.asMapSequence().take(5).forEach {
-                Log.e("TAGTAG", it.toString())
+            }.rowSequence().take(100).forEachIndexed { index, row ->
+               if(index< 5) Log.e("TAGTAG", row.toString())
             }
+
+            Log.e("TAGTAG", "query1: ${System.currentTimeMillis() - start}")
 
             Thread.sleep(2000)
 
@@ -180,11 +171,15 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             Log.e("TAGTAG", "==============================")
 
-            offer(TestTable).orderBy { asc(it.time) }.select(statementExecutor) {
-                it.id + it.name + it.age + it.time.local.aliased("time")
-            }.asMapSequence().take(5).forEach {
-                Log.e("TAGTAG", it.toString())
+            start = System.currentTimeMillis()
+
+            offer(TestTable).orderBy { asc(datetime(it.time)) }.select(statementExecutor) {
+                it.id + it.name + it.age + localtime(it.time).aliased("time")
+            }.rowSequence().take(100).forEachIndexed { index, row ->
+                if(index< 5) Log.e("TAGTAG", row.toString())
             }
+
+            Log.e("TAGTAG", "query2: ${System.currentTimeMillis() - start}")
 
 //                val start2 = System.currentTimeMillis()
 //                offer(TestTable).updateBatch(statementExecutor) {

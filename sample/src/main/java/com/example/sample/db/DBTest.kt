@@ -97,7 +97,7 @@ private val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
     .on(TestTable)
     .trigger {
         offer(TestTable)
-            .where { it.id eq it.id.old }
+            .where { it.id eq old(it.id) }
             .update { it.time(datetime("now")) }
     }.build()
 

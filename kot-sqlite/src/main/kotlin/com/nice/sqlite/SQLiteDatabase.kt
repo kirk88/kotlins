@@ -110,22 +110,20 @@ private class SQLiteStatementExecutor private constructor(
     }
 
     override fun executeUpdate(statement: UpdateStatement<*>): Int {
-        return database.compileStatement(statement.toString(SQLiteDialect)).apply {
-            if (statement.nativeBindValues) {
-                bindValues(statement.assignments)
-            }
-        }.executeUpdateDelete()
+        val stm = database.compileStatement(statement.toString(SQLiteDialect))
+        if (statement.nativeBindValues) {
+            bindValues(stm, statement.values)
+        }
+        return stm.executeUpdateDelete()
     }
 
     override fun executeUpdateBatch(statement: UpdateBatchStatement<*>): Int {
         var numberOfRows = 0
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            numberOfRows += caches.getOrPut(executable.sql) {
-                database.compileStatement(executable.sql)
-            }.apply {
-                bindValues(executable.values)
-            }.executeUpdateDelete()
+            val stm = caches.getOrPut(executable.sql) { database.compileStatement(executable.sql) }
+            bindValues(stm, executable.values)
+            numberOfRows += stm.executeUpdateDelete()
         }
         return numberOfRows
     }
@@ -135,22 +133,21 @@ private class SQLiteStatementExecutor private constructor(
     }
 
     override fun executeInsert(statement: InsertStatement<*>): Long {
-        return database.compileStatement(statement.toString(SQLiteDialect)).apply {
-            if (statement.nativeBindValues) {
-                bindValues(statement.assignments)
-            }
-        }.executeInsert()
+        val stm = database.compileStatement(statement.toString(SQLiteDialect))
+        if (statement.nativeBindValues) {
+            bindValues(stm, statement.values)
+        }
+        return stm.executeInsert()
     }
 
     override fun executeInsertBatch(statement: InsertBatchStatement<*>): Long {
         var lastRowId = -1L
         while (statement.hasNext()) {
             val executable = statement.next(SQLiteDialect)
-            lastRowId = caches.getOrPut(executable.sql) {
-                database.compileStatement(executable.sql)
-            }.apply {
-                bindValues(executable.values)
-            }.executeInsert()
+            val stm = caches.getOrPut(executable.sql) { database.compileStatement(executable.sql) }
+            bindValues(stm, executable.values)
+            val rowId = stm.executeInsert()
+            if (rowId >= 0L) lastRowId = rowId
         }
         return lastRowId
     }
@@ -159,18 +156,18 @@ private class SQLiteStatementExecutor private constructor(
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun SupportSQLiteStatement.bindValues(assignments: Bag<Value>) {
-        for ((index, assignment) in assignments.withIndex()) {
+    private fun bindValues(statement: SupportSQLiteStatement, values: Bag<Assignment>) {
+        for ((index, assignment) in values.withIndex()) {
             when (val value = assignment.value) {
-                null -> bindNull(index + 1)
-                is String -> bindString(index + 1, value)
-                is Long -> bindLong(index + 1, value)
-                is Int -> bindLong(index + 1, value.toLong())
-                is Short -> bindLong(index + 1, value.toLong())
-                is Double -> bindDouble(index + 1, value)
-                is Float -> bindDouble(index + 1, value.toDouble())
-                is Boolean -> bindLong(index + 1, if (value) 1 else 0)
-                is ByteArray -> bindBlob(index + 1, value)
+                null -> statement.bindNull(index + 1)
+                is String -> statement.bindString(index + 1, value)
+                is Long -> statement.bindLong(index + 1, value)
+                is Int -> statement.bindLong(index + 1, value.toLong())
+                is Short -> statement.bindLong(index + 1, value.toLong())
+                is Double -> statement.bindDouble(index + 1, value)
+                is Float -> statement.bindDouble(index + 1, value.toDouble())
+                is Boolean -> statement.bindLong(index + 1, if (value) 1 else 0)
+                is ByteArray -> statement.bindBlob(index + 1, value)
             }
         }
     }

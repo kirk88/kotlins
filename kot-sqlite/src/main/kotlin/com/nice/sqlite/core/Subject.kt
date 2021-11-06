@@ -125,7 +125,7 @@ inline fun <T : Table> TableSubject<T>.selectDistinct(
 inline fun <T : Table> TableSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Value>
+    crossinline values: (T) -> Bag<Assignment>
 ): UpdateStatement<T> = UpdateStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 
@@ -133,7 +133,7 @@ inline fun <T : Table> TableSubject<T>.update(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Value>
+    crossinline values: (T) -> Bag<Assignment>
 ): Int = executor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.updateBatch(
@@ -151,14 +151,14 @@ inline fun <T : Table> TableSubject<T>.updateBatch(
 inline fun <T : Table> TableSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Value>
+    crossinline values: (T) -> Bag<Assignment>
 ): InsertStatement<T> = InsertStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 inline fun <T : Table> TableSubject<T>.insert(
     executor: StatementExecutor,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Value>
+    crossinline values: (T) -> Bag<Assignment>
 ): Long = executor.executeInsert(insert(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.insertBatch(

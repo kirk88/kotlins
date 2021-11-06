@@ -19,6 +19,7 @@ interface Definition : Bag<Definition>, FullRenderer {
 
     val name: String
 
+    override val size: Int get() = 1
     override fun iterator(): Iterator<Definition> = OnceIterator(this)
 
 }
@@ -52,9 +53,9 @@ open class Column<T : Any>(
         )
     }
 
-    operator fun invoke(value: T?): Value = Value(this, value)
+    operator fun invoke(value: T?): Assignment = Assignment(this, value)
 
-    operator fun invoke(value: Defined): Value = Value(this, value)
+    operator fun invoke(value: Defined): Assignment = Assignment(this, value)
 
     override fun render(): String = name.surrounding()
 
@@ -156,9 +157,9 @@ operator fun <T : Column<*>> T.plus(onDeleteConstraint: ColumnConstraint.OnDelet
 
 open class Index(
     override val name: String,
-    val columns: Array<out Column<*>>,
     val unique: Boolean,
-    val table: Table
+    val table: Table,
+    val columns: Array<out Column<*>>,
 ) : Definition {
 
     override fun render(): String = buildString {
@@ -233,11 +234,8 @@ sealed class Defined(override val name: String) : Definition {
 }
 
 fun defined(name: String): Defined = Defined.Named(name)
-
-val Column<*>.old: Defined
-    get() = Defined.Old(this)
-val Column<*>.new: Defined
-    get() = Defined.New(this)
+fun old(column: Column<*>): Defined = Defined.Old(column)
+fun new(column: Column<*>): Defined = Defined.New(column)
 
 class Function internal constructor(
     name: String,
@@ -303,6 +301,10 @@ fun time(source: String, vararg modifiers: String) = function("time", source, *m
 fun datetime(source: String, vararg modifiers: String) = function("datetime", source, *modifiers)
 fun strftime(pattern: String, source: String, vararg modifiers: String) =
     function("strftime", pattern, source, *modifiers)
+
+fun localtime(column: Table.DateColumn):Function = date(column, "localtime")
+fun localtime(column: Table.TimeColumn):Function = date(column, "localtime")
+fun localtime(column: Table.DatetimeColumn):Function = date(column, "localtime")
 
 class AliasDefinition internal constructor(
     override val name: String,

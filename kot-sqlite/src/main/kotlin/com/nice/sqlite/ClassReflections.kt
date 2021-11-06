@@ -17,18 +17,18 @@ internal class FieldWrapper(private val field: Field) {
         field.isAccessible = true
     }
 
-    fun write(writer: Any, value: ColumnValue) {
-        field.set(writer, value.asTyped(field.type))
+    fun write(writer: Any, element: ColumnElement) {
+        field.set(writer, element.asTyped(field.type))
     }
 
 }
 
 internal class ReflectAdapter(private val fields: Map<String, FieldWrapper>) {
 
-    fun write(writer: Any, values: Map<String, ColumnValue>) {
-        for ((name, value) in values) {
-            val field = fields[name] ?: continue
-            field.write(writer, value)
+    fun write(writer: Any, row: Row) {
+        for (element in row) {
+            val field = fields[element.name] ?: continue
+            field.write(writer, element)
         }
     }
 }

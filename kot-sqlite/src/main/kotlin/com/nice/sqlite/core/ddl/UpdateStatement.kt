@@ -11,7 +11,7 @@ import com.nice.sqlite.core.dml.WhereClause
 class UpdateStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val assignments: Bag<Value>,
+    val values: Bag<Assignment>,
     val whereClause: WhereClause<T>? = null,
     val nativeBindValues: Boolean = false
 ) : Statement {
@@ -65,13 +65,14 @@ class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
         updateSpecs.add(UpdatePartBuilder(subject).apply(buildAction).build())
     }
 
+    override val size: Int get() = updateSpecs.size
     override fun iterator(): Iterator<UpdatePart<T>> = updateSpecs.iterator()
 
 }
 
 data class UpdatePart<T : Table>(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<Value>,
+    val values: Bag<Assignment>,
     val whereClause: WhereClause<T>?
 ) {
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -102,12 +103,12 @@ class UpdatePartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Bag<Value>
+    private lateinit var values: Bag<Assignment>
     private var whereClause: WhereClause<T>? = null
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Bag<Value>) {
+    fun values(values: (T) -> Bag<Assignment>) {
         this.values = values.invoke(subject.table)
     }
 
