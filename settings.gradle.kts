@@ -155,5 +155,6 @@ include(
     ":kot-sqlite",
     ":kot-okhttp",
     ":kot-gson",
-    ":sample"
+    ":sample",
+    ":kot-navigation"
 )

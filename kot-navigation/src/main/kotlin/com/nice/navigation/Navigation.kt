@@ -1,6 +1,6 @@
 @file:Suppress("UNUSED", "DEPRECATION")
 
-package com.nice.common.helper
+package com.nice.navigation
 
 import android.os.Bundle
 import android.view.Menu
@@ -23,7 +23,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.nice.common.R
 import com.nice.common.widget.TitleAppBar
 import java.util.regex.Pattern
 
@@ -281,6 +280,10 @@ class NavigationController internal constructor(
         }
 
         setPrimaryNavigationDestination(destination)
+
+        fragmentManager.commit {
+            add<Fragment>("")
+        }
 
         _fragmentNavigator.navigate(
             fragmentManager,
@@ -613,15 +616,6 @@ fun ActionBar.setupWithController(controller: NavigationController) {
 }
 
 fun Toolbar.setupWithController(controller: NavigationController) {
-    controller.addOnDestinationChangedListener { _, destination ->
-        val title = getTitleByDestination(destination)
-        if (title != null) {
-            setTitle(title)
-        }
-    }
-}
-
-fun TitleAppBar.setupWithController(controller: NavigationController) {
     controller.addOnDestinationChangedListener { _, destination ->
         val title = getTitleByDestination(destination)
         if (title != null) {

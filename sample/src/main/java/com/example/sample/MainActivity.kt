@@ -130,6 +130,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             start = System.currentTimeMillis()
 
+
             offer(TestTable).insertBatch(statementExecutor) {
                 var index = 0
                 var s: Long
