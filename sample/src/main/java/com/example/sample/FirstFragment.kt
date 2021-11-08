@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
 import com.nice.common.app.NiceViewModelFragment
 import com.nice.common.helper.add
 import com.nice.common.helper.doOnClick
@@ -26,7 +27,9 @@ class FirstFragment : NiceViewModelFragment<TestViewModel>(R.layout.fragment_fir
             viewModel.message = Message.Tip("hello world")
         }
 
-        childFragmentManager.add<ChildFragment>(R.id.frame_container)
+        childFragmentManager.commit {
+            add<ChildFragment>(R.id.frame_container)
+        }
     }
 
     override fun dispatchViewModelMessage(message: Message): Boolean {

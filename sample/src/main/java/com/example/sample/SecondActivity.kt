@@ -6,8 +6,11 @@ import androidx.activity.viewModels
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.common.app.NiceViewModelActivity
-import com.nice.common.event.*
-import com.nice.common.helper.*
+import com.nice.common.controller.*
+import com.nice.common.event.emitEvent
+import com.nice.common.event.emitStickyEvent
+import com.nice.common.helper.setContentView
+import com.nice.common.helper.viewBindings
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
 import com.nice.common.widget.defaultSnackTipViewFactory
@@ -27,29 +30,29 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
 
         val navView = findViewById<BottomNavigationView>(R.id.nav_view)
 
-        val navGraph = NavigationGraph()
-        navGraph += NavigationDestination(
+        val graph = FragmentGraph()
+        graph += FragmentDestination(
             R.id.fragment_first,
             FirstFragment::class.java.name,
             label = "First"
         )
-        navGraph += NavigationDestination(
+        graph += FragmentDestination(
             R.id.fragment_second,
             SecondFragment::class.java.name,
             label = "Second"
         )
-        navGraph += NavigationDestination(
+        graph += FragmentDestination(
             R.id.fragment_third,
             ThirdFragment::class.java.name,
             label = "Third"
         )
 
-        navGraph.setStartDestination(R.id.fragment_first)
+        graph.setStartDestination(R.id.fragment_first)
 
-        val navController = findNavigationController(R.id.frame_container)
-        navController.setGraph(navGraph)
+        val controller = findFragmentController(R.id.frame_container)
+        controller.setGraph(graph)
 
-        navView.setupWithController(navController) { item, position ->
+        navView.setupWithFragmentController(controller) { item, position ->
             item.setIcon(
                 when (position) {
                     0 -> R.drawable.ic_home_black_24dp
@@ -59,7 +62,7 @@ class SecondActivity : NiceViewModelActivity<TestViewModel>() {
             )
         }
 
-        setupAppBarWithController(navController)
+        setupAppBarWithFragmentController(controller)
 
        repeat(3){
            emitStickyEvent("event$it")

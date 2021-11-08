@@ -18,7 +18,7 @@
     <item name="toolbar" type="id" />
 
 
-    <item name="navigation_controller_id" type="id" />
+    <item name="fragment_controller_id" type="id" />
 
     <item name="ime_change_observer_popup_id" type="id" />
 

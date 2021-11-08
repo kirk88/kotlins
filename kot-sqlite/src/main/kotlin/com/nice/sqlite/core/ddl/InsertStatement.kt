@@ -96,12 +96,13 @@ class InsertPartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Bag<Assignment>
+    @PublishedApi
+    internal lateinit var values: Bag<Assignment>
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Bag<Assignment>) {
-        this.values = values.invoke(subject.table)
+    inline fun values(crossinline values: (T) -> Bag<Assignment>) {
+        this.values = values(subject.table)
     }
 
     @PublishedApi

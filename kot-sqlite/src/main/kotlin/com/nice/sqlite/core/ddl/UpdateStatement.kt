@@ -103,16 +103,19 @@ class UpdatePartBuilder<T : Table>(
     @PublishedApi internal val subject: TableSubject<T>
 ) {
 
-    private lateinit var values: Bag<Assignment>
-    private var whereClause: WhereClause<T>? = null
+    @PublishedApi
+    internal lateinit var values: Bag<Assignment>
+
+    @PublishedApi
+    internal var whereClause: WhereClause<T>? = null
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    fun values(values: (T) -> Bag<Assignment>) {
-        this.values = values.invoke(subject.table)
+    inline fun values(crossinline values: (T) -> Bag<Assignment>) {
+        this.values = values(subject.table)
     }
 
-    fun where(predicate: (T) -> Predicate) {
+    inline fun where(crossinline predicate: (T) -> Predicate) {
         this.whereClause = WhereClause(predicate(subject.table), subject)
     }
 

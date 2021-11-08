@@ -139,8 +139,6 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
                     item {
                         conflictAlgorithm = ConflictAlgorithm.Replace
 
-//                        values { bagOf(it.id(bean.id) , it.name(bean.name) , it.age(bean.age) ,
-//                            it.flag(bean.flag) , it.number(bean.number) , it.data(bean.data)) }
                         values {
                             it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
                                     it.flag(bean.flag) + it.number(bean.number) + it.data(bean.data)
