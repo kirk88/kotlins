@@ -1,6 +1,6 @@
 @file:Suppress("UNUSED", "DEPRECATION")
 
-package com.nice.common.controller
+package com.nice.common.helper
 
 import android.os.Bundle
 import android.view.Menu
@@ -24,7 +24,6 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nice.common.R
-import com.nice.common.helper.*
 import com.nice.common.widget.TitleAppBar
 import java.util.regex.Pattern
 

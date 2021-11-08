@@ -6,11 +6,9 @@ import androidx.activity.viewModels
 import com.example.sample.databinding.ActivitySecondBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nice.common.app.NiceViewModelActivity
-import com.nice.common.controller.*
 import com.nice.common.event.emitEvent
 import com.nice.common.event.emitStickyEvent
-import com.nice.common.helper.setContentView
-import com.nice.common.helper.viewBindings
+import com.nice.common.helper.*
 import com.nice.common.viewmodel.Message
 import com.nice.common.widget.TipView
 import com.nice.common.widget.defaultSnackTipViewFactory
