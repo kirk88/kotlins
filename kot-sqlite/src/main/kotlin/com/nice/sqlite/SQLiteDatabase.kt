@@ -156,18 +156,18 @@ private class SQLiteStatementExecutor private constructor(
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun bindValues(statement: SupportSQLiteStatement, values: Bag<Assignment>) {
-        for ((index, assignment) in values.withIndex()) {
-            when (val value = assignment.value) {
+    private fun bindValues(statement: SupportSQLiteStatement, values: Bag<ColumnValue>) {
+        for ((index, value) in values.withIndex()) {
+            when (val v = value.value) {
                 null -> statement.bindNull(index + 1)
-                is String -> statement.bindString(index + 1, value)
-                is Long -> statement.bindLong(index + 1, value)
-                is Int -> statement.bindLong(index + 1, value.toLong())
-                is Short -> statement.bindLong(index + 1, value.toLong())
-                is Double -> statement.bindDouble(index + 1, value)
-                is Float -> statement.bindDouble(index + 1, value.toDouble())
-                is Boolean -> statement.bindLong(index + 1, if (value) 1 else 0)
-                is ByteArray -> statement.bindBlob(index + 1, value)
+                is String -> statement.bindString(index + 1, v)
+                is Long -> statement.bindLong(index + 1, v)
+                is Int -> statement.bindLong(index + 1, v.toLong())
+                is Short -> statement.bindLong(index + 1, v.toLong())
+                is Double -> statement.bindDouble(index + 1, v)
+                is Float -> statement.bindDouble(index + 1, v.toDouble())
+                is Boolean -> statement.bindLong(index + 1, if (v) 1 else 0)
+                is ByteArray -> statement.bindBlob(index + 1, v)
             }
         }
     }

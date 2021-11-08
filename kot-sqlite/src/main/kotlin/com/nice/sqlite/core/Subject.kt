@@ -3,8 +3,10 @@
 package com.nice.sqlite.core
 
 import android.database.Cursor
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.*
+import com.nice.sqlite.statementExecutor
 
 interface TableSubject<T : Table> {
     val table: T
@@ -38,42 +40,42 @@ fun <T : Table> offer(table: T): TableSubject<T> = TableSubject(table)
 
 fun <T : Table> TriggerSubject<T>.create(): TriggerCreateStatement<T> = TriggerCreateStatement(this)
 
-fun <T : Table> TriggerSubject<T>.create(executor: StatementExecutor) = executor.execute(create())
+fun <T : Table> TriggerSubject<T>.create(database: SupportSQLiteDatabase) = database.statementExecutor.execute(create())
 
 fun ViewSubject.create(): ViewCreateStatement = ViewCreateStatement(this)
 
-fun ViewSubject.create(executor: StatementExecutor) = executor.execute(create())
+fun ViewSubject.create(database: SupportSQLiteDatabase) = database.statementExecutor.execute(create())
 
 fun ViewSubject.select(): ViewSelectStatement = ViewSelectStatement(this)
 
-fun ViewSubject.select(executor: StatementExecutor): Cursor = executor.executeQuery(select())
+fun ViewSubject.select(database: SupportSQLiteDatabase): Cursor = database.statementExecutor.executeQuery(select())
 
 inline fun <T : Table> TableSubject<T>.create(
     crossinline definitions: (T) -> Bag<Definition>
 ): TableCreateStatement<T> = TableCreateStatement(this, definitions(table))
 
 inline fun <T : Table> TableSubject<T>.create(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline definitions: (T) -> Bag<Definition>
-) = executor.execute(create(definitions))
+) = database.statementExecutor.execute(create(definitions))
 
 inline fun <T : Table> TableSubject<T>.alter(
     crossinline definitions: (T) -> Bag<Definition>
 ): TableAlterStatement<T> = TableAlterStatement(this, definitions(table))
 
 inline fun <T : Table> TableSubject<T>.alter(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline definitions: (T) -> Bag<Definition>
-) = executor.execute(alter(definitions))
+) = database.statementExecutor.execute(alter(definitions))
 
 inline fun <T : Table> TableSubject<T>.drop(
     crossinline definitions: (T) -> Bag<Definition> = { emptyBag() }
 ): TableDropStatement<T> = TableDropStatement(this, definitions(table))
 
 inline fun <T : Table> TableSubject<T>.drop(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline definitions: (T) -> Bag<Definition> = { emptyBag() }
-) = executor.execute(drop(definitions))
+) = database.statementExecutor.execute(drop(definitions))
 
 fun <T : Table, T2 : Table> TableSubject<T>.innerJoin(table2: T2): Join2Clause<T, T2> =
     Join2Clause(this, table2, JoinType.Inner)
@@ -101,40 +103,40 @@ inline fun <T : Table> TableSubject<T>.offset(offset: () -> Int): OffsetClause<T
 
 fun <T : Table> TableSubject<T>.delete(): DeleteStatement<T> = DeleteStatement(this)
 
-fun <T : Table> TableSubject<T>.delete(executor: StatementExecutor): Int =
-    executor.executeDelete(delete())
+fun <T : Table> TableSubject<T>.delete(database: SupportSQLiteDatabase): Int =
+    database.statementExecutor.executeDelete(delete())
 
 inline fun <T : Table> TableSubject<T>.select(
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
 ): SelectStatement<T> = SelectStatement(this, selection(table))
 
 inline fun <T : Table> TableSubject<T>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table> TableSubject<T>.selectDistinct(
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
 ): SelectStatement<T> = SelectStatement(this, selection(table), distinct = true)
 
 inline fun <T : Table> TableSubject<T>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 inline fun <T : Table> TableSubject<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
+    crossinline values: (T) -> Bag<ColumnValue>
 ): UpdateStatement<T> = UpdateStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 
 inline fun <T : Table> TableSubject<T>.update(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
-): Int = executor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
+    crossinline values: (T) -> Bag<ColumnValue>
+): Int = database.statementExecutor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.updateBatch(
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit
@@ -144,22 +146,22 @@ inline fun <T : Table> TableSubject<T>.updateBatch(
 )
 
 inline fun <T : Table> TableSubject<T>.updateBatch(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit
-): Int = executor.executeUpdateBatch(updateBatch(buildAction))
+): Int = database.statementExecutor.executeUpdateBatch(updateBatch(buildAction))
 
 inline fun <T : Table> TableSubject<T>.insert(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
+    crossinline values: (T) -> Bag<ColumnValue>
 ): InsertStatement<T> = InsertStatement(this, conflictAlgorithm, values(table), nativeBindValues = nativeBindValues)
 
 inline fun <T : Table> TableSubject<T>.insert(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
-): Long = executor.executeInsert(insert(conflictAlgorithm, nativeBindValues, values))
+    crossinline values: (T) -> Bag<ColumnValue>
+): Long = database.statementExecutor.executeInsert(insert(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> TableSubject<T>.insertBatch(
     crossinline buildAction: InsertBatchBuilder<T>.() -> Unit
@@ -169,6 +171,6 @@ inline fun <T : Table> TableSubject<T>.insertBatch(
 )
 
 inline fun <T : Table> TableSubject<T>.insertBatch(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline buildAction: InsertBatchBuilder<T>.() -> Unit
-): Long = executor.executeInsertBatch(insertBatch(buildAction))
+): Long = database.statementExecutor.executeInsertBatch(insertBatch(buildAction))

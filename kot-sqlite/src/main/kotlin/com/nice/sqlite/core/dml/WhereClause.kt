@@ -3,10 +3,12 @@
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.TableSubject
 import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.statementExecutor
 
 data class WhereClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -51,19 +53,19 @@ inline fun <T : Table> WhereClause<T>.selectDistinct(
 ): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> WhereClause<T>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table> WhereClause<T>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 inline fun <T : Table> WhereClause<T>.update(
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
+    crossinline values: (T) -> Bag<ColumnValue>
 ): UpdateStatement<T> = UpdateStatement(
     subject,
     conflictAlgorithm,
@@ -73,11 +75,11 @@ inline fun <T : Table> WhereClause<T>.update(
 )
 
 inline fun <T : Table> WhereClause<T>.update(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None,
     nativeBindValues: Boolean = false,
-    crossinline values: (T) -> Bag<Assignment>
-): Int = executor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
+    crossinline values: (T) -> Bag<ColumnValue>
+): Int = database.statementExecutor.executeUpdate(update(conflictAlgorithm, nativeBindValues, values))
 
 inline fun <T : Table> WhereClause<T>.updateBatch(
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit
@@ -87,15 +89,15 @@ inline fun <T : Table> WhereClause<T>.updateBatch(
 )
 
 inline fun <T : Table> WhereClause<T>.updateBatch(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline buildAction: UpdateBatchBuilder<T>.() -> Unit
-): Int = executor.executeUpdateBatch(updateBatch(buildAction))
+): Int = database.statementExecutor.executeUpdateBatch(updateBatch(buildAction))
 
 fun <T : Table> WhereClause<T>.delete(): DeleteStatement<T> =
     DeleteStatement(subject, whereClause = this)
 
-fun <T : Table> WhereClause<T>.delete(executor: StatementExecutor): Int =
-    executor.executeDelete(delete())
+fun <T : Table> WhereClause<T>.delete(database: SupportSQLiteDatabase): Int =
+    database.statementExecutor.executeDelete(delete())
 
 data class Where2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -160,14 +162,14 @@ inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.selectDistinct(
 ): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table> Where2Clause<T, T2>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Where3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -240,14 +242,14 @@ inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.selectDis
 ): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table> Where3Clause<T, T2, T3>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Where4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -324,11 +326,11 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Where4Clause<T, T2, T
 ): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Where4Clause<T, T2, T3, T4>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Where4Clause<T, T2, T3, T4>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))

@@ -53,9 +53,9 @@ open class Column<T : Any>(
         )
     }
 
-    operator fun invoke(value: T?): Assignment = Assignment(this, value)
+    operator fun invoke(value: T?): ColumnValue = ColumnValue(this, value)
 
-    operator fun invoke(value: Defined): Assignment = Assignment(this, value)
+    operator fun invoke(value: Defined): ColumnValue = ColumnValue(this, value)
 
     override fun render(): String = name.surrounding()
 

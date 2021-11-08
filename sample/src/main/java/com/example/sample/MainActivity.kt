@@ -34,7 +34,6 @@ import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.select
 import com.nice.sqlite.core.dml.update
 import com.nice.sqlite.rowSequence
-import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -131,7 +130,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
             start = System.currentTimeMillis()
 
 
-            offer(TestTable).insertBatch(statementExecutor) {
+            offer(TestTable).insertBatch(this) {
                 var index = 0
                 var s: Long
                 for (bean in beans) {
@@ -154,7 +153,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             start = System.currentTimeMillis()
 
-            offer(TestTable).select(statementExecutor) {
+            offer(TestTable).select(this) {
                 it.id + it.name + it.age + date(it.time)
             }.rowSequence().take(100).forEachIndexed { index, row ->
                if(index< 5) Log.e("TAGTAG", row.toString())
@@ -164,7 +163,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             Thread.sleep(2000)
 
-            offer(TestTable).where { it.id eq 0 }.update(statementExecutor) {
+            offer(TestTable).where { it.id eq 0 }.update(this) {
                 it.name("tom")
             }
 
@@ -172,7 +171,7 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
             start = System.currentTimeMillis()
 
-            offer(TestTable).orderBy { asc(datetime(it.time)) }.select(statementExecutor) {
+            offer(TestTable).orderBy { asc(datetime(it.time)) }.select(this) {
                 it.id + it.name + it.age + localtime(it.time).aliased("time")
             }.rowSequence().take(100).forEachIndexed { index, row ->
                 if(index< 5) Log.e("TAGTAG", row.toString())

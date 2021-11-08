@@ -3,10 +3,12 @@
 package com.nice.sqlite.core.dml
 
 import android.database.Cursor
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nice.sqlite.core.Predicate
 import com.nice.sqlite.core.Table
 import com.nice.sqlite.core.TableSubject
 import com.nice.sqlite.core.ddl.*
+import com.nice.sqlite.statementExecutor
 
 data class GroupClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -75,14 +77,14 @@ inline fun <T : Table> GroupClause<T>.selectDistinct(
 ): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> GroupClause<T>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table> GroupClause<T>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -160,14 +162,14 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
 ): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -248,14 +250,14 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDis
 ): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
@@ -339,11 +341,11 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T
 ): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(select(selection))
+): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.selectDistinct(
-    executor: StatementExecutor,
+    database: SupportSQLiteDatabase,
     crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
-): Cursor = executor.executeQuery(selectDistinct(selection))
+): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))

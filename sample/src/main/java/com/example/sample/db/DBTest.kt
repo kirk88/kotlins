@@ -10,7 +10,6 @@ import com.nice.sqlite.core.ddl.*
 import com.nice.sqlite.core.dml.limit
 import com.nice.sqlite.core.dml.selectDistinct
 import com.nice.sqlite.core.dml.update
-import com.nice.sqlite.statementExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -108,36 +107,36 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) {
-        offer(TestTable).create(db.statementExecutor) {
+        offer(TestTable).create(db) {
             it.id + it.name + it.age + it.flag +
                     it.number + it.data + it.time + it.idNameIndex
         }
 
-        offer(TestView).create(db.statementExecutor)
+        offer(TestView).create(db)
 
-        offer(TestTable2).create(db.statementExecutor) {
+        offer(TestTable2).create(db) {
             it.id + it.pid + it.name + it.age
         }
 
-        offer(TestTrigger).create(db.statementExecutor)
+        offer(TestTrigger).create(db)
     }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        offer(TestTable).alter(db.statementExecutor) {
+        offer(TestTable).alter(db) {
             it.number + it.data + it.time + it.idNameIndex
         }
 
-        offer(TestView).create(db.statementExecutor)
+        offer(TestView).create(db)
 
-        offer(TestTable2).alter(db.statementExecutor) {
+        offer(TestTable2).alter(db) {
             it.name + it.age
         }
 
-        offer(TestTable2).create(db.statementExecutor) {
+        offer(TestTable2).create(db) {
             it.id + it.pid + it.name + it.age
         }
 
-        offer(TestTrigger).create(db.statementExecutor)
+        offer(TestTrigger).create(db)
     }
 }
 
