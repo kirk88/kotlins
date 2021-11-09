@@ -27,7 +27,6 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="Sample"
-            android:theme="@style/Theme.Kotlins.NoActionBar.Main"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,9 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SecondActivity"
-            android:theme="@style/Theme.Kotlins.NoActionBar" />
+        <activity android:name=".SecondActivity" />
     </application>
 
 </manifest>

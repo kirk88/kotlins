@@ -6,13 +6,19 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.ActivityMainBinding
-import com.example.sample.db.*
+import com.example.sample.db.AppDatabase
+import com.example.sample.db.DBTest
+import com.example.sample.db.TestTable
+import com.example.sample.db.transactionAsync
 import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.Scanner
 import com.nice.bluetooth.ScannerType
@@ -55,10 +61,13 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContentView(binding)
         permissionRequestLauncher.register(this)
 
-        title = "Home"
+//        title = "Home"
+//        subtitle = "hello"
 
         binding.fab.doOnClick {
             activityForResultLauncher.launch<SecondActivity, ActivityResult>(
@@ -69,34 +78,29 @@ class MainActivity : NiceViewModelActivity<MainViewModel>() {
 
         }
 
+        binding.titleBar.setOnTitleClickListener{
+            tipView.show("hhhhhh")
+        }
+
         testDB()
 //        initBle()
 
 
     }
 
-    private fun testDB() {
-        lifecycleScope.launch(Dispatchers.IO){
-            val beans = mutableListOf<DBB>()
-            repeat(10000) { index ->
-                val bean = DBB(
-                    id = index.toLong(),
-                    name = "jack",
-                    age = index,
-                    flag = true,
-                    number = -index,
-                    data = byteArrayOf(1, 2, 3)
-                )
-                beans.add(bean)
-            }
-            var start = System.currentTimeMillis()
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
 
-            RoomDB.testDao.insert(beans)
-
-            Log.e("TAGTAG", "room api insert time: ${System.currentTimeMillis() - start}")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
         }
+    }
 
-
+    private fun testDB() {
         AppDatabase.transactionAsync(lifecycleScope) {
             val beans = mutableListOf<DBTest>()
             repeat(10000) { index ->

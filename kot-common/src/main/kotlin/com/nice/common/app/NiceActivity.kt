@@ -51,7 +51,7 @@ abstract class NiceActivity(@LayoutRes contentLayoutId: Int = 0) :
     }
 
     override fun getSubtitle(): CharSequence? {
-        return subtitle
+        return supportActionBar?.subtitle ?: subtitle
     }
 
 }

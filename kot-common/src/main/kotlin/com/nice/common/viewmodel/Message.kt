@@ -7,9 +7,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.annotation.StringRes
 import com.nice.common.applicationContext
-import com.nice.common.widget.InfiniteState
 
-sealed class Message(val what: Int = -1) {
+open class Message(val what: Int = -1) {
 
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
@@ -21,19 +20,7 @@ sealed class Message(val what: Int = -1) {
         extras[key] = value
     }
 
-    class Event : Message {
-        constructor(what: Int) : super(what)
-
-        constructor(what: Int, vararg args: Pair<String, Any?>) : super(what) {
-            for (arg in args) {
-                set(arg.first, arg.second)
-            }
-        }
-    }
-
-    class Tip(val text: CharSequence) : Message() {
-        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
-    }
+    class Tip(val text: CharSequence) : Message()
 
     class StartActivity(val intent: Intent) : Message()
 
@@ -42,61 +29,23 @@ sealed class Message(val what: Int = -1) {
         val callback: ActivityResultCallback<ActivityResult>
     ) : Message()
 
-    class SetActivityResult(val resultCode: Int, val data: Intent? = null) : Message()
+    class SetActivityResult(val resultCode: Int, val data: Intent?) : Message()
 
-    class FinishActivity : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
+    class FinishActivity : Message()
 
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
+    class ShowProgress(val text: CharSequence?) : Message()
 
-    class ShowProgress(val text: CharSequence? = null) : Message() {
-        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
-    }
+    class DismissProgress : Message()
 
-    class DismissProgress : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
+    class ShowLoading(val text: CharSequence?) : Message()
 
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
+    class ShowEmpty(val text: CharSequence?) : Message()
 
-    class RefreshState(val state: InfiniteState) : Message()
+    class ShowError(val text: CharSequence?) : Message()
 
-    class LoadMoreState(val state: InfiniteState) : Message()
+    class ShowContent : Message()
 
-    class ShowLoading(val text: CharSequence? = null) : Message() {
-        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
-    }
-
-    class ShowEmpty(val text: CharSequence? = null) : Message() {
-        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
-    }
-
-    class ShowError(val text: CharSequence? = null) : Message() {
-        constructor(@StringRes textId: Int) : this(applicationContext.getText(textId))
-    }
-
-    class ShowContent : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
-
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
-
-    class Batch(val messages: Set<Message>) : Message() {
-        constructor(vararg messages: Message) : this(messages.toSet())
-    }
+    internal class Batch(val messages: Set<Message>) : Message()
 
 }
 
@@ -105,3 +54,23 @@ fun <T : Any> Message.getOrNull(key: String): T? = extras[key] as? T
 fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(key) ?: defaultValue
 
 fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
+
+fun Tip(text: CharSequence) = Message.Tip(text)
+fun Tip(@StringRes textId: Int) = Message.Tip(applicationContext.getText(textId))
+fun StartActivity(intent: Intent) = Message.StartActivity(intent)
+fun StartActivityForResult(intent: Intent, callback: ActivityResultCallback<ActivityResult>) =
+    Message.StartActivityForResult(intent, callback)
+
+fun SetActivityResult(resultCode: Int, data: Intent? = null) = Message.SetActivityResult(resultCode, data)
+fun ShowProgress(text: CharSequence? = null) = Message.ShowProgress(text)
+fun ShowProgress(@StringRes textId: Int) = Message.ShowProgress(applicationContext.getText(textId))
+fun DismissProgress() = Message.DismissProgress()
+fun ShowLoading(text: CharSequence? = null) = Message.ShowLoading(text)
+fun ShowLoading(@StringRes textId: Int) = Message.ShowLoading(applicationContext.getText(textId))
+fun ShowEmpty(text: CharSequence? = null) = Message.ShowEmpty(text)
+fun ShowEmpty(@StringRes textId: Int) = Message.ShowEmpty(applicationContext.getText(textId))
+fun ShowError(text: CharSequence? = null) = Message.ShowError(text)
+fun ShowError(@StringRes textId: Int) = Message.ShowError(applicationContext.getText(textId))
+fun ShowContent() = Message.ShowContent()
+
+fun messageOf(vararg messages: Message): Message = Message.Batch(messages.toSet())

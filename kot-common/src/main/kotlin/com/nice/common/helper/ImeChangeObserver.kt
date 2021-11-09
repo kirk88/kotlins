@@ -4,10 +4,7 @@ package com.nice.common.helper
 
 import android.content.Context
 import android.graphics.Rect
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
 import android.widget.PopupWindow
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
@@ -40,17 +37,16 @@ class ImeChangeObserver {
     private fun registerInternal(view: View, receiver: ImeChangeReceiver) {
         this.receiver = receiver
 
-        val rootView = view.rootView
 
-        val popup = rootView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
-            ?: ObservablePopupWindow(view.context, rootView.bottom).also {
-                rootView.setTag(R.id.ime_change_observer_popup_id, it)
+        val vm = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
+        val anchorView = view.rootView
+        val popup = anchorView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
+            ?: ObservablePopupWindow(view.context, anchorView.bottom).also {
+                anchorView.setTag(R.id.ime_change_observer_popup_id, it)
             }
 
-        this.popup = popup.apply {
-            addReceiver(receiver)
-            show(rootView)
-        }
+        this.popup = popup.apply { addReceiver(receiver); show(anchorView) }
     }
 
 
@@ -60,7 +56,7 @@ class ImeChangeObserver {
         private val receivers = mutableSetOf<ImeChangeReceiver>()
 
         private val contentRect = Rect()
-        private var contentBottom: Int = bottom
+        private var contentBottom: Int = -1
         private var currentHeight: Int = 0
 
         private var viewTreeObserver: ViewTreeObserver? = null
@@ -136,9 +132,7 @@ class ImeChangeObserver {
     companion object {
 
         fun register(view: View, receiver: ImeChangeReceiver): ImeChangeObserver =
-            ImeChangeObserver().also {
-                it.register(view, receiver)
-            }
+            ImeChangeObserver().also { it.register(view, receiver) }
 
     }
 

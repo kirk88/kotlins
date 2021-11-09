@@ -9,7 +9,6 @@
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.Kotlins.AppBarOverlay"
         app:navigationAsUp="true"
         app:layout_constraintTop_toTopOf="parent"
         app:provideActionBar="true"

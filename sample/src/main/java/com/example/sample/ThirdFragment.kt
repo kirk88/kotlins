@@ -1,20 +1,16 @@
 package com.example.sample
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.lifecycle.lifecycleScope
 import com.example.sample.databinding.FragmentThirdBinding
 import com.nice.common.adapter.ItemViewHolder
 import com.nice.common.app.NiceFragment
-import com.nice.common.helper.*
-import com.nice.common.widget.InfiniteState
-import com.nice.common.widget.adapter
-import com.nice.common.widget.divider.GridDividerItemDecoration
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.nice.common.helper.adapterBuilder
+import com.nice.common.helper.setContentView
+import com.nice.common.helper.string
+import com.nice.common.helper.viewBindings
 
 class ThirdFragment : NiceFragment() {
 
@@ -38,49 +34,6 @@ class ThirdFragment : NiceFragment() {
                 (holder.itemView as TextView).string = "TEXT${holder.layoutPosition}"
             }
             .build()
-
-        binding.recyclerView.addItemDecoration(GridDividerItemDecoration(Color.BLUE, 8))
-
-        binding.recyclerView.adapter = adapter
-
-        var page = 0
-
-        binding.recyclerView.doOnRefresh {
-            page = 0
-
-            adapter.setItems(mutableListOf<String>().apply {
-                repeat(20) {
-                    add("")
-                }
-            })
-
-            lifecycleScope.launch {
-                delay(400)
-
-                binding.recyclerView.setRefreshState(InfiniteState.STATE_COMPLETED)
-            }
-        }
-
-        binding.recyclerView.doOnLoadMore {
-            lifecycleScope.launch {
-                delay(1000)
-
-                if (page == 3) {
-                    binding.recyclerView.setLoadMoreState(InfiniteState.STATE_FAILED)
-                    return@launch
-                }
-
-                adapter.addItems(mutableListOf<String>().apply {
-                    repeat(20) {
-                        add("")
-                    }
-                })
-
-                binding.recyclerView.setLoadMoreState(InfiniteState.STATE_IDLE)
-                page += 1
-            }
-        }
-
 
     }
 

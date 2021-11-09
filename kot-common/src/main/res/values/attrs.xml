@@ -21,7 +21,7 @@
         <attr name="emptyButtonTextAppearance" format="reference" />
         <attr name="emptyButtonBackground" format="reference" />
         <attr name="emptyButtonBackgroundTint" format="color" />
-        <attr name="emptyButtonBackgroundTintMode" format="enum" >
+        <attr name="emptyButtonBackgroundTintMode" format="enum">
             <enum name="src_over" value="3" />
             <enum name="src_in" value="5" />
             <enum name="src_atop" value="9" />
@@ -40,7 +40,7 @@
         <attr name="errorButtonTextAppearance" format="reference" />
         <attr name="errorButtonBackground" format="reference" />
         <attr name="errorButtonBackgroundTint" format="color" />
-        <attr name="errorButtonBackgroundTintMode" format="enum" >
+        <attr name="errorButtonBackgroundTintMode" format="enum">
             <enum name="src_over" value="3" />
             <enum name="src_in" value="5" />
             <enum name="src_atop" value="9" />
@@ -70,7 +70,9 @@
         <attr name="titleMarginEnd" />
         <attr name="titleMarginTop" />
         <attr name="titleMarginBottom" />
-        <attr name="titleVisible" />
+        <attr name="titleVisible" format="boolean" />
+        <attr name="titleCentered" format="boolean" />
+        <attr name="subtitleCentered" format="boolean" />
         <attr name="contentInsetStart" />
         <attr name="contentInsetEnd" />
         <attr name="contentInsetLeft" />
@@ -79,14 +81,18 @@
         <attr name="contentInsetEndWithActions" />
         <attr name="navigationIcon" />
         <attr name="navigationContentDescription" />
-        <attr name="navigationIconTint" />
-        <attr name="navigationIconTintMode" />
-        <attr name="navigationAsUp" format="boolean" />
-        <attr name="showBottomDivider" format="enum">
-            <enum name="ifNeed" value="0" />
-            <enum name="always" value="1" />
-            <enum name="never" value="2" />
+        <attr name="navigationIconTint" format="color|reference" />
+        <attr name="navigationIconTintMode" format="enum">
+            <enum name="src_over" value="3" />
+            <enum name="src_in" value="5" />
+            <enum name="src_atop" value="9" />
+            <enum name="multiply" value="14" />
+            <enum name="screen" value="15" />
+            <enum name="add" value="16" />
         </attr>
+        <attr name="navigationAsUp" format="boolean" />
+        <attr name="navigationEnabled" format="boolean" />
+        <attr name="bottomDividerVisible" format="boolean" />
         <attr name="bottomDividerHeight" format="dimension|reference" />
         <attr name="bottomDividerColor" format="color|reference" />
         <attr name="provideActionBar" format="boolean" />
@@ -94,50 +100,10 @@
         <attr name="menu" format="reference" />
     </declare-styleable>
 
-    <attr name="titleVisible" format="boolean" />
-    <attr name="navigationEnabled" format="boolean" />
-    <attr name="navigationIconTint" format="color|reference" />
-    <attr name="navigationIconTintMode" format="enum">
-        <enum name="src_over" value="3" />
-        <enum name="src_in" value="5" />
-        <enum name="src_atop" value="9" />
-        <enum name="multiply" value="14" />
-        <enum name="screen" value="15" />
-        <enum name="add" value="16" />
-    </attr>
-
     <attr name="titleAppBarStyle" format="reference" />
-
-    <declare-styleable name="TitleToolbar">
-        <attr name="titleTextAppearance" />
-        <attr name="subtitleTextAppearance" />
-        <attr name="titleVisible" />
-        <attr name="navigationIconTint" />
-        <attr name="navigationIconTintMode" />
-        <attr name="navigationEnabled" />
-    </declare-styleable>
 
     <declare-styleable name="TitleToolbar_Layout">
         <attr name="layout_overrideAttributes" format="boolean" />
-    </declare-styleable>
-
-    <declare-styleable name="InfiniteRecyclerView">
-        <attr name="android:padding" />
-        <attr name="android:paddingTop" />
-        <attr name="android:paddingBottom" />
-        <attr name="android:paddingStart" />
-        <attr name="android:paddingEnd" />
-        <attr name="android:paddingLeft" />
-        <attr name="android:paddingRight" />
-        <attr name="android:orientation" />
-        <attr name="android:overScrollMode" />
-        <attr name="layoutManager" />
-        <attr name="spanCount" />
-        <attr name="reverseLayout" />
-        <attr name="stackFromEnd" />
-        <attr name="fastScrollEnabled" />
-        <attr name="refreshEnabled" format="boolean" />
-        <attr name="loadMoreEnabled" format="boolean" />
     </declare-styleable>
 
 </resources>

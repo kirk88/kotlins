@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.ViewModel
 import com.nice.common.viewmodel.*
-import com.nice.common.widget.InfiniteView
 import com.nice.common.widget.ProgressView
 import com.nice.common.widget.StatefulView
 import com.nice.common.widget.TipView
@@ -18,8 +17,6 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
     ViewModelOwner<VM> where VM : ViewModel, VM : ViewModelController {
 
     open val statefulView: StatefulView? = null
-
-    open val infiniteView: InfiniteView? = null
 
     open val progressView: ProgressView? = null
 
@@ -61,8 +58,6 @@ abstract class NiceViewModelFragment<VM>(@LayoutRes contentLayoutId: Int = 0) :
         when (message) {
             is Message.ShowProgress -> progressView?.show(message.text)
             is Message.DismissProgress -> progressView?.dismiss()
-            is Message.RefreshState -> infiniteView?.setRefreshState(message.state)
-            is Message.LoadMoreState -> infiniteView?.setLoadMoreState(message.state)
             is Message.ShowLoading -> statefulView?.apply {
                 if (message.text != null) setLoadingText(message.text)
                 showLoading()

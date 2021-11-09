@@ -16,7 +16,7 @@ internal object ViewModelMessages {
         }
         if (activity is LifecycleMessageObserver
                 && activity is ViewModelOwner<*>
-                && activity.viewModel == owner.viewModel
+                && activity.viewModel === owner.viewModel
         ) {
             return
         }
@@ -24,7 +24,7 @@ internal object ViewModelMessages {
         val fragment = owner.parentFragment
         if (fragment is LifecycleMessageObserver
                 && fragment is ViewModelOwner<*>
-                && fragment.viewModel == owner.viewModel
+                && fragment.viewModel === owner.viewModel
         ) {
             return
         }

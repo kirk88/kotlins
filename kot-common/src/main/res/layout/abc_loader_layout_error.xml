@@ -16,7 +16,7 @@
         android:layout_marginBottom="12dp"
         android:adjustViewBounds="true" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@id/error_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,7 +33,6 @@
         android:layout_margin="16dp"
         android:gravity="center"
         android:minWidth="160dp"
-        app:cornerRadius="30dp"
         tools:text="@string/loader_retry_message"
         tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ButtonText"
         tools:textColor="#ffffff" />

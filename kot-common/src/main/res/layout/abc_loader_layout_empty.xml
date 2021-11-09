@@ -33,7 +33,6 @@
         android:layout_margin="16dp"
         android:gravity="center"
         android:minWidth="160dp"
-        app:cornerRadius="30dp"
         tools:textAppearance="@style/TextAppearance.StatefulFrameLayout.ButtonText"
         tools:textColor="#ffffff" />
 </LinearLayout>

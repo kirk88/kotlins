@@ -11,39 +11,19 @@
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:visibility="gone"
-        android:theme="@style/Theme.Kotlins.AppBarOverlay"
+        app:title="Home"
+        app:subtitle="hello world"
         app:navigationAsUp="true"
-        app:popupTheme="@style/Theme.Kotlins.PopupOverlay"
-        app:provideActionBar="true"
-        app:statusBarForeground="?colorPrimaryVariant" />
+        android:fitsSystemWindows="true"
+        app:provideActionBar="true" />
 
-    <com.nice.common.widget.StatefulFrameLayout
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:defaultShow="content"
-        app:emptyButtonVisible="true"
-        app:emptyButtonText="234234"
-        app:emptyImage="@mipmap/ic_launcher">
-        <com.example.sample.widget.TouchLinearLayout
-            android:id="@+id/content_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="100dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        </com.example.sample.widget.TouchLinearLayout>
-
-    </com.nice.common.widget.StatefulFrameLayout>
-
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -51,9 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@drawable/abc_vector_test"
-        app:elevation="10dp"
-        app:fabCustomSize="48dp"
-        tools:ignore="SpeakableTextPresentCheck" />
+        app:srcCompat="@android:drawable/ic_dialog_email" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
