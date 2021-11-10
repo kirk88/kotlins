@@ -4,7 +4,10 @@ package com.nice.common.helper
 
 import android.content.Context
 import android.graphics.Rect
-import android.view.*
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.PopupWindow
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
@@ -37,16 +40,12 @@ class ImeChangeObserver {
     private fun registerInternal(view: View, receiver: ImeChangeReceiver) {
         this.receiver = receiver
 
-
-        val vm = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-        val anchorView = view.rootView
-        val popup = anchorView.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
-            ?: ObservablePopupWindow(view.context, anchorView.bottom).also {
-                anchorView.setTag(R.id.ime_change_observer_popup_id, it)
+        val popup = view.getTag(R.id.ime_change_observer_popup_id) as? ObservablePopupWindow
+            ?: ObservablePopupWindow(view.context, view.context.displayHeight).also {
+                view.setTag(R.id.ime_change_observer_popup_id, it)
             }
 
-        this.popup = popup.apply { addReceiver(receiver); show(anchorView) }
+        this.popup = popup.apply { addReceiver(receiver); show(view) }
     }
 
 
@@ -56,7 +55,7 @@ class ImeChangeObserver {
         private val receivers = mutableSetOf<ImeChangeReceiver>()
 
         private val contentRect = Rect()
-        private var contentBottom: Int = -1
+        private var contentBottom: Int = bottom
         private var currentHeight: Int = 0
 
         private var viewTreeObserver: ViewTreeObserver? = null

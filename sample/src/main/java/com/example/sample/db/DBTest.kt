@@ -2,7 +2,7 @@ package com.example.sample.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import com.nice.common.applicationContext
+import com.example.sample.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSupportSQLiteOpenHelper
 import com.nice.sqlite.core.*

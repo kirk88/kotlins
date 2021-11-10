@@ -1,24 +1,5 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Kotlins" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="dividerHorizontal">@drawable/divider_horizontal</item>
-    </style>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
 
-    <style name="Theme.Kotlins" parent="Base.Theme.Kotlins" />
-
-    <style name="Theme.Kotlins.Main">
-        <!-- AppBarLayout statusBarForeground 生效-->
-        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
-    </style>
-
-    <style name="Theme.Kotlins.Translucent">
-        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
-        <item name="android:windowTranslucentNavigation" tools:targetApi="kitkat">true</item>
-    </style>
-
-    <style name="Style.TitleToolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="navigationIconTint">@color/black</item>
-    </style>
+    <style name="Theme.Sample" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

@@ -44,16 +44,15 @@ android {
 }
 
 dependencies {
-    api(libs.bundles.kotlin.stdlibs)
-    api(libs.bundles.kotlinx.coroutines)
-    api(libs.bundles.androidx.common.app)
-    api(libs.bundles.androidx.common.view)
-    api(libs.bundles.androidx.lifecycle)
-    api(libs.bundles.androidx.datastore)
-    api(libs.androidx.setup)
-    api(libs.androidx.multidex)
-    api(libs.google.material)
-    api(libs.coil)
+    api(coroutines.bundles.all)
+    api(androidxs.bundles.common)
+    api(androidxs.bundles.view)
+    api(androidxs.bundles.lifecycle)
+    api(androidxs.bundles.datastore)
+    api(androidxs.setup)
+    api(androidxs.multidex)
+    api(googles.material)
+    api(images.coil)
 }
 
 val versionMajor = 1

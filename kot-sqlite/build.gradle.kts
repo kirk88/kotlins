@@ -39,8 +39,7 @@ android {
 }
 
 dependencies {
-    api(libs.bundles.androidx.sqlite)
-    implementation(libs.kotlin.stdlib)
+    api(androidxs.bundles.sqlite)
 }
 
 val versionMajor = 1

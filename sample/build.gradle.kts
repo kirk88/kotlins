@@ -41,15 +41,24 @@ android {
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
-    kapt.includeCompileClasspath = false
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = composes.versions.compose.get()
+    }
 
 }
 
 dependencies {
-    implementation(project(":kot-common"))
     implementation(project(":kot-sqlite"))
     implementation(project(":kot-bluetooth"))
     implementation(project(":kot-okhttp"))
-    implementation(project(":kot-atomic"))
     implementation(project(":kot-gson"))
+    implementation(composes.bundles.common)
+    implementation(composes.bundles.accompanist)
+    implementation(composes.viewmodel)
+    implementation(composes.navigation)
+    implementation(composes.window)
 }

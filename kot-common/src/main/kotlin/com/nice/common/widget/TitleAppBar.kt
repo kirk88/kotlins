@@ -953,16 +953,6 @@ internal class TitleToolbar @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-
-//        if (isToolbarLayoutChild()) {
-//            if (!titleText.isNullOrEmpty()) {
-//                title = titleText
-//            }
-//        }
-    }
-
     fun setOnTitleClickListener(listener: OnClickListener?) {
         val titleView = titleTextView ?: tryGetSystemTitleView("mTitleTextView")
         titleView?.setOnClickListener(listener)

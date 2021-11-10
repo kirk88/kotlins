@@ -21,8 +21,7 @@ kotlin {
 }
 
 dependencies {
-    api(libs.google.gson)
-    implementation(libs.kotlin.stdlib)
+    api(googles.gson)
 }
 
 val versionMajor = 1

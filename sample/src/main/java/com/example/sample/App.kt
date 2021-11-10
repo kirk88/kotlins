@@ -1,19 +1,27 @@
 package com.example.sample
 
-import androidx.multidex.MultiDexApplication
-import com.nice.kothttp.OkHttpConfig
-import okhttp3.OkHttpClient
+import android.app.Application
+import android.content.Context
 
+private object ApplicationContextHolder {
 
-class App : MultiDexApplication() {
+    lateinit var applicationContext: Context
+        private set
+
+    fun init(context: Context) {
+        applicationContext = context.applicationContext
+    }
+
+}
+
+val applicationContext: Context
+    get() = ApplicationContextHolder.applicationContext
+
+class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        OkHttpConfig.Setter()
-            .client(OkHttpClient())
-            .domain("http://www.baidu.com")
-            .apply()
+        ApplicationContextHolder.init(this)
     }
 
 }
