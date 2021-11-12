@@ -1,4 +1,4 @@
-package com.example.mycomposeapp.ui.theme
+package com.hao.reader.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

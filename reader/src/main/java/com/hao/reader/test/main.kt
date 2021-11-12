@@ -1,9 +1,9 @@
-package com.example.sample.test
+package com.hao.reader.test
 
 fun main() {
 
-    val sa = "a"
-    val sb = "a"
+    val sa = String() + "a"
+    val sb = String() + "a"
     println(sa === sb)
 
     val a = 0x1

@@ -1,7 +1,16 @@
-package com.example.sample
+package com.hao.reader
 
 import android.app.Application
 import android.content.Context
+
+class App: Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        ApplicationContextHolder.init(this)
+    }
+
+}
 
 private object ApplicationContextHolder {
 
@@ -16,12 +25,3 @@ private object ApplicationContextHolder {
 
 val applicationContext: Context
     get() = ApplicationContextHolder.applicationContext
-
-class App: Application() {
-
-    override fun onCreate() {
-        super.onCreate()
-        ApplicationContextHolder.init(this)
-    }
-
-}

@@ -32,7 +32,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = kotlins.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -58,7 +58,7 @@ dependencies {
 val versionMajor = 1
 val versionMinor = 2
 val versionPatch = 0
-val versionSuffix = "alpha10"
+val versionSuffix = "alpha09"
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")

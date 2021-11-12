@@ -1,14 +1,13 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
 }
 
 android {
     compileSdk = androids.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.sample"
+        applicationId = "com.hao.reader"
         minSdk = androids.versions.minSdk.get().toInt()
         targetSdk = androids.versions.targetSdk.get().toInt()
         versionCode = 1
@@ -37,7 +36,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = kotlins.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -52,13 +51,12 @@ android {
 }
 
 dependencies {
-    implementation(project(":kot-sqlite"))
-    implementation(project(":kot-bluetooth"))
-    implementation(project(":kot-okhttp"))
-    implementation(project(":kot-gson"))
     implementation(composes.bundles.common)
     implementation(composes.bundles.accompanist)
     implementation(composes.viewmodel)
     implementation(composes.navigation)
     implementation(composes.window)
+    implementation(project(":kot-sqlite"))
+    implementation(project(":kot-okhttp"))
+    implementation(project(":kot-gson"))
 }

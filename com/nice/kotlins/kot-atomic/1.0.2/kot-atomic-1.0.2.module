@@ -25,15 +25,24 @@
         "org.jetbrains.kotlin.localToProject": "public",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.5.31"
+          }
+        }
+      ],
       "files": [
         {
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
           "size": 30288,
-          "sha512": "1a7e4f7e3c3e3026d53ef8663ec3ccc0ca171d547af62d60ec6056349b4fc121d87aaad3a321c27a7ebb0178c9459b9f718c03a4bcbf27e0fef3f69ee74156dc",
-          "sha256": "3e6a3fc555975866981563bdcb4096b7395fff8657ec26bcbb07f30dd68e8356",
-          "sha1": "957d32a376af1e5f71e273739fe7449176fede86",
-          "md5": "049b6c2484b5c5c9456607d9e9db5b8b"
+          "sha512": "cd00e391eed49ec6d51f8beb60f6f13bac53473f102d52800d804c16ecfc28034837612d99f7ce291b64d6727abb0c8aad35b10f7ab5a9cc942459c4218a0425",
+          "sha256": "33e42b3d5a5929fa19a2b3d00b2a6691706090db386618764adcbbc2a7f307a2",
+          "sha1": "faaee551bb5a150612c04f84c7e36c801e625e19",
+          "md5": "d97959b6f171e20dd8a72b2f1d770d4b"
         }
       ]
     },
@@ -51,7 +60,7 @@
       "dependencies": [
         {
           "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
+          "module": "kotlin-stdlib-jdk8",
           "version": {
             "requires": "1.5.31"
           }
@@ -62,10 +71,10 @@
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
           "size": 30288,
-          "sha512": "1a7e4f7e3c3e3026d53ef8663ec3ccc0ca171d547af62d60ec6056349b4fc121d87aaad3a321c27a7ebb0178c9459b9f718c03a4bcbf27e0fef3f69ee74156dc",
-          "sha256": "3e6a3fc555975866981563bdcb4096b7395fff8657ec26bcbb07f30dd68e8356",
-          "sha1": "957d32a376af1e5f71e273739fe7449176fede86",
-          "md5": "049b6c2484b5c5c9456607d9e9db5b8b"
+          "sha512": "cd00e391eed49ec6d51f8beb60f6f13bac53473f102d52800d804c16ecfc28034837612d99f7ce291b64d6727abb0c8aad35b10f7ab5a9cc942459c4218a0425",
+          "sha256": "33e42b3d5a5929fa19a2b3d00b2a6691706090db386618764adcbbc2a7f307a2",
+          "sha1": "faaee551bb5a150612c04f84c7e36c801e625e19",
+          "md5": "d97959b6f171e20dd8a72b2f1d770d4b"
         }
       ]
     },
@@ -82,10 +91,10 @@
           "name": "kot-atomic-1.0.2-sources.jar",
           "url": "kot-atomic-1.0.2-sources.jar",
           "size": 6034,
-          "sha512": "87a08cb1360f546c89780695d330c34b6c42b9c6e685e02beba8bf12a17d11d3b03f1f9183848ab75a1445616ecec0ff431ecda6c908704c7e29de0a8edb64f9",
-          "sha256": "0e5a0b3c136aa83c21ccc56d24ff817e8fff4acf0053974044c5100271066676",
-          "sha1": "12d1f4061995dce4de612d0967333090cd4accf6",
-          "md5": "cc1cfe77eabb89899452a46ed1f40f9c"
+          "sha512": "7525f0db3646a62b721b07250e09fc777836a0ac6d427167ca4ea6f0d40d485a3cbc278879d6ae387cf9deb4bb55d5c81ca60e0949f669ab8f65c3745596517c",
+          "sha256": "840451db24ad8fb13709f8ab3a225d04fd8e588584a2f9ad08618e7ab48cfc87",
+          "sha1": "7280940e5c102a328d1317eceeac0cc19fe81a14",
+          "md5": "6e56856f4e5bb3dd571dbc759ee717f4"
         }
       ]
     },
@@ -102,10 +111,10 @@
           "name": "kot-atomic-1.0.2-javadoc.jar",
           "url": "kot-atomic-1.0.2-javadoc.jar",
           "size": 261,
-          "sha512": "648bae0aa512f65e8d3eb19f5e9ca6cac4945d61785c4e3f8cfa7a1876afb4d44c923d0dadd94866c645c704a1cce84f5bc6c185050f96fe75f4e9a77a9ad08e",
-          "sha256": "872452fae9b564f2545ddf94e9822a3b33e376ab78838211b7607380e0065c5a",
-          "sha1": "5142246468aaedf63e6b9760a4c50891b17cd54d",
-          "md5": "4d6ac9f99fc460f69ea81a59305bf0f9"
+          "sha512": "fc3030ed65f923fe628d18eb656c4dbf4e07d1728c319d1e765aac57a92e96c1e8208bb3df1849dcc36a798353530b4ecb509f76a815f34e3979dc6143a8ef00",
+          "sha256": "913298c80f46879a28e1c36a79a645f0de46d920915ea73d75cf087883a8bf4a",
+          "sha1": "de8ee41818ae5a98522fa6b516169305ed04b3bb",
+          "md5": "7ec27312962278523fca63201c436602"
         }
       ]
     }

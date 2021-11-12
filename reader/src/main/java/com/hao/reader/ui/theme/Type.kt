@@ -1,4 +1,4 @@
-package com.example.sample.ui.theme
+package com.hao.reader.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

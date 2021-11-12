@@ -1,8 +1,8 @@
-package com.example.sample.db
+package com.hao.reader.db
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import com.example.sample.applicationContext
+import com.hao.reader.applicationContext
 import com.nice.sqlite.ClassParserConstructor
 import com.nice.sqlite.ManagedSupportSQLiteOpenHelper
 import com.nice.sqlite.core.*
@@ -86,7 +86,7 @@ object TestTable2 : Table("test2") {
 
 val TestView = View("test_view") {
     offer(TestTable)
-        .orderBy { desc(it.id) }
+        .orderBy { desc(TestTable.id) }
         .limit { 10 }
         .selectDistinct()
 }
@@ -96,8 +96,8 @@ private val TestTrigger = Trigger.Builder<TestTable>("test_trigger")
     .on(TestTable)
     .trigger {
         offer(TestTable)
-            .where { it.id eq old(it.id) }
-            .update { it.time(datetime("now")) }
+            .where { TestTable.id eq old(TestTable.id) }
+            .update { TestTable.time(datetime("now")) }
     }.build()
 
 private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback(22) {
@@ -108,14 +108,14 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         offer(TestTable).create(db) {
-            it.id + it.name + it.age + it.flag +
-                    it.number + it.data + it.time + it.idNameIndex
+            TestTable.id + TestTable.name + TestTable.age + TestTable.flag +
+                    TestTable.number + TestTable.data + TestTable.time + TestTable.idNameIndex
         }
 
         offer(TestView).create(db)
 
         offer(TestTable2).create(db) {
-            it.id + it.pid + it.name + it.age
+            TestTable2.id + TestTable2.pid + TestTable2.name + TestTable2.age
         }
 
         offer(TestTrigger).create(db)
@@ -123,17 +123,17 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
         offer(TestTable).alter(db) {
-            it.number + it.data + it.time + it.idNameIndex
+            TestTable.number + TestTable.data + TestTable.time + TestTable.idNameIndex
         }
 
         offer(TestView).create(db)
 
         offer(TestTable2).alter(db) {
-            it.name + it.age
+            TestTable2.name + TestTable2.age
         }
 
         offer(TestTable2).create(db) {
-            it.id + it.pid + it.name + it.age
+            TestTable2.id + TestTable2.pid + TestTable2.name + TestTable2.age
         }
 
         offer(TestTrigger).create(db)

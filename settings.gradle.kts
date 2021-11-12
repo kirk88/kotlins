@@ -30,6 +30,8 @@ dependencyResolutionManagement {
         }
 
         create("kotlins") {
+            version("jvmTarget", "11")
+
             val versionKotlinStdlib = "1.5.31"
             alias("stdlib").to("org.jetbrains.kotlin", "kotlin-stdlib")
                 .version(versionKotlinStdlib)
@@ -150,6 +152,8 @@ dependencyResolutionManagement {
 
             alias("material3").to("androidx.compose.material3", "material3")
                 .version("1.0.0-alpha01")
+            alias("material").to("androidx.compose.material", "material")
+                .version("1.0.0-alpha01")
             alias("activity").to("androidx.activity", "activity-compose")
                 .version("1.4.0")
             bundle(
@@ -163,6 +167,7 @@ dependencyResolutionManagement {
                     "foundation-layout",
                     "animation",
                     "material3",
+                    "material",
                     "activity"
                 )
             )
@@ -234,5 +239,5 @@ include(
     ":kot-sqlite",
     ":kot-okhttp",
     ":kot-gson",
-    ":sample"
+    ":reader"
 )

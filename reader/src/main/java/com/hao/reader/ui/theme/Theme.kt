@@ -1,4 +1,4 @@
-package com.example.sample.ui.theme
+package com.hao.reader.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
-import com.example.mycomposeapp.ui.theme.*
+import com.google.accompanist.insets.ProvideWindowInsets
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -35,7 +35,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun SampleAppTheme(
+fun ReaderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -62,4 +62,15 @@ fun SampleAppTheme(
         typography = Typography,
         content = content
     )
+}
+
+@Composable
+fun ReaderThemeWithInsets(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    ReaderTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
+        ProvideWindowInsets(content = content)
+    }
 }
