@@ -38,11 +38,11 @@
         {
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
-          "size": 30288,
-          "sha512": "cd00e391eed49ec6d51f8beb60f6f13bac53473f102d52800d804c16ecfc28034837612d99f7ce291b64d6727abb0c8aad35b10f7ab5a9cc942459c4218a0425",
-          "sha256": "33e42b3d5a5929fa19a2b3d00b2a6691706090db386618764adcbbc2a7f307a2",
-          "sha1": "faaee551bb5a150612c04f84c7e36c801e625e19",
-          "md5": "d97959b6f171e20dd8a72b2f1d770d4b"
+          "size": 29333,
+          "sha512": "a5e64a6cec80a79589f698ccb5a61816f9a4bdf2375dc9488aeaf1bbfc16791ab2ac55f789a61376c8c9d4a10693e8f47d57877ef854f78aeedbdef164a5158d",
+          "sha256": "7d276b63ce83d26e81a28984015f6c6139af164141006e78fe0101a61db9d7b0",
+          "sha1": "d8b8028692a3be79b7fa67f30542eb20934650d4",
+          "md5": "da30989775a1814da096dc843b4ec3f2"
         }
       ]
     },
@@ -70,11 +70,11 @@
         {
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
-          "size": 30288,
-          "sha512": "cd00e391eed49ec6d51f8beb60f6f13bac53473f102d52800d804c16ecfc28034837612d99f7ce291b64d6727abb0c8aad35b10f7ab5a9cc942459c4218a0425",
-          "sha256": "33e42b3d5a5929fa19a2b3d00b2a6691706090db386618764adcbbc2a7f307a2",
-          "sha1": "faaee551bb5a150612c04f84c7e36c801e625e19",
-          "md5": "d97959b6f171e20dd8a72b2f1d770d4b"
+          "size": 29333,
+          "sha512": "a5e64a6cec80a79589f698ccb5a61816f9a4bdf2375dc9488aeaf1bbfc16791ab2ac55f789a61376c8c9d4a10693e8f47d57877ef854f78aeedbdef164a5158d",
+          "sha256": "7d276b63ce83d26e81a28984015f6c6139af164141006e78fe0101a61db9d7b0",
+          "sha1": "d8b8028692a3be79b7fa67f30542eb20934650d4",
+          "md5": "da30989775a1814da096dc843b4ec3f2"
         }
       ]
     },
@@ -90,11 +90,11 @@
         {
           "name": "kot-atomic-1.0.2-sources.jar",
           "url": "kot-atomic-1.0.2-sources.jar",
-          "size": 6034,
-          "sha512": "7525f0db3646a62b721b07250e09fc777836a0ac6d427167ca4ea6f0d40d485a3cbc278879d6ae387cf9deb4bb55d5c81ca60e0949f669ab8f65c3745596517c",
-          "sha256": "840451db24ad8fb13709f8ab3a225d04fd8e588584a2f9ad08618e7ab48cfc87",
-          "sha1": "7280940e5c102a328d1317eceeac0cc19fe81a14",
-          "md5": "6e56856f4e5bb3dd571dbc759ee717f4"
+          "size": 5942,
+          "sha512": "23db1f8a2a5d86c150288df442297aab365f8014d536f3fcc0f0b2d6a5c7f2550c6b12d716f8a1e10d8a1390e2c7a9706ae6e2493fa9dc110b3e4bc46fa5ba4c",
+          "sha256": "7360d8156295537ed36982f527acb89d0aef3fc71a53220fcff2ed70b1dc52ce",
+          "sha1": "ddda25840815d1faaca645650cd52404844ec214",
+          "md5": "db3bb105b8ebd0d4dcc9c3651585214d"
         }
       ]
     },
