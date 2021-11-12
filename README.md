@@ -42,12 +42,10 @@ OkHttp的kotlin封装
 
 ```kotlin
 //不是必需操作
-OkFaker.setGlobalConfig(
-    OkConfig.Builder()
-        .baseUrl("https://www.baidu.com")
-        .client(OkHttpClient())
-        .build()
-)
+OkHttpConfig.Setter()
+    .baseUrl("https://www.baidu.com")
+    .client(OkHttpClient())
+    .apply()
 ```
 
 GET请求
@@ -78,7 +76,7 @@ POST请求
 httpCallFlow<String> {
 
     method(OkRequestMethod.POST)
-    
+
     url("/s")
 
     queryParameters {
@@ -109,6 +107,7 @@ httpCallFlow<String> {
         "wd" += "hello word"
     }
 
+    //默认已经使用gson实现了
     mapResponse { response ->
         //转换成任意格式
         JSONObject(response.body!!.string())
@@ -121,7 +120,7 @@ httpCallFlow<String> {
 
 ```kotlin
 httpCallFlow<File> {
-    client (
+    client(
         //注意 HttpLoggingInterceptor.Level < BODY
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
@@ -130,11 +129,13 @@ httpCallFlow<File> {
 
     url("http://www.baidu.com")
 
-    extension(DefaultOkDownloadExtension("../path.html", true) { readBytes, totalBytes ->
-        //Main Thread
-    })
+    extension(
+        DefaultOkDownloadExtension("../path.html", true) { readBytes, totalBytes ->
+            //Main Thread
+        }
+    )
 }.collect { file ->
-    
+
 }
 ```
 
@@ -148,79 +149,77 @@ SQLite的kotlin封装
 
 ```kotlin
 object TestTable : Table("test") {
-    val id = LongColumn("id").primaryKey()
-    val name = StringColumn("name", "jack")
-    val age = IntColumn("age")
-    val flag = BooleanColumn("flag")
-    val number = IntColumn("number").default(10)
+    val Id = LongColumn("id") + PrimaryKey()
+    val Name = StringColumn("name", "jack")
+    val Age = IntColumn("age")
+    val Flag = BooleanColumn("flag")
+    val Number = IntColumn("number") + Default(10)
+    val CreateTime = DatetimeColumn("create_time") + Default(datetime("now", "localtime"))
+    val UpdateTime = DatetimeColumn("update_time") + Default(datetime("now", "localtime"))
+    
+    val NameAgeIndex = UniqueIndex(Name, Age)
 }
 ```
 
-## 创建表
+## 创建数据库
 
 ```kotlin
-object DB : ManagedSQLiteOpenHelper(
-    SupportSQLiteOpenHelper.Configuration.builder(applicationContext)
-        .name("test_db.db")
-        .callback(Callback())
-        .build()
-) {
+private val TestUpdateTrigger = Trigger.Builder<TestTable>("test_update_time_trigger")
+    .at(TriggerTime.After, TriggerType.Update)
+    .on(TestTable)
+    .trigger {
+        offer(TestTable)
+            .where { it.Id eq old(it.Id) }
+            .update { it.UpdateTime(datetime("now", "localtime")) }
+    }.build()
 
-    private class Callback : SupportSQLiteOpenHelper.Callback(1) {
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            //创建表
-            offer(TestTable).create(db.statementExecutor) {
-                it.id + it.name + it.age + it.flag + it.number + index(
-                    it.id,
-                    it.name,
-                    name = "indexName"
-                )
-            }
+private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback(1) {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        //创建表
+        offer(TestTable).create(db) {
+            it.Id + it.Name + it.Age + it.Flag + it.Number + it.CreateTime + it.UpdateTime + it.NameAgeIndex
         }
 
-        override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            //添加列 或者 索引
-            offer(TestTable).alter(db.statementExecutor) {
-                it.number + index(it.id, it.name)
-            }
-        }
+        //创建触发器
+        offer(TestUpdateTrigger).create(db)
     }
 
+    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    }
+}
+
+val Database: ManagedSupportSQLiteOpenHelper by lazy {
+    ManagedSupportSQLiteOpenHelper(applicationContext, "test", SQLiteOpenHelperCallback)
 }
 ```
-
 ## 删除表
 
 ```kotlin
-offer(TestTable).drop()
+offer(TestTable).drop(db)
 ```
 
-如果要删除索引 (不支持删除列)
+删除索引
 
 ```kotlin
-offer(TestTable).drop {
-    index(it.id, it.name).ifExists()
-    //or
-    index(name = "indexName").ifExists()
-}
+offer(TestTable).drop(db) { it.NameAgeIndex }
 ```
 
 ## 插入数据
 
 ```kotlin
-offer(TestTable).insert {
-    it.id(1) + it.name("jack") + it.age(20) + it.flag(true)
+offer(TestTable).insert(db) {
+    it.Id(1) + it.Name("jack") + it.Age(20) + it.Flag(true) + it.Number(100)
 }
 ```
 
 批量插入
 
 ```kotlin
-offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
+offer(TestTable).batchInsert(db, Conflict.Replace) {
     for (bean in beans) {
         values {
-            it.id(bean.id) + it.name(bean.name) + it.age(bean.age) +
-                    it.flag(bean.flag) + it.number(bean.number)
+            it.Id(bean.id) + it.Name(bean.name) + it.Age(bean.age) +
+                    it.Flag(bean.flag) + it.Number(bean.number)
         }
     }
 }
@@ -229,18 +228,16 @@ offer(TestTable).batchInsert(statementExecutor, Conflict.Replace) {
 ## 删除数据
 
 ```kotlin
-offer(TestTable).where {
-    it.id eq 1
-}.delete()
+offer(TestTable).where { it.Id eq 1 }.delete()
 ```
 
 ## 查询数据
 
 ```kotlin
 offer(TestTable).where {
-    (it.name like "%jack%") and (it.id gt 100)
+    (it.Name like "%jack%") and (it.Id gt 100)
 }.select {
-    it.id + it.name + it.age + it.flag
+    it.Id + it.Name + it.Age + it.Flag + it.Number
 }
 
 //or
@@ -251,27 +248,25 @@ data class TestBean @ClassParserConstructor constructor(
     val flag: Boolean
 )
 
-DB.use {
-    val cursor = offer(TestTable)
-        .where { it.flag eq true }
-        .groupBy { it.id + it.name }
-        .having { it.age gt 20 }
-        .orderBy { desc(it.id) }
-        .limit { 10 }
-        .offset { 10 }
-        .select(statementExecutor) {
-            it.id + it.name + it.age + it.flag
-        }
-
-    //Sequence<Map<String, ColumnValue>>
-    for (row in cursor.asMapSequence()) {
-        //do something
+val cursor = offer(TestTable)
+    .where { it.Flag eq true }
+    .groupBy { it.Id + it.Name }
+    .having { it.Age gt 20 }
+    .orderBy { desc(it.Id) }
+    .limit { 10 }
+    .offset { 10 }
+    .select(db) {
+        it.id + it.name + it.age + it.flag
     }
 
-    //直接解析为bean
-    for (bean in cursor.parseList(classParser<TestBean>())) {
-        //do something
-    }
+//Sequence<Map<String, ColumnValue>>
+for (row in cursor.rowSequence()) {
+    //do something
+}
+
+//直接解析为bean
+for (bean in cursor.toList<TestBean>()) {
+    //do something
 }
 ```
 
@@ -279,9 +274,9 @@ DB.use {
 
 ```kotlin
 offer(TestTable).where {
-    it.name eq "jack"
+    it.Name eq "jack"
 }.update {
-    it.id(100) + it.name("tom") + it.age(20) + it.flag(false)
+    it.Id(100) + it.Name("tom")
 }
 ```
 

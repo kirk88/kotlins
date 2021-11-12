@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             }
 
             queryParameters {
-                add("kw", "百度")
+                "kw"+= "百度"
             }
 
             addRequestInterceptor {
