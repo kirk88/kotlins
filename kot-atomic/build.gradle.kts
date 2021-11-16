@@ -15,7 +15,7 @@ java {
 kotlin {
     target {
         compilations.all {
-            kotlinOptions.jvmTarget = kotlins.versions.jvmTarget.get()
+            kotlinOptions.jvmTarget = kotlinLibs.versions.jvmTarget.get()
         }
     }
 }

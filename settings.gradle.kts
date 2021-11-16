@@ -23,13 +23,13 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("androids") {
+        create("app") {
             version("compileSdk", "31")
             version("minSdk", "21")
             version("targetSdk", "30")
         }
 
-        create("kotlins") {
+        create("kotlinLibs") {
             version("jvmTarget", "11")
 
             val versionKotlinStdlib = "1.5.31"
@@ -43,7 +43,7 @@ dependencyResolutionManagement {
             )
         }
 
-        create("coroutines") {
+        create("coroutinesLibs") {
             val versionCoroutines = "1.5.2"
             alias("core").to("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
                 .version(versionCoroutines)
@@ -55,7 +55,7 @@ dependencyResolutionManagement {
             )
         }
 
-        create("androidxs") {
+        create("androidxLibs") {
             val versionLifecycle = "2.4.0"
             val versionDatastore = "1.0.0"
             val versionSqlite = "2.2.0-beta01"
@@ -129,7 +129,7 @@ dependencyResolutionManagement {
                 .version("2.0.1")
         }
 
-        create("composes") {
+        create("composeLibs") {
             val versionCompose = "1.1.0-beta02"
             val versionAccompanist = "0.21.2-beta"
 
@@ -204,7 +204,7 @@ dependencyResolutionManagement {
                 .version("1.0.0-beta03")
         }
 
-        create("okhttps") {
+        create("okhttpLibs") {
             val versionOkHttp = "4.9.2"
             alias("okhttp").to("com.squareup.okhttp3", "okhttp")
                 .version(versionOkHttp)
@@ -216,14 +216,14 @@ dependencyResolutionManagement {
             )
         }
 
-        create("googles") {
+        create("googleLibs") {
             alias("material").to("com.google.android.material", "material")
                 .version("1.5.0-alpha05")
             alias("gson").to("com.google.code.gson", "gson")
                 .version("2.8.9")
         }
 
-        create("images") {
+        create("imageLibs") {
             alias("coil").to("io.coil-kt", "coil")
                 .version("2.0.0-alpha02")
         }

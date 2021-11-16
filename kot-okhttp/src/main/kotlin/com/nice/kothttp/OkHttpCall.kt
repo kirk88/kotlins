@@ -350,7 +350,3 @@ inline fun <reified T> buildHttpCall(buildAction: OkHttpCallBuilder<T>.() -> Uni
     httpCallBuilder<T>()
         .apply(buildAction)
         .build()
-
-inline fun <reified T> httpCallFlow(buildAction: OkHttpCallBuilder<T>.() -> Unit): Flow<T> =
-    buildHttpCall(buildAction)
-        .make()

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = androids.versions.compileSdk.get().toInt()
+    compileSdk = app.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = androids.versions.minSdk.get().toInt()
-        targetSdk = androids.versions.targetSdk.get().toInt()
+        minSdk = app.versions.minSdk.get().toInt()
+        targetSdk = app.versions.targetSdk.get().toInt()
     }
 
     buildTypes {
@@ -28,7 +28,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = kotlins.versions.jvmTarget.get()
+        jvmTarget = kotlinLibs.versions.jvmTarget.get()
     }
 
     sourceSets {
@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    api(androidxs.bundles.sqlite)
+    api(androidxLibs.bundles.sqlite)
 }
 
 val versionMajor = 1

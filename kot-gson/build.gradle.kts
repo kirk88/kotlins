@@ -15,13 +15,13 @@ java {
 kotlin {
     target {
         compilations.all {
-            kotlinOptions.jvmTarget = kotlins.versions.jvmTarget.get()
+            kotlinOptions.jvmTarget = kotlinLibs.versions.jvmTarget.get()
         }
     }
 }
 
 dependencies {
-    api(googles.gson)
+    api(googleLibs.gson)
 }
 
 val versionMajor = 1

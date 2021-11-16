@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
 import com.hao.reader.extension.setDecorFitsSystemWindows
 import com.nice.kothttp.OkWebSocketResponse
-import com.nice.kothttp.httpCallFlow
-import com.nice.kothttp.webSocketCallFlow
+import com.nice.kothttp.buildHttpCall
+import com.nice.kothttp.buildWebSocketCall
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent { ReaderApp() }
 
 
-        val callFlow = httpCallFlow<String> {
+        val httpCall = buildHttpCall<String> {
 
             client(OkHttpClient())
 
@@ -48,13 +48,14 @@ class MainActivity : ComponentActivity() {
 
         }
 
-        callFlow.onEach {
+        httpCall.make().onEach {
             Log.e("TAG", "result: $it")
         }.launchIn(lifecycleScope)
 
-        webSocketCallFlow {
+
+        buildWebSocketCall {
             url("ws://xxx.xxx.xxx")
-        }.retryWhen { cause, attempt ->
+        }.make().retryWhen { cause, attempt ->
             cause is IOException
         }.onEach {
             when (it) {

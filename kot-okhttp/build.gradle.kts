@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = androids.versions.compileSdk.get().toInt()
+    compileSdk = app.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = androids.versions.minSdk.get().toInt()
-        targetSdk = androids.versions.targetSdk.get().toInt()
+        minSdk = app.versions.minSdk.get().toInt()
+        targetSdk = app.versions.targetSdk.get().toInt()
     }
 
     buildTypes {
@@ -28,7 +28,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = kotlins.versions.jvmTarget.get()
+        jvmTarget = kotlinLibs.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -40,14 +40,14 @@ android {
 }
 
 dependencies {
-    implementation(coroutines.bundles.all)
-    implementation(googles.gson)
-    api(okhttps.bundles.all)
+    implementation(coroutinesLibs.bundles.all)
+    implementation(googleLibs.gson)
+    api(okhttpLibs.bundles.all)
 }
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 4
+val versionPatch = 5
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")

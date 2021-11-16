@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = androids.versions.compileSdk.get().toInt()
+    compileSdk = app.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = androids.versions.minSdk.get().toInt()
-        targetSdk = androids.versions.targetSdk.get().toInt()
+        minSdk = app.versions.minSdk.get().toInt()
+        targetSdk = app.versions.targetSdk.get().toInt()
     }
 
     buildFeatures {
@@ -32,7 +32,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = kotlins.versions.jvmTarget.get()
+        jvmTarget = kotlinLibs.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -44,15 +44,15 @@ android {
 }
 
 dependencies {
-    api(coroutines.bundles.all)
-    api(androidxs.bundles.common)
-    api(androidxs.bundles.view)
-    api(androidxs.bundles.lifecycle)
-    api(androidxs.bundles.datastore)
-    api(androidxs.setup)
-    api(androidxs.multidex)
-    api(googles.material)
-    api(images.coil)
+    api(coroutinesLibs.bundles.all)
+    api(androidxLibs.bundles.common)
+    api(androidxLibs.bundles.view)
+    api(androidxLibs.bundles.lifecycle)
+    api(androidxLibs.bundles.datastore)
+    api(androidxLibs.setup)
+    api(androidxLibs.multidex)
+    api(googleLibs.material)
+    api(imageLibs.coil)
 }
 
 val versionMajor = 1

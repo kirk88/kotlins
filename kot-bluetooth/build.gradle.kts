@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = androids.versions.compileSdk.get().toInt()
+    compileSdk = app.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = androids.versions.minSdk.get().toInt()
-        targetSdk = androids.versions.targetSdk.get().toInt()
+        minSdk = app.versions.minSdk.get().toInt()
+        targetSdk = app.versions.targetSdk.get().toInt()
     }
 
     buildTypes {
@@ -28,7 +28,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = kotlins.versions.jvmTarget.get()
+        jvmTarget = kotlinLibs.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -40,10 +40,10 @@ android {
 }
 
 dependencies {
-    implementation(kotlins.bundles.all)
-    implementation(coroutines.bundles.all)
-    implementation(androidxs.setup)
-    implementation(androidxs.annotation)
+    implementation(kotlinLibs.bundles.all)
+    implementation(coroutinesLibs.bundles.all)
+    implementation(androidxLibs.setup)
+    implementation(androidxLibs.annotation)
 }
 
 val versionMajor = 1

@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk = androids.versions.compileSdk.get().toInt()
+    compileSdk = app.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.hao.reader"
-        minSdk = androids.versions.minSdk.get().toInt()
-        targetSdk = androids.versions.targetSdk.get().toInt()
+        minSdk = app.versions.minSdk.get().toInt()
+        targetSdk = app.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -36,7 +36,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = kotlins.versions.jvmTarget.get()
+        jvmTarget = kotlinLibs.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -45,17 +45,17 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composes.versions.compose.get()
+        kotlinCompilerExtensionVersion = composeLibs.versions.compose.get()
     }
 
 }
 
 dependencies {
-    implementation(composes.bundles.common)
-    implementation(composes.bundles.accompanist)
-    implementation(composes.viewmodel)
-    implementation(composes.navigation)
-    implementation(composes.window)
+    implementation(composeLibs.bundles.common)
+    implementation(composeLibs.bundles.accompanist)
+    implementation(composeLibs.viewmodel)
+    implementation(composeLibs.navigation)
+    implementation(composeLibs.window)
     implementation(project(":kot-sqlite"))
     implementation(project(":kot-okhttp"))
     implementation(project(":kot-gson"))

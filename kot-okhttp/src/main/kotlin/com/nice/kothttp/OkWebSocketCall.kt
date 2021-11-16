@@ -13,10 +13,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 class OkWebSocketCall(
     private val client: OkHttpClient,
     private val request: Request
-) : OkCall<OkWebSocketResponse> {
+) : OkCall<OkWebSocketResponse>, OkWebSocket {
 
-    private var webSocket: WebSocket? = null
-    private var connectionFailure: Throwable? = null
+    private var _webSocket: WebSocket? = null
+    private val webSocket: WebSocket
+        get() = _webSocket ?: throw IllegalStateException("Not Ready")
+
+    private var creationFailure: Throwable? = null
 
     private val executed = AtomicBoolean()
 
@@ -29,6 +32,9 @@ class OkWebSocketCall(
     override val isCanceled: Boolean
         get() = canceled
 
+    override val queueSize: Long
+        get() = webSocket.queueSize()
+
     override fun tag(): Any? = request.tag()
 
     override fun <T> tag(type: Class<out T>): T? = request.tag(type)
@@ -40,7 +46,7 @@ class OkWebSocketCall(
         return callbackFlow {
             val listener = OkWebSocketListener(this@OkWebSocketCall, this)
 
-            connectWebSocket(listener)
+            _webSocket = createWebSocket(listener)
 
             invokeOnClose {
                 cancel()
@@ -48,63 +54,63 @@ class OkWebSocketCall(
         }
     }
 
+    override fun send(text: String): Boolean {
+        return webSocket.send(text)
+    }
+
+    override fun send(bytes: ByteString): Boolean {
+        return webSocket.send(bytes)
+    }
+
+    override fun close(code: Int, reason: String?): Boolean {
+        return _webSocket?.close(code, reason) ?: false
+    }
+
     override fun cancel() {
         if (canceled) return
 
         canceled = true
-        webSocket?.cancel()
+        _webSocket?.cancel()
     }
 
-    fun close(code: Int = 0, reason: String? = null) {
-        webSocket?.close(code, reason)
-    }
-
-    fun send(text: String): Boolean {
-        return webSocket?.send(text) ?: false
-    }
-
-    fun send(bytes: ByteString): Boolean {
-        return webSocket?.send(bytes) ?: false
-    }
-
-    private fun connectWebSocket(listener: WebSocketListener) {
-        if (connectionFailure != null) {
-            throw connectionFailure!!
+    private fun createWebSocket(listener: WebSocketListener): WebSocket {
+        if (creationFailure != null) {
+            throw creationFailure!!
         }
         try {
-            this.webSocket = client.newWebSocket(request, listener)
+            return client.newWebSocket(request, listener)
         } catch (error: Throwable) {
-            connectionFailure = error
+            creationFailure = error
             throw error
         }
     }
 
     private class OkWebSocketListener(
-        private val call: OkWebSocketCall,
+        private val socket: OkWebSocket,
         private val channel: SendChannel<OkWebSocketResponse>
     ) : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            channel.trySend(OkWebSocketResponse.Open(call, response))
+            channel.trySend(OkWebSocketResponse.Open(socket, response))
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            channel.trySend(OkWebSocketResponse.StringMessage(call, text))
+            channel.trySend(OkWebSocketResponse.StringMessage(socket, text))
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            channel.trySend(OkWebSocketResponse.ByteStringMessage(call, bytes))
+            channel.trySend(OkWebSocketResponse.ByteStringMessage(socket, bytes))
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closing(call, code, reason))
+            channel.trySend(OkWebSocketResponse.Closing(socket, code, reason))
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closed(call, code, reason))
+            channel.trySend(OkWebSocketResponse.Closed(socket, code, reason))
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            channel.trySend(OkWebSocketResponse.Failure(call, t, response))
+            channel.trySend(OkWebSocketResponse.Failure(socket, t, response))
         }
     }
 
@@ -147,7 +153,3 @@ fun buildWebSocketCall(buildAction: OkWebSocketCallBuilder.() -> Unit): OkWebSoc
     webSocketCallBuilder()
         .apply(buildAction)
         .build()
-
-fun webSocketCallFlow(buildAction: OkWebSocketCallBuilder.() -> Unit): Flow<OkWebSocketResponse> =
-    buildWebSocketCall(buildAction)
-        .make()
