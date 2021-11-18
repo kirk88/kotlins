@@ -1,8 +1,7 @@
 package com.hao.reader.ui
 
+import android.widget.ScrollView
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -12,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.sample.R
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
@@ -79,12 +80,18 @@ private fun MainContent() {
             .navigationBarsPadding()
     ) {
 
-        Text(
-            text = stringResource(R.string.lorem_ipsum),
-            modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(state = rememberScrollState())
-        )
+        AndroidView(factory = { ScrollView(it) }){
+            it.addView(ComposeView(it.context).apply {
+                setContent {
+                    Text(
+                        text = stringResource(R.string.lorem_ipsum),
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+                }
+            })
+        }
+        
 
         FloatingActionButton(modifier = Modifier
             .align(Alignment.BottomEnd)

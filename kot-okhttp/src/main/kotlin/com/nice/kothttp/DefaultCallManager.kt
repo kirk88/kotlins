@@ -2,16 +2,16 @@
 
 package com.nice.kothttp
 
-class DefaultCallScope : CallScope {
+class DefaultCallManager : CallManager {
 
-    private var resources: MutableList<OkCall<*>>? = null
+    private var resources: MutableSet<OkCall<*>>? = null
 
     override fun add(call: OkCall<*>) {
         synchronized(this) {
             var list = resources
 
             if (list == null) {
-                list = mutableListOf()
+                list = mutableSetOf()
                 resources = list
             }
 
@@ -27,12 +27,30 @@ class DefaultCallScope : CallScope {
         }
     }
 
+    override fun deleteByTag(tag: Any): Boolean {
+        val call: OkCall<*>?
+        synchronized(this) {
+            call = resources?.find { it.tag() === tag }
+        }
+        call ?: return false
+        return delete(call)
+    }
+
     override fun remove(call: OkCall<*>): Boolean {
         if (delete(call)) {
             call.cancel()
             return true
         }
         return false
+    }
+
+    override fun removeByTag(tag: Any): Boolean {
+        val call: OkCall<*>?
+        synchronized(this) {
+            call = resources?.find { it.tag() === tag }
+        }
+        call ?: return false
+        return remove(call)
     }
 
     override fun clear() {
@@ -47,7 +65,7 @@ class DefaultCallScope : CallScope {
     }
 
     override fun size(): Int {
-        var list: List<OkCall<*>>?
+        var list: Set<OkCall<*>>?
         synchronized(this) {
             list = resources
         }
@@ -55,7 +73,7 @@ class DefaultCallScope : CallScope {
     }
 
     override fun iterator(): Iterator<OkCall<*>> {
-        val list: List<OkCall<*>> = resources ?: emptyList()
+        val list: Set<OkCall<*>> = resources ?: emptySet()
         return list.iterator()
     }
 

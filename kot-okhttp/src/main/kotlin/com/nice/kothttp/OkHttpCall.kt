@@ -200,11 +200,11 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
         requestBody = body
     }
 
-    fun addRequestInterceptor(interceptor: OkRequestInterceptor) {
+    fun interceptRequest(interceptor: OkRequestInterceptor) = apply {
         requestInterceptors.add(interceptor)
     }
 
-    fun addResponseInterceptor(interceptor: OkResponseInterceptor) {
+    fun interceptResponse(interceptor: OkResponseInterceptor) = apply {
         responseInterceptors.add(interceptor)
     }
 

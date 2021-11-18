@@ -9,9 +9,7 @@ import com.hao.reader.extension.setDecorFitsSystemWindows
 import com.nice.kothttp.OkWebSocketResponse
 import com.nice.kothttp.buildHttpCall
 import com.nice.kothttp.buildWebSocketCall
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import java.io.IOException
 
@@ -35,14 +33,14 @@ class MainActivity : ComponentActivity() {
             }
 
             queryParameters {
-                "kw"+= "百度"
+                "kw" += "百度"
             }
 
-            addRequestInterceptor {
+            interceptRequest {
                 it.newBuilder().build()
             }
 
-            addResponseInterceptor {
+            interceptResponse {
                 it.newBuilder().build()
             }
 
@@ -54,9 +52,15 @@ class MainActivity : ComponentActivity() {
 
 
         buildWebSocketCall {
+            client(OkHttpClient())
+
             url("ws://xxx.xxx.xxx")
         }.make().retryWhen { cause, attempt ->
             cause is IOException
+        }.onStart {
+
+        }.catch {
+
         }.onEach {
             when (it) {
                 is OkWebSocketResponse.StringMessage -> {
