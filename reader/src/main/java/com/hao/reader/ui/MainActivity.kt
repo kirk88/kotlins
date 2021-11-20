@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
         }.make().retryWhen { cause, attempt ->
             cause is IOException
         }.onStart {
-
+            throw IOException("Not Ready")
         }.catch {
 
         }.onEach {
@@ -69,10 +69,10 @@ class MainActivity : ComponentActivity() {
                 is OkWebSocketResponse.Failure -> {
                     Log.e("TAG", "error: ${it.error}")
                 }
-                is OkWebSocketResponse.ByteStringMessage -> TODO()
-                is OkWebSocketResponse.Closed -> TODO()
-                is OkWebSocketResponse.Closing -> TODO()
-                is OkWebSocketResponse.Open -> TODO()
+                is OkWebSocketResponse.ByteStringMessage -> TODO("onMessage")
+                is OkWebSocketResponse.Closed -> TODO("onClosed")
+                is OkWebSocketResponse.Closing -> TODO("onClosing")
+                is OkWebSocketResponse.Open -> TODO("onOpen")
             }
         }.launchIn(lifecycleScope)
     }
