@@ -23,7 +23,6 @@ import com.hao.reader.components.OverflowMenu
 import com.hao.reader.components.OverflowMenuItem
 import com.hao.reader.ui.common.Background
 import com.hao.reader.ui.theme.ReaderThemeWithInsets
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -71,9 +70,6 @@ private fun MainAppBar() {
 
 @Composable
 private fun MainContent() {
-    val scaffoldState = androidx.compose.material.rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,9 +92,6 @@ private fun MainContent() {
         FloatingActionButton(modifier = Modifier
             .align(Alignment.BottomEnd)
             .offset((-16).dp, (-16).dp), onClick = {
-                coroutineScope.launch {
-                  scaffoldState.snackbarHostState.showSnackbar(message = "What the fuck?")
-                }
             }
         ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = null)

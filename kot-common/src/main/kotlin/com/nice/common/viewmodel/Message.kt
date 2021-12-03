@@ -16,7 +16,7 @@ open class Message(val what: Int = -1) {
         return extras.getValue(key) as T
     }
 
-    operator fun Message.set(key: String, value: Any?) {
+    operator fun set(key: String, value: Any?) {
         extras[key] = value
     }
 

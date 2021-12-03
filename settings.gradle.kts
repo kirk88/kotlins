@@ -45,6 +45,7 @@ dependencyResolutionManagement {
 
         create("coroutinesLibs") {
             val versionCoroutines = "1.5.2"
+
             alias("core").to("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
                 .version(versionCoroutines)
             alias("android").to("org.jetbrains.kotlinx", "kotlinx-coroutines-android")
