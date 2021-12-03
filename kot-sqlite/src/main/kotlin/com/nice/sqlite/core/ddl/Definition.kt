@@ -229,13 +229,12 @@ sealed class Defined(override val name: String) : Definition {
     internal class New(private val column: Column<*>) : Defined(column.name) {
         override fun render(): String = "NEW.${column.render()}"
     }
-
-    object CurrentTime : Defined("CURRENT_TIMESTAMP")
 }
 
 fun defined(name: String): Defined = Defined.Named(name)
 fun old(column: Column<*>): Defined = Defined.Old(column)
 fun new(column: Column<*>): Defined = Defined.New(column)
+fun currentTime(): Defined = Defined.Named("CURRENT_TIMESTAMP")
 
 class Function internal constructor(
     name: String,
@@ -302,9 +301,9 @@ fun datetime(source: String, vararg modifiers: String) = function("datetime", so
 fun strftime(pattern: String, source: String, vararg modifiers: String) =
     function("strftime", pattern, source, *modifiers)
 
-fun localtime(column: Table.DateColumn):Function = date(column, "localtime")
-fun localtime(column: Table.TimeColumn):Function = date(column, "localtime")
-fun localtime(column: Table.DatetimeColumn):Function = date(column, "localtime")
+fun localtime(column: Table.DateColumn): Function = date(column, "localtime")
+fun localtime(column: Table.TimeColumn): Function = date(column, "localtime")
+fun localtime(column: Table.DatetimeColumn): Function = date(column, "localtime")
 
 class AliasDefinition internal constructor(
     override val name: String,

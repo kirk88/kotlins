@@ -67,7 +67,7 @@ object TestTable : Table("test") {
     val flag = BooleanColumn("flag") + Default(false)
     val number = IntColumn("number") + Default(10)
     val data = BlobColumn("data") + Default(byteArrayOf(1, 2, 3, 4, 5))
-    val time = DatetimeColumn("time") + Default(Defined.CurrentTime)
+    val time = DatetimeColumn("time") + Default(currentTime())
 
     val idNameIndex = NonuniqueIndex(id, name)
 }

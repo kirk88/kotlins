@@ -76,7 +76,7 @@ private fun MainContent() {
             .navigationBarsPadding()
     ) {
 
-        AndroidView(factory = { ScrollView(it) }){
+        AndroidView(factory = { ScrollView(it) }) {
             it.addView(ComposeView(it.context).apply {
                 setContent {
                     Text(
@@ -87,11 +87,13 @@ private fun MainContent() {
                 }
             })
         }
-        
 
-        FloatingActionButton(modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .offset((-16).dp, (-16).dp), onClick = {
+
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset((-16).dp, (-16).dp),
+            onClick = {
             }
         ) {
             Icon(imageVector = Icons.Filled.Send, contentDescription = null)
