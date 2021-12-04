@@ -201,9 +201,9 @@ open class Index(
 }
 
 sealed class Defined(override val name: String) : Definition {
-    override fun render(): String = name
-    override fun fullRender(): String = render()
-    override fun toString(): String = render()
+    override fun render(): String = toString()
+    override fun fullRender(): String = toString()
+    override fun toString(): String = name
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -220,21 +220,22 @@ sealed class Defined(override val name: String) : Definition {
         return name.hashCode()
     }
 
-    internal class Named(name: String) : Defined(name)
+    internal class Named(name: String) : Defined(name) {
+        override fun toString(): String = name.uppercase()
+    }
 
     internal class Old(private val column: Column<*>) : Defined(column.name) {
-        override fun render(): String = "OLD.${column.render()}"
+        override fun toString(): String = "OLD.${column.render()}"
     }
 
     internal class New(private val column: Column<*>) : Defined(column.name) {
-        override fun render(): String = "NEW.${column.render()}"
+        override fun toString(): String = "NEW.${column.render()}"
     }
 }
 
 fun defined(name: String): Defined = Defined.Named(name)
 fun old(column: Column<*>): Defined = Defined.Old(column)
 fun new(column: Column<*>): Defined = Defined.New(column)
-fun currentTime(): Defined = Defined.Named("CURRENT_TIMESTAMP")
 
 class Function internal constructor(
     name: String,
@@ -254,8 +255,6 @@ class Function internal constructor(
             if (it is Column<*>) it.fullRender() else it.toSqlString()
         }
     }
-
-    override fun toString(): String = name
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -277,10 +276,10 @@ class Function internal constructor(
 
 }
 
-fun function(
+private fun function(
     name: String,
     vararg values: Any
-): Function = Function(name, values)
+) = Function(name, values)
 
 fun count(column: Column<*>) = function("count", column)
 fun max(column: Column<*>) = function("max", column)
