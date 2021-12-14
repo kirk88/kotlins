@@ -73,4 +73,4 @@ fun ShowError(text: CharSequence? = null) = Message.ShowError(text)
 fun ShowError(@StringRes textId: Int) = Message.ShowError(applicationContext.getText(textId))
 fun ShowContent() = Message.ShowContent()
 
-fun messageOf(vararg messages: Message): Message = Message.Batch(messages.toSet())
+fun messagesOf(vararg messages: Message): Message = Message.Batch(messages.toSet())
