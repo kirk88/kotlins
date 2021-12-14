@@ -8,7 +8,9 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.annotation.StringRes
 import com.nice.common.applicationContext
 
-open class Message(val what: Int = -1) {
+sealed class Message {
+
+    open val what: Int = -1
 
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
@@ -45,6 +47,8 @@ open class Message(val what: Int = -1) {
 
     class ShowContent : Message()
 
+    internal class Event(override val what: Int) : Message()
+
     internal class Batch(val messages: Set<Message>) : Message()
 
 }
@@ -54,6 +58,9 @@ fun <T : Any> Message.getOrNull(key: String): T? = extras[key] as? T
 fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(key) ?: defaultValue
 
 fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
+
+fun Message(what: Int): Message = Message.Event(what)
+fun Message(vararg messages: Message): Message = Message.Batch(messages.toSet())
 
 fun Tip(text: CharSequence) = Message.Tip(text)
 fun Tip(@StringRes textId: Int) = Message.Tip(applicationContext.getText(textId))
@@ -72,5 +79,3 @@ fun ShowEmpty(@StringRes textId: Int) = Message.ShowEmpty(applicationContext.get
 fun ShowError(text: CharSequence? = null) = Message.ShowError(text)
 fun ShowError(@StringRes textId: Int) = Message.ShowError(applicationContext.getText(textId))
 fun ShowContent() = Message.ShowContent()
-
-fun messagesOf(vararg messages: Message): Message = Message.Batch(messages.toSet())
