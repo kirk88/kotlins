@@ -60,6 +60,10 @@ fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(
 fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
 
 fun Message(what: Int): Message = Message.Event(what)
+fun Message(what: Int, vararg args: Pair<String, Any?>): Message = Message.Event(what).apply {
+    extras.putAll(args)
+}
+
 fun Message(vararg messages: Message): Message = Message.Batch(messages.toSet())
 
 fun Tip(text: CharSequence) = Message.Tip(text)
