@@ -10,8 +10,6 @@ import com.nice.common.applicationContext
 
 sealed class Message {
 
-    open val what: Int = -1
-
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
     operator fun <T : Any> get(key: String): T {
@@ -33,11 +31,27 @@ sealed class Message {
 
     class SetActivityResult(val resultCode: Int, val data: Intent?) : Message()
 
-    class FinishActivity : Message()
+    class FinishActivity : Message() {
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 
     class ShowProgress(val text: CharSequence?) : Message()
 
-    class DismissProgress : Message()
+    class DismissProgress : Message() {
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 
     class ShowLoading(val text: CharSequence?) : Message()
 
@@ -45,9 +59,17 @@ sealed class Message {
 
     class ShowError(val text: CharSequence?) : Message()
 
-    class ShowContent : Message()
+    class ShowContent : Message() {
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
 
-    internal class Event(override val what: Int) : Message()
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
+
+    class Event(val what: Int) : Message()
 
     internal class Batch(val messages: Set<Message>) : Message()
 
@@ -59,12 +81,10 @@ fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(
 
 fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
 
-fun Message(what: Int): Message = Message.Event(what)
-fun Message(what: Int, vararg args: Pair<String, Any?>): Message = Message.Event(what).apply {
+fun Event(what: Int) = Message.Event(what)
+fun Event(what: Int, vararg args: Pair<String, Any?>) = Message.Event(what).apply {
     extras.putAll(args)
 }
-
-fun Message(vararg messages: Message): Message = Message.Batch(messages.toSet())
 
 fun Tip(text: CharSequence) = Message.Tip(text)
 fun Tip(@StringRes textId: Int) = Message.Tip(applicationContext.getText(textId))
@@ -83,3 +103,5 @@ fun ShowEmpty(@StringRes textId: Int) = Message.ShowEmpty(applicationContext.get
 fun ShowError(text: CharSequence? = null) = Message.ShowError(text)
 fun ShowError(@StringRes textId: Int) = Message.ShowError(applicationContext.getText(textId))
 fun ShowContent() = Message.ShowContent()
+
+fun messageBatchOf(vararg messages: Message): Message = Message.Batch(messages.toSet())
