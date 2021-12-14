@@ -8,7 +8,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.annotation.StringRes
 import com.nice.common.applicationContext
 
-sealed class Message {
+open class Message {
 
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
@@ -31,27 +31,11 @@ sealed class Message {
 
     class SetActivityResult(val resultCode: Int, val data: Intent?) : Message()
 
-    class FinishActivity : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
-
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
+    class FinishActivity : Message()
 
     class ShowProgress(val text: CharSequence?) : Message()
 
-    class DismissProgress : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
-
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
+    class DismissProgress : Message()
 
     class ShowLoading(val text: CharSequence?) : Message()
 
@@ -59,15 +43,7 @@ sealed class Message {
 
     class ShowError(val text: CharSequence?) : Message()
 
-    class ShowContent : Message() {
-        override fun equals(other: Any?): Boolean {
-            return this === other
-        }
-
-        override fun hashCode(): Int {
-            return System.identityHashCode(this)
-        }
-    }
+    class ShowContent : Message()
 
     class Event(val what: Int) : Message()
 
