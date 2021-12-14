@@ -10,6 +10,8 @@ import com.nice.common.applicationContext
 
 open class Message {
 
+    open var what: Int = -1
+
     internal val extras: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
     operator fun <T : Any> get(key: String): T {
@@ -45,8 +47,6 @@ open class Message {
 
     class ShowContent : Message()
 
-    class Event(val what: Int) : Message()
-
     internal class Batch(val messages: Set<Message>) : Message()
 
 }
@@ -57,9 +57,16 @@ fun <T : Any> Message.getOrDefault(key: String, defaultValue: T): T = getOrNull(
 
 fun <T : Any> Message.getOrElse(key: String, defaultValue: () -> T): T = getOrNull(key) ?: defaultValue()
 
-fun Event(what: Int) = Message.Event(what)
-fun Event(what: Int, vararg args: Pair<String, Any?>) = Message.Event(what).apply {
-    extras.putAll(args)
+fun Message(what: Int) = object : Message() {
+    override var what: Int = what
+}
+
+fun Message(what: Int, vararg args: Pair<String, Any?>) = object : Message() {
+    override var what: Int = what
+
+    init {
+        extras.putAll(args)
+    }
 }
 
 fun Tip(text: CharSequence) = Message.Tip(text)
