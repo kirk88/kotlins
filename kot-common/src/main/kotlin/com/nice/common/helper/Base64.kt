@@ -36,9 +36,9 @@ fun String.decodeBase64ToString(
 fun ByteArray.encodeBase64ToString(
     charset: Charset = Charsets.UTF_8,
     flag: Int = Base64.DEFAULT
-): String = Base64.encode(this, flag).toString(charset)
+): String = encodeBase64(flag).toString(charset)
 
 fun ByteArray.decodeBase64ToString(
     charset: Charset = Charsets.UTF_8,
     flag: Int = Base64.DEFAULT
-): String = Base64.decode(this, flag).toString(charset)
+): String = decodeBase64(flag).toString(charset)
