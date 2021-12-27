@@ -3,6 +3,7 @@
 package com.nice.common.event
 
 import androidx.lifecycle.*
+import com.nice.common.event.FlowEventBus.eventFlow
 import kotlinx.coroutines.*
 
 @PublishedApi
@@ -24,14 +25,14 @@ fun <T> LifecycleOwner.emitEvent(
     delay: Long = 0L
 ): Job = lifecycleScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 inline fun <T> LifecycleOwner.emitEvent(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitEvent(
@@ -39,13 +40,13 @@ inline fun <reified T> LifecycleOwner.emitEvent(
     delay: Long = 0L
 ): Job = lifecycleScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitEvent(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 fun <T> LifecycleOwner.emitStickyEvent(
@@ -54,14 +55,14 @@ fun <T> LifecycleOwner.emitStickyEvent(
     delay: Long = 0L
 ): Job = lifecycleScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 inline fun <T> LifecycleOwner.emitStickyEvent(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEvent(
@@ -69,13 +70,13 @@ inline fun <reified T> LifecycleOwner.emitStickyEvent(
     delay: Long = 0L
 ): Job = lifecycleScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEvent(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 fun <T> ViewModel.emitEvent(
@@ -84,14 +85,14 @@ fun <T> ViewModel.emitEvent(
     delay: Long = 0L
 ): Job = viewModelScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 inline fun <T> ViewModel.emitEvent(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 inline fun <reified T> ViewModel.emitEvent(
@@ -99,13 +100,13 @@ inline fun <reified T> ViewModel.emitEvent(
     delay: Long = 0L
 ): Job = viewModelScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 inline fun <reified T> ViewModel.emitEvent(
     crossinline event: suspend () -> T?
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 fun <T> ViewModel.emitStickyEvent(
@@ -114,14 +115,14 @@ fun <T> ViewModel.emitStickyEvent(
     delay: Long = 0L
 ): Job = viewModelScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 inline fun <T> ViewModel.emitStickyEvent(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 inline fun <reified T> ViewModel.emitStickyEvent(
@@ -129,13 +130,13 @@ inline fun <reified T> ViewModel.emitStickyEvent(
     delay: Long = 0L
 ): Job = viewModelScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 inline fun <reified T> ViewModel.emitStickyEvent(
     crossinline event: suspend () -> T?
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -145,7 +146,7 @@ fun <T> emitEventGlobal(
     delay: Long = 0L
 ): Job = GlobalScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -153,7 +154,7 @@ inline fun <T> emitEventGlobal(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -162,14 +163,14 @@ inline fun <reified T> emitEventGlobal(
     delay: Long = 0L
 ): Job = GlobalScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 inline fun <reified T> emitEventGlobal(
     crossinline event: suspend () -> T?
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -179,7 +180,7 @@ fun <T> emitStickyEventGlobal(
     delay: Long = 0L
 ): Job = GlobalScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -187,7 +188,7 @@ inline fun <T> emitStickyEventGlobal(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -196,33 +197,33 @@ inline fun <reified T> emitStickyEventGlobal(
     delay: Long = 0L
 ): Job = GlobalScope.launch {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 inline fun <reified T> emitStickyEventGlobal(
     crossinline event: suspend () -> T?
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 suspend fun <T> emitEvent(
     name: String,
     event: T?
-) = FlowEventBus.eventFlow<T>(name).emit(event)
+) = eventFlow<T>(name).emit(event)
 
 suspend inline fun <reified T> emitEvent(
     event: T?
-) = FlowEventBus.eventFlow<T>().emit(event)
+) = eventFlow<T>().emit(event)
 
 suspend fun <T> emitStickyEvent(
     name: String,
     event: T?
-) = FlowEventBus.eventFlow<T>(name).emitSticky(event)
+) = eventFlow<T>(name).emitSticky(event)
 
 suspend inline fun <reified T> emitStickyEvent(
     event: T?
-) = FlowEventBus.eventFlow<T>().emitSticky(event)
+) = eventFlow<T>().emitSticky(event)
 
 fun <T> LifecycleOwner.emitEventWhenCreated(
     name: String,
@@ -230,14 +231,14 @@ fun <T> LifecycleOwner.emitEventWhenCreated(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenCreated {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 inline fun <T> LifecycleOwner.emitEventWhenCreated(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenCreated {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenCreated(
@@ -245,13 +246,13 @@ inline fun <reified T> LifecycleOwner.emitEventWhenCreated(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenCreated {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenCreated(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenCreated {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 fun <T> LifecycleOwner.emitStickyEventWhenCreated(
@@ -260,14 +261,14 @@ fun <T> LifecycleOwner.emitStickyEventWhenCreated(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenCreated {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 inline fun <T> LifecycleOwner.emitStickyEventWhenCreated(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenCreated {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenCreated(
@@ -275,13 +276,13 @@ inline fun <reified T> LifecycleOwner.emitStickyEventWhenCreated(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenCreated {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenCreated(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenCreated {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 fun <T> LifecycleOwner.emitEventWhenStarted(
@@ -290,14 +291,14 @@ fun <T> LifecycleOwner.emitEventWhenStarted(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenStarted {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 inline fun <T> LifecycleOwner.emitEventWhenStarted(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenStarted {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenStarted(
@@ -305,13 +306,13 @@ inline fun <reified T> LifecycleOwner.emitEventWhenStarted(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenStarted {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenStarted(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenStarted {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 fun <T> LifecycleOwner.emitStickyEventWhenStarted(
@@ -320,14 +321,14 @@ fun <T> LifecycleOwner.emitStickyEventWhenStarted(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenStarted {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 inline fun <T> LifecycleOwner.emitStickyEventWhenStarted(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenStarted {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenStarted(
@@ -335,13 +336,13 @@ inline fun <reified T> LifecycleOwner.emitStickyEventWhenStarted(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenStarted {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenStarted(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenStarted {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 fun <T> LifecycleOwner.emitEventWhenResumed(
@@ -350,14 +351,14 @@ fun <T> LifecycleOwner.emitEventWhenResumed(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenResumed {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emit(event)
+    eventFlow<T>(name).emit(event)
 }
 
 inline fun <T> LifecycleOwner.emitEventWhenResumed(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenResumed {
-    FlowEventBus.eventFlow<T>(name).emit(event())
+    eventFlow<T>(name).emit(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenResumed(
@@ -365,13 +366,13 @@ inline fun <reified T> LifecycleOwner.emitEventWhenResumed(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenResumed {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emit(event)
+    eventFlow<T>().emit(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitEventWhenResumed(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenResumed {
-    FlowEventBus.eventFlow<T>().emit(event())
+    eventFlow<T>().emit(event())
 }
 
 fun <T> LifecycleOwner.emitStickyEventWhenResumed(
@@ -380,14 +381,14 @@ fun <T> LifecycleOwner.emitStickyEventWhenResumed(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenResumed {
     delay(delay)
-    FlowEventBus.eventFlow<T>(name).emitSticky(event)
+    eventFlow<T>(name).emitSticky(event)
 }
 
 inline fun <T> LifecycleOwner.emitStickyEventWhenResumed(
     name: String,
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenResumed {
-    FlowEventBus.eventFlow<T>(name).emitSticky(event())
+    eventFlow<T>(name).emitSticky(event())
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenResumed(
@@ -395,130 +396,160 @@ inline fun <reified T> LifecycleOwner.emitStickyEventWhenResumed(
     delay: Long = 0L
 ): Job = lifecycleScope.launchWhenResumed {
     delay(delay)
-    FlowEventBus.eventFlow<T>().emitSticky(event)
+    eventFlow<T>().emitSticky(event)
 }
 
 inline fun <reified T> LifecycleOwner.emitStickyEventWhenResumed(
     crossinline event: suspend () -> T?
 ): Job = lifecycleScope.launchWhenResumed {
-    FlowEventBus.eventFlow<T>().emitSticky(event())
+    eventFlow<T>().emitSticky(event())
 }
 
 fun <T> LifecycleOwner.collectEvent(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>(name).collect(receiver)
+    eventFlow<T>(name).collect(collector)
 }
 
 inline fun <reified T> LifecycleOwner.collectEvent(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>().collect(receiver)
+    eventFlow<T>().collect(collector)
 }
 
 fun <T> LifecycleOwner.collectStickEvent(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>(name).collectSticky(receiver)
+    eventFlow<T>(name).collectSticky(collector)
 }
 
 fun <T> LifecycleOwner.collectStickEventWithLifecycle(
     name: String,
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, receiver)
+    eventFlow<T>(name).collectStickyWithLifecycle(lifecycle, minActiveState, collector)
 }
 
 inline fun <reified T> LifecycleOwner.collectStickEvent(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>().collectSticky(receiver)
+    eventFlow<T>().collectSticky(collector)
 }
 
 inline fun <reified T> LifecycleOwner.collectStickEventWithLifecycle(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = lifecycleScope.launch {
-    FlowEventBus.eventFlow<T>().collectStickyWithLifecycle(lifecycle, minActiveState, receiver)
+    eventFlow<T>().collectStickyWithLifecycle(lifecycle, minActiveState, collector)
 }
 
 fun <T> ViewModel.collectEvent(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>(name).collect(receiver)
+    eventFlow<T>(name).collect(collector)
 }
 
 inline fun <reified T> ViewModel.collectEvent(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>().collect(receiver)
+    eventFlow<T>().collect(collector)
 }
 
 fun <T> ViewModel.collectStickyEvent(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>(name).collectSticky(receiver)
+    eventFlow<T>(name).collectSticky(collector)
 }
 
 inline fun <reified T> ViewModel.collectStickyEvent(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = viewModelScope.launch {
-    FlowEventBus.eventFlow<T>().collectSticky(receiver)
+    eventFlow<T>().collectSticky(collector)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 fun <T> collectEventForever(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>(name).collect(receiver)
+    eventFlow<T>(name).collect(collector)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 inline fun <reified T> collectEventForever(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>().collect(receiver)
+    eventFlow<T>().collect(collector)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 fun <T> collectStickyEventForever(
     name: String,
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>(name).collectSticky(receiver)
+    eventFlow<T>(name).collectSticky(collector)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 inline fun <reified T> collectStickyEventForever(
-    receiver: FlowReceiver<T?>
+    collector: EventCollector<T?>
 ): Job = GlobalScope.launch {
-    FlowEventBus.eventFlow<T>().collectSticky(receiver)
+    eventFlow<T>().collectSticky(collector)
 }
 
 suspend fun <T> collectEvent(
     name: String,
-    receiver: FlowReceiver<T?>
-) = FlowEventBus.eventFlow<T>(name).collect(receiver)
+    collector: EventCollector<T?>
+) = eventFlow<T>(name).collect(collector)
 
 suspend inline fun <reified T> collectEvent(
-    receiver: FlowReceiver<T?>
-) = FlowEventBus.eventFlow<T>().collect(receiver)
+    collector: EventCollector<T?>
+) = eventFlow<T>().collect(collector)
 
 suspend fun <T> collectStickyEvent(
     name: String,
-    receiver: FlowReceiver<T?>
-) = FlowEventBus.eventFlow<T>(name).collectSticky(receiver)
+    collector: EventCollector<T?>
+) = eventFlow<T>(name).collectSticky(collector)
 
 suspend inline fun <reified T> collectStickyEvent(
-    receiver: FlowReceiver<T?>
-) = FlowEventBus.eventFlow<T>().collectSticky(receiver)
+    collector: EventCollector<T?>
+) = eventFlow<T>().collectSticky(collector)
 
-fun clearStickyEvent(name: String) = FlowEventBus.eventFlow<Any>(name).clearStickyCache()
+suspend fun clearStickyEvent(name: String) = eventFlow<Any>(name).clearStickyCache()
 
-inline fun <reified T> clearStickyEvent() = FlowEventBus.eventFlow<T>().clearStickyCache()
+suspend inline fun <reified T> clearStickyEvent() = eventFlow<T>().clearStickyCache()
+
+@OptIn(DelicateCoroutinesApi::class)
+fun LifecycleOwner.clearStickyEvent(name: String) = lifecycleScope.launch {
+    eventFlow<Any>(name).clearStickyCache()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+inline fun <reified T> LifecycleOwner.clearStickyEvent() = lifecycleScope.launch {
+    eventFlow<T>().clearStickyCache()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun ViewModel.clearStickyEvent(name: String) = viewModelScope.launch {
+    eventFlow<Any>(name).clearStickyCache()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+inline fun <reified T> ViewModel.clearStickyEvent() = viewModelScope.launch {
+    eventFlow<T>().clearStickyCache()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun clearStickyEventGlobal(name: String) = GlobalScope.launch {
+    eventFlow<Any>(name).clearStickyCache()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+inline fun <reified T> clearStickyEventGlobal() = GlobalScope.launch {
+    eventFlow<T>().clearStickyCache()
+}

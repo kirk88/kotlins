@@ -34,7 +34,7 @@ internal class ConnectionHandler(
         callback.invokeOnDisconnected(onClose)
     }
 
-    private val lock = Mutex()
+    private val mutex = Mutex()
 
     val services: List<DiscoveredService>
         get() = bluetoothGatt.services.map { it.toDiscoveredService() }
@@ -61,7 +61,7 @@ internal class ConnectionHandler(
     suspend inline fun <T> execute(
         crossinline action: suspend BluetoothGatt.() -> Boolean,
         crossinline response: suspend Callback.() -> T
-    ): T = lock.withLock {
+    ): T = mutex.withLock {
         withContext(dispatcher) {
             bluetoothGatt.action() || throw GattRequestRejectedException()
         }
@@ -78,7 +78,7 @@ internal class ConnectionHandler(
     suspend inline fun <T> tryExecute(
         crossinline action: suspend BluetoothGatt.() -> Unit,
         crossinline response: suspend Callback.() -> T
-    ): T = lock.withLock {
+    ): T = mutex.withLock {
         withContext(dispatcher) {
             try {
                 bluetoothGatt.action()

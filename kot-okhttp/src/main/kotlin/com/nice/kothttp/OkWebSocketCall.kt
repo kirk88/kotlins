@@ -3,21 +3,22 @@
 package com.nice.kothttp
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.ByteString
 import java.util.concurrent.atomic.AtomicBoolean
 
 class OkWebSocketCall(
     private val client: OkHttpClient,
     private val request: Request
-) : OkCall<OkWebSocketResponse>, OkWebSocket {
+) : OkCall<OkWebSocket> {
 
-    private var _webSocket: WebSocket? = null
-    private val webSocket: WebSocket
-        get() = _webSocket ?: throw IllegalStateException("Not Ready")
+    private var webSocket: OkWebSocket? = null
 
     private var creationFailure: Throwable? = null
 
@@ -32,57 +33,71 @@ class OkWebSocketCall(
     override val isCanceled: Boolean
         get() = canceled
 
-    override val queueSize: Long
-        get() = webSocket.queueSize()
 
     override fun tag(): Any? = request.tag()
 
     override fun <T> tag(type: Class<out T>): T? = request.tag(type)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun make(): Flow<OkWebSocketResponse> {
+    override fun make(): OkWebSocket {
         check(executed.compareAndSet(false, true)) { "Already Executed" }
 
-        return callbackFlow {
-            val listener = OkWebSocketListener(this@OkWebSocketCall, this)
-
-            _webSocket = createWebSocket(listener)
-
-            invokeOnClose {
-                cancel()
+        if (creationFailure != null) {
+            throw creationFailure!!
+        }
+        if (webSocket == null) {
+            try {
+                webSocket = OkWebSocketImpl(this, client, request)
+            } catch (error: Throwable) {
+                creationFailure = error
+                throw error
             }
         }
-    }
-
-    override fun send(text: String): Boolean {
-        return webSocket.send(text)
-    }
-
-    override fun send(bytes: ByteString): Boolean {
-        return webSocket.send(bytes)
-    }
-
-    override fun close(code: Int, reason: String?): Boolean {
-        return _webSocket?.close(code, reason) ?: false
+        return webSocket!!
     }
 
     override fun cancel() {
         if (canceled) return
 
         canceled = true
-        _webSocket?.cancel()
+        webSocket?.cancel()
     }
 
-    private fun createWebSocket(listener: WebSocketListener): WebSocket {
-        if (creationFailure != null) {
-            throw creationFailure!!
+    private class OkWebSocketImpl(
+        private val call: OkWebSocketCall,
+        client: OkHttpClient,
+        request: Request
+    ) : OkWebSocket {
+
+        @OptIn(ExperimentalCoroutinesApi::class)
+        private val _response = Channel<OkWebSocketResponse>(capacity = Int.MAX_VALUE).apply {
+            invokeOnClose {
+                call.cancel()
+            }
         }
-        try {
-            return client.newWebSocket(request, listener)
-        } catch (error: Throwable) {
-            creationFailure = error
-            throw error
+        override val response: Flow<OkWebSocketResponse> = _response.consumeAsFlow()
+
+        private val socket = client.newWebSocket(request, OkWebSocketListener(this, _response))
+
+        override val queueSize: Long
+            get() = socket.queueSize()
+
+        override fun send(text: String): Boolean {
+            return socket.send(text)
         }
+
+        override fun send(bytes: ByteString): Boolean {
+            return socket.send(bytes)
+        }
+
+        override fun close(code: Int, reason: String?): Boolean {
+            return socket.close(code, reason)
+        }
+
+        override fun cancel() {
+            call.cancel()
+        }
+
     }
 
     private class OkWebSocketListener(
@@ -90,27 +105,27 @@ class OkWebSocketCall(
         private val channel: SendChannel<OkWebSocketResponse>
     ) : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            channel.trySend(OkWebSocketResponse.Open(socket, response))
+            channel.trySendBlocking(OkWebSocketResponse.Open(socket, response))
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            channel.trySend(OkWebSocketResponse.StringMessage(socket, text))
+            channel.trySendBlocking(OkWebSocketResponse.StringMessage(socket, text))
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            channel.trySend(OkWebSocketResponse.ByteStringMessage(socket, bytes))
+            channel.trySendBlocking(OkWebSocketResponse.ByteStringMessage(socket, bytes))
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closing(socket, code, reason))
+            channel.trySendBlocking(OkWebSocketResponse.Closing(socket, code, reason))
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySend(OkWebSocketResponse.Closed(socket, code, reason))
+            channel.trySendBlocking(OkWebSocketResponse.Closed(socket, code, reason))
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            channel.trySend(OkWebSocketResponse.Failure(socket, t, response))
+            channel.trySendBlocking(OkWebSocketResponse.Failure(socket, t, response))
         }
     }
 
@@ -120,6 +135,8 @@ class OkWebSocketCallBuilder internal constructor() {
 
     private var client: OkHttpClient = DEFAULT_CLIENT
 
+    private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
+
     private val requestBuilder: Request.Builder = Request.Builder()
 
     fun client(client: OkHttpClient) = apply {
@@ -127,7 +144,48 @@ class OkWebSocketCallBuilder internal constructor() {
     }
 
     fun url(url: String) = apply {
-        requestBuilder.url(url)
+        val httpUrl = url.toHttpUrl()
+        urlBuilder.scheme(httpUrl.scheme)
+            .host(httpUrl.host)
+            .port(httpUrl.port)
+
+        val username = httpUrl.username
+        val password = httpUrl.password
+        if (username.isNotEmpty() || password.isNotEmpty()) {
+            urlBuilder.username(username)
+            urlBuilder.password(password)
+        }
+
+        val pathSegments = httpUrl.pathSegments
+        for (pathSegment in pathSegments) {
+            urlBuilder.addPathSegment(pathSegment)
+        }
+
+        val fragment = httpUrl.fragment
+        if (!fragment.isNullOrEmpty()) {
+            urlBuilder.fragment(fragment)
+        }
+
+        val query = httpUrl.query
+        if (!query.isNullOrEmpty()) {
+            urlBuilder.query(query)
+        }
+    }
+
+    fun username(username: String) = apply {
+        urlBuilder.username(username)
+    }
+
+    fun password(password: String) = apply {
+        urlBuilder.password(password)
+    }
+
+    fun headers(buildAction: HeadersBuilder.() -> Unit) = apply {
+        HeadersBuilder(requestBuilder).apply(buildAction)
+    }
+
+    fun queryParameters(buildAction: QueryParametersBuilder.() -> Unit) = apply {
+        QueryParametersBuilder(urlBuilder).apply(buildAction)
     }
 
     fun tag(tag: Any?) = apply {
@@ -139,11 +197,11 @@ class OkWebSocketCallBuilder internal constructor() {
     }
 
     fun build(): OkWebSocketCall {
-        val request = requestBuilder.get().build()
+        val request = requestBuilder.url(urlBuilder.build()).get().build()
         return OkWebSocketCall(client, request)
     }
 
-    fun make(): Flow<OkWebSocketResponse> = build().make()
+    fun make(): OkWebSocket = build().make()
 
 }
 

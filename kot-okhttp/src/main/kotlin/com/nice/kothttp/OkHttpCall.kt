@@ -16,7 +16,7 @@ class OkHttpCall<T> internal constructor(
     private val requestInterceptors: List<OkRequestInterceptor>,
     private val responseInterceptors: List<OkResponseInterceptor>,
     private val transformer: OkTransformer<T>
-) : OkCall<T> {
+) : OkCall<Flow<T>> {
 
     private var call: Call? = null
     private var creationFailure: Throwable? = null
@@ -51,20 +51,18 @@ class OkHttpCall<T> internal constructor(
     }
 
     private suspend fun createCall(): Call {
-        var realCall: Call? = this.call
         if (creationFailure != null) {
             throw creationFailure!!
         }
-        if (realCall == null) {
+        if (call == null) {
             try {
-                this.call = client.newCall(interceptRequest(request))
-                realCall = this.call
+                call = client.newCall(interceptRequest(request))
             } catch (error: Throwable) {
                 creationFailure = error
                 throw error
             }
         }
-        return realCall!!
+        return call!!
     }
 
     private suspend fun interceptRequest(request: Request): Request {
@@ -253,96 +251,6 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
     }
 
 }
-
-class HeadersBuilder internal constructor(private val builder: Request.Builder) {
-
-    fun add(name: String, value: Any?) {
-        builder.addHeader(name, value.toStringOrEmpty())
-    }
-
-    fun set(name: String, value: Any?) {
-        builder.header(name, value.toStringOrEmpty())
-    }
-
-    fun remove(name: String) {
-        builder.removeHeader(name)
-    }
-
-    operator fun String.plusAssign(value: Any?) = add(this, value)
-
-    operator fun String.unaryMinus() = remove(this)
-
-}
-
-class QueryParametersBuilder internal constructor(private val builder: HttpUrl.Builder) {
-
-    fun add(name: String, value: Any?) {
-        builder.addQueryParameter(name, value.toStringOrEmpty())
-    }
-
-    fun addEncoded(name: String, value: Any?) {
-        builder.addEncodedQueryParameter(name, value.toStringOrEmpty())
-    }
-
-    fun set(name: String, value: Any?) {
-        builder.setQueryParameter(name, value.toStringOrEmpty())
-    }
-
-    fun setEncoded(name: String, value: Any?) {
-        builder.setEncodedQueryParameter(name, value.toStringOrEmpty())
-    }
-
-    fun remove(name: String) {
-        builder.removeAllQueryParameters(name)
-    }
-
-    fun removeEncoded(name: String) {
-        builder.removeAllEncodedQueryParameters(name)
-    }
-
-    operator fun String.plusAssign(value: Any?) = add(this, value)
-
-    operator fun String.unaryMinus() = remove(this)
-
-}
-
-class FormParametersBuilder internal constructor(private val builder: FormBody.Builder) {
-
-    fun add(name: String, value: Any?) {
-        builder.add(name, value.toStringOrEmpty())
-    }
-
-    fun addEncoded(name: String, value: Any?) {
-        builder.addEncoded(name, value.toStringOrEmpty())
-    }
-
-    operator fun String.plusAssign(value: Any?) = add(this, value)
-
-}
-
-class MultipartBodyBuilder internal constructor(private val builder: MultipartBody.Builder) {
-
-    fun add(name: String, value: Any?) {
-        builder.addFormDataPart(name, value.toStringOrEmpty())
-    }
-
-    fun add(name: String, filename: String?, body: RequestBody) {
-        builder.addFormDataPart(name, filename, body)
-    }
-
-    fun add(part: MultipartBody.Part) {
-        builder.addPart(part)
-    }
-
-    fun add(body: RequestBody) {
-        builder.addPart(body)
-    }
-
-    operator fun String.plusAssign(value: Any?) = add(this, value)
-
-}
-
-private fun Any?.toStringOrEmpty() = (this ?: "").toString()
 
 inline fun <reified T> httpCallBuilder() = OkHttpCallBuilder<T>().mapResponse(typeMapper())
 
