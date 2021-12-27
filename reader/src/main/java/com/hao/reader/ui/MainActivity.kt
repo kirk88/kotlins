@@ -50,11 +50,13 @@ class MainActivity : ComponentActivity() {
         }.launchIn(lifecycleScope)
 
 
-        buildWebSocketCall {
+        val socket = buildWebSocketCall {
             client(OkHttpClient())
 
             url("ws://xxx.xxx.xxx")
-        }.make().response.catch {
+        }.make()
+
+        socket.response.catch {
 
         }.onEach {
             when (it) {
