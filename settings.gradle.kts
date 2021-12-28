@@ -2,15 +2,14 @@ enableFeaturePreview("VERSION_CATALOGS")
 pluginManagement {
     repositories {
         google { url = uri("https://maven.aliyun.com/repository/google") }
-        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        mavenCentral { url = uri("https://maven.aliyun.com/repository/central") }
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
     }
     plugins {
         id("com.android.application") version "7.0.4"
         id("com.android.library") version "7.0.4"
-        id("org.jetbrains.kotlin.android") version "1.5.31"
-        id("org.jetbrains.kotlin.jvm") version "1.5.31"
-        id("com.github.ben-manes.versions") version "0.39.0"
+        id("org.jetbrains.kotlin.android") version "1.6.10"
+        id("org.jetbrains.kotlin.jvm") version "1.6.10"
     }
 }
 dependencyResolutionManagement {
@@ -18,7 +17,7 @@ dependencyResolutionManagement {
 
     repositories {
         google { url = uri("https://maven.aliyun.com/repository/google") }
-        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        mavenCentral { url = uri("https://maven.aliyun.com/repository/central") }
     }
 
     versionCatalogs {
@@ -31,7 +30,7 @@ dependencyResolutionManagement {
         create("kotlinLibs") {
             version("jvmTarget", "11")
 
-            val versionKotlinStdlib = "1.5.31"
+            val versionKotlinStdlib = "1.6.10"
             alias("stdlib").to("org.jetbrains.kotlin", "kotlin-stdlib")
                 .version(versionKotlinStdlib)
             alias("stdlib-common").to("org.jetbrains.kotlin", "kotlin-stdlib-common")
@@ -43,7 +42,7 @@ dependencyResolutionManagement {
         }
 
         create("coroutinesLibs") {
-            val versionCoroutines = "1.5.2"
+            val versionCoroutines = "1.6.0"
 
             alias("core").to("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
                 .version(versionCoroutines)
