@@ -19,7 +19,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://dl.google.com/dl/android/maven2")
+        maven("http://maven.aliyun.com/nexus/content/groups/public")
+        maven("http://maven.aliyun.com/nexus/content/repositories/jcenter")
+        maven("http://maven.aliyun.com/nexus/content/repositories/google")
+        maven("http://maven.aliyun.com/nexus/content/repositories/gradle-plugin")
     }
 
     versionCatalogs {
