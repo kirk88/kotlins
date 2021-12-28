@@ -19,7 +19,6 @@ class OkWebSocketCall(
 ) : OkCall<OkWebSocket> {
 
     private var webSocket: OkWebSocket? = null
-
     private var creationFailure: Throwable? = null
 
     private val executed = AtomicBoolean()
@@ -40,19 +39,21 @@ class OkWebSocketCall(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun make(): OkWebSocket {
-        check(executed.compareAndSet(false, true)) { "Already Executed" }
-
         if (creationFailure != null) {
             throw creationFailure!!
         }
+
         if (webSocket == null) {
             try {
-                webSocket = OkWebSocketImpl(this, client, request)
+                webSocket = RealOkWebSocket(client, request) { cancel() }
             } catch (error: Throwable) {
                 creationFailure = error
                 throw error
             }
         }
+
+        check(executed.compareAndSet(false, true)) { "Already Executed" }
+
         return webSocket!!
     }
 
@@ -63,16 +64,16 @@ class OkWebSocketCall(
         webSocket?.cancel()
     }
 
-    private class OkWebSocketImpl(
-        private val call: OkWebSocketCall,
+    private class RealOkWebSocket(
         client: OkHttpClient,
-        request: Request
+        request: Request,
+        private val onCancel: () -> Unit
     ) : OkWebSocket {
 
         @OptIn(ExperimentalCoroutinesApi::class)
         private val _response = Channel<OkWebSocketResponse>(capacity = Int.MAX_VALUE).apply {
             invokeOnClose {
-                call.cancel()
+                onCancel.invoke()
             }
         }
         override val response: Flow<OkWebSocketResponse> = _response.consumeAsFlow()
@@ -95,7 +96,7 @@ class OkWebSocketCall(
         }
 
         override fun cancel() {
-            call.cancel()
+            onCancel.invoke()
         }
 
     }
@@ -104,6 +105,7 @@ class OkWebSocketCall(
         private val socket: OkWebSocket,
         private val channel: SendChannel<OkWebSocketResponse>
     ) : WebSocketListener() {
+
         override fun onOpen(webSocket: WebSocket, response: Response) {
             channel.trySendBlocking(OkWebSocketResponse.Open(socket, response))
         }
@@ -127,6 +129,7 @@ class OkWebSocketCall(
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             channel.trySendBlocking(OkWebSocketResponse.Failure(socket, t, response))
         }
+
     }
 
 }

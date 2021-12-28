@@ -1,13 +1,13 @@
 enableFeaturePreview("VERSION_CATALOGS")
 pluginManagement {
     repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
+        google { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
     }
     plugins {
-        id("com.android.application") version "7.0.3"
-        id("com.android.library") version "7.0.3"
+        id("com.android.application") version "7.0.4"
+        id("com.android.library") version "7.0.4"
         id("org.jetbrains.kotlin.android") version "1.5.31"
         id("org.jetbrains.kotlin.jvm") version "1.5.31"
         id("com.github.ben-manes.versions") version "0.39.0"
@@ -17,9 +17,8 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
     repositories {
-        google()
-        mavenCentral()
-        maven("https://dl.google.com/dl/android/maven2")
+        google { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/central") }
     }
 
     versionCatalogs {
