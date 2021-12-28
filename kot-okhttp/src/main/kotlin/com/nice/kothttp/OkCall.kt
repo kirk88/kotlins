@@ -1,6 +1,5 @@
 package com.nice.kothttp
 
-import kotlinx.coroutines.flow.Flow
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
@@ -18,7 +17,7 @@ interface OkCall<T> {
 
     fun <T> tag(type: Class<out T>): T?
 
-    fun make(): Flow<T>
+    fun make(): T
 
     fun cancel()
 

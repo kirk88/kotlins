@@ -1,8 +1,11 @@
 package com.nice.kothttp
 
+import kotlinx.coroutines.flow.Flow
 import okio.ByteString
 
 interface OkWebSocket {
+
+    val response: Flow<OkWebSocketResponse>
 
     val queueSize: Long
 

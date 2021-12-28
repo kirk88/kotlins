@@ -9,9 +9,10 @@ import com.hao.reader.extension.setDecorFitsSystemWindows
 import com.nice.kothttp.OkWebSocketResponse
 import com.nice.kothttp.buildHttpCall
 import com.nice.kothttp.buildWebSocketCall
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import okhttp3.OkHttpClient
-import java.io.IOException
 
 
 class MainActivity : ComponentActivity() {
@@ -22,14 +23,12 @@ class MainActivity : ComponentActivity() {
         setContent { ReaderApp() }
 
 
-        val httpCall = buildHttpCall<String> {
-
-            client(OkHttpClient())
+        val call = buildHttpCall<String> {
 
             url("https://www.baidu.com")
 
             headers {
-                add("ContentType", "application/json")
+                "ContentType" += "application/json"
             }
 
             queryParameters {
@@ -46,20 +45,18 @@ class MainActivity : ComponentActivity() {
 
         }
 
-        httpCall.make().onEach {
+        call.make().onEach {
             Log.e("TAG", "result: $it")
         }.launchIn(lifecycleScope)
 
 
-        buildWebSocketCall {
+        val socket = buildWebSocketCall {
             client(OkHttpClient())
 
             url("ws://xxx.xxx.xxx")
-        }.make().retryWhen { cause, attempt ->
-            cause is IOException
-        }.onStart {
-            throw IOException("Not Ready")
-        }.catch {
+        }.make()
+
+        socket.response.catch {
 
         }.onEach {
             when (it) {

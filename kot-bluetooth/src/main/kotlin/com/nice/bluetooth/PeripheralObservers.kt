@@ -125,12 +125,12 @@ internal class PeripheralObservers(
 
 private class Observations {
 
-    private val lock = Mutex()
+    private val mutex = Mutex()
     private val observations = mutableMapOf<Characteristic, MutableList<OnSubscriptionAction>>()
 
     suspend inline fun forEach(
         action: (Characteristic, List<OnSubscriptionAction>) -> Unit
-    ) = lock.withLock {
+    ) = mutex.withLock {
         observations.forEach { (characteristic, onSubscriptionActions) ->
             action(characteristic, onSubscriptionActions)
         }
@@ -139,7 +139,7 @@ private class Observations {
     suspend fun add(
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction
-    ): Int = lock.withLock {
+    ): Int = mutex.withLock {
         val actions = observations[characteristic]
         if (actions == null) {
             val newActions = mutableListOf(onSubscription)
@@ -154,7 +154,7 @@ private class Observations {
     suspend fun remove(
         characteristic: Characteristic,
         onSubscription: OnSubscriptionAction,
-    ): Int = lock.withLock {
+    ): Int = mutex.withLock {
         val actions = observations[characteristic]
         when {
             actions == null -> -1 // No previous observation existed for characteristic.

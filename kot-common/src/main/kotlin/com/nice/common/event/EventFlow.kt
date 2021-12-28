@@ -6,23 +6,25 @@ import android.util.ArrayMap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.nice.common.helper.orZero
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
 
 @PublishedApi
 internal class EventFlow<T> {
 
-    private val eventsLazy = lazy {
+    private val events by lazy {
         MutableSharedFlow<T>(extraBufferCapacity = Int.MAX_VALUE)
     }
-    private val events by eventsLazy
 
+    private val mutex = Mutex()
+
+    private val repliedCounts = ArrayMap<EventCollector<T>, Int>()
     private var replayEvents: LinkedList<T>? = null
-    private val repliedCounts = ArrayMap<FlowReceiver<T>, Int>()
 
     suspend fun emit(value: T) {
         events.emit(value)
@@ -33,69 +35,56 @@ internal class EventFlow<T> {
         events.emit(value)
     }
 
-    suspend fun collect(receiver: FlowReceiver<T>) {
-        events.collect(receiver::onReceive)
+    suspend fun collect(collector: EventCollector<T>) {
+        events.collect(collector::onCollect)
     }
 
-    suspend fun collectSticky(receiver: FlowReceiver<T>) {
-        events.flowWithReplay(receiver).collect(receiver::onReceive)
+    suspend fun collectSticky(collector: EventCollector<T>) {
+        events.flowWithReplay(collector).collect(collector::onCollect)
     }
 
     suspend fun collectStickyWithLifecycle(
         lifecycle: Lifecycle,
         minActiveState: Lifecycle.State,
-        receiver: FlowReceiver<T>
+        collector: EventCollector<T>
     ) {
         lifecycle.repeatOnLifecycle(minActiveState) {
-            events.flowWithReplay(receiver).collect(receiver::onReceive)
+            events.flowWithReplay(collector).collect(collector::onCollect)
         }
     }
 
-    private suspend fun SharedFlow<T>.flowWithReplay(receiver: FlowReceiver<T>) = onSubscription {
+    private suspend fun SharedFlow<T>.flowWithReplay(collector: EventCollector<T>) = onSubscription {
         val replayEvents = replayEvents ?: return@onSubscription
-        val repliedCount = getRepliedCount(receiver)
+        val repliedCount = getRepliedCount(collector)
         try {
             replayEvents.drop(repliedCount).forEach { emit(it) }
         } finally {
-            updateRepliedCount(receiver)
+            updateRepliedCount(collector)
         }
     }
 
-    private fun getRepliedCount(receiver: FlowReceiver<T>): Int {
-        val repliedCount: Int
-        synchronized(this) {
-            repliedCount = repliedCounts[receiver].orZero()
-        }
-        return repliedCount
+    private suspend fun getRepliedCount(collector: EventCollector<T>): Int = mutex.withLock {
+        repliedCounts[collector].orZero()
     }
 
-    private fun updateRepliedCount(receiver: FlowReceiver<T>) {
-        synchronized(this) {
-            if (replayEvents != null) {
-                repliedCounts[receiver] = replayEvents!!.size
-            }
-        }
+    private suspend fun updateRepliedCount(collector: EventCollector<T>) = mutex.withLock {
+        repliedCounts[collector] = replayEvents?.size.orZero()
     }
 
-    private fun enqueueReply(value: T) {
-        synchronized(this) {
-            val cache = replayEvents ?: LinkedList<T>().also { replayEvents = it }
-            cache.add(value)
-        }
+    private suspend fun enqueueReply(value: T) = mutex.withLock {
+        val cache = replayEvents ?: LinkedList<T>().also { replayEvents = it }
+        cache.add(value)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun clearStickyCache() {
-        synchronized(this) {
-            replayEvents?.clear()
-            replayEvents = null
-        }
+    suspend fun clearStickyCache() = mutex.withLock {
+        replayEvents?.clear()
+        replayEvents = null
     }
 
 }
 
-fun interface FlowReceiver<T> {
-    suspend fun onReceive(value: T)
+fun interface EventCollector<T> {
+    suspend fun onCollect(value: T)
 }
 
-suspend operator fun <T> FlowReceiver<T>.invoke(value: T) = onReceive(value)
+suspend operator fun <T> EventCollector<T>.invoke(value: T) = onCollect(value)
