@@ -2,6 +2,8 @@ package com.nice.kothttp
 
 interface CallManager : Iterable<OkCall<*>> {
 
+    val size: Int
+
     fun add(call: OkCall<*>)
 
     fun delete(call: OkCall<*>): Boolean
@@ -14,5 +16,4 @@ interface CallManager : Iterable<OkCall<*>> {
 
     fun clear()
 
-    fun size(): Int
 }

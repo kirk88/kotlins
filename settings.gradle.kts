@@ -152,7 +152,7 @@ dependencyResolutionManagement {
             alias("material3").to("androidx.compose.material3", "material3")
                 .version("1.0.0-alpha01")
             alias("material").to("androidx.compose.material", "material")
-                .version("1.0.0-alpha01")
+                .version("1.0.0-alpha05")
             alias("activity").to("androidx.activity", "activity-compose")
                 .version("1.4.0")
             bundle(

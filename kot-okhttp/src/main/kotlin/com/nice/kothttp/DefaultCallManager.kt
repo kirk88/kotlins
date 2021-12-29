@@ -6,6 +6,9 @@ class DefaultCallManager : CallManager {
 
     private var resources: MutableSet<OkCall<*>>? = null
 
+    override val size: Int
+        get() = resources?.size ?: 0
+
     override fun add(call: OkCall<*>) {
         synchronized(this) {
             var list = resources
@@ -62,14 +65,6 @@ class DefaultCallManager : CallManager {
                 it.cancel()
             }
         }
-    }
-
-    override fun size(): Int {
-        var list: Set<OkCall<*>>?
-        synchronized(this) {
-            list = resources
-        }
-        return list?.size ?: 0
     }
 
     override fun iterator(): Iterator<OkCall<*>> {
