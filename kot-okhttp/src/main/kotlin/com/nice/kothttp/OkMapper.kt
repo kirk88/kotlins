@@ -3,9 +3,11 @@ package com.nice.kothttp
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Response
 import okio.ByteString
 import java.io.InputStream
+import kotlin.coroutines.resume
 
 fun interface OkResponseMapper<T> {
     suspend fun map(response: Response): T
@@ -29,12 +31,15 @@ internal val GSON: Gson = GsonBuilder()
 internal inline fun <reified T> typeMapper(): OkResponseMapper<T> = OkResponseMapper {
     val typeToken = object : TypeToken<T>() {}
     val body by lazy { requireNotNull(it.body) { "ResponseBody is null" } }
-    when (typeToken.rawType) {
-        Response::class.java -> it as T
-        String::class.java -> body.string() as T
-        ByteArray::class.java -> body.bytes() as T
-        ByteString::class.java -> body.byteString() as T
-        InputStream::class.java -> body.byteStream() as T
-        else -> GSON.fromJson(body.string(), typeToken.type)
+    suspendCancellableCoroutine { con ->
+        val result = when (typeToken.rawType) {
+            Response::class.java -> it as T
+            String::class.java -> body.string() as T
+            ByteArray::class.java -> body.bytes() as T
+            ByteString::class.java -> body.byteString() as T
+            InputStream::class.java -> body.byteStream() as T
+            else -> GSON.fromJson(body.string(), typeToken.type)
+        }
+        con.resume(result)
     }
 }
