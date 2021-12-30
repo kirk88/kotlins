@@ -57,9 +57,9 @@ open class Column<T : Any>(
 
     operator fun invoke(value: Defined): ColumnValue = ColumnValue(this, value)
 
-    override fun render(): String = name.surrounding()
+    override fun render(): String = name.addSurrounding()
 
-    override fun fullRender(): String = "${table.render()}.${name.surrounding()}"
+    override fun fullRender(): String = "${table.render()}.${name.addSurrounding()}"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -163,13 +163,13 @@ open class Index(
 ) : Definition {
 
     override fun render(): String = buildString {
-        append(name.surrounding())
+        append(name.addSurrounding())
         append(" ON ")
         append(table.render())
     }
 
     override fun fullRender(): String = buildString {
-        append(name.surrounding())
+        append(name.addSurrounding())
         append(" ON ")
         append(table.render())
         append(' ')
@@ -309,9 +309,9 @@ class AliasDefinition internal constructor(
     val definition: Definition
 ) : Definition {
 
-    override fun render(): String = "${definition.render()} AS ${name.surrounding()}"
+    override fun render(): String = "${definition.render()} AS ${name.addSurrounding()}"
 
-    override fun fullRender(): String = "${definition.fullRender()} AS ${name.surrounding()}"
+    override fun fullRender(): String = "${definition.fullRender()} AS ${name.addSurrounding()}"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

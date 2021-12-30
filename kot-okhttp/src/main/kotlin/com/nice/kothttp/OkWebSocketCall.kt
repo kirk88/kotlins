@@ -4,8 +4,6 @@ package com.nice.kothttp
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import okhttp3.*
@@ -71,14 +69,40 @@ class OkWebSocketCall(
     ) : OkWebSocket {
 
         @OptIn(ExperimentalCoroutinesApi::class)
-        private val _response = Channel<OkWebSocketResponse>(capacity = Int.MAX_VALUE).apply {
+        private val _response = Channel<OkWebSocketResponse>(Channel.UNLIMITED).apply {
             invokeOnClose {
                 onCancel.invoke()
             }
         }
         override val response: Flow<OkWebSocketResponse> = _response.consumeAsFlow()
 
-        private val socket = client.newWebSocket(request, OkWebSocketListener(this, _response))
+        private val socket = client.newWebSocket(request, object : WebSocketListener() {
+
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                _response.trySend(OkWebSocketResponse.Open(this@RealOkWebSocket, response))
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                _response.trySend(OkWebSocketResponse.StringMessage(this@RealOkWebSocket, text))
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                _response.trySend(OkWebSocketResponse.ByteStringMessage(this@RealOkWebSocket, bytes))
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                _response.trySend(OkWebSocketResponse.Closing(this@RealOkWebSocket, code, reason))
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                _response.trySend(OkWebSocketResponse.Closed(this@RealOkWebSocket, code, reason))
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                _response.trySend(OkWebSocketResponse.Failure(this@RealOkWebSocket, t, response))
+            }
+
+        })
 
         override val queueSize: Long
             get() = socket.queueSize()
@@ -97,37 +121,6 @@ class OkWebSocketCall(
 
         override fun cancel() {
             onCancel.invoke()
-        }
-
-    }
-
-    private class OkWebSocketListener(
-        private val socket: OkWebSocket,
-        private val channel: SendChannel<OkWebSocketResponse>
-    ) : WebSocketListener() {
-
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            channel.trySendBlocking(OkWebSocketResponse.Open(socket, response))
-        }
-
-        override fun onMessage(webSocket: WebSocket, text: String) {
-            channel.trySendBlocking(OkWebSocketResponse.StringMessage(socket, text))
-        }
-
-        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            channel.trySendBlocking(OkWebSocketResponse.ByteStringMessage(socket, bytes))
-        }
-
-        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySendBlocking(OkWebSocketResponse.Closing(socket, code, reason))
-        }
-
-        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            channel.trySendBlocking(OkWebSocketResponse.Closed(socket, code, reason))
-        }
-
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            channel.trySendBlocking(OkWebSocketResponse.Failure(socket, t, response))
         }
 
     }

@@ -5,7 +5,7 @@ package com.nice.sqlite.core
 import com.nice.sqlite.core.ddl.Column
 import com.nice.sqlite.core.ddl.Renderer
 import com.nice.sqlite.core.ddl.Statement
-import com.nice.sqlite.core.ddl.surrounding
+import com.nice.sqlite.core.ddl.addSurrounding
 
 class Trigger<T : Table> private constructor(
     val name: String,
@@ -15,7 +15,7 @@ class Trigger<T : Table> private constructor(
     val statement: Statement
 ) : Renderer {
 
-    override fun render(): String = name.surrounding()
+    override fun render(): String = name.addSurrounding()
 
     override fun toString(): String = name
 

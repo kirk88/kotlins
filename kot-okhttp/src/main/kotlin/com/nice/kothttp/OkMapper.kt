@@ -29,16 +29,16 @@ internal val GSON: Gson = GsonBuilder()
 
 @PublishedApi
 internal inline fun <reified T> typeMapper(): OkResponseMapper<T> = OkResponseMapper {
-    val typeToken = object : TypeToken<T>() {}
+    val token = object : TypeToken<T>() {}
     val body by lazy { requireNotNull(it.body) { "ResponseBody is null" } }
     suspendCancellableCoroutine { con ->
-        val result = when (typeToken.rawType) {
+        val result = when (token.rawType) {
             Response::class.java -> it as T
             String::class.java -> body.string() as T
             ByteArray::class.java -> body.bytes() as T
             ByteString::class.java -> body.byteString() as T
             InputStream::class.java -> body.byteStream() as T
-            else -> GSON.fromJson(body.string(), typeToken.type)
+            else -> GSON.fromJson(body.string(), token.type)
         }
         con.resume(result)
     }

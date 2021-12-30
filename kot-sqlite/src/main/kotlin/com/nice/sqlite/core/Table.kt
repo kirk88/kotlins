@@ -28,7 +28,7 @@ abstract class Table(private val name: String) : Renderer {
         name: String = columns.joinToString("_")
     ) : Index(name, false, this, columns)
 
-    override fun render(): String = name.surrounding()
+    override fun render(): String = name.addSurrounding()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -14,7 +14,7 @@ interface FullRenderer : Renderer {
 
 }
 
-internal fun String.surrounding() = "\"$this\""
+internal fun String.addSurrounding(prefix: CharSequence = "\"", suffix: CharSequence = "\"") = "$prefix$$this$suffix"
 
 internal fun Any?.toSqlString(): String {
     return when (this) {
