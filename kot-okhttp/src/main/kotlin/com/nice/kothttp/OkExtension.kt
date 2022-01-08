@@ -38,7 +38,7 @@ abstract class OkDownloadExtension<T> : OkExtension<T> {
 
 }
 
-open class DefaultOkDownloadExtension internal constructor(
+open class DefaultOkDownloadExtension(
     path: String,
     private val continuing: Boolean
 ) : OkDownloadExtension<File>() {
@@ -84,17 +84,17 @@ open class DefaultOkDownloadExtension internal constructor(
     ): File {
         val inputStream = body.byteStream()
         return RandomAccessFile(file, "rw").use { accessFile ->
-            var readBytes = file.length()
-            val totalBytes = body.contentLength() + readBytes
+            var readBytesLength = file.length()
+            val totalBytesLength = body.contentLength() + readBytesLength
             val buffer = ByteArray(1024)
             var length: Int
-            accessFile.seek(readBytes)
+            accessFile.seek(readBytesLength)
             while (inputStream.read(buffer).also { len -> length = len } != -1) {
-                readBytes += length.toLong()
+                readBytesLength += length.toLong()
                 accessFile.write(buffer, 0, length)
-                HANDLER.notifyProgressChanged(this, readBytes, totalBytes)
+                HANDLER.notifyProgressChanged(this, readBytesLength, totalBytesLength)
             }
-            if (readBytes == totalBytes) {
+            if (readBytesLength == totalBytesLength) {
                 rename(file)
             } else throw IOException("Response closed or failed to write to file")
         }

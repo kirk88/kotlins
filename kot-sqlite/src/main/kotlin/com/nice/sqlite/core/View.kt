@@ -4,7 +4,7 @@ package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.QueryStatement
 import com.nice.sqlite.core.ddl.Renderer
-import com.nice.sqlite.core.ddl.surrounding
+import com.nice.sqlite.core.ddl.addSurrounding
 
 enum class ViewType {
     None,
@@ -22,7 +22,7 @@ abstract class View(
 
     abstract val statement: QueryStatement
 
-    override fun render(): String = name.surrounding()
+    override fun render(): String = name.addSurrounding()
 
     override fun toString(): String = name
 
