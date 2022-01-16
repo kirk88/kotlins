@@ -8,8 +8,8 @@ pluginManagement {
     plugins {
         id("com.android.application") version "7.0.4"
         id("com.android.library") version "7.0.4"
-        id("org.jetbrains.kotlin.android") version "1.6.10"
-        id("org.jetbrains.kotlin.jvm") version "1.6.10"
+        id("org.jetbrains.kotlin.android") version "1.6.0"
+        id("org.jetbrains.kotlin.jvm") version "1.6.0"
     }
 }
 dependencyResolutionManagement {
@@ -30,7 +30,7 @@ dependencyResolutionManagement {
         create("kotlinLibs") {
             version("jvmTarget", "11")
 
-            val versionKotlinStdlib = "1.6.10"
+            val versionKotlinStdlib = "1.6.0"
             alias("stdlib").to("org.jetbrains.kotlin", "kotlin-stdlib")
                 .version(versionKotlinStdlib)
             alias("stdlib-common").to("org.jetbrains.kotlin", "kotlin-stdlib-common")

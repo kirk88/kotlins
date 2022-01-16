@@ -10,7 +10,7 @@
   },
   "createdBy": {
     "gradle": {
-      "version": "7.3-rc-1"
+      "version": "7.2"
     }
   },
   "variants": [
@@ -30,7 +30,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib-jdk8",
           "version": {
-            "requires": "1.6.10"
+            "requires": "1.6.0"
           }
         }
       ],
@@ -39,10 +39,10 @@
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
           "size": 29400,
-          "sha512": "468eaa44e09675791abe37e9b6e40ce49a9938543f518992e6078203b5503c0e129591991b474665891a6069c6b21df71dad24e114418b247419f6a05f8a9a5b",
-          "sha256": "d8d65b72bf038a2a4f0fb3805b516902fb1d24dee8c88ce8a228a957a2eaa024",
-          "sha1": "f650ebcbb7a392f1e0315a8b071123c91ba8f948",
-          "md5": "1a1df8dd54eddc310fd5c99c204c6f02"
+          "sha512": "28ff4f4377b3dffef6b0dbcd2f926959b5abe93400679ab4c97cf8608399f501980d0f7f3cc81682c1f546cfbe1a41837098f4f0f484422090032552c25914e6",
+          "sha256": "da7c62c48425677b241496209daf9a7db9d458ae8866550733e1358d429b93d7",
+          "sha1": "2ffc16f54ee59c3df23f091913cf724e81949f10",
+          "md5": "82636fcdaa4981df6275964c22d15d2f"
         }
       ]
     },
@@ -62,7 +62,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib-jdk8",
           "version": {
-            "requires": "1.6.10"
+            "requires": "1.6.0"
           }
         }
       ],
@@ -71,10 +71,10 @@
           "name": "kot-atomic-1.0.2.jar",
           "url": "kot-atomic-1.0.2.jar",
           "size": 29400,
-          "sha512": "468eaa44e09675791abe37e9b6e40ce49a9938543f518992e6078203b5503c0e129591991b474665891a6069c6b21df71dad24e114418b247419f6a05f8a9a5b",
-          "sha256": "d8d65b72bf038a2a4f0fb3805b516902fb1d24dee8c88ce8a228a957a2eaa024",
-          "sha1": "f650ebcbb7a392f1e0315a8b071123c91ba8f948",
-          "md5": "1a1df8dd54eddc310fd5c99c204c6f02"
+          "sha512": "28ff4f4377b3dffef6b0dbcd2f926959b5abe93400679ab4c97cf8608399f501980d0f7f3cc81682c1f546cfbe1a41837098f4f0f484422090032552c25914e6",
+          "sha256": "da7c62c48425677b241496209daf9a7db9d458ae8866550733e1358d429b93d7",
+          "sha1": "2ffc16f54ee59c3df23f091913cf724e81949f10",
+          "md5": "82636fcdaa4981df6275964c22d15d2f"
         }
       ]
     },
@@ -91,10 +91,10 @@
           "name": "kot-atomic-1.0.2-sources.jar",
           "url": "kot-atomic-1.0.2-sources.jar",
           "size": 5942,
-          "sha512": "d133b22ae52dac8617b435ac620b9749835a1ddea9bd784c1f5cd7b0faae2c64ff07806b01fc84f8e081674d648bece395a02fe7d820059117433507fbf7d2ed",
-          "sha256": "4be751871879b96f5a3cf8b6ba4ba674570897376c6d504f830178aa517bd5d5",
-          "sha1": "e5081b35ce654e69260ebf22d61cdbcdbdfde981",
-          "md5": "dddc9357641499d66904bb05ddd056d1"
+          "sha512": "6f1ab05d13c1f57f76b6f88f29ffff85f1ff73a2198738a51af7d26a8c3420617b96bf385a5facf096bfbb836522186787e449f93b03fbcfccae5fda96017102",
+          "sha256": "a716eeb27e7f8d6b32c508a099a54b0f76f441ffc9e32e2d0667547897bcfbc8",
+          "sha1": "eadd749835806e9fff34bb48b6634a8b0188aa74",
+          "md5": "567e3bf7d235dfe840f52a5a70aea166"
         }
       ]
     },
@@ -111,10 +111,10 @@
           "name": "kot-atomic-1.0.2-javadoc.jar",
           "url": "kot-atomic-1.0.2-javadoc.jar",
           "size": 261,
-          "sha512": "3d69f5cd0c8acdfaffc826dd9f07f451e33a6c3b4e4851776f992c18814597c8dff25703eb142d449ca01b54a2b10e23b85f6b0cabfc6089614e60311ae371d1",
-          "sha256": "f9d7d535f98d5937aeec81154c82bedb570a7705c626fe1d68e145a7e67180a9",
-          "sha1": "a44efdbe6bae67b55da842ab86ff824b605a14ff",
-          "md5": "66c553414aa7d90a40386dd14dfc5bb4"
+          "sha512": "f474b25c2f1bf8cf2ebdcfc2088ce4c1ca67a3b20e085183da8b2f006f4bc92d5680098fdebcec052232bf51199fbb78d0e267350ca6ee100e456c258a0acf99",
+          "sha256": "3674823325b13ee8206c6ab6a3413c0e8df5a73e38c648e0c533cbcadc6b4ccd",
+          "sha1": "58a9311948983573b6a55bbb9502af73bcc45745",
+          "md5": "53889f4b5316cc73d5cedddbbf325d7b"
         }
       ]
     }
