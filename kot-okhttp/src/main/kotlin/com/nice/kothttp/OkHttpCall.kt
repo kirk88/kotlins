@@ -85,7 +85,7 @@ class OkHttpCall<T> internal constructor(
 
 class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
 
-    private val config: OkHttpConfig = OkHttpConfig
+    private val config: OkHttpConfiguration = OkHttpConfiguration
 
     private var client: OkHttpClient = DEFAULT_CLIENT
     private var method: OkHttpMethod = OkHttpMethod.Get

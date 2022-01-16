@@ -8,21 +8,29 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.net.URL
 
-object OkHttpConfig {
+object OkHttpConfiguration {
 
-    internal var client: OkHttpClient? = null
-    internal var domain: String? = null
-    internal var cacheControl: CacheControl? = null
-    internal var username: String? = null
-    internal var password: String? = null
-    internal var headers: Map<String, String>? = null
-    internal var queryParameters: Map<String, String>? = null
-    internal var formParameters: Map<String, String>? = null
+    var client: OkHttpClient? = null
+        private set
+    var baseUrl: String? = null
+        private set
+    var cacheControl: CacheControl? = null
+        private set
+    var username: String? = null
+        private set
+    var password: String? = null
+        private set
+    var headers: Map<String, String>? = null
+        private set
+    var queryParameters: Map<String, String>? = null
+        private set
+    var formParameters: Map<String, String>? = null
+        private set
 
     class Setter {
 
         private var client: OkHttpClient? = null
-        private var domain: String? = null
+        private var baseUrl: String? = null
         private var cacheControl: CacheControl? = null
         private var username: String? = null
         private var password: String? = null
@@ -35,8 +43,8 @@ object OkHttpConfig {
             this.client = client
         }
 
-        fun domain(domain: String) = apply {
-            this.domain = domain
+        fun baseUrl(baseUrl: String) = apply {
+            this.baseUrl = baseUrl
         }
 
         fun cacheControl(cacheControl: CacheControl) = apply {
@@ -80,9 +88,9 @@ object OkHttpConfig {
         fun formParameters(vararg parameters: Pair<String, String>) =
             formParameters(parameters.toMap())
 
-        fun apply() = OkHttpConfig.also {
+        fun apply() = OkHttpConfiguration.also {
             if (client != null) it.client = client
-            if (domain != null) it.domain = domain
+            if (baseUrl != null) it.baseUrl = baseUrl
             if (cacheControl != null) it.cacheControl = cacheControl
             if (username != null) it.username = username
             if (password != null) it.password = password
@@ -95,8 +103,8 @@ object OkHttpConfig {
 
 }
 
-internal fun String.toHttpUrl(config: OkHttpConfig?): HttpUrl {
-    val domain = config?.domain
+internal fun String.toHttpUrl(config: OkHttpConfiguration?): HttpUrl {
+    val domain = config?.baseUrl
     return when {
         this.isNetworkUrl() -> this
         !domain.isNullOrEmpty() -> URL(domain).resolve(this)
