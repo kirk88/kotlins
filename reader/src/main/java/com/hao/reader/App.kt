@@ -3,6 +3,8 @@ package com.hao.reader
 import android.app.Application
 import android.content.Context
 import com.nice.kothttp.OkHttpConfiguration
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 
 class App: Application() {
 
@@ -10,7 +12,14 @@ class App: Application() {
         super.onCreate()
         ApplicationContextHolder.init(this)
 
-        OkHttpConfiguration.Setter().apply()
+        OkHttpConfiguration.Setter()
+            .client(
+                OkHttpClient.Builder().addInterceptor(
+                    HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+                ).build()
+            )
+            .baseUrl("http://192.168.0.198:8090/")
+            .apply()
     }
 
 }

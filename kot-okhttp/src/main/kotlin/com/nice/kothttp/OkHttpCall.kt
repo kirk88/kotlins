@@ -96,17 +96,17 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
     private var _formBodyBuilder: FormBody.Builder? = null
     private val formBodyBuilder: FormBody.Builder
         get() = _formBodyBuilder ?: FormBody.Builder().also {
+            requestBody = null
             _formBodyBuilder = it
             _multipartBodyBuilder = null
-            requestBody = null
         }
 
     private var _multipartBodyBuilder: MultipartBody.Builder? = null
     private val multipartBodyBuilder: MultipartBody.Builder
         get() = _multipartBodyBuilder ?: MultipartBody.Builder().also {
-            _multipartBodyBuilder = it
-            _formBodyBuilder = null
             requestBody = null
+            _formBodyBuilder = null
+            _multipartBodyBuilder = it
         }
 
     private var requestBody: RequestBody? = null
