@@ -1,6 +1,8 @@
 package com.nice.kothttp
 
 import okhttp3.*
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 class HeadersBuilder internal constructor(private val builder: Request.Builder) {
 
@@ -71,7 +73,11 @@ class FormParametersBuilder internal constructor(private val builder: FormBody.B
 class MultipartBodyBuilder internal constructor(private val builder: MultipartBody.Builder) {
 
     fun add(name: String, value: Any?) {
-        builder.addFormDataPart(name, value.toStringOrEmpty())
+        if (value is File) {
+            builder.addFormDataPart(name, value.name, value.asRequestBody())
+        } else {
+            builder.addFormDataPart(name, value.toStringOrEmpty())
+        }
     }
 
     fun add(name: String, filename: String?, body: RequestBody) {

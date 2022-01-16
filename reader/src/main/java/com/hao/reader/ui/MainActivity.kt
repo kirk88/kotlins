@@ -1,9 +1,13 @@
 package com.hao.reader.ui
 
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.net.toFile
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.hao.reader.extension.setDecorFitsSystemWindows
 import com.nice.kothttp.OkHttpMethod
@@ -24,6 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setDecorFitsSystemWindows(false)
 
+        MediaStore.MediaColumns.DATA
 
         val call = buildHttpCall<Response> {
 
