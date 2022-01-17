@@ -1,11 +1,11 @@
 package com.hao.reader.ui
 
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.hao.reader.extension.setDecorFitsSystemWindows
+import com.nice.kothttp.OkRequestMethod
 import com.nice.kothttp.buildHttpCall
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -19,15 +19,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setDecorFitsSystemWindows(false)
 
-        MediaStore.MediaColumns.DATA
+        val call = buildHttpCall<Response>(OkRequestMethod.Post) {
 
-        val call = buildHttpCall<Response> {
+            url { "mzzkd/userApp/wx_login.do" }
 
-            url("mzzkd/userApp/wx_login.do")
-
-            queryParameters {
+            formParameters {
                 "code" += "061fNyFa1jcztC0frdHa1MQupb0fNyFy"
             }
+
         }
 
         call.make().onEach {

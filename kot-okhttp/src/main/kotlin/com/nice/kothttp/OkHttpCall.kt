@@ -83,12 +83,11 @@ class OkHttpCall<T> internal constructor(
 
 }
 
-class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
+class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method: OkRequestMethod) {
 
     private val config: OkHttpConfiguration = OkHttpConfiguration
 
     private var client: OkHttpClient = DEFAULT_CLIENT
-    private var method: OkRequestMethod = OkRequestMethod.Get
 
     private val urlBuilder: HttpUrl.Builder = HttpUrl.Builder()
     private val requestBuilder: Request.Builder = Request.Builder()
@@ -121,16 +120,12 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
 
     private val transformer = OkTransformer<T>()
 
-    fun client(client: OkHttpClient) = apply {
-        this.client = client
+    fun client(client: () -> OkHttpClient) = apply {
+        this.client = client()
     }
 
-    fun method(method: OkRequestMethod) = apply {
-        this.method = method
-    }
-
-    fun url(url: String) = apply {
-        val httpUrl = url.toHttpUrl(config)
+    fun url(url: () -> String) = apply {
+        val httpUrl = url().toHttpUrl(config)
         urlBuilder.scheme(httpUrl.scheme)
             .host(httpUrl.host)
             .port(httpUrl.port)
@@ -158,24 +153,24 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
         }
     }
 
-    fun username(username: String) = apply {
-        urlBuilder.username(username)
+    fun username(username: () -> String) = apply {
+        urlBuilder.username(username())
     }
 
-    fun password(password: String) = apply {
-        urlBuilder.password(password)
+    fun password(password: () -> String) = apply {
+        urlBuilder.password(password())
     }
 
-    fun cacheControl(cacheControl: CacheControl) = apply {
-        requestBuilder.cacheControl(cacheControl)
+    fun cacheControl(cacheControl: () -> CacheControl) = apply {
+        requestBuilder.cacheControl(cacheControl())
     }
 
-    fun tag(tag: Any?) = apply {
-        requestBuilder.tag(tag)
+    fun tag(tag: () -> Any?) = apply {
+        requestBuilder.tag(tag())
     }
 
-    fun <T : Any> tag(type: Class<in T>, tag: T?) = apply {
-        requestBuilder.tag(type, tag)
+    fun <T : Any> tag(type: Class<in T>, tag: () -> T?) = apply {
+        requestBuilder.tag(type, tag())
     }
 
     fun headers(buildAction: HeadersBuilder.() -> Unit) = apply {
@@ -194,8 +189,8 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
         MultipartBodyBuilder(multipartBodyBuilder).apply(buildAction)
     }
 
-    fun requestBody(body: RequestBody) = apply {
-        requestBody = body
+    fun requestBody(body: () -> RequestBody) = apply {
+        requestBody = body()
     }
 
     fun interceptRequest(interceptor: OkRequestInterceptor) = apply {
@@ -235,10 +230,10 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
     fun make(): Flow<T> = build().make()
 
     init {
-        config.client?.let { client(it) }
-        config.cacheControl?.let { cacheControl(it) }
-        config.username?.let { username(it) }
-        config.password?.let { password(it) }
+        config.client?.let { client = it }
+        config.cacheControl?.let { requestBuilder.cacheControl(it) }
+        config.username?.let { urlBuilder.username(it) }
+        config.password?.let { urlBuilder.password(it) }
         config.headers?.forEach {
             requestBuilder.addHeader(it.key, it.value)
         }
@@ -252,9 +247,13 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor() {
 
 }
 
-inline fun <reified T> httpCallBuilder() = OkHttpCallBuilder<T>().mapResponse(typeMapper())
+inline fun <reified T> httpCallBuilder(method: OkRequestMethod = OkRequestMethod.Get) =
+    OkHttpCallBuilder<T>(method).mapResponse(typeMapper())
 
-inline fun <reified T> buildHttpCall(buildAction: OkHttpCallBuilder<T>.() -> Unit): OkHttpCall<T> =
-    httpCallBuilder<T>()
+inline fun <reified T> buildHttpCall(
+    method: OkRequestMethod = OkRequestMethod.Get,
+    buildAction: OkHttpCallBuilder<T>.() -> Unit
+): OkHttpCall<T> =
+    httpCallBuilder<T>(method)
         .apply(buildAction)
         .build()

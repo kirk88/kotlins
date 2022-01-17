@@ -135,12 +135,12 @@ class OkWebSocketCallBuilder internal constructor() {
 
     private val requestBuilder: Request.Builder = Request.Builder()
 
-    fun client(client: OkHttpClient) = apply {
-        this.client = client
+    fun client(client: () -> OkHttpClient) = apply {
+        this.client = client()
     }
 
-    fun url(url: String) = apply {
-        val httpUrl = url.toHttpUrl()
+    fun url(url: () -> String) = apply {
+        val httpUrl = url().toHttpUrl()
         urlBuilder.scheme(httpUrl.scheme)
             .host(httpUrl.host)
             .port(httpUrl.port)
@@ -168,12 +168,12 @@ class OkWebSocketCallBuilder internal constructor() {
         }
     }
 
-    fun username(username: String) = apply {
-        urlBuilder.username(username)
+    fun username(username: () -> String) = apply {
+        urlBuilder.username(username())
     }
 
-    fun password(password: String) = apply {
-        urlBuilder.password(password)
+    fun password(password: () -> String) = apply {
+        urlBuilder.password(password())
     }
 
     fun headers(buildAction: HeadersBuilder.() -> Unit) = apply {
@@ -184,12 +184,12 @@ class OkWebSocketCallBuilder internal constructor() {
         QueryParametersBuilder(urlBuilder).apply(buildAction)
     }
 
-    fun tag(tag: Any?) = apply {
-        requestBuilder.tag(tag)
+    fun tag(tag: () -> Any?) = apply {
+        requestBuilder.tag(tag())
     }
 
-    fun <T : Any> tag(type: Class<in T>, tag: T?) = apply {
-        requestBuilder.tag(type, tag)
+    fun <T : Any> tag(type: Class<in T>, tag: () -> T?) = apply {
+        requestBuilder.tag(type, tag())
     }
 
     fun build(): OkWebSocketCall {
