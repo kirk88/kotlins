@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import okhttp3.internal.http.HttpMethod
 import kotlin.coroutines.resume
 
 class OkHttpCall<T> internal constructor(
@@ -210,9 +211,13 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method
     }
 
     fun build(): OkHttpCall<T> {
-        val body = requestBody
+        var body = requestBody
             ?: _formBodyBuilder?.build()
             ?: _multipartBodyBuilder?.build()
+
+        if (body == null && HttpMethod.requiresRequestBody(method.toString())) {
+            body = FormBody.Builder().build()
+        }
 
         val request = requestBuilder.url(urlBuilder.build())
             .method(method.toString(), body)

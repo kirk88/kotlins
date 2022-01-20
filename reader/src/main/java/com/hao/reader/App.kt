@@ -18,7 +18,7 @@ class App: Application() {
                     HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
                 ).build()
             )
-            .baseUrl("http://192.168.0.198:8090/")
+            .baseUrl("http://124.71.62.192:8090/")
             .apply()
     }
 

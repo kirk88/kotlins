@@ -21,12 +21,7 @@ class MainActivity : ComponentActivity() {
 
         val call = buildHttpCall<Response>(OkRequestMethod.Post) {
 
-            url { "mzzkd/userApp/wx_login.do" }
-
-            formParameters {
-                "code" += "061fNyFa1jcztC0frdHa1MQupb0fNyFy"
-            }
-
+            url { "mzzkd/userApp/wx_sign.do" }
         }
 
         call.make().onEach {
