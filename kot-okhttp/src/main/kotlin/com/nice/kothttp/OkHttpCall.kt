@@ -235,10 +235,11 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method
     fun make(): Flow<T> = build().make()
 
     init {
-        config.client?.let { client = it }
-        config.cacheControl?.let { requestBuilder.cacheControl(it) }
-        config.username?.let { urlBuilder.username(it) }
-        config.password?.let { urlBuilder.password(it) }
+        config.client?.let { client { it } }
+        config.cacheControl?.let { cacheControl { it } }
+        config.baseUrl?.let { url { it } }
+        config.username?.let { username { it } }
+        config.password?.let { password { it } }
         config.headers?.forEach {
             requestBuilder.addHeader(it.key, it.value)
         }

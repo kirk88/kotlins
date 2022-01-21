@@ -104,10 +104,10 @@ object OkHttpConfiguration {
 }
 
 internal fun String.toHttpUrl(config: OkHttpConfiguration?): HttpUrl {
-    val domain = config?.baseUrl
+    val baseUrl = config?.baseUrl
     return when {
         this.isNetworkUrl() -> this
-        !domain.isNullOrEmpty() -> URL(domain).resolve(this)
+        !baseUrl.isNullOrEmpty() -> URL(baseUrl).resolve(this)
         else -> throw IllegalArgumentException("Invalid url: $this")
     }.toHttpUrl()
 }
