@@ -29,6 +29,8 @@ class MainActivity : ComponentActivity() {
         }.catch {
             Log.e("TAGTAG", it.message, it)
         }.launchIn(lifecycleScope)
+
+
     }
 
 }

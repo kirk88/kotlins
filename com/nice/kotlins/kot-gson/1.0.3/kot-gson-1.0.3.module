@@ -1,0 +1,136 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.nice.kotlins",
+    "module": "kot-gson",
+    "version": "1.0.3",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.3-rc-1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.8.9"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.6.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "kot-gson-1.0.3.jar",
+          "url": "kot-gson-1.0.3.jar",
+          "size": 216547,
+          "sha512": "a798519d14f7a5f10437e559954f5ba5a58faadd94dca732bb445ba6103cd7ca974cf7450a7c93ef2def5594f3c950d8edf1095f49c9ce02bee9ec1554e30924",
+          "sha256": "cea4ae11f8e8c12c32deb7846eb9c565c622d124ca87b0455d1fa2c190fdfdc6",
+          "sha1": "0760449700616b72fc1a182f5a95562ded21171e",
+          "md5": "cc2e45f32a4b6b8ca18dea13b65c7294"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.8.9"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.6.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "kot-gson-1.0.3.jar",
+          "url": "kot-gson-1.0.3.jar",
+          "size": 216547,
+          "sha512": "a798519d14f7a5f10437e559954f5ba5a58faadd94dca732bb445ba6103cd7ca974cf7450a7c93ef2def5594f3c950d8edf1095f49c9ce02bee9ec1554e30924",
+          "sha256": "cea4ae11f8e8c12c32deb7846eb9c565c622d124ca87b0455d1fa2c190fdfdc6",
+          "sha1": "0760449700616b72fc1a182f5a95562ded21171e",
+          "md5": "cc2e45f32a4b6b8ca18dea13b65c7294"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-gson-1.0.3-sources.jar",
+          "url": "kot-gson-1.0.3-sources.jar",
+          "size": 7848,
+          "sha512": "18e2d8332ddd4f10de21809c844aa405153960277f4e9ebbeaec5b4b84f2cc05d5aeeb3151c2e4213a5c6cb7ac68801458b12257277698d0d000ec6257f28f5b",
+          "sha256": "6ca63f27b3e2b9e92697a56117e1c34b62f96f628e3c8115a142a7da77c745b0",
+          "sha1": "ccfdbfa9de03758c3c1f44a6346e446c442dfd94",
+          "md5": "d90077aca8d1b44559b8aa74fec59932"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "kot-gson-1.0.3-javadoc.jar",
+          "url": "kot-gson-1.0.3-javadoc.jar",
+          "size": 261,
+          "sha512": "96e44a319b55ca12c16dd5d873bcc7b69cedf6fdf80be2aa73da145aa09906f7570bd51ab1c20e5e1cde101655bc2ef25c5b6bb64f61bc78d6208147b47fc35d",
+          "sha256": "0154dc1b86b5b2164b37f978fc6c85393701d3a608ecfeb98e3c3ef5aefe1c5a",
+          "sha1": "8999fb9ff8f1b648052ef6e2ec8e5f0a42215ab9",
+          "md5": "e1e6c52428dbcb46e80720a7a5c2b5b0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import java.util.logging.Logger.global
+
 plugins {
     id("java-library")
     id("org.jetbrains.kotlin.jvm")
@@ -5,8 +7,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
+    targetCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
 
     withSourcesJar()
     withJavadocJar()
@@ -15,14 +17,14 @@ java {
 kotlin {
     target {
         compilations.all {
-            kotlinOptions.jvmTarget = kotlinLibs.versions.jvmTarget.get()
+            kotlinOptions.jvmTarget = vers.versions.jvmTarget.get()
         }
     }
 }
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 2
+val versionPatch = 3
 
 publishing {
     publications {

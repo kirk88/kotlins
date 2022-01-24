@@ -4,7 +4,7 @@ package com.nice.sqlite.core
 
 import com.nice.sqlite.core.ddl.*
 
-abstract class Table(private val name: String) : Renderer {
+abstract class Table(val name: String) : Renderer {
 
     inner class IntColumn(name: String) : Column<Int>(name, SqlType.Integer, this)
     inner class LongColumn(name: String) : Column<Long>(name, SqlType.Integer, this)

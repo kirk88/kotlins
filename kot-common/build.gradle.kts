@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = app.versions.compileSdk.get().toInt()
+    compileSdk = vers.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = app.versions.minSdk.get().toInt()
-        targetSdk = app.versions.targetSdk.get().toInt()
+        minSdk = vers.versions.minSdk.get().toInt()
+        targetSdk = vers.versions.targetSdk.get().toInt()
     }
 
     buildFeatures {
@@ -27,12 +27,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
+        targetCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
     }
 
     kotlinOptions {
-        jvmTarget = kotlinLibs.versions.jvmTarget.get()
+        jvmTarget = vers.versions.jvmTarget.get()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
@@ -57,8 +57,7 @@ dependencies {
 
 val versionMajor = 1
 val versionMinor = 2
-val versionPatch = 0
-val versionSuffix = "alpha20"
+val versionPatch = 1
 
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
@@ -71,7 +70,7 @@ afterEvaluate {
             create<MavenPublication>("maven") {
                 groupId = "com.nice.kotlins"
                 artifactId = "kot-common"
-                version = "${versionMajor}.${versionMinor}.${versionPatch}-${versionSuffix}"
+                version = "${versionMajor}.${versionMinor}.${versionPatch}"
 
                 artifact(sourcesJar)
                 artifact(tasks.getByName("bundleReleaseAar"))

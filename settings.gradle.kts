@@ -21,15 +21,16 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("app") {
+        create("vers") {
             version("compileSdk", "31")
             version("minSdk", "21")
             version("targetSdk", "30")
+
+            version("jvmTarget", "1.8")
+            version("javaVersion", "1.8")
         }
 
         create("kotlinLibs") {
-            version("jvmTarget", "11")
-
             val versionKotlinStdlib = "1.6.0"
             alias("stdlib").to("org.jetbrains.kotlin", "kotlin-stdlib")
                 .version(versionKotlinStdlib)
