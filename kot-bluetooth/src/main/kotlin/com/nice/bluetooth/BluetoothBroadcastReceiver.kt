@@ -16,7 +16,7 @@ internal class BluetoothStateReceiver(private val action: (state: Int) -> Unit) 
     BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+        val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)
         action.invoke(state)
     }
 
@@ -64,7 +64,6 @@ internal class BluetoothScannerReceiver(
         }
     }
 
-
     fun register() {
         applicationContext.registerReceiver(this, BLUETOOTH_SCANNER_INTENT_FILTER)
     }
@@ -85,6 +84,7 @@ internal inline fun registerBluetoothScannerReceiver(
         if (serviceUuids == null) {
             onScanResult.invoke(result)
         } else {
+            //TODO filter by service uuids
             if (result.scanRecord?.serviceUuids?.any { serviceUuids.contains(it) } == true) {
                 onScanResult.invoke(result)
             }
