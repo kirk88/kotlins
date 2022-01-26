@@ -62,14 +62,14 @@ data class DBTest2 @ClassParserConstructor constructor(
 
 object TestTable : Table("test") {
     val id = LongColumn("id") + PrimaryKey()
-    val name = StringColumn("name") + Default("jack")
+    val namee = StringColumn("name") + Default("jack")
     val age = IntColumn("age") + Default(20)
     val flag = BooleanColumn("flag") + Default(false)
     val number = IntColumn("number") + Default(10)
     val data = BlobColumn("data") + Default(byteArrayOf(1, 2, 3, 4, 5))
     val time = DatetimeColumn("time") + Default(defined("CURRENT_TIMESTAMP"))
 
-    val idNameIndex = NonuniqueIndex(id, name)
+    val idNameIndex = NonuniqueIndex(id, namee)
 }
 
 object TestTable2 : Table("test2") {
@@ -78,7 +78,7 @@ object TestTable2 : Table("test2") {
 
     val pid = IntColumn("pid") + References(TestTable.id) + OnDelete(ConstraintAction.Cascade)
 
-    val name = StringColumn("name")
+    val namee = StringColumn("name")
 
     val age = IntColumn("age")
 
@@ -108,14 +108,14 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         offer(TestTable).create(db) {
-            TestTable.id + TestTable.name + TestTable.age + TestTable.flag +
+            TestTable.id + TestTable.namee + TestTable.age + TestTable.flag +
                     TestTable.number + TestTable.data + TestTable.time + TestTable.idNameIndex
         }
 
         offer(TestView).create(db)
 
         offer(TestTable2).create(db) {
-            TestTable2.id + TestTable2.pid + TestTable2.name + TestTable2.age
+            TestTable2.id + TestTable2.pid + TestTable2.namee + TestTable2.age
         }
 
         offer(TestTrigger).create(db)
@@ -129,11 +129,11 @@ private val SQLiteOpenHelperCallback = object : SupportSQLiteOpenHelper.Callback
         offer(TestView).create(db)
 
         offer(TestTable2).alter(db) {
-            TestTable2.name + TestTable2.age
+            TestTable2.namee + TestTable2.age
         }
 
         offer(TestTable2).create(db) {
-            TestTable2.id + TestTable2.pid + TestTable2.name + TestTable2.age
+            TestTable2.id + TestTable2.pid + TestTable2.namee + TestTable2.age
         }
 
         offer(TestTrigger).create(db)
