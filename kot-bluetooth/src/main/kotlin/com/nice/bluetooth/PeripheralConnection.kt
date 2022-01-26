@@ -66,7 +66,7 @@ internal class PeripheralConnection(
 
     private val observers = PeripheralObservers(this)
 
-    private fun tryConnect(autoConnect: Boolean): ConnectionHandler {
+    private fun establishConnectionHandler(autoConnect: Boolean): ConnectionHandler {
         return bluetoothDevice.connect(
             applicationContext,
             autoConnect,
@@ -80,11 +80,11 @@ internal class PeripheralConnection(
     }
 
     /** Creates a connect [Job] that completes when connection is established, or failure occurs. */
-    private fun establishConnectAsync(autoConnect: Boolean) = scope.async(start = CoroutineStart.LAZY) {
+    private fun connectAsync(autoConnect: Boolean) = scope.async(start = CoroutineStart.LAZY) {
         var exception: Throwable? = null
 
         try {
-            val connectionHandler = tryConnect(autoConnect).also {
+            val connectionHandler = establishConnectionHandler(autoConnect).also {
                 _connectionHandler = it
             }
 
@@ -126,7 +126,7 @@ internal class PeripheralConnection(
 
     suspend fun connect(autoConnect: Boolean) {
         check(Bluetooth.isEnabled) { "Bluetooth is not enabled" }
-        connectJob.updateAndGetCompat { it ?: establishConnectAsync(autoConnect) }!!.await()?.let { throw it }
+        connectJob.updateAndGetCompat { it ?: connectAsync(autoConnect) }!!.await()?.let { throw it }
     }
 
     suspend fun disconnect() {
