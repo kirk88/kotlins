@@ -625,9 +625,10 @@ class TitleAppBar @JvmOverloads constructor(
             }
 
         fun AppCompatActivity.setTitleAppBar(
-            titleAppBar: TitleAppBar
+            titleAppBar: TitleAppBar,
+            block: ActionBar.() -> Unit = {}
         ) {
-            titleAppBar.attachToActivity(this)
+            titleAppBar.attachToActivity(this, block)
         }
 
     }
