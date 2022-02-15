@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.hao.reader.extension.setDecorFitsSystemWindows
-import com.nice.kothttp.OkRequestMethod
+import com.nice.kothttp.RequestMethod
 import com.nice.kothttp.buildHttpCall
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setDecorFitsSystemWindows(false)
 
-        val call = buildHttpCall<Response>(OkRequestMethod.Post) {
+        val call = buildHttpCall<Response>(RequestMethod.Post) {
 
             url { "mzzkd/userApp/wx_sign.do" }
         }
@@ -29,8 +29,6 @@ class MainActivity : ComponentActivity() {
         }.catch {
             Log.e("TAGTAG", it.message, it)
         }.launchIn(lifecycleScope)
-
-
     }
 
 }

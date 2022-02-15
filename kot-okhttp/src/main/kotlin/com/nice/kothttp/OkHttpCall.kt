@@ -84,7 +84,7 @@ class OkHttpCall<T> internal constructor(
 
 }
 
-class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method: OkRequestMethod) {
+class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method: RequestMethod) {
 
     private val config: OkHttpConfiguration = OkHttpConfiguration
 
@@ -253,11 +253,11 @@ class OkHttpCallBuilder<T> @PublishedApi internal constructor(private val method
 
 }
 
-inline fun <reified T> httpCallBuilder(method: OkRequestMethod = OkRequestMethod.Get) =
+inline fun <reified T> httpCallBuilder(method: RequestMethod = RequestMethod.Get) =
     OkHttpCallBuilder<T>(method).mapResponse(typeMapper())
 
 inline fun <reified T> buildHttpCall(
-    method: OkRequestMethod = OkRequestMethod.Get,
+    method: RequestMethod = RequestMethod.Get,
     buildAction: OkHttpCallBuilder<T>.() -> Unit
 ): OkHttpCall<T> =
     httpCallBuilder<T>(method)

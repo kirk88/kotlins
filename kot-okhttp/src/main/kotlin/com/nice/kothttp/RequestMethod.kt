@@ -2,7 +2,7 @@
 
 package com.nice.kothttp
 
-enum class OkRequestMethod {
+enum class RequestMethod {
     Get, Post, Delete, Put, Head, Patch;
 
     override fun toString(): String = name.uppercase()
