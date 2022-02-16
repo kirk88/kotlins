@@ -1,12 +1,15 @@
 @file:Suppress("MissingPermission")
 
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.annotation.TargetApi
 import android.bluetooth.*
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
 import android.os.Build
 import android.util.Log
+import com.nice.bluetooth.Bluetooth
+import com.nice.bluetooth.TAG
+import com.nice.bluetooth.applicationContext
 import com.nice.bluetooth.common.*
 import com.nice.bluetooth.external.CLIENT_CHARACTERISTIC_CONFIG_UUID
 import com.nice.bluetooth.gatt.GattStatus

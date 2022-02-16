@@ -4,7 +4,7 @@ package com.nice.sqlite.core.ddl
 
 enum class SqlOrderDirection { ASC, DESC }
 
-interface Ordering : Bag<Ordering>, FullRenderer {
+interface Ordering : Shell<Ordering>, FullRenderer {
 
     val definition: Definition
     val direction: SqlOrderDirection

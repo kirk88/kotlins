@@ -41,7 +41,7 @@ inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.on(
 )
 
 inline fun <T : Table, T2 : Table> Join2Clause<T, T2>.using(
-    crossinline using: (T, T2) -> Bag<Definition>
+    crossinline using: (T, T2) -> Shell<Definition>
 ): JoinOn2Clause<T, T2> = JoinOn2Clause(
     subject,
     table2,
@@ -59,7 +59,7 @@ data class JoinOn2Clause<T : Table, T2 : Table> @PublishedApi internal construct
     @PublishedApi
     internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val using: Bag<Definition>? = null
+    internal val using: Shell<Definition>? = null
 )
 
 fun <T : Table, T2 : Table, T3 : Table> JoinOn2Clause<T, T2>.innerJoin(
@@ -79,11 +79,11 @@ inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.where(
 ): Where2Clause<T, T2> = Where2Clause(predicate(subject.table, table2), joinOn2Clause = this)
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.groupBy(
-    crossinline group: (T, T2) -> Bag<Column<*>>
+    crossinline group: (T, T2) -> Shell<Column<*>>
 ): Group2Clause<T, T2> = Group2Clause(group(subject.table, table2), joinOn2Clause = this)
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.orderBy(
-    crossinline order: (T, T2) -> Bag<Ordering>
+    crossinline order: (T, T2) -> Shell<Ordering>
 ): Order2Clause<T, T2> = Order2Clause(order(subject.table, table2), joinOn2Clause = this)
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.limit(
@@ -96,7 +96,7 @@ inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition>,
+    crossinline selection: (T, T2) -> Shell<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> = Select2Statement(
     selection(
@@ -108,21 +108,21 @@ internal inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
 )
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, false)
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectDistinct(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table> JoinOn2Clause<T, T2>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Join3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -144,7 +144,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.on(
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> Join3Clause<T, T2, T3>.using(
-    crossinline using: (T, T2, T3) -> Bag<Definition>
+    crossinline using: (T, T2, T3) -> Shell<Definition>
 ): JoinOn3Clause<T, T2, T3> = JoinOn3Clause(
     joinOn2Clause,
     table3,
@@ -162,7 +162,7 @@ data class JoinOn3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi intern
     @PublishedApi
     internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val using: Bag<Definition>? = null
+    internal val using: Shell<Definition>? = null
 )
 
 fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn3Clause<T, T2, T3>.innerJoin(
@@ -185,14 +185,14 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.where(
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.groupBy(
-    crossinline group: (T, T2, T3) -> Bag<Column<*>>
+    crossinline group: (T, T2, T3) -> Shell<Column<*>>
 ): Group3Clause<T, T2, T3> = Group3Clause(
     group(joinOn2Clause.subject.table, joinOn2Clause.table2, table3),
     joinOn3Clause = this
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.orderBy(
-    crossinline order: (T, T2, T3) -> Bag<Ordering>
+    crossinline order: (T, T2, T3) -> Shell<Ordering>
 ): Order3Clause<T, T2, T3> = Order3Clause(
     order(joinOn2Clause.subject.table, joinOn2Clause.table2, table3),
     joinOn3Clause = this
@@ -208,7 +208,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3) -> Shell<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> = Select3Statement(
     selection(
@@ -221,21 +221,21 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectDistinct(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table> JoinOn3Clause<T, T2, T3>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Join4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -262,7 +262,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Join4Clause<T, T2, T3, T4>.using(
-    crossinline using: (T, T2, T3, T4) -> Bag<Definition>
+    crossinline using: (T, T2, T3, T4) -> Shell<Definition>
 ): JoinOn4Clause<T, T2, T3, T4> = JoinOn4Clause(
     joinOn3Clause,
     table4,
@@ -285,7 +285,7 @@ data class JoinOn4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @Publish
     @PublishedApi
     internal val predicate: Predicate? = null,
     @PublishedApi
-    internal val using: Bag<Definition>? = null
+    internal val using: Shell<Definition>? = null
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.where(
@@ -301,7 +301,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, 
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.groupBy(
-    crossinline group: (T, T2, T3, T4) -> Bag<Column<*>>
+    crossinline group: (T, T2, T3, T4) -> Shell<Column<*>>
 ): Group4Clause<T, T2, T3, T4> = Group4Clause(
     group(
         joinOn3Clause.joinOn2Clause.subject.table,
@@ -313,7 +313,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, 
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.orderBy(
-    crossinline order: (T, T2, T3, T4) -> Bag<Ordering>
+    crossinline order: (T, T2, T3, T4) -> Shell<Ordering>
 ): Order4Clause<T, T2, T3, T4> = Order4Clause(
     order(
         joinOn3Clause.joinOn2Clause.subject.table,
@@ -334,7 +334,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, 
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> = Select4Statement(
     selection(
@@ -348,19 +348,19 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Claus
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.selectDistinct(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> JoinOn4Clause<T, T2, T3, T4>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))

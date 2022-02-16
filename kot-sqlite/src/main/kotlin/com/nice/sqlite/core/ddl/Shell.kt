@@ -2,7 +2,7 @@
 
 package com.nice.sqlite.core.ddl
 
-interface Bag<out T> {
+interface Shell<out T> {
 
     val size: Int
 
@@ -12,37 +12,37 @@ interface Bag<out T> {
 
 }
 
-interface MutableBag<T> : Bag<T> {
+interface MutableShell<T> : Shell<T> {
 
     fun add(element: T): Boolean
 
-    fun addAll(elements: Bag<T>): Boolean
+    fun addAll(elements: Shell<T>): Boolean
 
     fun remove(element: T): Boolean
 
-    fun removeAll(elements: Bag<T>): Boolean
+    fun removeAll(elements: Shell<T>): Boolean
 
     fun clear()
 
 }
 
-operator fun <T> Bag<T>.plus(element: T): Bag<T> {
-    if (this is MutableBag<T>) {
+operator fun <T> Shell<T>.plus(element: T): Shell<T> {
+    if (this is MutableShell<T>) {
         add(element)
         return this
     }
-    val bag = ArrayBag(this)
-    bag.add(element)
-    return bag
+    val shell = ArrayShell(this)
+    shell.add(element)
+    return shell
 }
 
-operator fun <T> Bag<T>.minus(element: T): Bag<T> {
-    if (this is MutableBag<T>) {
+operator fun <T> Shell<T>.minus(element: T): Shell<T> {
+    if (this is MutableShell<T>) {
         remove(element)
         return this
     }
     var removed = false
-    return filterTo(ArrayBag()) {
+    return filterTo(ArrayShell()) {
         if (!removed && it == element) {
             removed = true; false
         } else true
@@ -50,7 +50,7 @@ operator fun <T> Bag<T>.minus(element: T): Bag<T> {
 }
 
 @PublishedApi
-internal class ArrayBag<T> : MutableBag<T> {
+internal class ArrayShell<T> : MutableShell<T> {
 
     private val delegate: ArrayList<T>
 
@@ -58,7 +58,7 @@ internal class ArrayBag<T> : MutableBag<T> {
         delegate = ArrayList()
     }
 
-    constructor(elements: Bag<T>) : super() {
+    constructor(elements: Shell<T>) : super() {
         delegate = ArrayList()
         addAll(elements)
     }
@@ -68,7 +68,7 @@ internal class ArrayBag<T> : MutableBag<T> {
 
     override fun add(element: T): Boolean = delegate.add(element)
 
-    override fun addAll(elements: Bag<T>): Boolean {
+    override fun addAll(elements: Shell<T>): Boolean {
         var modified = false
         for (element in elements) {
             if (delegate.add(element)) {
@@ -80,7 +80,7 @@ internal class ArrayBag<T> : MutableBag<T> {
 
     override fun remove(element: T): Boolean = delegate.remove(element)
 
-    override fun removeAll(elements: Bag<T>): Boolean {
+    override fun removeAll(elements: Shell<T>): Boolean {
         var modified = false
         for (element in elements) {
             if (delegate.remove(element)) {
@@ -105,75 +105,75 @@ internal class OnceIterator<T>(private val value: T) : Iterator<T> {
     }
 }
 
-internal object EmptyBagIterator : Iterator<Nothing> {
+internal object EmptyShellIterator : Iterator<Nothing> {
     override fun hasNext(): Boolean = false
     override fun next(): Nothing = throw NoSuchElementException()
 }
 
 @PublishedApi
-internal object EmptyBag : Bag<Nothing> {
+internal object EmptyShell : Shell<Nothing> {
     override val size: Int = 0
-    override fun iterator(): Iterator<Nothing> = EmptyBagIterator
+    override fun iterator(): Iterator<Nothing> = EmptyShellIterator
 }
 
-fun <T> emptyBag(): Bag<T> = EmptyBag
+fun <T> emptyShell(): Shell<T> = EmptyShell
 
-fun <T> mutableBagOf(vararg elements: T): MutableBag<T> =
-    if (elements.isEmpty()) ArrayBag() else ArrayBag<T>().apply {
+fun <T> mutableShellOf(vararg elements: T): MutableShell<T> =
+    if (elements.isEmpty()) ArrayShell() else ArrayShell<T>().apply {
         for (element in elements) add(element)
     }
 
-fun <T> mutableBagOf(): MutableBag<T> = ArrayBag()
+fun <T> mutableShellOf(): MutableShell<T> = ArrayShell()
 
-fun <T> bagOf(): Bag<T> = EmptyBag
+fun <T> shellOf(): Shell<T> = EmptyShell
 
-fun <T> bagOf(vararg elements: T): Bag<T> = object : Bag<T> {
+fun <T> shellOf(vararg elements: T): Shell<T> = object : Shell<T> {
     override val size: Int = elements.size
     override fun iterator(): Iterator<T> = elements.iterator()
 }
 
-inline fun <T> Bag<T>.none(predicate: (T) -> Boolean): Boolean {
+inline fun <T> Shell<T>.none(predicate: (T) -> Boolean): Boolean {
     if (isEmpty()) return true
     for (element in this) if (predicate(element)) return false
     return true
 }
 
-inline fun <T> Bag<T>.forEach(action: (T) -> Unit) {
+inline fun <T> Shell<T>.forEach(action: (T) -> Unit) {
     for (element in this) action(element)
 }
 
-inline fun <T, R> Bag<T>.mapTo(destination: MutableBag<R>, transform: (T) -> R): Bag<R> {
+inline fun <T, R> Shell<T>.mapTo(destination: MutableShell<R>, transform: (T) -> R): Shell<R> {
     for (element in this)
         destination.add(transform(element))
     return destination
 }
 
-inline fun <T, R> Bag<T>.map(transform: (T) -> R): Bag<R> {
-    return mapTo(ArrayBag(), transform)
+inline fun <T, R> Shell<T>.map(transform: (T) -> R): Shell<R> {
+    return mapTo(ArrayShell(), transform)
 }
 
-inline fun <T, C : MutableBag<in T>> Bag<T>.filterTo(destination: C, predicate: (T) -> Boolean): C {
+inline fun <T, C : MutableShell<in T>> Shell<T>.filterTo(destination: C, predicate: (T) -> Boolean): C {
     for (element in this)
         if (predicate(element)) destination.add(element)
     return destination
 }
 
-inline fun <T> Bag<T>.filter(predicate: (T) -> Boolean): Bag<T> {
-    return filterTo(ArrayBag(), predicate)
+inline fun <T> Shell<T>.filter(predicate: (T) -> Boolean): Shell<T> {
+    return filterTo(ArrayShell(), predicate)
 }
 
-inline fun <reified R, C : MutableBag<in R>> Bag<*>.filterIsInstanceTo(destination: C): C {
+inline fun <reified R, C : MutableShell<in R>> Shell<*>.filterIsInstanceTo(destination: C): C {
     for (element in this)
         if (element is R) destination.add(element)
     return destination
 }
 
-inline fun <reified R> Bag<*>.filterIsInstance(): Bag<R> {
+inline fun <reified R> Shell<*>.filterIsInstance(): Shell<R> {
     listOf<String>().withIndex()
-    return filterIsInstanceTo(ArrayBag())
+    return filterIsInstanceTo(ArrayShell())
 }
 
-fun <T> Bag<T>.withIndex(): Iterable<IndexedValue<T>> {
+fun <T> Shell<T>.withIndex(): Iterable<IndexedValue<T>> {
     return IndexingIterable { iterator() }
 }
 
@@ -181,7 +181,7 @@ internal class IndexingIterable<out T>(private val iteratorFactory: () -> Iterat
     override fun iterator(): Iterator<IndexedValue<T>> = iteratorFactory().withIndex()
 }
 
-inline fun <T, A : Appendable> Bag<T>.joinTo(
+inline fun <T, A : Appendable> Shell<T>.joinTo(
     appendable: A,
     separator: String = ", ",
     prefix: String = "",
@@ -198,7 +198,7 @@ inline fun <T, A : Appendable> Bag<T>.joinTo(
     return appendable
 }
 
-inline fun <T> Bag<T>.joinToString(
+inline fun <T> Shell<T>.joinToString(
     separator: String = ", ",
     prefix: String = "",
     postfix: String = "",

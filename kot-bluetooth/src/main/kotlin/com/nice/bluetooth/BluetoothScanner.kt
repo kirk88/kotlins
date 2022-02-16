@@ -2,18 +2,18 @@
 
 package com.nice.bluetooth
 
-import android.annotation.TargetApi
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
+import com.nice.bluetooth.client.AndroidAdvertisement
+import com.nice.bluetooth.client.registerBluetoothScannerReceiver
 import com.nice.bluetooth.common.Advertisement
 import com.nice.bluetooth.common.BluetoothScanResult
-import com.nice.bluetooth.common.Scanner
+import com.nice.bluetooth.common.BluetoothScanner
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -23,20 +23,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
-fun Scanner(buildAction: ScannerBuilder.() -> Unit): Scanner {
-    val builder = ScannerBuilder().apply(buildAction)
+fun BluetoothScanner(buildAction: BluetoothScannerBuilder.() -> Unit): BluetoothScanner {
+    val builder = BluetoothScannerBuilder().apply(buildAction)
     return when (builder.type) {
-        ScannerType.System -> AndroidSystemScanner(builder.filterServices)
-        ScannerType.New -> AndroidNewScanner(builder.filterServices, builder.settings)
-        ScannerType.Old -> AndroidOldScanner(builder.filterServices)
+        ScanType.System -> AndroidSystemBluetoothScanner(builder.filterServices)
+        ScanType.New -> AndroidNewBluetoothScanner(builder.filterServices, builder.settings)
+        ScanType.Old -> AndroidOldBluetoothScanner(builder.filterServices)
     }
 }
 
-fun Scanner(type: ScannerType): Scanner = Scanner {
+fun BluetoothScanner(type: ScanType): BluetoothScanner = BluetoothScanner {
     this.type = type
 }
 
-enum class ScannerType {
+enum class ScanType {
     System,
     New,
     Old
@@ -46,13 +46,13 @@ enum class ScannerType {
  * [type] is not designed to work with different Android versions,
  * but you can try to change it when Bluetooth cannot scan devices.
  *
- * [settings] is only used when [type] = [ScannerType.New]
+ * [settings] is only used when [type] = [ScanType.New]
  */
-class ScannerBuilder {
+class BluetoothScannerBuilder {
 
     internal var filterServices: MutableList<UUID>? = null
 
-    var type: ScannerType = ScannerType.New
+    var type: ScanType = ScanType.New
 
     var settings: ScanSettings = ScanSettings.Builder().build()
 
@@ -66,7 +66,7 @@ class ScanFailedException internal constructor(
     errorCode: Int
 ) : IllegalStateException("Bluetooth scan failed with error code $errorCode")
 
-internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : Scanner {
+internal class AndroidSystemBluetoothScanner(private val filterServices: List<UUID>?) : BluetoothScanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 
@@ -100,11 +100,10 @@ internal class AndroidSystemScanner(private val filterServices: List<UUID>?) : S
 
 }
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-internal class AndroidNewScanner(
+internal class AndroidNewBluetoothScanner(
     private val filterServices: List<UUID>?,
     private val settings: ScanSettings
-) : Scanner {
+) : BluetoothScanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 
@@ -155,7 +154,7 @@ internal class AndroidNewScanner(
     }
 }
 
-internal class AndroidOldScanner internal constructor(private val filterServices: List<UUID>?) : Scanner {
+internal class AndroidOldBluetoothScanner internal constructor(private val filterServices: List<UUID>?) : BluetoothScanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 

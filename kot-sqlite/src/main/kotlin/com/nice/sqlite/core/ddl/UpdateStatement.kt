@@ -11,7 +11,7 @@ import com.nice.sqlite.core.dml.WhereClause
 class UpdateStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<ColumnValue>,
+    val values: Shell<ColumnValue>,
     val whereClause: WhereClause<T>? = null,
     val nativeBindValues: Boolean = false
 ) : Statement {
@@ -22,7 +22,7 @@ class UpdateStatement<T : Table>(
 
 class UpdateBatchStatement<T : Table>(
     val subject: TableSubject<T>,
-    updateParts: Bag<UpdatePart<T>>
+    updateParts: Shell<UpdatePart<T>>
 ) : Statement {
 
     private val iterator = updateParts.iterator()
@@ -56,23 +56,23 @@ class UpdateBatchStatement<T : Table>(
 
 class UpdateBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: TableSubject<T>
-) : Bag<UpdatePart<T>> {
+) : Shell<UpdatePart<T>> {
 
     @PublishedApi
-    internal val updateSpecs = mutableListOf<UpdatePart<T>>()
+    internal val updateParts = mutableListOf<UpdatePart<T>>()
 
     inline fun item(buildAction: UpdatePartBuilder<T>.() -> Unit) {
-        updateSpecs.add(UpdatePartBuilder(subject).apply(buildAction).build())
+        updateParts.add(UpdatePartBuilder(subject).apply(buildAction).build())
     }
 
-    override val size: Int get() = updateSpecs.size
-    override fun iterator(): Iterator<UpdatePart<T>> = updateSpecs.iterator()
+    override val size: Int get() = updateParts.size
+    override fun iterator(): Iterator<UpdatePart<T>> = updateParts.iterator()
 
 }
 
 data class UpdatePart<T : Table>(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<ColumnValue>,
+    val values: Shell<ColumnValue>,
     val whereClause: WhereClause<T>?
 ) {
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -104,14 +104,14 @@ class UpdatePartBuilder<T : Table>(
 ) {
 
     @PublishedApi
-    internal lateinit var values: Bag<ColumnValue>
+    internal lateinit var values: Shell<ColumnValue>
 
     @PublishedApi
     internal var whereClause: WhereClause<T>? = null
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    inline fun values(crossinline values: (T) -> Bag<ColumnValue>) {
+    inline fun values(crossinline values: (T) -> Shell<ColumnValue>) {
         this.values = values(subject.table)
     }
 

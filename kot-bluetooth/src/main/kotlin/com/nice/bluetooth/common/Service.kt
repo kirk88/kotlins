@@ -7,7 +7,28 @@ import java.util.*
 
 interface Service {
     val serviceUuid: UUID
+    val serviceType: Int
+
+    companion object {
+        operator fun invoke(
+            serviceUuid: UUID,
+            serviceType: Int = -1
+        ): Service = LazyService(serviceUuid, serviceType)
+    }
 }
+
+fun serviceOf(
+    serviceUuid: String,
+    serviceType: Int = -1
+): Service = Service(
+    serviceUuid = UUID.fromString(serviceUuid),
+    serviceType = serviceType
+)
+
+private data class LazyService(
+    override val serviceUuid: UUID,
+    override val serviceType: Int
+) : Service
 
 data class DiscoveredService internal constructor(
     override val serviceUuid: UUID,
@@ -15,8 +36,10 @@ data class DiscoveredService internal constructor(
     internal val bluetoothGattService: BluetoothGattService
 ) : Service {
 
-    override fun toString(): String =
-        "DiscoveredService(serviceUuid=$serviceUuid, characteristics=$characteristics)"
+    override val serviceType: Int
+        get() = bluetoothGattService.type
+
+    override fun toString(): String = "DiscoveredService(serviceUuid=$serviceUuid, characteristics=$characteristics)"
 
 }
 
@@ -42,24 +65,18 @@ operator fun DiscoveredService.get(characteristicUuid: UUID, descriptorUuid: UUI
 
 internal fun <T : Service> List<T>.first(
     serviceUuid: UUID
-): T = firstOrNull { it.serviceUuid == serviceUuid }
-    ?: throw NoSuchElementException("Service $serviceUuid not found")
+): T = firstOrNull { it.serviceUuid == serviceUuid } ?: throw NoSuchElementException("Service $serviceUuid not found")
 
 /** @throws NoSuchElementException if service or characteristic is not found. */
 internal fun List<DiscoveredService>.getCharacteristic(
     characteristic: Characteristic
-): DiscoveredCharacteristic = first(characteristic.serviceUuid)
-    .characteristics
-    .first(characteristic.characteristicUuid)
+): DiscoveredCharacteristic = first(characteristic.serviceUuid).characteristics.first(characteristic.characteristicUuid)
 
 /** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
 internal fun List<DiscoveredService>.getDescriptor(
     descriptor: Descriptor
-): DiscoveredDescriptor = first(descriptor.serviceUuid)
-    .characteristics
-    .first(descriptor.characteristicUuid)
-    .descriptors
-    .first(descriptor.descriptorUuid)
+): DiscoveredDescriptor =
+    first(descriptor.serviceUuid).characteristics.first(descriptor.characteristicUuid).descriptors.first(descriptor.descriptorUuid)
 
 internal fun BluetoothGattService.toDiscoveredService(): DiscoveredService {
     val serviceUuid = uuid
@@ -81,8 +98,6 @@ internal fun BluetoothGattService.toDiscoveredService(): DiscoveredService {
         )
     }
     return DiscoveredService(
-        serviceUuid = serviceUuid,
-        characteristics = characteristics,
-        bluetoothGattService = this
+        serviceUuid = serviceUuid, characteristics = characteristics, bluetoothGattService = this
     )
 }

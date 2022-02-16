@@ -1,6 +1,6 @@
 @file:Suppress("MissingPermission")
 
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex

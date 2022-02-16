@@ -15,7 +15,7 @@ sealed class SqlType(val name: String) {
     override fun toString(): String = name.uppercase()
 }
 
-interface Definition : Bag<Definition>, FullRenderer {
+interface Definition : Shell<Definition>, FullRenderer {
 
     val name: String
 

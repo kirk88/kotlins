@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.startup.Initializer
+import com.nice.bluetooth.client.registerBluetoothStateReceiver
 import com.nice.bluetooth.common.BluetoothState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

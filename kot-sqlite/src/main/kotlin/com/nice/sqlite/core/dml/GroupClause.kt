@@ -12,7 +12,7 @@ import com.nice.sqlite.statementExecutor
 
 data class GroupClause<T : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val columns: Bag<Column<*>>,
+    internal val columns: Shell<Column<*>>,
     @PublishedApi
     internal val subject: TableSubject<T>,
     @PublishedApi
@@ -29,7 +29,7 @@ inline fun <T : Table> GroupClause<T>.having(
 )
 
 inline fun <T : Table> GroupClause<T>.orderBy(
-    crossinline order: (T) -> Bag<Ordering>
+    crossinline order: (T) -> Shell<Ordering>
 ): OrderClause<T> = OrderClause(
     order(subject.table),
     subject,
@@ -58,7 +58,7 @@ inline fun <T : Table> GroupClause<T>.offset(
 
 @PublishedApi
 internal inline fun <T : Table> GroupClause<T>.select(
-    crossinline selection: (T) -> Bag<Definition>,
+    crossinline selection: (T) -> Shell<Definition>,
     distinct: Boolean
 ): SelectStatement<T> = SelectStatement(
     subject,
@@ -69,26 +69,26 @@ internal inline fun <T : Table> GroupClause<T>.select(
 )
 
 inline fun <T : Table> GroupClause<T>.select(
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): SelectStatement<T> = select(selection, false)
 
 inline fun <T : Table> GroupClause<T>.selectDistinct(
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> GroupClause<T>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table> GroupClause<T>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val columns: Bag<Column<*>>,
+    internal val columns: Shell<Column<*>>,
     @PublishedApi
     internal val joinOn2Clause: JoinOn2Clause<T, T2>,
     @PublishedApi
@@ -108,7 +108,7 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.having(
 )
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.orderBy(
-    crossinline order: (T, T2) -> Bag<Ordering>
+    crossinline order: (T, T2) -> Shell<Ordering>
 ): Order2Clause<T, T2> = Order2Clause(
     order(
         joinOn2Clause.subject.table,
@@ -140,7 +140,7 @@ inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition>,
+    crossinline selection: (T, T2) -> Shell<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> = Select2Statement(
     selection(
@@ -154,26 +154,26 @@ internal inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
 )
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, false)
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table> Group2Clause<T, T2>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val columns: Bag<Column<*>>,
+    internal val columns: Shell<Column<*>>,
     @PublishedApi
     internal val joinOn3Clause: JoinOn3Clause<T, T2, T3>,
     @PublishedApi
@@ -194,7 +194,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.having(
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.orderBy(
-    crossinline order: (T, T2, T3) -> Bag<Ordering>
+    crossinline order: (T, T2, T3) -> Shell<Ordering>
 ): Order3Clause<T, T2, T3> = Order3Clause(
     order(
         joinOn3Clause.joinOn2Clause.subject.table,
@@ -227,7 +227,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3) -> Shell<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> = Select3Statement(
     selection(
@@ -242,26 +242,26 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDistinct(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table> Group3Clause<T, T2, T3>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Group4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
     @PublishedApi
-    internal val columns: Bag<Column<*>>,
+    internal val columns: Shell<Column<*>>,
     @PublishedApi
     internal val joinOn4Clause: JoinOn4Clause<T, T2, T3, T4>,
     @PublishedApi
@@ -283,7 +283,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.orderBy(
-    crossinline order: (T, T2, T3, T4) -> Bag<Ordering>
+    crossinline order: (T, T2, T3, T4) -> Shell<Ordering>
 ): Order4Clause<T, T2, T3, T4> = Order4Clause(
     order(
         joinOn4Clause.joinOn3Clause.joinOn2Clause.subject.table,
@@ -317,7 +317,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> = Select4Statement(
     selection(
@@ -333,19 +333,19 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.selectDistinct(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Group4Clause<T, T2, T3, T4>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))

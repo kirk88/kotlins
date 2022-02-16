@@ -1,4 +1,4 @@
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.nice.bluetooth.applicationContext
 import com.nice.bluetooth.common.BluetoothScanResult
 import java.util.*
 

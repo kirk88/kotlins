@@ -38,7 +38,7 @@ inline fun <T : Table> LimitClause<T>.offset(
 
 @PublishedApi
 internal inline fun <T : Table> LimitClause<T>.select(
-    crossinline selection: (T) -> Bag<Definition>,
+    crossinline selection: (T) -> Shell<Definition>,
     distinct: Boolean
 ): SelectStatement<T> = SelectStatement(
     subject,
@@ -54,21 +54,21 @@ internal inline fun <T : Table> LimitClause<T>.select(
 )
 
 inline fun <T : Table> LimitClause<T>.select(
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): SelectStatement<T> = select(selection, false)
 
 inline fun <T : Table> LimitClause<T>.selectDistinct(
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): SelectStatement<T> = select(selection, true)
 
 inline fun <T : Table> LimitClause<T>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table> LimitClause<T>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T) -> Bag<Definition> = { emptyBag() }
+    crossinline selection: (T) -> Shell<Definition> = { emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Limit2Clause<T : Table, T2 : Table> @PublishedApi internal constructor(
@@ -100,7 +100,7 @@ inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition>,
+    crossinline selection: (T, T2) -> Shell<Definition>,
     distinct: Boolean
 ): Select2Statement<T, T2> = Select2Statement(
     selection(
@@ -117,21 +117,21 @@ internal inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
 )
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, false)
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.selectDistinct(
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Select2Statement<T, T2> = select(selection, true)
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table> Limit2Clause<T, T2>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2) -> Bag<Definition> = { _, _ -> emptyBag() }
+    crossinline selection: (T, T2) -> Shell<Definition> = { _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Limit3Clause<T : Table, T2 : Table, T3 : Table> @PublishedApi internal constructor(
@@ -163,7 +163,7 @@ inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.offset(
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3) -> Shell<Definition>,
     distinct: Boolean
 ): Select3Statement<T, T2, T3> = Select3Statement(
     selection(
@@ -181,21 +181,21 @@ internal inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.selectDistinct(
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Select3Statement<T, T2, T3> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table> Limit3Clause<T, T2, T3>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3) -> Bag<Definition> = { _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3) -> Shell<Definition> = { _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))
 
 data class Limit4Clause<T : Table, T2 : Table, T3 : Table, T4 : Table> @PublishedApi internal constructor(
@@ -227,7 +227,7 @@ inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T
 
 @PublishedApi
 internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition>,
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition>,
     distinct: Boolean
 ): Select4Statement<T, T2, T3, T4> = Select4Statement(
     selection(
@@ -246,19 +246,19 @@ internal inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause
 )
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, false)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.selectDistinct(
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Select4Statement<T, T2, T3, T4> = select(selection, true)
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.select(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(select(selection))
 
 inline fun <T : Table, T2 : Table, T3 : Table, T4 : Table> Limit4Clause<T, T2, T3, T4>.selectDistinct(
     database: SupportSQLiteDatabase,
-    crossinline selection: (T, T2, T3, T4) -> Bag<Definition> = { _, _, _, _ -> emptyBag() }
+    crossinline selection: (T, T2, T3, T4) -> Shell<Definition> = { _, _, _, _ -> emptyShell() }
 ): Cursor = database.statementExecutor.executeQuery(selectDistinct(selection))

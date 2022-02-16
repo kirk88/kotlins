@@ -1,6 +1,7 @@
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.bluetooth.BluetoothDevice
+import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.common.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

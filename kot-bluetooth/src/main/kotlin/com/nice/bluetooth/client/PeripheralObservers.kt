@@ -1,6 +1,7 @@
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.util.Log
+import com.nice.bluetooth.TAG
 import com.nice.bluetooth.common.Characteristic
 import com.nice.bluetooth.common.ConnectionState
 import com.nice.bluetooth.common.NotReadyException

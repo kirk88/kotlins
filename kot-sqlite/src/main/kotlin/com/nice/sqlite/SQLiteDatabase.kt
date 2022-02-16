@@ -156,7 +156,7 @@ private class SQLiteStatementExecutor private constructor(
         return database.query(statement.toString(SQLiteDialect))
     }
 
-    private fun bindValues(statement: SupportSQLiteStatement, values: Bag<ColumnValue>) {
+    private fun bindValues(statement: SupportSQLiteStatement, values: Shell<ColumnValue>) {
         for ((index, value) in values.withIndex()) {
             when (val v = value.value) {
                 null -> statement.bindNull(index + 1)

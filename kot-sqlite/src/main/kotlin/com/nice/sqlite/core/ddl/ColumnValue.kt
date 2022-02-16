@@ -3,7 +3,7 @@ package com.nice.sqlite.core.ddl
 data class ColumnValue(
     val column: Column<*>,
     val value: Any?
-) : Bag<ColumnValue> {
+) : Shell<ColumnValue> {
 
     override val size: Int get() = 1
     override fun iterator(): Iterator<ColumnValue> = OnceIterator(this)

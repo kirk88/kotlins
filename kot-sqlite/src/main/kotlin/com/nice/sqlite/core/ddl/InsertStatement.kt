@@ -9,7 +9,7 @@ import com.nice.sqlite.core.TableSubject
 class InsertStatement<T : Table>(
     val subject: TableSubject<T>,
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<ColumnValue>,
+    val values: Shell<ColumnValue>,
     val nativeBindValues: Boolean = false
 ) : Statement {
 
@@ -19,7 +19,7 @@ class InsertStatement<T : Table>(
 
 class InsertBatchStatement<T : Table>(
     val subject: TableSubject<T>,
-    insertParts: Bag<InsertPart>
+    insertParts: Shell<InsertPart>
 ) : Statement {
 
     private val iterator = insertParts.iterator()
@@ -52,23 +52,23 @@ class InsertBatchStatement<T : Table>(
 
 class InsertBatchBuilder<T : Table> @PublishedApi internal constructor(
     @PublishedApi internal val subject: TableSubject<T>
-) : Bag<InsertPart> {
+) : Shell<InsertPart> {
 
     @PublishedApi
-    internal val insertSpecs = mutableListOf<InsertPart>()
+    internal val insertParts = mutableListOf<InsertPart>()
 
     inline fun item(buildAction: InsertPartBuilder<T>.() -> Unit) {
-        insertSpecs.add(InsertPartBuilder(subject).apply(buildAction).build())
+        insertParts.add(InsertPartBuilder(subject).apply(buildAction).build())
     }
 
-    override val size: Int get() = insertSpecs.size
-    override fun iterator(): Iterator<InsertPart> = insertSpecs.iterator()
+    override val size: Int get() = insertParts.size
+    override fun iterator(): Iterator<InsertPart> = insertParts.iterator()
 
 }
 
 class InsertPart(
     val conflictAlgorithm: ConflictAlgorithm,
-    val values: Bag<ColumnValue>
+    val values: Shell<ColumnValue>
 ) {
 
     private val id: Int = values.joinToString(prefix = "$conflictAlgorithm, ") {
@@ -97,11 +97,11 @@ class InsertPartBuilder<T : Table>(
 ) {
 
     @PublishedApi
-    internal lateinit var values: Bag<ColumnValue>
+    internal lateinit var values: Shell<ColumnValue>
 
     var conflictAlgorithm: ConflictAlgorithm = ConflictAlgorithm.None
 
-    inline fun values(crossinline values: (T) -> Bag<ColumnValue>) {
+    inline fun values(crossinline values: (T) -> Shell<ColumnValue>) {
         this.values = values(subject.table)
     }
 

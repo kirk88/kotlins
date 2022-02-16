@@ -1,4 +1,4 @@
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import com.nice.bluetooth.common.*
 

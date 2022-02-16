@@ -1,6 +1,6 @@
 @file:Suppress("MissingPermission")
 
-package com.nice.bluetooth
+package com.nice.bluetooth.client
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.*

@@ -20,32 +20,61 @@ enum class DescriptorPermission(internal val value: Int) {
 fun descriptorOf(
     service: String,
     characteristic: String,
-    descriptor: String
+    descriptor: String,
+    permissions: Array<DescriptorPermission> = emptyArray()
 ): Descriptor = Descriptor(
     serviceUuid = UUID.fromString(service),
     characteristicUuid = UUID.fromString(characteristic),
-    descriptorUuid = UUID.fromString(descriptor)
+    descriptorUuid = UUID.fromString(descriptor),
+    permissions = permissions
 )
 
 interface Descriptor {
     val serviceUuid: UUID
     val characteristicUuid: UUID
     val descriptorUuid: UUID
+    val permissions: Array<DescriptorPermission>
+
+    fun hasPermission(permission: DescriptorPermission): Boolean {
+        return permissions.contains(permission)
+    }
 
     companion object {
         operator fun invoke(
             serviceUuid: UUID,
             characteristicUuid: UUID,
-            descriptorUuid: UUID
-        ): Descriptor = LazyDescriptor(serviceUuid, characteristicUuid, descriptorUuid)
+            descriptorUuid: UUID,
+            permissions: Array<DescriptorPermission> = emptyArray()
+        ): Descriptor = LazyDescriptor(serviceUuid, characteristicUuid, descriptorUuid, permissions)
     }
 }
 
 private data class LazyDescriptor(
     override val serviceUuid: UUID,
     override val characteristicUuid: UUID,
-    override val descriptorUuid: UUID
-) : Descriptor
+    override val descriptorUuid: UUID,
+    override val permissions: Array<DescriptorPermission>
+) : Descriptor {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LazyDescriptor
+
+        if (serviceUuid != other.serviceUuid) return false
+        if (characteristicUuid != other.characteristicUuid) return false
+        if (descriptorUuid != other.descriptorUuid) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = serviceUuid.hashCode()
+        result = 31 * result + characteristicUuid.hashCode()
+        result = 31 * result + descriptorUuid.hashCode()
+        return result
+    }
+}
 
 data class DiscoveredDescriptor internal constructor(
     override val serviceUuid: UUID,
@@ -54,11 +83,7 @@ data class DiscoveredDescriptor internal constructor(
     internal val bluetoothGattDescriptor: BluetoothGattDescriptor
 ) : Descriptor {
 
-    val permissions: Array<DescriptorPermission> = DescriptorPermission.values().filter { hasPermission(it) }.toTypedArray()
-
-    fun hasPermission(permission: DescriptorPermission): Boolean {
-        return bluetoothGattDescriptor.permissions and permission.value != 0
-    }
+    override val permissions: Array<DescriptorPermission> = bluetoothGattDescriptor.permissionValues
 
     override fun toString(): String =
         "DiscoveredDescriptor(serviceUuid=$serviceUuid, characteristicUuid=$characteristicUuid, descriptorUuid=$descriptorUuid)"
@@ -69,3 +94,6 @@ internal fun <T : Descriptor> List<T>.first(
     descriptorUuid: UUID
 ): T = firstOrNull { it.descriptorUuid == descriptorUuid }
     ?: throw NoSuchElementException("Descriptor $descriptorUuid not found")
+
+private val BluetoothGattDescriptor.permissionValues: Array<DescriptorPermission>
+    get() = DescriptorPermission.values().filter { permissions and it.value != 0 }.toTypedArray()
