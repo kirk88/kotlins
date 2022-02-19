@@ -8,22 +8,7 @@ enum class BondState {
     Bonded,
 }
 
-interface Advertisement {
-    /**
-     * The name in the Advertisement.
-     * The same as, or a shortened version of, the local name assigned to the device
-     */
-    val name: String
-
-    /**
-     * The hardware address in the Advertisement
-     */
-    val address: String
-
-    /**
-     * The bond state of the remote device
-     */
-    val bondState: BondState
+interface Advertisement: Device {
 
     /**
      * The received signal strength, in dBm, of the packet received.
@@ -36,12 +21,6 @@ interface Advertisement {
      * `pathloss = txPower – rssi`
      */
     val txPower: Int?
-
-    /**
-     * A list of Service or Service Class UUIDs.
-     * According to the BLE specification, GAP and GATT service UUIDs should not be included here.
-     */
-    val uuids: List<UUID>
 
     /**
      * The Manufacturer Specific Data, or null if none provided in the Advertisement packet.

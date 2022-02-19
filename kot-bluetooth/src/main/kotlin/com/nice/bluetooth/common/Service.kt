@@ -6,98 +6,82 @@ import android.bluetooth.BluetoothGattService
 import java.util.*
 
 interface Service {
-    val serviceUuid: UUID
+    val uuid: UUID
     val serviceType: Int
-
-    companion object {
-        operator fun invoke(
-            serviceUuid: UUID,
-            serviceType: Int = -1
-        ): Service = LazyService(serviceUuid, serviceType)
-    }
+    val characteristics: List<Characteristic>
 }
 
-fun serviceOf(
-    serviceUuid: String,
-    serviceType: Int = -1
-): Service = Service(
-    serviceUuid = UUID.fromString(serviceUuid),
-    serviceType = serviceType
+fun Service(
+    uuid: String,
+    serviceType: Int = -1,
+    characteristics: List<Characteristic> = emptyList()
+): Service = LazyService(
+    uuid = UUID.fromString(uuid),
+    serviceType = serviceType,
+    characteristics = characteristics
+)
+
+fun Service(
+    uuid: UUID,
+    serviceType: Int = -1,
+    characteristics: List<Characteristic> = emptyList()
+): Service = LazyService(
+    uuid = uuid,
+    serviceType = serviceType,
+    characteristics = characteristics
 )
 
 private data class LazyService(
-    override val serviceUuid: UUID,
-    override val serviceType: Int
+    override val uuid: UUID,
+    override val serviceType: Int,
+    override val characteristics: List<Characteristic>
 ) : Service
 
-data class DiscoveredService internal constructor(
-    override val serviceUuid: UUID,
-    val characteristics: List<DiscoveredCharacteristic>,
-    internal val bluetoothGattService: BluetoothGattService
+
+private data class DiscoveredService(
+    val bluetoothGattService: BluetoothGattService
 ) : Service {
 
-    override val serviceType: Int
-        get() = bluetoothGattService.type
+    override val uuid: UUID = bluetoothGattService.uuid
 
-    override fun toString(): String = "DiscoveredService(serviceUuid=$serviceUuid, characteristics=$characteristics)"
+    override val serviceType: Int = bluetoothGattService.type
+
+    override val characteristics: List<Characteristic> =
+        bluetoothGattService.characteristics.map { it.toCharacteristic() }
+
+    override fun toString(): String = "DiscoveredService(serviceUuid=$uuid, characteristics=$characteristics)"
 
 }
 
-fun DiscoveredService.findCharacteristic(characteristicUuid: UUID): DiscoveredCharacteristic? {
-    return characteristics.find { it.characteristicUuid == characteristicUuid }
+fun Service.findCharacteristic(characteristicUuid: UUID): Characteristic? {
+    return characteristics.find { it.uuid == characteristicUuid }
 }
 
-fun DiscoveredService.findCharacteristic(predicate: (DiscoveredCharacteristic) -> Boolean): DiscoveredCharacteristic? {
+fun Service.findCharacteristic(predicate: (Characteristic) -> Boolean): Characteristic? {
     return characteristics.find(predicate)
 }
 
-fun DiscoveredService.findDescriptor(characteristicUuid: UUID, descriptorUuid: UUID): DiscoveredDescriptor? {
+fun Service.findDescriptor(characteristicUuid: UUID, descriptorUuid: UUID): Descriptor? {
     return findCharacteristic(characteristicUuid)?.findDescriptor(descriptorUuid)
 }
 
-operator fun DiscoveredService.get(characteristicUuid: UUID): DiscoveredCharacteristic {
-    return characteristics.first(characteristicUuid)
+operator fun Service.get(characteristicUuid: UUID): Characteristic {
+    return characteristics.first { it.uuid == characteristicUuid }
 }
 
-operator fun DiscoveredService.get(characteristicUuid: UUID, descriptorUuid: UUID): DiscoveredDescriptor {
+operator fun Service.get(characteristicUuid: UUID, descriptorUuid: UUID): Descriptor {
     return get(characteristicUuid)[descriptorUuid]
 }
 
-internal fun <T : Service> List<T>.first(
-    serviceUuid: UUID
-): T = firstOrNull { it.serviceUuid == serviceUuid } ?: throw NoSuchElementException("Service $serviceUuid not found")
-
-/** @throws NoSuchElementException if service or characteristic is not found. */
-internal fun List<DiscoveredService>.getCharacteristic(
-    characteristic: Characteristic
-): DiscoveredCharacteristic = first(characteristic.serviceUuid).characteristics.first(characteristic.characteristicUuid)
-
-/** @throws NoSuchElementException if service, characteristic or descriptor is not found. */
-internal fun List<DiscoveredService>.getDescriptor(
-    descriptor: Descriptor
-): DiscoveredDescriptor =
-    first(descriptor.serviceUuid).characteristics.first(descriptor.characteristicUuid).descriptors.first(descriptor.descriptorUuid)
-
-internal fun BluetoothGattService.toDiscoveredService(): DiscoveredService {
-    val serviceUuid = uuid
-    val characteristics = characteristics.map { characteristic ->
-        val descriptors = characteristic.descriptors.map { descriptor ->
-            DiscoveredDescriptor(
-                serviceUuid = serviceUuid,
-                characteristicUuid = characteristic.uuid,
-                descriptorUuid = descriptor.uuid,
-                bluetoothGattDescriptor = descriptor
-            )
-        }
-
-        DiscoveredCharacteristic(
-            serviceUuid = serviceUuid,
-            characteristicUuid = characteristic.uuid,
-            descriptors = descriptors,
-            bluetoothGattCharacteristic = characteristic
-        )
+internal fun Service.toBluetoothGattService(): BluetoothGattService {
+    if (this is DiscoveredService) {
+        return bluetoothGattService
     }
-    return DiscoveredService(
-        serviceUuid = serviceUuid, characteristics = characteristics, bluetoothGattService = this
-    )
+    val service = BluetoothGattService(uuid, serviceType)
+    for (characteristic in characteristics) {
+        service.addCharacteristic(characteristic.toBluetoothGattCharacteristic())
+    }
+    return service
 }
+
+internal fun BluetoothGattService.toService(): Service = DiscoveredService(this)

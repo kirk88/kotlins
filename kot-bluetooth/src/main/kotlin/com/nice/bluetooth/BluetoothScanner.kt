@@ -48,16 +48,18 @@ enum class ScanType {
  *
  * [settings] is only used when [type] = [ScanType.New]
  */
-class BluetoothScannerBuilder {
+class BluetoothScannerBuilder internal constructor(){
 
-    internal var filterServices: MutableList<UUID>? = null
+    private val _filterServices by lazy { mutableListOf<UUID>() }
+    internal val filterServices: List<UUID>
+        get() = _filterServices
 
     var type: ScanType = ScanType.New
 
     var settings: ScanSettings = ScanSettings.Builder().build()
 
     fun addFilterService(uuid: UUID) {
-        (filterServices ?: mutableListOf<UUID>().also { filterServices = it }).add(uuid)
+        _filterServices.add(uuid)
     }
 
 }
@@ -154,7 +156,8 @@ internal class AndroidNewBluetoothScanner(
     }
 }
 
-internal class AndroidOldBluetoothScanner internal constructor(private val filterServices: List<UUID>?) : BluetoothScanner {
+internal class AndroidOldBluetoothScanner internal constructor(private val filterServices: List<UUID>?) :
+    BluetoothScanner {
 
     private val bluetoothAdapter = Bluetooth.adapter
 

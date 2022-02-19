@@ -63,8 +63,8 @@ internal class PeripheralConnection(
     val phy = MutableStateFlow<PreferredPhy?>(null)
 
     @Volatile
-    private var _services: List<DiscoveredService>? = null
-    val services: List<DiscoveredService>
+    private var _services: List<Service>? = null
+    val services: List<Service>
         get() = checkNotNull(_services) { "Services have not been discovered for $this" }
 
     private val observers = PeripheralObservers(this)
@@ -119,7 +119,7 @@ internal class PeripheralConnection(
             response = { onServicesDiscovered.receiveOrThrow() }
         )
 
-        _services = connectionHandler.services
+        _services = connectionHandler.services.map { it.toService() }
     }
 
     private fun close() {
@@ -148,7 +148,7 @@ internal class PeripheralConnection(
         data: ByteArray,
         writeType: WriteType
     ) {
-        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
+        val bluetoothGattCharacteristic = characteristic.toBluetoothGattCharacteristic()
         connectionHandler.execute(
             action = {
                 bluetoothGattCharacteristic.value = data
@@ -162,7 +162,7 @@ internal class PeripheralConnection(
     override suspend fun read(
         characteristic: Characteristic
     ): ByteArray {
-        val bluetoothGattCharacteristic = bluetoothGattCharacteristicFrom(characteristic)
+        val bluetoothGattCharacteristic = characteristic.toBluetoothGattCharacteristic()
         return connectionHandler.execute(
             action = { readCharacteristic(bluetoothGattCharacteristic) },
             response = { onCharacteristicRead.receiveOrThrow() }
@@ -173,13 +173,7 @@ internal class PeripheralConnection(
         descriptor: Descriptor,
         data: ByteArray
     ) {
-        write(bluetoothGattDescriptorFrom(descriptor), data)
-    }
-
-    private suspend fun write(
-        bluetoothGattDescriptor: BluetoothGattDescriptor,
-        data: ByteArray
-    ) {
+        val bluetoothGattDescriptor = descriptor.toBluetoothGattDescriptor()
         connectionHandler.execute(
             action = {
                 bluetoothGattDescriptor.value = data
@@ -192,7 +186,7 @@ internal class PeripheralConnection(
     override suspend fun read(
         descriptor: Descriptor
     ): ByteArray {
-        val bluetoothGattDescriptor = bluetoothGattDescriptorFrom(descriptor)
+        val bluetoothGattDescriptor = descriptor.toBluetoothGattDescriptor()
         return connectionHandler.execute(
             action = { readDescriptor(bluetoothGattDescriptor) },
             response = { onDescriptorRead.receiveOrThrow() }
@@ -272,72 +266,61 @@ internal class PeripheralConnection(
     ): Flow<ByteArray> = observers.acquire(characteristic, onSubscription)
 
     suspend fun startObservation(characteristic: Characteristic) {
-        val discoveredCharacteristic = services.getCharacteristic(characteristic)
-        setCharacteristicNotification(discoveredCharacteristic, true)
-        setConfigDescriptor(discoveredCharacteristic, enable = true)
+        setCharacteristicNotification(characteristic, true)
+        setConfigDescriptor(characteristic, enable = true)
     }
 
     suspend fun stopObservation(characteristic: Characteristic) {
-        val discoveredCharacteristic = services.getCharacteristic(characteristic)
         try {
-            setConfigDescriptor(discoveredCharacteristic, enable = false)
+            setConfigDescriptor(characteristic, enable = false)
         } finally {
-            setCharacteristicNotification(discoveredCharacteristic, false)
+            setCharacteristicNotification(characteristic, false)
         }
     }
 
     private fun setCharacteristicNotification(
-        characteristic: DiscoveredCharacteristic,
+        characteristic: Characteristic,
         enable: Boolean
     ) = connectionHandler.setCharacteristicNotification(
-        characteristic,
+        characteristic.toBluetoothGattCharacteristic(),
         enable
     )
 
     private suspend fun setConfigDescriptor(
-        characteristic: DiscoveredCharacteristic,
+        characteristic: Characteristic,
         enable: Boolean
     ) {
         val configDescriptor = characteristic.configDescriptor
         if (configDescriptor != null) {
-            val bluetoothGattDescriptor = configDescriptor.bluetoothGattDescriptor
             if (enable) {
                 when {
                     characteristic.supportsNotify -> write(
-                        bluetoothGattDescriptor,
+                        configDescriptor,
                         BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                     )
                     characteristic.supportsIndicate -> write(
-                        bluetoothGattDescriptor,
+                        configDescriptor,
                         BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
                     )
                     else -> Log.w(
                         TAG,
-                        "Characteristic ${characteristic.characteristicUuid} supports neither notification nor indication"
+                        "Characteristic ${characteristic.uuid} supports neither notification nor indication"
                     )
                 }
             } else {
                 if (characteristic.supportsNotify || characteristic.supportsIndicate)
                     write(
-                        bluetoothGattDescriptor,
+                        configDescriptor,
                         BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
                     )
             }
         } else {
             Log.w(
                 TAG,
-                "Characteristic ${characteristic.characteristicUuid} is missing config descriptor."
+                "Characteristic ${characteristic.uuid} is missing config descriptor."
             )
         }
     }
-
-    private fun bluetoothGattCharacteristicFrom(
-        characteristic: Characteristic
-    ) = services.getCharacteristic(characteristic).bluetoothGattCharacteristic
-
-    private fun bluetoothGattDescriptorFrom(
-        descriptor: Descriptor
-    ) = services.getDescriptor(descriptor).bluetoothGattDescriptor
 
 }
 
@@ -352,13 +335,13 @@ private suspend inline fun <T : Response> Channel<out T>.receiveOrThrow(): T {
     return response
 }
 
-private val DiscoveredCharacteristic.configDescriptor: DiscoveredDescriptor?
+private val Characteristic.configDescriptor: Descriptor?
     get() = findDescriptor(CHARACTERISTIC_CONFIG_UUID)
 
-private val DiscoveredCharacteristic.supportsNotify: Boolean
+private val Characteristic.supportsNotify: Boolean
     get() = hasProperty(CharacteristicProperty.Notify)
 
-private val DiscoveredCharacteristic.supportsIndicate: Boolean
+private val Characteristic.supportsIndicate: Boolean
     get() = hasProperty(CharacteristicProperty.Indicate)
 
 private val PhyOptions.intValue: Int
@@ -376,7 +359,6 @@ private val WriteType.intValue: Int
     }
 
 private val ConnectionPriority.intValue: Int
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     get() = when (this) {
         ConnectionPriority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
         ConnectionPriority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED

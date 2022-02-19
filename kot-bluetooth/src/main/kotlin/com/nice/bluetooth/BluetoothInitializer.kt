@@ -32,9 +32,16 @@ internal lateinit var applicationContext: Context
 
 object Bluetooth {
 
-    private val bluetoothAdapter: BluetoothAdapter? by lazy {
-        (applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+    private val bluetoothManager: BluetoothManager? by lazy {
+        applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
     }
+
+    private val bluetoothAdapter: BluetoothAdapter? by lazy {
+        bluetoothManager?.adapter
+    }
+
+    internal val manager: BluetoothManager
+        get() = bluetoothManager ?: error("Bluetooth not supported")
 
     internal val adapter: BluetoothAdapter
         get() = bluetoothAdapter ?: error("Bluetooth not supported")

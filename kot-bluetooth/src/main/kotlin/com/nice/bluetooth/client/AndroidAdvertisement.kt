@@ -4,6 +4,7 @@ package com.nice.bluetooth.client
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.*
+import android.os.Build
 import com.nice.bluetooth.common.*
 import java.util.*
 
@@ -17,8 +18,15 @@ internal class AndroidAdvertisement(
     private val scanRecord: ScanRecord?
         get() = scanResult.scanRecord
 
-    override val name: String
-        get() = device.name.orEmpty()
+    override val name: String?
+        get() = device.name
+
+    override val alias: String?
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            device.alias
+        } else {
+            null
+        }
 
     override val address: String
         get() = device.address.orEmpty()
@@ -31,14 +39,17 @@ internal class AndroidAdvertisement(
             else -> error("Unknown bond state: ${device.bondState}")
         }
 
+    override val uuids: List<UUID>
+        get() = device.uuids?.map { it.uuid }.orEmpty()
+
+    override val type: Int
+        get() = device.type
+
     override val rssi: Int
         get() = scanResult.rssi
 
     override val txPower: Int?
         get() = scanRecord?.txPowerLevel
-
-    override val uuids: List<UUID>
-        get() = scanRecord?.serviceUuids.orEmpty()
 
     override val manufacturerData: ManufacturerData?
         get() = scanRecord?.manufacturerSpecificData?.find { it.data.isNotEmpty() }

@@ -5,6 +5,8 @@ package com.nice.bluetooth.client
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.os.Build
 import android.os.Handler
@@ -35,8 +37,8 @@ internal class ConnectionHandler(
 
     private val mutex = Mutex()
 
-    val services: List<DiscoveredService>
-        get() = bluetoothGatt.services.map { it.toDiscoveredService() }
+    val services: List<BluetoothGattService>
+        get() = bluetoothGatt.services
 
     fun connect() = bluetoothGatt.connect()
 
@@ -62,7 +64,9 @@ internal class ConnectionHandler(
         crossinline response: suspend Callback.() -> T
     ): T = mutex.withLock {
         withContext(dispatcher) {
-            bluetoothGatt.action() || throw GattRequestRejectedException()
+             if(!bluetoothGatt.action()) {
+                 throw GattRequestRejectedException()
+             }
         }
 
         callback.response()
@@ -101,9 +105,9 @@ internal class ConnectionHandler(
             }
     }
 
-    fun setCharacteristicNotification(characteristic: DiscoveredCharacteristic, enabled: Boolean) {
+    fun setCharacteristicNotification(characteristic: BluetoothGattCharacteristic, enabled: Boolean) {
         bluetoothGatt.setCharacteristicNotification(
-            characteristic.bluetoothGattCharacteristic,
+            characteristic,
             enabled
         ) || throw GattRequestRejectedException()
     }

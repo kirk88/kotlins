@@ -107,7 +107,7 @@ interface Peripheral : Readable, Writable {
     val phy: Flow<PreferredPhy?>
 
     /** @return discovered [services][Service], or `null` until a [connection][connect] has been established. */
-    val services: List<DiscoveredService>
+    val services: List<Service>
 
     /**
      * Initiates a connection, suspending until connected, or failure occurs. Multiple concurrent invocations will all
@@ -179,7 +179,7 @@ interface Peripheral : Readable, Writable {
     suspend fun readPhy(): PreferredPhy
 
     /**
-     * Observes changes to the specified [characteristicOf].
+     * Observes changes to the specified [Characteristic].
      *
      * Observations can be setup ([observe] can be called) prior to a [connection][connect] being established. Once
      * connected, the observation will automatically start emitting changes. If connection is lost, [Flow] will remain
@@ -219,18 +219,18 @@ interface Peripheral : Readable, Writable {
 
 }
 
-fun Peripheral.findService(serviceUuid: UUID): DiscoveredService? {
-    return services.find { it.serviceUuid == serviceUuid }
+fun Peripheral.findService(serviceUuid: UUID): Service? {
+    return services.find { it.uuid == serviceUuid }
 }
 
-fun Peripheral.findService(predicate: (DiscoveredService) -> Boolean): DiscoveredService? {
+fun Peripheral.findService(predicate: (Service) -> Boolean): Service? {
     return services.find(predicate)
 }
 
 fun Peripheral.findCharacteristic(
     serviceUuid: UUID,
     characteristicUuid: UUID
-): DiscoveredCharacteristic? {
+): Characteristic? {
     return findService(serviceUuid)?.findCharacteristic(characteristicUuid)
 }
 
@@ -238,18 +238,18 @@ fun Peripheral.findDescriptor(
     serviceUuid: UUID,
     characteristicUuid: UUID,
     descriptorUuid: UUID
-): DiscoveredDescriptor? {
+): Descriptor? {
     return findService(serviceUuid)?.findCharacteristic(characteristicUuid)?.findDescriptor(descriptorUuid)
 }
 
-operator fun Peripheral.get(serviceUuid: UUID): DiscoveredService {
-    return services.first(serviceUuid)
+operator fun Peripheral.get(serviceUuid: UUID): Service {
+    return services.first { it.uuid == serviceUuid }
 }
 
-operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID): DiscoveredCharacteristic {
+operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID): Characteristic {
     return get(serviceUuid)[characteristicUuid]
 }
 
-operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID, descriptorUuid: UUID): DiscoveredDescriptor {
+operator fun Peripheral.get(serviceUuid: UUID, characteristicUuid: UUID, descriptorUuid: UUID): Descriptor {
     return get(serviceUuid, characteristicUuid)[descriptorUuid]
 }

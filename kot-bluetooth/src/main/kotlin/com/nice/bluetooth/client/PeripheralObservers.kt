@@ -89,7 +89,7 @@ internal class PeripheralObservers(
             onSubscription()
         }
         .filter {
-            it.characteristic.characteristicUuid == characteristic.characteristicUuid &&
+            it.characteristic.uuid == characteristic.uuid &&
                     it.characteristic.serviceUuid == characteristic.serviceUuid
         }
         .map {

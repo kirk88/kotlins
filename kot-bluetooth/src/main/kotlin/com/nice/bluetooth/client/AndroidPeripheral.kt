@@ -58,7 +58,7 @@ class AndroidPeripheral internal constructor(
 
     override val phy: Flow<PreferredPhy?> = connection.phy.asStateFlow()
 
-    override val services: List<DiscoveredService>
+    override val services: List<Service>
         get() = connection.services
 
     override suspend fun connect(autoConnect: Boolean) {
