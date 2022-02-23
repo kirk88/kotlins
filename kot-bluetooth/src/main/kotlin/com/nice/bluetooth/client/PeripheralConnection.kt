@@ -2,9 +2,10 @@
 
 package com.nice.bluetooth.client
 
-import android.annotation.TargetApi
-import android.bluetooth.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
+import android.bluetooth.BluetoothGattDescriptor
 import android.os.Build
 import android.util.Log
 import com.nice.bluetooth.Bluetooth
@@ -343,27 +344,6 @@ private val Characteristic.supportsNotify: Boolean
 
 private val Characteristic.supportsIndicate: Boolean
     get() = hasProperty(CharacteristicProperty.Indicate)
-
-private val PhyOptions.intValue: Int
-    @TargetApi(Build.VERSION_CODES.O)
-    get() = when (this) {
-        PhyOptions.NoPreferred -> BluetoothDevice.PHY_OPTION_NO_PREFERRED
-        PhyOptions.S2 -> BluetoothDevice.PHY_OPTION_S2
-        PhyOptions.S8 -> BluetoothDevice.PHY_OPTION_S8
-    }
-
-private val WriteType.intValue: Int
-    get() = when (this) {
-        WriteType.WithResponse -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-        WriteType.WithoutResponse -> BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-    }
-
-private val ConnectionPriority.intValue: Int
-    get() = when (this) {
-        ConnectionPriority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
-        ConnectionPriority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
-        ConnectionPriority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
-    }
 
 /**
  * Suspends until [PeripheralConnection] receiver arrives at the [ConnectionState] specified.

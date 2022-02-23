@@ -56,6 +56,7 @@ dependencies {
     implementation(composeLibs.viewmodel)
     implementation(composeLibs.navigation)
     implementation(composeLibs.window)
+    implementation(project(":kot-bluetooth"))
     implementation(project(":kot-sqlite"))
     implementation(project(":kot-okhttp"))
     implementation(project(":kot-gson"))

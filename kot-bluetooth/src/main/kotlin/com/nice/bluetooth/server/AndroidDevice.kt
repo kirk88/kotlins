@@ -4,12 +4,13 @@ package com.nice.bluetooth.server
 
 import android.bluetooth.BluetoothDevice
 import android.os.Build
+import com.nice.bluetooth.Bluetooth
 import com.nice.bluetooth.common.BondState
 import com.nice.bluetooth.common.Device
 import java.util.*
 
 internal class AndroidDevice(
-    private val device: BluetoothDevice
+    val device: BluetoothDevice
 ) : Device {
 
     override val name: String?
@@ -40,3 +41,12 @@ internal class AndroidDevice(
         get() = device.type
 
 }
+
+internal fun Device.toBluetoothDevice(): BluetoothDevice {
+    if (this is AndroidDevice) {
+        return device
+    }
+    return Bluetooth.adapter.getRemoteDevice(address)
+}
+
+internal fun BluetoothDevice.toDevice(): Device = AndroidDevice(this)

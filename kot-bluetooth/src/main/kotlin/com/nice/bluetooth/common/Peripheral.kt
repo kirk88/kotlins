@@ -2,6 +2,11 @@
 
 package com.nice.bluetooth.common
 
+import android.annotation.TargetApi
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.os.Build
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -30,6 +35,35 @@ enum class ConnectionPriority {
     Balanced,
     High
 }
+
+internal val Int.phy: Phy
+    get() = when (this) {
+        BluetoothDevice.PHY_LE_1M -> Phy.Le1M
+        BluetoothDevice.PHY_LE_2M -> Phy.Le2M
+        BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
+        else -> error("Unknown phy: $this")
+    }
+
+internal val ConnectionPriority.intValue: Int
+    get() = when (this) {
+        ConnectionPriority.Low -> BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
+        ConnectionPriority.Balanced -> BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+        ConnectionPriority.High -> BluetoothGatt.CONNECTION_PRIORITY_HIGH
+    }
+
+internal val WriteType.intValue: Int
+    get() = when (this) {
+        WriteType.WithResponse -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        WriteType.WithoutResponse -> BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+    }
+
+internal val PhyOptions.intValue: Int
+    @TargetApi(Build.VERSION_CODES.O)
+    get() = when (this) {
+        PhyOptions.NoPreferred -> BluetoothDevice.PHY_OPTION_NO_PREFERRED
+        PhyOptions.S2 -> BluetoothDevice.PHY_OPTION_S2
+        PhyOptions.S8 -> BluetoothDevice.PHY_OPTION_S8
+    }
 
 interface Readable {
 

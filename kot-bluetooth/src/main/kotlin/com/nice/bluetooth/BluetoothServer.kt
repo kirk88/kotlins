@@ -63,7 +63,7 @@ private class DefaultBluetoothServer(
     private val bluetoothAdapter = Bluetooth.adapter
 
     private val bluetoothGattServer: BluetoothGattServer by lazy {
-        bluetoothManager.openGattServer(applicationContext, bluetoothGattServerCallback)
+        bluetoothManager.openGattServer(applicationContext, ServerCallback(_serverEvent){ bluetoothGattServer })
     }
 
     private val bluetoothLeAdvertiser: BluetoothLeAdvertiser by lazy {
@@ -81,8 +81,6 @@ private class DefaultBluetoothServer(
     private val _serverEvent = Channel<ServerEvent>()
     override val serverEvent: Flow<ServerEvent> = _serverEvent.consumeAsFlow()
 
-    private val bluetoothGattServerCallback = ServerCallback(_serverEvent)
-
     private val advertiseCallback = object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
             _advertiseState.trySendBlocking(AdvertiseState.Success(settingsInEffect))
@@ -95,6 +93,14 @@ private class DefaultBluetoothServer(
 
     override fun addService(service: Service) {
         bluetoothGattServer.addService(service.toBluetoothGattService())
+    }
+
+    override fun removeService(service: Service) {
+        bluetoothGattServer.removeService(service.toBluetoothGattService())
+    }
+
+    override fun clearServices() {
+        bluetoothGattServer.clearServices()
     }
 
     override fun start() {
@@ -112,7 +118,12 @@ private class DefaultBluetoothServer(
     override fun stop() {
         if (isStarted) {
             bluetoothLeAdvertiser.stopAdvertising(advertiseCallback)
-            bluetoothGattServer.close()
         }
     }
+
+    override fun close() {
+        stop()
+        bluetoothGattServer.close()
+    }
+
 }

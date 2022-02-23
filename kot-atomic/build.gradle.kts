@@ -1,5 +1,3 @@
-import java.util.logging.Logger.global
-
 plugins {
     id("java-library")
     id("org.jetbrains.kotlin.jvm")

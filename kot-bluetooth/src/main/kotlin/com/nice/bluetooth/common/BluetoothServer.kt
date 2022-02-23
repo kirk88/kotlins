@@ -11,9 +11,15 @@ interface BluetoothServer {
 
     fun addService(service: Service)
 
+    fun removeService(service: Service)
+
+    fun clearServices()
+
     fun start()
 
     fun stop()
+
+    fun close()
 
 }
 

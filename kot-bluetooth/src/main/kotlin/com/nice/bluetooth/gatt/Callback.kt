@@ -2,15 +2,18 @@
 
 package com.nice.bluetooth.gatt
 
-import android.bluetooth.*
+import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGatt.GATT_SUCCESS
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile.*
 import android.util.Log
 import com.nice.bluetooth.TAG
 import com.nice.bluetooth.common.ConnectionLostException
 import com.nice.bluetooth.common.ConnectionState
-import com.nice.bluetooth.common.Phy
 import com.nice.bluetooth.common.PreferredPhy
+import com.nice.bluetooth.common.phy
 import com.nice.bluetooth.external.*
 import com.nice.bluetooth.gatt.Response.*
 import kotlinx.coroutines.channels.Channel
@@ -188,14 +191,6 @@ internal class Callback(
     }
 
 }
-
-private val Int.phy: Phy
-    get() = when (this) {
-        BluetoothDevice.PHY_LE_1M -> Phy.Le1M
-        BluetoothDevice.PHY_LE_2M -> Phy.Le2M
-        BluetoothDevice.PHY_LE_CODED -> Phy.LeCoded
-        else -> error("Unknown phy: $this")
-    }
 
 private val Int.connectionState: ConnectionState.Disconnected.Status?
     get() = when (this) {

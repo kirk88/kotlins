@@ -63,6 +63,9 @@ interface Characteristic {
     val permissions: Array<CharacteristicPermission>
     val descriptors: List<Descriptor>
 
+    var value: ByteArray?
+    var writeType: WriteType
+
     fun hasProperty(property: CharacteristicProperty): Boolean {
         return properties.contains(property)
     }
@@ -79,6 +82,9 @@ private data class LazyCharacteristic(
     override val permissions: Array<CharacteristicPermission>,
     override val descriptors: List<Descriptor>
 ) : Characteristic {
+
+    override var value: ByteArray? = null
+    override var writeType: WriteType = WriteType.WithResponse
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -119,6 +125,19 @@ private data class DiscoveredCharacteristic(
 
     override val descriptors: List<Descriptor> = bluetoothGattCharacteristic.descriptors.map { it.toDescriptor() }
 
+
+    override var value: ByteArray?
+        get() = bluetoothGattCharacteristic.value
+        set(value) {
+            bluetoothGattCharacteristic.value = value
+        }
+
+    override var writeType: WriteType
+        get() = if (bluetoothGattCharacteristic.writeType == WRITE_TYPE_DEFAULT) WriteType.WithResponse else WriteType.WithoutResponse
+        set(value) {
+            bluetoothGattCharacteristic.writeType = value.intValue
+        }
+
     override fun toString(): String =
         "DiscoveredCharacteristic(serviceUuid=$serviceUuid, characteristicUuid=$uuid, descriptors=$descriptors)"
 
@@ -152,7 +171,7 @@ internal fun Characteristic.toBluetoothGattCharacteristic(): BluetoothGattCharac
 
     val characteristic = BluetoothGattCharacteristic(uuid, propertiesFlag, permissionsFlag)
 
-    for (descriptor in descriptors){
+    for (descriptor in descriptors) {
         characteristic.addDescriptor(descriptor.toBluetoothGattDescriptor())
     }
     return characteristic
