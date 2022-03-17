@@ -43,11 +43,6 @@ android {
 }
 
 dependencies {
-    implementation(composeLibs.bundles.common)
-    implementation(composeLibs.bundles.accompanist)
-    implementation(composeLibs.viewmodel)
-    implementation(composeLibs.navigation)
-    implementation(composeLibs.window)
     implementation(project(":kot-bluetooth"))
     implementation(project(":kot-sqlite"))
     implementation(project(":kot-okhttp"))

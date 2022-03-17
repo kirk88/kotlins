@@ -40,9 +40,13 @@ android {
 }
 
 dependencies {
-    implementation(coroutinesLibs.bundles.all)
-    implementation(googleLibs.gson)
-    api(okhttpLibs.bundles.all)
+    implementation(Libs.KotlinStdlib)
+    implementation(Libs.KotlinStdlibCommon)
+    implementation(Libs.CoroutinesCore)
+    implementation(Libs.CoroutinesAndroid)
+    implementation(Libs.Gson)
+    api(Libs.OkHttp)
+    api(Libs.OkHttpLogging)
 }
 
 val versionMajor = 1

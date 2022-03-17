@@ -44,15 +44,23 @@ android {
 }
 
 dependencies {
-    api(coroutinesLibs.bundles.all)
-    api(androidxLibs.bundles.common)
-    api(androidxLibs.bundles.view)
-    api(androidxLibs.bundles.lifecycle)
-    api(androidxLibs.bundles.datastore)
-    api(androidxLibs.setup)
-    api(androidxLibs.multidex)
-    api(googleLibs.material)
-    api(imageLibs.coil)
+    api(Libs.KotlinStdlib)
+    api(Libs.KotlinStdlibCommon)
+    api(Libs.CoroutinesCore)
+    api(Libs.CoroutinesAndroid)
+    api(Libs.CoreKtx)
+    api(Libs.ActivityKtx)
+    api(Libs.FragmentKtx)
+    api(Libs.Appcompat)
+    api(Libs.LifecycleRuntimeKtx)
+    api(Libs.LifecycleViewModelSavedState)
+    api(Libs.LifecycleViewModelKtx)
+    api(Libs.DataStoreCore)
+    api(Libs.DataStorePreferences)
+    api(Libs.Startup)
+    api(Libs.Multidex)
+    api(Libs.Material)
+    api(Libs.Coil)
 }
 
 val versionMajor = 1

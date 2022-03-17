@@ -21,7 +21,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "kotlins"
 rootProject.buildFileName = "build.gradle.kts"
-include(":buildSrc")
 include(":kot-atomic")
 include(":kot-bluetooth")
 include(":kot-common")

@@ -40,10 +40,12 @@ android {
 }
 
 dependencies {
-    implementation(kotlinLibs.bundles.all)
-    implementation(coroutinesLibs.bundles.all)
-    implementation(androidxLibs.setup)
-    implementation(androidxLibs.annotation)
+    implementation(Libs.KotlinStdlib)
+    implementation(Libs.KotlinStdlibCommon)
+    implementation(Libs.CoroutinesCore)
+    implementation(Libs.CoroutinesAndroid)
+    implementation(Libs.Startup)
+    implementation(Libs.Annotation)
 }
 
 val versionMajor = 1
