@@ -4,14 +4,14 @@ plugins {
 }
 
 android {
-    compileSdk = vers.versions.compileSdk.get().toInt()
+    compileSdk = BuildVersions.compileSdk
 
     defaultConfig {
         applicationId = "com.hao.reader"
-        minSdk = vers.versions.minSdk.get().toInt()
-        targetSdk = vers.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = BuildVersions.minSdk
+        targetSdk = BuildVersions.targetSdk
+        versionCode = BuildVersions.versionCode
+        versionName = BuildVersions.versionName
 
         multiDexEnabled = true
     }
@@ -31,21 +31,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
-        targetCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
+        sourceCompatibility = JavaVersions.sourceCompatibility
+        targetCompatibility = JavaVersions.targetCompatibility
     }
 
     kotlinOptions {
-        jvmTarget = vers.versions.jvmTarget.get()
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-    }
-
-    buildFeatures {
-        compose = false
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLibs.versions.compose.get()
+        jvmTarget = KotlinOptions.jvmTarget
+        freeCompilerArgs = KotlinOptions.compilerArgs
     }
 
 }

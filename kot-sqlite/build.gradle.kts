@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = vers.versions.compileSdk.get().toInt()
+    compileSdk = BuildVersions.compileSdk
 
     defaultConfig {
-        minSdk = vers.versions.minSdk.get().toInt()
-        targetSdk = vers.versions.targetSdk.get().toInt()
+        minSdk = BuildVersions.minSdk
+        targetSdk = BuildVersions.targetSdk
     }
 
     buildTypes {
@@ -23,12 +23,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
-        targetCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
+        sourceCompatibility = JavaVersions.sourceCompatibility
+        targetCompatibility = JavaVersions.targetCompatibility
     }
 
     kotlinOptions {
-        jvmTarget = vers.versions.jvmTarget.get()
+        jvmTarget = KotlinOptions.jvmTarget
     }
 
     sourceSets {

@@ -20,7 +20,6 @@ class MainActivity : ComponentActivity() {
         setDecorFitsSystemWindows(false)
 
         val call = buildHttpCall<Response>(RequestMethod.Post) {
-
             url { "mzzkd/userApp/wx_sign.do" }
         }
 

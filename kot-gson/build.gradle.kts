@@ -5,8 +5,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
-    targetCompatibility = JavaVersion.toVersion(vers.versions.javaVersion.get())
+    sourceCompatibility = JavaVersions.sourceCompatibility
+    targetCompatibility = JavaVersions.targetCompatibility
 
     withSourcesJar()
     withJavadocJar()
@@ -15,7 +15,7 @@ java {
 kotlin {
     target {
         compilations.all {
-            kotlinOptions.jvmTarget = vers.versions.jvmTarget.get()
+            kotlinOptions.jvmTarget = KotlinOptions.jvmTarget
         }
     }
 }

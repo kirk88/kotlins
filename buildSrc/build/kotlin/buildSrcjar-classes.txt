@@ -1,0 +1,1 @@
+D:\Android\WorkPlace\kotlins\buildSrc\build\classes\kotlin\main\BuildVersion.class;D:\Android\WorkPlace\kotlins\buildSrc\build\classes\kotlin\main\Libs.class;D:\Android\WorkPlace\kotlins\buildSrc\build\classes\kotlin\main\Versions.class
