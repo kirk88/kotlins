@@ -5,8 +5,8 @@ pluginManagement {
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
     }
     plugins {
-        id("com.android.application") version "7.0.4"
-        id("com.android.library") version "7.0.4"
+        id("com.android.application") version "7.1.2"
+        id("com.android.library") version "7.1.2"
         id("org.jetbrains.kotlin.android") version "1.6.10"
         id("org.jetbrains.kotlin.jvm") version "1.6.10"
     }

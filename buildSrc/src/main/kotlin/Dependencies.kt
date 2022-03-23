@@ -1,23 +1,3 @@
-import org.gradle.api.JavaVersion
-
-object BuildVersions {
-    const val compileSdk = 31
-    const val minSdk = 21
-    const val targetSdk = 30
-    const val versionCode = 1
-    const val versionName = "1.0.0"
-}
-
-object JavaVersions {
-    val sourceCompatibility = JavaVersion.VERSION_1_8
-    val targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-object KotlinOptions {
-    const val jvmTarget = "1.8"
-    val compilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-}
-
 internal object Versions {
     const val kotlin = "1.6.10"
     const val coroutines = "1.6.0"
@@ -34,7 +14,7 @@ internal object Versions {
     const val sqlite = "2.2.0"
     const val okhttp = "4.9.2"
     const val gson = "2.8.9"
-    const val coil = "2.0.0"
+    const val coil = "2.0.0-rc02"
 }
 
 object Libs {
@@ -47,7 +27,7 @@ object Libs {
     const val ActivityKtx = "androidx.activity:activity-ktx:${Versions.activityKtx}"
     const val FragmentKtx = "androidx.fragment:fragment-ktx:${Versions.fragmentKtx}"
 
-    const val CoreKtx = "androidx.core:core-ktx:1.3.2:${Versions.coreKtx}"
+    const val CoreKtx = "androidx.core:core-ktx:${Versions.coreKtx}"
     const val Appcompat = "androidx.appcompat:appcompat:${Versions.appcompat}"
     const val Material = "com.google.android.material:material:${Versions.material}"
 

@@ -28,7 +28,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = KotlinOptions.jvmTarget
+        jvmTarget = KotlinVersions.jvmTarget
     }
 
     sourceSets {
