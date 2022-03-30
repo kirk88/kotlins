@@ -36,8 +36,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = KotlinOptions.jvmTarget
-        freeCompilerArgs = KotlinOptions.compilerArgs
+        jvmTarget = KotlinVersions.jvmTarget
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
 }
