@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":kot-common"))
     implementation(project(":kot-bluetooth"))
     implementation(project(":kot-sqlite"))
     implementation(project(":kot-okhttp"))

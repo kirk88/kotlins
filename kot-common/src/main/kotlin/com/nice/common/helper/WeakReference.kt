@@ -30,6 +30,7 @@ internal class WeakImpl<T>(initializer: () -> T?) : Weak<T> {
         }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        reference?.clear()
         reference = WeakReference(value)
     }
 
